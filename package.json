@@ -1,0 +1,29 @@
+{
+  "name": "root",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "benchmark": "pnpm --filter @lit-core/benchmarks run benchmark",
+    "benchmark:webawesome": "pnpm --filter @lit-core/benchmarks run benchmark:webawesome",
+    "benchmark:markdown": "pnpm --filter @lit-core/benchmarks run benchmark:markdown",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "biome format --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "turbo": "^2.11.4",
+    "typescript": "^7.0.2"
+  },
+  "packageManager": "pnpm@12.6.0",
+  "dependencies": {
+    "@awesome.me/webawesome": "^3.14.0"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "name": "@lit-core/vite-plugin",
+  "version": "0.1.0",
+  "description": "Official Vite plugin for Lit and Web Components (@lit-core)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node test.js && node test/integration.test.js",
+    "benchmark": "pnpm --filter @lit-core/benchmarks run benchmark"
+  },
+  "keywords": [
+    "css",
+    "dedup",
+    "constructable-stylesheets",
+    "shadow-dom",
+    "vite",
+    "vite-plugin",
+    "web-components"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@lit-core/css-fuse": "workspace:*",
+    "@lit-core/props-lower": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/vite-plugin"
+  }
+}

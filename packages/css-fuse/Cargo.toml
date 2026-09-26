@@ -1,0 +1,43 @@
+[package]
+name = "css_fuse"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+napi = { version = "3.10.5", features = ["serde-json"] }
+napi-derive = "3.5.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+glob = "0.3"
+
+# JS/TS parsing (matching existing monorepo versions)
+oxc_parser = "0.15.0"
+oxc_ast = "0.15.0"
+oxc_allocator = "0.15.0"
+oxc_span = "0.15.0"
+
+# CSS parsing & transformation
+lightningcss = "1.0.0-alpha.72"
+
+# Fast hashing
+blake3 = "1.5"
+
+# CLI
+clap = { version = "4.5", features = ["derive"] }
+
+# Diagnostics
+thiserror = "2.0"
+miette = { version = "7.6", features = ["fancy"] }
+
+[dev-dependencies]
+insta = { version = "1.41", features = ["json", "redactions"] }
+
+[[bin]]
+name = "css-fuse-bin"
+path = "src/bin.rs"
+
+[build-dependencies]
+napi-build = "2.3.2"
