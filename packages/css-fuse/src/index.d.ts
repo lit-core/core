@@ -9,6 +9,7 @@ export interface FuseConfig {
   outputDir?: string;
   write?: boolean;
   virtualImports?: boolean;
+  minSavings?: number;
 }
 
 export interface FusedSheetInfo {

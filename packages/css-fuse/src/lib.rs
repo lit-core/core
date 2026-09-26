@@ -21,10 +21,16 @@ use crate::models::{Diagnostic, FuseConfig, FuseResult, FuseStats, NormalizedRul
 use crate::normalizer::normalize_css;
 use crate::scoping::ScopingAuditor;
 
+use crate::extractor::import_resolver::normalize_path;
+
 fn resolve_input_files(config: &FuseConfig) -> Vec<String> {
     if let Some(explicit_files) = &config.files {
-        let mut files = explicit_files.clone();
+        let mut files: Vec<String> = explicit_files
+            .iter()
+            .map(|f| normalize_path(Path::new(f)).to_string_lossy().to_string())
+            .collect();
         files.sort();
+        files.dedup();
         return files;
     }
 
@@ -56,7 +62,8 @@ fn resolve_input_files(config: &FuseConfig) -> Vec<String> {
     for pattern in includes {
         if let Ok(entries) = glob(pattern) {
             for entry in entries.flatten() {
-                let path_str = entry.to_string_lossy().to_string();
+                let norm = normalize_path(&entry);
+                let path_str = norm.to_string_lossy().to_string();
 
                 let is_excluded = excludes.iter().any(|exc| {
                     if let Ok(pat) = glob::Pattern::new(exc) {
@@ -101,7 +108,9 @@ pub fn run_fuse_pipeline(config: &FuseConfig, dry_run: bool) -> FuseResult {
     let mut frequency_index = FrequencyIndex::new();
     frequency_index.index_rules(&all_normalized_rules);
 
-    let min_savings = config.min_savings.unwrap_or(0) as usize;
+    let min_savings = config
+        .min_savings
+        .unwrap_or(if virtual_imports { 150 } else { 0 }) as usize;
     let clusters =
         ClusterEngine::cluster_with_min_savings(&frequency_index, threshold, min_savings);
 

@@ -195,8 +195,7 @@ export function renderMarkdownPerToolAccordion(allResults) {
   if (toolNames.length === 0) return '';
 
   const lines = [];
-  lines.push('<details>');
-  lines.push('<summary><strong>Per-tool impact breakdown</strong> — Click to expand individual tool tables</summary>\n');
+  lines.push('## 🛠️ Per-tool impact breakdown\n');
 
   for (const toolName of toolNames) {
     lines.push(`### ${toolName}\n`);
@@ -229,7 +228,6 @@ export function renderMarkdownPerToolAccordion(allResults) {
     lines.push(`| **Total** | **${totalElements}** | **${formatKb(totalBaseline)}** | **${formatKb(totalOptimized)}** | **${totalSavingsStr}** |\n`);
   }
 
-  lines.push('</details>\n');
   return lines.join('\n');
 }
 
@@ -239,27 +237,59 @@ export function renderMarkdownPerToolAccordion(allResults) {
  * @returns {string}
  */
 export function renderMarkdownDiagnosticsTable(allResults) {
-  const headers = ['Design system or library', 'Rules scanned', 'Duplicate rules fused', 'Shared sheets created', 'Chunks rewritten'];
+  const lines = [];
+
+  // CSS deduplication
+  const cssHeaders = ['Design system or library', 'Rules scanned', 'Duplicate rules fused', 'Shared sheets created', 'Chunks rewritten'];
   const alignments = [':---', '---:', '---:', '---:', '---:'];
 
-  const lines = [];
-  lines.push('### 🔬 Deduplication diagnostics');
-  lines.push('');
-  lines.push(`| ${headers.join(' | ')} |`);
-  lines.push(`| ${alignments.join(' | ')} |`);
-
+  let hasCss = false;
+  const cssRows = [];
   for (const res of allResults) {
-    if (res.diagnostics) {
-      for (const diag of Object.values(res.diagnostics)) {
-        if (diag.rulesScanned !== undefined) {
-          lines.push(
-            `| **${res.suiteName}** | ${diag.rulesScanned.toLocaleString()} | ${diag.rulesDeduped.toLocaleString()} | ${diag.fusedSheetsCreated.toLocaleString()} | ${diag.componentsRewritten.toLocaleString()} |`,
-          );
-        }
+    if (res.diagnostics && res.diagnostics['css-fuse']) {
+      const diag = res.diagnostics['css-fuse'];
+      if (diag.rulesScanned !== undefined) {
+        hasCss = true;
+        cssRows.push(
+          `| **${res.suiteName}** | ${diag.rulesScanned.toLocaleString()} | ${diag.rulesDeduped.toLocaleString()} | ${diag.fusedSheetsCreated.toLocaleString()} | ${diag.componentsRewritten.toLocaleString()} |`,
+        );
       }
     }
   }
 
-  lines.push('');
+  if (hasCss) {
+    lines.push('### 🔬 CSS deduplication diagnostics');
+    lines.push('');
+    lines.push(`| ${cssHeaders.join(' | ')} |`);
+    lines.push(`| ${alignments.join(' | ')} |`);
+    lines.push(...cssRows);
+    lines.push('');
+  }
+
+  // HTML deduplication
+  const htmlHeaders = ['Design system or library', 'Fragments scanned', 'Duplicate fragments fused', 'Shared templates created', 'Components rewritten'];
+  let hasHtml = false;
+  const htmlRows = [];
+  for (const res of allResults) {
+    if (res.diagnostics && res.diagnostics['html-fuse']) {
+      const diag = res.diagnostics['html-fuse'];
+      if (diag.fragmentsScanned !== undefined) {
+        hasHtml = true;
+        htmlRows.push(
+          `| **${res.suiteName}** | ${diag.fragmentsScanned.toLocaleString()} | ${diag.fragmentsDeduped.toLocaleString()} | ${diag.fusedTemplatesCreated.toLocaleString()} | ${diag.componentsRewritten.toLocaleString()} |`,
+        );
+      }
+    }
+  }
+
+  if (hasHtml) {
+    lines.push('### 🧬 HTML template deduplication diagnostics');
+    lines.push('');
+    lines.push(`| ${htmlHeaders.join(' | ')} |`);
+    lines.push(`| ${alignments.join(' | ')} |`);
+    lines.push(...htmlRows);
+    lines.push('');
+  }
+
   return lines.join('\n');
 }

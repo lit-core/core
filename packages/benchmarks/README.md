@@ -2,10 +2,11 @@
 
 > Bundle size and deduplication benchmarks for `@lit-core` optimization tools across production Lit design systems.
 
-Benchmarks evaluate standard Vite production builds (**Baseline**) against optimized builds across **252 production Web Components** from 4 major design systems:
+Benchmarks evaluate standard Vite production builds (**Baseline**) against optimized builds across **349 production Web Components** from 5 major design systems:
 - **Carbon Web Components** (`@carbon/web-components`, 99 elements)
-- **Spectrum Web Components** (`@spectrum-web-components`, 52 elements)
+- **Momentum Design** (`@momentum-design/components`, 97 elements)
 - **Web Awesome** (`@awesome.me/webawesome`, 73 elements)
+- **Spectrum Web Components** (`@spectrum-web-components`, 52 elements)
 - **Material Web** (`@material/web`, 28 elements)
 
 ---
@@ -14,58 +15,60 @@ Benchmarks evaluate standard Vite production builds (**Baseline**) against optim
 
 | Design system or library | Elements | Baseline size | Optimized size | Net savings |
 | :--- | ---: | ---: | ---: | ---: |
-| **Carbon Web Components** | 99 | 5,801.88 KB | 2,622.61 KB | **-3,179.26 KB (-54.80%)** |
-| **Spectrum Web Components** | 52 | 1,739.92 KB | 1,581.30 KB | **-158.62 KB (-9.12%)** |
-| **Web Awesome** | 73 | 803.12 KB | 682.78 KB | **-120.34 KB (-14.98%)** |
-| **Material Web** | 28 | 448.37 KB | 428.48 KB | **-19.89 KB (-4.44%)** |
-| **Total** | **252** | **8,793.29 KB** | **5,315.17 KB** | **-3,478.12 KB (-39.55%)** |
+| **Carbon Web Components** | 99 | 5,801.88 KB | 2,654.33 KB | **-3,147.55 KB (-54.25%)** |
+| **Spectrum Web Components** | 52 | 1,739.92 KB | 1,478.16 KB | **-261.76 KB (-15.04%)** |
+| **Web Awesome** | 73 | 803.12 KB | 682.42 KB | **-120.70 KB (-15.03%)** |
+| **Momentum Design** | 97 | 870.05 KB | 812.52 KB | **-57.53 KB (-6.61%)** |
+| **Material Web** | 28 | 448.37 KB | 426.26 KB | **-22.11 KB (-4.93%)** |
+| **Total** | **349** | **9,663.34 KB** | **6,053.68 KB** | **-3,609.65 KB (-37.35%)** |
 
 ---
 
-<details>
-<summary><strong>Per-tool impact breakdown</strong> — Click to expand individual tool tables</summary>
+## 🛠️ Per-tool impact breakdown
 
 ### `css-fuse` (CSS AST deduplication)
 
 | Design system or library | Elements | Baseline size | Optimized size | Savings |
 | :--- | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5,801.88 KB | 2,761.86 KB | -3,040.02 KB (-52.40%) |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,619.78 KB | -120.14 KB (-6.90%) |
-| Web Awesome | 73 | 803.12 KB | 731.78 KB | -71.34 KB (-8.88%) |
-| Material Web | 28 | 448.37 KB | 444.31 KB | -4.06 KB (-0.91%) |
-| Total | 252 | 8,793.29 KB | 5,557.72 KB | -3,235.56 KB (-36.80%) |
+| Carbon Web Components | 99 | 5,801.88 KB | 2,826.79 KB | -2,975.09 KB (-51.28%) |
+| Spectrum Web Components | 52 | 1,739.92 KB | 1,621.17 KB | -118.75 KB (-6.82%) |
+| Web Awesome | 73 | 803.12 KB | 739.72 KB | -63.40 KB (-7.89%) |
+| Momentum Design | 97 | 870.05 KB | 850.00 KB | -20.04 KB (-2.30%) |
+| Material Web | 28 | 448.37 KB | 450.92 KB | +2.55 KB (+0.57%) |
+| Total | 349 | 9,663.34 KB | 6,488.60 KB | -3,174.73 KB (-32.85%) |
+
+### `props-lower` (AOT decorator and property lowering)
+
+| Design system or library | Elements | Baseline size | Optimized size | Savings |
+| :--- | ---: | ---: | ---: | ---: |
+| Spectrum Web Components | 52 | 1,739.92 KB | 1,633.12 KB | -106.80 KB (-6.14%) |
+| Carbon Web Components | 99 | 5,801.88 KB | 5,793.47 KB | -8.41 KB (-0.14%) |
+| Material Web | 28 | 448.37 KB | 445.74 KB | -2.63 KB (-0.59%) |
+| Web Awesome | 73 | 803.12 KB | 800.61 KB | -2.51 KB (-0.31%) |
+| Momentum Design | 97 | 870.05 KB | 871.99 KB | +1.94 KB (+0.22%) |
+| Total | 349 | 9,663.34 KB | 9,544.93 KB | -118.40 KB (-1.23%) |
 
 ### `css-minifier` (embedded CSS minification)
 
 | Design system or library | Elements | Baseline size | Optimized size | Savings |
 | :--- | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5,801.88 KB | 5,759.60 KB | -42.27 KB (-0.73%) |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,739.09 KB | -0.83 KB (-0.05%) |
 | Web Awesome | 73 | 803.12 KB | 733.47 KB | -69.65 KB (-8.67%) |
+| Carbon Web Components | 99 | 5,801.88 KB | 5,759.60 KB | -42.27 KB (-0.73%) |
+| Momentum Design | 97 | 870.05 KB | 833.56 KB | -36.49 KB (-4.19%) |
 | Material Web | 28 | 448.37 KB | 441.92 KB | -6.45 KB (-1.44%) |
-| Total | 252 | 8,793.29 KB | 8,674.09 KB | -119.19 KB (-1.36%) |
+| Spectrum Web Components | 52 | 1,739.92 KB | 1,739.09 KB | -0.83 KB (-0.05%) |
+| Total | 349 | 9,663.34 KB | 9,507.65 KB | -155.69 KB (-1.61%) |
 
 ### `html-minifier` (Lit HTML and SVG template minification)
 
 | Design system or library | Elements | Baseline size | Optimized size | Savings |
 | :--- | ---: | ---: | ---: | ---: |
 | Carbon Web Components | 99 | 5,801.88 KB | 5,747.27 KB | -54.60 KB (-0.94%) |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,718.86 KB | -21.06 KB (-1.21%) |
 | Web Awesome | 73 | 803.12 KB | 775.79 KB | -27.33 KB (-3.40%) |
+| Spectrum Web Components | 52 | 1,739.92 KB | 1,718.86 KB | -21.06 KB (-1.21%) |
+| Momentum Design | 97 | 870.05 KB | 852.54 KB | -17.51 KB (-2.01%) |
 | Material Web | 28 | 448.37 KB | 441.81 KB | -6.57 KB (-1.46%) |
-| Total | 252 | 8,793.29 KB | 8,683.72 KB | -109.57 KB (-1.25%) |
-
-### `props-lower` (AOT decorator lowering)
-
-| Design system or library | Elements | Baseline size | Optimized size | Savings |
-| :--- | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5,801.88 KB | 5,801.88 KB | — |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,739.92 KB | — |
-| Web Awesome | 73 | 803.12 KB | 803.12 KB | — |
-| Material Web | 28 | 448.37 KB | 448.37 KB | — |
-| Total | 252 | 8,793.29 KB | 8,793.29 KB | — |
-
-</details>
+| Total | 349 | 9,663.34 KB | 9,536.26 KB | -127.07 KB (-1.32%) |
 
 ---
 
@@ -73,10 +76,11 @@ Benchmarks evaluate standard Vite production builds (**Baseline**) against optim
 
 | Design system or library | Rules scanned | Duplicate rules fused | Shared sheets created | Chunks rewritten |
 | :--- | ---: | ---: | ---: | ---: |
-| **Carbon Web Components** | 135,434 | 129,973 | 211 | 117 |
-| **Spectrum Web Components** | 14,046 | 14,242 | 431 | 536 |
-| **Web Awesome** | 1,001 | 212 | 83 | 68 |
-| **Material Web** | 2,466 | 1,505 | 155 | 98 |
+| **Carbon Web Components** | 23,881 | 14,987 | 89 | 98 |
+| **Spectrum Web Components** | 10,794 | 10,213 | 392 | 536 |
+| **Material Web** | 1,354 | 138 | 32 | 63 |
+| **Momentum Design** | 1,094 | 130 | 20 | 59 |
+| **Web Awesome** | 1,001 | 117 | 22 | 55 |
 
 ---
 
@@ -88,9 +92,11 @@ pnpm run benchmark
 
 # Run a specific suite
 pnpm run benchmark:webawesome
+pnpm run benchmark:momentum
 node packages/benchmarks/src/index.js --suite=carbon
 node packages/benchmarks/src/index.js --suite=spectrum
 node packages/benchmarks/src/index.js --suite=material
+node packages/benchmarks/src/index.js --suite=momentum
 
 # Output markdown format
 pnpm run benchmark:markdown

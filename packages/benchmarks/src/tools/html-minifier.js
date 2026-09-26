@@ -26,6 +26,4 @@ export const htmlMinifierTool = {
     });
   },
 };
-
-export const templateWhitespaceCollapserTool = htmlMinifierTool;
 export default htmlMinifierTool;

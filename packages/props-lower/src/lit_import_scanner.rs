@@ -39,6 +39,9 @@ pub fn is_lit_import(specifier: &str) -> bool {
         || specifier == "lit-element"
         || specifier.starts_with("lit-element/")
         || specifier.starts_with("@lit/")
+        || specifier.ends_with("/decorators.js")
+        || specifier.ends_with("/decorators")
+        || specifier.contains("decorators")
 }
 
 #[derive(Debug, Default)]

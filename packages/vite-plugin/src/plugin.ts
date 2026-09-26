@@ -2,11 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
+import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
 import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
-import type { CssFuseOptions, CssMinifierOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
-import { extractSheetId, formatVirtualId, isVirtualFusedId, RESOLVED_FUSED_PREFIX } from './utils.js';
+import type { CssFuseOptions, CssMinifierOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import { extractHtmlTemplateId, extractSheetId, formatVirtualHtmlId, formatVirtualId, isVirtualFusedId, isVirtualHtmlFusedId, RESOLVED_FUSED_PREFIX, RESOLVED_HTML_FUSED_PREFIX } from './utils.js';
 
 export function cssFuse(options: CssFuseOptions = {}): Plugin {
   let config: ResolvedConfig;
@@ -21,6 +22,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
     outputDir = '.fused',
     scopingAudit = true,
     applyInDev = false,
+    minSavings,
   } = options;
 
   function runOptimization(virtualImports = true, write = false): FuseResult | null {
@@ -32,6 +34,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
         outputDir,
         write,
         virtualImports,
+        minSavings,
       });
 
       virtualSheets.clear();
@@ -217,13 +220,20 @@ function matchesPattern(cleanId: string, pattern: string | RegExp): boolean {
     if (cleanId.includes(pattern)) return true;
     if (pattern.includes('*')) {
       const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-      return new RegExp(escaped).test(cleanId);
+      if (new RegExp(escaped).test(cleanId)) return true;
+      const nodeModulesIdx = pattern.indexOf('node_modules/');
+      if (nodeModulesIdx !== -1) {
+        const subPattern = pattern.slice(nodeModulesIdx);
+        const subEscaped = subPattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+        if (new RegExp(subEscaped).test(cleanId)) return true;
+      }
     }
   }
   return false;
 }
 
-const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b/;
+const LIT_DECORATOR_FAST_CHECK =
+  /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b|\b(?:customElement|property|state)\s*\(/;
 
 export function propsLower(options: PropsLowerOptions = {}): Plugin {
   const { sourcemap = true } = options;
@@ -384,10 +394,143 @@ export function cssMinifier(options: CssMinifierOptions = {}): Plugin {
   };
 }
 
+export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
+  let config: ResolvedConfig;
+  let fuseResult: HtmlFuseResult | null = null;
+  const virtualTemplates = new Map<string, string>();
+  const transformedFiles = new Map<string, string>();
+
+  const {
+    include = ['packages/components/**/src/**/*.ts', 'src/**/*.ts'],
+    exclude = ['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**'],
+    threshold = 2,
+    minFragmentLength = 15,
+    outputDir = '.fused-html',
+    applyInDev = false,
+  } = options;
+
+  function runOptimization(virtualImports = true, write = false): HtmlFuseResult | null {
+    try {
+      const res = fuseHtml({
+        include,
+        exclude,
+        threshold,
+        minFragmentLength,
+        outputDir,
+        write,
+        virtualImports,
+      });
+
+      virtualTemplates.clear();
+      const templates = res.fusedTemplates || [];
+      for (const tpl of templates) {
+        virtualTemplates.set(tpl.id, tpl.code);
+        virtualTemplates.set(`${tpl.id}.js`, tpl.code);
+        virtualTemplates.set(`${tpl.id}.ts`, tpl.code);
+        virtualTemplates.set(tpl.fileName, tpl.code);
+      }
+
+      transformedFiles.clear();
+      const files = res.rewrittenFiles || [];
+      for (const file of files) {
+        if (file.filePath && file.transformedCode) {
+          transformedFiles.set(file.filePath, file.transformedCode);
+          const abs = path.resolve(file.filePath);
+          transformedFiles.set(abs, file.transformedCode);
+          try {
+            const real = fs.realpathSync(abs);
+            transformedFiles.set(real, file.transformedCode);
+          } catch {}
+        }
+      }
+
+      return res;
+    } catch (err) {
+      if (config) {
+        config.logger.error(`[html-fuse] Optimization pass failed: ${err}`);
+      }
+      return null;
+    }
+  }
+
+  return {
+    name: 'html-fuse',
+    enforce: 'pre',
+
+    configResolved(resolvedConfig) {
+      config = resolvedConfig;
+    },
+
+    buildStart() {
+      const isDev = config.command === 'serve';
+
+      if (isDev && !applyInDev) {
+        return;
+      }
+
+      fuseResult = runOptimization(true, false);
+      if (fuseResult && config) {
+        const stats = fuseResult.stats;
+        if (stats.fragmentsDeduped > 0) {
+          config.logger.info(
+            `⚡ [html-fuse] Deduplicated ${stats.fragmentsDeduped} static fragments into ${stats.fusedTemplatesCreated} shared templates across ${stats.componentsRewritten} components (~${(stats.bytesSaved / 1024).toFixed(1)} KB saved)`,
+          );
+        }
+      }
+    },
+
+    resolveId(id) {
+      if (isVirtualHtmlFusedId(id)) {
+        return formatVirtualHtmlId(id);
+      }
+      return undefined;
+    },
+
+    load(id) {
+      if (isVirtualHtmlFusedId(id)) {
+        const tplId = extractHtmlTemplateId(id);
+        const code =
+          virtualTemplates.get(tplId) ||
+          virtualTemplates.get(tplId.replace(/\.js$/, '')) ||
+          virtualTemplates.get(`${tplId}.js`);
+
+        if (code) {
+          return {
+            code,
+            map: null,
+          };
+        }
+      }
+      return undefined;
+    },
+
+    transform(_code, id) {
+      const cleanId = id.split('?')[0];
+      let transformed = transformedFiles.get(cleanId);
+      if (!transformed) {
+        const abs = path.resolve(cleanId);
+        transformed = transformedFiles.get(abs);
+        if (!transformed) {
+          try {
+            const real = fs.realpathSync(abs);
+            transformed = transformedFiles.get(real);
+          } catch {}
+        }
+      }
+      if (transformed) {
+        return {
+          code: transformed,
+          map: null,
+        };
+      }
+      return undefined;
+    },
+  };
+}
+
 export const litCssMinifier = cssMinifier;
-export const templateWhitespaceCollapser = htmlMinifier;
 export const litHtmlMinifier = htmlMinifier;
-export const litTemplateWhitespaceCollapser = htmlMinifier;
+export const litHtmlFuse = htmlFuse;
 
 export function lit(options: LitPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [];
@@ -396,6 +539,12 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
   if (cssFuseOpt !== false) {
     const fuseOpts = typeof cssFuseOpt === 'object' ? cssFuseOpt : {};
     plugins.push(cssFuse(fuseOpts));
+  }
+
+  const htmlFuseOpt = options.htmlFuse ?? options['html-fuse'];
+  if (htmlFuseOpt) {
+    const fuseOpts = typeof htmlFuseOpt === 'object' ? htmlFuseOpt : {};
+    plugins.push(htmlFuse(fuseOpts));
   }
 
   const propsLowerOpt = options.propsLower ?? options['props-lower'];
@@ -410,7 +559,7 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(cssMinifier(minifierOpts));
   }
 
-  const minifierOpt = options.htmlMinifier ?? options['html-minifier'] ?? options.templateWhitespaceCollapser ?? options['template-whitespace-collapser'];
+  const minifierOpt = options.htmlMinifier ?? options['html-minifier'];
   if (minifierOpt) {
     const minifierOpts = typeof minifierOpt === 'object' ? minifierOpt : {};
     plugins.push(htmlMinifier(minifierOpts));
@@ -423,3 +572,4 @@ export const litCore = lit;
 export const litCssFuse = cssFuse;
 export const litPropsLower = propsLower;
 export default lit;
+

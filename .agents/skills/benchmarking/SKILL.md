@@ -16,7 +16,8 @@ This skill guides you through running, analyzing, and formatting benchmarks in `
 - `spectrum`: `@spectrum-web-components` (Adobe Spectrum, 52 components)
 - `webawesome`: `@awesome.me/webawesome` (73 components)
 - `material`: `@material/web` (Google Material Design 3, 28 components)
-- `all`: Runs all four suites in sequence
+- `momentum`: `@momentum-design/components` (Cisco Momentum Design, 97 components)
+- `all`: Runs all five suites in sequence
 
 ## Execution commands
 
@@ -26,9 +27,11 @@ pnpm run benchmark
 
 # Run an individual suite
 pnpm run benchmark:webawesome
+pnpm run benchmark:momentum
 node packages/benchmarks/src/index.js --suite=carbon
 node packages/benchmarks/src/index.js --suite=spectrum
 node packages/benchmarks/src/index.js --suite=material
+node packages/benchmarks/src/index.js --suite=momentum
 
 # Generate clean markdown output
 pnpm run benchmark:markdown

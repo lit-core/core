@@ -31,7 +31,7 @@ Usage:
   node src/index.js [options]
 
 Options:
-  --suite=<name>     Suite to run: 'webawesome', 'material', 'carbon', 'spectrum', or 'all' (default: all)
+  --suite=<name>     Suite to run: 'webawesome', 'material', 'carbon', 'spectrum', 'momentum', or 'all' (default: all)
   --tools=<list>     Comma-separated tool ids to test (default: all active tools)
   --format=<type>    Output format: 'ascii' (default), 'markdown', or 'json'
   --verbose, -v      Show verbose build progress
@@ -46,7 +46,7 @@ async function main() {
   const tools = getActiveTools(options.tools);
 
   if (suites.length === 0) {
-    console.error(`❌ No benchmark suites matched '${options.suite}'. Available: webawesome, material, carbon, spectrum`);
+    console.error(`❌ No benchmark suites matched '${options.suite}'. Available: webawesome, material, carbon, spectrum, momentum`);
     process.exit(1);
   }
 
@@ -109,6 +109,11 @@ async function main() {
           if (diag.rulesScanned !== undefined) {
             console.log(
               `  [${toolId}] CSS Rules Scanned: ${diag.rulesScanned} | Deduped: ${diag.rulesDeduped} | Fused Sheets: ${diag.fusedSheetsCreated} | Chunks Rewritten: ${diag.componentsRewritten}`,
+            );
+          }
+          if (diag.fragmentsScanned !== undefined) {
+            console.log(
+              `  [${toolId}] Fragments Scanned: ${diag.fragmentsScanned} | Deduped: ${diag.fragmentsDeduped} | Shared Templates: ${diag.fusedTemplatesCreated} | Components Rewritten: ${diag.componentsRewritten}`,
             );
           }
         }

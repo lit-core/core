@@ -12,13 +12,18 @@ export const propsLowerTool = {
 
   /**
    * Return Vite plugin(s) to test propsLower in isolation.
-   * @param {import('../types.js').SuiteContext} _suite
+   * @param {import('../types.js').SuiteContext} suite
    * @returns {import('vite').Plugin[]}
    */
-  getPlugins(_suite) {
+  getPlugins(suite) {
+    const include = Array.isArray(suite.includePattern) ? suite.includePattern : suite.includePattern ? [suite.includePattern] : undefined;
+
     return lit({
       cssFuse: false,
-      propsLower: true,
+      propsLower: {
+        include,
+        exclude: [],
+      },
     });
   },
 };

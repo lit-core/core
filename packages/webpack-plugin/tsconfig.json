@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationDir": "dist",
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@lit-core/css-fuse": ["../css-fuse/src/index.d.ts"],
+      "@lit-core/css-minifier": ["../css-minifier/src/index.d.ts"],
+      "@lit-core/html-minifier": ["../html-minifier/src/index.d.ts"],
+      "@lit-core/props-lower": ["../props-lower/src/index.d.ts"]
+    }
+  },
+  "include": ["src/"]
+}

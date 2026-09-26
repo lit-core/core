@@ -121,4 +121,36 @@ impl<'a, 'b> AstHelper<'a, 'b> {
             self.ast,
         )
     }
+
+    /// Builds `Class.createProperty("propName", options);`
+    pub fn create_property_call(
+        &self,
+        class_expr: Expression<'a>,
+        prop_name: &'a str,
+        options: Option<Expression<'a>>,
+    ) -> Statement<'a> {
+        let callee = self.static_member(class_expr, "createProperty", false);
+        let mut args = ArenaVec::new_in(self.ast);
+        args.push(Argument::from(self.string_lit(prop_name)));
+        if let Some(opt) = options {
+            args.push(Argument::from(opt));
+        }
+        let call = self.call_expr(callee, args, false);
+        self.expr_stmt(call)
+    }
+
+    /// Builds `customElements.define("tag-name", Class);`
+    pub fn custom_elements_define(
+        &self,
+        tag_name: &'a str,
+        class_expr: Expression<'a>,
+    ) -> Statement<'a> {
+        let custom_elements_ident = self.ident_ref("customElements");
+        let callee = self.static_member(custom_elements_ident, "define", false);
+        let mut args = ArenaVec::new_in(self.ast);
+        args.push(Argument::from(self.string_lit(tag_name)));
+        args.push(Argument::from(class_expr));
+        let call = self.call_expr(callee, args, false);
+        self.expr_stmt(call)
+    }
 }

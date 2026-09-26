@@ -35,9 +35,56 @@ export interface CssFuseOptions {
    * @default false
    */
   applyInDev?: boolean;
+
+  /**
+   * Minimum net byte savings threshold for extracting a shared constructable sheet.
+   * Prevents creating micro-sheets where virtual module import overhead exceeds CSS savings.
+   * @default 150
+   */
+  minSavings?: number;
 }
 
 export type LitCssFuseOptions = CssFuseOptions;
+
+export interface HtmlFuseOptions {
+  /**
+   * Glob patterns for component source files to scan.
+   * @default ['packages/components/** /src/** /*.ts', 'src/** /*.ts']
+   */
+  include?: string[];
+
+  /**
+   * Glob patterns to exclude.
+   * @default ['**\/*.test.ts', '**\/*.spec.ts', '**\/node_modules/**', '**\/dist/**']
+   */
+  exclude?: string[];
+
+  /**
+   * Minimum number of components sharing a fragment to trigger clustering.
+   * @default 2
+   */
+  threshold?: number;
+
+  /**
+   * Minimum character length of static fragment to qualify for clustering.
+   * @default 15
+   */
+  minFragmentLength?: number;
+
+  /**
+   * Directory for generated fused template files, relative to project root.
+   * @default '.fused-html'
+   */
+  outputDir?: string;
+
+  /**
+   * Apply deduplication and AST transformations during Vite dev server mode.
+   * @default false
+   */
+  applyInDev?: boolean;
+}
+
+export type LitHtmlFuseOptions = HtmlFuseOptions;
 
 export interface PropsLowerOptions {
   /**
@@ -82,8 +129,6 @@ export interface HtmlMinifierOptions {
 }
 
 export type LitHtmlMinifierOptions = HtmlMinifierOptions;
-export type TemplateWhitespaceCollapserOptions = HtmlMinifierOptions;
-export type LitTemplateWhitespaceCollapserOptions = HtmlMinifierOptions;
 
 export interface CssMinifierOptions {
   /**
@@ -114,6 +159,18 @@ export interface LitPluginOptions {
    * @default true
    */
   cssFuse?: boolean | CssFuseOptions;
+
+  /**
+   * Cross-component static template and SVG fragment clustering.
+   * Pass `true` or an `HtmlFuseOptions` object to enable.
+   * @default false
+   */
+  htmlFuse?: boolean | HtmlFuseOptions;
+
+  /**
+   * Kebab-case alias for `htmlFuse`.
+   */
+  'html-fuse'?: boolean | HtmlFuseOptions;
 
   /**
    * Native Rust AOT AST lowering for Lit decorators and properties via OXC.
@@ -150,16 +207,6 @@ export interface LitPluginOptions {
    * Kebab-case alias for `htmlMinifier`.
    */
   'html-minifier'?: boolean | HtmlMinifierOptions;
-
-  /**
-   * Alias for `htmlMinifier`.
-   */
-  templateWhitespaceCollapser?: boolean | HtmlMinifierOptions;
-
-  /**
-   * Alias for `htmlMinifier`.
-   */
-  'template-whitespace-collapser'?: boolean | HtmlMinifierOptions;
 }
 
 export type LitCorePluginOptions = LitPluginOptions;

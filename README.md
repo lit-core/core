@@ -75,9 +75,9 @@ Web Components isolate styles within Shadow DOM. While this prevents global styl
 3. **High-speed template minification (`@lit-core/css-minifier`, `@lit-core/html-minifier`)**:
    - Minifies embedded CSS within Lit `css` template literals via `lightningcss`.
    - Strips whitespace, comments, and redundant tokens from Lit `html` and `svg` templates using `oxc` AST walking without touching interpolation holes.
-4. **Unified bundler integration (`@lit-core/vite-plugin`)**:
-   - Connects all native compilation passes into Vite and Rollup pipelines.
-   - Scopes shared constructable stylesheets to Rollup chunk boundaries to prevent lazy-loaded component styles from leaking into entry chunks.
+4. **Unified bundler integration (`@lit-core/vite-plugin`, `@lit-core/webpack-plugin`)**:
+   - Connects all native compilation passes into Vite, Rollup, and Webpack pipelines.
+   - Scopes shared constructable stylesheets to bundler chunk boundaries to prevent lazy-loaded component styles from leaking into entry chunks.
    - Provides fine-grained Hot Module Replacement (HMR) for individual stylesheets without full page reloads.
 
 ---
@@ -91,6 +91,7 @@ Web Components isolate styles within Shadow DOM. While this prevents global styl
 | [`@lit-core/css-minifier`](packages/css-minifier/) | `packages/css-minifier` | Rust (`oxc`, `lightningcss`), NAPI-RS | High-speed CSS template literal minification |
 | [`@lit-core/html-minifier`](packages/html-minifier/) | `packages/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML and SVG template literal minification |
 | [`@lit-core/vite-plugin`](packages/vite-plugin/) | `packages/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
+| [`@lit-core/webpack-plugin`](packages/webpack-plugin/) | `packages/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack |
 | [`@lit-core/benchmarks`](packages/benchmarks/) (private) | `packages/benchmarks` | Node.js, Vite | Empirical benchmark harness evaluating bundle reductions |
 
 ---
@@ -100,9 +101,10 @@ Web Components isolate styles within Shadow DOM. While this prevents global styl
 The `@lit-core/benchmarks` harness evaluates bundle size reductions across popular production Lit component libraries:
 
 - **Web Awesome** (`@awesome.me/webawesome`): 73 components evaluated across full-suite bundles.
-- **Carbon Web Components** (`@carbon/web-components`): Enterprise design system components.
-- **Adobe Spectrum** (`@spectrum-web-components/bundle`): Complex interactive UI suites.
-- **Material Web** (`@material/web`): Google Material 3 components.
+- **Carbon Web Components** (`@carbon/web-components`): Enterprise design system components (99 elements).
+- **Adobe Spectrum** (`@spectrum-web-components/bundle`): Complex interactive UI suites (52 elements).
+- **Momentum Design** (`@momentum-design/components`): Cisco Momentum Design components (97 elements).
+- **Material Web** (`@material/web`): Google Material 3 components (28 elements).
 
 Running the full suite demonstrates significant cumulative bundle reductions through shared stylesheet instantiation and native template minification.
 
@@ -152,6 +154,9 @@ pnpm run benchmark
 # Run the Web Awesome benchmark suite
 pnpm run benchmark:webawesome
 
+# Run the Momentum Design benchmark suite
+pnpm run benchmark:momentum
+
 # Output benchmark comparison tables in Markdown
 pnpm run benchmark:markdown
 ```
@@ -166,6 +171,7 @@ pnpm run benchmark:markdown
 - `pnpm run format`: Format JavaScript, TypeScript, and JSON files with Biome.
 - `pnpm run benchmark`: Run the multi-suite bundler optimization benchmarks.
 - `pnpm run benchmark:webawesome`: Benchmark bundle size impact on Web Awesome components.
+- `pnpm run benchmark:momentum`: Benchmark bundle size impact on Momentum Design components.
 - `pnpm run benchmark:markdown`: Print formatted benchmark impact tables in Markdown.
 - `pnpm run clean`: Remove build artifacts, target folders, and cache directories.
 

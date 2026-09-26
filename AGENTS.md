@@ -48,7 +48,7 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 4. **Unified bundler plugin (`vite-plugin`)**:
    - Integrates deduplication, lowering, and minification into Vite and Rollup pipelines with fine-grained HMR and chunk scoping.
 5. **Empirical benchmarking harness (`benchmarks`)**:
-   - Validates real-world bundle size reductions across major production Lit design systems (Carbon, Spectrum, Web Awesome, Material Web).
+   - Validates real-world bundle size reductions across major production Lit design systems (Carbon, Spectrum, Web Awesome, Material Web, Cisco Momentum).
 
 ---
 
@@ -61,6 +61,7 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 | `@lit-core/css-minifier` | `packages/css-minifier` | Rust (`lightningcss`), NAPI-RS | High-speed CSS template literal minifier |
 | `@lit-core/html-minifier` | `packages/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML template literal minifier |
 | `@lit-core/vite-plugin` | `packages/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
+| `@lit-core/webpack-plugin` | `packages/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack |
 | `@lit-core/benchmarks` | `packages/benchmarks` | Node.js, Vite | Multi-library bundle size and deduplication benchmark harness |
 
 ---

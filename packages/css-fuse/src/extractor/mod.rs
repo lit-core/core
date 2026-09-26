@@ -3,7 +3,7 @@ pub mod import_resolver;
 
 use crate::models::ExtractedStyle;
 use css_tag_visitor::CssTagVisitor;
-use import_resolver::resolve_relative_import;
+use import_resolver::{normalize_path, resolve_relative_import};
 use oxc_allocator::Allocator;
 use oxc_ast::Visit;
 use oxc_parser::Parser;
@@ -19,12 +19,14 @@ impl StyleExtractor {
         source_code: &str,
         file_path: &str,
     ) -> (Vec<ExtractedStyle>, Vec<String>) {
+        let norm_path = normalize_path(Path::new(file_path));
+        let norm_path_str = norm_path.to_string_lossy().to_string();
         let allocator = Allocator::default();
-        let source_type = SourceType::from_path(Path::new(file_path)).unwrap_or_default();
+        let source_type = SourceType::from_path(&norm_path).unwrap_or_default();
         let parser = Parser::new(&allocator, source_code, source_type);
         let parsed = parser.parse();
 
-        let mut visitor = CssTagVisitor::new(source_code, file_path);
+        let mut visitor = CssTagVisitor::new(source_code, &norm_path_str);
         visitor.visit_program(&parsed.program);
 
         let related_imports = visitor
@@ -39,7 +41,10 @@ impl StyleExtractor {
     pub fn extract_from_files(file_paths: &[String]) -> Vec<ExtractedStyle> {
         let mut all_styles = Vec::new();
         let mut visited_files: HashSet<String> = HashSet::new();
-        let mut files_to_scan: Vec<String> = file_paths.to_vec();
+        let mut files_to_scan: Vec<String> = file_paths
+            .iter()
+            .map(|p| normalize_path(Path::new(p)).to_string_lossy().to_string())
+            .collect();
 
         while let Some(path) = files_to_scan.pop() {
             if visited_files.contains(&path) {
@@ -56,7 +61,7 @@ impl StyleExtractor {
 
             for imp in imported_paths {
                 if let Some(resolved) = resolve_relative_import(&path, &imp) {
-                    let resolved_str = resolved.to_string_lossy().to_string();
+                    let resolved_str = normalize_path(&resolved).to_string_lossy().to_string();
                     if !visited_files.contains(&resolved_str) {
                         files_to_scan.push(resolved_str);
                     }

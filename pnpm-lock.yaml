@@ -198,6 +198,9 @@ importers:
       '@biomejs/biome':
         specifier: ^2.5.14
         version: 2.5.14
+      '@momentum-design/components':
+        specifier: ^0.139.9
+        version: 0.139.9(@types/react@19.3.0)
       '@types/webpack':
         specifier: ^5.28.5
         version: 5.28.5
@@ -244,6 +247,9 @@ importers:
       '@material/web':
         specifier: ^2.5.0
         version: 2.5.0
+      '@momentum-design/components':
+        specifier: ^0.139.9
+        version: 0.139.9(@types/react@19.3.0)
       '@spectrum-web-components/bundle':
         specifier: ^1.12.2
         version: 1.12.2
@@ -261,6 +267,12 @@ importers:
         version: 3.10.5(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@26.6.2)
 
   packages/css-minifier:
+    devDependencies:
+      '@napi-rs/cli':
+        specifier: ^3.10.5
+        version: 3.10.5(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.2)
+
+  packages/html-fuse:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.5
@@ -302,6 +314,34 @@ importers:
       vite:
         specifier: ^8.3.1
         version: 8.3.1(@types/node@26.6.2)(terser@5.51.2)
+
+  packages/webpack-plugin:
+    dependencies:
+      '@lit-core/css-fuse':
+        specifier: workspace:*
+        version: link:../css-fuse
+      '@lit-core/css-minifier':
+        specifier: workspace:*
+        version: link:../css-minifier
+      '@lit-core/html-minifier':
+        specifier: workspace:*
+        version: link:../html-minifier
+      '@lit-core/props-lower':
+        specifier: workspace:*
+        version: link:../props-lower
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.2
+        version: 26.6.2
+      '@types/webpack':
+        specifier: ^5.28.5
+        version: 5.28.5
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      webpack:
+        specifier: ^5.111.1
+        version: 5.111.1
 
 packages:
 
@@ -675,6 +715,25 @@ packages:
 
   '@material/web@2.5.0':
     resolution: {integrity: sha512-x2Uovyq8E/Zc1xHXd9s1eBMXF5pMHVAt70pISKd0fL3Ajj4L6zQaQUY/awcfR2RDAMKXC7i4+vr0arv1YaOR/g==}
+
+  '@momentum-design/animations@0.4.3':
+    resolution: {integrity: sha512-VbjjUqoG50VV5Kok5dA3Y0x02W2oyZ4OplVIZ8N4mMKX0II7evpmgQ1TDwlIw4ZzftmkOY5y0rfMIdAMSefmTg==}
+
+  '@momentum-design/brand-visuals@0.40.0':
+    resolution: {integrity: sha512-ZqRqWilrNNlJAPLNbDvcNOt/N1SAIxOLVeFLTSpYqejrlBflLaDXbeSGtEeAYOM6kXpnhYaICquBAaD37q2quQ==}
+
+  '@momentum-design/components@0.139.9':
+    resolution: {integrity: sha512-6QdrVOyUUc/H82kdy8jhXck+9ffDtm/ZuIMAmap3S9sBBIjbuGo5aXs0/uSLxHs90mWl1PiDm+eTp9i58aVGcQ==}
+    engines: {node: '>=24.0.0', npm: '>=8.0.0'}
+
+  '@momentum-design/fonts@0.2.6':
+    resolution: {integrity: sha512-+0BJuu2KQNULASJ8WyO+hbo6HCz3iZ73y/ADt6QLDnKTE+TfWXP978isQCYTWhCQuh366DQ8qkz/6MRc+1+GWg==}
+
+  '@momentum-design/icons@0.64.0':
+    resolution: {integrity: sha512-vRp41BxgpMg9g4mARYaUwPae6LWfOgfr2CE6X2eacqIxZEapEU/ZSWAnSJQMr4sfOVy/qeM4mAorpmBL2Xs3xA==}
+
+  '@momentum-design/tokens@0.12.0':
+    resolution: {integrity: sha512-vfddZMLIVEyn5rtE0LDdE6qpuCsjch0+me7KGTCx9IJh7liuMMMbaSkjkvjvCVfzVLHtVMojW978EvY5+WFGVA==}
 
   '@napi-rs/cli@3.10.5':
     resolution: {integrity: sha512-GF4WXmLLQk3uQvkPuLCOSH50DN4GUKZw1zHlMDh4rRF5TWpfOj3a8DkZ2PWCTwpPDMD4ex05sAjrCEwNdukEjg==}
@@ -1439,6 +1498,14 @@ packages:
   '@swc/helpers@0.5.23':
     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
 
+  '@tanstack/lit-virtual@3.14.2':
+    resolution: {integrity: sha512-rqcB46bUexVpIlsjESJurdnT6kh7AK1x3WMrNfugx5amcG+Qpkq9YzvSkrhCwzZUkSzo4vKqCZAmrLVubzJMGg==}
+    peerDependencies:
+      lit: ^3.1.0
+
+  '@tanstack/virtual-core@3.17.11':
+    resolution: {integrity: sha512-+ILjvtHup6Y2hzQ6YzwMgX1Q+oQpxEGOXCEsCNaPoIP0VxMbizIBTmYTDtkerkIQS8/CbP1BRuyt8V/8BCsy1g==}
+
   '@turbo/darwin-64@2.11.4':
     resolution: {integrity: sha512-fEmcQVa95k79tZjcay5b2A4cpR/VrlNUki4AN7EbA+32vj5C5rBUE1q3i2yOFxsB2n01sOlzIZ+s2p2zADCTig==}
     cpu: [x64]
@@ -1954,6 +2021,9 @@ packages:
   lodash-es@4.18.1:
     resolution: {integrity: sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==}
 
+  lottie-web@5.13.0:
+    resolution: {integrity: sha512-+gfBXl6sxXMPe8tKQm7qzLnUy5DUPJPKIyRHwtpCpyUEYjHYRJC/5gjUvdkuO2c3JllrPtHXH5UJJK8LRYl5yQ==}
+
   marked@11.2.0:
     resolution: {integrity: sha512-HR0m3bvu0jAPYiIvLUUQtdg1g6D247//lvcekpHO1WMvbwDlwSkZAX9Lw4F4YHE1T0HaaNve0tuAWuV1UJ6vtw==}
     engines: {node: '>= 18'}
@@ -2171,6 +2241,10 @@ packages:
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
+
+  uuid@11.1.1:
+    resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
+    hasBin: true
 
   vite@8.3.1:
     resolution: {integrity: sha512-/bvH9E9tmCXRGp2uXY3WbOldqpTwFkbha/8ANaEQ6VkxhH60KyqLwgZq6lG2y+4uT55x9+9eUHMpQ7uGnOCKjA==}
@@ -2671,6 +2745,33 @@ snapshots:
       '@lit/context': 1.1.6
       lit: 3.3.3
       tslib: 2.8.1
+
+  '@momentum-design/animations@0.4.3': {}
+
+  '@momentum-design/brand-visuals@0.40.0': {}
+
+  '@momentum-design/components@0.139.9(@types/react@19.3.0)':
+    dependencies:
+      '@floating-ui/dom': 1.8.0
+      '@lit/context': 1.1.6
+      '@lit/react': 1.0.8(@types/react@19.3.0)
+      '@momentum-design/animations': 0.4.3
+      '@momentum-design/brand-visuals': 0.40.0
+      '@momentum-design/fonts': 0.2.6
+      '@momentum-design/icons': 0.64.0
+      '@momentum-design/tokens': 0.12.0
+      '@tanstack/lit-virtual': 3.14.2(lit@3.3.3)
+      lit: 3.3.3
+      lottie-web: 5.13.0
+      uuid: 11.1.1
+    transitivePeerDependencies:
+      - '@types/react'
+
+  '@momentum-design/fonts@0.2.6': {}
+
+  '@momentum-design/icons@0.64.0': {}
+
+  '@momentum-design/tokens@0.12.0': {}
 
   '@napi-rs/cli@3.10.5(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.2)':
     dependencies:
@@ -3724,6 +3825,13 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@tanstack/lit-virtual@3.14.2(lit@3.3.3)':
+    dependencies:
+      '@tanstack/virtual-core': 3.17.11
+      lit: 3.3.3
+
+  '@tanstack/virtual-core@3.17.11': {}
+
   '@turbo/darwin-64@2.11.4':
     optional: true
 
@@ -4153,6 +4261,8 @@ snapshots:
 
   lodash-es@4.18.1: {}
 
+  lottie-web@5.13.0: {}
+
   marked@11.2.0: {}
 
   merge-stream@2.0.0: {}
@@ -4328,6 +4438,8 @@ snapshots:
       browserslist: 4.29.1
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  uuid@11.1.1: {}
 
   vite@8.3.1(@types/node@26.6.2)(terser@5.51.2):
     dependencies:

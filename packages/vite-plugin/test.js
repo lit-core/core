@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import litDefault, { cssFuse, htmlMinifier, lit, litCore, litCssFuse, litHtmlMinifier, litPropsLower, litTemplateWhitespaceCollapser, propsLower, templateWhitespaceCollapser } from './dist/index.js';
+import litDefault, { cssFuse, htmlMinifier, lit, litCore, litCssFuse, litHtmlMinifier, litPropsLower, propsLower } from './dist/index.js';
 
 console.log('Testing @lit-core/vite-plugin hooks and exports...');
 
@@ -12,8 +12,6 @@ assert.strictEqual(typeof propsLower, 'function', 'propsLower must be a function
 assert.strictEqual(typeof litPropsLower, 'function', 'litPropsLower must be an alias');
 assert.strictEqual(typeof htmlMinifier, 'function', 'htmlMinifier must be a function');
 assert.strictEqual(typeof litHtmlMinifier, 'function', 'litHtmlMinifier must be an alias');
-assert.strictEqual(typeof templateWhitespaceCollapser, 'function', 'templateWhitespaceCollapser must be a function');
-assert.strictEqual(typeof litTemplateWhitespaceCollapser, 'function', 'litTemplateWhitespaceCollapser must be an alias');
 
 // Test lit() default options: includes css-fuse
 const defaultPlugins = lit();
@@ -40,11 +38,6 @@ assert.strictEqual(minifierPlugins[0].name, 'html-minifier');
 const kebabMinifierPlugins = lit({ cssFuse: false, 'html-minifier': true });
 assert.strictEqual(kebabMinifierPlugins.length, 1);
 assert.strictEqual(kebabMinifierPlugins[0].name, 'html-minifier');
-
-// Test lit({ templateWhitespaceCollapser: true }): alias option
-const aliasPlugins = lit({ cssFuse: false, templateWhitespaceCollapser: true });
-assert.strictEqual(aliasPlugins.length, 1);
-assert.strictEqual(aliasPlugins[0].name, 'html-minifier');
 
 // Test lit with all active
 const allPlugins = lit({ propsLower: true, htmlMinifier: true });

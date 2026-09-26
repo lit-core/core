@@ -1,11 +1,12 @@
 use napi_derive::napi;
-use oxc_allocator::{Allocator, ArenaVec};
+use oxc_allocator::{Allocator, ArenaVec, CloneIn, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
 use oxc_span::{SourceType, SPAN};
 
+use crate::ast_helpers::AstHelper;
 use crate::constructor::inject_constructor_statements;
 use crate::decorators::custom_element::transform_custom_element;
 use crate::decorators::event_options::try_transform_event_options;
@@ -16,7 +17,7 @@ use crate::decorators::query_all::try_transform_query_all;
 use crate::decorators::query_assigned::try_transform_query_assigned;
 use crate::decorators::query_async::try_transform_query_async;
 use crate::decorators::state::try_transform_state;
-use crate::lit_import_scanner::{is_lit_import, ImportContext};
+use crate::lit_import_scanner::{is_lit_import, ImportContext, LitDecoratorKind};
 use crate::static_properties::inject_or_merge_static_properties;
 
 #[napi(object)]
@@ -60,28 +61,28 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
 
     let ast = AstBuilder::new(&allocator);
 
-    // 2. Walk top-level statements and transform classes
+    // 2. Walk top-level statements and transform classes & decorate calls
     let old_statements = std::mem::replace(&mut program.body, ArenaVec::new_in(&ast));
-    let mut new_statements = ArenaVec::new_in(&ast);
+    let mut intermediate_statements = ArenaVec::new_in(&ast);
 
     for mut stmt in old_statements {
         match &mut stmt {
             Statement::ClassDeclaration(class) => {
                 let post_stmts = transform_class(class, &import_ctx, &ast);
-                new_statements.push(stmt);
+                intermediate_statements.push(stmt);
                 for s in post_stmts {
-                    new_statements.push(s);
+                    intermediate_statements.push(s);
                 }
             }
             Statement::ExportDeclaration(export_decl) => {
                 if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
                     let post_stmts = transform_class(class, &import_ctx, &ast);
-                    new_statements.push(stmt);
+                    intermediate_statements.push(stmt);
                     for s in post_stmts {
-                        new_statements.push(s);
+                        intermediate_statements.push(s);
                     }
                 } else {
-                    new_statements.push(stmt);
+                    intermediate_statements.push(stmt);
                 }
             }
             Statement::ExportDefaultDeclaration(export_decl) => {
@@ -89,22 +90,38 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
                     &mut export_decl.declaration
                 {
                     let post_stmts = transform_class(class, &import_ctx, &ast);
-                    new_statements.push(stmt);
+                    intermediate_statements.push(stmt);
                     for s in post_stmts {
-                        new_statements.push(s);
+                        intermediate_statements.push(s);
                     }
                 } else {
-                    new_statements.push(stmt);
+                    intermediate_statements.push(stmt);
                 }
             }
-            Statement::ImportDeclaration(import_decl) => {
-                if clean_lit_import(import_decl, &import_ctx, &ast) {
-                    new_statements.push(stmt);
+            Statement::ExpressionStatement(expr_stmt) => {
+                if let Some(lowered_stmts) = try_transform_expression_statement(expr_stmt, &import_ctx, &ast) {
+                    for s in lowered_stmts {
+                        intermediate_statements.push(s);
+                    }
+                } else {
+                    intermediate_statements.push(stmt);
                 }
             }
             _ => {
+                intermediate_statements.push(stmt);
+            }
+        }
+    }
+
+    // 3. Clean unused decorator imports
+    let mut new_statements = ArenaVec::new_in(&ast);
+    for mut stmt in intermediate_statements {
+        if let Statement::ImportDeclaration(import_decl) = &mut stmt {
+            if clean_lit_import(import_decl, &import_ctx, &ast) {
                 new_statements.push(stmt);
             }
+        } else {
+            new_statements.push(stmt);
         }
     }
 
@@ -282,6 +299,180 @@ fn clean_lit_import<'a>(
     } else {
         *specifiers = new_specs;
         true
+    }
+}
+
+pub fn try_transform_expression_statement<'a>(
+    expr_stmt: &mut ExpressionStatement<'a>,
+    import_ctx: &ImportContext,
+    ast: &AstBuilder<'a>,
+) -> Option<Vec<Statement<'a>>> {
+    match &mut expr_stmt.expression {
+        Expression::CallExpression(call) => try_transform_decorate_call(call, import_ctx, ast),
+        Expression::AssignmentExpression(assign) => {
+            if let Expression::CallExpression(call) = &assign.right {
+                try_transform_decorate_call(call, import_ctx, ast)
+            } else {
+                None
+            }
+        }
+        Expression::SequenceExpression(seq) => {
+            let mut out_stmts = Vec::new();
+            let mut any_transformed = false;
+            for expr in &seq.expressions {
+                if let Expression::CallExpression(call) = expr {
+                    if let Some(stmts) = try_transform_decorate_call(call, import_ctx, ast) {
+                        out_stmts.extend(stmts);
+                        any_transformed = true;
+                        continue;
+                    }
+                }
+                out_stmts.push(Statement::new_expression_statement(
+                    SPAN,
+                    expr.clone_in(ast.allocator()),
+                    ast,
+                ));
+            }
+            if any_transformed {
+                Some(out_stmts)
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
+pub fn try_transform_decorate_call<'a>(
+    call: &CallExpression<'a>,
+    import_ctx: &ImportContext,
+    ast: &AstBuilder<'a>,
+) -> Option<Vec<Statement<'a>>> {
+    if call.arguments.len() < 2 {
+        return None;
+    }
+
+    let first_arg = call.arguments.first()?;
+    let Expression::ArrayExpression(arr) = first_arg.as_expression()? else {
+        return None;
+    };
+    if arr.elements.is_empty() {
+        return None;
+    }
+
+    let second_arg = call.arguments.get(1)?;
+    let target_expr = second_arg.as_expression()?;
+    let helper = AstHelper::new(ast);
+
+    let mut lowered_stmts = Vec::new();
+
+    for elem in &arr.elements {
+        let Some(Expression::CallExpression(dec_call)) = elem.as_expression() else {
+            return None;
+        };
+
+        let dec_name = match &dec_call.callee {
+            Expression::Identifier(id) => id.name.as_str(),
+            Expression::StaticMemberExpression(mem) => mem.property.name.as_str(),
+            _ => return None,
+        };
+
+        let kind = import_ctx
+            .get_decorator_kind(dec_name)
+            .or_else(|| LitDecoratorKind::from_canonical_name(dec_name))?;
+
+        match kind {
+            LitDecoratorKind::Property => {
+                let Expression::StaticMemberExpression(target_mem) = target_expr else {
+                    return None;
+                };
+                if target_mem.property.name != "prototype" {
+                    return None;
+                }
+                let class_expr = target_mem.object.clone_in(ast.allocator());
+
+                let third_arg = call.arguments.get(2)?;
+                let prop_name = match third_arg.as_expression()? {
+                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
+                    Expression::Identifier(id) => id.name.as_str(),
+                    _ => return None,
+                };
+
+                let opt_arg = dec_call
+                    .arguments
+                    .first()
+                    .and_then(|a| a.as_expression())
+                    .map(|e| e.clone_in(ast.allocator()));
+
+                let stmt = helper.create_property_call(
+                    class_expr,
+                    ast.allocator().alloc_str(prop_name),
+                    opt_arg,
+                );
+                lowered_stmts.push(stmt);
+            }
+            LitDecoratorKind::State => {
+                let Expression::StaticMemberExpression(target_mem) = target_expr else {
+                    return None;
+                };
+                if target_mem.property.name != "prototype" {
+                    return None;
+                }
+                let class_expr = target_mem.object.clone_in(ast.allocator());
+
+                let third_arg = call.arguments.get(2)?;
+                let prop_name = match third_arg.as_expression()? {
+                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
+                    Expression::Identifier(id) => id.name.as_str(),
+                    _ => return None,
+                };
+
+                let state_key = PropertyKey::new_static_identifier(SPAN, "state", ast);
+                let true_val = Expression::new_boolean_literal(SPAN, true, ast);
+                let obj_prop = ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    state_key,
+                    true_val,
+                    false,
+                    false,
+                    false,
+                    ast,
+                );
+                let mut props = ArenaVec::new_in(ast);
+                props.push(obj_prop);
+                let state_obj = Expression::new_object_expression(SPAN, props, ast);
+
+                let stmt = helper.create_property_call(
+                    class_expr,
+                    ast.allocator().alloc_str(prop_name),
+                    Some(state_obj),
+                );
+                lowered_stmts.push(stmt);
+            }
+            LitDecoratorKind::CustomElement => {
+                let class_expr = target_expr.clone_in(ast.allocator());
+
+                let tag_arg = dec_call.arguments.first()?;
+                let tag_str = match tag_arg.as_expression()? {
+                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
+                    _ => return None,
+                };
+
+                let stmt = helper.custom_elements_define(
+                    ast.allocator().alloc_str(tag_str),
+                    class_expr,
+                );
+                lowered_stmts.push(stmt);
+            }
+            _ => return None,
+        }
+    }
+
+    if lowered_stmts.is_empty() {
+        None
+    } else {
+        Some(lowered_stmts)
     }
 }
 
@@ -525,5 +716,37 @@ mod tests {
             res.code.contains("console.log(\"init\")") || res.code.contains("console.log('init')")
         );
         assert!(res.code.contains("this.msg = \"hi\"") || res.code.contains("this.msg = 'hi'"));
+    }
+
+    #[test]
+    fn test_compiled_decorate_property() {
+        let input = r#"
+      import {property} from 'lit/decorators.js';
+      class MyElement {}
+      __decorate([
+        property({type: String})
+      ], MyElement.prototype, "label", void 0);
+    "#;
+
+        let res = transform_code(input, TransformOptions::default());
+        assert!(!res.code.contains("__decorate"));
+        assert!(res.code.contains("MyElement.createProperty(\"label\", { type: String })"));
+        assert!(!res.code.contains("lit/decorators.js"));
+    }
+
+    #[test]
+    fn test_compiled_decorate_custom_element() {
+        let input = r#"
+      import {customElement} from 'lit/decorators.js';
+      let MyElement = class MyElement {};
+      MyElement = __decorate([
+        customElement('my-element')
+      ], MyElement);
+    "#;
+
+        let res = transform_code(input, TransformOptions::default());
+        assert!(!res.code.contains("__decorate"));
+        assert!(res.code.contains("customElements.define(\"my-element\", MyElement)"));
+        assert!(!res.code.contains("lit/decorators.js"));
     }
 }

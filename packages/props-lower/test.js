@@ -177,4 +177,36 @@ console.log('Testing @uibit/props-lower native addon...');
   console.log('  ✔ Sourcemap generation');
 }
 
-console.log('\nAll 9 integration tests passed successfully!\n');
+// Test 10: Compiled __decorate property lowering
+{
+  const input = `
+    import {property} from 'lit/decorators.js';
+    class MyElement {}
+    __decorate([
+      property({type: String})
+    ], MyElement.prototype, "title", void 0);
+  `;
+  const res = transformLitProps(input);
+  assert(!res.code.includes('__decorate'), 'Should remove __decorate call');
+  assert(res.code.includes('MyElement.createProperty("title", { type: String })'), 'Should lower to createProperty');
+  assert(!res.code.includes('decorators.js'), 'Should clean unused decorator import');
+  console.log('  ✔ Compiled __decorate property lowering');
+}
+
+// Test 11: Compiled __decorate customElement lowering
+{
+  const input = `
+    import {customElement} from 'lit/decorators.js';
+    let MyElement = class MyElement {};
+    MyElement = __decorate([
+      customElement('my-element')
+    ], MyElement);
+  `;
+  const res = transformLitProps(input);
+  assert(!res.code.includes('__decorate'), 'Should remove __decorate call');
+  assert(res.code.includes('customElements.define("my-element", MyElement)'), 'Should lower to customElements.define');
+  assert(!res.code.includes('decorators.js'), 'Should clean unused decorator import');
+  console.log('  ✔ Compiled __decorate customElement lowering');
+}
+
+console.log('\nAll 11 integration tests passed successfully!\n');

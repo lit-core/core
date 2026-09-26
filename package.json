@@ -31,6 +31,7 @@
     "typecheck": "turbo run typecheck",
     "benchmark": "pnpm --filter @lit-core/benchmarks run benchmark",
     "benchmark:webawesome": "pnpm --filter @lit-core/benchmarks run benchmark:webawesome",
+    "benchmark:momentum": "pnpm --filter @lit-core/benchmarks run benchmark:momentum",
     "benchmark:markdown": "pnpm --filter @lit-core/benchmarks run benchmark:markdown",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "biome format --write .",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
+    "@momentum-design/components": "^0.139.9",
     "@types/webpack": "^5.28.5",
     "turbo": "^2.11.4",
     "typescript": "^7.0.2",

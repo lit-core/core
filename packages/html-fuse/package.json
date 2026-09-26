@@ -1,0 +1,69 @@
+{
+  "name": "@lit-core/html-fuse",
+  "version": "0.1.0",
+  "description": "Cross-component static template and SVG fragment clustering for Lit and Web Components",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "bin",
+    "*.node"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/html-fuse"
+  },
+  "homepage": "https://github.com/lit-core/core/tree/main/packages/html-fuse#readme",
+  "bugs": {
+    "url": "https://github.com/lit-core/core/issues"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "html",
+    "svg",
+    "template",
+    "dedup",
+    "clustering",
+    "ast",
+    "oxc"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "napi": {
+    "binaryName": "html-fuse",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "bin": {
+    "html-fuse": "bin/html-fuse.js",
+    "html-fuse-bin": "bin/html-fuse-bin"
+  },
+  "scripts": {
+    "artifacts": "napi artifacts",
+    "build": "cargo build --release && cp target/release/libhtml_fuse.dylib html-fuse.darwin-arm64.node 2>/dev/null || true; cp target/release/html-fuse-bin bin/html-fuse-bin 2>/dev/null || true",
+    "build:debug": "cargo build && cp target/debug/libhtml_fuse.dylib html-fuse.darwin-arm64.node 2>/dev/null || true; cp target/debug/html-fuse-bin bin/html-fuse-bin 2>/dev/null || true",
+    "prepublishOnly": "napi prepublish -t npm",
+    "version": "napi version",
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.5"
+  }
+}

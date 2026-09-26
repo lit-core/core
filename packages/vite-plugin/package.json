@@ -42,6 +42,7 @@
   "dependencies": {
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
+    "@lit-core/html-fuse": "workspace:*",
     "@lit-core/html-minifier": "workspace:*",
     "@lit-core/props-lower": "workspace:*"
   },

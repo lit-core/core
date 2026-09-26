@@ -1,0 +1,67 @@
+{
+  "name": "@lit-core/webpack-plugin",
+  "version": "0.1.0",
+  "description": "Official Webpack plugin for Lit and Web Components (@lit-core)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./loader": {
+      "types": "./dist/loader.d.ts",
+      "import": "./dist/loader.js"
+    }
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node test.js && node test/integration.test.js"
+  },
+  "keywords": [
+    "css",
+    "dedup",
+    "constructable-stylesheets",
+    "shadow-dom",
+    "webpack",
+    "webpack-plugin",
+    "web-components",
+    "lit"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@lit-core/css-fuse": "workspace:*",
+    "@lit-core/css-minifier": "workspace:*",
+    "@lit-core/html-fuse": "workspace:*",
+    "@lit-core/html-minifier": "workspace:*",
+    "@lit-core/props-lower": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/webpack": "^5.28.5",
+    "typescript": "^7.0.2",
+    "webpack": "^5.111.1"
+  },
+  "peerDependencies": {
+    "webpack": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/webpack-plugin"
+  }
+}

@@ -19,6 +19,7 @@ Always use sentence case for table headers, suite titles, metric names, and mark
    - `spectrum`: `@spectrum-web-components` (Adobe Spectrum)
    - `webawesome`: `@awesome.me/webawesome`
    - `material`: `@material/web` (Google Material Design 3)
+   - `momentum`: `@momentum-design/components` (Cisco Momentum Design System)
 3. **Execution commands**:
    - All suites: `pnpm run benchmark`
    - Single suite: `node packages/benchmarks/src/index.js --suite=<name>`

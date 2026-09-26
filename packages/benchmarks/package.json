@@ -12,6 +12,7 @@
   "scripts": {
     "benchmark": "node src/index.js",
     "benchmark:webawesome": "node src/index.js --suite=webawesome",
+    "benchmark:momentum": "node src/index.js --suite=momentum",
     "benchmark:lit-ds": "node src/index.js --suite=lit-ds",
     "benchmark:all": "node src/index.js --suite=all",
     "benchmark:markdown": "node src/index.js --format=markdown",
@@ -32,6 +33,7 @@
     "@awesome.me/webawesome": "^3.14.0",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
+    "@lit-core/html-fuse": "workspace:*",
     "@lit-core/html-minifier": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
@@ -41,6 +43,7 @@
   "devDependencies": {
     "@carbon/web-components": "^2.64.0",
     "@material/web": "^2.5.0",
+    "@momentum-design/components": "^0.139.9",
     "@spectrum-web-components/bundle": "^1.12.2",
     "@types/node": "^26.6.2",
     "typescript": "^7.0.2"

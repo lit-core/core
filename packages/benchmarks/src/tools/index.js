@@ -1,6 +1,7 @@
 import { lit } from '@lit-core/vite-plugin';
 import { cssFuseTool } from './css-fuse.js';
 import { cssMinifierTool } from './css-minifier.js';
+import { htmlFuseTool } from './html-fuse.js';
 import { htmlMinifierTool } from './html-minifier.js';
 import { propsLowerTool } from './props-lower.js';
 
@@ -8,7 +9,7 @@ import { propsLowerTool } from './props-lower.js';
  * Array of all registered Vite bundler optimization tools.
  * @type {import('../types.js').BenchmarkTool[]}
  */
-export const registeredTools = [cssFuseTool, propsLowerTool, cssMinifierTool, htmlMinifierTool];
+export const registeredTools = [cssFuseTool, htmlFuseTool, propsLowerTool, cssMinifierTool, htmlMinifierTool];
 
 /**
  * Get active tools (optionally filtered by IDs).
@@ -30,9 +31,10 @@ export function getActiveTools(filterIds) {
  */
 export async function getCombinedPlugins(tools, suite) {
   const hasCssFuse = tools.some((t) => t.id === 'css-fuse');
+  const hasHtmlFuse = tools.some((t) => t.id === 'html-fuse');
   const hasPropsLower = tools.some((t) => t.id === 'props-lower');
   const hasCssMinifier = tools.some((t) => t.id === 'css-minifier');
-  const hasHtmlMinifier = tools.some((t) => t.id === 'html-minifier' || t.id === 'template-whitespace-collapser');
+  const hasHtmlMinifier = tools.some((t) => t.id === 'html-minifier');
 
   const include = Array.isArray(suite.includePattern) ? suite.includePattern : suite.includePattern ? [suite.includePattern] : undefined;
 
@@ -45,7 +47,20 @@ export async function getCombinedPlugins(tools, suite) {
           applyInDev: true,
         }
       : false,
-    propsLower: hasPropsLower,
+    htmlFuse: hasHtmlFuse
+      ? {
+          include,
+          exclude: [],
+          threshold: 2,
+          minFragmentLength: 15,
+        }
+      : false,
+    propsLower: hasPropsLower
+      ? {
+          include,
+          exclude: [],
+        }
+      : false,
     cssMinifier: hasCssMinifier
       ? {
           exclude: [],
