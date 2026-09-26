@@ -120,26 +120,32 @@ export function renderMarkdownTable(title, rows) {
 }
 
 /**
- * Format a multi-suite overview table.
+ * Format a multi-suite overview table in ASCII.
  * @param {Array<{ suiteName: string, componentCount: number, baselineRaw: number, baselineGzip: number, totalRaw: number, totalGzip: number, rawSaved: number, rawPct: number, gzipSaved: number, gzipPct: number }>} summaryRows
  * @returns {string}
  */
 export function renderCrossSuiteSummary(summaryRows) {
   const headers = [
-    'Benchmark Suite',
-    'Components',
+    'Design System / Library',
+    'Elements',
     'Baseline (Raw / Gzip)',
     'Optimized (Raw / Gzip)',
-    'Total Net Savings',
+    'Net Savings (Raw / Gzip)',
   ];
 
-  const formattedRows = summaryRows.map((s) => [
-    s.suiteName,
-    `${s.componentCount} elements`,
-    `${formatKb(s.baselineRaw)} / ${formatKb(s.baselineGzip)}`,
-    `${formatKb(s.totalRaw)} / ${formatKb(s.totalGzip)}`,
-    `-${formatKb(s.rawSaved)} (-${s.rawPct.toFixed(2)}%) [Gzip: -${s.gzipPct.toFixed(2)}%]`,
-  ]);
+  const formattedRows = summaryRows.map((s) => {
+    const sign = s.rawSaved >= 0 ? '-' : '+';
+    const absRaw = Math.abs(s.rawSaved);
+    const absGzip = Math.abs(s.gzipSaved);
+    const gzSign = s.gzipSaved >= 0 ? '-' : '+';
+    return [
+      s.suiteName,
+      `${s.componentCount} elements`,
+      `${formatKb(s.baselineRaw)} / ${formatKb(s.baselineGzip)}`,
+      `${formatKb(s.totalRaw)} / ${formatKb(s.totalGzip)}`,
+      `${sign}${formatKb(absRaw)} (${s.rawPct >= 0 ? '-' : '+'}${Math.abs(s.rawPct).toFixed(2)}%) [Gzip: ${gzSign}${formatKb(absGzip)}]`,
+    ];
+  });
 
   const colWidths = headers.map((header, i) => {
     const maxData = Math.max(...formattedRows.map((r) => r[i].length));
@@ -155,7 +161,7 @@ export function renderCrossSuiteSummary(summaryRows) {
 
   const output = [];
   output.push(`\n${'═'.repeat(totalWidth)}`);
-  output.push(`🏆 CROSS-SUITE IMPACT OVERVIEW`);
+  output.push(`🏆 CROSS-LIBRARY IMPACT OVERVIEW (ALL CONFIGS ENABLED)`);
   output.push(`${'═'.repeat(totalWidth)}`);
   output.push(topBorder);
   output.push(headerLine);
@@ -167,4 +173,86 @@ export function renderCrossSuiteSummary(summaryRows) {
 
   output.push(botBorder);
   return output.join('\n');
+}
+
+/**
+ * Format overview table of all libraries with all configs enabled in Markdown.
+ * @param {Array<{ suiteName: string, componentCount: number, baselineRaw: number, baselineGzip: number, totalRaw: number, totalGzip: number, rawSaved: number, rawPct: number, gzipSaved: number, gzipPct: number }>} summaryRows
+ * @returns {string}
+ */
+export function renderMarkdownOverviewTable(summaryRows) {
+  const headers = [
+    'Design System / Library',
+    'Elements',
+    'Baseline (Min / Gzip)',
+    'Optimized (All Configs)',
+    'Raw Savings (Δ)',
+    'Gzip Savings (Δ)',
+  ];
+
+  const alignments = [':---', '---:', '---:', '---:', '---:', '---:'];
+
+  const lines = [];
+  lines.push('### 🏆 Overview: All Libraries (All Optimizations Enabled)');
+  lines.push('');
+  lines.push(`| ${headers.join(' | ')} |`);
+  lines.push(`| ${alignments.join(' | ')} |`);
+
+  for (const s of summaryRows) {
+    const rawDiffStr = formatImpact(-s.rawSaved, -s.rawPct);
+    const gzipDiffStr = formatImpact(-s.gzipSaved, -s.gzipPct);
+    const isOverall = s.suiteName.includes('TOTAL');
+    const prefix = isOverall ? '**' : '';
+    const suffix = isOverall ? '**' : '';
+
+    lines.push(
+      `| ${prefix}${s.suiteName}${suffix} | ${s.componentCount} | ${formatKb(s.baselineRaw)} / ${formatKb(s.baselineGzip)} | ${formatKb(s.totalRaw)} / ${formatKb(s.totalGzip)} | ${prefix}${rawDiffStr}${suffix} | ${prefix}${gzipDiffStr}${suffix} |`
+    );
+  }
+
+  lines.push('');
+  return lines.join('\n');
+}
+
+/**
+ * Format one unified table across all libraries, broken down per config tool.
+ * @param {Array<{ suiteName: string, rows: TableRow[] }>} allResults
+ * @returns {string}
+ */
+export function renderMarkdownPerConfigTable(allResults) {
+  const headers = [
+    'Library',
+    'Optimization Tool / Config',
+    'Minified JS',
+    'Gzip Size',
+    'Brotli Size',
+    'Raw Impact (Δ)',
+    'Gzip Impact (Δ)',
+  ];
+
+  const alignments = [':---', ':---', '---:', '---:', '---:', '---:', '---:'];
+
+  const lines = [];
+  lines.push('### 📊 All Libraries Per Optimization Config');
+  lines.push('');
+  lines.push(`| ${headers.join(' | ')} |`);
+  lines.push(`| ${alignments.join(' | ')} |`);
+
+  for (const res of allResults) {
+    for (const r of res.rows) {
+      const rawSize = formatKb(r.metrics.rawBytes);
+      const gzipSize = formatKb(r.metrics.gzipBytes);
+      const brotliSize = formatKb(r.metrics.brotliBytes);
+      const rawImpact = r.isBaseline ? '—' : formatImpact(r.impact?.rawDiff ?? 0, r.impact?.rawPercent ?? 0);
+      const gzipImpact = r.isBaseline ? '—' : formatImpact(r.impact?.gzipDiff ?? 0, r.impact?.gzipPercent ?? 0);
+
+      const namePrefix = r.isTotal ? '**TOTAL** ' : r.isBaseline ? '*Baseline* ' : '';
+      lines.push(
+        `| ${res.suiteName} | ${namePrefix}${r.name} | ${rawSize} | ${gzipSize} | ${brotliSize} | ${rawImpact} | ${gzipImpact} |`
+      );
+    }
+  }
+
+  lines.push('');
+  return lines.join('\n');
 }

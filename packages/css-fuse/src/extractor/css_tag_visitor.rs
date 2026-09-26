@@ -1,5 +1,6 @@
+use std::collections::{HashMap, HashSet};
 use oxc_ast::ast::{
-  Class, ClassElement, Expression, MethodDefinitionKind, PropertyKey, Statement,
+  CallExpression, Class, ClassElement, Expression, MethodDefinitionKind, PropertyKey, Statement,
   TaggedTemplateExpression, VariableDeclaration,
 };
 use oxc_ast::Visit;
@@ -10,18 +11,23 @@ pub struct CssTagVisitor<'a> {
   pub source_code: &'a str,
   pub file_path: &'a str,
   pub extracted_styles: Vec<ExtractedStyle>,
-  pub imported_styles_identifiers: std::collections::HashMap<String, String>, // ident -> import_specifier
+  pub imported_styles_identifiers: HashMap<String, String>, // ident -> import_specifier
+  pub css_identifiers: HashSet<String>,
   current_class_name: Option<String>,
   current_tag_name: Option<String>,
 }
 
 impl<'a> CssTagVisitor<'a> {
   pub fn new(source_code: &'a str, file_path: &'a str) -> Self {
+    let mut css_identifiers = HashSet::new();
+    css_identifiers.insert("css".to_string());
+
     Self {
       source_code,
       file_path,
       extracted_styles: Vec::new(),
-      imported_styles_identifiers: std::collections::HashMap::new(),
+      imported_styles_identifiers: HashMap::new(),
+      css_identifiers,
       current_class_name: None,
       current_tag_name: None,
     }
@@ -54,6 +60,26 @@ impl<'a> CssTagVisitor<'a> {
     }
   }
 
+  fn get_css_tag_name(&self, expr: &Expression<'a>) -> Option<String> {
+    match expr {
+      Expression::Identifier(ident) => {
+        if ident.name == "css" || self.css_identifiers.contains(ident.name.as_str()) {
+          Some(ident.name.to_string())
+        } else {
+          None
+        }
+      }
+      Expression::StaticMemberExpression(member) => {
+        if member.property.name == "css" {
+          Some("css".to_string())
+        } else {
+          None
+        }
+      }
+      _ => None,
+    }
+  }
+
   fn extract_css_from_tagged_template(
     &mut self,
     tagged: &TaggedTemplateExpression<'a>,
@@ -63,24 +89,16 @@ impl<'a> CssTagVisitor<'a> {
     location_kind: &str,
     parent_span: Option<SourceSpan>,
   ) {
-    // Check if the tag is `css`
-    let is_css_tag = match &tagged.tag {
-      Expression::Identifier(ident) => ident.name == "css",
-      Expression::StaticMemberExpression(member) => member.property.name == "css",
-      _ => false,
+    let tag_ident = match self.get_css_tag_name(&tagged.tag) {
+      Some(name) => name,
+      None => return,
     };
-
-    if !is_css_tag {
-      return;
-    }
 
     // Extract raw text from the template quasis
     let mut raw_css = String::new();
     for (i, quasi) in tagged.quasi.quasis.iter().enumerate() {
       raw_css.push_str(quasi.value.raw.as_str());
       if i < tagged.quasi.expressions.len() {
-        // If there's an interpolation expression, e.g. ${unsafeCSS(...)} or ${sharedStyles}
-        // we can placeholder it or represent it
         raw_css.push_str("/*__INTERPOLATION__*/");
       }
     }
@@ -97,6 +115,86 @@ impl<'a> CssTagVisitor<'a> {
       export_name,
       location_kind: location_kind.to_string(),
       parent_span,
+      tag_identifier: Some(tag_ident),
+    });
+  }
+
+  fn extract_css_from_call(
+    &mut self,
+    call: &CallExpression<'a>,
+    component_name: Option<String>,
+    tag_name: Option<String>,
+    export_name: Option<String>,
+    location_kind: &str,
+    parent_span: Option<SourceSpan>,
+  ) {
+    let tag_ident = match self.get_css_tag_name(&call.callee) {
+      Some(name) => name,
+      None => return,
+    };
+
+    if call.arguments.is_empty() {
+      return;
+    }
+
+    let mut raw_css = String::new();
+
+    if let Some(first_arg) = call.arguments.first() {
+      if let Some(expr) = first_arg.as_expression() {
+        match expr {
+          Expression::ArrayExpression(arr) => {
+            for elem in &arr.elements {
+              if let Some(e) = elem.as_expression() {
+                match e {
+                  Expression::StringLiteral(lit) => {
+                    raw_css.push_str(lit.value.as_str());
+                  }
+                  Expression::TemplateLiteral(temp) => {
+                    for (i, quasi) in temp.quasis.iter().enumerate() {
+                      raw_css.push_str(quasi.value.raw.as_str());
+                      if i < temp.expressions.len() {
+                        raw_css.push_str("/*__INTERPOLATION__*/");
+                      }
+                    }
+                  }
+                  _ => {}
+                }
+              }
+            }
+          }
+          Expression::StringLiteral(lit) => {
+            raw_css.push_str(lit.value.as_str());
+          }
+          Expression::TemplateLiteral(temp) => {
+            for (i, quasi) in temp.quasis.iter().enumerate() {
+              raw_css.push_str(quasi.value.raw.as_str());
+              if i < temp.expressions.len() {
+                raw_css.push_str("/*__INTERPOLATION__*/");
+              }
+            }
+          }
+          _ => {}
+        }
+      }
+    }
+
+    if raw_css.trim().is_empty() {
+      return;
+    }
+
+    let span = self.compute_span(call.span);
+
+    self.extracted_styles.push(ExtractedStyle {
+      file_path: self.file_path.to_string(),
+      component_name,
+      tag_name,
+      css_text: raw_css,
+      span,
+      is_external_module: export_name.is_some(),
+      export_name,
+      location_kind: location_kind.to_string(),
+      parent_span,
+      tag_identifier: Some(tag_ident),
     });
   }
 
@@ -113,6 +211,16 @@ impl<'a> CssTagVisitor<'a> {
       Expression::TaggedTemplateExpression(tagged) => {
         self.extract_css_from_tagged_template(
           tagged,
+          component_name,
+          tag_name,
+          export_name,
+          location_kind,
+          parent_span,
+        );
+      }
+      Expression::CallExpression(call) => {
+        self.extract_css_from_call(
+          call,
           component_name,
           tag_name,
           export_name,
@@ -176,7 +284,10 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
               oxc_ast::ast::ModuleExportName::StringLiteral(lit) => lit.value.to_string(),
             };
             if imported_name == "styles" || imported_name.ends_with("Styles") || imported_name == "default" {
-              self.imported_styles_identifiers.insert(local_name, source_str.clone());
+              self.imported_styles_identifiers.insert(local_name.clone(), source_str.clone());
+            }
+            if imported_name == "css" {
+              self.css_identifiers.insert(local_name);
             }
           }
           oxc_ast::ast::ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
@@ -298,6 +409,21 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
     if !already_extracted {
       self.extract_css_from_tagged_template(
         tagged,
+        self.current_class_name.clone(),
+        self.current_tag_name.clone(),
+        None,
+        "standalone",
+        None,
+      );
+    }
+  }
+
+  fn visit_call_expression(&mut self, call: &CallExpression<'a>) {
+    let span = self.compute_span(call.span);
+    let already_extracted = self.extracted_styles.iter().any(|s| s.span.start == span.start);
+    if !already_extracted {
+      self.extract_css_from_call(
+        call,
         self.current_class_name.clone(),
         self.current_tag_name.clone(),
         None,

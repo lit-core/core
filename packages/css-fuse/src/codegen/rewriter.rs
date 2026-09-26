@@ -45,57 +45,78 @@ pub fn rewrite_file(
   for style in file_styles {
     let remaining_css = subtract_rules_from_css(style, &shared_rules);
     let cluster_ref_list = cluster_ids.join(", ");
+    let tag = style.tag_identifier.as_deref().unwrap_or("css");
 
     match style.location_kind.as_str() {
       "static_property" => {
         if let Some(parent) = &style.parent_span {
           let replacement = if let Some(rem) = remaining_css {
-            format!("static styles = [{}, css`\n{}\n  `];", cluster_ref_list, rem)
+            format!("static styles = [{}, {}`\n{}\n  `];", cluster_ref_list, tag, rem)
           } else {
             format!("static styles = [{}];", cluster_ref_list)
           };
           replacements.push((parent.start, parent.end, replacement));
         } else if let Some(rem) = remaining_css {
+          let interpolations: Vec<String> = cluster_ids.iter().map(|c| format!("${{{}}}", c)).collect();
           replacements.push((
             style.span.start,
             style.span.end,
-            format!("css`\n{}\n  `", rem),
+            format!("{}`\n{}\n{}\n  `", tag, interpolations.join("\n"), rem),
+          ));
+        } else if cluster_ids.len() == 1 {
+          replacements.push((
+            style.span.start,
+            style.span.end,
+            cluster_ids[0].clone(),
+          ));
+        } else {
+          replacements.push((
+            style.span.start,
+            style.span.end,
+            format!("[{}]", cluster_ref_list),
           ));
         }
       }
       "static_getter" => {
         if let Some(parent) = &style.parent_span {
           let replacement = if let Some(rem) = remaining_css {
-            format!("return [{}, css`\n{}\n  `];", cluster_ref_list, rem)
+            format!("return [{}, {}`\n{}\n  `];", cluster_ref_list, tag, rem)
           } else {
             format!("return [{}];", cluster_ref_list)
           };
           replacements.push((parent.start, parent.end, replacement));
         } else if let Some(rem) = remaining_css {
+          let interpolations: Vec<String> = cluster_ids.iter().map(|c| format!("${{{}}}", c)).collect();
           replacements.push((
             style.span.start,
             style.span.end,
-            format!("css`\n{}\n  `", rem),
+            format!("{}`\n{}\n{}\n  `", tag, interpolations.join("\n"), rem),
+          ));
+        } else if cluster_ids.len() == 1 {
+          replacements.push((
+            style.span.start,
+            style.span.end,
+            cluster_ids[0].clone(),
+          ));
+        } else {
+          replacements.push((
+            style.span.start,
+            style.span.end,
+            format!("[{}]", cluster_ref_list),
           ));
         }
       }
-      "variable" | "export_default" => {
+      _ => {
+        // "variable", "export_default", "standalone", or array element
         let replacement = if let Some(rem) = remaining_css {
-          format!("[{}, css`\n{}\n  `]", cluster_ref_list, rem)
+          let interpolations: Vec<String> = cluster_ids.iter().map(|c| format!("${{{}}}", c)).collect();
+          format!("{}`\n{}\n{}\n  `", tag, interpolations.join("\n"), rem)
+        } else if cluster_ids.len() == 1 {
+          cluster_ids[0].clone()
         } else {
           format!("[{}]", cluster_ref_list)
         };
         replacements.push((style.span.start, style.span.end, replacement));
-      }
-      _ => {
-        // standalone or array element
-        if let Some(rem) = remaining_css {
-          replacements.push((
-            style.span.start,
-            style.span.end,
-            format!("css`\n{}\n  `", rem),
-          ));
-        }
       }
     }
   }

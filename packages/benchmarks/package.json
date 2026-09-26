@@ -23,6 +23,9 @@
     "vite": "^8.3.1"
   },
   "devDependencies": {
+    "@carbon/web-components": "^2.64.0",
+    "@material/web": "^2.5.0",
+    "@spectrum-web-components/bundle": "^1.12.2",
     "@types/node": "^26.6.2",
     "typescript": "^7.0.2"
   }

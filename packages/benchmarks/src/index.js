@@ -2,13 +2,20 @@
 import { getSuites } from './suites/index.js';
 import { getActiveTools } from './tools/index.js';
 import { runSuiteBenchmark } from './runner.js';
-import { renderAsciiTable, renderMarkdownTable, renderCrossSuiteSummary } from './table.js';
+import {
+  renderAsciiTable,
+  renderMarkdownTable,
+  renderCrossSuiteSummary,
+  renderMarkdownOverviewTable,
+  renderMarkdownPerConfigTable,
+} from './table.js';
 
 // Parse command line arguments
 const args = process.argv.slice(2);
 const options = {
   suite: 'all',
-  tools: null,
+  /** @type {string[] | undefined} */
+  tools: undefined,
   format: 'ascii',
   verbose: false,
 };
@@ -30,7 +37,7 @@ Usage:
   node src/index.js [options]
 
 Options:
-  --suite=<name>     Suite to run: 'webawesome', 'lit-ds', or 'all' (default: all)
+  --suite=<name>     Suite to run: 'webawesome', 'material', 'carbon', 'spectrum', or 'all' (default: all)
   --tools=<list>     Comma-separated tool ids to test (default: all active tools)
   --format=<type>    Output format: 'ascii' (default), 'markdown', or 'json'
   --verbose, -v      Show verbose build progress
@@ -45,7 +52,7 @@ async function main() {
   const tools = getActiveTools(options.tools);
 
   if (suites.length === 0) {
-    console.error(`❌ No benchmark suites matched '${options.suite}'. Available suites: webawesome, lit-ds`);
+    console.error(`❌ No benchmark suites matched '${options.suite}'. Available: webawesome, material, carbon, spectrum`);
     process.exit(1);
   }
 
@@ -58,8 +65,8 @@ async function main() {
     console.log(`\n========================================================================================`);
     console.log(`⚡ LIT-CORE BUNDLE OPTIMIZATION BENCHMARK SUITE`);
     console.log(`========================================================================================`);
-    console.log(`Suites to run: ${suites.map((s) => s.name).join(', ')}`);
-    console.log(`Tools tested:  ${tools.map((t) => t.name).join(', ')}`);
+    console.log(`Libraries: ${suites.map((s) => s.name).join(', ')}`);
+    console.log(`Configs:   ${tools.map((t) => t.name).join(', ')}`);
   }
 
   const allResults = [];
@@ -100,7 +107,6 @@ async function main() {
     if (options.format === 'ascii') {
       console.log(renderAsciiTable(`${suite.name} Bundle Size Impact`, rows));
 
-      // Print diagnostics if available
       if (rows.diagnostics && Object.keys(rows.diagnostics).length > 0) {
         console.log(`\nDiagnostics:`);
         for (const [toolId, diag] of Object.entries(rows.diagnostics)) {
@@ -109,8 +115,6 @@ async function main() {
           }
         }
       }
-    } else if (options.format === 'markdown') {
-      console.log(renderMarkdownTable(`${suite.name} Bundle Size Impact`, rows));
     }
   }
 
@@ -119,9 +123,8 @@ async function main() {
     return;
   }
 
-  // If multiple suites ran, print cross-suite summary
-  if (crossSuiteSummaries.length > 1 && options.format === 'ascii') {
-    // Add cumulative row
+  // Calculate cumulative summary row across all libraries
+  if (crossSuiteSummaries.length > 0) {
     const totalBaselineRaw = crossSuiteSummaries.reduce((acc, s) => acc + s.baselineRaw, 0);
     const totalBaselineGzip = crossSuiteSummaries.reduce((acc, s) => acc + s.baselineGzip, 0);
     const totalOptimizedRaw = crossSuiteSummaries.reduce((acc, s) => acc + s.totalRaw, 0);
@@ -133,7 +136,7 @@ async function main() {
     const totalComponents = crossSuiteSummaries.reduce((acc, s) => acc + s.componentCount, 0);
 
     crossSuiteSummaries.push({
-      suiteName: 'OVERALL TOTAL',
+      suiteName: 'OVERALL TOTAL (All Libraries)',
       componentCount: totalComponents,
       baselineRaw: totalBaselineRaw,
       baselineGzip: totalBaselineGzip,
@@ -144,7 +147,33 @@ async function main() {
       gzipSaved: totalGzipSaved,
       gzipPct: totalGzipPct,
     });
+  }
 
+  if (options.format === 'markdown') {
+    // 1. One overview table with all libraries, having all configs enabled
+    console.log('\n' + renderMarkdownOverviewTable(crossSuiteSummaries));
+
+    // 2. One table with all libraries, per config
+    console.log('\n' + renderMarkdownPerConfigTable(allResults));
+
+    // 3. Accordions for more granular details per library
+    console.log('### 🔍 Granular Library Details\n');
+    for (const res of allResults) {
+      console.log(`<details>`);
+      console.log(`<summary><strong>${res.suiteName} (${res.componentCount} elements)</strong> — Click to expand details</summary>\n`);
+      console.log(renderMarkdownTable(`${res.suiteName} Detailed Breakdown`, res.rows));
+      if (res.diagnostics && Object.keys(res.diagnostics).length > 0) {
+        console.log(`**AST & Deduplication Diagnostics**:`);
+        for (const [toolId, diag] of Object.entries(res.diagnostics)) {
+          if (diag.rulesScanned !== undefined) {
+            console.log(`- **[${toolId}]** Rules Scanned: ${diag.rulesScanned} | Deduped: ${diag.rulesDeduped} | Fused Sheets Created: ${diag.fusedSheetsCreated} | Chunks Rewritten: ${diag.componentsRewritten}`);
+          }
+        }
+        console.log('');
+      }
+      console.log(`</details>\n`);
+    }
+  } else if (crossSuiteSummaries.length > 1 && options.format === 'ascii') {
     console.log(renderCrossSuiteSummary(crossSuiteSummaries));
   }
 

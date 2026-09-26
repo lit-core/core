@@ -33,12 +33,20 @@ fn resolve_input_files(config: &FuseConfig) -> Vec<String> {
     "src/**/*.ts".to_string(),
   ];
   let includes = config.include.as_ref().unwrap_or(&default_includes);
-  let default_excludes = vec![
+  let mut default_excludes = vec![
     "**/*.test.ts".to_string(),
     "**/*.spec.ts".to_string(),
-    "**/node_modules/**".to_string(),
-    "**/dist/**".to_string(),
+    "**/*.test.js".to_string(),
+    "**/*.spec.js".to_string(),
   ];
+  let any_targets_node_modules = includes.iter().any(|p| p.contains("node_modules"));
+  if !any_targets_node_modules {
+    default_excludes.push("**/node_modules/**".to_string());
+  }
+  let any_targets_dist = includes.iter().any(|p| p.contains("/dist/") || p.contains("dist/**"));
+  if !any_targets_dist {
+    default_excludes.push("**/dist/**".to_string());
+  }
   let excludes = config.exclude.as_ref().unwrap_or(&default_excludes);
 
   let mut matched_files: HashSet<String> = HashSet::new();

@@ -57,6 +57,7 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
   const suiteContext = await suite.setup();
   const rows = [];
+  /** @type {Record<string, any>} */
   const diagnostics = {};
 
   try {

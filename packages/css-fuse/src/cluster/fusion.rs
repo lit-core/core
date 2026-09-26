@@ -83,6 +83,12 @@ impl ClusterEngine {
         a.selector.cmp(&b.selector)
       });
 
+      let total_css_len: usize = rules.iter().map(|r| r.full_canonical_css.len()).sum();
+      let net_bytes_saved = (files.len().saturating_sub(1)) * total_css_len;
+      if net_bytes_saved < 100 {
+        continue;
+      }
+
       let rule_hashes: Vec<RuleHash> = rules.iter().map(|r| r.hash.clone()).collect();
       let cluster_id = format!("_fused_{}", compute_cluster_hash(&rule_hashes));
 

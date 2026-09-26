@@ -51,6 +51,7 @@ pub struct ExtractedStyle {
   pub export_name: Option<String>,
   pub location_kind: String, // "static_property", "static_property_array_element", "static_getter", "variable", "export_default", "standalone"
   pub parent_span: Option<SourceSpan>,
+  pub tag_identifier: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]

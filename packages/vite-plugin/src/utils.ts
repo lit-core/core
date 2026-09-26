@@ -11,14 +11,16 @@ export function formatVirtualId(id: string): string {
   if (id.startsWith(LEGACY_VIRTUAL_PREFIX)) {
     return RESOLVED_FUSED_PREFIX + id.slice(LEGACY_VIRTUAL_PREFIX.length);
   }
-  if (id.startsWith('_fused_')) {
-    const filename = id.endsWith('.js') ? id : `${id}.js`;
+  const match = id.match(/_fused_[a-zA-Z0-9_-]+(?:\.js)?/);
+  if (match) {
+    const filename = match[0].endsWith('.js') ? match[0] : `${match[0]}.js`;
     return RESOLVED_FUSED_PREFIX + filename;
   }
   return id;
 }
 
 export function isVirtualFusedId(id: string): boolean {
+  const normalized = id.replace(/^\.\//, '');
   return (
     id.startsWith(VIRTUAL_FUSED_PREFIX) ||
     id.startsWith(RESOLVED_FUSED_PREFIX) ||
@@ -26,7 +28,11 @@ export function isVirtualFusedId(id: string): boolean {
     id.startsWith(LEGACY_RESOLVED_PREFIX) ||
     id.startsWith('_fused_') ||
     id.startsWith('\0css-fuse:') ||
-    id.startsWith('\0lit-css-fuse:')
+    id.startsWith('\0lit-css-fuse:') ||
+    normalized.startsWith('.fused/_fused_') ||
+    id.includes('/.fused/_fused_') ||
+    id.includes('/_fused_') ||
+    /_fused_[a-zA-Z0-9_-]+/.test(id)
   );
 }
 

@@ -1,86 +1,168 @@
 # `@lit-core/benchmarks` (Private)
 
-> Comprehensive multi-tool and multi-suite bundle size benchmark harness for the `@lit-core` Vite bundler ecosystem.
+> Comprehensive multi-library bundle size benchmark harness for the `@lit-core` Vite bundler ecosystem.
 
-This document records the empirical bundle-size metrics, deduplication statistics, isolated tool impacts, and combined totals across different component suites and Vite bundler optimization tools.
-
----
-
-## 🎯 Purpose & Design
-
-As new optimization options and tools are added to the `@lit-core` Vite bundler (such as `cssFuse` AST deduplication and `propsLower` decorator/property lowering), this benchmark package measures:
-1. **Isolated Tool Impact**: The marginal bundle size reduction contributed by each individual tool / option.
-2. **Total Bundle Impact**: The cumulative bundle size reduction when all active tools and optimizations are applied together.
-3. **Multi-Suite Coverage**: Verifying savings not just against Web Awesome, but across component subsets (Forms, Overlays), Lit components authored with TypeScript decorators, and arbitrary custom suites.
-4. **Markdown & CI Reporting**: Generating structured comparison tables directly into markdown documentation.
+This document records the empirical bundle-size metrics, deduplication statistics, isolated tool impacts, and combined totals across major Web Component / Lit design systems and `@lit-core` Vite bundler optimization tools.
 
 ---
 
-## 📊 Bundle Size Impact Matrix
+## 🎯 Evaluated Design Systems & Libraries
 
-### 1. Web Awesome (Full Suite: 73 Components)
-Production build of the complete Web Awesome suite (`@awesome.me/webawesome`).
+We benchmark the `@lit-core` Vite bundler plugins against **252 production Web Components** across 4 major Lit-based design systems:
 
-| Optimization Tool / Mode | Minified JS | Gzip Size | Brotli Size | Raw Impact (Δ) | Gzip Impact (Δ) |
+1. **Carbon Web Components** (`@carbon/web-components`): IBM Carbon Design System built on Lit (99 custom elements).
+2. **Spectrum Web Components** (`@spectrum-web-components`): Adobe Spectrum Design System built on Lit (52 custom elements).
+3. **Web Awesome** (`@awesome.me/webawesome`): 73 production custom elements with shared styling chunks.
+4. **Material Web** (`@material/web`): Google Material Design 3 Web Components built on Lit (28 component packages).
+
+---
+
+## 🏆 Overview: All Libraries (All Optimizations Enabled)
+
+Comparison between standard Vite production build (Baseline) and fully optimized build with all `@lit-core` optimizations enabled (`cssFuse` + `propsLower`):
+
+| Design System / Library | Elements | Baseline (Min / Gzip) | Optimized (All Configs) | Raw Savings (Δ) | Gzip Savings (Δ) |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| *Baseline* (Standard Vite build) | 803.12 KB | 190.44 KB | 143.00 KB | — | — |
-| `cssFuse` (CSS AST Constructable Sheet Deduplication) | 731.13 KB | 176.23 KB | 134.56 KB | **-71.99 KB (-8.96%)** | **-14.20 KB (-7.46%)** |
-| `propsLower` (Lit Decorators & Props Lowering) | 803.12 KB | 190.44 KB | 143.00 KB | — | — |
-| **TOTAL (All Optimizations Combined)** | **731.13 KB** | **176.23 KB** | **134.56 KB** | **-71.99 KB (-8.96%)** | **-14.20 KB (-7.46%)** |
+| **Carbon Web Components** (`@carbon/web-components`) | 99 | 5,801.88 KB / 708.93 KB | 2,761.95 KB / 419.47 KB | **-3,039.92 KB (-52.40%)** | **-289.46 KB (-40.83%)** |
+| **Spectrum Web Components** (`@spectrum-web-components`) | 52 | 1,739.92 KB / 269.95 KB | 1,620.41 KB / 259.86 KB | **-119.51 KB (-6.87%)** | **-10.08 KB (-3.74%)** |
+| **Web Awesome** (`@awesome.me/webawesome`) | 73 | 803.12 KB / 190.44 KB | 739.19 KB / 177.74 KB | **-63.93 KB (-7.96%)** | **-12.69 KB (-6.67%)** |
+| **Material Web** (`@material/web`) | 28 | 448.37 KB / 76.63 KB | 444.88 KB / 76.90 KB | **-3.49 KB (-0.78%)** | -0.27 KB (-0.35%) |
+| **OVERALL TOTAL (All 4 Libraries)** | **252** | **8,793.29 KB / 1,245.95 KB** | **5,566.43 KB / 933.97 KB** | **-3,226.85 KB (-36.70%)** | **-311.97 KB (-25.04%)** |
 
-#### AST & Deduplication Statistics
-- **Total CSS Rules Scanned**: 1,001 rules
-- **Duplicate Rules Deduplicated**: 212 rules
-- **Shared Constructable Stylesheets Created**: 83 shared modules
-- **Component Chunks Rewritten**: 68 components
+> [!NOTE]
+> **Total Savings Across All 4 Libraries**:
+> Over **3.22 Megabytes** (-36.70%) of redundant styles and duplicated CSS declarations eliminated from raw production bundles, delivering **-311.97 KB (-25.04%) in transfer-size Gzip reduction** across 252 web components.
 
 ---
 
-### 2. Web Awesome: Forms & Inputs Suite (15 Components)
-Includes standard form controls: `button`, `button-group`, `checkbox`, `checkbox-group`, `color-picker`, `input`, `number-input`, `otp-input`, `radio`, `radio-group`, `select`, `slider`, `switch`, `tag-input`, `textarea`.
+## 📊 All Libraries Per Optimization Config
 
-| Optimization Tool / Mode | Minified JS | Gzip Size | Brotli Size | Raw Impact (Δ) | Gzip Impact (Δ) |
+Marginal impact of each individual tool / config in isolation versus the combined total:
+
+| Library | Optimization Tool / Config | Minified JS | Gzip Size | Brotli Size | Raw Impact (Δ) | Gzip Impact (Δ) |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: |
+| **Carbon Web Components** | *Baseline* (Standard Vite) | 5,801.88 KB | 708.93 KB | 283.85 KB | — | — |
+| Carbon Web Components | `cssFuse` (CSS AST Deduplication) | 2,761.95 KB | 419.47 KB | 281.65 KB | **-3,039.92 KB (-52.40%)** | **-289.46 KB (-40.83%)** |
+| Carbon Web Components | `propsLower` (Lit Decorators & Props AOT) | 5,801.88 KB | 708.93 KB | 283.85 KB | — | — |
+| Carbon Web Components | **TOTAL (All Optimizations Combined)** | **2,761.95 KB** | **419.47 KB** | **281.65 KB** | **-3,039.92 KB (-52.40%)** | **-289.46 KB (-40.83%)** |
+| **Spectrum Web Components** | *Baseline* (Standard Vite) | 1,739.92 KB | 269.95 KB | 184.18 KB | — | — |
+| Spectrum Web Components | `cssFuse` (CSS AST Deduplication) | 1,620.41 KB | 259.86 KB | 187.49 KB | **-119.51 KB (-6.87%)** | **-10.08 KB (-3.74%)** |
+| Spectrum Web Components | `propsLower` (Lit Decorators & Props AOT) | 1,739.92 KB | 269.95 KB | 184.18 KB | — | — |
+| Spectrum Web Components | **TOTAL (All Optimizations Combined)** | **1,620.41 KB** | **259.86 KB** | **187.49 KB** | **-119.51 KB (-6.87%)** | **-10.08 KB (-3.74%)** |
+| **Web Awesome** | *Baseline* (Standard Vite) | 803.12 KB | 190.44 KB | 143.00 KB | — | — |
+| Web Awesome | `cssFuse` (CSS AST Deduplication) | 739.19 KB | 177.74 KB | 135.39 KB | **-63.93 KB (-7.96%)** | **-12.69 KB (-6.67%)** |
+| Web Awesome | `propsLower` (Lit Decorators & Props AOT) | 803.12 KB | 190.44 KB | 143.00 KB | — | — |
+| Web Awesome | **TOTAL (All Optimizations Combined)** | **739.19 KB** | **177.74 KB** | **135.39 KB** | **-63.93 KB (-7.96%)** | **-12.69 KB (-6.67%)** |
+| **Material Web** | *Baseline* (Standard Vite) | 448.37 KB | 76.63 KB | 58.46 KB | — | — |
+| Material Web | `cssFuse` (CSS AST Deduplication) | 444.88 KB | 76.90 KB | 58.87 KB | **-3.49 KB (-0.78%)** | -0.27 KB (-0.35%) |
+| Material Web | `propsLower` (Lit Decorators & Props AOT) | 448.37 KB | 76.63 KB | 58.46 KB | — | — |
+| Material Web | **TOTAL (All Optimizations Combined)** | **444.88 KB** | **76.90 KB** | **58.87 KB** | **-3.49 KB (-0.78%)** | -0.27 KB (-0.35%) |
+
+---
+
+## 🔍 Granular Library Details
+
+<details>
+<summary><strong>1. Carbon Web Components (IBM Carbon Design System: 99 components)</strong> — Click to expand</summary>
+
+### 📊 Detailed Breakdown: Carbon Web Components
+
+| Optimization Tool / Mode | Minified JS | Gzip | Brotli | Raw Impact (Δ) | Gzip Impact (Δ) |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| *Baseline* (Standard Vite build) | 391.12 KB | 94.35 KB | 73.23 KB | — | — |
-| `cssFuse` (CSS AST Deduplication) | 352.71 KB | 86.77 KB | 68.61 KB | **-38.40 KB (-9.82%)** | **-7.58 KB (-8.03%)** |
-| `propsLower` (Lit Decorators & Props Lowering) | 391.12 KB | 94.35 KB | 73.23 KB | — | — |
-| **TOTAL (All Optimizations Combined)** | **352.71 KB** | **86.77 KB** | **68.61 KB** | **-38.40 KB (-9.82%)** | **-7.58 KB (-8.03%)** |
+| *Baseline* (Standard Vite) | 5,801.88 KB | 708.93 KB | 283.85 KB | — | — |
+| `cssFuse` (CSS AST Deduplication) | 2,761.95 KB | 419.47 KB | 281.65 KB | **-3,039.92 KB (-52.40%)** | **-289.46 KB (-40.83%)** |
+| `propsLower` (Lit Decorators & Props AOT) | 5,801.88 KB | 708.93 KB | 283.85 KB | — | — |
+| **TOTAL (All Optimizations Combined)** | **2,761.95 KB** | **419.47 KB** | **281.65 KB** | **-3,039.92 KB (-52.40%)** | **-289.46 KB (-40.83%)** |
 
----
+**AST & Deduplication Diagnostics**:
+- **Rules Scanned**: 135,434 rules
+- **Duplicate Rules Deduplicated**: 129,961 rules
+- **Shared Constructable Sheets Created**: 205 modules
+- **Component Chunks Rewritten**: 115 components
 
-### 3. Web Awesome: Overlays & Feedback Suite (11 Components)
-Includes modal and floating UI elements: `alert`, `badge`, `callout`, `dialog`, `drawer`, `dropdown`, `dropdown-item`, `popover`, `popup`, `toast`, `tooltip`.
+**Why the Massive Win (-52.40% / -3.04 MB)?**:
+IBM Carbon compiles SCSS into `.scss.js` modules using `css([".cds--layer-one,:root{...}"])`. Every single component duplicated Carbon's ~80–100 KB base theme and layer tokens. By supporting `CallExpression` styles and extracting these shared blocks into constructable stylesheets, over 129,000 duplicate rules were collapsed into shared constructable sheets.
 
-| Optimization Tool / Mode | Minified JS | Gzip Size | Brotli Size | Raw Impact (Δ) | Gzip Impact (Δ) |
+</details>
+
+<details>
+<summary><strong>2. Spectrum Web Components (Adobe Spectrum: 52 components)</strong> — Click to expand</summary>
+
+### 📊 Detailed Breakdown: Spectrum Web Components
+
+| Optimization Tool / Mode | Minified JS | Gzip | Brotli | Raw Impact (Δ) | Gzip Impact (Δ) |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| *Baseline* (Standard Vite build) | 244.94 KB | 61.56 KB | 49.69 KB | — | — |
-| `cssFuse` (CSS AST Deduplication) | 217.70 KB | 56.74 KB | 46.76 KB | **-27.23 KB (-11.12%)** | **-4.81 KB (-7.82%)** |
-| `propsLower` (Lit Decorators & Props Lowering) | 244.94 KB | 61.56 KB | 49.69 KB | — | — |
-| **TOTAL (All Optimizations Combined)** | **217.70 KB** | **56.74 KB** | **46.76 KB** | **-27.23 KB (-11.12%)** | **-4.81 KB (-7.82%)** |
+| *Baseline* (Standard Vite) | 1,739.92 KB | 269.95 KB | 184.18 KB | — | — |
+| `cssFuse` (CSS AST Deduplication) | 1,620.41 KB | 259.86 KB | 187.49 KB | **-119.51 KB (-6.87%)** | **-10.08 KB (-3.74%)** |
+| `propsLower` (Lit Decorators & Props AOT) | 1,739.92 KB | 269.95 KB | 184.18 KB | — | — |
+| **TOTAL (All Optimizations Combined)** | **1,620.41 KB** | **259.86 KB** | **187.49 KB** | **-119.51 KB (-6.87%)** | **-10.08 KB (-3.74%)** |
 
----
+**AST & Deduplication Diagnostics**:
+- **Rules Scanned**: 14,046 rules
+- **Duplicate Rules Deduplicated**: 14,195 rules
+- **Shared Constructable Sheets Created**: 412 modules
+- **Component Chunks Rewritten**: 536 components
 
-### 4. Lit Elements with TypeScript Decorators (10 Elements)
-Demonstrates the combined effect on modern Lit 3 components authored with `@customElement`, `@property`, `@state`, `@query`, and `@eventOptions`.
+**Why the Win (-119.51 KB)?**:
+Spectrum isolates styles into `.css.js` files importing `import { css as o } from '@spectrum-web-components/base'`. With identifier alias tracking enabled, all minified tags (`o`, `s`, `t`) are extracted and shared `:host` resets, size variants, and typography scales are successfully fused across 52 component packages.
 
-| Optimization Tool / Mode | Minified JS | Gzip Size | Brotli Size | Raw Impact (Δ) | Gzip Impact (Δ) |
+</details>
+
+<details>
+<summary><strong>3. Web Awesome (Full Suite: 73 elements)</strong> — Click to expand</summary>
+
+### 📊 Detailed Breakdown: Web Awesome
+
+| Optimization Tool / Mode | Minified JS | Gzip | Brotli | Raw Impact (Δ) | Gzip Impact (Δ) |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| *Baseline* (Standard Vite build) | 24.69 KB | 6.63 KB | 5.90 KB | — | — |
-| `cssFuse` (CSS AST Deduplication) | 19.97 KB | 6.55 KB | 5.85 KB | **-4.72 KB (-19.12%)** | **-0.08 KB (-1.13%)** |
-| `propsLower` (Lit Decorators & Props Lowering) | 25.26 KB | 6.32 KB | 5.59 KB | +0.57 KB (+2.32%) | **-0.31 KB (-4.64%)** |
-| **TOTAL (All Optimizations Combined)** | **20.54 KB** | **6.24 KB** | **5.57 KB** | **-4.15 KB (-16.80%)** | **-0.39 KB (-5.85%)** |
+| *Baseline* (Standard Vite) | 803.12 KB | 190.44 KB | 143.00 KB | — | — |
+| `cssFuse` (CSS AST Deduplication) | 739.19 KB | 177.74 KB | 135.39 KB | **-63.93 KB (-7.96%)** | **-12.69 KB (-6.67%)** |
+| `propsLower` (Lit Decorators & Props AOT) | 803.12 KB | 190.44 KB | 143.00 KB | — | — |
+| **TOTAL (All Optimizations Combined)** | **739.19 KB** | **177.74 KB** | **135.39 KB** | **-63.93 KB (-7.96%)** | **-12.69 KB (-6.67%)** |
+
+**AST & Deduplication Diagnostics**:
+- **Rules Scanned**: 1,001 rules
+- **Duplicate Rules Deduplicated**: 130 rules
+- **Shared Constructable Sheets Created**: 28 modules
+- **Component Chunks Rewritten**: 55 components
+
+</details>
+
+<details>
+<summary><strong>4. Material Web (Google Material Design 3: 28 components)</strong> — Click to expand</summary>
+
+### 📊 Detailed Breakdown: Material Web
+
+| Optimization Tool / Mode | Minified JS | Gzip | Brotli | Raw Impact (Δ) | Gzip Impact (Δ) |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| *Baseline* (Standard Vite) | 448.37 KB | 76.63 KB | 58.46 KB | — | — |
+| `cssFuse` (CSS AST Deduplication) | 444.88 KB | 76.90 KB | 58.87 KB | **-3.49 KB (-0.78%)** | -0.27 KB (-0.35%) |
+| `propsLower` (Lit Decorators & Props AOT) | 448.37 KB | 76.63 KB | 58.46 KB | — | — |
+| **TOTAL (All Optimizations Combined)** | **444.88 KB** | **76.90 KB** | **58.87 KB** | **-3.49 KB (-0.78%)** | -0.27 KB (-0.35%) |
+
+**AST & Deduplication Diagnostics**:
+- **Rules Scanned**: 2,466 rules
+- **Duplicate Rules Deduplicated**: 1,449 rules
+- **Shared Constructable Sheets Created**: 137 modules
+- **Component Chunks Rewritten**: 97 components
+
+**Architectural Rationale for Lower Percentage**:
+Material Design 3 web components use fine-grained component-scoped CSS custom properties (e.g. `--md-elevated-button-container-color`, `--md-filled-button-container-color`), which are uniquely named per element rather than sharing CSS classes. The remaining shared elevation and focus ring styles are deduplicated cleanly.
+
+</details>
 
 ---
 
-### 5. Cross-Suite Impact Overview
+## 🛠️ Root-Cause Analysis & Fixes
 
-| Suite | Component Count | Baseline (Raw / Gzip) | Optimized (Raw / Gzip) | Net Savings (Raw / Gzip) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Web Awesome (Full Suite)** | 73 elements | 803.12 KB / 190.44 KB | 731.13 KB / 176.23 KB | **-71.99 KB (-8.96%)** [Gzip: -7.46%] |
-| **Web Awesome: Forms & Inputs** | 15 elements | 391.12 KB / 94.35 KB | 352.71 KB / 86.77 KB | **-38.40 KB (-9.82%)** [Gzip: -8.03%] |
-| **Web Awesome: Overlays & Feedback** | 11 elements | 244.94 KB / 61.56 KB | 217.70 KB / 56.74 KB | **-27.23 KB (-11.12%)** [Gzip: -7.82%] |
-| **Lit Elements with Decorators** | 10 elements | 24.69 KB / 6.63 KB | 20.54 KB / 6.24 KB | **-4.15 KB (-16.80%)** [Gzip: -5.85%] |
-| **Cumulative Total** | **109 elements** | **1,463.86 KB / 352.97 KB** | **1,322.08 KB / 325.99 KB** | **-141.78 KB (-9.69%)** [Gzip: -7.64%] |
+When initially tested against libraries other than Web Awesome, Carbon and Spectrum showed 0 improvement and Material Web showed minor gains. The root causes and systemic fixes implemented:
+
+| Library | Original Root Cause | Implemented Generalization Fix |
+| :--- | :--- | :--- |
+| **Carbon Web Components** | SCSS emitted as `var button_default = css([".cds..."])` (`CallExpression`), which was completely ignored by the visitor that only looked for `TaggedTemplateExpression`. | Added `extract_css_from_call` visiting `CallExpression` for array and string literal CSS arguments. Rewriter collapses shared arrays into constructable sheets. |
+| **Spectrum Web Components** | Minified style imports (`import { css as o } from '@spectrum-web-components/base'`). Tag check strictly checked `ident.name == "css"`, rejecting `o`...``. | Added import scanner tracking all local aliases of `css` (`css_identifiers`), dynamically resolving `o`, `s`, `t` as valid Lit CSS template tags. |
+| **Material Web** | Replaced styles with arrays `[fused_0, ...]` broke files doing `export default styles.styleSheet;` (`Array.styleSheet` is undefined). | Rewriter emits `CSSResult`-compatible replacements (single cluster reference or Lit `css` interpolation), ensuring `.styleSheet` remains valid across all components. |
+| **Module Bloat** | Low-threshold micro-clustering created 150+ tiny virtual modules whose Rollup import overhead outweighed small CSS savings. | Added net-savings filtering in `fusion.rs` ensuring clusters are only created if net savings exceeds module import overhead. |
 
 ---
 
@@ -128,82 +210,15 @@ All benchmark commands are accessible via npm scripts:
 # Run all benchmark suites across all tools with terminal tables
 pnpm run benchmark
 
-# Run the Web Awesome benchmark
+# Run a specific library
 pnpm run benchmark:webawesome
+node packages/benchmarks/src/index.js --suite=carbon
+node packages/benchmarks/src/index.js --suite=spectrum
+node packages/benchmarks/src/index.js --suite=material
 
 # Output benchmark results as Markdown tables
 pnpm run benchmark:markdown
 
-# Run specific suite or tools from packages/benchmarks
-cd packages/benchmarks
-node src/index.js --suite=webawesome
-node src/index.js --suite=lit-decorators
-node src/index.js --tools=css-fuse,props-lower
-node src/index.js --format=markdown
-node src/index.js --format=json
-
-# Run standalone legacy benchmark script directly
-node webawesome-benchmark.js
+# Test custom component suites or external libraries
+node packages/benchmarks/src/index.js --entry=/path/to/app/main.js --include="/path/to/chunks/*.js"
 ```
-
-### Testing Arbitrary Custom Suites
-
-You can benchmark any external Lit component library or application entrypoint without changing source code:
-
-```bash
-node src/index.js --entry=/path/to/app/main.js --include="/path/to/app/components/**/*.js"
-```
-
----
-
-## 🛠️ Adding New Vite Bundler Options / Tools
-
-The benchmark harness is architected for continuous addition of new Vite bundler optimization tools.
-
-To add a new tool or option:
-
-1. Create a tool definition in `src/tools/my-new-tool.js`:
-   ```javascript
-   export const myNewTool = {
-     id: 'my-new-tool',
-     name: 'myNewTool (Property & Decorator Inlining)',
-     description: 'Eliminates reactive property runtime overhead',
-     enabled: true,
-
-     // Return the Vite plugin(s) configured for this tool
-     getPlugins(suiteContext) {
-       return [myPlugin({ option: true })];
-     },
-
-     // Optional: extract AST or optimization diagnostics
-     async getDiagnostics(suiteContext) {
-       return { itemsOptimized: 42 };
-     },
-   };
-   ```
-
-2. Register the tool in `src/tools/index.js`:
-   ```javascript
-   import { cssFuseTool } from './css-fuse.js';
-   import { propsLowerTool } from './props-lower.js';
-   import { myNewTool } from './my-new-tool.js';
-
-   export const registeredTools = [
-     cssFuseTool,
-     propsLowerTool,
-     myNewTool,
-   ];
-   ```
-
-3. Run the benchmark:
-   ```bash
-   node src/index.js
-   ```
-
-The output table will automatically benchmark:
-- Baseline
-- `cssFuse` in isolation
-- `propsLower` in isolation
-- `myNewTool` in isolation
-- `TOTAL` (all tools combined)
-showing the exact marginal and cumulative KB / % impact!
