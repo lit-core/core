@@ -7,6 +7,14 @@ pub struct ClusterEngine;
 
 impl ClusterEngine {
     pub fn cluster(frequency_index: &FrequencyIndex, threshold: usize) -> Vec<ClusterGroup> {
+        Self::cluster_with_min_savings(frequency_index, threshold, 0)
+    }
+
+    pub fn cluster_with_min_savings(
+        frequency_index: &FrequencyIndex,
+        threshold: usize,
+        min_savings: usize,
+    ) -> Vec<ClusterGroup> {
         // Map: sharing profile (sorted files) -> Vec<NormalizedRule>
         let mut profile_to_rules: HashMap<Vec<String>, Vec<NormalizedRule>> = HashMap::new();
 
@@ -90,7 +98,7 @@ impl ClusterEngine {
 
             let total_css_len: usize = rules.iter().map(|r| r.full_canonical_css.len()).sum();
             let net_bytes_saved = (files.len().saturating_sub(1)) * total_css_len;
-            if net_bytes_saved < 100 {
+            if net_bytes_saved < min_savings || net_bytes_saved == 0 {
                 continue;
             }
 

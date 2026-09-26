@@ -560,7 +560,7 @@ const __napiWasiFlavors = ['wasm32-wasi'];
 const __napiWasiFlavor = process.env.NAPI_RS_WASI_FLAVOR;
 const __napiWasiFlavorRequested = typeof __napiWasiFlavor === 'string' && __napiWasiFlavor.length > 0;
 if (__napiWasiFlavorRequested && __napiWasiFlavors.indexOf(__napiWasiFlavor) === -1) {
-  throw new Error('Unsupported WASI flavor "' + __napiWasiFlavor + '". Available flavors: ' + __napiWasiFlavors.join(', '));
+  throw new Error(`Unsupported WASI flavor "${__napiWasiFlavor}". Available flavors: ${__napiWasiFlavors.join(', ')}`);
 }
 const forceWasiError = process.env.NAPI_RS_FORCE_WASI === 'error';
 const forceWasi = process.env.NAPI_RS_FORCE_WASI === 'true' || forceWasiError || __napiWasiFlavorRequested;

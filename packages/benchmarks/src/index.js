@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { runSuiteBenchmark } from './runner.js';
 import { getSuites } from './suites/index.js';
-import { renderAsciiTable, renderCrossSuiteSummary, renderMarkdownDiagnosticsTable, renderMarkdownOverviewTable, renderMarkdownTable } from './table.js';
+import { renderAsciiTable, renderCrossSuiteSummary, renderMarkdownDiagnosticsTable, renderMarkdownOverviewTable, renderMarkdownPerToolAccordion, renderMarkdownTable } from './table.js';
 import { getActiveTools } from './tools/index.js';
 
 // Parse command line arguments
@@ -150,6 +150,7 @@ async function main() {
   if (options.format === 'markdown') {
     if (crossSuiteSummaries.length > 1) {
       console.log(`\n${renderMarkdownOverviewTable(crossSuiteSummaries)}`);
+      console.log(renderMarkdownPerToolAccordion(allResults));
       console.log(renderMarkdownDiagnosticsTable(allResults));
     } else {
       const res = allResults[0];

@@ -16,6 +16,18 @@
     "src/index.d.ts",
     "*.node"
   ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/props-lower"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "napi": {
     "binaryName": "props-lower",
     "targets": [

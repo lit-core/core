@@ -11,6 +11,7 @@ pub struct FuseConfig {
     pub output_dir: Option<String>,
     pub write: Option<bool>,
     pub virtual_imports: Option<bool>,
+    pub min_savings: Option<u32>,
 }
 
 impl Default for FuseConfig {
@@ -28,6 +29,7 @@ impl Default for FuseConfig {
             output_dir: Some(".fused".to_string()),
             write: Some(false),
             virtual_imports: Some(false),
+            min_savings: None,
         }
     }
 }

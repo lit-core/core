@@ -76,9 +76,8 @@ export function renderAsciiTable(title, rows) {
  * @returns {string}
  */
 export function renderMarkdownTable(title, rows) {
-  const headers = ['Optimization tool or mode', 'Minified JS', 'Gzip', 'Brotli', 'Raw impact (Δ)', 'Gzip impact (Δ)'];
-
-  const alignments = [':---', '---:', '---:', '---:', '---:', '---:'];
+  const headers = ['Optimization tool or mode', 'Size', 'Savings'];
+  const alignments = [':---', '---:', '---:'];
 
   const lines = [];
   lines.push(`### 📊 ${title}`);
@@ -88,13 +87,9 @@ export function renderMarkdownTable(title, rows) {
 
   for (const r of rows) {
     const rawSize = formatKb(r.metrics.rawBytes);
-    const gzipSize = formatKb(r.metrics.gzipBytes);
-    const brotliSize = formatKb(r.metrics.brotliBytes);
     const rawImpact = r.isBaseline ? '—' : formatImpact(r.impact?.rawDiff ?? 0, r.impact?.rawPercent ?? 0);
-    const gzipImpact = r.isBaseline ? '—' : formatImpact(r.impact?.gzipDiff ?? 0, r.impact?.gzipPercent ?? 0);
-
     const namePrefix = r.isTotal ? '**TOTAL** ' : r.isBaseline ? '*Baseline* ' : '';
-    lines.push(`| ${namePrefix}${r.name} | ${rawSize} | ${gzipSize} | ${brotliSize} | ${rawImpact} | ${gzipImpact} |`);
+    lines.push(`| ${namePrefix}${r.name} | ${rawSize} | ${rawImpact} |`);
   }
 
   lines.push('');
@@ -157,9 +152,8 @@ export function renderCrossSuiteSummary(summaryRows) {
  * @returns {string}
  */
 export function renderMarkdownOverviewTable(summaryRows) {
-  const headers = ['Design system or library', 'Elements', 'Baseline (min / gzip)', 'Optimized (min / gzip)', 'Net savings (raw)', 'Net savings (gzip)'];
-
-  const alignments = [':---', '---:', '---:', '---:', '---:', '---:'];
+  const headers = ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Net savings'];
+  const alignments = [':---', '---:', '---:', '---:', '---:'];
 
   const lines = [];
   lines.push('### 📊 Results summary');
@@ -169,18 +163,73 @@ export function renderMarkdownOverviewTable(summaryRows) {
 
   for (const s of summaryRows) {
     const rawDiffStr = formatImpact(-s.rawSaved, -s.rawPct);
-    const gzipDiffStr = formatImpact(-s.gzipSaved, -s.gzipPct);
     const isOverall = s.suiteName.includes('TOTAL');
     const name = isOverall ? 'Total' : s.suiteName;
     const prefix = isOverall ? '**' : '';
     const suffix = isOverall ? '**' : '';
 
-    lines.push(
-      `| ${prefix}${name}${suffix} | ${s.componentCount} | ${formatKb(s.baselineRaw)} / ${formatKb(s.baselineGzip)} | ${formatKb(s.totalRaw)} / ${formatKb(s.totalGzip)} | ${prefix}${rawDiffStr}${suffix} | ${prefix}${gzipDiffStr}${suffix} |`,
-    );
+    lines.push(`| ${prefix}${name}${suffix} | ${s.componentCount} | ${formatKb(s.baselineRaw)} | ${formatKb(s.totalRaw)} | ${prefix}${rawDiffStr}${suffix} |`);
   }
 
   lines.push('');
+  return lines.join('\n');
+}
+
+/**
+ * Format an accordion containing one table per tool across all libraries tested (no gzip, regular sizes only).
+ * @param {Array<{ suiteName: string, componentCount: number, rows: TableRow[] }>} allResults
+ * @returns {string}
+ */
+export function renderMarkdownPerToolAccordion(allResults) {
+  // Find all distinct tools (excluding baseline and total)
+  /** @type {string[]} */
+  const toolNames = [];
+  for (const res of allResults) {
+    for (const r of res.rows) {
+      if (!r.isBaseline && !r.isTotal && !toolNames.includes(r.name)) {
+        toolNames.push(r.name);
+      }
+    }
+  }
+
+  if (toolNames.length === 0) return '';
+
+  const lines = [];
+  lines.push('<details>');
+  lines.push('<summary><strong>Per-tool impact breakdown</strong> — Click to expand individual tool tables</summary>\n');
+
+  for (const toolName of toolNames) {
+    lines.push(`### ${toolName}\n`);
+    const headers = ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Savings'];
+    const alignments = [':---', '---:', '---:', '---:', '---:'];
+    lines.push(`| ${headers.join(' | ')} |`);
+    lines.push(`| ${alignments.join(' | ')} |`);
+
+    let totalBaseline = 0;
+    let totalOptimized = 0;
+    let totalElements = 0;
+
+    for (const res of allResults) {
+      const baselineRow = res.rows.find((r) => r.isBaseline);
+      const toolRow = res.rows.find((r) => r.name === toolName);
+      if (baselineRow && toolRow) {
+        const baselineSize = baselineRow.metrics.rawBytes;
+        const optSize = toolRow.metrics.rawBytes;
+        const savings = toolRow.impact ? formatImpact(toolRow.impact.rawDiff, toolRow.impact.rawPercent) : '—';
+        totalBaseline += baselineSize;
+        totalOptimized += optSize;
+        totalElements += res.componentCount;
+        lines.push(`| ${res.suiteName} | ${res.componentCount} | ${formatKb(baselineSize)} | ${formatKb(optSize)} | ${savings} |`);
+      }
+    }
+
+    const totalDiff = totalOptimized - totalBaseline;
+    const totalPct = totalBaseline > 0 ? (totalDiff / totalBaseline) * 100 : 0;
+    const totalSavingsStr = totalDiff === 0 ? '—' : formatImpact(totalDiff, totalPct);
+    lines.push(`| **Total** | **${totalElements}** | **${formatKb(totalBaseline)}** | **${formatKb(totalOptimized)}** | **${totalSavingsStr}** |\n`);
+  }
+
+  lines.push('</details>\n');
   return lines.join('\n');
 }
 
@@ -208,39 +257,6 @@ export function renderMarkdownDiagnosticsTable(allResults) {
           );
         }
       }
-    }
-  }
-
-  lines.push('');
-  return lines.join('\n');
-}
-
-/**
- * Format one unified table across all libraries, broken down per config tool.
- * @param {Array<{ suiteName: string, rows: TableRow[] }>} allResults
- * @returns {string}
- */
-export function renderMarkdownPerConfigTable(allResults) {
-  const headers = ['Library', 'Optimization Tool / Config', 'Minified JS', 'Gzip Size', 'Brotli Size', 'Raw Impact (Δ)', 'Gzip Impact (Δ)'];
-
-  const alignments = [':---', ':---', '---:', '---:', '---:', '---:', '---:'];
-
-  const lines = [];
-  lines.push('### 📊 All Libraries Per Optimization Config');
-  lines.push('');
-  lines.push(`| ${headers.join(' | ')} |`);
-  lines.push(`| ${alignments.join(' | ')} |`);
-
-  for (const res of allResults) {
-    for (const r of res.rows) {
-      const rawSize = formatKb(r.metrics.rawBytes);
-      const gzipSize = formatKb(r.metrics.gzipBytes);
-      const brotliSize = formatKb(r.metrics.brotliBytes);
-      const rawImpact = r.isBaseline ? '—' : formatImpact(r.impact?.rawDiff ?? 0, r.impact?.rawPercent ?? 0);
-      const gzipImpact = r.isBaseline ? '—' : formatImpact(r.impact?.gzipDiff ?? 0, r.impact?.gzipPercent ?? 0);
-
-      const namePrefix = r.isTotal ? '**TOTAL** ' : r.isBaseline ? '*Baseline* ' : '';
-      lines.push(`| ${res.suiteName} | ${namePrefix}${r.name} | ${rawSize} | ${gzipSize} | ${brotliSize} | ${rawImpact} | ${gzipImpact} |`);
     }
   }
 

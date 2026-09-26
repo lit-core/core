@@ -58,6 +58,7 @@ fn main() {
         output_dir: cli.output_dir,
         write: Some(cli.write),
         virtual_imports: None,
+        min_savings: None,
     };
 
     match cli.command {

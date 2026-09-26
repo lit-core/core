@@ -101,7 +101,9 @@ pub fn run_fuse_pipeline(config: &FuseConfig, dry_run: bool) -> FuseResult {
     let mut frequency_index = FrequencyIndex::new();
     frequency_index.index_rules(&all_normalized_rules);
 
-    let clusters = ClusterEngine::cluster(&frequency_index, threshold);
+    let min_savings = config.min_savings.unwrap_or(0) as usize;
+    let clusters =
+        ClusterEngine::cluster_with_min_savings(&frequency_index, threshold, min_savings);
 
     // Step 5: Generate fused sheets
     let mut fused_sheets = Vec::new();

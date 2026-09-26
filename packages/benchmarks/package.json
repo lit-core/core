@@ -5,6 +5,10 @@
   "description": "Multi-suite bundle size and optimization benchmark framework for @lit-core Vite bundler",
   "type": "module",
   "main": "src/index.js",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "benchmark": "node src/index.js",
     "benchmark:webawesome": "node src/index.js --suite=webawesome",
@@ -17,8 +21,9 @@
   "dependencies": {
     "@awesome.me/webawesome": "^3.14.0",
     "@lit-core/css-fuse": "workspace:*",
-    "@lit-core/props-lower": "workspace:*",
+    "@lit-core/css-minifier": "workspace:*",
     "@lit-core/html-minifier": "workspace:*",
+    "@lit-core/props-lower": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "lit": "^3.3.3",
     "vite": "^8.3.1"

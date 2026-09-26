@@ -5,6 +5,29 @@
   "type": "module",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "bin",
+    "*.node"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/css-fuse"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "napi": {
     "binaryName": "css-fuse",
     "targets": [
@@ -19,22 +42,13 @@
   },
   "scripts": {
     "artifacts": "napi artifacts",
-    "build": "cargo build --release --bin css-fuse-bin && cp target/release/css-fuse-bin bin/css-fuse-bin",
-    "build:debug": "cargo build --bin css-fuse-bin && cp target/debug/css-fuse-bin bin/css-fuse-bin",
+    "build": "cargo build --release && cp target/release/libcss_fuse.dylib css-fuse.darwin-arm64.node 2>/dev/null || true; cp target/release/css-fuse-bin bin/css-fuse-bin 2>/dev/null || true",
+    "build:debug": "cargo build && cp target/debug/libcss_fuse.dylib css-fuse.darwin-arm64.node 2>/dev/null || true; cp target/debug/css-fuse-bin bin/css-fuse-bin 2>/dev/null || true",
     "prepublishOnly": "napi prepublish -t npm",
     "version": "napi version",
     "test": "node src/test.js"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.10.5"
-  },
-  "packageManager": "pnpm@11.11.0",
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lit-core/core",
-    "directory": "packages/css-fuse"
   }
 }

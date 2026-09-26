@@ -17,6 +17,9 @@
     "README.md",
     "LICENSE"
   ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",

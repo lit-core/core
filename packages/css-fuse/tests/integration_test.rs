@@ -50,6 +50,7 @@ fn test_css_normalization_and_deduplication() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
 
     let style2 = ExtractedStyle {
@@ -67,6 +68,7 @@ fn test_css_normalization_and_deduplication() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
 
     let rules1 = normalize_css(&style1);
@@ -106,6 +108,7 @@ fn test_sub_rule_extraction_and_subtraction_preserves_overrides() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
 
     // Component B has :host with display, box-sizing, and color: blue (override)
@@ -124,6 +127,7 @@ fn test_sub_rule_extraction_and_subtraction_preserves_overrides() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
 
     let rules_a = normalize_css(&style_a);
@@ -238,6 +242,7 @@ fn test_tree_shaking_isolation() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
     let s_b = ExtractedStyle {
         file_path: "comp-b.ts".to_string(),
@@ -254,6 +259,7 @@ fn test_tree_shaking_isolation() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
     let s_c = ExtractedStyle {
         file_path: "comp-c.ts".to_string(),
@@ -270,6 +276,7 @@ fn test_tree_shaking_isolation() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
     let s_d = ExtractedStyle {
         file_path: "comp-d.ts".to_string(),
@@ -286,6 +293,7 @@ fn test_tree_shaking_isolation() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
 
     let mut index = FrequencyIndex::new();
@@ -343,6 +351,7 @@ fn test_slotted_scoping_audit() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
 
     let valid_style = ExtractedStyle {
@@ -360,6 +369,7 @@ fn test_slotted_scoping_audit() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
 
     let diags_invalid = audit_slotted_selectors(&invalid_style);
@@ -387,6 +397,7 @@ fn test_custom_property_contract_audit() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
 
     let style_with_fallback = ExtractedStyle {
@@ -404,6 +415,7 @@ fn test_custom_property_contract_audit() {
         export_name: None,
         location_kind: "standalone".to_string(),
         parent_span: None,
+        tag_identifier: None,
     };
 
     let diags_no_fallback = audit_custom_properties(&style_no_fallback);
