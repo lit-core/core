@@ -57,5 +57,9 @@
     "type": "git",
     "url": "https://github.com/lit-core/core",
     "directory": "packages/vite-plugin"
+  },
+  "homepage": "https://github.com/lit-core/core/tree/main/packages/vite-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/lit-core/core/issues"
   }
 }

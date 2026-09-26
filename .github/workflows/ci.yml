@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    # Monthly scheduled check on the first day of each month at 00:00 UTC
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint and format check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Biome check
+        run: pnpm run lint
+
+  rust:
+    name: Rust formatting and clippy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Format check css-fuse
+        run: cargo fmt --check --manifest-path packages/css-fuse/Cargo.toml
+
+      - name: Format check props-lower
+        run: cargo fmt --check --manifest-path packages/props-lower/Cargo.toml
+
+      - name: Format check css-minifier
+        run: cargo fmt --check --manifest-path packages/css-minifier/Cargo.toml
+
+      - name: Format check html-minifier
+        run: cargo fmt --check --manifest-path packages/html-minifier/Cargo.toml
+
+      - name: Clippy css-fuse
+        run: cargo clippy --manifest-path packages/css-fuse/Cargo.toml -- -D warnings
+
+      - name: Clippy props-lower
+        run: cargo clippy --manifest-path packages/props-lower/Cargo.toml -- -D warnings
+
+      - name: Clippy css-minifier
+        run: cargo clippy --manifest-path packages/css-minifier/Cargo.toml -- -D warnings
+
+      - name: Clippy html-minifier
+        run: cargo clippy --manifest-path packages/html-minifier/Cargo.toml -- -D warnings
+
+  test:
+    name: Build and test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspaces
+        run: pnpm run build
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Run bundler integration tests
+        run: node packages/vite-plugin/test/integration.test.js

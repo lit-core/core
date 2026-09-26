@@ -1,23 +1,41 @@
+# Dependencies and package managers
 node_modules
 .pnpm-store
+
+# Build outputs and caches
 dist
+build
+out
 .turbo
 .next
-out
-build
 coverage
+*.tsbuildinfo
+
+# Rust build artifacts
+target
+**/*/target
+*.node
+packages/css-fuse/bin/css-fuse-bin
+
+# Environment and logs
 *.log
-.DS_Store
 .env.local
 .env.*.local
 
+# Operating system files
+.DS_Store
+Thumbs.db
 
-**/*/target
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Temporary benchmark files and caches
 .fused
 **/.dist-*
 **/.webawesome-entry.js
-*.node
-packages/css-fuse/bin/css-fuse-bin
 **/.temp-bench*
 **/*-entry.js
 **/.*-entry.js

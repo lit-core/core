@@ -14,11 +14,11 @@ Benchmarks evaluate standard Vite production builds (**Baseline**) against optim
 
 | Design system or library | Elements | Baseline size | Optimized size | Net savings |
 | :--- | ---: | ---: | ---: | ---: |
-| **Carbon Web Components** | 99 | 5,801.88 KB | 2,622.66 KB | **-3,179.22 KB (-54.80%)** |
-| **Spectrum Web Components** | 52 | 1,739.92 KB | 1,603.12 KB | **-136.80 KB (-7.86%)** |
-| **Web Awesome** | 73 | 803.12 KB | 684.50 KB | **-118.63 KB (-14.77%)** |
-| **Material Web** | 28 | 448.37 KB | 428.77 KB | **-19.60 KB (-4.37%)** |
-| **Total** | **252** | **8,793.29 KB** | **5,339.04 KB** | **-3,454.24 KB (-39.28%)** |
+| **Carbon Web Components** | 99 | 5,801.88 KB | 2,622.61 KB | **-3,179.26 KB (-54.80%)** |
+| **Spectrum Web Components** | 52 | 1,739.92 KB | 1,581.30 KB | **-158.62 KB (-9.12%)** |
+| **Web Awesome** | 73 | 803.12 KB | 682.78 KB | **-120.34 KB (-14.98%)** |
+| **Material Web** | 28 | 448.37 KB | 428.48 KB | **-19.89 KB (-4.44%)** |
+| **Total** | **252** | **8,793.29 KB** | **5,315.17 KB** | **-3,478.12 KB (-39.55%)** |
 
 ---
 
@@ -29,21 +29,31 @@ Benchmarks evaluate standard Vite production builds (**Baseline**) against optim
 
 | Design system or library | Elements | Baseline size | Optimized size | Savings |
 | :--- | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5,801.88 KB | 2,761.95 KB | -3,039.92 KB (-52.40%) |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,620.41 KB | -119.51 KB (-6.87%) |
-| Web Awesome | 73 | 803.12 KB | 739.19 KB | -63.93 KB (-7.96%) |
-| Material Web | 28 | 448.37 KB | 444.88 KB | -3.49 KB (-0.78%) |
-| Total | 252 | 8,793.29 KB | 5,566.43 KB | -3,226.85 KB (-36.70%) |
+| Carbon Web Components | 99 | 5,801.88 KB | 2,761.86 KB | -3,040.02 KB (-52.40%) |
+| Spectrum Web Components | 52 | 1,739.92 KB | 1,619.78 KB | -120.14 KB (-6.90%) |
+| Web Awesome | 73 | 803.12 KB | 731.78 KB | -71.34 KB (-8.88%) |
+| Material Web | 28 | 448.37 KB | 444.31 KB | -4.06 KB (-0.91%) |
+| Total | 252 | 8,793.29 KB | 5,557.72 KB | -3,235.56 KB (-36.80%) |
 
 ### `css-minifier` (embedded CSS minification)
 
 | Design system or library | Elements | Baseline size | Optimized size | Savings |
 | :--- | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5,801.88 KB | 5,662.58 KB | -139.30 KB (-2.40%) |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,722.63 KB | -17.29 KB (-0.99%) |
-| Web Awesome | 73 | 803.12 KB | 748.42 KB | -54.70 KB (-6.81%) |
-| Material Web | 28 | 448.37 KB | 432.26 KB | -16.11 KB (-3.59%) |
-| Total | 252 | 8,793.29 KB | 8,565.89 KB | -227.40 KB (-2.59%) |
+| Carbon Web Components | 99 | 5,801.88 KB | 5,759.60 KB | -42.27 KB (-0.73%) |
+| Spectrum Web Components | 52 | 1,739.92 KB | 1,739.09 KB | -0.83 KB (-0.05%) |
+| Web Awesome | 73 | 803.12 KB | 733.47 KB | -69.65 KB (-8.67%) |
+| Material Web | 28 | 448.37 KB | 441.92 KB | -6.45 KB (-1.44%) |
+| Total | 252 | 8,793.29 KB | 8,674.09 KB | -119.19 KB (-1.36%) |
+
+### `html-minifier` (Lit HTML and SVG template minification)
+
+| Design system or library | Elements | Baseline size | Optimized size | Savings |
+| :--- | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 99 | 5,801.88 KB | 5,747.27 KB | -54.60 KB (-0.94%) |
+| Spectrum Web Components | 52 | 1,739.92 KB | 1,718.86 KB | -21.06 KB (-1.21%) |
+| Web Awesome | 73 | 803.12 KB | 775.79 KB | -27.33 KB (-3.40%) |
+| Material Web | 28 | 448.37 KB | 441.81 KB | -6.57 KB (-1.46%) |
+| Total | 252 | 8,793.29 KB | 8,683.72 KB | -109.57 KB (-1.25%) |
 
 ### `props-lower` (AOT decorator lowering)
 
@@ -63,10 +73,10 @@ Benchmarks evaluate standard Vite production builds (**Baseline**) against optim
 
 | Design system or library | Rules scanned | Duplicate rules fused | Shared sheets created | Chunks rewritten |
 | :--- | ---: | ---: | ---: | ---: |
-| **Carbon Web Components** | 135,434 | 129,961 | 205 | 115 |
-| **Spectrum Web Components** | 14,046 | 14,195 | 412 | 536 |
-| **Web Awesome** | 1,001 | 130 | 28 | 55 |
-| **Material Web** | 2,466 | 1,449 | 137 | 97 |
+| **Carbon Web Components** | 135,434 | 129,973 | 211 | 117 |
+| **Spectrum Web Components** | 14,046 | 14,242 | 431 | 536 |
+| **Web Awesome** | 1,001 | 212 | 83 | 68 |
+| **Material Web** | 2,466 | 1,505 | 155 | 98 |
 
 ---
 

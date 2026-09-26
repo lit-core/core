@@ -25,6 +25,20 @@
     "url": "https://github.com/lit-core/core",
     "directory": "packages/css-fuse"
   },
+  "homepage": "https://github.com/lit-core/core/tree/main/packages/css-fuse#readme",
+  "bugs": {
+    "url": "https://github.com/lit-core/core/issues"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "css",
+    "dedup",
+    "constructable-stylesheets",
+    "ast",
+    "oxc",
+    "lightningcss"
+  ],
   "engines": {
     "node": ">=24.0.0"
   },

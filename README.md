@@ -1,111 +1,187 @@
-# CSS Fuse Monorepo
+# lit-core
 
-> **AOT Cross-Component CSS Deduplication & Constructable Stylesheet Sharing for Lit & Web Components**
+> Ahead-of-time compiler and bundler optimization toolchain for Lit and Web Components
 
-This repository contains the `@lit-core` toolchain for analyzing, deduplicating, and sharing CSS rules across Web Components ahead of time (AOT).
+`@lit-core` is an ahead-of-time (AOT) toolchain designed to optimize Web Component applications. It addresses key performance overheads in modern Web Component architectures—including duplicate styles inside Shadow DOM, runtime decorator reflection, and unoptimized template literals—at compile time.
 
 ```mermaid
 flowchart TD
-    subgraph Core ["@lit-core/css-fuse (Rust Core)"]
-        A["Lit Components & Styles"] --> B["AST Tag Visitor (oxc)"]
-        B --> C["Rule Normalizer (lightningcss)"]
-        C --> D["Declaration Frequency Index"]
-        D --> E["Cluster Engine (threshold >= 2)"]
-        E --> F["Shared Constructable Sheets (css`...`)"]
-        E --> G["Component AST Rewriter"]
-        G --> H["[sharedSheets, localOverrides]"]
+    subgraph Sources ["Component source code"]
+        A["Lit components (.ts, .js)"]
     end
 
-    subgraph Bundler ["@lit-core/vite-plugin"]
-        F --> I["Virtual Module Provider (virtual:css-fuse/*)"]
-        H --> J["Vite / Rollup Module Graph"]
-        I --> J
-        J --> K["Chunk-Aligned Bundle Output"]
-        J --> L["Fine-Grained HMR (No Full Reload)"]
+    subgraph NativeCore ["Native Rust compiler core (NAPI-RS)"]
+        B["@lit-core/props-lower<br/>(lowers decorators to static properties)"]
+        C["@lit-core/css-fuse<br/>(AST CSS deduplication into shared constructable sheets)"]
+        D["@lit-core/css-minifier<br/>(lightningcss & oxc template minifier)"]
+        E["@lit-core/html-minifier<br/>(oxc HTML & SVG template minifier)"]
     end
+
+    subgraph BundlerPlugin ["@lit-core/vite-plugin"]
+        F["Vite / Rollup integration"]
+        G["Virtual module provider (virtual:css-fuse/*)"]
+        H["Rollup chunk boundary alignment"]
+        I["Fine-grained HMR without full page reloads"]
+    end
+
+    subgraph Output ["Optimized runtime output"]
+        J["Chunk-scoped JS bundles"]
+        K["Shared in-memory CSSStyleSheet instances"]
+    end
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    F --> H
+    F --> I
+    G --> J
+    H --> J
+    I --> J
+    J --> K
 ```
 
 ---
 
-## Architectural Direction
+## Architectural motivation
 
-Traditional utility-class atomization requires parsing HTML templates, rewriting `class` attributes, and breaking the CSS cascade inside Shadow DOM.
+Web Components isolate styles within Shadow DOM. While this prevents global style leakage, it introduces architectural challenges for application performance:
 
-`@lit-core/css-fuse` takes an **AST-driven constructable stylesheet** approach:
-1. **Pure CSS AST Transform**: Scans `css` tagged template literals across components using `oxc` and `lightningcss`. Lit `html` templates and class names are completely untouched.
-2. **Sub-Rule & Declaration-Level Extraction**: Detects identical CSS declaration blocks and selectors across components, extracting common rules into shared, hash-identified constructable stylesheet modules.
-3. **Local Override Preservation**: Retains unique rules and component-specific overrides in the component's local stylesheet.
-4. **Order & Specificity Preservation**: Updates component `static styles` arrays by prepending shared sheets before local styles (`static styles = [sharedRuleSet, localStyles]`), strictly preserving cascade precedence without altering specificity.
-5. **Constructable Stylesheet Instance Sharing**: Consuming components share identical `CSSStyleSheet` instances in memory, eliminating redundant style compilation in browser engines.
-6. **Chunk-Aware Scoping**: The Vite plugin connects with Rollup's module graph to ensure shared stylesheets are co-located with their consuming components, preventing lazy-route styles from leaking into entry bundles.
-
----
-
-## Monorepo Workspaces
-
-| Package | Description | Language / Tech |
-|---|---|---|
-| [`@lit-core/css-fuse`](packages/css-fuse/) | Core AOT deduplication engine, normalizer, and scoping auditor | Rust (`oxc`, `lightningcss`, `blake3`) + NAPI-RS |
-| [`@lit-core/vite-plugin`](packages/vite-plugin/) | Official Vite / Rollup plugin with configurable css-fuse AST deduplication | TypeScript + Vite / Rollup |
-| [`@lit-core/benchmarks`](packages/benchmarks/) (private) | Multi-tool optimization benchmark runner and size impact reporting | Node.js + Vite |
+1. **Style duplication across shadow roots**:
+   Traditional CSS utility engines cannot cross shadow boundaries without template rewrites. As a result, design systems often duplicate hundreds of lines of resets, design tokens, layout helpers, and component base rules inside every single component's stylesheet.
+2. **Runtime decorator overhead**:
+   Standard Lit decorators (`@property()`, `@state()`, `@query()`) rely on experimental decorator metadata and runtime reflection polyfills, bloating bundle size and delaying boot time.
+3. **Template opacity in standard minifiers**:
+   Standard bundler minifiers often treat Lit `css` and `html` tagged template literals as plain strings, leaving excess whitespace, unminified CSS declarations, and redundant markup.
 
 ---
 
-## Quick Start
+## How it works
+
+`@lit-core` solves these issues ahead of time using native Rust AST analysis and bundler orchestration:
+
+1. **AST CSS deduplication (`@lit-core/css-fuse`)**:
+   - Parses component styles at the AST level using `oxc` and `lightningcss`.
+   - Identifies identical CSS rules and declaration blocks across components.
+   - Extracts shared rules into virtual modules (`virtual:css-fuse/*`) exporting Lit `css` tagged template strings.
+   - At runtime, shared sheets instantiate a single constructable `CSSStyleSheet` object shared across components in browser memory.
+   - Preserves cascade order and specificity by prepending shared sheets before local overrides (`static styles = [sharedRuleSet, localStyles]`).
+2. **AOT Lit decorator lowering (`@lit-core/props-lower`)**:
+   - Compiles `@property()` and `@state()` decorators into standard static `properties` fields ahead of time.
+   - Transforms `@query()`, `@queryAll()`, and `@eventOptions()` into efficient getters and prototype bindings.
+   - Eliminates runtime decorator polyfills and reflection libraries.
+3. **High-speed template minification (`@lit-core/css-minifier`, `@lit-core/html-minifier`)**:
+   - Minifies embedded CSS within Lit `css` template literals via `lightningcss`.
+   - Strips whitespace, comments, and redundant tokens from Lit `html` and `svg` templates using `oxc` AST walking without touching interpolation holes.
+4. **Unified bundler integration (`@lit-core/vite-plugin`)**:
+   - Connects all native compilation passes into Vite and Rollup pipelines.
+   - Scopes shared constructable stylesheets to Rollup chunk boundaries to prevent lazy-loaded component styles from leaking into entry chunks.
+   - Provides fine-grained Hot Module Replacement (HMR) for individual stylesheets without full page reloads.
+
+---
+
+## Packages
+
+| Package | Path | Tech stack | Purpose |
+| :--- | :--- | :--- | :--- |
+| [`@lit-core/css-fuse`](packages/css-fuse/) | `packages/css-fuse` | Rust (`oxc`, `lightningcss`), NAPI-RS | Cross-component CSS deduplication into shared constructable sheets |
+| [`@lit-core/props-lower`](packages/props-lower/) | `packages/props-lower` | Rust (`oxc`), NAPI-RS | AOT Lit decorator and property lowering |
+| [`@lit-core/css-minifier`](packages/css-minifier/) | `packages/css-minifier` | Rust (`oxc`, `lightningcss`), NAPI-RS | High-speed CSS template literal minification |
+| [`@lit-core/html-minifier`](packages/html-minifier/) | `packages/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML and SVG template literal minification |
+| [`@lit-core/vite-plugin`](packages/vite-plugin/) | `packages/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
+| [`@lit-core/benchmarks`](packages/benchmarks/) (private) | `packages/benchmarks` | Node.js, Vite | Empirical benchmark harness evaluating bundle reductions |
+
+---
+
+## Empirical benchmarks
+
+The `@lit-core/benchmarks` harness evaluates bundle size reductions across popular production Lit component libraries:
+
+- **Web Awesome** (`@awesome.me/webawesome`): 73 components evaluated across full-suite bundles.
+- **Carbon Web Components** (`@carbon/web-components`): Enterprise design system components.
+- **Adobe Spectrum** (`@spectrum-web-components/bundle`): Complex interactive UI suites.
+- **Material Web** (`@material/web`): Google Material 3 components.
+
+Running the full suite demonstrates significant cumulative bundle reductions through shared stylesheet instantiation and native template minification.
+
+---
+
+## Getting started
 
 ### Prerequisites
-- Node.js >= 20
-- pnpm >= 10
-- Rust toolchain (cargo, rustc) for compiling native bindings
+
+- Node.js `>= 24`
+- `pnpm >= 11`
+- Rust toolchain (`cargo`, `rustc`) for compiling native NAPI-RS bindings
 
 ### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/lit-core/core.git
+cd core
+
+# Install dependencies
 pnpm install
 ```
 
-### Build Everything
+### Building native modules and packages
 
 ```bash
 pnpm run build
 ```
 
-### Run Tests
+### Running tests
 
 ```bash
-# Run all workspace test suites (Rust unit/integration tests + Vite bundler tests)
+# Run all workspace test suites
 pnpm run test
+
+# Run bundler integration tests
+node packages/vite-plugin/test/integration.test.js
 ```
 
-### Run Bundle Benchmarks
-
-Evaluate bundle size reduction, individual tool impacts, and combined totals across multiple component suites (see [`@lit-core/benchmarks` README](packages/benchmarks/README.md) for full metrics and documentation):
+### Running benchmarks
 
 ```bash
-# Run all benchmark suites with breakdown tables
+# Run all benchmark suites
 pnpm run benchmark
 
-# Run the Web Awesome full suite benchmark
+# Run the Web Awesome benchmark suite
 pnpm run benchmark:webawesome
 
-# Output markdown tables
+# Output benchmark comparison tables in Markdown
 pnpm run benchmark:markdown
 ```
 
 ---
 
-## Available Scripts
+## Available scripts
 
-- `pnpm run build`: Build all workspaces using Turborepo.
-- `pnpm run test`: Run the full test suite across Rust and TypeScript packages.
-- `pnpm run benchmark`: Run the multi-suite bundler optimization benchmarks with impact tables.
-- `pnpm run benchmark:webawesome`: Run the bundle comparison benchmark on Web Awesome.
-- `pnpm run benchmark:markdown`: Output benchmark comparison tables in Markdown format.
-- `pnpm run clean`: Clean all build artifacts, targets, and turbo caches.
-- `pnpm run format`: Format source files with Biome.
+- `pnpm run build`: Compile all native Rust crates and build TypeScript packages via Turborepo.
+- `pnpm run test`: Execute unit and integration tests across all packages.
+- `pnpm run lint`: Check code quality and formatting with Biome.
+- `pnpm run format`: Format JavaScript, TypeScript, and JSON files with Biome.
+- `pnpm run benchmark`: Run the multi-suite bundler optimization benchmarks.
+- `pnpm run benchmark:webawesome`: Benchmark bundle size impact on Web Awesome components.
+- `pnpm run benchmark:markdown`: Print formatted benchmark impact tables in Markdown.
+- `pnpm run clean`: Remove build artifacts, target folders, and cache directories.
+
+---
+
+## Safety invariants
+
+1. **Cascade and specificity preservation**:
+   Shared constructable stylesheets are prepended before component local overrides (`static styles = [sharedSheet, localOverrides]`). Selector specificity and order are never altered.
+2. **Module graph alignment**:
+   Shared stylesheets strictly respect Rollup chunk boundaries to ensure lazy-loaded component styles do not leak into entry chunks.
+3. **Net savings threshold**:
+   Clustering rules enforce a net savings threshold so virtual module import overhead never exceeds CSS bytes saved.
 
 ---
 
 ## License
 
-MIT © Jonathan Rawlings
+MIT © lit-core

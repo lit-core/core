@@ -16,7 +16,17 @@
     "benchmark:all": "node src/index.js --suite=all",
     "benchmark:markdown": "node src/index.js --format=markdown",
     "benchmark:json": "node src/index.js --format=json",
+    "test": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/benchmarks"
+  },
+  "homepage": "https://github.com/lit-core/core/tree/main/packages/benchmarks#readme",
+  "bugs": {
+    "url": "https://github.com/lit-core/core/issues"
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.14.0",

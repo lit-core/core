@@ -1,12 +1,34 @@
 {
-  "name": "root",
+  "name": "@lit-core/core",
+  "version": "0.1.0",
   "private": true,
+  "description": "Ahead-of-time (AOT) compiler and bundler optimization toolchain for Lit and Web Components",
   "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/lit-core/core#readme",
+  "bugs": {
+    "url": "https://github.com/lit-core/core/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "vite",
+    "compiler",
+    "css-fuse",
+    "constructable-stylesheets",
+    "aot",
+    "bundler"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "biome check .",
     "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
     "benchmark": "pnpm --filter @lit-core/benchmarks run benchmark",
     "benchmark:webawesome": "pnpm --filter @lit-core/benchmarks run benchmark:webawesome",
     "benchmark:markdown": "pnpm --filter @lit-core/benchmarks run benchmark:markdown",
@@ -14,18 +36,16 @@
     "format": "biome format --write .",
     "format:check": "biome format ."
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lit-core/core"
-  },
   "engines": {
     "node": ">=24.0.0",
     "pnpm": ">=11.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
+    "@types/webpack": "^5.28.5",
     "turbo": "^2.11.4",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "webpack": "^5.111.1"
   },
   "packageManager": "pnpm@11.11.0",
   "dependencies": {

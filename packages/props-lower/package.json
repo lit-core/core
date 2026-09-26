@@ -25,6 +25,19 @@
     "url": "https://github.com/lit-core/core",
     "directory": "packages/props-lower"
   },
+  "homepage": "https://github.com/lit-core/core/tree/main/packages/props-lower#readme",
+  "bugs": {
+    "url": "https://github.com/lit-core/core/issues"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "decorators",
+    "oxc",
+    "ast",
+    "aot",
+    "properties"
+  ],
   "engines": {
     "node": ">=24.0.0"
   },

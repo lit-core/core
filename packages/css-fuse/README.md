@@ -225,4 +225,4 @@ packages/css-fuse/src/
 
 ## License
 
-MIT © Jonathan Rawlings
+MIT © lit-core

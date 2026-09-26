@@ -274,7 +274,7 @@ export function propsLower(options: PropsLowerOptions = {}): Plugin {
   };
 }
 
-const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
+const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\b/;
 
 export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
   const { sourcemap = false } = options;
@@ -294,7 +294,7 @@ export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
         for (const pattern of excludes) {
           if (matchesPattern(cleanId, pattern)) return null;
         }
-      } else if (cleanId.includes('/node_modules/')) {
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
         return null;
       }
 
@@ -329,7 +329,7 @@ export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
   };
 }
 
-const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
+const LIT_CSS_FAST_CHECK = /\bcss\b/;
 
 export function cssMinifier(options: CssMinifierOptions = {}): Plugin {
   const { sourcemap = true } = options;
@@ -349,7 +349,7 @@ export function cssMinifier(options: CssMinifierOptions = {}): Plugin {
         for (const pattern of excludes) {
           if (matchesPattern(cleanId, pattern)) return null;
         }
-      } else if (cleanId.includes('/node_modules/')) {
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
         return null;
       }
 

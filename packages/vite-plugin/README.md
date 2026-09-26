@@ -191,4 +191,4 @@ Tests verify:
 
 ## License
 
-MIT © Jonathan Rawlings
+MIT © lit-core

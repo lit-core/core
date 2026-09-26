@@ -25,6 +25,19 @@
     "url": "https://github.com/lit-core/core",
     "directory": "packages/css-minifier"
   },
+  "homepage": "https://github.com/lit-core/core/tree/main/packages/css-minifier#readme",
+  "bugs": {
+    "url": "https://github.com/lit-core/core/issues"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "css",
+    "minifier",
+    "lightningcss",
+    "oxc",
+    "template-literals"
+  ],
   "engines": {
     "node": ">=24.0.0"
   },

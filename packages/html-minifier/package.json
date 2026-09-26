@@ -25,6 +25,19 @@
     "url": "https://github.com/lit-core/core",
     "directory": "packages/html-minifier"
   },
+  "homepage": "https://github.com/lit-core/core/tree/main/packages/html-minifier#readme",
+  "bugs": {
+    "url": "https://github.com/lit-core/core/issues"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "html",
+    "minifier",
+    "oxc",
+    "template-literals",
+    "svg"
+  ],
   "engines": {
     "node": ">=24.0.0"
   },
