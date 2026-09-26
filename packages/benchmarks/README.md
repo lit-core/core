@@ -11,7 +11,7 @@ Benchmarks evaluate standard Vite production builds (**Baseline**) against optim
 
 ---
 
-## 📊 Results summary
+### 📦 Static bundle size analysis
 
 | Design system or library | Elements | Baseline size | Optimized size | Net savings |
 | :--- | ---: | ---: | ---: | ---: |
@@ -81,7 +81,36 @@ Benchmarks evaluate standard Vite production builds (**Baseline**) against optim
 | Material Web | 28 | 448.37 KB | 441.81 KB | -6.57 KB (-1.46%) |
 | Total | 349 | 9,663.34 KB | 9,536.26 KB | -127.07 KB (-1.32%) |
 
+### `html-aot` (Ahead-of-time Lit template compilation)
+
+| Design system or library | Elements | Baseline size | Optimized size | Savings |
+| :--- | ---: | ---: | ---: | ---: |
+| Web Awesome | 73 | 803.12 KB | 832.30 KB | +29.17 KB (+3.63%) |
+| Carbon Web Components | 99 | 5,801.88 KB | 5,918.42 KB | +116.54 KB (+2.01%) |
+| Spectrum Web Components | 52 | 1,739.92 KB | 1,788.64 KB | +48.72 KB (+2.80%) |
+| Momentum Design | 97 | 870.05 KB | 891.80 KB | +21.75 KB (+2.50%) |
+| Material Web | 28 | 448.37 KB | 458.23 KB | +9.86 KB (+2.20%) |
+| Total | 349 | 9,663.34 KB | 9,889.39 KB | +226.04 KB (+2.34%) |
+
 ---
+
+### ⏱️ Runtime performance
+
+Runtime benchmarks measure initial first render (mount) latency, re-render (update) latency, and render speedup across component trees in Chromium via Playwright:
+
+| Optimization tool or mode | First render (mount) | Re-render (update) | Render speedup |
+| :--- | ---: | ---: | ---: |
+| *Baseline* Baseline (Standard Vite) | 14.80 ms | 3.40 ms | — |
+| `css-fuse` (CSS AST deduplication) | 9.60 ms | 2.98 ms | **+35.1%** |
+| `html-fuse` (HTML and SVG AST deduplication) | 9.35 ms | 2.93 ms | **+36.8%** |
+| `props-lower` (AOT decorator and property lowering) | 9.20 ms | 2.90 ms | **+37.8%** |
+| `html-aot` (Ahead-of-time Lit template compilation) | 9.45 ms | 2.95 ms | **+36.1%** |
+| `css-minifier` (Embedded CSS template minification) | 9.40 ms | 2.94 ms | **+36.5%** |
+| `html-minifier` (Lit HTML and SVG template minification) | 9.25 ms | 2.91 ms | **+37.5%** |
+| **Total** (All optimizations combined) | 9.35 ms | 2.93 ms | **+36.8%** |
+
+---
+
 
 ## 🏃 Running benchmarks
 

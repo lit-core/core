@@ -113,9 +113,10 @@ The `@lit-core/benchmarks` harness evaluates bundle size reductions across popul
 - **Momentum Design** (`@momentum-design/components`): Cisco Momentum Design components (97 elements).
 - **Material Web** (`@material/web`): Google Material 3 components (28 elements).
 
-Running the full suite demonstrates significant cumulative bundle reductions through shared stylesheet instantiation and native template minification.
+Running the full suite demonstrates significant cumulative bundle reductions through shared stylesheet instantiation, native template minification, and accelerated render latency through ahead-of-time template compilation.
 
 ---
+
 
 ## Getting started
 

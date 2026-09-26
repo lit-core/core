@@ -50,10 +50,10 @@ Welcome to the `@lit-core` monorepo. This file outlines core architectural princ
 
 `@lit-core` is an ahead-of-time (AOT) compiler and bundler optimization toolchain for Lit and Web Component applications.
 
-### Core Problem
+### Core problem
 Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization (utility classes like Tailwind) fails inside Shadow DOM because encapsulation prevents utility classes from piercing shadow boundaries without template modification. This forces component libraries to either duplicate large blocks of theme/reset styles across every component or incur runtime stylesheet injection costs.
 
-### Solution and Mechanism
+### Solution and mechanism
 1. **Compile-time CSS AST deduplication (`css-fuse`)**:
    - Parses component styles at the AST level using `oxc` and `lightningcss`.
    - Identifies identical declaration blocks and rules across components.
@@ -63,10 +63,12 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
    - Native Rust transform lowering `@property()` and `@state()` decorators into standard static `properties` definitions ahead of time, eliminating runtime decorator polyfills and reflection.
 3. **Native template and style minification (`css-minifier`, `html-minifier`)**:
    - High-speed Rust-based minification for Lit `css` and `html` template literals.
-4. **Unified bundler plugin (`vite-plugin`)**:
+4. **Ahead-of-time Lit template compilation (`html-aot`)**:
+   - Compiles Lit `html` tagged templates ahead of time into static `CompiledTemplateResult` descriptors with pre-computed part indices, eliminating runtime HTML parsing and template preparation.
+5. **Unified bundler plugin (`vite-plugin`)**:
    - Integrates deduplication, lowering, and minification into Vite and Rollup pipelines with fine-grained HMR and chunk scoping.
-5. **Empirical benchmarking harness (`benchmarks`)**:
-   - Validates real-world bundle size reductions across major production Lit design systems (Carbon, Spectrum, Web Awesome, Material Web, Cisco Momentum).
+6. **Empirical benchmarking harness (`benchmarks`)**:
+   - Validates real-world bundle size reductions and runtime render latency across major production Lit design systems (Carbon, Spectrum, Web Awesome, Material Web, Cisco Momentum).
 
 ---
 
@@ -97,7 +99,8 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
   - JavaScript / TypeScript: `pnpm run format` (powered by Biome).
   - Rust: `cargo fmt` and `cargo clippy`.
 - **Testing**:
-  - Run package-specific tests or `pnpm test`.
+  - Run package-specific tests or `pnpm test` (powered by Vitest).
+  - Use Vitest and Playwright to test DOM rendering, AOT compiler transforms, and browser runtime performance instead of low-level Rust unit tests.
 
 ---
 
@@ -112,7 +115,10 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
    - Clustering in `css-fuse` must enforce a net-savings threshold so virtual module import overhead never exceeds CSS bytes saved.
 4. **General-purpose neutrality**:
    - All compiler logic, AST visitors, and extraction passes must remain strictly general-purpose with zero library-specific hardcoding, class checks, or aliases.
-5. **Documentation brevity**:
+5. **Runtime verification with Playwright and Vitest**:
+   - Always verify template compilation, DOM hydration, and real render performance using Vitest and Playwright.
+6. **Documentation brevity**:
    - Keep markdown concise, high-signal, and easy to read.
    - Avoid repetitive tables and redundant prose.
    - Follow the sentence case instruction strictly.
+
