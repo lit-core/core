@@ -15,7 +15,7 @@ glob = "0.3"
 
 # JS/TS parsing (matching existing monorepo versions)
 oxc_parser = "0.15.0"
-oxc_ast = "0.15.0"
+oxc_ast = "0.151.0"
 oxc_allocator = "0.15.0"
 oxc_span = "0.15.0"
 
