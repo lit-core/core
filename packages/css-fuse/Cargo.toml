@@ -17,7 +17,7 @@ glob = "0.3"
 oxc_parser = "0.15.0"
 oxc_ast = "0.15.0"
 oxc_allocator = "0.15.0"
-oxc_span = "0.15.0"
+oxc_span = "0.151.0"
 
 # CSS parsing & transformation
 lightningcss = "1.0.0-alpha.72"
