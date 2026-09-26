@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
 import { calculateImpact, getFileSizes } from './metrics.js';
+import { closeBrowser, measureBundleRuntime } from './runtime.js';
 import { getCombinedPlugins } from './tools/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -72,6 +73,16 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       plugins: [],
     });
 
+    const runtimeRows = [];
+    const baselineBundle = path.join(baselineOutDir, 'bundle.js');
+    const baselineRuntime = await measureBundleRuntime(baselineBundle, 'Baseline');
+    runtimeRows.push({
+      name: 'Baseline (Standard Vite)',
+      firstRenderMs: baselineRuntime.firstRenderMs,
+      updateMs: baselineRuntime.updateMs,
+      isBaseline: true,
+    });
+
     rows.push({
       name: 'Baseline (Standard Vite)',
       description: 'Standard Vite build without optimization plugins',
@@ -95,6 +106,17 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
       const impact = calculateImpact(baselineMetrics, toolMetrics);
 
+      const toolBundle = path.join(toolOutDir, 'bundle.js');
+      const toolRuntime = await measureBundleRuntime(toolBundle, tool.name);
+      const speedup = baselineRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - toolRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
+
+      runtimeRows.push({
+        name: tool.name,
+        firstRenderMs: toolRuntime.firstRenderMs,
+        updateMs: toolRuntime.updateMs,
+        speedupPercent: speedup,
+      });
+
       rows.push({
         name: tool.name,
         description: tool.description,
@@ -117,6 +139,7 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
     let totalMetrics = null;
     let totalImpact = null;
+    const totalOutDir = path.join(tempBaseDir, 'dist-total');
 
     if (tools.length === 1) {
       // Single tool: combined matches that tool's metrics
@@ -125,7 +148,6 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       totalImpact = singleToolRow.impact;
     } else if (tools.length > 1) {
       const combinedPlugins = await getCombinedPlugins(tools, suiteContext);
-      const totalOutDir = path.join(tempBaseDir, 'dist-total');
       totalMetrics = await runViteBuild({
         entryPath: suiteContext.entryPath,
         outDir: totalOutDir,
@@ -136,6 +158,18 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       totalMetrics = baselineMetrics;
       totalImpact = calculateImpact(baselineMetrics, baselineMetrics);
     }
+
+    const totalBundle = path.join(totalOutDir, 'bundle.js');
+    const totalRuntime = fs.existsSync(totalBundle) ? await measureBundleRuntime(totalBundle, 'TOTAL') : baselineRuntime;
+    const totalSpeedup = baselineRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - totalRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
+
+    runtimeRows.push({
+      name: 'TOTAL (All Optimizations Combined)',
+      firstRenderMs: totalRuntime.firstRenderMs,
+      updateMs: totalRuntime.updateMs,
+      speedupPercent: totalSpeedup,
+      isTotal: true,
+    });
 
     rows.push({
       name: 'TOTAL (All Optimizations Combined)',
@@ -149,10 +183,12 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
     const result = Object.assign(rows, {
       diagnostics,
       suiteContext,
+      runtimeRows,
     });
 
     return result;
   } finally {
+    await closeBrowser();
     // Teardown suite resources and clean up temp build artifacts
     await suite.cleanup();
     if (fs.existsSync(tempBaseDir)) {

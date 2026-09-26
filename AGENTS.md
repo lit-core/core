@@ -28,6 +28,24 @@ Welcome to the `@lit-core` monorepo. This file outlines core architectural princ
 
 ---
 
+## 🌐 General-purpose architecture rule (Never hardcode library-specific heuristics)
+
+> **MANDATORY DESIGN RULE: STRICTLY GENERAL PURPOSE**:
+> Every compiler pass, AST visitor, parser, clustering algorithm, transform, lowering logic, and bundler plugin in this monorepo must be **100% general-purpose**.
+>
+> - **NEVER EVER hardcode library-specific, component-suite-specific, or vendor-specific hacks into core tools.**
+>   - ❌ **Strictly forbidden**:
+>     - Hardcoding component suite class names, IDs, or substrings (e.g. `iconContainer`, `indicator`, `badge`, `chevron`, `focus-ring`) to trigger, bias, or filter AST extraction.
+>     - Restricting element, tag, attribute, or style extraction to whitelists designed to make specific benchmarks or libraries pass or look favorable.
+>     - Hardcoding non-standard external library decorator wrappers (e.g. `carbonElement`) into core decorator lowering or regex detection rather than parsing standard Lit decorators (`@customElement`, `@property`, `@state`, etc.).
+>     - Hardcoding arbitrary package-specific paths, component namespaces, or vendor conventions into general-purpose transforms.
+>   - ✅ **Required general-purpose design**:
+>     - Rely exclusively on official Web Component, DOM, HTML, CSS, JavaScript, and Lit language specifications.
+>     - Static fragment deduplication must inspect any valid HTML, SVG, or custom element subtree structurally and hierarchically based on syntax and configurable length/frequency thresholds, never class name or tag whitelists.
+>     - Benchmarking harnesses measure real-world performance against third-party design systems objectively without the core compiler containing any special-cased logic for those libraries.
+
+---
+
 ## 🏛️ Architecture and Vision
 
 `@lit-core` is an ahead-of-time (AOT) compiler and bundler optimization toolchain for Lit and Web Component applications.
@@ -57,9 +75,11 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 | Package | Path | Tech stack | Purpose |
 | :--- | :--- | :--- | :--- |
 | `@lit-core/css-fuse` | `packages/css-fuse` | Rust (`oxc`, `lightningcss`), NAPI-RS | Cross-component CSS deduplication into shared constructable sheets |
+| `@lit-core/html-fuse` | `packages/html-fuse` | Rust (`oxc`), NAPI-RS | Cross-component static HTML and SVG fragment clustering |
 | `@lit-core/props-lower` | `packages/props-lower` | Rust (`oxc`), NAPI-RS | AOT Lit decorator and property lowering |
 | `@lit-core/css-minifier` | `packages/css-minifier` | Rust (`lightningcss`), NAPI-RS | High-speed CSS template literal minifier |
 | `@lit-core/html-minifier` | `packages/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML template literal minifier |
+| `@lit-core/html-aot` | `packages/html-aot` | TypeScript, `parse5`, `lit-html` | Ahead-of-time Lit template compilation eliminating runtime prepare phase |
 | `@lit-core/vite-plugin` | `packages/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
 | `@lit-core/webpack-plugin` | `packages/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack |
 | `@lit-core/benchmarks` | `packages/benchmarks` | Node.js, Vite | Multi-library bundle size and deduplication benchmark harness |
@@ -81,7 +101,7 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 
 ---
 
-## 🔒 Invariants and Safety Constraints
+## 🔒 Invariants and safety constraints
 
 1. **Cascade and specificity preservation**:
    - Shared constructable stylesheets must always be prepended before component local overrides in `static styles = [sharedSheet, localOverrides]`.
@@ -90,7 +110,9 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
    - Shared stylesheets must respect Rollup chunk boundaries to prevent lazy-loaded component styles from leaking into entry chunks.
 3. **Net savings threshold**:
    - Clustering in `css-fuse` must enforce a net-savings threshold so virtual module import overhead never exceeds CSS bytes saved.
-4. **Documentation brevity**:
+4. **General-purpose neutrality**:
+   - All compiler logic, AST visitors, and extraction passes must remain strictly general-purpose with zero library-specific hardcoding, class checks, or aliases.
+5. **Documentation brevity**:
    - Keep markdown concise, high-signal, and easy to read.
    - Avoid repetitive tables and redundant prose.
    - Follow the sentence case instruction strictly.

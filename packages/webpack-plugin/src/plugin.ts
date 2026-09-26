@@ -3,9 +3,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Compiler } from 'webpack';
 import { registerPluginState, unregisterPluginState } from './loader.js';
-import type { CssFuseOptions, CssMinifierOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import type { CssFuseOptions, CssMinifierOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
 import { runFuseOptimization, runHtmlFuseOptimization, runScopingAudit } from './transforms.js';
-import { extractHtmlTemplateId, extractSheetId, isVirtualHtmlFusedId, VIRTUAL_FUSED_PREFIX, VIRTUAL_HTML_FUSED_PREFIX } from './utils.js';
+import { BARE_FUSED_ID_REGEX, BARE_HTML_FUSED_ID_REGEX, extractHtmlTemplateId, extractSheetId, isVirtualHtmlFusedId, VIRTUAL_FUSED_PREFIX, VIRTUAL_HTML_FUSED_PREFIX } from './utils.js';
 
 let loaderPath = fileURLToPath(new URL('./loader.js', import.meta.url));
 if (!fs.existsSync(loaderPath)) {
@@ -177,10 +177,7 @@ export class LitWebpackPlugin {
 
             const sheetId = extractSheetId(resource);
             const code =
-              this.virtualSheets.get(sheetId) ||
-              this.virtualSheets.get(path.basename(sheetId)) ||
-              this.virtualSheets.get(sheetId.replace(/\.js$/, '')) ||
-              this.virtualSheets.get(`${sheetId}.js`);
+              this.virtualSheets.get(sheetId) || this.virtualSheets.get(path.basename(sheetId)) || this.virtualSheets.get(sheetId.replace(/\.js$/, '')) || this.virtualSheets.get(`${sheetId}.js`);
 
             if (code !== undefined) {
               return Buffer.from(code);
@@ -195,12 +192,12 @@ export class LitWebpackPlugin {
       compiler.hooks.normalModuleFactory.tap(this.name, (nmf) => {
         nmf.hooks.resolve.tap(this.name, (resolveData) => {
           if (!resolveData.request) return;
-          if (resolveData.request.startsWith('_fused_html_') || resolveData.request.startsWith('_fused_svg_')) {
+          if (BARE_HTML_FUSED_ID_REGEX.test(resolveData.request)) {
             const filename = resolveData.request.endsWith('.js') ? resolveData.request : `${resolveData.request}.js`;
             resolveData.request = `${VIRTUAL_HTML_FUSED_PREFIX}${filename}`;
           } else if (resolveData.request.startsWith('virtual:lit-html-fuse/')) {
             resolveData.request = resolveData.request.replace('virtual:lit-html-fuse/', VIRTUAL_HTML_FUSED_PREFIX);
-          } else if (resolveData.request.startsWith('_fused_')) {
+          } else if (BARE_FUSED_ID_REGEX.test(resolveData.request)) {
             const filename = resolveData.request.endsWith('.js') ? resolveData.request : `${resolveData.request}.js`;
             resolveData.request = `${VIRTUAL_FUSED_PREFIX}${filename}`;
           } else if (resolveData.request.startsWith('virtual:lit-css-fuse/')) {
@@ -247,6 +244,12 @@ export class HtmlMinifierWebpackPlugin extends LitWebpackPlugin {
   }
 }
 
+export class HtmlAotWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: HtmlAotOptions = {}) {
+    super({ cssFuse: false, htmlFuse: false, propsLower: false, htmlAot: options, cssMinifier: false, htmlMinifier: false }, 'HtmlAotWebpackPlugin');
+  }
+}
+
 export function lit(options: LitPluginOptions = {}): LitWebpackPlugin {
   return new LitWebpackPlugin(options);
 }
@@ -271,11 +274,16 @@ export function htmlMinifier(options: HtmlMinifierOptions = {}): HtmlMinifierWeb
   return new HtmlMinifierWebpackPlugin(options);
 }
 
+export function htmlAot(options: HtmlAotOptions = {}): HtmlAotWebpackPlugin {
+  return new HtmlAotWebpackPlugin(options);
+}
+
 export const litCore = lit;
 export const litCssFuse = cssFuse;
 export const litHtmlFuse = htmlFuse;
 export const litPropsLower = propsLower;
 export const litCssMinifier = cssMinifier;
 export const litHtmlMinifier = htmlMinifier;
+export const litHtmlAot = htmlAot;
 
 export default lit;

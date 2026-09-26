@@ -40,8 +40,24 @@ impl HtmlClusterEngine {
             }
         }
 
+        // Sort candidates by length descending so larger parent subtrees are prioritized
+        clusters.sort_by(|a, b| b.canonical_text.len().cmp(&a.canonical_text.len()));
+
+        let mut non_subsumed = Vec::new();
+        for candidate in clusters {
+            let is_subsumed = non_subsumed.iter().any(|parent: &HtmlClusterGroup| {
+                parent.canonical_text.contains(&candidate.canonical_text)
+                    && candidate.occurrences_count <= parent.occurrences_count
+                    && candidate.shared_by_files.iter().all(|f| parent.shared_by_files.contains(f))
+            });
+
+            if !is_subsumed {
+                non_subsumed.push(candidate);
+            }
+        }
+
         // Sort clusters deterministically by ID
-        clusters.sort_by(|a, b| a.id.cmp(&b.id));
-        clusters
+        non_subsumed.sort_by(|a, b| a.id.cmp(&b.id));
+        non_subsumed
     }
 }

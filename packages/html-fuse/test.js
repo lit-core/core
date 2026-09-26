@@ -181,4 +181,63 @@ console.log('Testing @lit-core/html-fuse native addon...');
   console.log('  ✔ Template diagnostics and audit');
 }
 
+// Test 5: General-purpose HTML element subtree deduplication (no SVG, no slot, no hardcoded heuristics)
+{
+  const fixtureDir = path.join(__dirname, '.test-fixtures-5');
+  fs.mkdirSync(fixtureDir, { recursive: true });
+
+  const compA = `
+    import { html, LitElement } from 'lit';
+    export class CompA extends LitElement {
+      render() {
+        return html\`
+          <section class="user-panel">
+            <div class="card-item"><button type="button" class="action-btn">Confirm</button></div>
+            <span>\${this.userName}</span>
+          </section>
+        \`;
+      }
+    }
+  `;
+
+  const compB = `
+    import { html, LitElement } from 'lit';
+    export class CompB extends LitElement {
+      render() {
+        return html\`
+          <section class="admin-panel">
+            <div class="card-item"><button type="button" class="action-btn">Confirm</button></div>
+            <span>\${this.adminRole}</span>
+          </section>
+        \`;
+      }
+    }
+  `;
+
+  const fileA = path.join(fixtureDir, 'comp-a.ts');
+  const fileB = path.join(fixtureDir, 'comp-b.ts');
+  fs.writeFileSync(fileA, compA);
+  fs.writeFileSync(fileB, compB);
+
+  const res = fuse({
+    files: [fileA, fileB],
+    threshold: 2,
+    virtualImports: true,
+  });
+
+  assert.strictEqual(res.fusedTemplates.length, 1, 'Should create 1 shared fused template for identical generic HTML');
+  const fused = res.fusedTemplates[0];
+  assert(fused.code.includes('export const _fused_html_'), 'Should export _fused_html_ constant');
+  assert(fused.code.includes('<div class="card-item"><button type="button" class="action-btn">Confirm</button></div>'), 'Should preserve canonical HTML markup');
+
+  assert.strictEqual(res.rewrittenFiles.length, 2, 'Should rewrite both components');
+  for (const rewritten of res.rewrittenFiles) {
+    assert(rewritten.transformedCode.includes(`\${${fused.id}}`), 'Should replace inline HTML with interpolation of shared template');
+    assert(!rewritten.transformedCode.includes('<div class="card-item"><button'), 'Should remove duplicate raw HTML subtree');
+  }
+
+  fs.rmSync(fixtureDir, { recursive: true, force: true });
+  console.log('  ✔ General-purpose HTML element subtree deduplication');
+}
+
 console.log('\nAll html-fuse tests passed successfully!\n');

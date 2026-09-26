@@ -10,5 +10,7 @@ This package implements cross-component static template and SVG fragment cluster
    Extracted subtrees must never contain dynamic interpolations (`${...}`). They must be completely static DOM trees.
 3. **Deterministic hashing**:
    BLAKE3 hashing computes canonical identifiers ensuring stable builds and reproducible module hashes across runs.
-4. **Writing style**:
+4. **General-purpose extraction**:
+   Extraction must be purely structural across any valid HTML, SVG, or custom element subtree, with zero hardcoded class names, tag whitelists, or component-library heuristics.
+5. **Writing style**:
    Always use sentence case for documentation, comments, and summaries.

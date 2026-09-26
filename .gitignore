@@ -11,11 +11,16 @@ out
 coverage
 *.tsbuildinfo
 
-# Rust build artifacts
+# Rust build artifacts and native binaries
 target
 **/*/target
 *.node
-packages/css-fuse/bin/css-fuse-bin
+*.dylib
+*.so
+*.dll
+*.exe
+**/bin/*-bin
+**/bin/*-bin.exe
 
 # Environment and logs
 *.log

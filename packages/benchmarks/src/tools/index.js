@@ -1,6 +1,7 @@
 import { lit } from '@lit-core/vite-plugin';
 import { cssFuseTool } from './css-fuse.js';
 import { cssMinifierTool } from './css-minifier.js';
+import { htmlAotTool } from './html-aot.js';
 import { htmlFuseTool } from './html-fuse.js';
 import { htmlMinifierTool } from './html-minifier.js';
 import { propsLowerTool } from './props-lower.js';
@@ -9,7 +10,7 @@ import { propsLowerTool } from './props-lower.js';
  * Array of all registered Vite bundler optimization tools.
  * @type {import('../types.js').BenchmarkTool[]}
  */
-export const registeredTools = [cssFuseTool, htmlFuseTool, propsLowerTool, cssMinifierTool, htmlMinifierTool];
+export const registeredTools = [cssFuseTool, htmlFuseTool, propsLowerTool, htmlAotTool, cssMinifierTool, htmlMinifierTool];
 
 /**
  * Get active tools (optionally filtered by IDs).
@@ -33,6 +34,7 @@ export async function getCombinedPlugins(tools, suite) {
   const hasCssFuse = tools.some((t) => t.id === 'css-fuse');
   const hasHtmlFuse = tools.some((t) => t.id === 'html-fuse');
   const hasPropsLower = tools.some((t) => t.id === 'props-lower');
+  const hasHtmlAot = tools.some((t) => t.id === 'html-aot');
   const hasCssMinifier = tools.some((t) => t.id === 'css-minifier');
   const hasHtmlMinifier = tools.some((t) => t.id === 'html-minifier');
 
@@ -58,6 +60,11 @@ export async function getCombinedPlugins(tools, suite) {
     propsLower: hasPropsLower
       ? {
           include,
+          exclude: [],
+        }
+      : false,
+    htmlAot: hasHtmlAot
+      ? {
           exclude: [],
         }
       : false,

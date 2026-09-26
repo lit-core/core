@@ -200,7 +200,42 @@ export interface LitPluginOptions {
    * Kebab-case alias for `htmlMinifier`.
    */
   'html-minifier'?: boolean | HtmlMinifierOptions;
+
+  /**
+   * Ahead-of-time template compilation for Lit templates via @lit-core/html-aot.
+   * Compiles Lit html template literals into pre-parsed CompiledTemplate objects,
+   * skipping Lit's runtime template preparation phase.
+   * Pass `true` or an `HtmlAotOptions` object to enable.
+   * @default false
+   */
+  htmlAot?: boolean | HtmlAotOptions;
+
+  /**
+   * Kebab-case alias for `htmlAot`.
+   */
+  'html-aot'?: boolean | HtmlAotOptions;
 }
 
+export interface HtmlAotOptions {
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default false
+   */
+  sourcemap?: boolean;
+}
+
+export type LitHtmlAotOptions = HtmlAotOptions;
 export type LitCorePluginOptions = LitPluginOptions;
 export type LitWebpackPluginOptions = LitPluginOptions;

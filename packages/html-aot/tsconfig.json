@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "typescript": ["../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/typescript.d.ts"],
+      "lit-html/*": ["../../node_modules/.pnpm/lit-html@3.3.3/node_modules/lit-html/*"],
+      "parse5": ["../../node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/index.d.ts"],
+      "@parse5/tools": ["../../node_modules/.pnpm/@parse5+tools@0.3.0/node_modules/@parse5/tools/lib/main.d.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["test/**/*", "lib/**/*"]
+}

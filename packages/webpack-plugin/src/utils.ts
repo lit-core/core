@@ -4,6 +4,12 @@ export const RESOLVED_FUSED_PREFIX = '\0virtual:css-fuse/';
 const LEGACY_VIRTUAL_PREFIX = 'virtual:lit-css-fuse/';
 const LEGACY_RESOLVED_PREFIX = '\0virtual:lit-css-fuse/';
 
+export const VIRTUAL_HTML_FUSED_PREFIX = 'virtual:html-fuse/';
+export const RESOLVED_HTML_FUSED_PREFIX = '\0virtual:html-fuse/';
+
+export const BARE_FUSED_ID_REGEX = /^_fused_[a-zA-Z0-9_-]+(?:\.js)?$/;
+export const BARE_HTML_FUSED_ID_REGEX = /^_fused_(?:html|svg)_[a-zA-Z0-9_-]+(?:\.js)?$/;
+
 export function formatVirtualId(id: string): string {
   if (isVirtualHtmlFusedId(id)) {
     return id;
@@ -14,9 +20,8 @@ export function formatVirtualId(id: string): string {
   if (id.startsWith(LEGACY_VIRTUAL_PREFIX)) {
     return RESOLVED_FUSED_PREFIX + id.slice(LEGACY_VIRTUAL_PREFIX.length);
   }
-  const match = id.match(/_fused_[a-zA-Z0-9_-]+(?:\.js)?/);
-  if (match) {
-    const filename = match[0].endsWith('.js') ? match[0] : `${match[0]}.js`;
+  if (BARE_FUSED_ID_REGEX.test(id)) {
+    const filename = id.endsWith('.js') ? id : `${id}.js`;
     return RESOLVED_FUSED_PREFIX + filename;
   }
   return id;
@@ -26,20 +31,7 @@ export function isVirtualFusedId(id: string): boolean {
   if (isVirtualHtmlFusedId(id)) {
     return false;
   }
-  const normalized = id.replace(/^\.\//, '');
-  return (
-    id.startsWith(VIRTUAL_FUSED_PREFIX) ||
-    id.startsWith(RESOLVED_FUSED_PREFIX) ||
-    id.startsWith(LEGACY_VIRTUAL_PREFIX) ||
-    id.startsWith(LEGACY_RESOLVED_PREFIX) ||
-    id.startsWith('_fused_') ||
-    id.startsWith('\0css-fuse:') ||
-    id.startsWith('\0lit-css-fuse:') ||
-    normalized.startsWith('.fused/_fused_') ||
-    id.includes('/.fused/_fused_') ||
-    id.includes('/_fused_') ||
-    /_fused_[a-zA-Z0-9_-]+/.test(id)
-  );
+  return id.startsWith(VIRTUAL_FUSED_PREFIX) || id.startsWith(RESOLVED_FUSED_PREFIX) || id.startsWith(LEGACY_VIRTUAL_PREFIX) || id.startsWith(LEGACY_RESOLVED_PREFIX) || BARE_FUSED_ID_REGEX.test(id);
 }
 
 export function extractSheetId(resolvedId: string): string {
@@ -55,28 +47,30 @@ export function extractSheetId(resolvedId: string): string {
   if (resolvedId.startsWith(LEGACY_VIRTUAL_PREFIX)) {
     return resolvedId.slice(LEGACY_VIRTUAL_PREFIX.length);
   }
-  if (resolvedId.startsWith('\0css-fuse:')) {
-    return resolvedId.slice('\0css-fuse:'.length);
-  }
-  if (resolvedId.startsWith('\0lit-css-fuse:')) {
-    return resolvedId.slice('\0lit-css-fuse:'.length);
-  }
   return resolvedId;
 }
 
-export const VIRTUAL_HTML_FUSED_PREFIX = 'virtual:html-fuse/';
-export const RESOLVED_HTML_FUSED_PREFIX = '\0virtual:html-fuse/';
+export function formatVirtualHtmlId(id: string): string {
+  if (id.startsWith(VIRTUAL_HTML_FUSED_PREFIX)) {
+    return RESOLVED_HTML_FUSED_PREFIX + id.slice(VIRTUAL_HTML_FUSED_PREFIX.length);
+  }
+  if (id.startsWith('virtual:lit-html-fuse/')) {
+    return RESOLVED_HTML_FUSED_PREFIX + id.slice('virtual:lit-html-fuse/'.length);
+  }
+  if (BARE_HTML_FUSED_ID_REGEX.test(id)) {
+    const filename = id.endsWith('.js') ? id : `${id}.js`;
+    return RESOLVED_HTML_FUSED_PREFIX + filename;
+  }
+  return id;
+}
 
 export function isVirtualHtmlFusedId(id: string): boolean {
-  const normalized = id.replace(/^\.\//, '');
   return (
     id.startsWith(VIRTUAL_HTML_FUSED_PREFIX) ||
     id.startsWith(RESOLVED_HTML_FUSED_PREFIX) ||
-    id.startsWith('_fused_html_') ||
-    id.startsWith('_fused_svg_') ||
-    normalized.startsWith('.fused-html/_fused_') ||
-    id.includes('/.fused-html/_fused_') ||
-    /_fused_(?:html|svg)_[a-zA-Z0-9_-]+/.test(id)
+    id.startsWith('virtual:lit-html-fuse/') ||
+    id.startsWith('\0virtual:lit-html-fuse/') ||
+    BARE_HTML_FUSED_ID_REGEX.test(id)
   );
 }
 
@@ -84,27 +78,65 @@ export function extractHtmlTemplateId(resolvedId: string): string {
   if (resolvedId.startsWith(RESOLVED_HTML_FUSED_PREFIX)) {
     return resolvedId.slice(RESOLVED_HTML_FUSED_PREFIX.length);
   }
+  if (resolvedId.startsWith('\0virtual:lit-html-fuse/')) {
+    return resolvedId.slice('\0virtual:lit-html-fuse/'.length);
+  }
   if (resolvedId.startsWith(VIRTUAL_HTML_FUSED_PREFIX)) {
     return resolvedId.slice(VIRTUAL_HTML_FUSED_PREFIX.length);
+  }
+  if (resolvedId.startsWith('virtual:lit-html-fuse/')) {
+    return resolvedId.slice('virtual:lit-html-fuse/'.length);
   }
   return resolvedId;
 }
 
+const globRegexCache = new Map<string, RegExp>();
+
+export function globToRegex(glob: string): RegExp {
+  const cached = globRegexCache.get(glob);
+  if (cached) return cached;
+
+  let regexStr = '';
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+    if (c === '/' || c === '\\') {
+      regexStr += '[/\\\\]';
+    } else if (c === '*') {
+      if (glob[i + 1] === '*') {
+        i++;
+        if (glob[i + 1] === '/' || glob[i + 1] === '\\') {
+          i++;
+          regexStr += '(?:.*[/\\\\])?';
+        } else {
+          regexStr += '.*';
+        }
+      } else {
+        regexStr += '[^/\\\\]*';
+      }
+    } else if (c === '?') {
+      regexStr += '[^/\\\\]';
+    } else if (['.', '+', '^', '$', '(', ')', '|', '{', '}'].includes(c)) {
+      regexStr += `\\${c}`;
+    } else {
+      regexStr += c;
+    }
+  }
+
+  const prefix = glob.startsWith('*') || glob.startsWith('/') || glob.startsWith('\\') ? '^' : '(?:^|[/\\\\])';
+  const re = new RegExp(`${prefix}${regexStr}$`);
+  globRegexCache.set(glob, re);
+  return re;
+}
 
 export function matchesPattern(cleanId: string, pattern: string | RegExp): boolean {
-  if (pattern instanceof RegExp) return pattern.test(cleanId);
+  if (pattern instanceof RegExp) {
+    return pattern.test(cleanId);
+  }
   if (typeof pattern === 'string') {
-    if (cleanId.includes(pattern)) return true;
-    if (pattern.includes('*')) {
-      const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-      if (new RegExp(escaped).test(cleanId)) return true;
-      const nodeModulesIdx = pattern.indexOf('node_modules/');
-      if (nodeModulesIdx !== -1) {
-        const subPattern = pattern.slice(nodeModulesIdx);
-        const subEscaped = subPattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-        if (new RegExp(subEscaped).test(cleanId)) return true;
-      }
+    if (pattern.includes('*') || pattern.includes('?')) {
+      return globToRegex(pattern).test(cleanId);
     }
+    return cleanId.includes(pattern);
   }
   return false;
 }

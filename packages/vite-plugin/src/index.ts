@@ -1,11 +1,13 @@
 export type {
   CssFuseOptions,
   CssMinifierOptions,
+  HtmlAotOptions,
   HtmlFuseOptions,
   HtmlMinifierOptions,
   LitCorePluginOptions,
   LitCssFuseOptions,
   LitCssMinifierOptions,
+  LitHtmlAotOptions,
   LitHtmlFuseOptions,
   LitHtmlMinifierOptions,
   LitPluginOptions,
@@ -15,6 +17,7 @@ export type {
 export {
   cssFuse,
   cssMinifier,
+  htmlAot,
   htmlFuse,
   htmlMinifier,
   lit,
@@ -22,9 +25,9 @@ export {
   litCore,
   litCssFuse,
   litCssMinifier,
+  litHtmlAot,
   litHtmlFuse,
   litHtmlMinifier,
   litPropsLower,
   propsLower,
 } from './plugin.js';
-

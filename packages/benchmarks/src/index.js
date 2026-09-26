@@ -1,7 +1,16 @@
 #!/usr/bin/env node
 import { runSuiteBenchmark } from './runner.js';
 import { getSuites } from './suites/index.js';
-import { renderAsciiTable, renderCrossSuiteSummary, renderMarkdownDiagnosticsTable, renderMarkdownOverviewTable, renderMarkdownPerToolAccordion, renderMarkdownTable } from './table.js';
+import {
+  renderAsciiRuntimeTable,
+  renderAsciiTable,
+  renderCrossSuiteSummary,
+  renderMarkdownDiagnosticsTable,
+  renderMarkdownOverviewTable,
+  renderMarkdownPerToolAccordion,
+  renderMarkdownRuntimeTable,
+  renderMarkdownTable,
+} from './table.js';
 import { getActiveTools } from './tools/index.js';
 
 // Parse command line arguments
@@ -101,9 +110,13 @@ async function main() {
     }
 
     if (options.format === 'ascii') {
-      console.log(renderAsciiTable(`${suite.name} Bundle Size Impact`, rows));
+      console.log(renderAsciiTable(`${suite.name} static bundle size analysis`, rows));
 
-      if (rows.diagnostics && Object.keys(rows.diagnostics).length > 0) {
+      if (rows.runtimeRows && rows.runtimeRows.length > 0) {
+        console.log(renderAsciiRuntimeTable(`${suite.name} runtime performance`, rows.runtimeRows));
+      }
+
+      if (options.verbose && rows.diagnostics && Object.keys(rows.diagnostics).length > 0) {
         console.log(`\nDiagnostics:`);
         for (const [toolId, diag] of Object.entries(rows.diagnostics)) {
           if (diag.rulesScanned !== undefined) {
@@ -156,13 +169,15 @@ async function main() {
     if (crossSuiteSummaries.length > 1) {
       console.log(`\n${renderMarkdownOverviewTable(crossSuiteSummaries)}`);
       console.log(renderMarkdownPerToolAccordion(allResults));
-      console.log(renderMarkdownDiagnosticsTable(allResults));
     } else {
       const res = allResults[0];
       console.log(`\n${renderMarkdownTable(res.suiteName, res.rows)}`);
-      if (res.diagnostics && Object.keys(res.diagnostics).length > 0) {
-        console.log(renderMarkdownDiagnosticsTable(allResults));
-      }
+    }
+
+    // Additional table at bottom of benchmarks: runtime performance
+    const lastResult = allResults[allResults.length - 1];
+    if (lastResult?.rows?.runtimeRows && lastResult.rows.runtimeRows.length > 0) {
+      console.log(renderMarkdownRuntimeTable(lastResult.rows.runtimeRows));
     }
   } else if (crossSuiteSummaries.length > 1 && options.format === 'ascii') {
     console.log(renderCrossSuiteSummary(crossSuiteSummaries));

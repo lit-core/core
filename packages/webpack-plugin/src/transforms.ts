@@ -2,14 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
+import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
-import type { CssFuseOptions, CssMinifierOptions, HtmlFuseOptions, HtmlMinifierOptions, PropsLowerOptions } from './options.js';
+import type { CssFuseOptions, CssMinifierOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, PropsLowerOptions } from './options.js';
 import { matchesPattern } from './utils.js';
 
-export const LIT_DECORATOR_FAST_CHECK =
-  /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b|\b(?:customElement|property|state)\s*\(/;
+export const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b/;
 export const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
 export const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
 
@@ -119,6 +119,37 @@ export function transformCssMinifier(code: string, id: string, options: CssMinif
     });
 
     if (result.minifiedTemplates === 0) {
+      return null;
+    }
+
+    return {
+      code: result.code,
+      map: result.map ? JSON.parse(result.map) : null,
+    };
+  } catch (_err) {
+    return null;
+  }
+}
+
+export function transformHtmlAot(code: string, id: string, options: HtmlAotOptions = {}): TransformResult | null {
+  const { sourcemap = false } = options;
+  const cleanId = id.split('?')[0] ?? id;
+
+  if (!shouldProcessFile(cleanId, options)) {
+    return null;
+  }
+
+  if (!LIT_HTML_FAST_CHECK.test(code)) {
+    return null;
+  }
+
+  try {
+    const result = compileHtmlAot(code, {
+      filename: cleanId,
+      sourcemap,
+    });
+
+    if (result.templatesCount === 0) {
       return null;
     }
 
@@ -248,4 +279,3 @@ export function runHtmlFuseOptimization(options: HtmlFuseOptions = {}): HtmlOpti
     transformedFiles,
   };
 }
-

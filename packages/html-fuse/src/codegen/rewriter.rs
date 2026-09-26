@@ -38,29 +38,23 @@ pub fn rewrite_file(
         return None;
     }
 
-    let mut replacements: Vec<(usize, usize, String)> = Vec::new();
-    let mut used_clusters = Vec::new();
+    let mut replacements: Vec<(usize, usize, String, String)> = Vec::new();
 
     for frag in file_frags {
         if let Some(cluster) = cluster_map.get(&frag.hash) {
-            used_clusters.push(cluster.id.clone());
-
             let replacement = if frag.is_full_template {
                 cluster.id.clone()
             } else {
                 format!("${{{}}}", cluster.id)
             };
 
-            replacements.push((frag.span.start, frag.span.end, replacement));
+            replacements.push((frag.span.start, frag.span.end, replacement, cluster.id.clone()));
         }
     }
 
     if replacements.is_empty() {
         return None;
     }
-
-    used_clusters.sort();
-    used_clusters.dedup();
 
     // Deduplicate/filter overlapping replacements: sort by start asc, end desc
     replacements.sort_by(|a, b| {
@@ -72,13 +66,22 @@ pub fn rewrite_file(
     });
 
     let mut filtered_replacements: Vec<(usize, usize, String)> = Vec::new();
+    let mut used_clusters = Vec::new();
     let mut last_end = 0;
-    for rep in replacements {
-        if rep.0 >= last_end {
-            last_end = rep.1;
-            filtered_replacements.push(rep);
+    for (start, end, rep_text, cid) in replacements {
+        if start >= last_end {
+            last_end = end;
+            used_clusters.push(cid);
+            filtered_replacements.push((start, end, rep_text));
         }
     }
+
+    if filtered_replacements.is_empty() {
+        return None;
+    }
+
+    used_clusters.sort();
+    used_clusters.dedup();
 
     // Sort replacements descending by start byte offset so offsets remain valid
     filtered_replacements.sort_by_key(|b| std::cmp::Reverse(b.0));

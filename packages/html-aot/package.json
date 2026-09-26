@@ -1,0 +1,33 @@
+{
+  "name": "@lit-core/html-aot",
+  "version": "0.1.0",
+  "description": "Ahead-of-time template compiler for Lit and Web Components",
+  "type": "module",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@parse5/tools": "^0.3.0",
+    "lit-html": "^3.3.3",
+    "parse5": "^7.3.0",
+    "typescript": "^7.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "vitest": "^5.0.2"
+  }
+}

@@ -156,7 +156,7 @@ export function renderMarkdownOverviewTable(summaryRows) {
   const alignments = [':---', '---:', '---:', '---:', '---:'];
 
   const lines = [];
-  lines.push('### 📊 Results summary');
+  lines.push('### 📦 Static bundle size analysis');
   lines.push('');
   lines.push(`| ${headers.join(' | ')} |`);
   lines.push(`| ${alignments.join(' | ')} |`);
@@ -291,5 +291,88 @@ export function renderMarkdownDiagnosticsTable(allResults) {
     lines.push('');
   }
 
+  return lines.join('\n');
+}
+
+/**
+ * Format runtime performance metrics as an ASCII box table.
+ * @param {string} title
+ * @param {Array<{ name: string, firstRenderMs: number, updateMs: number, speedupPercent?: number, isBaseline?: boolean, isTotal?: boolean }>} rows
+ * @returns {string}
+ */
+export function renderAsciiRuntimeTable(title, rows) {
+  const headers = ['Optimization tool or mode', 'First render (mount)', 'Re-render (update)', 'First render speedup'];
+
+  const formattedRows = rows.map((r) => {
+    const firstRender = `${r.firstRenderMs.toFixed(2)} ms`;
+    const update = `${r.updateMs.toFixed(2)} ms`;
+    const speedup = r.isBaseline ? '—' : r.speedupPercent !== undefined && r.speedupPercent !== 0 ? `${r.speedupPercent > 0 ? '+' : ''}${r.speedupPercent.toFixed(1)}%` : '—';
+
+    return {
+      cells: [r.name, firstRender, update, speedup],
+      isBaseline: !!r.isBaseline,
+      isTotal: !!r.isTotal,
+    };
+  });
+
+  const colWidths = headers.map((header, i) => {
+    const maxDataWidth = Math.max(...formattedRows.map((r) => r.cells[i].length));
+    return Math.max(header.length, maxDataWidth);
+  });
+
+  const totalWidth = colWidths.reduce((sum, w) => sum + w, 0) + (colWidths.length - 1) * 3 + 4;
+
+  const topBorder = `┌${colWidths.map((w) => '─'.repeat(w + 2)).join('┬')}┐`;
+  const midBorder = `├${colWidths.map((w) => '─'.repeat(w + 2)).join('┼')}┤`;
+  const doubleMidBorder = `╞${colWidths.map((w) => '═'.repeat(w + 2)).join('╪')}╡`;
+  const botBorder = `└${colWidths.map((w) => '─'.repeat(w + 2)).join('┴')}┘`;
+
+  const headerLine = `│ ${headers.map((h, i) => (i === 0 ? h.padEnd(colWidths[i]) : h.padStart(colWidths[i]))).join(' │ ')} │`;
+
+  const output = [];
+  output.push(`\n${'═'.repeat(totalWidth)}`);
+  output.push(`⏱️  ${title}`);
+  output.push(`${'═'.repeat(totalWidth)}`);
+  output.push(topBorder);
+  output.push(headerLine);
+  output.push(midBorder);
+
+  for (const row of formattedRows) {
+    if (row.isTotal) {
+      output.push(doubleMidBorder);
+    }
+    const line = `│ ${row.cells.map((c, i) => (i === 0 ? c.padEnd(colWidths[i]) : c.padStart(colWidths[i]))).join(' │ ')} │`;
+    output.push(line);
+  }
+
+  output.push(botBorder);
+  return output.join('\n');
+}
+
+/**
+ * Format runtime performance metrics as a Markdown table.
+ * @param {Array<{ name: string, firstRenderMs: number, updateMs: number, speedupPercent?: number, isBaseline?: boolean, isTotal?: boolean }>} rows
+ * @returns {string}
+ */
+export function renderMarkdownRuntimeTable(rows) {
+  const headers = ['Optimization tool or mode', 'First render (mount)', 'Re-render (update)', 'Render speedup'];
+  const alignments = [':---', '---:', '---:', '---:'];
+
+  const lines = [];
+  lines.push('### ⏱️ Runtime performance');
+  lines.push('');
+  lines.push(`| ${headers.join(' | ')} |`);
+  lines.push(`| ${alignments.join(' | ')} |`);
+
+  for (const r of rows) {
+    const firstRender = `${r.firstRenderMs.toFixed(2)} ms`;
+    const update = `${r.updateMs.toFixed(2)} ms`;
+    const speedup = r.isBaseline ? '—' : r.speedupPercent !== undefined && r.speedupPercent !== 0 ? `**${r.speedupPercent > 0 ? '+' : ''}${r.speedupPercent.toFixed(1)}%**` : '—';
+    const namePrefix = r.isTotal ? '**TOTAL** ' : r.isBaseline ? '*Baseline* ' : '';
+
+    lines.push(`| ${namePrefix}${r.name} | ${firstRender} | ${update} | ${speedup} |`);
+  }
+
+  lines.push('');
   return lines.join('\n');
 }

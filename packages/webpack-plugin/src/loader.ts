@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { LoaderContext } from 'webpack';
-import type { CssMinifierOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
-import { transformCssMinifier, transformHtmlMinifier, transformPropsLower } from './transforms.js';
+import type { CssMinifierOptions, HtmlAotOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import { transformCssMinifier, transformHtmlAot, transformHtmlMinifier, transformPropsLower } from './transforms.js';
 
 export interface PluginState {
   transformedFiles: Map<string, string>;
@@ -92,7 +92,20 @@ export default function litWebpackLoader(
     }
   }
 
-  // 4. Apply html-minifier template minification if enabled
+  // 4. Apply html-aot template compilation if enabled
+  const htmlAotOpt = options.htmlAot ?? options['html-aot'];
+  if (htmlAotOpt) {
+    const aotOpts: HtmlAotOptions = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
+    const result = transformHtmlAot(currentSource, resourcePath, aotOpts);
+    if (result) {
+      currentSource = result.code;
+      if (result.map) {
+        currentMap = result.map;
+      }
+    }
+  }
+
+  // 5. Apply html-minifier template minification if enabled
   const htmlMinifierOpt = options.htmlMinifier ?? options['html-minifier'];
   if (htmlMinifierOpt) {
     const htmlOpts: HtmlMinifierOptions = typeof htmlMinifierOpt === 'object' ? htmlMinifierOpt : {};

@@ -2,12 +2,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
+import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
 import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
-import type { CssFuseOptions, CssMinifierOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
-import { extractHtmlTemplateId, extractSheetId, formatVirtualHtmlId, formatVirtualId, isVirtualFusedId, isVirtualHtmlFusedId, RESOLVED_FUSED_PREFIX, RESOLVED_HTML_FUSED_PREFIX } from './utils.js';
+import type { CssFuseOptions, CssMinifierOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import {
+  extractHtmlTemplateId,
+  extractSheetId,
+  formatVirtualHtmlId,
+  formatVirtualId,
+  isVirtualFusedId,
+  isVirtualHtmlFusedId,
+  matchesPattern,
+  RESOLVED_FUSED_PREFIX,
+  RESOLVED_HTML_FUSED_PREFIX,
+} from './utils.js';
 
 export function cssFuse(options: CssFuseOptions = {}): Plugin {
   let config: ResolvedConfig;
@@ -214,26 +225,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
   };
 }
 
-function matchesPattern(cleanId: string, pattern: string | RegExp): boolean {
-  if (pattern instanceof RegExp) return pattern.test(cleanId);
-  if (typeof pattern === 'string') {
-    if (cleanId.includes(pattern)) return true;
-    if (pattern.includes('*')) {
-      const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-      if (new RegExp(escaped).test(cleanId)) return true;
-      const nodeModulesIdx = pattern.indexOf('node_modules/');
-      if (nodeModulesIdx !== -1) {
-        const subPattern = pattern.slice(nodeModulesIdx);
-        const subEscaped = subPattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-        if (new RegExp(subEscaped).test(cleanId)) return true;
-      }
-    }
-  }
-  return false;
-}
-
-const LIT_DECORATOR_FAST_CHECK =
-  /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b|\b(?:customElement|property|state)\s*\(/;
+const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b/;
 
 export function propsLower(options: PropsLowerOptions = {}): Plugin {
   const { sourcemap = true } = options;
@@ -284,7 +276,7 @@ export function propsLower(options: PropsLowerOptions = {}): Plugin {
   };
 }
 
-const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\b/;
+const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
 
 export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
   const { sourcemap = false } = options;
@@ -339,7 +331,7 @@ export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
   };
 }
 
-const LIT_CSS_FAST_CHECK = /\bcss\b/;
+const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
 
 export function cssMinifier(options: CssMinifierOptions = {}): Plugin {
   const { sourcemap = true } = options;
@@ -489,10 +481,7 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
     load(id) {
       if (isVirtualHtmlFusedId(id)) {
         const tplId = extractHtmlTemplateId(id);
-        const code =
-          virtualTemplates.get(tplId) ||
-          virtualTemplates.get(tplId.replace(/\.js$/, '')) ||
-          virtualTemplates.get(`${tplId}.js`);
+        const code = virtualTemplates.get(tplId) || virtualTemplates.get(tplId.replace(/\.js$/, '')) || virtualTemplates.get(`${tplId}.js`);
 
         if (code) {
           return {
@@ -528,9 +517,65 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
   };
 }
 
+const LIT_HTML_AOT_FAST_CHECK = /\b(?:html|svg)\s*`|\b[a-zA-Z0-9_$]+\.html\s*`/;
+
+export function htmlAot(options: HtmlAotOptions = {}): Plugin {
+  const { sourcemap = false } = options;
+
+  return {
+    name: 'html-aot',
+    enforce: 'pre',
+
+    transform(code: string, id: string) {
+      const cleanId = id.split('?')[0] ?? id;
+      if (!/\.[jt]sx?$/.test(cleanId)) {
+        return null;
+      }
+
+      if (options.exclude) {
+        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+        for (const pattern of excludes) {
+          if (matchesPattern(cleanId, pattern)) return null;
+        }
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
+        return null;
+      }
+
+      if (options.include) {
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+        if (!matched) return null;
+      }
+
+      if (!LIT_HTML_AOT_FAST_CHECK.test(code)) {
+        return null;
+      }
+
+      try {
+        const result = compileHtmlAot(code, {
+          filename: cleanId,
+          sourcemap,
+        });
+
+        if (result.templatesCount === 0) {
+          return null;
+        }
+
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      } catch (_err) {
+        return null;
+      }
+    },
+  };
+}
+
 export const litCssMinifier = cssMinifier;
 export const litHtmlMinifier = htmlMinifier;
 export const litHtmlFuse = htmlFuse;
+export const litHtmlAot = htmlAot;
 
 export function lit(options: LitPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [];
@@ -553,6 +598,12 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(propsLower(propsOpts));
   }
 
+  const htmlAotOpt = options.htmlAot ?? options['html-aot'];
+  if (htmlAotOpt) {
+    const aotOpts = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
+    plugins.push(htmlAot(aotOpts));
+  }
+
   const cssMinifierOpt = options.cssMinifier ?? options['css-minifier'];
   if (cssMinifierOpt) {
     const minifierOpts = typeof cssMinifierOpt === 'object' ? cssMinifierOpt : {};
@@ -572,4 +623,3 @@ export const litCore = lit;
 export const litCssFuse = cssFuse;
 export const litPropsLower = propsLower;
 export default lit;
-
