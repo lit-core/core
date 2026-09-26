@@ -1,14 +1,8 @@
 #!/usr/bin/env node
-import { getSuites } from './suites/index.js';
-import { getActiveTools } from './tools/index.js';
 import { runSuiteBenchmark } from './runner.js';
-import {
-  renderAsciiTable,
-  renderMarkdownTable,
-  renderCrossSuiteSummary,
-  renderMarkdownOverviewTable,
-  renderMarkdownPerConfigTable,
-} from './table.js';
+import { getSuites } from './suites/index.js';
+import { renderAsciiTable, renderCrossSuiteSummary, renderMarkdownDiagnosticsTable, renderMarkdownOverviewTable, renderMarkdownTable } from './table.js';
+import { getActiveTools } from './tools/index.js';
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -77,7 +71,9 @@ async function main() {
       console.log(`\n⏳ Running benchmark for: ${suite.name}...`);
     }
 
-    const rows = await runSuiteBenchmark(suite, tools, { verbose: options.verbose });
+    const rows = await runSuiteBenchmark(suite, tools, {
+      verbose: options.verbose,
+    });
     allResults.push({
       suiteId: suite.id,
       suiteName: suite.name,
@@ -89,7 +85,7 @@ async function main() {
     const baselineRow = rows.find((r) => r.isBaseline);
     const totalRow = rows.find((r) => r.isTotal);
 
-    if (baselineRow && totalRow && totalRow.impact) {
+    if (baselineRow && totalRow?.impact) {
       crossSuiteSummaries.push({
         suiteName: suite.name,
         componentCount: rows.suiteContext.componentCount,
@@ -111,7 +107,9 @@ async function main() {
         console.log(`\nDiagnostics:`);
         for (const [toolId, diag] of Object.entries(rows.diagnostics)) {
           if (diag.rulesScanned !== undefined) {
-            console.log(`  [${toolId}] CSS Rules Scanned: ${diag.rulesScanned} | Deduped: ${diag.rulesDeduped} | Fused Sheets: ${diag.fusedSheetsCreated} | Chunks Rewritten: ${diag.componentsRewritten}`);
+            console.log(
+              `  [${toolId}] CSS Rules Scanned: ${diag.rulesScanned} | Deduped: ${diag.rulesDeduped} | Fused Sheets: ${diag.fusedSheetsCreated} | Chunks Rewritten: ${diag.componentsRewritten}`,
+            );
           }
         }
       }
@@ -150,28 +148,15 @@ async function main() {
   }
 
   if (options.format === 'markdown') {
-    // 1. One overview table with all libraries, having all configs enabled
-    console.log('\n' + renderMarkdownOverviewTable(crossSuiteSummaries));
-
-    // 2. One table with all libraries, per config
-    console.log('\n' + renderMarkdownPerConfigTable(allResults));
-
-    // 3. Accordions for more granular details per library
-    console.log('### 🔍 Granular Library Details\n');
-    for (const res of allResults) {
-      console.log(`<details>`);
-      console.log(`<summary><strong>${res.suiteName} (${res.componentCount} elements)</strong> — Click to expand details</summary>\n`);
-      console.log(renderMarkdownTable(`${res.suiteName} Detailed Breakdown`, res.rows));
+    if (crossSuiteSummaries.length > 1) {
+      console.log(`\n${renderMarkdownOverviewTable(crossSuiteSummaries)}`);
+      console.log(renderMarkdownDiagnosticsTable(allResults));
+    } else {
+      const res = allResults[0];
+      console.log(`\n${renderMarkdownTable(res.suiteName, res.rows)}`);
       if (res.diagnostics && Object.keys(res.diagnostics).length > 0) {
-        console.log(`**AST & Deduplication Diagnostics**:`);
-        for (const [toolId, diag] of Object.entries(res.diagnostics)) {
-          if (diag.rulesScanned !== undefined) {
-            console.log(`- **[${toolId}]** Rules Scanned: ${diag.rulesScanned} | Deduped: ${diag.rulesDeduped} | Fused Sheets Created: ${diag.fusedSheetsCreated} | Chunks Rewritten: ${diag.componentsRewritten}`);
-          }
-        }
-        console.log('');
+        console.log(renderMarkdownDiagnosticsTable(allResults));
       }
-      console.log(`</details>\n`);
     }
   } else if (crossSuiteSummaries.length > 1 && options.format === 'ascii') {
     console.log(renderCrossSuiteSummary(crossSuiteSummaries));

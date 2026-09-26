@@ -1,19 +1,14 @@
-import { webAwesomeSuite } from './webawesome.js';
-import { materialSuite } from './material.js';
 import { carbonSuite } from './carbon.js';
-import { spectrumSuite } from './spectrum.js';
 import { createCustomSuite } from './custom.js';
+import { materialSuite } from './material.js';
+import { spectrumSuite } from './spectrum.js';
+import { webAwesomeSuite } from './webawesome.js';
 
 /**
  * All production library benchmark suites.
  * @type {import('../types.js').BenchmarkSuite[]}
  */
-export const registeredSuites = [
-  webAwesomeSuite,
-  materialSuite,
-  carbonSuite,
-  spectrumSuite,
-];
+export const registeredSuites = [webAwesomeSuite, materialSuite, carbonSuite, spectrumSuite];
 
 /**
  * Get benchmark suites to run based on filter argument or custom options.
@@ -25,7 +20,7 @@ export const registeredSuites = [
  * @returns {import('../types.js').BenchmarkSuite[]}
  */
 export function getSuites(suiteFilter, customOptions = {}) {
-  if (customOptions && customOptions.entry) {
+  if (customOptions?.entry) {
     const custom = createCustomSuite({
       entry: customOptions.entry,
       include: customOptions.include,

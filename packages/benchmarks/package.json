@@ -18,6 +18,7 @@
     "@awesome.me/webawesome": "^3.14.0",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
+    "@lit-core/html-minifier": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "lit": "^3.3.3",
     "vite": "^8.3.1"

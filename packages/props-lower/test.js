@@ -167,7 +167,10 @@ console.log('Testing @uibit/props-lower native addon...');
     @customElement('my-element')
     class MyElement extends LitElement {}
   `;
-  const res = transformLitProps(input, { sourcemap: true, filename: 'test.ts' });
+  const res = transformLitProps(input, {
+    sourcemap: true,
+    filename: 'test.ts',
+  });
   assert(res.map, 'Should generate sourcemap when requested');
   const parsedMap = JSON.parse(res.map);
   assert(parsedMap.mappings, 'Sourcemap should have mappings');

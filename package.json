@@ -5,24 +5,29 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "lint": "biome check .",
     "test": "turbo run test",
     "benchmark": "pnpm --filter @lit-core/benchmarks run benchmark",
     "benchmark:webawesome": "pnpm --filter @lit-core/benchmarks run benchmark:webawesome",
     "benchmark:markdown": "pnpm --filter @lit-core/benchmarks run benchmark:markdown",
     "clean": "turbo run clean && rm -rf node_modules",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "format:check": "biome format ."
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/lit-core/core"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=11.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "turbo": "^2.11.4",
     "typescript": "^7.0.2"
   },
-  "packageManager": "pnpm@12.6.0",
+  "packageManager": "pnpm@11.11.0",
   "dependencies": {
     "@awesome.me/webawesome": "^3.14.0"
   }

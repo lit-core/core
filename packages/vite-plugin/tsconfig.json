@@ -11,6 +11,8 @@
     "skipLibCheck": true,
     "paths": {
       "@lit-core/css-fuse": ["../css-fuse/src/index.d.ts"],
+      "@lit-core/css-minifier": ["../css-minifier/src/index.d.ts"],
+      "@lit-core/html-minifier": ["../html-minifier/src/index.d.ts"],
       "@lit-core/props-lower": ["../props-lower/src/index.d.ts"]
     }
   },

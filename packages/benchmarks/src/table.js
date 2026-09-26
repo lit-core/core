@@ -1,4 +1,4 @@
-import { formatKb, formatImpact } from './metrics.js';
+import { formatImpact, formatKb } from './metrics.js';
 
 /**
  * @typedef {Object} TableRow
@@ -17,14 +17,7 @@ import { formatKb, formatImpact } from './metrics.js';
  * @returns {string}
  */
 export function renderAsciiTable(title, rows) {
-  const headers = [
-    'Optimization Tool / Mode',
-    'Minified JS',
-    'Gzip',
-    'Brotli',
-    'Raw Impact (Δ)',
-    'Gzip Impact (Δ)',
-  ];
+  const headers = ['Optimization Tool / Mode', 'Minified JS', 'Gzip', 'Brotli', 'Raw Impact (Δ)', 'Gzip Impact (Δ)'];
 
   const formattedRows = rows.map((r) => {
     const rawSize = formatKb(r.metrics.rawBytes);
@@ -68,9 +61,7 @@ export function renderAsciiTable(title, rows) {
     if (row.isTotal) {
       output.push(doubleMidBorder);
     }
-    const line = `│ ${row.cells
-      .map((c, i) => (i === 0 ? c.padEnd(colWidths[i]) : c.padStart(colWidths[i])))
-      .join(' │ ')} │`;
+    const line = `│ ${row.cells.map((c, i) => (i === 0 ? c.padEnd(colWidths[i]) : c.padStart(colWidths[i]))).join(' │ ')} │`;
     output.push(line);
   }
 
@@ -85,14 +76,7 @@ export function renderAsciiTable(title, rows) {
  * @returns {string}
  */
 export function renderMarkdownTable(title, rows) {
-  const headers = [
-    'Optimization Tool / Mode',
-    'Minified JS',
-    'Gzip',
-    'Brotli',
-    'Raw Impact (Δ)',
-    'Gzip Impact (Δ)',
-  ];
+  const headers = ['Optimization tool or mode', 'Minified JS', 'Gzip', 'Brotli', 'Raw impact (Δ)', 'Gzip impact (Δ)'];
 
   const alignments = [':---', '---:', '---:', '---:', '---:', '---:'];
 
@@ -110,9 +94,7 @@ export function renderMarkdownTable(title, rows) {
     const gzipImpact = r.isBaseline ? '—' : formatImpact(r.impact?.gzipDiff ?? 0, r.impact?.gzipPercent ?? 0);
 
     const namePrefix = r.isTotal ? '**TOTAL** ' : r.isBaseline ? '*Baseline* ' : '';
-    lines.push(
-      `| ${namePrefix}${r.name} | ${rawSize} | ${gzipSize} | ${brotliSize} | ${rawImpact} | ${gzipImpact} |`
-    );
+    lines.push(`| ${namePrefix}${r.name} | ${rawSize} | ${gzipSize} | ${brotliSize} | ${rawImpact} | ${gzipImpact} |`);
   }
 
   lines.push('');
@@ -125,13 +107,7 @@ export function renderMarkdownTable(title, rows) {
  * @returns {string}
  */
 export function renderCrossSuiteSummary(summaryRows) {
-  const headers = [
-    'Design System / Library',
-    'Elements',
-    'Baseline (Raw / Gzip)',
-    'Optimized (Raw / Gzip)',
-    'Net Savings (Raw / Gzip)',
-  ];
+  const headers = ['Design System / Library', 'Elements', 'Baseline (Raw / Gzip)', 'Optimized (Raw / Gzip)', 'Net Savings (Raw / Gzip)'];
 
   const formattedRows = summaryRows.map((s) => {
     const sign = s.rawSaved >= 0 ? '-' : '+';
@@ -181,19 +157,12 @@ export function renderCrossSuiteSummary(summaryRows) {
  * @returns {string}
  */
 export function renderMarkdownOverviewTable(summaryRows) {
-  const headers = [
-    'Design System / Library',
-    'Elements',
-    'Baseline (Min / Gzip)',
-    'Optimized (All Configs)',
-    'Raw Savings (Δ)',
-    'Gzip Savings (Δ)',
-  ];
+  const headers = ['Design system or library', 'Elements', 'Baseline (min / gzip)', 'Optimized (min / gzip)', 'Net savings (raw)', 'Net savings (gzip)'];
 
   const alignments = [':---', '---:', '---:', '---:', '---:', '---:'];
 
   const lines = [];
-  lines.push('### 🏆 Overview: All Libraries (All Optimizations Enabled)');
+  lines.push('### 📊 Results summary');
   lines.push('');
   lines.push(`| ${headers.join(' | ')} |`);
   lines.push(`| ${alignments.join(' | ')} |`);
@@ -202,12 +171,44 @@ export function renderMarkdownOverviewTable(summaryRows) {
     const rawDiffStr = formatImpact(-s.rawSaved, -s.rawPct);
     const gzipDiffStr = formatImpact(-s.gzipSaved, -s.gzipPct);
     const isOverall = s.suiteName.includes('TOTAL');
+    const name = isOverall ? 'Total' : s.suiteName;
     const prefix = isOverall ? '**' : '';
     const suffix = isOverall ? '**' : '';
 
     lines.push(
-      `| ${prefix}${s.suiteName}${suffix} | ${s.componentCount} | ${formatKb(s.baselineRaw)} / ${formatKb(s.baselineGzip)} | ${formatKb(s.totalRaw)} / ${formatKb(s.totalGzip)} | ${prefix}${rawDiffStr}${suffix} | ${prefix}${gzipDiffStr}${suffix} |`
+      `| ${prefix}${name}${suffix} | ${s.componentCount} | ${formatKb(s.baselineRaw)} / ${formatKb(s.baselineGzip)} | ${formatKb(s.totalRaw)} / ${formatKb(s.totalGzip)} | ${prefix}${rawDiffStr}${suffix} | ${prefix}${gzipDiffStr}${suffix} |`,
     );
+  }
+
+  lines.push('');
+  return lines.join('\n');
+}
+
+/**
+ * Format deduplication diagnostics across libraries as a clean Markdown table.
+ * @param {Array<{ suiteName: string, diagnostics?: Record<string, any> }>} allResults
+ * @returns {string}
+ */
+export function renderMarkdownDiagnosticsTable(allResults) {
+  const headers = ['Design system or library', 'Rules scanned', 'Duplicate rules fused', 'Shared sheets created', 'Chunks rewritten'];
+  const alignments = [':---', '---:', '---:', '---:', '---:'];
+
+  const lines = [];
+  lines.push('### 🔬 Deduplication diagnostics');
+  lines.push('');
+  lines.push(`| ${headers.join(' | ')} |`);
+  lines.push(`| ${alignments.join(' | ')} |`);
+
+  for (const res of allResults) {
+    if (res.diagnostics) {
+      for (const diag of Object.values(res.diagnostics)) {
+        if (diag.rulesScanned !== undefined) {
+          lines.push(
+            `| **${res.suiteName}** | ${diag.rulesScanned.toLocaleString()} | ${diag.rulesDeduped.toLocaleString()} | ${diag.fusedSheetsCreated.toLocaleString()} | ${diag.componentsRewritten.toLocaleString()} |`,
+          );
+        }
+      }
+    }
   }
 
   lines.push('');
@@ -220,15 +221,7 @@ export function renderMarkdownOverviewTable(summaryRows) {
  * @returns {string}
  */
 export function renderMarkdownPerConfigTable(allResults) {
-  const headers = [
-    'Library',
-    'Optimization Tool / Config',
-    'Minified JS',
-    'Gzip Size',
-    'Brotli Size',
-    'Raw Impact (Δ)',
-    'Gzip Impact (Δ)',
-  ];
+  const headers = ['Library', 'Optimization Tool / Config', 'Minified JS', 'Gzip Size', 'Brotli Size', 'Raw Impact (Δ)', 'Gzip Impact (Δ)'];
 
   const alignments = [':---', ':---', '---:', '---:', '---:', '---:', '---:'];
 
@@ -247,9 +240,7 @@ export function renderMarkdownPerConfigTable(allResults) {
       const gzipImpact = r.isBaseline ? '—' : formatImpact(r.impact?.gzipDiff ?? 0, r.impact?.gzipPercent ?? 0);
 
       const namePrefix = r.isTotal ? '**TOTAL** ' : r.isBaseline ? '*Baseline* ' : '';
-      lines.push(
-        `| ${res.suiteName} | ${namePrefix}${r.name} | ${rawSize} | ${gzipSize} | ${brotliSize} | ${rawImpact} | ${gzipImpact} |`
-      );
+      lines.push(`| ${res.suiteName} | ${namePrefix}${r.name} | ${rawSize} | ${gzipSize} | ${brotliSize} | ${rawImpact} | ${gzipImpact} |`);
     }
   }
 

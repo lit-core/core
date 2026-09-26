@@ -1,5 +1,5 @@
-import lit from '@lit-core/vite-plugin';
 import { fuse } from '@lit-core/css-fuse';
+import lit from '@lit-core/vite-plugin';
 
 /**
  * Tool definition for @lit-core/css-fuse
@@ -16,11 +16,7 @@ export const cssFuseTool = {
    * @returns {import('vite').Plugin[]}
    */
   getPlugins(suite) {
-    const include = Array.isArray(suite.includePattern)
-      ? suite.includePattern
-      : suite.includePattern
-        ? [suite.includePattern]
-        : undefined;
+    const include = Array.isArray(suite.includePattern) ? suite.includePattern : suite.includePattern ? [suite.includePattern] : undefined;
 
     return lit({
       cssFuse: {
@@ -38,9 +34,7 @@ export const cssFuseTool = {
    */
   async getDiagnostics(suite) {
     if (!suite.includePattern) return null;
-    const include = Array.isArray(suite.includePattern)
-      ? suite.includePattern
-      : [suite.includePattern];
+    const include = Array.isArray(suite.includePattern) ? suite.includePattern : [suite.includePattern];
 
     try {
       const res = fuse({

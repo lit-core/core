@@ -1,11 +1,29 @@
-export { lit, litCore, cssFuse, litCssFuse, propsLower, litPropsLower } from './plugin.js';
 export type {
-  LitPluginOptions,
-  LitCorePluginOptions,
   CssFuseOptions,
+  CssMinifierOptions,
+  HtmlMinifierOptions,
+  LitCorePluginOptions,
   LitCssFuseOptions,
-  PropsLowerOptions,
+  LitCssMinifierOptions,
+  LitHtmlMinifierOptions,
+  LitPluginOptions,
   LitPropsLowerOptions,
+  LitTemplateWhitespaceCollapserOptions,
+  PropsLowerOptions,
+  TemplateWhitespaceCollapserOptions,
 } from './options.js';
-export { lit as default } from './plugin.js';
-
+export {
+  cssFuse,
+  cssMinifier,
+  htmlMinifier,
+  lit,
+  lit as default,
+  litCore,
+  litCssFuse,
+  litCssMinifier,
+  litHtmlMinifier,
+  litPropsLower,
+  litTemplateWhitespaceCollapser,
+  propsLower,
+  templateWhitespaceCollapser,
+} from './plugin.js';

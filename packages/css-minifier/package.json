@@ -1,0 +1,35 @@
+{
+  "name": "@lit-core/css-minifier",
+  "version": "0.1.0",
+  "description": "Embedded CSS template minification for Lit via OXC and Lightning CSS",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "*.node"
+  ],
+  "napi": {
+    "binaryName": "css-minifier",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "cargo build --release && cp target/release/libcss_minifier.dylib css-minifier.darwin-arm64.node 2>/dev/null || true",
+    "build:debug": "cargo build && cp target/debug/libcss_minifier.dylib css-minifier.darwin-arm64.node 2>/dev/null || true",
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.5"
+  }
+}

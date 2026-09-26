@@ -61,6 +61,52 @@ export interface PropsLowerOptions {
 
 export type LitPropsLowerOptions = PropsLowerOptions;
 
+export interface HtmlMinifierOptions {
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default false
+   */
+  sourcemap?: boolean;
+}
+
+export type LitHtmlMinifierOptions = HtmlMinifierOptions;
+export type TemplateWhitespaceCollapserOptions = HtmlMinifierOptions;
+export type LitTemplateWhitespaceCollapserOptions = HtmlMinifierOptions;
+
+export interface CssMinifierOptions {
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitCssMinifierOptions = CssMinifierOptions;
+
 export interface LitPluginOptions {
   /**
    * Cross-component CSS AST deduplication and constructable stylesheet sharing.
@@ -80,7 +126,40 @@ export interface LitPluginOptions {
    * Kebab-case alias for `propsLower`.
    */
   'props-lower'?: boolean | PropsLowerOptions;
+
+  /**
+   * Embedded CSS template minification via Lightning CSS.
+   * Pass `true` or a `CssMinifierOptions` object to enable.
+   * @default false
+   */
+  cssMinifier?: boolean | CssMinifierOptions;
+
+  /**
+   * Kebab-case alias for `cssMinifier`.
+   */
+  'css-minifier'?: boolean | CssMinifierOptions;
+
+  /**
+   * Native Rust AOT HTML & SVG template minification for Lit via OXC.
+   * Pass `true` or an `HtmlMinifierOptions` object to enable.
+   * @default false
+   */
+  htmlMinifier?: boolean | HtmlMinifierOptions;
+
+  /**
+   * Kebab-case alias for `htmlMinifier`.
+   */
+  'html-minifier'?: boolean | HtmlMinifierOptions;
+
+  /**
+   * Alias for `htmlMinifier`.
+   */
+  templateWhitespaceCollapser?: boolean | HtmlMinifierOptions;
+
+  /**
+   * Alias for `htmlMinifier`.
+   */
+  'template-whitespace-collapser'?: boolean | HtmlMinifierOptions;
 }
 
 export type LitCorePluginOptions = LitPluginOptions;
-

@@ -1,21 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
-import { build } from 'vite';
-import lit, { cssFuse } from '@lit-core/vite-plugin';
+import zlib from 'node:zlib';
 import { fuse } from '@lit-core/css-fuse';
+import lit from '@lit-core/vite-plugin';
+import { build } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../..');
 
 // Find Web Awesome components
-const possiblePaths = [
-  path.join(rootDir, 'node_modules/@awesome.me/webawesome/dist/components'),
-  path.resolve('node_modules/@awesome.me/webawesome/dist/components'),
-];
+const possiblePaths = [path.join(rootDir, 'node_modules/@awesome.me/webawesome/dist/components'), path.resolve('node_modules/@awesome.me/webawesome/dist/components')];
 
-let compDir = possiblePaths.find((p) => fs.existsSync(p));
+const compDir = possiblePaths.find((p) => fs.existsSync(p));
 if (!compDir) {
   console.error('Could not locate @awesome.me/webawesome installation.');
   process.exit(1);
@@ -32,9 +29,7 @@ console.log(`===============================================================`);
 console.log(`Detected components: ${components.length} Web Awesome elements`);
 
 const benchmarkDir = __dirname;
-const entryContent = components
-  .map((name) => `import '@awesome.me/webawesome/dist/components/${name}/${name}.js';`)
-  .join('\n');
+const entryContent = components.map((name) => `import '@awesome.me/webawesome/dist/components/${name}/${name}.js';`).join('\n');
 
 const entryPath = path.join(benchmarkDir, '.webawesome-entry.js');
 fs.writeFileSync(entryPath, entryContent);
@@ -48,7 +43,7 @@ function getSizes(filePath) {
 }
 
 function formatKb(bytes) {
-  return (bytes / 1024).toFixed(2) + ' KB';
+  return `${(bytes / 1024).toFixed(2)} KB`;
 }
 
 const baselineDir = path.join(benchmarkDir, '.dist-baseline');
@@ -126,6 +121,9 @@ try {
           exclude: [],
           threshold: 2,
           applyInDev: true,
+        },
+        htmlMinifier: {
+          exclude: [],
         },
       }),
     ],

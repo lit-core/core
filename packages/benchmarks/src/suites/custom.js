@@ -22,9 +22,7 @@ export function createCustomSuite({ entry, include, name = 'Custom Component Sui
     },
 
     async setup() {
-      const resolvedInclude = include
-        ? path.resolve(process.cwd(), include)
-        : path.dirname(resolvedEntry) + '/**/*.js';
+      const resolvedInclude = include ? path.resolve(process.cwd(), include) : `${path.dirname(resolvedEntry)}/**/*.js`;
 
       return {
         id: 'custom',

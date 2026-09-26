@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { platform, arch } from 'node:os';
+import { arch, platform } from 'node:os';
 
 const require = createRequire(import.meta.url);
 

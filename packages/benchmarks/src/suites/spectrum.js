@@ -6,10 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../../..');
 
 function findSpectrumDir() {
-  const possible = [
-    path.join(rootDir, 'node_modules/@spectrum-web-components'),
-    path.resolve('node_modules/@spectrum-web-components'),
-  ];
+  const possible = [path.join(rootDir, 'node_modules/@spectrum-web-components'), path.resolve('node_modules/@spectrum-web-components')];
   return possible.find((p) => fs.existsSync(p)) || null;
 }
 

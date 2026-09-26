@@ -43,9 +43,7 @@ export const webAwesomeSuite = {
       return fs.existsSync(fullPath);
     });
 
-    const entryContent = components
-      .map((name) => `import '@awesome.me/webawesome/dist/components/${name}/${name}.js';`)
-      .join('\n');
+    const entryContent = components.map((name) => `import '@awesome.me/webawesome/dist/components/${name}/${name}.js';`).join('\n');
 
     const entryPath = path.join(__dirname, '.webawesome-entry.js');
     fs.writeFileSync(entryPath, entryContent);

@@ -1,16 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Plugin, ResolvedConfig, HmrContext } from 'vite';
-import { fuse, auditScoping, type FuseResult } from '@lit-core/css-fuse';
+import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
+import { minifyEmbeddedCss } from '@lit-core/css-minifier';
+import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
-import type { CssFuseOptions, LitCssFuseOptions, LitPluginOptions, PropsLowerOptions, LitPropsLowerOptions } from './options.js';
-import {
-  VIRTUAL_FUSED_PREFIX,
-  RESOLVED_FUSED_PREFIX,
-  formatVirtualId,
-  isVirtualFusedId,
-  extractSheetId,
-} from './utils.js';
+import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
+import type { CssFuseOptions, CssMinifierOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import { extractSheetId, formatVirtualId, isVirtualFusedId, RESOLVED_FUSED_PREFIX } from './utils.js';
 
 export function cssFuse(options: CssFuseOptions = {}): Plugin {
   let config: ResolvedConfig;
@@ -108,7 +104,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
       if (fuseResult) {
         const stats = fuseResult.stats;
         config.logger.info(
-          `⚡ [css-fuse] Deduplicated ${stats.rulesDeduped} rules into ${stats.fusedSheetsCreated} shared constructable sheets across ${stats.componentsRewritten} components (~${(stats.bytesSaved / 1024).toFixed(1)} KB saved)`
+          `⚡ [css-fuse] Deduplicated ${stats.rulesDeduped} rules into ${stats.fusedSheetsCreated} shared constructable sheets across ${stats.componentsRewritten} components (~${(stats.bytesSaved / 1024).toFixed(1)} KB saved)`,
         );
 
         const diags = fuseResult.diagnostics || [];
@@ -132,10 +128,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
     load(id) {
       if (isVirtualFusedId(id)) {
         const sheetId = extractSheetId(id);
-        const code =
-          virtualSheets.get(sheetId) ||
-          virtualSheets.get(sheetId.replace(/\.js$/, '')) ||
-          virtualSheets.get(`${sheetId}.js`);
+        const code = virtualSheets.get(sheetId) || virtualSheets.get(sheetId.replace(/\.js$/, '')) || virtualSheets.get(`${sheetId}.js`);
 
         if (code) {
           return {
@@ -218,8 +211,19 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
   };
 }
 
-const LIT_DECORATOR_FAST_CHECK =
-  /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b/;
+function matchesPattern(cleanId: string, pattern: string | RegExp): boolean {
+  if (pattern instanceof RegExp) return pattern.test(cleanId);
+  if (typeof pattern === 'string') {
+    if (cleanId.includes(pattern)) return true;
+    if (pattern.includes('*')) {
+      const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+      return new RegExp(escaped).test(cleanId);
+    }
+  }
+  return false;
+}
+
+const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b/;
 
 export function propsLower(options: PropsLowerOptions = {}): Plugin {
   const { sourcemap = true } = options;
@@ -237,19 +241,15 @@ export function propsLower(options: PropsLowerOptions = {}): Plugin {
       if (options.exclude) {
         const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
         for (const pattern of excludes) {
-          if (pattern instanceof RegExp && pattern.test(cleanId)) return null;
-          if (typeof pattern === 'string' && cleanId.includes(pattern)) return null;
+          if (matchesPattern(cleanId, pattern)) return null;
         }
-      } else if (cleanId.includes('/node_modules/')) {
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
         return null;
       }
 
       if (options.include) {
         const includes = Array.isArray(options.include) ? options.include : [options.include];
-        const matched = includes.some((pattern) => {
-          if (pattern instanceof RegExp) return pattern.test(cleanId);
-          return typeof pattern === 'string' && cleanId.includes(pattern);
-        });
+        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
         if (!matched) return null;
       }
 
@@ -267,12 +267,127 @@ export function propsLower(options: PropsLowerOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (err) {
+      } catch (_err) {
         return null;
       }
     },
   };
 }
+
+const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
+
+export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
+  const { sourcemap = false } = options;
+
+  return {
+    name: 'html-minifier',
+    enforce: 'pre',
+
+    transform(code: string, id: string) {
+      const cleanId = id.split('?')[0] ?? id;
+      if (!/\.[jt]sx?$/.test(cleanId)) {
+        return null;
+      }
+
+      if (options.exclude) {
+        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+        for (const pattern of excludes) {
+          if (matchesPattern(cleanId, pattern)) return null;
+        }
+      } else if (cleanId.includes('/node_modules/')) {
+        return null;
+      }
+
+      if (options.include) {
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+        if (!matched) return null;
+      }
+
+      if (!LIT_HTML_FAST_CHECK.test(code)) {
+        return null;
+      }
+
+      try {
+        const result = minifyHtmlTemplates(code, {
+          sourcemap,
+          filename: cleanId,
+        });
+
+        if (result.templatesCount === 0) {
+          return null;
+        }
+
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      } catch (_err) {
+        return null;
+      }
+    },
+  };
+}
+
+const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
+
+export function cssMinifier(options: CssMinifierOptions = {}): Plugin {
+  const { sourcemap = true } = options;
+
+  return {
+    name: 'css-minifier',
+    enforce: 'pre',
+
+    transform(code: string, id: string) {
+      const cleanId = id.split('?')[0] ?? id;
+      if (!/\.[jt]sx?$/.test(cleanId)) {
+        return null;
+      }
+
+      if (options.exclude) {
+        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+        for (const pattern of excludes) {
+          if (matchesPattern(cleanId, pattern)) return null;
+        }
+      } else if (cleanId.includes('/node_modules/')) {
+        return null;
+      }
+
+      if (options.include) {
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        const matched = includes.some((pattern: string | RegExp) => matchesPattern(cleanId, pattern));
+        if (!matched) return null;
+      }
+
+      if (!LIT_CSS_FAST_CHECK.test(code)) {
+        return null;
+      }
+
+      try {
+        const result = minifyEmbeddedCss(code, {
+          sourcemap,
+          filename: cleanId,
+        });
+
+        if (result.minifiedTemplates === 0) {
+          return null;
+        }
+
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      } catch (_err) {
+        return null;
+      }
+    },
+  };
+}
+
+export const litCssMinifier = cssMinifier;
+export const templateWhitespaceCollapser = htmlMinifier;
+export const litHtmlMinifier = htmlMinifier;
+export const litTemplateWhitespaceCollapser = htmlMinifier;
 
 export function lit(options: LitPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [];
@@ -287,6 +402,18 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
   if (propsLowerOpt) {
     const propsOpts = typeof propsLowerOpt === 'object' ? propsLowerOpt : {};
     plugins.push(propsLower(propsOpts));
+  }
+
+  const cssMinifierOpt = options.cssMinifier ?? options['css-minifier'];
+  if (cssMinifierOpt) {
+    const minifierOpts = typeof cssMinifierOpt === 'object' ? cssMinifierOpt : {};
+    plugins.push(cssMinifier(minifierOpts));
+  }
+
+  const minifierOpt = options.htmlMinifier ?? options['html-minifier'] ?? options.templateWhitespaceCollapser ?? options['template-whitespace-collapser'];
+  if (minifierOpt) {
+    const minifierOpts = typeof minifierOpt === 'object' ? minifierOpt : {};
+    plugins.push(htmlMinifier(minifierOpts));
   }
 
   return plugins;

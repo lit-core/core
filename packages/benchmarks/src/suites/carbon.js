@@ -6,10 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../../..');
 
 function findCarbonDir() {
-  const possible = [
-    path.join(rootDir, 'node_modules/@carbon/web-components'),
-    path.resolve('node_modules/@carbon/web-components'),
-  ];
+  const possible = [path.join(rootDir, 'node_modules/@carbon/web-components'), path.resolve('node_modules/@carbon/web-components')];
   return possible.find((p) => fs.existsSync(p)) || null;
 }
 
@@ -39,9 +36,7 @@ export const carbonSuite = {
       return fs.existsSync(p);
     });
 
-    const entryContent = components
-      .map((name) => `import '@carbon/web-components/es/components/${name}/index.js';`)
-      .join('\n');
+    const entryContent = components.map((name) => `import '@carbon/web-components/es/components/${name}/index.js';`).join('\n');
 
     const entryPath = path.join(__dirname, '.carbon-entry.js');
     fs.writeFileSync(entryPath, entryContent);

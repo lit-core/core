@@ -1,0 +1,35 @@
+{
+  "name": "@lit-core/html-minifier",
+  "version": "0.1.0",
+  "description": "High-performance native Rust AOT AST HTML & SVG template minifier for Lit via OXC",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "*.node"
+  ],
+  "napi": {
+    "binaryName": "html-minifier",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "cargo build --release && cp target/release/libhtml_minifier.dylib html-minifier.darwin-arm64.node 2>/dev/null || true",
+    "build:debug": "cargo build && cp target/debug/libhtml_minifier.dylib html-minifier.darwin-arm64.node 2>/dev/null || true",
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.5"
+  }
+}

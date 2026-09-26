@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import litDefault, { lit, litCore, cssFuse, litCssFuse, propsLower, litPropsLower } from './dist/index.js';
+import litDefault, { cssFuse, htmlMinifier, lit, litCore, litCssFuse, litHtmlMinifier, litPropsLower, litTemplateWhitespaceCollapser, propsLower, templateWhitespaceCollapser } from './dist/index.js';
 
 console.log('Testing @lit-core/vite-plugin hooks and exports...');
 
@@ -10,6 +10,10 @@ assert.strictEqual(typeof cssFuse, 'function', 'cssFuse must be a function');
 assert.strictEqual(typeof litCssFuse, 'function', 'litCssFuse must be an alias');
 assert.strictEqual(typeof propsLower, 'function', 'propsLower must be a function');
 assert.strictEqual(typeof litPropsLower, 'function', 'litPropsLower must be an alias');
+assert.strictEqual(typeof htmlMinifier, 'function', 'htmlMinifier must be a function');
+assert.strictEqual(typeof litHtmlMinifier, 'function', 'litHtmlMinifier must be an alias');
+assert.strictEqual(typeof templateWhitespaceCollapser, 'function', 'templateWhitespaceCollapser must be a function');
+assert.strictEqual(typeof litTemplateWhitespaceCollapser, 'function', 'litTemplateWhitespaceCollapser must be an alias');
 
 // Test lit() default options: includes css-fuse
 const defaultPlugins = lit();
@@ -27,16 +31,47 @@ const propsPlugins = lit({ cssFuse: false, propsLower: true });
 assert.strictEqual(propsPlugins.length, 1);
 assert.strictEqual(propsPlugins[0].name, 'props-lower');
 
-// Test lit({ 'props-lower': true }): kebab-case option
-const kebabPlugins = lit({ cssFuse: false, 'props-lower': true });
-assert.strictEqual(kebabPlugins.length, 1);
-assert.strictEqual(kebabPlugins[0].name, 'props-lower');
+// Test lit({ htmlMinifier: true }): includes html-minifier
+const minifierPlugins = lit({ cssFuse: false, htmlMinifier: true });
+assert.strictEqual(minifierPlugins.length, 1);
+assert.strictEqual(minifierPlugins[0].name, 'html-minifier');
 
-// Test lit with both active
-const bothPlugins = lit({ propsLower: true });
-assert.strictEqual(bothPlugins.length, 2);
-assert.strictEqual(bothPlugins[0].name, 'css-fuse');
-assert.strictEqual(bothPlugins[1].name, 'props-lower');
+// Test lit({ 'html-minifier': true }): kebab-case option
+const kebabMinifierPlugins = lit({ cssFuse: false, 'html-minifier': true });
+assert.strictEqual(kebabMinifierPlugins.length, 1);
+assert.strictEqual(kebabMinifierPlugins[0].name, 'html-minifier');
+
+// Test lit({ templateWhitespaceCollapser: true }): alias option
+const aliasPlugins = lit({ cssFuse: false, templateWhitespaceCollapser: true });
+assert.strictEqual(aliasPlugins.length, 1);
+assert.strictEqual(aliasPlugins[0].name, 'html-minifier');
+
+// Test lit with all active
+const allPlugins = lit({ propsLower: true, htmlMinifier: true });
+assert.strictEqual(allPlugins.length, 3);
+assert.strictEqual(allPlugins[0].name, 'css-fuse');
+assert.strictEqual(allPlugins[1].name, 'props-lower');
+assert.strictEqual(allPlugins[2].name, 'html-minifier');
+
+// Test standalone htmlMinifier transform hook
+const htmlMinifierInstance = htmlMinifier();
+assert.strictEqual(htmlMinifierInstance.name, 'html-minifier');
+assert.strictEqual(htmlMinifierInstance.enforce, 'pre');
+assert.strictEqual(typeof htmlMinifierInstance.transform, 'function');
+
+const sampleTemplate = `
+  import { html } from 'lit';
+  export const tpl = html\`
+    <div class="test">
+      <!-- comment to remove -->
+      <span>Hello Lit</span>
+    </div>
+  \`;
+`;
+const transformedTpl = htmlMinifierInstance.transform.call({}, sampleTemplate, '/src/my-comp.ts');
+assert(transformedTpl, 'transform should return collapsed template code');
+assert(!transformedTpl.code.includes('comment to remove'), 'comment should be stripped');
+assert(transformedTpl.code.includes('<div class="test"><span>Hello Lit</span></div>'), 'tags whitespace collapsed');
 
 // Test standalone propsLower transform hook
 const propsPluginInstance = propsLower();
@@ -86,4 +121,3 @@ const regularResolved = plugin.resolveId.call({}, 'regular-file.ts');
 assert.strictEqual(regularResolved, undefined);
 
 console.log('✓ Vite plugin hooks and options verified successfully.');
-

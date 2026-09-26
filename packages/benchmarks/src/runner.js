@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
-import { getFileSizes, calculateImpact } from './metrics.js';
+import { calculateImpact, getFileSizes } from './metrics.js';
 import { getCombinedPlugins } from './tools/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

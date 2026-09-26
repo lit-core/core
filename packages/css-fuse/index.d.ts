@@ -2,57 +2,57 @@
 /* eslint-disable */
 
 export interface FuseConfig {
-  include?: Array<string>
-  exclude?: Array<string>
-  files?: Array<string>
-  threshold?: number
-  outputDir?: string
-  write?: boolean
-  virtualImports?: boolean
+  include?: Array<string>;
+  exclude?: Array<string>;
+  files?: Array<string>;
+  threshold?: number;
+  outputDir?: string;
+  write?: boolean;
+  virtualImports?: boolean;
 }
 
 export interface FusedSheetInfo {
-  id: string
-  fileName: string
-  code: string
-  rulesCount: number
-  sharedBy: Array<string>
+  id: string;
+  fileName: string;
+  code: string;
+  rulesCount: number;
+  sharedBy: Array<string>;
 }
 
 export interface RewrittenFileInfo {
-  filePath: string
-  originalCode: string
-  transformedCode: string
-  fusedImports: Array<string>
+  filePath: string;
+  originalCode: string;
+  transformedCode: string;
+  fusedImports: Array<string>;
 }
 
 export interface Diagnostic {
-  severity: 'error' | 'warning' | 'info'
-  code: string
-  message: string
-  filePath?: string
-  line?: number
-  column?: number
+  severity: 'error' | 'warning' | 'info';
+  code: string;
+  message: string;
+  filePath?: string;
+  line?: number;
+  column?: number;
 }
 
 export interface FuseStats {
-  filesScanned: number
-  stylesExtracted: number
-  totalRules: number
-  uniqueRules: number
-  rulesDeduped: number
-  fusedSheetsCreated: number
-  componentsRewritten: number
-  bytesSaved: number
+  filesScanned: number;
+  stylesExtracted: number;
+  totalRules: number;
+  uniqueRules: number;
+  rulesDeduped: number;
+  fusedSheetsCreated: number;
+  componentsRewritten: number;
+  bytesSaved: number;
 }
 
 export interface FuseResult {
-  fusedSheets: Array<FusedSheetInfo>
-  rewrittenFiles: Array<RewrittenFileInfo>
-  diagnostics: Array<Diagnostic>
-  stats: FuseStats
+  fusedSheets: Array<FusedSheetInfo>;
+  rewrittenFiles: Array<RewrittenFileInfo>;
+  diagnostics: Array<Diagnostic>;
+  stats: FuseStats;
 }
 
-export declare function fuse(config: FuseConfig): FuseResult
-export declare function analyze(config: FuseConfig): FuseResult
-export declare function auditScoping(config: FuseConfig): Array<Diagnostic>
+export declare function fuse(config: FuseConfig): FuseResult;
+export declare function analyze(config: FuseConfig): FuseResult;
+export declare function auditScoping(config: FuseConfig): Array<Diagnostic>;

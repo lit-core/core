@@ -6,10 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../../..');
 
 function findMaterialDir() {
-  const possible = [
-    path.join(rootDir, 'node_modules/@material/web'),
-    path.resolve('node_modules/@material/web'),
-  ];
+  const possible = [path.join(rootDir, 'node_modules/@material/web'), path.resolve('node_modules/@material/web')];
   return possible.find((p) => fs.existsSync(p)) || null;
 }
 

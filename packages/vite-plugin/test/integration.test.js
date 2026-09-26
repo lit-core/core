@@ -2,9 +2,9 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { build } from 'vite';
-import lit, { cssFuse } from '../dist/index.js';
 import { fuse } from '@lit-core/css-fuse';
+import { build } from 'vite';
+import lit from '../dist/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixtureDir = path.join(__dirname, 'fixtures');
@@ -29,7 +29,7 @@ export class CompA extends LitElement {
     }
   \`;
 }
-`
+`,
   );
 
   // Component B: shares base rules, has local color: blue
@@ -49,7 +49,7 @@ export class CompB extends LitElement {
     }
   \`;
 }
-`
+`,
   );
 
   // Component C: isolated component with completely separate rules
@@ -64,7 +64,7 @@ export class CompC extends LitElement {
     }
   \`;
 }
-`
+`,
   );
 
   // Component D: shares rules only with Comp C
@@ -79,7 +79,7 @@ export class CompD extends LitElement {
     }
   \`;
 }
-`
+`,
   );
 
   // Entry 1 imports only Comp A & Comp B
@@ -88,7 +88,7 @@ export class CompD extends LitElement {
     `import { CompA } from './comp-a.js';
 import { CompB } from './comp-b.js';
 export { CompA, CompB };
-`
+`,
   );
 
   // Entry 2 imports only Comp C & Comp D (e.g. lazy route)
@@ -97,7 +97,7 @@ export { CompA, CompB };
     `import { CompC } from './comp-c.js';
 import { CompD } from './comp-d.js';
 export { CompC, CompD };
-`
+`,
   );
 }
 
@@ -135,26 +135,11 @@ async function runTests() {
     const codeA = rewrittenA.transformedCode;
 
     // Verify cascade order: shared sheet must be prepended BEFORE local styles
-    assert(
-      codeA.includes('static styles = [_fused_'),
-      'Shared stylesheet must be the first item in static styles array'
-    );
-    assert(
-      codeA.includes(", css`"),
-      'Local overrides must be included after the shared stylesheet'
-    );
-    assert(
-      codeA.includes('color: red;'),
-      'Component A must retain its unique local override (color: red)'
-    );
-    assert(
-      !codeA.includes('box-sizing: border-box;'),
-      'Shared box-sizing declaration must be extracted out of local CSS'
-    );
-    assert(
-      !codeA.includes('cursor: pointer;'),
-      'Shared cursor declaration must be extracted out of local CSS'
-    );
+    assert(codeA.includes('static styles = [_fused_'), 'Shared stylesheet must be the first item in static styles array');
+    assert(codeA.includes(', css`'), 'Local overrides must be included after the shared stylesheet');
+    assert(codeA.includes('color: red;'), 'Component A must retain its unique local override (color: red)');
+    assert(!codeA.includes('box-sizing: border-box;'), 'Shared box-sizing declaration must be extracted out of local CSS');
+    assert(!codeA.includes('cursor: pointer;'), 'Shared cursor declaration must be extracted out of local CSS');
 
     console.log('✓ Cascade order verified: shared sheets prepended before local overrides.');
 
@@ -164,7 +149,7 @@ async function runTests() {
     console.log('\n[Test 2] Verifying Rollup/Vite module graph & tree-shaking isolation...');
 
     const outDir = path.join(fixtureDir, 'dist');
-    const rollupResult = await build({
+    const _rollupResult = await build({
       root: fixtureDir,
       logLevel: 'silent',
       build: {
@@ -201,20 +186,11 @@ async function runTests() {
     const lazyCode = fs.readFileSync(lazyBundlePath, 'utf-8');
 
     // Main entry must contain Comp A/B styles, but MUST NOT contain Comp C/D isolated styles
-    assert(
-      !mainCode.includes('isolated-sidebar'),
-      'Tree-shaking violation: Entry main must not leak styles from unimported lazy components'
-    );
-    assert(
-      mainCode.includes('color: red') || mainCode.includes('color:red'),
-      'Entry main must contain Component A styles'
-    );
+    assert(!mainCode.includes('isolated-sidebar'), 'Tree-shaking violation: Entry main must not leak styles from unimported lazy components');
+    assert(mainCode.includes('color: red') || mainCode.includes('color:red'), 'Entry main must contain Component A styles');
 
     // Lazy entry must not contain Comp A/B styles
-    assert(
-      !lazyCode.includes('font-size: 14px') && !lazyCode.includes('font-size:14px'),
-      'Tree-shaking violation: Lazy entry must not leak Comp A/B styles'
-    );
+    assert(!lazyCode.includes('font-size: 14px') && !lazyCode.includes('font-size:14px'), 'Tree-shaking violation: Lazy entry must not leak Comp A/B styles');
 
     console.log('✓ Tree-shaking verified: unimported shared sheets are strictly isolated.');
 
@@ -237,16 +213,9 @@ async function runTests() {
     const sheetInstance1 = mod1[sheetAB.id];
     const sheetInstance2 = mod2[sheetAB.id];
 
-    assert.strictEqual(
-      sheetInstance1,
-      sheetInstance2,
-      'Constructable stylesheet instance must be strictly identical across imports (same reference)'
-    );
+    assert.strictEqual(sheetInstance1, sheetInstance2, 'Constructable stylesheet instance must be strictly identical across imports (same reference)');
 
-    assert(
-      sheetInstance1 && sheetInstance1._$cssResult$,
-      'Exported constructable stylesheet must be a valid Lit CSSResult constructable sheet'
-    );
+    assert(sheetInstance1?._$cssResult$, 'Exported constructable stylesheet must be a valid Lit CSSResult constructable sheet');
 
     console.log('✓ Constructable stylesheet reuse verified: same CSSStyleSheet reference shared.');
 

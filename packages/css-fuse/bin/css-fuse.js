@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import fs from 'node:fs';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -27,9 +27,7 @@ function main() {
     }
   }
 
-  console.error(
-    `Error: css-fuse binary not found. Run 'pnpm build' in packages/css-fuse first.`
-  );
+  console.error(`Error: css-fuse binary not found. Run 'pnpm build' in packages/css-fuse first.`);
   process.exit(1);
 }
 

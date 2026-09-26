@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { fuse, analyze, auditScoping } from './index.js';
+import { analyze, auditScoping, fuse } from './index.js';
 
 console.log('Testing @lit-core/css-fuse JS exports...');
 

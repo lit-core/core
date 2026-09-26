@@ -18,4 +18,6 @@ coverage
 **/.webawesome-entry.js
 *.node
 packages/css-fuse/bin/css-fuse-bin
-
+**/.temp-bench*
+**/*-entry.js
+**/.*-entry.js
