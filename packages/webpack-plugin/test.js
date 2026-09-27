@@ -4,6 +4,8 @@ import litDefault, {
   CssMinifierWebpackPlugin,
   cssFuse,
   cssMinifier,
+  ElemProxyWebpackPlugin,
+  elemProxy,
   HtmlMinifierWebpackPlugin,
   htmlMinifier,
   LitWebpackPlugin,
@@ -11,13 +13,14 @@ import litDefault, {
   litCore,
   litCssFuse,
   litCssMinifier,
+  litElemProxy,
   litHtmlMinifier,
   litPropsLower,
   litWebpackLoader,
   PropsLowerWebpackPlugin,
   propsLower,
 } from './dist/index.js';
-import { transformCssMinifier, transformHtmlMinifier, transformPropsLower } from './dist/transforms.js';
+import { transformCssMinifier, transformElemProxy, transformHtmlMinifier, transformPropsLower } from './dist/transforms.js';
 import { extractSheetId, formatVirtualId, isVirtualFusedId } from './dist/utils.js';
 
 console.log('Testing @lit-core/webpack-plugin exports, classes, and transforms...');
@@ -30,6 +33,8 @@ assert.strictEqual(typeof cssFuse, 'function', 'cssFuse must be a function');
 assert.strictEqual(typeof litCssFuse, 'function', 'litCssFuse must be an alias');
 assert.strictEqual(typeof propsLower, 'function', 'propsLower must be a function');
 assert.strictEqual(typeof litPropsLower, 'function', 'litPropsLower must be an alias');
+assert.strictEqual(typeof elemProxy, 'function', 'elemProxy must be a function');
+assert.strictEqual(typeof litElemProxy, 'function', 'litElemProxy must be an alias');
 assert.strictEqual(typeof htmlMinifier, 'function', 'htmlMinifier must be a function');
 assert.strictEqual(typeof litHtmlMinifier, 'function', 'litHtmlMinifier must be an alias');
 assert.strictEqual(typeof cssMinifier, 'function', 'cssMinifier must be a function');
@@ -40,6 +45,7 @@ assert.strictEqual(typeof litWebpackLoader, 'function', 'litWebpackLoader must b
 assert.strictEqual(typeof LitWebpackPlugin, 'function', 'LitWebpackPlugin class must exist');
 assert.strictEqual(typeof CssFuseWebpackPlugin, 'function', 'CssFuseWebpackPlugin class must exist');
 assert.strictEqual(typeof PropsLowerWebpackPlugin, 'function', 'PropsLowerWebpackPlugin class must exist');
+assert.strictEqual(typeof ElemProxyWebpackPlugin, 'function', 'ElemProxyWebpackPlugin class must exist');
 assert.strictEqual(typeof HtmlMinifierWebpackPlugin, 'function', 'HtmlMinifierWebpackPlugin class must exist');
 assert.strictEqual(typeof CssMinifierWebpackPlugin, 'function', 'CssMinifierWebpackPlugin class must exist');
 

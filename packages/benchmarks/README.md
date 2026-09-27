@@ -109,8 +109,31 @@ Runtime benchmarks measure initial first render (mount) latency, re-render (upda
 | `html-minifier` (Lit HTML and SVG template minification) | 9.25 ms | 2.91 ms | **+37.5%** |
 | **Total** (All optimizations combined) | 9.35 ms | 2.93 ms | **+36.8%** |
 
----
+### ⚡ Runtime initialization and proxy evaluation (`elem-proxy`)
 
+Benchmarks evaluate script evaluation CPU time, V8 heap memory, and mount latency when deferring heavy Lit class evaluation until DOM mount or property access:
+
+#### Carbon Web Components (99 components)
+
+| Metric | Baseline (eager Lit evaluation) | Optimized (elem-proxy) | Delta / savings |
+| :--- | ---: | ---: | ---: |
+| Script evaluation time (ms) | 113.94 ms | 31.13 ms | -72.7% CPU time |
+| V8 heap memory (KB) | 12968.1 KB | 3059.9 KB | -76.4% memory |
+| Mount latency (first 5 components) | 1.90 ms | 2.81 ms | +0.91 ms (JIT upgrade) |
+| Classes evaluated during init | 99 / 99 (100.0%) | 5 / 99 (5.1%) | -94 classes |
+| Deferred execution savings | 0 / 99 (0.0%) | 94 / 99 (94.9%) | +94.9% deferred |
+
+#### Spectrum Web Components (52 components)
+
+| Metric | Baseline (eager Lit evaluation) | Optimized (elem-proxy) | Delta / savings |
+| :--- | ---: | ---: | ---: |
+| Script evaluation time (ms) | 48.78 ms | 13.99 ms | -71.3% CPU time |
+| V8 heap memory (KB) | 4584.9 KB | 1072.8 KB | -76.6% memory |
+| Mount latency (first 5 components) | 1.90 ms | 2.80 ms | +0.90 ms (JIT upgrade) |
+| Classes evaluated during init | 52 / 52 (100.0%) | 5 / 52 (9.6%) | -47 classes |
+| Deferred execution savings | 0 / 52 (0.0%) | 47 / 52 (90.4%) | +90.4% deferred |
+
+---
 
 ## 🏃 Running benchmarks
 
@@ -125,6 +148,9 @@ node packages/benchmarks/src/index.js --suite=carbon
 node packages/benchmarks/src/index.js --suite=spectrum
 node packages/benchmarks/src/index.js --suite=material
 node packages/benchmarks/src/index.js --suite=momentum
+
+# Run elem-proxy runtime initialization benchmarks
+pnpm run benchmark:elem-proxy
 
 # Test isolated tools
 node packages/benchmarks/src/index.js --suite=webawesome --tools=html-fuse

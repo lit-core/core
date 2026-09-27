@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Compiler } from 'webpack';
 import { registerPluginState, unregisterPluginState } from './loader.js';
-import type { CssFuseOptions, CssMinifierOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import type { CssFuseOptions, CssMinifierOptions, ElemProxyOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
 import { runFuseOptimization, runHtmlFuseOptimization, runScopingAudit } from './transforms.js';
 import { BARE_FUSED_ID_REGEX, BARE_HTML_FUSED_ID_REGEX, extractHtmlTemplateId, extractSheetId, isVirtualHtmlFusedId, VIRTUAL_FUSED_PREFIX, VIRTUAL_HTML_FUSED_PREFIX } from './utils.js';
 
@@ -244,6 +244,12 @@ export class HtmlMinifierWebpackPlugin extends LitWebpackPlugin {
   }
 }
 
+export class ElemProxyWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: ElemProxyOptions = {}) {
+    super({ cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: options, cssMinifier: false, htmlMinifier: false }, 'ElemProxyWebpackPlugin');
+  }
+}
+
 export class HtmlAotWebpackPlugin extends LitWebpackPlugin {
   constructor(options: HtmlAotOptions = {}) {
     super({ cssFuse: false, htmlFuse: false, propsLower: false, htmlAot: options, cssMinifier: false, htmlMinifier: false }, 'HtmlAotWebpackPlugin');
@@ -266,6 +272,10 @@ export function propsLower(options: PropsLowerOptions = {}): PropsLowerWebpackPl
   return new PropsLowerWebpackPlugin(options);
 }
 
+export function elemProxy(options: ElemProxyOptions = {}): ElemProxyWebpackPlugin {
+  return new ElemProxyWebpackPlugin(options);
+}
+
 export function cssMinifier(options: CssMinifierOptions = {}): CssMinifierWebpackPlugin {
   return new CssMinifierWebpackPlugin(options);
 }
@@ -282,6 +292,7 @@ export const litCore = lit;
 export const litCssFuse = cssFuse;
 export const litHtmlFuse = htmlFuse;
 export const litPropsLower = propsLower;
+export const litElemProxy = elemProxy;
 export const litCssMinifier = cssMinifier;
 export const litHtmlMinifier = htmlMinifier;
 export const litHtmlAot = htmlAot;

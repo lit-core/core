@@ -1,66 +1,28 @@
-import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(__dirname, '../../../..');
-
-function findMomentumDir() {
-  const possible = [
-    path.join(rootDir, 'node_modules/@momentum-design/components'),
-    path.resolve('node_modules/@momentum-design/components'),
-    path.resolve(__dirname, '../../node_modules/@momentum-design/components'),
-  ];
-  return possible.find((p) => fs.existsSync(p)) || null;
-}
+import { createComponentSuite, scanComponentEntries } from './base.js';
 
 /**
  * Momentum Design (@momentum-design/components) benchmark suite definition.
  * Cisco Momentum Design System web components built on Lit.
  * @type {import('../types.js').BenchmarkSuite}
  */
-export const momentumSuite = {
+export const momentumSuite = createComponentSuite({
   id: 'momentum',
   name: 'Momentum Design (@momentum-design/components)',
   description: 'Cisco Momentum Design System Web Components built on Lit (Full Suite)',
-
-  isAvailable() {
-    return findMomentumDir() !== null;
-  },
-
-  async setup() {
-    const momDir = findMomentumDir();
-    if (!momDir) {
-      throw new Error('Momentum Design package not found in node_modules.');
-    }
-
+  packageName: '@momentum-design/components',
+  entryFileName: '.momentum-entry.js',
+  resolveConfig(momDir) {
     const compBaseDir = path.join(momDir, 'dist/components');
-    const components = fs.existsSync(compBaseDir)
-      ? fs.readdirSync(compBaseDir).filter((name) => {
-          const p = path.join(compBaseDir, name, 'index.js');
-          return fs.existsSync(p);
-        })
-      : [];
-
-    const entryPath = path.join(__dirname, '.momentum-entry.js');
-    fs.writeFileSync(entryPath, "import '@momentum-design/components';\n");
-
+    const components = scanComponentEntries(compBaseDir, (_name, dir) => path.join(dir, 'index.js'));
+    const entryContent = "import '@momentum-design/components';\n";
     const includePattern = path.join(momDir, 'dist/**/*.js');
 
     return {
-      id: 'momentum',
-      name: `Momentum Design (${components.length} components)`,
-      entryPath,
-      includePattern,
+      entryContent,
       componentCount: components.length,
-      metadata: { momDir, components },
+      includePattern,
+      metadata: { momDir, components: components.map((c) => c.name) },
     };
   },
-
-  async cleanup() {
-    const entryPath = path.join(__dirname, '.momentum-entry.js');
-    if (fs.existsSync(entryPath)) {
-      fs.rmSync(entryPath, { force: true });
-    }
-  },
-};
+});

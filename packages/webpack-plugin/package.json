@@ -46,6 +46,7 @@
   "dependencies": {
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
+    "@lit-core/elem-proxy": "workspace:*",
     "@lit-core/html-aot": "workspace:*",
     "@lit-core/html-fuse": "workspace:*",
     "@lit-core/html-minifier": "workspace:*",

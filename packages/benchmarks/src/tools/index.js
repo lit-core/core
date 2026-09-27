@@ -1,6 +1,8 @@
 import { lit } from '@lit-core/vite-plugin';
+import { normalizeInclude } from './base.js';
 import { cssFuseTool } from './css-fuse.js';
 import { cssMinifierTool } from './css-minifier.js';
+import { elemProxyTool } from './elem-proxy.js';
 import { htmlAotTool } from './html-aot.js';
 import { htmlFuseTool } from './html-fuse.js';
 import { htmlMinifierTool } from './html-minifier.js';
@@ -10,7 +12,7 @@ import { propsLowerTool } from './props-lower.js';
  * Array of all registered Vite bundler optimization tools.
  * @type {import('../types.js').BenchmarkTool[]}
  */
-export const registeredTools = [cssFuseTool, htmlFuseTool, propsLowerTool, htmlAotTool, cssMinifierTool, htmlMinifierTool];
+export const registeredTools = [cssFuseTool, htmlFuseTool, propsLowerTool, elemProxyTool, htmlAotTool, cssMinifierTool, htmlMinifierTool];
 
 /**
  * Get active tools (optionally filtered by IDs).
@@ -31,17 +33,12 @@ export function getActiveTools(filterIds) {
  * @returns {Promise<import('vite').Plugin[]>}
  */
 export async function getCombinedPlugins(tools, suite) {
-  const hasCssFuse = tools.some((t) => t.id === 'css-fuse');
-  const hasHtmlFuse = tools.some((t) => t.id === 'html-fuse');
-  const hasPropsLower = tools.some((t) => t.id === 'props-lower');
-  const hasHtmlAot = tools.some((t) => t.id === 'html-aot');
-  const hasCssMinifier = tools.some((t) => t.id === 'css-minifier');
-  const hasHtmlMinifier = tools.some((t) => t.id === 'html-minifier');
-
-  const include = Array.isArray(suite.includePattern) ? suite.includePattern : suite.includePattern ? [suite.includePattern] : undefined;
+  /** @param {string} id */
+  const hasTool = (id) => tools.some((t) => t.id === id);
+  const include = normalizeInclude(suite.includePattern);
 
   return lit({
-    cssFuse: hasCssFuse
+    cssFuse: hasTool('css-fuse')
       ? {
           include,
           exclude: [],
@@ -49,7 +46,7 @@ export async function getCombinedPlugins(tools, suite) {
           applyInDev: true,
         }
       : false,
-    htmlFuse: hasHtmlFuse
+    htmlFuse: hasTool('html-fuse')
       ? {
           include,
           exclude: [],
@@ -57,23 +54,29 @@ export async function getCombinedPlugins(tools, suite) {
           minFragmentLength: 15,
         }
       : false,
-    propsLower: hasPropsLower
+    propsLower: hasTool('props-lower')
       ? {
           include,
           exclude: [],
         }
       : false,
-    htmlAot: hasHtmlAot
+    elemProxy: hasTool('elem-proxy')
+      ? {
+          include,
+          exclude: [],
+        }
+      : false,
+    htmlAot: hasTool('html-aot')
       ? {
           exclude: [],
         }
       : false,
-    cssMinifier: hasCssMinifier
+    cssMinifier: hasTool('css-minifier')
       ? {
           exclude: [],
         }
       : false,
-    htmlMinifier: hasHtmlMinifier
+    htmlMinifier: hasTool('html-minifier')
       ? {
           exclude: [],
         }

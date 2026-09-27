@@ -1,8 +1,9 @@
-import { lit } from '@lit-core/vite-plugin';
+import { createIsolatedToolPlugin } from './base.js';
 
 /**
  * Tool definition for @lit-core/css-minifier
  * Embedded CSS template minification via Lightning CSS.
+ * @type {import('../types.js').BenchmarkTool}
  */
 export const cssMinifierTool = {
   id: 'css-minifier',
@@ -16,11 +17,8 @@ export const cssMinifierTool = {
    * @returns {import('vite').Plugin[]}
    */
   getPlugins(_suite) {
-    return lit({
-      cssFuse: false,
-      cssMinifier: {
-        exclude: [],
-      },
+    return createIsolatedToolPlugin('cssMinifier', {
+      exclude: [],
     });
   },
 };

@@ -1,9 +1,10 @@
-import { lit } from '@lit-core/vite-plugin';
+import { createIsolatedToolPlugin } from './base.js';
 
 /**
  * Tool definition for @lit-core/html-aot
  * Ahead-of-time (AOT) template compilation for Lit components.
  * Pre-computes parts and skips runtime parse and prepare phases.
+ * @type {import('../types.js').BenchmarkTool}
  */
 export const htmlAotTool = {
   id: 'html-aot',
@@ -17,15 +18,8 @@ export const htmlAotTool = {
    * @returns {import('vite').Plugin[]}
    */
   getPlugins(_suite) {
-    return lit({
-      cssFuse: false,
-      propsLower: false,
-      cssMinifier: false,
-      htmlMinifier: false,
-      htmlFuse: false,
-      htmlAot: {
-        exclude: [],
-      },
+    return createIsolatedToolPlugin('htmlAot', {
+      exclude: [],
     });
   },
 };

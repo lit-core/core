@@ -80,7 +80,11 @@ Web Components isolate styles within Shadow DOM. While this prevents global styl
 4. **High-speed template minification (`@lit-core/css-minifier`, `@lit-core/html-minifier`)**:
    - Minifies embedded CSS within Lit `css` template literals via `lightningcss`.
    - Strips whitespace, comments, and redundant tokens from Lit `html` and `svg` templates using `oxc` AST walking without touching interpolation holes.
-5. **Unified bundler integration (`@lit-core/vite-plugin`, `@lit-core/webpack-plugin`)**:
+5. **AOT deferred element proxying (`@lit-core/elem-proxy`)**:
+   - Replaces eager Custom Element registration with lightweight proxy stubs.
+   - Defers class evaluation and stylesheet creation until an element is mounted in the DOM or touched via JavaScript property access.
+   - Preserves prototype chains and `instanceof` checks with zero layout shifts.
+6. **Unified bundler integration (`@lit-core/vite-plugin`, `@lit-core/webpack-plugin`)**:
    - Connects all native compilation passes into Vite, Rollup, and Webpack pipelines.
    - Scopes shared constructable stylesheets and virtual templates to bundler chunk boundaries.
    - Provides fine-grained Hot Module Replacement (HMR) for individual stylesheets without full page reloads.
@@ -94,6 +98,7 @@ Web Components isolate styles within Shadow DOM. While this prevents global styl
 | [`@lit-core/css-fuse`](packages/css-fuse/) | `packages/css-fuse` | Rust (`oxc`, `lightningcss`), NAPI-RS | Cross-component CSS deduplication into shared constructable sheets |
 | [`@lit-core/html-fuse`](packages/html-fuse/) | `packages/html-fuse` | Rust (`oxc`), NAPI-RS | Cross-component static HTML and SVG fragment clustering |
 | [`@lit-core/props-lower`](packages/props-lower/) | `packages/props-lower` | Rust (`oxc`), NAPI-RS | AOT Lit decorator and property lowering |
+| [`@lit-core/elem-proxy`](packages/elem-proxy/) | `packages/elem-proxy` | Rust (`oxc`), NAPI-RS | AOT deferred Custom Element stubs and JIT upgrade proxy transform |
 | [`@lit-core/css-minifier`](packages/css-minifier/) | `packages/css-minifier` | Rust (`oxc`, `lightningcss`), NAPI-RS | High-speed CSS template literal minification |
 | [`@lit-core/html-minifier`](packages/html-minifier/) | `packages/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML and SVG template literal minification |
 | [`@lit-core/html-aot`](packages/html-aot/) | `packages/html-aot` | TypeScript, `parse5`, `lit-html` | Ahead-of-time Lit template compilation eliminating runtime prepare phase |
@@ -113,7 +118,7 @@ The `@lit-core/benchmarks` harness evaluates bundle size reductions across popul
 - **Momentum Design** (`@momentum-design/components`): Cisco Momentum Design components (97 elements).
 - **Material Web** (`@material/web`): Google Material 3 components (28 elements).
 
-Running the full suite demonstrates significant cumulative bundle reductions through shared stylesheet instantiation, native template minification, and accelerated render latency through ahead-of-time template compilation.
+Running the full suite demonstrates significant cumulative bundle reductions through shared stylesheet instantiation, native template minification, and accelerated render latency through ahead-of-time template compilation. In addition, the runtime initialization benchmark evaluates initial script evaluation CPU time, heap memory, and mount latency when deferring element evaluation via [`@lit-core/elem-proxy`](packages/elem-proxy/) (see [`packages/benchmarks/README.md`](packages/benchmarks/README.md)).
 
 ---
 

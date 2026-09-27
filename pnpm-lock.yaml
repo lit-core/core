@@ -237,6 +237,9 @@ importers:
       '@lit-core/html-minifier':
         specifier: workspace:*
         version: link:../html-minifier
+      '@lit-core/elem-proxy':
+        specifier: workspace:*
+        version: link:../elem-proxy
       '@lit-core/props-lower':
         specifier: workspace:*
         version: link:../props-lower
@@ -276,6 +279,12 @@ importers:
         version: 3.10.5(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@26.6.2)
 
   packages/css-minifier:
+    devDependencies:
+      '@napi-rs/cli':
+        specifier: ^3.10.5
+        version: 3.10.5(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.2)
+
+  packages/elem-proxy:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.5
@@ -347,6 +356,9 @@ importers:
       '@lit-core/html-minifier':
         specifier: workspace:*
         version: link:../html-minifier
+      '@lit-core/elem-proxy':
+        specifier: workspace:*
+        version: link:../elem-proxy
       '@lit-core/props-lower':
         specifier: workspace:*
         version: link:../props-lower
@@ -375,6 +387,9 @@ importers:
       '@lit-core/html-minifier':
         specifier: workspace:*
         version: link:../html-minifier
+      '@lit-core/elem-proxy':
+        specifier: workspace:*
+        version: link:../elem-proxy
       '@lit-core/props-lower':
         specifier: workspace:*
         version: link:../props-lower

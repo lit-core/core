@@ -1,8 +1,9 @@
 import { fuse } from '@lit-core/html-fuse';
-import lit from '@lit-core/vite-plugin';
+import { createIsolatedToolPlugin, normalizeInclude } from './base.js';
 
 /**
  * Tool definition for @lit-core/html-fuse
+ * @type {import('../types.js').BenchmarkTool}
  */
 export const htmlFuseTool = {
   id: 'html-fuse',
@@ -16,16 +17,11 @@ export const htmlFuseTool = {
    * @returns {import('vite').Plugin[]}
    */
   getPlugins(suite) {
-    const include = Array.isArray(suite.includePattern) ? suite.includePattern : suite.includePattern ? [suite.includePattern] : undefined;
-
-    return lit({
-      cssFuse: false,
-      htmlFuse: {
-        include,
-        exclude: [],
-        threshold: 2,
-        minFragmentLength: 15,
-      },
+    return createIsolatedToolPlugin('htmlFuse', {
+      include: normalizeInclude(suite.includePattern),
+      exclude: [],
+      threshold: 2,
+      minFragmentLength: 15,
     });
   },
 
@@ -34,8 +30,8 @@ export const htmlFuseTool = {
    * @param {import('../types.js').SuiteContext} suite
    */
   async getDiagnostics(suite) {
-    if (!suite.includePattern) return null;
-    const include = Array.isArray(suite.includePattern) ? suite.includePattern : [suite.includePattern];
+    const include = normalizeInclude(suite.includePattern);
+    if (!include) return null;
 
     try {
       const res = fuse({

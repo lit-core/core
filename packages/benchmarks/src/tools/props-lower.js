@@ -1,8 +1,9 @@
-import { lit } from '@lit-core/vite-plugin';
+import { createIsolatedToolPlugin, normalizeInclude } from './base.js';
 
 /**
  * Tool definition for @lit-core/props-lower
  * Lowers Lit decorators and reactive properties to static properties ahead-of-time (AOT).
+ * @type {import('../types.js').BenchmarkTool}
  */
 export const propsLowerTool = {
   id: 'props-lower',
@@ -16,14 +17,9 @@ export const propsLowerTool = {
    * @returns {import('vite').Plugin[]}
    */
   getPlugins(suite) {
-    const include = Array.isArray(suite.includePattern) ? suite.includePattern : suite.includePattern ? [suite.includePattern] : undefined;
-
-    return lit({
-      cssFuse: false,
-      propsLower: {
-        include,
-        exclude: [],
-      },
+    return createIsolatedToolPlugin('propsLower', {
+      include: normalizeInclude(suite.includePattern),
+      exclude: [],
     });
   },
 };

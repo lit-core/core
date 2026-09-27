@@ -1,6 +1,6 @@
-import { describe, it, expect, afterAll } from 'vitest';
-import { chromium, type Browser } from 'playwright';
 import { compileHtmlAot } from '@lit-core/html-aot';
+import { type Browser, chromium } from 'playwright';
+import { afterAll, describe, expect, it } from 'vitest';
 
 describe('playwright browser runtime testing for lit-core and html-aot', () => {
   let browser: Browser;
@@ -11,7 +11,7 @@ describe('playwright browser runtime testing for lit-core and html-aot', () => {
     }
   });
 
-  it('renders aot-compiled Lit templates in real browser DOM via Playwright', async (ctx) => {
+  it('renders aot-compiled Lit templates in real browser DOM via Playwright', async (_ctx) => {
     // Source component using Lit html tagged template
     const componentSource = `
       import { html, render } from 'lit';
@@ -81,7 +81,6 @@ describe('playwright browser runtime testing for lit-core and html-aot', () => {
     }
 
     const page = await browser.newPage();
-    const tStart = performance.now();
 
     const testHtml = `<!DOCTYPE html>
 <html>

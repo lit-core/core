@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { renderAsciiRuntimeTable, renderAsciiTable, renderMarkdownOverviewTable, renderMarkdownRuntimeTable } from '../src/table.js';
+import { describe, expect, it } from 'vitest';
+import { renderAsciiRuntimeTable, renderMarkdownOverviewTable, renderMarkdownRuntimeTable } from '../src/table.js';
 
 describe('benchmarks table formatting and runtime performance rendering', () => {
   it('renders top table with static bundle size analysis header in Markdown', () => {

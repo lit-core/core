@@ -1,72 +1,28 @@
-import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(__dirname, '../../../..');
-
-/**
- * Locate @awesome.me/webawesome components directory
- * @returns {string | null}
- */
-function findWebAwesomeDir() {
-  const possiblePaths = [
-    path.join(rootDir, 'node_modules/@awesome.me/webawesome/dist/components'),
-    path.resolve('node_modules/@awesome.me/webawesome/dist/components'),
-    path.resolve(__dirname, '../../node_modules/@awesome.me/webawesome/dist/components'),
-  ];
-  return possiblePaths.find((p) => fs.existsSync(p)) || null;
-}
+import { createComponentSuite, scanComponentEntries } from './base.js';
 
 /**
  * Web Awesome benchmark suite definition.
  * Tests full-suite bundling of 70+ components from @awesome.me/webawesome.
  * @type {import('../types.js').BenchmarkSuite}
  */
-export const webAwesomeSuite = {
+export const webAwesomeSuite = createComponentSuite({
   id: 'webawesome',
   name: 'Web Awesome (Full Component Suite)',
   description: '70+ production web components with shared styling and chunks',
-
-  isAvailable() {
-    return findWebAwesomeDir() !== null;
-  },
-
-  async setup() {
-    const compDir = findWebAwesomeDir();
-    if (!compDir) {
-      throw new Error('Web Awesome package not found in node_modules.');
-    }
-
-    const components = fs.readdirSync(compDir).filter((name) => {
-      const fullPath = path.join(compDir, name, `${name}.js`);
-      return fs.existsSync(fullPath);
-    });
-
-    const entryContent = components.map((name) => `import '@awesome.me/webawesome/dist/components/${name}/${name}.js';`).join('\n');
-
-    const entryPath = path.join(__dirname, '.webawesome-entry.js');
-    fs.writeFileSync(entryPath, entryContent);
-
-    const chunksPattern = path.join(compDir, '../chunks/*.js');
+  packageName: '@awesome.me/webawesome',
+  entryFileName: '.webawesome-entry.js',
+  resolveConfig(compDirRoot) {
+    const compDir = path.join(compDirRoot, 'dist/components');
+    const components = scanComponentEntries(compDir, (name, dir) => path.join(dir, `${name}.js`));
+    const entryContent = components.map((c) => `import '@awesome.me/webawesome/dist/components/${c.name}/${c.name}.js';`).join('\n');
+    const includePattern = path.join(compDirRoot, 'dist/chunks/*.js');
 
     return {
-      id: 'webawesome',
-      name: `Web Awesome (${components.length} components)`,
-      entryPath,
-      includePattern: chunksPattern,
+      entryContent,
       componentCount: components.length,
-      metadata: {
-        compDir,
-        components,
-      },
+      includePattern,
+      metadata: { compDir, components: components.map((c) => c.name) },
     };
   },
-
-  async cleanup() {
-    const entryPath = path.join(__dirname, '.webawesome-entry.js');
-    if (fs.existsSync(entryPath)) {
-      fs.rmSync(entryPath, { force: true });
-    }
-  },
-};
+});

@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { LoaderContext } from 'webpack';
-import type { CssMinifierOptions, HtmlAotOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
-import { transformCssMinifier, transformHtmlAot, transformHtmlMinifier, transformPropsLower } from './transforms.js';
+import type { CssMinifierOptions, ElemProxyOptions, HtmlAotOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import { transformCssMinifier, transformElemProxy, transformHtmlAot, transformHtmlMinifier, transformPropsLower } from './transforms.js';
 
 export interface PluginState {
   transformedFiles: Map<string, string>;
@@ -79,7 +79,20 @@ export default function litWebpackLoader(
     }
   }
 
-  // 3. Apply css-minifier embedded CSS minification if enabled
+  // 3. Apply elem-proxy AOT proxy stub optimization if enabled
+  const elemProxyOpt = options.elemProxy ?? options['elem-proxy'];
+  if (elemProxyOpt) {
+    const proxyOpts: ElemProxyOptions = typeof elemProxyOpt === 'object' ? elemProxyOpt : {};
+    const result = transformElemProxy(currentSource, resourcePath, proxyOpts);
+    if (result) {
+      currentSource = result.code;
+      if (result.map) {
+        currentMap = result.map;
+      }
+    }
+  }
+
+  // 4. Apply css-minifier embedded CSS minification if enabled
   const cssMinifierOpt = options.cssMinifier ?? options['css-minifier'];
   if (cssMinifierOpt) {
     const cssOpts: CssMinifierOptions = typeof cssMinifierOpt === 'object' ? cssMinifierOpt : {};

@@ -50,7 +50,7 @@ async function runViteBuild({ entryPath, outDir, plugins = [] }) {
  * @param {import('./types.js').BenchmarkTool[]} tools
  * @param {Object} [options]
  * @param {boolean} [options.verbose]
- * @returns {Promise<import('./table.js').TableRow[] & { diagnostics?: Record<string, any>, suiteContext: import('./types.js').SuiteContext }>}
+ * @returns {Promise<import('./types.js').SuiteBenchmarkResult>}
  */
 export async function runSuiteBenchmark(suite, tools, options = {}) {
   const tempBaseDir = path.join(__dirname, `../.temp-bench-${suite.id}-${Date.now()}`);

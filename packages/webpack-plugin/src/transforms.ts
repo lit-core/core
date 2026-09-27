@@ -2,14 +2,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
+import { transformElemProxy as runTransformElemProxy } from '@lit-core/elem-proxy';
 import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
-import type { CssFuseOptions, CssMinifierOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, PropsLowerOptions } from './options.js';
+import type { CssFuseOptions, CssMinifierOptions, ElemProxyOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, PropsLowerOptions } from './options.js';
 import { matchesPattern } from './utils.js';
 
 export const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b/;
+export const LIT_ELEM_PROXY_FAST_CHECK = /@customElement\b|customElements\.define\b/;
 export const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
 export const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
 
@@ -59,6 +61,38 @@ export function transformPropsLower(code: string, id: string, options: PropsLowe
       sourcemap,
       filename: cleanId,
     });
+
+    return {
+      code: result.code,
+      map: result.map ? JSON.parse(result.map) : null,
+    };
+  } catch (_err) {
+    return null;
+  }
+}
+
+export function transformElemProxy(code: string, id: string, options: ElemProxyOptions = {}): TransformResult | null {
+  const { sourcemap = true } = options;
+  const cleanId = id.split('?')[0] ?? id;
+
+  if (!shouldProcessFile(cleanId, options)) {
+    return null;
+  }
+
+  if (!LIT_ELEM_PROXY_FAST_CHECK.test(code)) {
+    return null;
+  }
+
+  try {
+    const result = runTransformElemProxy(code, {
+      sourcemap,
+      filename: cleanId,
+      mode: options.mode,
+    });
+
+    if (result.proxiedElementsCount === 0) {
+      return null;
+    }
 
     return {
       code: result.code,

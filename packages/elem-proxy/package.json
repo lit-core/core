@@ -1,0 +1,55 @@
+{
+  "name": "@lit-core/elem-proxy",
+  "version": "0.1.0",
+  "description": "General-purpose AOT compiler transform replacing eager Custom Element registrations with lightweight proxy stubs",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "*.node"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/elem-proxy"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "proxy",
+    "custom-elements",
+    "aot",
+    "oxc",
+    "performance"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "napi": {
+    "binaryName": "elem-proxy",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "cargo build --release && cp target/release/libelem_proxy.dylib elem-proxy.darwin-arm64.node 2>/dev/null || true",
+    "build:debug": "cargo build && cp target/debug/libelem_proxy.dylib elem-proxy.darwin-arm64.node 2>/dev/null || true",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.5",
+    "vitest": "^5.0.2"
+  }
+}

@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import path from 'node:path';
 import { chromium } from 'playwright';
 
 /**
@@ -12,6 +11,7 @@ import { chromium } from 'playwright';
  * @property {boolean} [isTotal]
  */
 
+/** @type {import('playwright').Browser | null} */
 let browserInstance = null;
 
 export async function getBrowser() {
@@ -62,11 +62,9 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
     const isCompiled = bundleCode.includes('_$litType$');
     const isBaseline = name.includes('Baseline');
 
-    const t0 = performance.now();
     for (let i = 0; i < iterations; i++) {
-      const obj = isCompiled ? { _$litType$: { h: (s) => s, parts: [{ type: 2, index: 1 }] }, values: [i] } : { strings: ['<div>', '</div>'], values: [i] };
+      const _obj = isCompiled ? { _$litType$: { h: (s = '') => s, parts: [{ type: 2, index: 1 }] }, values: [i] } : { strings: ['<div>', '</div>'], values: [i] };
     }
-    const t1 = performance.now();
 
     // Baseline includes template parsing / regex / cache overhead
     // Compiled template results skip prepare phase (~30-45% faster first render)
@@ -108,13 +106,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
     // Execute precision in-browser rendering measurement
     const timing = await page.evaluate(async () => {
       const container = document.getElementById('container');
-      const customElementsList = Array.from(window.customElements ? [] : []);
-
-      // Discover custom elements registered by the bundle
-      const allElements = [];
-      if (window.customElements && typeof window.customElements.get === 'function') {
-        // Collect tags registered in the registry
-      }
+      if (!container) return { firstRenderMs: 0, updateMs: 0 };
 
       // Benchmark rendering synthetic Lit templates or defined custom elements
       const iterations = 50;
@@ -126,7 +118,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
       for (let i = 0; i < iterations; i++) {
         const item = document.createElement('div');
         item.setAttribute('data-index', String(i));
-        item.innerHTML = '<span>Test content ' + i + '</span>';
+        item.innerHTML = `<span>Test content ${i}</span>`;
         mountDiv.appendChild(item);
       }
       // Force layout calculation
@@ -140,7 +132,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
         const child = mountDiv.children[i];
         if (child) {
           child.setAttribute('data-active', i % 2 === 0 ? 'true' : 'false');
-          child.textContent = 'Updated content ' + i;
+          child.textContent = `Updated content ${i}`;
         }
       }
       void mountDiv.offsetHeight;
@@ -152,7 +144,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
     });
 
     return timing;
-  } catch (err) {
+  } catch (_err) {
     return { firstRenderMs: 0, updateMs: 0 };
   } finally {
     await page.close();

@@ -2,23 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
+import { transformElemProxy } from '@lit-core/elem-proxy';
 import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
 import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
-import type { CssFuseOptions, CssMinifierOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
-import {
-  extractHtmlTemplateId,
-  extractSheetId,
-  formatVirtualHtmlId,
-  formatVirtualId,
-  isVirtualFusedId,
-  isVirtualHtmlFusedId,
-  matchesPattern,
-  RESOLVED_FUSED_PREFIX,
-  RESOLVED_HTML_FUSED_PREFIX,
-} from './utils.js';
+import type { CssFuseOptions, CssMinifierOptions, ElemProxyOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import { extractHtmlTemplateId, extractSheetId, formatVirtualHtmlId, formatVirtualId, isVirtualFusedId, isVirtualHtmlFusedId, matchesPattern, RESOLVED_FUSED_PREFIX } from './utils.js';
 
 export function cssFuse(options: CssFuseOptions = {}): Plugin {
   let config: ResolvedConfig;
@@ -577,6 +568,64 @@ export const litHtmlMinifier = htmlMinifier;
 export const litHtmlFuse = htmlFuse;
 export const litHtmlAot = htmlAot;
 
+const LIT_ELEM_PROXY_FAST_CHECK = /@customElement\b|customElements\.define\b/;
+
+export function elemProxy(options: ElemProxyOptions = {}): Plugin {
+  const { sourcemap = true } = options;
+
+  return {
+    name: 'elem-proxy',
+    enforce: 'pre',
+
+    transform(code: string, id: string) {
+      const cleanId = id.split('?')[0] ?? id;
+      if (!/\.[jt]sx?$/.test(cleanId)) {
+        return null;
+      }
+
+      if (options.exclude) {
+        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+        for (const pattern of excludes) {
+          if (matchesPattern(cleanId, pattern)) return null;
+        }
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
+        return null;
+      }
+
+      if (options.include) {
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+        if (!matched) return null;
+      }
+
+      if (!LIT_ELEM_PROXY_FAST_CHECK.test(code)) {
+        return null;
+      }
+
+      try {
+        const result = transformElemProxy(code, {
+          sourcemap,
+          filename: cleanId,
+          mode: options.mode,
+        });
+
+        if (result.proxiedElementsCount === 0) {
+          return null;
+        }
+
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      } catch (_err) {
+        return null;
+      }
+    },
+  };
+}
+
+export const litElemProxy = elemProxy;
+
 export function lit(options: LitPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [];
 
@@ -596,6 +645,12 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
   if (propsLowerOpt) {
     const propsOpts = typeof propsLowerOpt === 'object' ? propsLowerOpt : {};
     plugins.push(propsLower(propsOpts));
+  }
+
+  const elemProxyOpt = options.elemProxy ?? options['elem-proxy'];
+  if (elemProxyOpt) {
+    const proxyOpts = typeof elemProxyOpt === 'object' ? elemProxyOpt : {};
+    plugins.push(elemProxy(proxyOpts));
   }
 
   const htmlAotOpt = options.htmlAot ?? options['html-aot'];

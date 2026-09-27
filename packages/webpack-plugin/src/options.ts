@@ -214,7 +214,50 @@ export interface LitPluginOptions {
    * Kebab-case alias for `htmlAot`.
    */
   'html-aot'?: boolean | HtmlAotOptions;
+
+  /**
+   * AOT custom element proxy stub optimization via @lit-core/elem-proxy.
+   * Defers parsing and evaluating heavy LitElement classes until mount or property access.
+   * Pass `true` or an `ElemProxyOptions` object to enable.
+   * @default false
+   */
+  elemProxy?: boolean | ElemProxyOptions;
+
+  /**
+   * Kebab-case alias for `elemProxy`.
+   */
+  'elem-proxy'?: boolean | ElemProxyOptions;
 }
+
+export interface ElemProxyOptions {
+  /**
+   * Transformation mode:
+   * - 'inline': wraps implementation in a deferred factory closure within the module.
+   * - 'split': splits implementation into a deferred dynamic import / chunk.
+   * @default 'inline'
+   */
+  mode?: 'inline' | 'split';
+
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitElemProxyOptions = ElemProxyOptions;
 
 export interface HtmlAotOptions {
   /**

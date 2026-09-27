@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import litDefault, { cssFuse, htmlMinifier, lit, litCore, litCssFuse, litHtmlMinifier, litPropsLower, propsLower } from './dist/index.js';
+import litDefault, { cssFuse, elemProxy, htmlMinifier, lit, litCore, litCssFuse, litElemProxy, litHtmlMinifier, litPropsLower, propsLower } from './dist/index.js';
 
 console.log('Testing @lit-core/vite-plugin hooks and exports...');
 
@@ -10,6 +10,8 @@ assert.strictEqual(typeof cssFuse, 'function', 'cssFuse must be a function');
 assert.strictEqual(typeof litCssFuse, 'function', 'litCssFuse must be an alias');
 assert.strictEqual(typeof propsLower, 'function', 'propsLower must be a function');
 assert.strictEqual(typeof litPropsLower, 'function', 'litPropsLower must be an alias');
+assert.strictEqual(typeof elemProxy, 'function', 'elemProxy must be a function');
+assert.strictEqual(typeof litElemProxy, 'function', 'litElemProxy must be an alias');
 assert.strictEqual(typeof htmlMinifier, 'function', 'htmlMinifier must be a function');
 assert.strictEqual(typeof litHtmlMinifier, 'function', 'litHtmlMinifier must be an alias');
 
@@ -86,6 +88,27 @@ assert(transformed, 'transform should return lowered code');
 assert(!transformed.code.includes('@customElement'), 'decorators should be stripped');
 assert(transformed.code.includes('customElements.define("x-btn", XBtn)'), 'customElements.define emitted');
 assert(transformed.code.includes('static properties'), 'static properties emitted');
+
+// Test standalone elemProxy transform hook
+const elemProxyInstance = elemProxy();
+assert.strictEqual(elemProxyInstance.name, 'elem-proxy');
+assert.strictEqual(elemProxyInstance.enforce, 'pre');
+assert.strictEqual(typeof elemProxyInstance.transform, 'function');
+
+const sampleElemProxy = `
+  import { LitElement } from 'lit';
+  import { customElement, property } from 'lit/decorators.js';
+
+  @customElement('proxy-btn')
+  class ProxyBtn extends LitElement {
+    @property({ type: String, attribute: 'btn-label' }) label = 'click';
+  }
+`;
+const transformedProxy = elemProxyInstance.transform.call({}, sampleElemProxy, '/src/proxy-btn.ts');
+assert(transformedProxy, 'transform should return proxied code');
+assert(transformedProxy.code.includes('ProxyBtnProxy'), 'proxy stub emitted');
+assert(transformedProxy.code.includes('__getImpl_ProxyBtn'), 'deferred getter emitted');
+assert(transformedProxy.code.includes("customElements.define('proxy-btn', ProxyBtnProxy)"), 'customElements.define emitted');
 
 // Test standalone cssFuse() plugin
 const plugin = cssFuse();

@@ -174,6 +174,11 @@ async function main() {
       console.log(`\n${renderMarkdownTable(res.suiteName, res.rows)}`);
     }
 
+    const diagTable = renderMarkdownDiagnosticsTable(allResults);
+    if (diagTable) {
+      console.log(diagTable);
+    }
+
     // Additional table at bottom of benchmarks: runtime performance
     const lastResult = allResults[allResults.length - 1];
     if (lastResult?.rows?.runtimeRows && lastResult.rows.runtimeRows.length > 0) {

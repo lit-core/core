@@ -1,9 +1,10 @@
-import { lit } from '@lit-core/vite-plugin';
+import { createIsolatedToolPlugin } from './base.js';
 
 /**
  * Tool definition for @lit-core/html-minifier
  * Ahead-of-time (AOT) HTML & SVG tagged template minifier for Lit components via OXC.
  * Impact: -3.5% to -6.0% Minified JS / -2.0% to -3.5% Brotli across any component suite.
+ * @type {import('../types.js').BenchmarkTool}
  */
 export const htmlMinifierTool = {
   id: 'html-minifier',
@@ -17,13 +18,10 @@ export const htmlMinifierTool = {
    * @returns {import('vite').Plugin[]}
    */
   getPlugins(_suite) {
-    return lit({
-      cssFuse: false,
-      propsLower: false,
-      htmlMinifier: {
-        exclude: [],
-      },
+    return createIsolatedToolPlugin('htmlMinifier', {
+      exclude: [],
     });
   },
 };
+
 export default htmlMinifierTool;

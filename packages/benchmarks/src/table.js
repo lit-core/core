@@ -17,7 +17,7 @@ import { formatImpact, formatKb } from './metrics.js';
  * @returns {string}
  */
 export function renderAsciiTable(title, rows) {
-  const headers = ['Optimization Tool / Mode', 'Minified JS', 'Gzip', 'Brotli', 'Raw Impact (Δ)', 'Gzip Impact (Δ)'];
+  const headers = ['Optimization tool or mode', 'Minified JS', 'Gzip', 'Brotli', 'Raw impact (Δ)', 'Gzip impact (Δ)'];
 
   const formattedRows = rows.map((r) => {
     const rawSize = formatKb(r.metrics.rawBytes);
@@ -102,7 +102,7 @@ export function renderMarkdownTable(title, rows) {
  * @returns {string}
  */
 export function renderCrossSuiteSummary(summaryRows) {
-  const headers = ['Design System / Library', 'Elements', 'Baseline (Raw / Gzip)', 'Optimized (Raw / Gzip)', 'Net Savings (Raw / Gzip)'];
+  const headers = ['Design system or library', 'Elements', 'Baseline (raw / gzip)', 'Optimized (raw / gzip)', 'Net savings (raw / gzip)'];
 
   const formattedRows = summaryRows.map((s) => {
     const sign = s.rawSaved >= 0 ? '-' : '+';
@@ -132,7 +132,7 @@ export function renderCrossSuiteSummary(summaryRows) {
 
   const output = [];
   output.push(`\n${'═'.repeat(totalWidth)}`);
-  output.push(`🏆 CROSS-LIBRARY IMPACT OVERVIEW (ALL CONFIGS ENABLED)`);
+  output.push(`🏆 Cross-library impact overview (all configs enabled)`);
   output.push(`${'═'.repeat(totalWidth)}`);
   output.push(topBorder);
   output.push(headerLine);
@@ -246,7 +246,7 @@ export function renderMarkdownDiagnosticsTable(allResults) {
   let hasCss = false;
   const cssRows = [];
   for (const res of allResults) {
-    if (res.diagnostics && res.diagnostics['css-fuse']) {
+    if (res.diagnostics?.['css-fuse']) {
       const diag = res.diagnostics['css-fuse'];
       if (diag.rulesScanned !== undefined) {
         hasCss = true;
@@ -271,7 +271,7 @@ export function renderMarkdownDiagnosticsTable(allResults) {
   let hasHtml = false;
   const htmlRows = [];
   for (const res of allResults) {
-    if (res.diagnostics && res.diagnostics['html-fuse']) {
+    if (res.diagnostics?.['html-fuse']) {
       const diag = res.diagnostics['html-fuse'];
       if (diag.fragmentsScanned !== undefined) {
         hasHtml = true;
