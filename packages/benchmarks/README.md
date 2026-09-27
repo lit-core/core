@@ -31,13 +31,13 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Baseline bundle size** | 5801.88 KB | 1739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 2807.41 KB | 1740.01 KB | 739.10 KB | 867.15 KB | 450.49 KB |
-| **Net bundle savings** | **-2994.47 KB (-51.61%)** | **+0.09 KB (+0.01%)** | **-64.02 KB (-7.97%)** | **-2.90 KB (-0.33%)** | **+2.11 KB (+0.47%)** |
-| **Baseline build time** | 217 ms | 217 ms | 225 ms | 233 ms | 44 ms |
-| **Optimized build time** | 1848 ms | 228 ms | 773 ms | 708 ms | 373 ms |
-| **Build overhead** | +1631 ms | +11 ms | +548 ms | +475 ms | +329 ms |
-| **First render speedup** | **+35.8% faster** | **+35.4% faster** | **+34.1% faster** | **+35.4% faster** | **+34.5% faster** |
+| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 2939.11 KB | 1749.03 KB | 806.86 KB | 843.11 KB | 469.43 KB |
+| **Net bundle savings** | **-2862.76 KB (-49.34%)** | **-129.05 KB (-6.87%)** | **+3.74 KB (+0.47%)** | **-26.94 KB (-3.10%)** | **+21.06 KB (+4.70%)** |
+| **Baseline build time** | 169 ms | 180 ms | 91 ms | 129 ms | 40 ms |
+| **Optimized build time** | 1522 ms | 2249 ms | 616 ms | 619 ms | 315 ms |
+| **Build overhead** | +1353 ms | +2069 ms | +525 ms | +490 ms | +275 ms |
+| **First render speedup** | **+37.4% faster** | **+36.6% faster** | **+35.5% faster** | **+34.8% faster** | **+35.3% faster** |
 
 > [!NOTE]
 > The ~34-36% first render speedup in the combined overview is delivered primarily by ahead-of-time Lit template compilation (`@lit-core/html-aot`), which eliminates runtime HTML parsing and template preparation, supplemented by shared constructable stylesheets (`css-fuse`) and lowered properties (`props-lower`). In isolation, static fragment clustering (`html-fuse`) and template minifiers (`css-minifier`, `html-minifier`) optimize bundle size and have neutral runtime mount impact.

@@ -17,8 +17,9 @@ export const htmlAotTool = {
    * @param {import('../types.js').SuiteContext} _suite
    * @returns {import('vite').Plugin[]}
    */
-  getPlugins(_suite) {
+  getPlugins(suite) {
     return createIsolatedToolPlugin('htmlAot', {
+      include: suite?.includePattern ? [suite.includePattern].flat() : undefined,
       exclude: [],
     });
   },

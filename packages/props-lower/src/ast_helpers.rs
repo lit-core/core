@@ -168,4 +168,89 @@ impl<'a, 'b> AstHelper<'a, 'b> {
             self.ast,
         )
     }
+
+    /// Builds `Object.defineProperty(target, "propName", { get() { return return_expr; }, enumerable: true, configurable: true });`
+    pub fn define_getter(
+        &self,
+        target_expr: Expression<'a>,
+        prop_name: &'a str,
+        return_expr: Expression<'a>,
+    ) -> Statement<'a> {
+        let obj_ident = self.ident_ref("Object");
+        let define_prop_member = self.static_member(obj_ident, "defineProperty", false);
+
+        let mut statements = ArenaVec::new_in(self.ast);
+        statements.push(Statement::new_return_statement(
+            SPAN,
+            Some(return_expr),
+            self.ast,
+        ));
+        let func_body = FunctionBody::boxed(SPAN, ArenaVec::new_in(self.ast), statements, self.ast);
+        let params = FormalParameters::boxed(
+            SPAN,
+            FormalParameterKind::FormalParameter,
+            ArenaVec::new_in(self.ast),
+            None,
+            self.ast,
+        );
+        let get_func = Function::boxed(
+            SPAN,
+            FunctionType::FunctionExpression,
+            None,
+            false,
+            false,
+            false,
+            None,
+            None,
+            params,
+            None,
+            Some(func_body),
+            self.ast,
+        );
+
+        let mut desc_props = ArenaVec::new_in(self.ast);
+        let get_key = PropertyKey::new_static_identifier(SPAN, "get", self.ast);
+        desc_props.push(ObjectPropertyKind::new_object_property(
+            SPAN,
+            PropertyKind::Init,
+            get_key,
+            Expression::FunctionExpression(get_func),
+            false,
+            false,
+            false,
+            self.ast,
+        ));
+        let enum_key = PropertyKey::new_static_identifier(SPAN, "enumerable", self.ast);
+        desc_props.push(ObjectPropertyKind::new_object_property(
+            SPAN,
+            PropertyKind::Init,
+            enum_key,
+            self.bool_lit(true),
+            false,
+            false,
+            false,
+            self.ast,
+        ));
+        let conf_key = PropertyKey::new_static_identifier(SPAN, "configurable", self.ast);
+        desc_props.push(ObjectPropertyKind::new_object_property(
+            SPAN,
+            PropertyKind::Init,
+            conf_key,
+            self.bool_lit(true),
+            false,
+            false,
+            false,
+            self.ast,
+        ));
+
+        let desc_obj = Expression::new_object_expression(SPAN, desc_props, self.ast);
+
+        let mut args = ArenaVec::new_in(self.ast);
+        args.push(Argument::from(target_expr));
+        args.push(Argument::from(self.string_lit(prop_name)));
+        args.push(Argument::from(desc_obj));
+
+        let call = self.call_expr(define_prop_member, args, false);
+        self.expr_stmt(call)
+    }
 }

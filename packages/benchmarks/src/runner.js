@@ -36,6 +36,7 @@ async function runViteBuild({ entryPath, outDir, plugins = [] }) {
         input: entryPath,
         output: {
           entryFileNames: 'bundle.js',
+          codeSplitting: false,
         },
       },
     },

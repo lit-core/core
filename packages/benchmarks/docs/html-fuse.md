@@ -26,15 +26,15 @@ Measurements compare a standard Vite production build with minification (`minify
 
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Baseline bundle size** | 5801.88 KB | 1739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 5799.20 KB | 1739.92 KB | 801.80 KB | 869.70 KB | 446.99 KB |
-| **Net bundle savings** | **-2.68 KB (-0.05%)** | **-0.00 KB (-0.00%)** | **-1.33 KB (-0.17%)** | **-0.35 KB (-0.04%)** | **-1.38 KB (-0.31%)** |
-| **Baseline mount latency** | 15.12 ms | 14.96 ms | 14.80 ms | 14.84 ms | 14.88 ms |
-| **Optimized mount latency** | 14.96 ms | 14.96 ms | 14.92 ms | 15.00 ms | 15.08 ms |
-| **Mount speedup** | **+1.1% (neutral)** | **+0.0% (neutral)** | **-0.8% (neutral)** | **-1.1% (neutral)** | **-1.3% (neutral)** |
-| **Baseline update latency** | 3.45 ms | 3.42 ms | 3.40 ms | 3.41 ms | 3.41 ms |
-| **Optimized update latency** | 3.42 ms | 3.42 ms | 3.42 ms | 3.43 ms | 3.44 ms |
-| **Update speedup** | **+0.9% (neutral)** | **+0.0% (neutral)** | **-0.6% (neutral)** | **-0.6% (neutral)** | **-0.9% (neutral)** |
+| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 5799.20 KB | 1876.36 KB | 801.80 KB | 869.70 KB | 446.99 KB |
+| **Net bundle savings** | **-2.68 KB (-0.05%)** | **-1.71 KB (-0.09%)** | **-1.33 KB (-0.17%)** | **-0.35 KB (-0.04%)** | **-1.38 KB (-0.31%)** |
+| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms |
+| **Optimized mount latency** | 14.96 ms | 14.88 ms | 14.92 ms | 15.00 ms | 15.08 ms |
+| **Mount speedup** | **+1.1% (neutral)** | **+1.6% (neutral)** | **-0.8% (neutral)** | **-1.1% (neutral)** | **-1.3% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Optimized update latency** | 3.42 ms | 3.41 ms | 3.42 ms | 3.43 ms | 3.44 ms |
+| **Update speedup** | **+0.9% (neutral)** | **+1.2% (neutral)** | **-0.6% (neutral)** | **-0.6% (neutral)** | **-0.9% (neutral)** |
 
 > [!NOTE]
 > `html-fuse` is an ahead-of-time static fragment clustering and deduplication transform. It identifies repeated static HTML and SVG subtrees across components and clusters them into shared template constants. Because it does not alter the runtime Lit template compiler or bypass the template prepare phase (which is handled separately by `@lit-core/html-aot`), runtime mount and update latencies are neutral and remain within standard measurement noise.

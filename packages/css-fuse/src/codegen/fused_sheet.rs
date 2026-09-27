@@ -1,10 +1,27 @@
 use crate::models::{ClusterGroup, FusedSheetInfo};
+use std::collections::BTreeMap;
 
 pub fn generate_fused_sheet(cluster: &ClusterGroup) -> FusedSheetInfo {
-    let mut css_rules = String::new();
+    let mut grouped: BTreeMap<(Option<String>, String), Vec<String>> = BTreeMap::new();
     for rule in &cluster.rules {
+        let key = (rule.at_rule.clone(), rule.selector.clone());
+        let decls = grouped.entry(key).or_default();
+        for d in &rule.declarations {
+            if !decls.contains(d) {
+                decls.push(d.clone());
+            }
+        }
+    }
+
+    let mut css_rules = String::new();
+    for ((at_rule, selector), decls) in grouped {
+        let body = decls.join(";");
         css_rules.push_str("  ");
-        css_rules.push_str(&rule.full_canonical_css);
+        if let Some(at) = at_rule {
+            css_rules.push_str(&format!("{} {{\n    {} {{{}}}\n  }}", at, selector, body));
+        } else {
+            css_rules.push_str(&format!("{} {{{}}}", selector, body));
+        }
         css_rules.push('\n');
     }
 

@@ -32,12 +32,12 @@ Evaluated across **349 production Web Components** from 5 enterprise design syst
 
 | Design system or library | Elements | Baseline size | Optimized size | Net savings | First render speedup |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5801.88 KB | 2807.41 KB | **-2994.47 KB (-51.61%)** | **+35.8%** |
-| Spectrum Web Components | 52 | 1739.92 KB | 1740.01 KB | **+0.09 KB (+0.01%)** | **+35.4%** |
-| Web Awesome | 73 | 803.12 KB | 739.10 KB | **-64.02 KB (-7.97%)** | **+34.1%** |
-| Momentum Design | 97 | 870.05 KB | 867.15 KB | **-2.90 KB (-0.33%)** | **+35.4%** |
-| Material Web | 28 | 448.37 KB | 450.49 KB | **+2.11 KB (+0.47%)** | **+34.5%** |
-| **Total** | **349** | **9,663.34 KB** | **6,604.15 KB** | **-3,059.18 KB (-31.66%)** | **+35.0%** |
+| Carbon Web Components | 99 | 5801.88 KB | 2939.11 KB | **-2862.76 KB (-49.34%)** | **+37.4%** |
+| Spectrum Web Components | 52 | 1878.08 KB | 1749.03 KB | **-129.05 KB (-6.87%)** | **+36.6%** |
+| Web Awesome | 73 | 803.12 KB | 806.86 KB | **+3.74 KB (+0.47%)** | **+35.5%** |
+| Momentum Design | 97 | 870.05 KB | 843.11 KB | **-26.94 KB (-3.10%)** | **+34.8%** |
+| Material Web | 28 | 448.37 KB | 469.43 KB | **+21.06 KB (+4.70%)** | **+35.3%** |
+| **Total** | **349** | **9,801.49 KB** | **6,807.54 KB** | **-2,993.96 KB (-30.55%)** | **+35.9%** |
 
 ### Dedicated benchmark reports
 

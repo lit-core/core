@@ -110,21 +110,14 @@ impl ClusterEngine {
             if indices.len() >= 2 {
                 // Check if rules share a common core of files
                 let mut common_files = candidate_rules[indices[0]].files.clone();
-                let mut union_files = candidate_rules[indices[0]].files.clone();
                 for &idx in &indices[1..] {
                     common_files = common_files
                         .intersection(&candidate_rules[idx].files)
                         .cloned()
                         .collect();
-                    union_files = union_files
-                        .union(&candidate_rules[idx].files)
-                        .cloned()
-                        .collect();
                 }
 
-                if common_files.len() >= threshold
-                    || (common_files.len() >= 1 && union_files.len() >= threshold)
-                {
+                if common_files.len() >= threshold {
                     let mut rules = Vec::new();
                     for &idx in indices {
                         rules.push(candidate_rules[idx].rule.clone());
@@ -141,20 +134,28 @@ impl ClusterEngine {
 
                     let total_css_len: usize =
                         rules.iter().map(|r| r.full_canonical_css.len()).sum();
-                    let net_bytes_saved = (union_files.len().saturating_sub(1)) * total_css_len;
-                    if net_bytes_saved >= min_savings && net_bytes_saved > 0 {
-                        let rule_hashes: Vec<RuleHash> =
-                            rules.iter().map(|r| r.hash.clone()).collect();
-                        let cluster_id =
-                            format!("_fused_subsystem_{}", compute_cluster_hash(&rule_hashes));
-
-                        clusters.push(ClusterGroup {
-                            id: cluster_id.clone(),
-                            fused_sheet_name: format!("{}.js", cluster_id),
-                            rules,
-                            shared_by_files: union_files.into_iter().collect(),
-                        });
+                    let gross_savings = (common_files.len().saturating_sub(1)) * total_css_len;
+                    let net_bytes_saved = if min_savings > 0 {
+                        let module_overhead = 48 + common_files.len() * 45;
+                        gross_savings.saturating_sub(module_overhead)
+                    } else {
+                        gross_savings
+                    };
+                    if net_bytes_saved < min_savings || gross_savings == 0 {
+                        continue;
                     }
+
+                    let rule_hashes: Vec<RuleHash> =
+                        rules.iter().map(|r| r.hash.clone()).collect();
+                    let cluster_id =
+                        format!("_fused_subsystem_{}", compute_cluster_hash(&rule_hashes));
+
+                    clusters.push(ClusterGroup {
+                        id: cluster_id.clone(),
+                        fused_sheet_name: format!("{}.js", cluster_id),
+                        rules,
+                        shared_by_files: common_files.into_iter().collect(),
+                    });
                 }
             }
         }
@@ -177,21 +178,14 @@ impl ClusterEngine {
             let indices = &topology_groups[&top];
             if indices.len() >= 2 {
                 let mut common_files = candidate_rules[indices[0]].files.clone();
-                let mut union_files = candidate_rules[indices[0]].files.clone();
                 for &idx in &indices[1..] {
                     common_files = common_files
                         .intersection(&candidate_rules[idx].files)
                         .cloned()
                         .collect();
-                    union_files = union_files
-                        .union(&candidate_rules[idx].files)
-                        .cloned()
-                        .collect();
                 }
 
-                if common_files.len() >= threshold
-                    || (common_files.len() >= 1 && union_files.len() >= threshold)
-                {
+                if common_files.len() >= threshold {
                     let mut rules = Vec::new();
                     for &idx in indices {
                         rules.push(candidate_rules[idx].rule.clone());
@@ -208,20 +202,28 @@ impl ClusterEngine {
 
                     let total_css_len: usize =
                         rules.iter().map(|r| r.full_canonical_css.len()).sum();
-                    let net_bytes_saved = (union_files.len().saturating_sub(1)) * total_css_len;
-                    if net_bytes_saved >= min_savings && net_bytes_saved > 0 {
-                        let rule_hashes: Vec<RuleHash> =
-                            rules.iter().map(|r| r.hash.clone()).collect();
-                        let cluster_id =
-                            format!("_fused_subsystem_{}", compute_cluster_hash(&rule_hashes));
-
-                        clusters.push(ClusterGroup {
-                            id: cluster_id.clone(),
-                            fused_sheet_name: format!("{}.js", cluster_id),
-                            rules,
-                            shared_by_files: union_files.into_iter().collect(),
-                        });
+                    let gross_savings = (common_files.len().saturating_sub(1)) * total_css_len;
+                    let net_bytes_saved = if min_savings > 0 {
+                        let module_overhead = 48 + common_files.len() * 45;
+                        gross_savings.saturating_sub(module_overhead)
+                    } else {
+                        gross_savings
+                    };
+                    if net_bytes_saved < min_savings || gross_savings == 0 {
+                        continue;
                     }
+
+                    let rule_hashes: Vec<RuleHash> =
+                        rules.iter().map(|r| r.hash.clone()).collect();
+                    let cluster_id =
+                        format!("_fused_subsystem_{}", compute_cluster_hash(&rule_hashes));
+
+                    clusters.push(ClusterGroup {
+                        id: cluster_id.clone(),
+                        fused_sheet_name: format!("{}.js", cluster_id),
+                        rules,
+                        shared_by_files: common_files.into_iter().collect(),
+                    });
                 }
             }
         }
@@ -260,8 +262,14 @@ impl ClusterEngine {
             });
 
             let total_css_len: usize = rules.iter().map(|r| r.full_canonical_css.len()).sum();
-            let net_bytes_saved = (files.len().saturating_sub(1)) * total_css_len;
-            if net_bytes_saved < min_savings || net_bytes_saved == 0 {
+            let gross_savings = (files.len().saturating_sub(1)) * total_css_len;
+            let net_bytes_saved = if min_savings > 0 {
+                let module_overhead = 48 + files.len() * 45;
+                gross_savings.saturating_sub(module_overhead)
+            } else {
+                gross_savings
+            };
+            if net_bytes_saved < min_savings || gross_savings == 0 {
                 continue;
             }
 

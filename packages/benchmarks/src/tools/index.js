@@ -75,16 +75,19 @@ export async function getCombinedPlugins(tools, suite) {
       : false,
     htmlAot: hasTool('html-aot')
       ? {
+          include,
           exclude: [],
         }
       : false,
     cssMinifier: hasTool('css-minifier')
       ? {
+          include,
           exclude: [],
         }
       : false,
     htmlMinifier: hasTool('html-minifier')
       ? {
+          include,
           exclude: [],
         }
       : false,

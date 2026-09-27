@@ -37,7 +37,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
     outputDir = '.fused',
     scopingAudit = true,
     applyInDev = false,
-    minSavings,
+    minSavings = 80,
   } = options;
 
   function runOptimization(virtualImports = true, write = false): FuseResult | null {
@@ -229,7 +229,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
   };
 }
 
-const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b/;
+const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b|\bimport\b[^;]*\b(?:decorators\.js|property|customElement|state)\b/;
 
 export function propsLower(options: PropsLowerOptions = {}): Plugin {
   const { sourcemap = true } = options;
@@ -280,7 +280,7 @@ export function propsLower(options: PropsLowerOptions = {}): Plugin {
   };
 }
 
-const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
+const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`|\bimport\b[^;]*\b(?:html|svg)\b/;
 
 export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
   const { sourcemap = false } = options;
@@ -335,7 +335,7 @@ export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
   };
 }
 
-const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
+const LIT_CSS_FAST_CHECK = /\bcss\s*[`(]|\bimport\b[^;]*\bcss\b/;
 
 export function cssMinifier(options: CssMinifierOptions = {}): Plugin {
   const { sourcemap = true } = options;
@@ -521,7 +521,7 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
   };
 }
 
-const LIT_HTML_AOT_FAST_CHECK = /\b(?:html|svg)\s*`|\b[a-zA-Z0-9_$]+\.html\s*`/;
+const LIT_HTML_AOT_FAST_CHECK = /\b(?:html|svg)\s*`|\b[a-zA-Z0-9_$]+\.html\s*`|\bimport\b[^;]*\b(?:html|svg)\b/;
 
 export function htmlAot(options: HtmlAotOptions = {}): Plugin {
   const { sourcemap = false } = options;

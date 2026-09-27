@@ -13,11 +13,12 @@ export const spectrumSuite = createComponentSuite({
   packageName: '@spectrum-web-components/bundle',
   entryFileName: '.spectrum-entry.js',
   resolveConfig(specDir) {
+    const spectrumDir = path.dirname(specDir);
     return {
       entryContent: "import '@spectrum-web-components/bundle/elements.js';\n",
       componentCount: 52,
-      includePattern: path.join(specDir, '**/*.js'),
-      metadata: { specDir },
+      includePattern: path.join(spectrumDir, '**/*.js'),
+      metadata: { specDir, spectrumDir },
     };
   },
 });

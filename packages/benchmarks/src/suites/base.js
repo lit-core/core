@@ -16,7 +16,8 @@ export function resolvePackageDir(relativePackagePath) {
     path.resolve('node_modules', relativePackagePath),
     path.resolve(__dirname, '../../node_modules', relativePackagePath),
   ];
-  return possiblePaths.find((p) => fs.existsSync(p)) || null;
+  const found = possiblePaths.find((p) => fs.existsSync(p)) || null;
+  return found ? fs.realpathSync(found) : null;
 }
 
 /**

@@ -17,8 +17,9 @@ export const htmlMinifierTool = {
    * @param {import('../types.js').SuiteContext} _suite
    * @returns {import('vite').Plugin[]}
    */
-  getPlugins(_suite) {
+  getPlugins(suite) {
     return createIsolatedToolPlugin('htmlMinifier', {
+      include: suite?.includePattern ? [suite.includePattern].flat() : undefined,
       exclude: [],
     });
   },

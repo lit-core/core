@@ -16,7 +16,7 @@ export const webAwesomeSuite = createComponentSuite({
     const compDir = path.join(compDirRoot, 'dist/components');
     const components = scanComponentEntries(compDir, (name, dir) => path.join(dir, `${name}.js`));
     const entryContent = components.map((c) => `import '@awesome.me/webawesome/dist/components/${c.name}/${c.name}.js';`).join('\n');
-    const includePattern = path.join(compDirRoot, 'dist/chunks/*.js');
+    const includePattern = path.join(compDirRoot, 'dist/**/*.js');
 
     return {
       entryContent,

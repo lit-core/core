@@ -134,7 +134,21 @@ export function matchesPattern(cleanId: string, pattern: string | RegExp): boole
   }
   if (typeof pattern === 'string') {
     if (pattern.includes('*') || pattern.includes('?')) {
-      return globToRegex(pattern).test(cleanId);
+      if (globToRegex(pattern).test(cleanId)) return true;
+      if (cleanId.includes('/.pnpm/') && pattern.includes('/node_modules/')) {
+        const nodeModulesIdx = cleanId.lastIndexOf('/node_modules/');
+        if (nodeModulesIdx !== -1) {
+          const relativeSubpath = cleanId.slice(nodeModulesIdx);
+          const patternNmIdx = pattern.lastIndexOf('/node_modules/');
+          if (patternNmIdx !== -1) {
+            const patternSubpath = pattern.slice(patternNmIdx);
+            if (globToRegex(patternSubpath).test(relativeSubpath)) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
     }
     return cleanId.includes(pattern);
   }
