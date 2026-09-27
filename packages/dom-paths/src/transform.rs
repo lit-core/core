@@ -1,9 +1,11 @@
 use napi_derive::napi;
-use oxc_allocator::Allocator;
+use oxc_allocator::{Allocator, ArenaVec};
 use oxc_ast::ast::*;
+use oxc_ast::builder::AstBuilder;
 use oxc_ast_visit::Visit;
+use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_span::SourceType;
+use oxc_span::{SourceType, SPAN};
 use serde::{Deserialize, Serialize};
 
 use crate::parser::{compute_template_parts, PartDescriptor};
@@ -71,27 +73,30 @@ impl<'a> Visit<'a> for TemplateCollector {
     }
 }
 
-fn collect_classes<'a>(stmts: &'a [Statement<'a>], out: &mut Vec<&'a Class<'a>>) {
+fn collect_classes_mut<'a, 'b>(
+    stmts: &'b mut [Statement<'a>],
+    out: &mut Vec<&'b mut Class<'a>>,
+) {
     for stmt in stmts {
         match stmt {
             Statement::ClassDeclaration(class) => {
                 out.push(class);
             }
             Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &export_decl.declaration {
+                if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
                     out.push(class);
                 }
             }
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
-                    &export_decl.declaration
+                    &mut export_decl.declaration
                 {
                     out.push(class);
                 }
             }
             Statement::VariableDeclaration(var_decl) => {
-                for decl in &var_decl.declarations {
-                    if let Some(Expression::ClassExpression(class)) = &decl.init {
+                for decl in &mut var_decl.declarations {
+                    if let Some(Expression::ClassExpression(class)) = &mut decl.init {
                         out.push(class);
                     }
                 }
@@ -115,7 +120,7 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
     let allocator = Allocator::default();
     let filename = options.filename.as_deref().unwrap_or("source.ts");
     let source_type = SourceType::from_path(filename).unwrap_or_default();
-    let parsed = Parser::new(&allocator, source, source_type).parse();
+    let mut parsed = Parser::new(&allocator, source, source_type).parse();
 
     if parsed.program.body.is_empty() {
         return DomPathsResult {
@@ -127,8 +132,14 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         };
     }
 
+    let ast = AstBuilder::new(&allocator);
+    let normalize_whitespace = options.normalize_whitespace.unwrap_or(true);
+    let mut all_component_paths = Vec::new();
+    let mut total_paths_count = 0;
+    let mut transformed_components = 0;
+
     let mut classes = Vec::new();
-    collect_classes(&parsed.program.body, &mut classes);
+    collect_classes_mut(&mut parsed.program.body, &mut classes);
 
     if classes.is_empty() {
         return DomPathsResult {
@@ -140,18 +151,16 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         };
     }
 
-    let normalize_whitespace = options.normalize_whitespace.unwrap_or(true);
-    let mut all_component_paths = Vec::new();
-    let mut total_paths_count = 0;
-    let mut transformed_components = 0;
-    let mut insertions: Vec<(usize, String)> = Vec::new();
-
     for class in classes {
-        let body_span = class.body.span;
-        let class_src = &source[body_span.start as usize..body_span.end as usize];
-
         // Skip if already has __litPartPaths
-        if class_src.contains("__litPartPaths") {
+        let has_part_paths = class.body.body.iter().any(|elem| match elem {
+            ClassElement::PropertyDefinition(prop) => {
+                prop.r#static && prop.key.is_specific_static_name("__litPartPaths")
+            }
+            _ => false,
+        });
+
+        if has_part_paths {
             continue;
         }
 
@@ -201,41 +210,51 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
             transformed_components += 1;
             all_component_paths.push(numeric_paths);
 
-            // Build formatted static descriptor
-            let mut descriptor = String::from("\n  static __litPartPaths = [\n");
-            for (idx, part) in part_descriptors.iter().enumerate() {
-                let path_str = part
-                    .path
-                    .iter()
-                    .map(|n| n.to_string())
-                    .collect::<Vec<_>>()
-                    .join(", ");
-
-                if part.is_attribute {
-                    if let Some(ref tag) = part.target_tag {
-                        descriptor.push_str(&format!(
-                            "    [{}], // Part {} (attribute on {})\n",
-                            path_str, idx, tag
-                        ));
-                    } else {
-                        descriptor.push_str(&format!(
-                            "    [{}], // Part {} (attribute)\n",
-                            path_str, idx
-                        ));
-                    }
-                } else {
-                    descriptor.push_str(&format!("    [{}], // Part {}\n", path_str, idx));
+            // Construct AST node for `static __litPartPaths = [ ... ];`
+            let mut elements = ArenaVec::new_in(&ast);
+            for part in &part_descriptors {
+                let mut path_elements = ArenaVec::new_in(&ast);
+                for idx in &part.path {
+                    path_elements.push(ArrayExpressionElement::from(Expression::new_numeric_literal(
+                        SPAN,
+                        *idx as f64,
+                        None,
+                        NumberBase::Decimal,
+                        &ast,
+                    )));
                 }
+                elements.push(ArrayExpressionElement::from(Expression::new_array_expression(
+                    SPAN,
+                    path_elements,
+                    &ast,
+                )));
             }
-            descriptor.push_str("  ];\n");
 
-            // Insert right after the opening '{' of class body
-            let insert_pos = (body_span.start as usize) + 1;
-            insertions.push((insert_pos, descriptor));
+            let array_expr = Expression::new_array_expression(SPAN, elements, &ast);
+            let key = PropertyKey::new_static_identifier(SPAN, "__litPartPaths", &ast);
+            let prop_def = ClassElement::new_property_definition(
+                SPAN,
+                PropertyDefinitionType::PropertyDefinition,
+                ArenaVec::new_in(&ast),
+                key,
+                None,
+                Some(array_expr),
+                false,
+                true, // static = true
+                false,
+                false,
+                false,
+                false,
+                false,
+                None,
+                &ast,
+            );
+
+            class.body.body.insert(0, prop_def);
         }
     }
 
-    if insertions.is_empty() {
+    if transformed_components == 0 {
         return DomPathsResult {
             code: source.to_string(),
             map: None,
@@ -245,16 +264,19 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         };
     }
 
-    // Sort insertions in descending order of position
-    insertions.sort_by_key(|b| std::cmp::Reverse(b.0));
-    let mut new_code = source.to_string();
-    for (pos, text) in insertions {
-        new_code.insert_str(pos, &text);
+    let mut codegen_options = CodegenOptions::default();
+    if options.sourcemap.unwrap_or(false) {
+        if let Some(ref filename) = options.filename {
+            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
+        }
     }
 
+    let codegen_result = Codegen::new().with_options(codegen_options).build(&parsed.program);
+    let map_json = codegen_result.map.map(|m| m.to_json_string());
+
     DomPathsResult {
-        code: new_code,
-        map: None,
+        code: codegen_result.code,
+        map: map_json,
         components_count: transformed_components,
         paths_count: total_paths_count,
         paths: all_component_paths,

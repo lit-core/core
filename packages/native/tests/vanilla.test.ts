@@ -61,7 +61,7 @@ export class StatusBadge extends LitElement {
     expect(res.code).toContain('class StatusBadge extends HTMLElement');
     expect(res.code).toContain('new CSSStyleSheet()');
     expect(res.code).toContain('replaceSync(');
-    expect(res.code).toContain("document.createElement('template')");
+    expect(res.code).toContain('document.createElement("template")');
     expect(res.code).toContain('cloneNode(true)');
     expect(res.code).toContain('attachShadow');
     expect(res.code).toContain('adoptedStyleSheets');
@@ -69,7 +69,7 @@ export class StatusBadge extends LitElement {
     expect(res.code).toContain('get status()');
     expect(res.code).toContain('set status(v)');
     expect(res.code).toContain('attributeChangedCallback');
-    expect(res.code).toContain("customElements.define('status-badge', StatusBadge)");
+    expect(res.code).toContain('customElements.define("status-badge", StatusBadge)');
   });
 
   it('correctly reflects boolean and string attributes', () => {

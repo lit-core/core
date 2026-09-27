@@ -27,14 +27,14 @@ Measurements compare a standard Vite production build with minification (`minify
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 5805.59 KB | 1878.08 KB | 803.59 KB | 870.20 KB | 449.03 KB |
-| **Net bundle savings** | **+3.72 KB (+0.06%)** | **-0.00 KB (-0.00%)** | **+0.47 KB (+0.06%)** | **+0.15 KB (+0.02%)** | **+0.66 KB (+0.15%)** |
+| **Optimized bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.22 KB | 445.37 KB |
+| **Net bundle savings** | **-0.00 KB (-0.00%)** | **-0.00 KB (-0.00%)** | **-0.00 KB (-0.00%)** | **+0.17 KB (+0.02%)** | **-3.00 KB (-0.67%)** |
 | **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms |
-| **Optimized mount latency** | 14.92 ms | 15.12 ms | 14.92 ms | 14.88 ms | 15.00 ms |
-| **Mount speedup** | **+1.3% (neutral)** | **+0.0% (neutral)** | **-0.8% (neutral)** | **-0.3% (neutral)** | **-0.8% (neutral)** |
+| **Optimized mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.88 ms | 14.88 ms |
+| **Mount speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **-0.3% (neutral)** | **+0.0% (neutral)** |
 | **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms |
-| **Optimized update latency** | 3.42 ms | 3.45 ms | 3.42 ms | 3.41 ms | 3.43 ms |
-| **Update speedup** | **+0.9% (neutral)** | **+0.0% (neutral)** | **-0.6% (neutral)** | **+0.0% (neutral)** | **-0.6% (neutral)** |
+| **Optimized update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Update speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** |
 
 > [!NOTE]
 > `@lit-core/native` strips the standard Lit runtime dependencies (`lit-element`, `lit-html`, and `reactive-element`), replacing them with direct native `<template>` cloning, direct C++ text node property mutations (`node.data = val`), and native `adoptedStyleSheets` integration. This eliminates the fixed baseline runtime floor (~16 KB minified, ~28 KB across multiple chunk entries) and provides a 24% to 27% runtime mount acceleration by bypassing runtime HTML parsing and template preparation.

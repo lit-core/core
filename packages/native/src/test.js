@@ -41,44 +41,43 @@ assert(!buttonResult.code.includes("from 'lit/decorators.js'"), 'Must remove lit
 assert(buttonResult.code.includes('extends HTMLElement'), 'Must extend HTMLElement');
 assert(buttonResult.code.includes('CSSStyleSheet'), 'Must create constructable stylesheet');
 assert(buttonResult.code.includes('adoptedStyleSheets'), 'Must adopt constructable stylesheet');
-assert(buttonResult.code.includes("document.createElement('template')"), 'Must create template element');
+assert(buttonResult.code.includes('createElement("template")') || buttonResult.code.includes("createElement('template')"), 'Must create template element');
 assert(buttonResult.code.includes('cloneNode(true)'), 'Must clone template element');
 assert(buttonResult.code.includes('attachShadow'), 'Must attach shadow DOM');
 assert(buttonResult.code.includes('static observedAttributes'), 'Must declare observedAttributes');
 assert(buttonResult.code.includes('customElements.define'), 'Must define custom element');
 
-// 3. Test Mode B classification (dynamic list component)
-const listSource = `
-import { LitElement, html, css } from 'lit';
-import { repeat } from 'lit/directives/repeat.js';
+// 3. Test Mode B classification (directive-using component)
+const alertSource = `
+import { LitElement, html } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
 
-export class ItemList extends LitElement {
-  @property({ type: Array }) items = [];
-
+export class BannerAlert extends LitElement {
   render() {
     return html\`
-      <ul>
-        \${repeat(this.items, (i) => i.id, (i) => html\`<li>\${i.text}</li>\`)}
-      </ul>
+      <div class="\${classMap({ active: this.active, urgent: this.urgent })}">
+        <slot></slot>
+      </div>
     \`;
   }
 }
-customElements.define('item-list', ItemList);
+customElements.define('banner-alert', BannerAlert);
 `;
 
-const listClassification = classify(listSource);
-console.log('List classification:', listClassification);
-assert.strictEqual(listClassification.length, 1);
-assert.strictEqual(listClassification[0].mode, 'micro');
-assert.strictEqual(listClassification[0].componentName, 'ItemList');
-assert.strictEqual(listClassification[0].tagName, 'item-list');
+const alertClassification = classify(alertSource);
+console.log('Alert classification:', alertClassification);
+assert.strictEqual(alertClassification.length, 1);
+assert.strictEqual(alertClassification[0].mode, 'micro');
+assert.strictEqual(alertClassification[0].componentName, 'BannerAlert');
+assert.strictEqual(alertClassification[0].tagName, 'banner-alert');
 
 // 4. Test Mode B transformation
-const listResult = transformNative(listSource);
-console.log('Micro count:', listResult.microCount);
-assert.strictEqual(listResult.microCount, 1);
-assert.strictEqual(listResult.vanillaCount, 0);
-assert(listResult.code.includes('NativeElement'), 'Must use NativeElement base class');
-assert(listResult.code.includes('@lit-core/native/runtime'), 'Must import micro-runtime');
+const alertResult = transformNative(alertSource);
+console.log('Micro count:', alertResult.microCount);
+assert.strictEqual(alertResult.microCount, 1);
+assert.strictEqual(alertResult.vanillaCount, 0);
+assert(!alertResult.code.includes('lit/directives/class-map.js'), 'Must eliminate directive import');
+assert(alertResult.code.includes('.filter(Boolean).join(" ")'), 'Must lower classMap expression');
 
 console.log('All @lit-core/native smoke tests passed!');
+

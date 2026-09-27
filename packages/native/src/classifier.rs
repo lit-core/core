@@ -1,3 +1,4 @@
+use crate::import_scanner::{DirectiveKind, ImportContext};
 use crate::models::{ClassificationResult, ClassifyOptions};
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
@@ -15,6 +16,7 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
     }
 
     let program = &parsed.program;
+    let import_ctx = ImportContext::scan(program);
     let mut results = Vec::new();
 
     let forced_mode = options.mode.as_deref().unwrap_or("auto");
@@ -22,13 +24,15 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
     for stmt in &program.body {
         match stmt {
             Statement::ClassDeclaration(class) => {
-                if let Some(res) = classify_class(class, forced_mode, source, None) {
+                if let Some(res) = classify_class(class, forced_mode, source, &import_ctx, None) {
                     results.push(res);
                 }
             }
             Statement::ExportDeclaration(export_decl) => match &export_decl.declaration {
                 Declaration::ClassDeclaration(class) => {
-                    if let Some(res) = classify_class(class, forced_mode, source, None) {
+                    if let Some(res) =
+                        classify_class(class, forced_mode, source, &import_ctx, None)
+                    {
                         results.push(res);
                     }
                 }
@@ -39,7 +43,9 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
                                 BindingPattern::BindingIdentifier(id) => Some(id.name.as_str()),
                                 _ => None,
                             };
-                            if let Some(res) = classify_class(class, forced_mode, source, name) {
+                            if let Some(res) =
+                                classify_class(class, forced_mode, source, &import_ctx, name)
+                            {
                                 results.push(res);
                             }
                         }
@@ -49,12 +55,16 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
             },
             Statement::ExportDefaultDeclaration(export_decl) => match &export_decl.declaration {
                 ExportDefaultDeclarationKind::ClassDeclaration(class) => {
-                    if let Some(res) = classify_class(class, forced_mode, source, None) {
+                    if let Some(res) =
+                        classify_class(class, forced_mode, source, &import_ctx, None)
+                    {
                         results.push(res);
                     }
                 }
                 ExportDefaultDeclarationKind::ClassExpression(class) => {
-                    if let Some(res) = classify_class(class, forced_mode, source, None) {
+                    if let Some(res) =
+                        classify_class(class, forced_mode, source, &import_ctx, None)
+                    {
                         results.push(res);
                     }
                 }
@@ -67,7 +77,9 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
                             BindingPattern::BindingIdentifier(id) => Some(id.name.as_str()),
                             _ => None,
                         };
-                        if let Some(res) = classify_class(class, forced_mode, source, name) {
+                        if let Some(res) =
+                            classify_class(class, forced_mode, source, &import_ctx, name)
+                        {
                             results.push(res);
                         }
                     }
@@ -80,10 +92,11 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
     results
 }
 
-fn classify_class<'a>(
+pub fn classify_class<'a>(
     class: &Class<'a>,
     forced_mode: &str,
     source: &str,
+    import_ctx: &ImportContext,
     fallback_name: Option<&str>,
 ) -> Option<ClassificationResult> {
     let component_name = class
@@ -93,7 +106,7 @@ fn classify_class<'a>(
         .or_else(|| fallback_name.map(|s| s.to_string()))
         .unwrap_or_else(|| "AnonymousComponent".to_string());
 
-    // Check if class extends LitElement, ReactiveElement, or has @customElement decorator
+    // Check heritage: class must extend LitElement, ReactiveElement, or mixin wrapping it
     let mut extends_lit = false;
     if let Some(heritage) = &class.heritage {
         let span = heritage.expression.span();
@@ -139,79 +152,60 @@ fn classify_class<'a>(
         });
     }
 
-    // Inspect complexity of the class for Mode A vs Mode B
-    let mut is_complex = false;
-    let mut reason: Option<String> = None;
+    // Inspect complexity of the class
+    let mut has_structural_directive = false;
+    let mut has_lowerable_directive = false;
+    let mut has_lifecycle_override = false;
+    let mut num_html_templates = 0;
+    let mut num_reactive_props = 0;
 
-    // Check for complex directives and dynamic loops in render()
     for elem in &class.body.body {
         match elem {
             ClassElement::MethodDefinition(m) => {
                 let name = m.key.static_name().unwrap_or_default();
-                if name == "shouldUpdate" || name == "willUpdate" {
-                    is_complex = true;
-                    reason = Some(format!("Overrides {}", name));
-                    break;
+                if name == "shouldUpdate"
+                    || name == "willUpdate"
+                    || name == "updated"
+                    || name == "firstUpdated"
+                {
+                    has_lifecycle_override = true;
                 }
 
                 if name == "render" {
                     if let Some(body) = &m.value.body {
-                        let span = body.span;
-                        let start = span.start as usize;
-                        let end = (span.end as usize).min(source.len());
-                        if start < end {
-                            let render_slice = &source[start..end];
-                            if render_slice.contains("repeat(") {
-                                is_complex = true;
-                                reason = Some("Uses repeat() directive".to_string());
-                                break;
-                            }
-                            if render_slice.contains("until(") {
-                                is_complex = true;
-                                reason = Some("Uses until() directive".to_string());
-                                break;
-                            }
-                            if render_slice.contains("cache(") {
-                                is_complex = true;
-                                reason = Some("Uses cache() directive".to_string());
-                                break;
-                            }
-                            if render_slice.contains("live(") {
-                                is_complex = true;
-                                reason = Some("Uses live() directive".to_string());
-                                break;
-                            }
-                            if render_slice.contains(".map(") && render_slice.contains("html`") {
-                                is_complex = true;
-                                reason = Some("Dynamic sub-template loop in render".to_string());
-                                break;
-                            }
-                            if render_slice.matches("html`").count() > 1 {
-                                is_complex = true;
-                                reason = Some("Multiple html template literals in render".to_string());
-                                break;
-                            }
-                            if render_slice.contains("this.render") {
-                                is_complex = true;
-                                reason = Some("Invokes helper render methods".to_string());
-                                break;
-                            }
-                            if render_slice.contains("classMap(")
-                                || render_slice.contains("styleMap(")
-                                || render_slice.contains("ifDefined(")
-                                || render_slice.contains("guard(")
-                            {
-                                is_complex = true;
-                                reason = Some("Uses Lit dynamic template directives".to_string());
-                                break;
-                            }
-                            if render_slice.contains('?')
-                                && render_slice.contains(':')
-                                && render_slice.contains("html`")
-                            {
-                                is_complex = true;
-                                reason = Some("Conditional dynamic template branches".to_string());
-                                break;
+                        // Count templates and inspect directives
+                        for stmt in &body.statements {
+                            inspect_render_statement(
+                                stmt,
+                                import_ctx,
+                                &mut has_structural_directive,
+                                &mut has_lowerable_directive,
+                                &mut num_html_templates,
+                            );
+                        }
+                    }
+                }
+            }
+            ClassElement::PropertyDefinition(prop) => {
+                let name = match &prop.key {
+                    PropertyKey::StaticIdentifier(id) => Some(id.name.as_str()),
+                    PropertyKey::StringLiteral(lit) => Some(lit.value.as_str()),
+                    _ => None,
+                };
+                if let Some(p_name) = name {
+                    if !prop.r#static && p_name != "styles" {
+                        for dec in &prop.decorators {
+                            if let Expression::CallExpression(call) = &dec.expression {
+                                let callee_name = match &call.callee {
+                                    Expression::Identifier(id) => Some(id.name.as_str()),
+                                    Expression::StaticMemberExpression(mem) => {
+                                        Some(mem.property.name.as_str())
+                                    }
+                                    _ => None,
+                                };
+                                if callee_name == Some("property") || callee_name == Some("state") {
+                                    num_reactive_props += 1;
+                                }
                             }
                         }
                     }
@@ -221,7 +215,19 @@ fn classify_class<'a>(
         }
     }
 
-    let mode = if is_complex { "micro" } else { "vanilla" };
+    // Classification decision:
+    // 1. If has structural directives (repeat, cache, until, live) -> Mode B micro/skip
+    // 2. If has lowerable directives (classMap, styleMap, ifDefined, guard) OR complex lifecycle -> Mode B
+    // 3. If genuine leaf (no directives, <= 12 props, single template, no lifecycle overrides) -> Mode A vanilla
+    let (mode, reason) = if has_structural_directive {
+        ("micro", Some("Contains structural Lit directives".to_string()))
+    } else if has_lowerable_directive {
+        ("micro", Some("Contains lowerable Lit directives".to_string()))
+    } else if has_lifecycle_override || num_html_templates > 1 || num_reactive_props > 12 {
+        ("micro", Some("Complex lifecycle or multiple templates".to_string()))
+    } else {
+        ("vanilla", Some("Genuine leaf component".to_string()))
+    };
 
     Some(ClassificationResult {
         mode: mode.to_string(),
@@ -229,6 +235,90 @@ fn classify_class<'a>(
         tag_name,
         reason,
     })
+}
+
+fn inspect_render_statement<'a>(
+    stmt: &Statement<'a>,
+    import_ctx: &ImportContext,
+    has_structural: &mut bool,
+    has_lowerable: &mut bool,
+    num_templates: &mut usize,
+) {
+    match stmt {
+        Statement::ReturnStatement(ret) => {
+            if let Some(arg) = &ret.argument {
+                inspect_render_expression(arg, import_ctx, has_structural, has_lowerable, num_templates);
+            }
+        }
+        Statement::ExpressionStatement(expr_stmt) => {
+            inspect_render_expression(&expr_stmt.expression, import_ctx, has_structural, has_lowerable, num_templates);
+        }
+        Statement::IfStatement(if_stmt) => {
+            inspect_render_expression(&if_stmt.test, import_ctx, has_structural, has_lowerable, num_templates);
+            inspect_render_statement(&if_stmt.consequent, import_ctx, has_structural, has_lowerable, num_templates);
+            if let Some(alt) = &if_stmt.alternate {
+                inspect_render_statement(alt, import_ctx, has_structural, has_lowerable, num_templates);
+            }
+        }
+        Statement::BlockStatement(block) => {
+            for s in &block.body {
+                inspect_render_statement(s, import_ctx, has_structural, has_lowerable, num_templates);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn inspect_render_expression<'a>(
+    expr: &Expression<'a>,
+    import_ctx: &ImportContext,
+    has_structural: &mut bool,
+    has_lowerable: &mut bool,
+    num_templates: &mut usize,
+) {
+    match expr {
+        Expression::TaggedTemplateExpression(tag) => {
+            if let Expression::Identifier(id) = &tag.tag {
+                if id.name == "html" {
+                    *num_templates += 1;
+                }
+            }
+            for e in &tag.quasi.expressions {
+                inspect_render_expression(e, import_ctx, has_structural, has_lowerable, num_templates);
+            }
+        }
+        Expression::CallExpression(call) => {
+            if let Expression::Identifier(id) = &call.callee {
+                if let Some(directive) = import_ctx.get_directive_kind(&id.name) {
+                    match directive {
+                        DirectiveKind::Repeat
+                        | DirectiveKind::Cache
+                        | DirectiveKind::Until
+                        | DirectiveKind::Live => {
+                            *has_structural = true;
+                        }
+                        DirectiveKind::ClassMap
+                        | DirectiveKind::StyleMap
+                        | DirectiveKind::IfDefined
+                        | DirectiveKind::Guard => {
+                            *has_lowerable = true;
+                        }
+                    }
+                }
+            }
+            for arg in &call.arguments {
+                if let Some(e) = arg.as_expression() {
+                    inspect_render_expression(e, import_ctx, has_structural, has_lowerable, num_templates);
+                }
+            }
+        }
+        Expression::ConditionalExpression(cond) => {
+            inspect_render_expression(&cond.test, import_ctx, has_structural, has_lowerable, num_templates);
+            inspect_render_expression(&cond.consequent, import_ctx, has_structural, has_lowerable, num_templates);
+            inspect_render_expression(&cond.alternate, import_ctx, has_structural, has_lowerable, num_templates);
+        }
+        _ => {}
+    }
 }
 
 fn extract_tag_name<'a>(
@@ -253,15 +343,16 @@ fn extract_tag_name<'a>(
         }
     }
 
-    // Check if customElements.define is used in the module
     let class_name = class
         .id
         .as_ref()
         .map(|id| id.name.as_str())
         .or(fallback_name)?;
-    let search_str = format!("customElements.define(");
-    if let Some(pos) = source.find(&search_str) {
-        let after = &source[pos + search_str.len()..];
+    let search_str = "customElements.define(";
+    let mut pos_offset = 0;
+    while let Some(pos) = source[pos_offset..].find(search_str) {
+        let abs_pos = pos_offset + pos;
+        let after = &source[abs_pos + search_str.len()..];
         if let Some(comma_pos) = after.find(',') {
             let tag_part = after[..comma_pos].trim();
             let remaining = after[comma_pos + 1..].trim();
@@ -270,6 +361,7 @@ fn extract_tag_name<'a>(
                 return Some(clean_tag.to_string());
             }
         }
+        pos_offset = abs_pos + search_str.len();
     }
 
     None

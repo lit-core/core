@@ -52,8 +52,8 @@ export class CounterComponent extends LitElement {
         ]);
 
         expect(res.code).toContain('static __litPartPaths = [');
-        expect(res.code).toContain('[0, 1, 1]');
-        expect(res.code).toContain('[0, 2]');
+        expect(res.code.replace(/\s+/g, '')).toContain('[0,1,1]');
+        expect(res.code.replace(/\s+/g, '')).toContain('[0,2]');
         expect(res.code).toContain('render()');
       });
 

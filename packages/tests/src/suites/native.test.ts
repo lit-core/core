@@ -85,55 +85,28 @@ describe('@lit-core/native Playwright Chromium and real component verification',
         // Skipped in sandbox environment lacking Mach port rendezvous privileges
         return;
       }
-      const componentCode = `
-        const _sheet = new CSSStyleSheet();
-        _sheet.replaceSync(':host { display: inline-block; } button { color: rgb(0, 128, 0); }');
+      const litSource = `
+        import { LitElement, html, css } from 'lit';
+        import { customElement, property } from 'lit/decorators.js';
 
-        const _tmpl = document.createElement('template');
-        _tmpl.innerHTML = '<button id="btn"><span id="txt"> </span></button>';
+        @customElement('pw-vanilla-button')
+        export class PlaywrightVanillaButton extends LitElement {
+          static styles = css\`:host { display: inline-block; } button { color: rgb(0, 128, 0); }\`;
 
-        class PlaywrightVanillaButton extends HTMLElement {
-          static observedAttributes = ['label', 'disabled'];
+          @property({ type: String }) label = 'Initial';
+          @property({ type: Boolean, reflect: true }) disabled = false;
 
-          constructor() {
-            super();
-            this.attachShadow({ mode: 'open' });
-            this.shadowRoot.adoptedStyleSheets = [_sheet];
-            const frag = _tmpl.content.cloneNode(true);
-            this.__btn = frag.querySelector('#btn');
-            this.__txt = frag.querySelector('#txt');
-            this.shadowRoot.appendChild(frag);
-
-            this._label = 'Initial';
-            this._disabled = false;
-            this._clicked = 0;
-
-            this.__btn.addEventListener('click', () => {
-              this._clicked++;
-            });
-          }
-
-          get label() { return this._label; }
-          set label(v) {
-            this._label = v;
-            if (this.__txt) this.__txt.textContent = v;
-          }
-
-          get disabled() { return this._disabled; }
-          set disabled(v) {
-            this._disabled = Boolean(v);
-            this.toggleAttribute('disabled', Boolean(v));
-            if (this.__btn) this.__btn.disabled = Boolean(v);
-          }
-
-          attributeChangedCallback(name, oldVal, newVal) {
-            if (oldVal === newVal) return;
-            if (name === 'label') this.label = newVal;
-            if (name === 'disabled') this.disabled = newVal !== null;
+          render() {
+            return html\`<button id="btn"><span id="txt">\${this.label}</span></button>\`;
           }
         }
+      `;
 
-        customElements.define('pw-vanilla-button', PlaywrightVanillaButton);
+      const transformed = transformNative(litSource);
+      expect(transformed.vanillaCount).toBe(1);
+
+      const componentCode = `
+        ${transformed.code}
 
         const el = document.createElement('pw-vanilla-button');
         el.label = 'Click Me';

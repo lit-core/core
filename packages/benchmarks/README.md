@@ -32,12 +32,12 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 2942.83 KB | 1749.03 KB | 807.33 KB | 843.26 KB | 467.66 KB |
-| **Net bundle savings** | **-2859.04 KB (-49.28%)** | **-129.05 KB (-6.87%)** | **+4.21 KB (+0.52%)** | **-26.79 KB (-3.08%)** | **+19.29 KB (+4.30%)** |
-| **Baseline build time** | 195 ms | 170 ms | 96 ms | 247 ms | 39 ms |
-| **Optimized build time** | 1612 ms | 2051 ms | 677 ms | 815 ms | 333 ms |
-| **Build overhead** | +1417 ms | +1881 ms | +581 ms | +568 ms | +294 ms |
-| **First render speedup** | **+35.3% faster** | **+36.6% faster** | **+34.7% faster** | **+34.6% faster** | **+34.5% faster** |
+| **Optimized bundle size** | 2939.11 KB | 1749.03 KB | 806.86 KB | 843.34 KB | 463.18 KB |
+| **Net bundle savings** | **-2862.76 KB (-49.34%)** | **-129.05 KB (-6.87%)** | **+3.74 KB (+0.47%)** | **-26.71 KB (-3.07%)** | **+14.81 KB (+3.30%)** |
+| **Baseline build time** | 181 ms | 215 ms | 83 ms | 139 ms | 39 ms |
+| **Optimized build time** | 1918 ms | 2616 ms | 702 ms | 660 ms | 352 ms |
+| **Build overhead** | +1737 ms | +2401 ms | +619 ms | +521 ms | +313 ms |
+| **First render speedup** | **+37.4% faster** | **+36.6% faster** | **+35.5% faster** | **+35.4% faster** | **+35.6% faster** |
 
 > [!NOTE]
 > The ~34-36% first render speedup in the combined overview is delivered primarily by ahead-of-time Lit template compilation (`@lit-core/html-aot`), which eliminates runtime HTML parsing and template preparation, supplemented by shared constructable stylesheets (`css-fuse`) and lowered properties (`props-lower`). In isolation, static fragment clustering (`html-fuse`) and template minifiers (`css-minifier`, `html-minifier`) optimize bundle size and have neutral runtime mount impact.
