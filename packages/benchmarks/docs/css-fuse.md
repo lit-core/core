@@ -13,10 +13,10 @@ Cross-component CSS AST deduplication into constructable stylesheets evaluated a
 | `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 73 elements |
 | `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 97 elements |
 | `@material/web` | Google Material Design 3 | `2.5.0` | 28 elements |
-| `lit` | Core runtime | `3.3.3` | — |
-| `vite` | Bundler | `8.3.1` | — |
-| `playwright` | Runtime evaluation engine | `1.63.0` | — |
-| `node` | Runtime environment | `v24.14.0` | — |
+| `lit` | Core runtime | `3.3.3` | n/a |
+| `vite` | Bundler | `8.3.1` | n/a |
+| `playwright` | Runtime evaluation engine | `1.63.0` | n/a |
+| `node` | Runtime environment | `v24.14.0` | n/a |
 
 ---
 

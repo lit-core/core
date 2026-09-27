@@ -20,10 +20,10 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 | `@awesome.me/webawesome` | Design system component suite | `3.14.0` | 73 elements |
 | `@spectrum-web-components/bundle` | Design system component suite | `1.12.2` | 52 elements |
 | `@material/web` | Design system component suite | `2.5.0` | 28 elements |
-| `lit` | Core runtime & toolchain | `3.3.3` | — |
-| `vite` | Core runtime & toolchain | `8.3.1` | — |
-| `playwright` | Core runtime & toolchain | `1.63.0` | — |
-| `node` | Core runtime & toolchain | `v24.14.0` | — |
+| `lit` | Core runtime & toolchain | `3.3.3` | n/a |
+| `vite` | Core runtime & toolchain | `8.3.1` | n/a |
+| `playwright` | Core runtime & toolchain | `1.63.0` | n/a |
+| `node` | Core runtime & toolchain | `v24.14.0` | n/a |
 
 ---
 
@@ -32,25 +32,26 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 2,807.99 KB | 1,603.62 KB | 739.07 KB | 867.13 KB | 450.40 KB |
-| **Net bundle savings** | **-2,993.88 KB (-51.60%)** | **-136.30 KB (-7.83%)** | **-64.05 KB (-7.98%)** | **-2.92 KB (-0.34%)** | **-2.03 KB (-0.45%)** |
-| **Baseline build time** | 206 ms | 196 ms | 88 ms | 134 ms | 34 ms |
-| **Optimized build time** | 1,559 ms | 1,864 ms | 656 ms | 742 ms | 355 ms |
-| **Build overhead** | +1,353 ms | +1,668 ms | +568 ms | +609 ms | +322 ms |
-| **First render speedup** | **+37.7% faster** | **+37.7% faster** | **+36.8% faster** | **+37.4% faster** | **+37.2% faster** |
+| **Optimized bundle size** | 2,807.41 KB | 1,740.01 KB | 739.10 KB | 867.15 KB | 450.49 KB |
+| **Net bundle savings** | **-2,994.47 KB (-51.61%)** | **+0.09 KB (+0.01%)** | **-64.02 KB (-7.97%)** | **-2.90 KB (-0.33%)** | **+2.11 KB (+0.47%)** |
+| **Baseline build time** | 206 ms | 196 ms | 85 ms | 134 ms | 34 ms |
+| **Optimized build time** | 1,559 ms | 1,864 ms | 609 ms | 742 ms | 355 ms |
+| **Build overhead** | +1,353 ms | +1,668 ms | +524 ms | +609 ms | +321 ms |
+| **First render speedup** | **+45.1% faster** | **+44.3% faster** | **+43.1% faster** | **+44.3% faster** | **+43.4% faster** |
 
 ---
 
-## Dedicated per-feature benchmarks
+## Dedicated per-package benchmarks
 
-Detailed benchmarks, full AST diagnostics, build durations, and runtime measurements are documented individually per feature:
+Detailed benchmarks, full AST diagnostics, build durations, and runtime measurements are documented individually per package:
 
-- [**`css-fuse` benchmark**](docs/css-fuse.md): Full CSS AST deduplication, constructable stylesheet metrics, and up to -51.3% size reduction.
+- [**`css-fuse` benchmark**](docs/css-fuse.md): Full CSS AST deduplication, constructable stylesheet metrics, and up to -51.6% size reduction.
 - [**`html-fuse` benchmark**](docs/html-fuse.md): Static HTML and SVG fragment clustering and consolidated innerHTML parsing.
+- [**`props-lower` benchmark**](docs/props-lower.md): Native Rust decorator lowering, prototype scalar hoisting, and descriptor preset deduplication.
 - [**`elem-proxy` benchmark**](docs/elem-proxy.md): Deferred element proxy stubs, -72.8% script evaluation CPU time, and -67.4% to -70.2% V8 heap memory savings.
-- [**`html-aot` benchmark**](docs/html-aot.md): Ahead-of-time Lit template compilation, eliminated runtime prepare overhead, and +38.0% render speedup.
-- [**`props-lower` benchmark**](docs/props-lower.md): Native Rust decorator lowering, zero runtime reflection, and up to -6.1% size reduction.
-- [**Template minifiers benchmark**](docs/template-minifiers.md): High-speed Lightning CSS and OXC template minification (`css-minifier` & `html-minifier`).
+- [**`html-aot` benchmark**](docs/html-aot.md): Ahead-of-time Lit template compilation, eliminated runtime prepare overhead, and +44% render speedup.
+- [**`css-minifier` benchmark**](docs/css-minifier.md): High-speed Lightning CSS template minification.
+- [**`html-minifier` benchmark**](docs/html-minifier.md): High-speed OXC HTML and SVG template minification.
 
 ---
 

@@ -33,9 +33,32 @@ node packages/benchmarks/src/index.js --suite=spectrum
 node packages/benchmarks/src/index.js --suite=material
 node packages/benchmarks/src/index.js --suite=momentum
 
+# Run isolated tools
+node packages/benchmarks/src/index.js --tools=css-fuse
+node packages/benchmarks/src/index.js --tools=html-fuse
+node packages/benchmarks/src/index.js --tools=props-lower
+node packages/benchmarks/src/index.js --tools=html-aot
+node packages/benchmarks/src/index.js --tools=css-minifier
+node packages/benchmarks/src/index.js --tools=html-minifier
+
+# Run elem-proxy runtime initialization benchmarks
+pnpm run benchmark:elem-proxy
+
 # Generate clean markdown output
 pnpm run benchmark:markdown
 ```
+
+## Mandatory benchmark structure: one benchmark per package
+
+Each tool has its own dedicated benchmark document in `packages/benchmarks/docs/`. **NEVER merge separate tools into one document**:
+
+- `packages/benchmarks/docs/css-fuse.md`: CSS AST deduplication and constructable stylesheets.
+- `packages/benchmarks/docs/html-fuse.md`: Static HTML and SVG fragment clustering.
+- `packages/benchmarks/docs/props-lower.md`: Decorator lowering, descriptor preset deduplication, prototype scalar hoisting.
+- `packages/benchmarks/docs/elem-proxy.md`: Deferred element proxy stubs, script evaluation CPU time, heap memory.
+- `packages/benchmarks/docs/html-aot.md`: Ahead-of-time Lit template compilation and runtime prepare elimination.
+- `packages/benchmarks/docs/css-minifier.md`: Embedded CSS template literal minification via Lightning CSS.
+- `packages/benchmarks/docs/html-minifier.md`: Embedded HTML/SVG template literal minification via OXC.
 
 ## Reporting and formatting rules
 
@@ -43,6 +66,9 @@ pnpm run benchmark:markdown
    - Present a single **Results summary** table comparing Baseline vs. Optimized (Minified JS, Gzip, Brotli, and delta savings).
    - Present a separate **Deduplication diagnostics** table for AST metrics (rules scanned, duplicate rules fused, shared sheets created, chunks rewritten).
    - Do NOT duplicate rows across multiple nested accordions.
-2. **Casing and style**:
+2. **Casing and punctuation**:
    - Always use sentence case for all table headers, section titles, and descriptions. Do not uppercase every word.
-   - Omit internal bug fix postmortems or debugging notes from consumer-facing benchmark documentation.
+   - Strictly NO em dashes (`—` or `--`). Use `n/a` or `-` for non-applicable values.
+3. **Build overhead profiling**:
+   - Native Rust transforms (`css-minifier`, `html-minifier`, `props-lower`) have near-zero overhead (<100 ms total across 100 components).
+   - Node.js AST compiler passes (`html-aot`) run in JavaScript and must always use fast-path regex checks (`LIT_HTML_AOT_FAST_CHECK`) before AST parsing to prevent unneeded overhead on non-Lit modules.

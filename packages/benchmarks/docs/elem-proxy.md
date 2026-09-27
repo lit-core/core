@@ -10,9 +10,9 @@ Deferred Custom Element proxy stubs evaluated across production Lit design syste
 | :--- | :--- | :--- | ---: |
 | `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 99 elements |
 | `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 52 elements |
-| `lit` | Core runtime | `3.3.3` | — |
-| `vite` | Bundler | `8.3.1` | — |
-| `node` | Runtime environment | `v24.14.0` | — |
+| `lit` | Core runtime | `3.3.3` | n/a |
+| `vite` | Bundler | `8.3.1` | n/a |
+| `node` | Runtime environment | `v24.14.0` | n/a |
 
 ---
 
