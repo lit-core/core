@@ -50,6 +50,7 @@
     "@lit-core/html-fuse": "workspace:*",
     "@lit-core/html-minifier": "workspace:*",
     "@lit-core/memoize": "workspace:*",
+    "@lit-core/native": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*"
   },

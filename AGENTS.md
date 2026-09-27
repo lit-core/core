@@ -87,6 +87,7 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 | `@lit-core/html-minifier` | `packages/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML template literal minifier |
 | `@lit-core/html-aot` | `packages/html-aot` | TypeScript, `parse5`, `lit-html` | Ahead-of-time Lit template compilation eliminating runtime prepare phase |
 | `@lit-core/resumable` | `packages/resumable` | TypeScript, Lit | Zero-JavaScript SSR and interaction-driven runtime resumption |
+| `@lit-core/native` | `packages/native` | Rust (`oxc`), NAPI-RS | AOT vanilla Web Component and micro-runtime compiler |
 | `@lit-core/vite-plugin` | `packages/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
 | `@lit-core/webpack-plugin` | `packages/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack |
 | `@lit-core/benchmarks` | `packages/benchmarks` | Node.js, Vite | Multi-library bundle size and deduplication benchmark harness |
@@ -100,7 +101,7 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 - **Monorepo build orchestration**: `turbo run build`.
 - **Rust NAPI modules**:
   - Rust packages contain native `.node` bindings.
-  - Whenever you modify Rust code in `packages/css-fuse`, `packages/props-lower`, `packages/css-minifier`, or `packages/html-minifier`, run `cargo build --release` (or the package's build script) to update the `.node` binary before executing JS tests or benchmarks.
+  - Whenever you modify Rust code in `packages/css-fuse`, `packages/props-lower`, `packages/native`, `packages/css-minifier`, or `packages/html-minifier`, run `cargo build --release` (or the package's build script) to update the `.node` binary before executing JS tests or benchmarks.
 - **Code formatting and linting**:
   - JavaScript / TypeScript: `pnpm run format` (powered by Biome).
   - Rust: `cargo fmt` and `cargo clippy`.

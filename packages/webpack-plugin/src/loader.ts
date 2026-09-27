@@ -11,6 +11,7 @@ import type {
   HtmlMinifierOptions,
   LitPluginOptions,
   MemoizeOptions,
+  NativeOptions,
   PropsLowerOptions,
   ResumableOptions,
 } from './options.js';
@@ -23,6 +24,7 @@ import {
   transformHtmlAot,
   transformHtmlMinifier,
   transformMemoizePlugin,
+  transformNativePlugin,
   transformPropsLower,
   transformResumable,
 } from './transforms.js';
@@ -102,6 +104,19 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
   if (elemProxyOpt) {
     const proxyOpts: ElemProxyOptions = typeof elemProxyOpt === 'object' ? elemProxyOpt : {};
     const result = transformElemProxy(currentSource, resourcePath, proxyOpts);
+    if (result) {
+      currentSource = result.code;
+      if (result.map) {
+        currentMap = result.map;
+      }
+    }
+  }
+
+  // 3.5. Apply native AOT vanilla / micro-runtime compiler if enabled
+  const nativeOpt = options.native ?? options['native-compile'];
+  if (nativeOpt) {
+    const nativeOpts: NativeOptions = typeof nativeOpt === 'object' ? nativeOpt : {};
+    const result = transformNativePlugin(currentSource, resourcePath, nativeOpts);
     if (result) {
       currentSource = result.code;
       if (result.map) {

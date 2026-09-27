@@ -34,9 +34,9 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 | **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
 | **Optimized bundle size** | 2939.11 KB | 1749.03 KB | 806.86 KB | 843.11 KB | 469.43 KB |
 | **Net bundle savings** | **-2862.76 KB (-49.34%)** | **-129.05 KB (-6.87%)** | **+3.74 KB (+0.47%)** | **-26.94 KB (-3.10%)** | **+21.06 KB (+4.70%)** |
-| **Baseline build time** | 188 ms | 176 ms | 134 ms | 134 ms | 43 ms |
-| **Optimized build time** | 1628 ms | 2042 ms | 706 ms | 642 ms | 363 ms |
-| **Build overhead** | +1440 ms | +1866 ms | +572 ms | +508 ms | +320 ms |
+| **Baseline build time** | 224 ms | 214 ms | 100 ms | 149 ms | 41 ms |
+| **Optimized build time** | 1656 ms | 2320 ms | 842 ms | 752 ms | 359 ms |
+| **Build overhead** | +1432 ms | +2106 ms | +742 ms | +603 ms | +318 ms |
 | **First render speedup** | **+37.4% faster** | **+36.6% faster** | **+35.5% faster** | **+34.8% faster** | **+35.3% faster** |
 
 > [!NOTE]

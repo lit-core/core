@@ -13,6 +13,7 @@
     "test:material": "vitest run material",
     "test:momentum": "vitest run momentum",
     "test:plugins": "vitest run plugins",
+    "test:native": "vitest run native",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "@lit-core/html-aot": "workspace:*",
     "@lit-core/html-fuse": "workspace:*",
     "@lit-core/html-minifier": "workspace:*",
+    "@lit-core/native": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",

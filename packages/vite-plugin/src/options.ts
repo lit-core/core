@@ -236,6 +236,20 @@ export interface LitPluginOptions {
   'elem-proxy'?: boolean | ElemProxyOptions;
 
   /**
+   * Ahead-of-time vanilla Web Component and micro-runtime compiler via @lit-core/native.
+   * Compiles leaf components into 100% pure vanilla Web Components with 0 KB Lit runtime
+   * imports, and complex dynamic components into a shared 1.5 KB micro-runtime.
+   * Pass `true` or a `NativeOptions` object to enable.
+   * @default false
+   */
+  native?: boolean | NativeOptions;
+
+  /**
+   * Kebab-case alias for `native`.
+   */
+  'native-compile'?: boolean | NativeOptions;
+
+  /**
    * Ahead-of-time ShadowRoot event delegation compiler pass via @lit-core/event-hoist.
    * Hoists bubbling child event listeners to a single delegated listener on ShadowRoot.
    * Pass `true` or an `EventHoistOptions` object to enable.
@@ -471,4 +485,32 @@ export interface MemoizeOptions {
 }
 
 export type LitMemoizeOptions = MemoizeOptions;
+
+export interface NativeOptions {
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Forced compilation mode ('auto' | 'vanilla-only' | 'micro-only').
+   * @default 'auto'
+   */
+  mode?: 'auto' | 'vanilla-only' | 'micro-only';
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitNativeOptions = NativeOptions;
 export type LitCorePluginOptions = LitPluginOptions;

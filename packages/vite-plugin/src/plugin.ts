@@ -10,6 +10,7 @@ import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformMemoize } from '@lit-core/memoize';
+import { transformNative } from '@lit-core/native';
 import { transformLitProps } from '@lit-core/props-lower';
 import { resumable as litResumablePlugin } from '@lit-core/resumable/vite';
 import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
@@ -25,6 +26,7 @@ import type {
   HtmlMinifierOptions,
   LitPluginOptions,
   MemoizeOptions,
+  NativeOptions,
   PropsLowerOptions,
 } from './options.js';
 import { extractHtmlTemplateId, extractSheetId, formatVirtualHtmlId, formatVirtualId, isVirtualFusedId, isVirtualHtmlFusedId, matchesPattern, RESOLVED_FUSED_PREFIX } from './utils.js';
@@ -645,6 +647,64 @@ export function elemProxy(options: ElemProxyOptions = {}): Plugin {
 
 export const litElemProxy = elemProxy;
 
+const LIT_NATIVE_FAST_CHECK = /\bLitElement\b|@customElement\b|extends\s+(?:LitElement|ReactiveElement)\b/;
+
+export function native(options: NativeOptions = {}): Plugin {
+  const { sourcemap = true } = options;
+
+  return {
+    name: 'native',
+    enforce: 'pre',
+
+    transform(code: string, id: string) {
+      const cleanId = id.split('?')[0] ?? id;
+      if (!/\.[jt]sx?$/.test(cleanId)) {
+        return null;
+      }
+
+      if (options.exclude) {
+        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+        for (const pattern of excludes) {
+          if (matchesPattern(cleanId, pattern)) return null;
+        }
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
+        return null;
+      }
+
+      if (options.include) {
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+        if (!matched) return null;
+      }
+
+      if (!LIT_NATIVE_FAST_CHECK.test(code)) {
+        return null;
+      }
+
+      try {
+        const result = transformNative(code, {
+          sourcemap,
+          filename: cleanId,
+          mode: options.mode,
+        });
+
+        if (result.vanillaCount === 0 && result.microCount === 0) {
+          return null;
+        }
+
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      } catch (_err) {
+        return null;
+      }
+    },
+  };
+}
+
+export const litNative = native;
+
 const LIT_EVENT_HOIST_FAST_CHECK = /html\s*`[\s\S]*?@[a-zA-Z]/;
 
 export function eventHoist(options: EventHoistOptions = {}): Plugin {
@@ -900,6 +960,12 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
   if (elemProxyOpt) {
     const proxyOpts = typeof elemProxyOpt === 'object' ? elemProxyOpt : {};
     plugins.push(elemProxy(proxyOpts));
+  }
+
+  const nativeOpt = options.native ?? options['native-compile'];
+  if (nativeOpt) {
+    const nativeOpts = typeof nativeOpt === 'object' ? nativeOpt : {};
+    plugins.push(native(nativeOpts));
   }
 
   const eventHoistOpt = options.eventHoist ?? options['event-hoist'];

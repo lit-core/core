@@ -1,0 +1,49 @@
+{
+  "name": "@lit-core/native",
+  "version": "0.1.0",
+  "description": "Ahead-of-time vanilla Web Component and micro-runtime compiler for Lit",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./runtime": {
+      "types": "./src/runtime/index.d.ts",
+      "import": "./src/runtime/index.js"
+    },
+    "./runtime/reconciler": {
+      "types": "./src/runtime/reconciler.d.ts",
+      "import": "./src/runtime/reconciler.js"
+    }
+  },
+  "files": [
+    "src",
+    "*.node"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "napi": {
+    "binaryName": "native",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build:rs": "cargo build --release && cp target/release/libnative.dylib native.darwin-arm64.node 2>/dev/null || true",
+    "build:rs:debug": "cargo build && cp target/debug/libnative.dylib native.darwin-arm64.node 2>/dev/null || true",
+    "build:ts": "tsc -p tsconfig.json",
+    "build": "pnpm run build:rs && pnpm run build:ts",
+    "test": "node src/test.js"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.5",
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2"
+  }
+}

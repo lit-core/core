@@ -20,6 +20,8 @@
       "@lit-core/html-fuse": ["../html-fuse/src/index.d.ts"],
       "@lit-core/html-minifier": ["../html-minifier/src/index.d.ts"],
       "@lit-core/memoize": ["../memoize/src/index.d.ts"],
+      "@lit-core/native": ["../native/src/index.d.ts"],
+      "@lit-core/native/*": ["../native/src/*"],
       "@lit-core/props-lower": ["../props-lower/src/index.d.ts"],
       "@lit-core/resumable": ["../resumable/lib/index.d.ts"],
       "@lit-core/resumable/vite": ["../resumable/lib/vite/index.d.ts"]

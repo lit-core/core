@@ -10,6 +10,7 @@ import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformMemoize } from '@lit-core/memoize';
+import { transformNative } from '@lit-core/native';
 import { transformLitProps } from '@lit-core/props-lower';
 import type {
   CssFuseOptions,
@@ -22,6 +23,7 @@ import type {
   HtmlFuseOptions,
   HtmlMinifierOptions,
   MemoizeOptions,
+  NativeOptions,
   PropsLowerOptions,
   ResumableOptions,
 } from './options.js';
@@ -29,6 +31,7 @@ import { matchesPattern } from './utils.js';
 
 export const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b/;
 export const LIT_ELEM_PROXY_FAST_CHECK = /@customElement\b|customElements\.define\b/;
+export const LIT_NATIVE_FAST_CHECK = /\bLitElement\b|@customElement\b|extends\s+(?:LitElement|ReactiveElement)\b/;
 export const LIT_EVENT_HOIST_FAST_CHECK = /html\s*`[\s\S]*?@[a-zA-Z]/;
 export const LIT_DIRTY_MASK_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
 export const LIT_MEMOIZE_FAST_CHECK = /\brender\s*\([^)]*\)\s*\{/;
@@ -111,6 +114,38 @@ export function transformElemProxy(code: string, id: string, options: ElemProxyO
     });
 
     if (result.proxiedElementsCount === 0) {
+      return null;
+    }
+
+    return {
+      code: result.code,
+      map: result.map ? JSON.parse(result.map) : null,
+    };
+  } catch (_err) {
+    return null;
+  }
+}
+
+export function transformNativePlugin(code: string, id: string, options: NativeOptions = {}): TransformResult | null {
+  const { sourcemap = true } = options;
+  const cleanId = id.split('?')[0] ?? id;
+
+  if (!shouldProcessFile(cleanId, options)) {
+    return null;
+  }
+
+  if (!LIT_NATIVE_FAST_CHECK.test(code)) {
+    return null;
+  }
+
+  try {
+    const result = transformNative(code, {
+      sourcemap,
+      filename: cleanId,
+      mode: options.mode,
+    });
+
+    if (result.vanillaCount === 0 && result.microCount === 0) {
       return null;
     }
 
