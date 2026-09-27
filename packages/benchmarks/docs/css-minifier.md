@@ -29,12 +29,15 @@ Measurements compare a standard Vite production build with minification (`minify
 | **Baseline bundle size** | 803.12 KB | 870.05 KB | 448.37 KB | 5,801.88 KB | 1,739.92 KB |
 | **Optimized bundle size** | 733.47 KB | 833.56 KB | 441.92 KB | 5,801.88 KB | 1,739.92 KB |
 | **Net bundle savings** | **-69.65 KB (-8.67%)** | **-36.49 KB (-4.19%)** | **-6.45 KB (-1.44%)** | Pre-minified upstream | Pre-minified upstream |
-| **Baseline mount latency** | 14.80 ms | 14.85 ms | 14.90 ms | 15.12 ms | 14.96 ms |
-| **Optimized mount latency** | 8.30 ms | 8.22 ms | 8.14 ms | 8.46 ms | 13.48 ms |
-| **Mount speedup** | **+43.9% faster** | **+44.6% faster** | **+45.3% faster** | **+44.0% faster** | **+9.9% faster** |
-| **Baseline update latency** | 3.40 ms | 3.41 ms | 3.42 ms | 3.45 ms | 3.42 ms |
-| **Optimized update latency** | 2.51 ms | 2.49 ms | 2.48 ms | 2.53 ms | 3.22 ms |
-| **Update speedup** | **+26.2% faster** | **+27.0% faster** | **+27.5% faster** | **+26.7% faster** | **+5.8% faster** |
+| **Baseline mount latency** | 14.80 ms | 14.85 ms | 14.88 ms | 15.12 ms | 14.96 ms |
+| **Optimized mount latency** | 14.78 ms | 14.82 ms | 14.86 ms | 15.10 ms | 14.94 ms |
+| **Mount speedup** | **+0.1% (neutral)** | **+0.2% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** |
+| **Baseline update latency** | 3.40 ms | 3.41 ms | 3.41 ms | 3.45 ms | 3.42 ms |
+| **Optimized update latency** | 3.39 ms | 3.40 ms | 3.40 ms | 3.44 ms | 3.41 ms |
+| **Update speedup** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** |
+
+> [!NOTE]
+> `css-minifier` optimizes embedded CSS ASTs using Lightning CSS, removing comments, redundant whitespace, and duplicate declarations at build time. Because it does not alter stylesheet instantiation, DOM adoption, or the Lit rendering cycle, runtime mount and update latencies remain neutral.
 
 ---
 

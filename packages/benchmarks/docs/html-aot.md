@@ -36,6 +36,9 @@ Ahead-of-time compilation pre-computes part bindings and template structures. Wh
 | **Optimized update latency** | 2.94 ms | 3.22 ms | 2.95 ms | 2.90 ms | 2.98 ms |
 | **Update speedup** | **+15.5% faster** | **+6.4% faster** | **+13.2% faster** | **+15.0% faster** | **+12.9% faster** |
 
+> [!NOTE]
+> `@lit-core/html-aot` is the sole engine in `@lit-core` responsible for ahead-of-time template compilation and runtime prepare elimination. The ~35-38% mount speedup stems directly from pre-computed part indices and static HTML strings, bypassing runtime HTML parsing and caching. In contrast, `@lit-core/html-fuse` handles static fragment deduplication and does not modify the template compilation model.
+
 ---
 
 ## Running this benchmark

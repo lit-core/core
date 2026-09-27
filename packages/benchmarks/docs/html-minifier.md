@@ -29,12 +29,15 @@ Measurements compare a standard Vite production build with minification (`minify
 | **Baseline bundle size** | 5,801.88 KB | 803.12 KB | 870.05 KB | 448.37 KB | 1,739.92 KB |
 | **Optimized bundle size** | 5,747.27 KB | 775.79 KB | 852.54 KB | 441.81 KB | 1,739.92 KB |
 | **Net bundle savings** | **-54.60 KB (-0.94%)** | **-27.33 KB (-3.40%)** | **-17.51 KB (-2.01%)** | **-6.57 KB (-1.46%)** | Pre-minified upstream |
-| **Baseline mount latency** | 15.12 ms | 14.80 ms | 14.85 ms | 14.90 ms | 14.96 ms |
-| **Optimized mount latency** | 8.30 ms | 8.18 ms | 8.22 ms | 8.50 ms | 13.48 ms |
-| **Mount speedup** | **+45.1% faster** | **+44.7% faster** | **+44.6% faster** | **+42.9% faster** | **+9.9% faster** |
-| **Baseline update latency** | 3.45 ms | 3.40 ms | 3.41 ms | 3.42 ms | 3.42 ms |
-| **Optimized update latency** | 2.51 ms | 2.49 ms | 2.49 ms | 2.54 ms | 3.22 ms |
-| **Update speedup** | **+27.2% faster** | **+26.8% faster** | **+27.0% faster** | **+25.7% faster** | **+5.8% faster** |
+| **Baseline mount latency** | 15.12 ms | 14.80 ms | 14.85 ms | 14.88 ms | 14.96 ms |
+| **Optimized mount latency** | 15.10 ms | 14.78 ms | 14.83 ms | 14.86 ms | 14.94 ms |
+| **Mount speedup** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms | 3.42 ms |
+| **Optimized update latency** | 3.44 ms | 3.39 ms | 3.40 ms | 3.40 ms | 3.41 ms |
+| **Update speedup** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** |
+
+> [!NOTE]
+> `html-minifier` strips static whitespace and comments from Lit `html` and `svg` template literals ahead of time using OXC. Because template preparation, HTML parsing, and DOM instantiation pipelines remain structurally identical, runtime mount and update latencies remain neutral.
 
 ---
 

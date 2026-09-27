@@ -166,7 +166,7 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
     }
 
     const totalBundle = path.join(totalOutDir, 'bundle.js');
-    const totalRuntime = fs.existsSync(totalBundle) ? await measureBundleRuntime(totalBundle, 'TOTAL') : baselineRuntime;
+    const totalRuntime = tools.length === 1 && runtimeRows[1] ? runtimeRows[1] : fs.existsSync(totalBundle) ? await measureBundleRuntime(totalBundle, 'TOTAL') : baselineRuntime;
     const totalSpeedup = baselineRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - totalRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
 
     runtimeRows.push({

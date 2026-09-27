@@ -39,6 +39,9 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 | **Build overhead** | +1,353 ms | +1,668 ms | +524 ms | +609 ms | +321 ms |
 | **First render speedup** | **+45.1% faster** | **+44.3% faster** | **+43.1% faster** | **+44.3% faster** | **+43.4% faster** |
 
+> [!NOTE]
+> The ~43-45% first render speedup in the combined overview is delivered primarily by ahead-of-time Lit template compilation (`@lit-core/html-aot`), which eliminates runtime HTML parsing and template preparation, supplemented by shared constructable stylesheets (`css-fuse`) and lowered properties (`props-lower`). In isolation, static fragment clustering (`html-fuse`) and template minifiers (`css-minifier`, `html-minifier`) optimize bundle size and have neutral runtime mount impact.
+
 ---
 
 ## Dedicated per-package benchmarks
@@ -50,8 +53,10 @@ Detailed benchmarks, full AST diagnostics, build durations, and runtime measurem
 - [**`props-lower` benchmark**](docs/props-lower.md): Native Rust decorator lowering, prototype scalar hoisting, and descriptor preset deduplication.
 - [**`elem-proxy` benchmark**](docs/elem-proxy.md): Deferred element proxy stubs, -72.8% script evaluation CPU time, and -67.4% to -70.2% V8 heap memory savings.
 - [**`html-aot` benchmark**](docs/html-aot.md): Ahead-of-time Lit template compilation, eliminated runtime prepare overhead, and +44% render speedup.
+- [**`event-hoist` benchmark**](docs/event-hoist.md): Ahead-of-time ShadowRoot event delegation, -99.9% native DOM event listeners, and -30% mount latency.
 - [**`css-minifier` benchmark**](docs/css-minifier.md): High-speed Lightning CSS template minification.
 - [**`html-minifier` benchmark**](docs/html-minifier.md): High-speed OXC HTML and SVG template minification.
+- [**`resumable` benchmark**](docs/resumable.md): Zero-JavaScript Declarative Shadow DOM SSR, -99.5% initial client JavaScript payload, and -98.2% Total Blocking Time.
 
 ---
 
@@ -78,6 +83,12 @@ node packages/benchmarks/src/index.js --tools=html-minifier
 
 # Run elem-proxy runtime initialization benchmarks
 pnpm run benchmark:elem-proxy
+
+# Run event-hoist runtime delegation benchmarks
+pnpm run benchmark:event-hoist
+
+# Run resumable SSR and resumption benchmarks
+pnpm run benchmark:resumable
 
 # Output formatted markdown report
 pnpm run benchmark:markdown

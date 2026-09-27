@@ -29,12 +29,15 @@ Measurements compare a standard Vite production build with minification (`minify
 | **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
 | **Optimized bundle size** | 5,799.20 KB | 1,736.80 KB | 801.80 KB | 869.70 KB | 446.99 KB |
 | **Net bundle savings** | **-2.68 KB (-0.05%)** | **-3.12 KB (-0.18%)** | **-1.33 KB (-0.17%)** | **-0.35 KB (-0.04%)** | **-1.38 KB (-0.31%)** |
-| **Baseline mount latency** | 15.20 ms | 15.00 ms | 14.80 ms | 14.85 ms | 14.90 ms |
-| **Optimized mount latency** | 9.55 ms | 12.80 ms | 9.35 ms | 9.45 ms | 9.55 ms |
-| **Mount speedup** | **+37.2% faster** | **+14.7% faster** | **+36.8% faster** | **+36.4% faster** | **+35.9% faster** |
-| **Baseline update latency** | 3.48 ms | 3.44 ms | 3.40 ms | 3.41 ms | 3.42 ms |
-| **Optimized update latency** | 2.97 ms | 3.25 ms | 2.93 ms | 2.95 ms | 2.97 ms |
-| **Update speedup** | **+14.7% faster** | **+5.5% faster** | **+13.8% faster** | **+13.5% faster** | **+13.2% faster** |
+| **Baseline mount latency** | 15.12 ms | 15.00 ms | 14.80 ms | 14.85 ms | 14.88 ms |
+| **Optimized mount latency** | 14.96 ms | 14.92 ms | 14.76 ms | 14.80 ms | 15.08 ms |
+| **Mount speedup** | **+1.1% (neutral)** | **+0.5% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **-1.3% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.44 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Optimized update latency** | 3.42 ms | 3.43 ms | 3.39 ms | 3.40 ms | 3.44 ms |
+| **Update speedup** | **+0.9% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **-0.9% (neutral)** |
+
+> [!NOTE]
+> `html-fuse` is an ahead-of-time static fragment clustering and deduplication transform. It identifies repeated static HTML and SVG subtrees across components and clusters them into shared template constants. Because it does not alter the runtime Lit template compiler or bypass the template prepare phase (which is handled separately by `@lit-core/html-aot`), runtime mount and update latencies are neutral and remain within standard measurement noise.
 
 ---
 

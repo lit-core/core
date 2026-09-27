@@ -32,6 +32,8 @@
     "benchmark": "pnpm --filter @lit-core/benchmarks run benchmark",
     "benchmark:webawesome": "pnpm --filter @lit-core/benchmarks run benchmark:webawesome",
     "benchmark:momentum": "pnpm --filter @lit-core/benchmarks run benchmark:momentum",
+    "benchmark:event-hoist": "pnpm --filter @lit-core/benchmarks run benchmark:event-hoist",
+    "benchmark:resumable": "pnpm --filter @lit-core/benchmarks run benchmark:resumable",
     "benchmark:markdown": "pnpm --filter @lit-core/benchmarks run benchmark:markdown",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "biome format --write .",

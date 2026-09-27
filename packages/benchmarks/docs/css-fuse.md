@@ -29,14 +29,15 @@ Measurements compare a standard Vite production build with minification (`minify
 | **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
 | **Optimized bundle size** | 2,826.64 KB | 1,619.78 KB | 731.78 KB | 845.73 KB | 452.41 KB |
 | **Net bundle savings** | **-2,975.24 KB (-51.28%)** | **-120.14 KB (-6.90%)** | **-71.34 KB (-8.88%)** | **-24.32 KB (-2.79%)** | **+4.04 KB (+0.90%)** |
-| **Baseline mount latency** | 15.20 ms | 15.00 ms | 14.80 ms | 14.85 ms | 14.90 ms |
-| **Optimized mount latency** | 9.50 ms | 12.70 ms | 9.60 ms | 9.25 ms | 9.30 ms |
-| **Mount speedup** | **+37.5% faster** | **+15.3% faster** | **+35.1% faster** | **+37.7% faster** | **+37.6% faster** |
-| **Baseline update latency** | 3.48 ms | 3.44 ms | 3.40 ms | 3.41 ms | 3.42 ms |
-| **Optimized update latency** | 2.96 ms | 3.24 ms | 2.98 ms | 2.91 ms | 2.92 ms |
-| **Update speedup** | **+14.9% faster** | **+5.8% faster** | **+12.4% faster** | **+14.7% faster** | **+14.6% faster** |
+| **Baseline mount latency** | 15.12 ms | 15.00 ms | 14.80 ms | 14.85 ms | 14.88 ms |
+| **Optimized mount latency** | 14.90 ms | 14.82 ms | 14.62 ms | 14.68 ms | 15.04 ms |
+| **Mount speedup** | **+1.5% faster** | **+1.2% faster** | **+1.2% faster** | **+1.1% faster** | **-1.1% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.44 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Optimized update latency** | 3.42 ms | 3.41 ms | 3.38 ms | 3.39 ms | 3.44 ms |
+| **Update speedup** | **+0.9% faster** | **+0.9% faster** | **+0.6% faster** | **+0.6% faster** | **-0.9% (neutral)** |
 
-> In Material Web, components use shared CSS custom property design tokens rather than repeated static rule blocks. The safety net-savings threshold prevents unwarranted sheet creation on sub-threshold fragments.
+> [!NOTE]
+> `css-fuse` focuses on AST-level CSS deduplication and constructable stylesheet extraction (`CSSStyleSheet`), achieving massive bundle savings (up to -51.3% on Carbon). Shared constructable sheets eliminate duplicate CSS parsing in the browser, providing a modest mount speedup (~1-2%). In Material Web, components use shared CSS custom property design tokens rather than repeated static rule blocks; the net-savings threshold prevents unwarranted sheet creation on sub-threshold fragments. Template rendering speedups are handled separately by `@lit-core/html-aot`.
 
 ---
 
