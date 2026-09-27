@@ -38,6 +38,19 @@ export default defineConfig({
 });
 ```
 
+Via `@lit-core/webpack-plugin`:
+```javascript
+const { LitCoreWebpackPlugin } = require('@lit-core/webpack-plugin');
+
+module.exports = {
+  plugins: [
+    new LitCoreWebpackPlugin({
+      htmlMinifier: true,
+    }),
+  ],
+};
+```
+
 ---
 
 ## Related documentation

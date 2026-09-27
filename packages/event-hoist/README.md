@@ -19,6 +19,49 @@ In standard Lit components, declarative event bindings such as `@click=${this._o
 - **Encapsulation preservation**: Traverses the composed event path while verifying `getRootNode()`, ensuring delegated handlers never inadvertently trigger on action markers from nested Shadow DOM boundaries.
 - **Propagation fidelity**: Fully respects `event.stopPropagation()` to stop bubbling and prevent higher-level delegated triggers.
 
+---
+
+## Installation
+
+```bash
+pnpm add -D @lit-core/event-hoist
+```
+
+---
+
+## Quick usage
+
+Via `@lit-core/vite-plugin`:
+
+```typescript
+import { defineConfig } from 'vite';
+import { lit } from '@lit-core/vite-plugin';
+
+export default defineConfig({
+  plugins: [
+    lit({
+      eventHoist: true,
+    }),
+  ],
+});
+```
+
+Via `@lit-core/webpack-plugin`:
+
+```javascript
+const { LitCoreWebpackPlugin } = require('@lit-core/webpack-plugin');
+
+module.exports = {
+  plugins: [
+    new LitCoreWebpackPlugin({
+      eventHoist: true,
+    }),
+  ],
+};
+```
+
+---
+
 ## Architecture and cross references
 
 - Monorepo benchmark overview: [benchmarks README](../benchmarks/README.md)

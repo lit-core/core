@@ -1,14 +1,19 @@
-# @lit-core/memoize
+# `@lit-core/memoize`
 
-Ahead-of-time reactive expression auto-memoization compiler pass and bundler optimization for Lit and Web Components.
+> Ahead-of-time reactive expression auto-memoization compiler pass and bundler optimization for Lit and Web Components.
 
-## Overview
+`@lit-core/memoize` is an ahead-of-time AST optimization pass powered by OXC that analyzes JavaScript data flow inside Lit `render()` methods and automatically wraps pure array transformations (`.map()`, `.filter()`, `.sort()`, `.slice()`, `.reduce()`, `.flatMap()`) in property-guarded cache slots (`this.__memo_*`).
 
-In Lit components, developers frequently write data transformations directly inside `render()` (e.g. `this.items.filter(x => x.active).map(x => html\`<li>\${x}</li>\`)`). Whenever an unrelated property changes (`this.open = true`), these array pipelines re-execute from scratch, allocating new intermediate arrays and hundreds of `TemplateResult` objects. This creates heavy V8 garbage collection (GC) pauses and forces Lit to re-check entire subtrees.
+---
 
-`@lit-core/memoize` is an ahead-of-time AST optimization pass powered by OXC that analyzes JavaScript AST data flow inside Lit `render()` methods and automatically wraps pure array transformations (`.map()`, `.filter()`, `.sort()`, `.slice()`, `.reduce()`, `.flatMap()`) in property-guarded cache slots (`this.__memo_*`).
+## Key benefits
 
-When input references are unchanged, the component returns the cached reference, allowing Lit's `Object.is()` check to skip child subtree reconciliation in 0 milliseconds with 0 heap allocations.
+- **Zero heap allocations on re-render**: Returns cached array and `TemplateResult` references when input properties are unchanged.
+- **Microtask reconciliation skipping**: Allows Lit's `Object.is()` check to skip child subtree diffing in 0 ms.
+- **Automatic dependency tracking**: Inspects accessed reactive properties on `this` without manual dependency array declarations.
+- **Strict purity guarantees**: Rejects mutating array methods, external non-deterministic globals, and impure calls.
+
+---
 
 ## How it works
 
@@ -66,13 +71,48 @@ export class FilteredList extends LitElement {
 }
 ```
 
+---
+
 ## Installation
 
 ```bash
 pnpm add -D @lit-core/memoize
 ```
 
-## Programmatic usage
+---
+
+## Quick usage
+
+### Vite plugin
+
+```typescript
+import { defineConfig } from 'vite';
+import { lit } from '@lit-core/vite-plugin';
+
+export default defineConfig({
+  plugins: [
+    lit({
+      memoize: true,
+    }),
+  ],
+});
+```
+
+### Webpack plugin
+
+```javascript
+const { LitCoreWebpackPlugin } = require('@lit-core/webpack-plugin');
+
+module.exports = {
+  plugins: [
+    new LitCoreWebpackPlugin({
+      memoize: true,
+    }),
+  ],
+};
+```
+
+### Direct API
 
 ```ts
 import { transformMemoize } from '@lit-core/memoize';
@@ -85,3 +125,12 @@ const result = transformMemoize(sourceCode, {
 console.log(result.code);
 console.log(`Memoized ${result.memoizedCount} expressions across ${result.componentsCount} components`);
 ```
+
+---
+
+## Related documentation
+
+- [Ahead-of-time property dependency bitmasking (`dirty-mask`)](../dirty-mask/README.md)
+- [Ahead-of-time template compilation (`html-aot`)](../html-aot/docs/template-compilation.md)
+- [memoize benchmark report](../benchmarks/docs/memoize.md)
+- [Monorepo benchmark overview](../benchmarks/README.md)

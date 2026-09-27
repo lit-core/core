@@ -1,8 +1,12 @@
-# Ahead-of-time structural DOM path compiler
+# `@lit-core/dom-paths`
+
+> Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal for Lit and Web Components.
 
 `@lit-core/dom-paths` precomputes exact hierarchical child pointer paths (`[0, 2, 1]`) for dynamic parts in Lit templates ahead of time. It eliminates runtime TreeWalker DOM traversal during component mounting by resolving target part nodes via native `.childNodes[i]` pointers in nanoseconds.
 
-## Features
+---
+
+## Key features
 
 - **Eliminates runtime TreeWalker**: Replaces recursive DOM TreeWalker comment and element discovery with direct child pointer resolution.
 - **Nanosecond part resolution**: Traverses native C++ `.childNodes[i]` pointers directly.
@@ -10,10 +14,12 @@
 - **High-speed native parser**: Native Rust compiler pass powered by OXC, with a pure JavaScript fallback.
 - **Full DOM fidelity**: Accounts for HTML whitespace normalization and text node merging.
 
+---
+
 ## Installation
 
 ```bash
-pnpm add @lit-core/dom-paths
+pnpm add -D @lit-core/dom-paths
 ```
 
 ## How it works
@@ -86,10 +92,28 @@ const result = transformDomPaths(sourceCode, {
 console.log(result.code);
 ```
 
-### Client runtime resolver
+### Bundler plugin integration
 
-```ts
-import { resolveNodeByPath } from '@lit-core/dom-paths/client';
+Via `@lit-core/vite-plugin`:
 
-const targetNode = resolveNodeByPath(shadowRoot, [0, 1, 1]);
+```typescript
+import { defineConfig } from 'vite';
+import { lit } from '@lit-core/vite-plugin';
+
+export default defineConfig({
+  plugins: [
+    lit({
+      domPaths: true,
+    }),
+  ],
+});
 ```
+
+---
+
+## Related documentation
+
+- [Ahead-of-time template compilation (`html-aot`)](../html-aot/docs/template-compilation.md)
+- [ShadowRoot event delegation (`event-hoist`)](../event-hoist/README.md)
+- [dom-paths benchmark report](../benchmarks/docs/dom-paths.md)
+- [Monorepo benchmark overview](../benchmarks/README.md)

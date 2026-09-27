@@ -6,25 +6,40 @@
 
 ---
 
-## Packages
+## Compiler and optimization packages
 
-| Package | Purpose | Documentation |
-| :--- | :--- | :--- |
-| [`@lit-core/css-fuse`](packages/css-fuse/) | Cross-component CSS deduplication into shared constructable sheets | [README](packages/css-fuse/README.md) · [Architecture](packages/css-fuse/docs/architecture.md) |
-| [`@lit-core/html-fuse`](packages/html-fuse/) | Static HTML and SVG fragment clustering | [README](packages/html-fuse/README.md) · [Guide](packages/html-fuse/docs/fragment-clustering.md) |
-| [`@lit-core/props-lower`](packages/props-lower/) | AOT Lit decorator and reactive property lowering | [README](packages/props-lower/README.md) · [Guide](packages/props-lower/docs/transform-mechanics.md) |
-| [`@lit-core/event-hoist`](packages/event-hoist/) | Ahead-of-time ShadowRoot event delegation | [README](packages/event-hoist/README.md) |
-| [`@lit-core/dom-paths`](packages/dom-paths/) | Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal | [README](packages/dom-paths/README.md) |
-| [`@lit-core/memoize`](packages/memoize/) | Ahead-of-time reactive expression auto-memoization | [README](packages/memoize/README.md) |
-| [`@lit-core/elem-proxy`](packages/elem-proxy/) | Deferred custom element stubs and JIT class upgrade | [README](packages/elem-proxy/README.md) · [Architecture](packages/elem-proxy/docs/proxy-architecture.md) |
-| [`@lit-core/html-aot`](packages/html-aot/) | Ahead-of-time Lit template compilation | [README](packages/html-aot/README.md) · [Guide](packages/html-aot/docs/template-compilation.md) |
-| [`@lit-core/css-minifier`](packages/css-minifier/) | CSS template literal minification | [README](packages/css-minifier/README.md) |
-| [`@lit-core/html-minifier`](packages/html-minifier/) | HTML and SVG template literal minification | [README](packages/html-minifier/README.md) |
-| [`@lit-core/resumable`](packages/resumable/) | Zero-JS SSR and interaction-driven runtime resumption | [README](packages/resumable/README.md) |
-| [`@lit-core/vite-plugin`](packages/vite-plugin/) | Unified Vite and Rollup plugin | [README](packages/vite-plugin/README.md) · [Configuration](packages/vite-plugin/docs/configuration.md) |
-| [`@lit-core/webpack-plugin`](packages/webpack-plugin/) | Unified Webpack 5 plugin | [README](packages/webpack-plugin/README.md) · [Configuration](packages/webpack-plugin/docs/configuration.md) |
-| [`@lit-core/benchmarks`](packages/benchmarks/) | Empirical benchmark harness across production design systems | [README](packages/benchmarks/README.md) · [Reports](packages/benchmarks/docs/css-fuse.md) |
-| [`@lit-core/tests`](packages/tests/) | Real component multi-framework Playwright test suite (2,305 tests) | [README](packages/tests/README.md) |
+| Package | Purpose |
+| :--- | :--- |
+| [`@lit-core/css-fuse`](packages/css-fuse/) | Cross-component CSS deduplication into shared constructable sheets |
+| [`@lit-core/html-fuse`](packages/html-fuse/) | Static HTML and SVG fragment clustering |
+| [`@lit-core/props-lower`](packages/props-lower/) | AOT Lit decorator and reactive property lowering |
+| [`@lit-core/event-hoist`](packages/event-hoist/) | Ahead-of-time ShadowRoot event delegation |
+| [`@lit-core/dom-paths`](packages/dom-paths/) | Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal |
+| [`@lit-core/dirty-mask`](packages/dirty-mask/) | Ahead-of-time property-to-part dependency bitmasking |
+| [`@lit-core/memoize`](packages/memoize/) | Ahead-of-time reactive expression auto-memoization |
+| [`@lit-core/elem-proxy`](packages/elem-proxy/) | Deferred custom element stubs and JIT class upgrade |
+| [`@lit-core/html-aot`](packages/html-aot/) | Ahead-of-time Lit template compilation |
+| [`@lit-core/css-minifier`](packages/css-minifier/) | CSS template literal minification |
+| [`@lit-core/html-minifier`](packages/html-minifier/) | HTML and SVG template literal minification |
+| [`@lit-core/resumable`](packages/resumable/) | Zero-JS SSR and interaction-driven runtime resumption |
+
+---
+
+## Bundler plugins
+
+| Package | Purpose |
+| :--- | :--- |
+| [`@lit-core/vite-plugin`](packages/vite-plugin/) | Unified Vite and Rollup plugin |
+| [`@lit-core/webpack-plugin`](packages/webpack-plugin/) | Unified Webpack 5 plugin |
+
+---
+
+## Benchmarks and testing
+
+| Package | Purpose |
+| :--- | :--- |
+| [`@lit-core/benchmarks`](packages/benchmarks/) | Empirical benchmark harness across production design systems |
+| [`@lit-core/tests`](packages/tests/) | Real component multi-framework Playwright test suite (2,305 tests) |
 
 ---
 
