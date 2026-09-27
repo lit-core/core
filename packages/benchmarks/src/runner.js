@@ -202,3 +202,66 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
     }
   }
 }
+
+/**
+ * Convenience runner for single-package benchmarks across frameworks.
+ * @param {string} toolId
+ * @param {Object} [options]
+ * @param {string} [options.suite]
+ * @param {boolean} [options.verbose]
+ */
+export async function runSingleToolBenchmark(toolId, options = {}) {
+  const { getSuites } = await import('./suites/index.js');
+  const { getActiveTools } = await import('./tools/index.js');
+  const { renderAsciiTable, renderAsciiRuntimeTable, renderCrossSuiteSummary } = await import('./table.js');
+
+  const suiteFilter = options.suite || 'all';
+  const suites = getSuites(suiteFilter);
+  const tools = getActiveTools([toolId]);
+
+  if (suites.length === 0) {
+    console.error(`❌ No benchmark suites matched '${suiteFilter}'. Available: webawesome, material, carbon, spectrum, momentum`);
+    process.exit(1);
+  }
+
+  if (tools.length === 0) {
+    console.error(`❌ Tool '${toolId}' is not recognized or not enabled.`);
+    process.exit(1);
+  }
+
+  console.log(`\n========================================================================================`);
+  console.log(`⚡ LIT-CORE BENCHMARK: ${tools[0].name.toUpperCase()}`);
+  console.log(`========================================================================================`);
+  console.log(`Suites: ${suites.map((s) => s.name).join(', ')}`);
+
+  const crossSuiteSummaries = [];
+
+  for (const suite of suites) {
+    console.log(`\n⏳ Evaluating ${suite.name} with ${tools[0].name}...`);
+    const rows = await runSuiteBenchmark(suite, tools, { verbose: options.verbose });
+
+    console.log(renderAsciiTable(suite.name, rows));
+    if (rows.runtimeRows) {
+      console.log(renderAsciiRuntimeTable(suite.name, rows.runtimeRows));
+    }
+
+    const baseline = rows.find((r) => r.isBaseline);
+    const optimized = rows.find((r) => !r.isBaseline);
+    if (baseline && optimized && optimized.impact) {
+      crossSuiteSummaries.push({
+        suiteName: suite.name,
+        componentCount: rows.suiteContext.componentCount,
+        baseline: baseline.metrics,
+        optimized: optimized.metrics,
+        impact: optimized.impact,
+      });
+    }
+  }
+
+  if (crossSuiteSummaries.length > 1) {
+    console.log(renderCrossSuiteSummary(crossSuiteSummaries));
+  }
+
+  console.log(`\n✓ ${tools[0].name} benchmark complete across ${suites.length} suites.\n`);
+}
+

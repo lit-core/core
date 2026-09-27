@@ -22,6 +22,7 @@
 | [`@lit-core/vite-plugin`](packages/vite-plugin/) | Unified Vite and Rollup plugin | [README](packages/vite-plugin/README.md) · [Configuration](packages/vite-plugin/docs/configuration.md) |
 | [`@lit-core/webpack-plugin`](packages/webpack-plugin/) | Unified Webpack 5 plugin | [README](packages/webpack-plugin/README.md) · [Configuration](packages/webpack-plugin/docs/configuration.md) |
 | [`@lit-core/benchmarks`](packages/benchmarks/) | Empirical benchmark harness across production design systems | [README](packages/benchmarks/README.md) · [Reports](packages/benchmarks/docs/css-fuse.md) |
+| [`@lit-core/tests`](packages/tests/) | Real component multi-framework Playwright test suite (2,305 tests) | [README](packages/tests/README.md) |
 
 ---
 
@@ -31,12 +32,12 @@ Evaluated across **349 production Web Components** from 5 enterprise design syst
 
 | Design system or library | Elements | Baseline size | Optimized size | Net savings | First render speedup |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5,801.88 KB | 2,807.41 KB | **-2,994.47 KB (-51.61%)** | **+35.8%** |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,740.01 KB | **+0.09 KB (+0.01%)** | **+35.4%** |
+| Carbon Web Components | 99 | 5801.88 KB | 2807.41 KB | **-2994.47 KB (-51.61%)** | **+35.8%** |
+| Spectrum Web Components | 52 | 1739.92 KB | 1740.01 KB | **+0.09 KB (+0.01%)** | **+35.4%** |
 | Web Awesome | 73 | 803.12 KB | 739.10 KB | **-64.02 KB (-7.97%)** | **+34.1%** |
 | Momentum Design | 97 | 870.05 KB | 867.15 KB | **-2.90 KB (-0.33%)** | **+35.4%** |
 | Material Web | 28 | 448.37 KB | 450.49 KB | **+2.11 KB (+0.47%)** | **+34.5%** |
-| **Total** | **349** | **9,663.34 KB** | **6,604.16 KB** | **-3,059.19 KB (-31.66%)** | **+35.0%** |
+| **Total** | **349** | **9,663.34 KB** | **6,604.15 KB** | **-3,059.18 KB (-31.66%)** | **+35.0%** |
 
 ### Dedicated benchmark reports
 

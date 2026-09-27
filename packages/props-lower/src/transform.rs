@@ -54,12 +54,17 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
 
     // 1. Scan for Lit decorator imports
     let import_ctx = ImportContext::scan(&program);
-    if !import_ctx.has_lit_decorators() {
+    let has_decorators_in_source = source.contains("@property")
+        || source.contains("@state")
+        || source.contains("@customElement")
+        || source.contains("__decorate");
+    if !import_ctx.has_lit_decorators() && !has_decorators_in_source {
         return TransformResult {
             code: source.to_string(),
             map: None,
         };
     }
+
 
     let ast = AstBuilder::new(&allocator);
 

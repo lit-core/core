@@ -1,0 +1,43 @@
+{
+  "name": "@lit-core/tests",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Comprehensive multi-framework Playwright test suite for all @lit-core compiler and bundler features",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest run",
+    "test:carbon": "vitest run carbon",
+    "test:spectrum": "vitest run spectrum",
+    "test:webawesome": "vitest run webawesome",
+    "test:material": "vitest run material",
+    "test:momentum": "vitest run momentum",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@awesome.me/webawesome": "^3.14.0",
+    "@carbon/web-components": "^2.64.0",
+    "@lit-core/benchmarks": "workspace:*",
+    "@lit-core/css-fuse": "workspace:*",
+    "@lit-core/css-minifier": "workspace:*",
+    "@lit-core/elem-proxy": "workspace:*",
+    "@lit-core/event-hoist": "workspace:*",
+    "@lit-core/html-aot": "workspace:*",
+    "@lit-core/html-fuse": "workspace:*",
+    "@lit-core/html-minifier": "workspace:*",
+    "@lit-core/props-lower": "workspace:*",
+    "@lit-core/resumable": "workspace:*",
+    "@lit-core/vite-plugin": "workspace:*",
+    "@lit-core/webpack-plugin": "workspace:*",
+    "@material/web": "^2.5.0",
+    "@momentum-design/components": "^0.139.9",
+    "@spectrum-web-components/bundle": "^1.12.2",
+    "lit": "^3.3.3",
+    "playwright": "^1.63.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  }
+}

@@ -5,6 +5,15 @@
   "description": "Multi-suite bundle size and optimization benchmark framework for @lit-core Vite bundler",
   "type": "module",
   "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./suites": "./src/suites/index.js",
+    "./runner": "./src/runner.js",
+    "./tools": "./src/tools/index.js",
+    "./table": "./src/table.js",
+    "./runtime": "./src/runtime.js",
+    "./resumable": "./src/resumable-bench.js"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=24.0.0"
@@ -34,7 +43,6 @@
     "url": "https://github.com/lit-core/core/issues"
   },
   "dependencies": {
-    "@awesome.me/webawesome": "^3.14.0",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
     "@lit-core/elem-proxy": "workspace:*",
@@ -44,12 +52,13 @@
     "@lit-core/html-minifier": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
-    "@lit-core/vite-plugin": "workspace:*",
-    "lit": "^3.3.3",
-    "playwright": "^1.63.0",
-    "vite": "^8.3.1"
+    "@lit-core/vite-plugin": "workspace:*"
   },
   "devDependencies": {
+    "lit": "^3.3.3",
+    "playwright": "^1.63.0",
+    "vite": "^8.3.1",
+    "@awesome.me/webawesome": "^3.14.0",
     "@carbon/web-components": "^2.64.0",
     "@material/web": "^2.5.0",
     "@momentum-design/components": "^0.139.9",

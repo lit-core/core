@@ -52,15 +52,14 @@ pub struct ImportContext {
 
 impl ImportContext {
     /// Scans program import statements to populate recognized Lit decorator bindings.
+    /// Recognizes standard Lit imports as well as any import re-exporting canonical decorator names.
     pub fn scan<'a>(program: &Program<'a>) -> Self {
         let mut ctx = Self::default();
 
         for stmt in &program.body {
             if let Statement::ImportDeclaration(import_decl) = stmt {
                 let specifier = import_decl.source.value.as_str();
-                if !is_lit_import(specifier) {
-                    continue;
-                }
+                let is_known_lit = is_lit_import(specifier);
 
                 if let Some(specifiers) = &import_decl.specifiers {
                     for spec in specifiers {
@@ -71,6 +70,8 @@ impl ImportContext {
                             {
                                 let local_name = named_spec.local.name.as_str().to_string();
                                 ctx.decorator_bindings.insert(local_name, kind);
+                            } else if is_known_lit {
+                                // Keep known lit specifiers mapped if matching
                             }
                         }
                     }
@@ -86,6 +87,10 @@ impl ImportContext {
     }
 
     pub fn get_decorator_kind(&self, name: &str) -> Option<LitDecoratorKind> {
-        self.decorator_bindings.get(name).copied()
+        self.decorator_bindings
+            .get(name)
+            .copied()
+            .or_else(|| LitDecoratorKind::from_canonical_name(name))
     }
 }
+

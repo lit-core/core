@@ -26,15 +26,15 @@ Measurements compare a standard Vite production build with minification (`minify
 
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 5,801.88 KB | 1,739.92 KB | 733.47 KB | 833.56 KB | 441.92 KB |
-| **Net bundle savings** | Pre-minified upstream | Pre-minified upstream | **-69.65 KB (-8.67%)** | **-36.49 KB (-4.19%)** | **-6.45 KB (-1.44%)** |
-| **Baseline mount latency** | 15.12 ms | 14.96 ms | 14.80 ms | 14.85 ms | 14.88 ms |
-| **Optimized mount latency** | 15.10 ms | 14.94 ms | 14.78 ms | 14.82 ms | 14.80 ms |
-| **Mount speedup** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.2% (neutral)** | **+0.5% (neutral)** |
+| **Baseline bundle size** | 5801.88 KB | 1739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 5801.88 KB | 1739.92 KB | 733.47 KB | 833.56 KB | 441.92 KB |
+| **Net bundle savings** | **-0.00 KB (-0.00%)** | **-0.00 KB (-0.00%)** | **-69.65 KB (-8.67%)** | **-36.49 KB (-4.19%)** | **-6.45 KB (-1.44%)** |
+| **Baseline mount latency** | 15.12 ms | 14.96 ms | 14.80 ms | 14.84 ms | 14.88 ms |
+| **Optimized mount latency** | 15.12 ms | 14.96 ms | 14.96 ms | 14.88 ms | 14.80 ms |
+| **Mount speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **-1.1% (neutral)** | **-0.3% (neutral)** | **+0.5% (neutral)** |
 | **Baseline update latency** | 3.45 ms | 3.42 ms | 3.40 ms | 3.41 ms | 3.41 ms |
-| **Optimized update latency** | 3.44 ms | 3.41 ms | 3.39 ms | 3.40 ms | 3.40 ms |
-| **Update speedup** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** |
+| **Optimized update latency** | 3.45 ms | 3.42 ms | 3.42 ms | 3.41 ms | 3.40 ms |
+| **Update speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **-0.6% (neutral)** | **+0.0% (neutral)** | **+0.3% (neutral)** |
 
 > [!NOTE]
 > `css-minifier` optimizes embedded CSS ASTs using Lightning CSS, removing comments, redundant whitespace, and duplicate declarations at build time. Because it does not alter stylesheet instantiation, DOM adoption, or the Lit rendering cycle, runtime mount and update latencies remain neutral.

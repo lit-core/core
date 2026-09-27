@@ -210,21 +210,25 @@ function formatResults(results) {
   return lines.join('\n');
 }
 
-async function main() {
-  console.log('⚡ Running @lit-core/resumable SSR and resumption benchmarks across all 5 design systems...');
+export async function runResumableBenchmark(options = {}) {
+  const suiteFilter = options.suite || 'all';
+  const targetSuites = suiteFilter === 'all' ? SUITES : SUITES.filter((s) => s.id === suiteFilter);
+
+  console.log('⚡ Running @lit-core/resumable SSR and resumption benchmarks across design systems...');
 
   const results = [];
-  for (const suite of SUITES) {
+  for (const suite of targetSuites) {
     const res = await measureResumablePerformance(suite);
     results.push(res);
   }
 
   const doc = formatResults(results);
   const docPath = path.resolve(__dirname, '../docs/resumable.md');
-  fs.writeFileSync(docPath, doc, 'utf8');
-
-  console.log(`\n✓ Resumable benchmark documentation generated at: ${docPath}`);
-  console.log('\n--- Summary Results (All 5 Design Systems) ---');
+  if (suiteFilter === 'all') {
+    fs.writeFileSync(docPath, doc, 'utf8');
+    console.log(`\n✓ Resumable benchmark documentation generated at: ${docPath}`);
+  }
+  console.log('\n--- Summary results ---');
   console.table(
     results.map((r) => ({
       Suite: `${r.suite.name} (${r.suite.elements} el)`,
@@ -236,11 +240,13 @@ async function main() {
       'Resumable TTI (ms)': r.resumable.ttiMs,
     })),
   );
+  return results;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main().catch((err) => {
+  runResumableBenchmark().catch((err) => {
     console.error(err);
     process.exit(1);
   });
 }
+

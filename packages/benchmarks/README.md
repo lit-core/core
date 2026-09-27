@@ -31,12 +31,12 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 2,807.41 KB | 1,740.01 KB | 739.10 KB | 867.15 KB | 450.49 KB |
-| **Net bundle savings** | **-2,994.47 KB (-51.61%)** | **+0.09 KB (+0.01%)** | **-64.02 KB (-7.97%)** | **-2.90 KB (-0.33%)** | **+2.11 KB (+0.47%)** |
-| **Baseline build time** | 185 ms | 166 ms | 91 ms | 144 ms | 58 ms |
-| **Optimized build time** | 1,578 ms | 233 ms | 641 ms | 679 ms | 364 ms |
-| **Build overhead** | +1,393 ms | +67 ms | +550 ms | +535 ms | +306 ms |
+| **Baseline bundle size** | 5801.88 KB | 1739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 2807.41 KB | 1740.01 KB | 739.10 KB | 867.15 KB | 450.49 KB |
+| **Net bundle savings** | **-2994.47 KB (-51.61%)** | **+0.09 KB (+0.01%)** | **-64.02 KB (-7.97%)** | **-2.90 KB (-0.33%)** | **+2.11 KB (+0.47%)** |
+| **Baseline build time** | 217 ms | 217 ms | 225 ms | 233 ms | 44 ms |
+| **Optimized build time** | 1848 ms | 228 ms | 773 ms | 708 ms | 373 ms |
+| **Build overhead** | +1631 ms | +11 ms | +548 ms | +475 ms | +329 ms |
 | **First render speedup** | **+35.8% faster** | **+35.4% faster** | **+34.1% faster** | **+35.4% faster** | **+34.5% faster** |
 
 > [!NOTE]

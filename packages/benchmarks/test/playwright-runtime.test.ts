@@ -48,7 +48,17 @@ describe('playwright browser runtime testing for lit-core and html-aot', () => {
 
     const htmlContent = `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"></head>
+<head>
+  <meta charset="utf-8">
+  <script type="importmap">
+  {
+    "imports": {
+      "lit": "https://esm.sh/lit@3.3.3",
+      "lit/": "https://esm.sh/lit@3.3.3/"
+    }
+  }
+  </script>
+</head>
 <body>
   <div id="app"></div>
   <script type="module">

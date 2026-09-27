@@ -32,7 +32,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.2
-        version: 5.0.2(@types/node@26.6.3)(vite@8.3.1(@types/node@26.6.3)(terser@5.51.2))
+        version: 5.0.2(@types/node@26.6.3)(vite@8.3.1(terser@5.51.2))
       webpack:
         specifier: ^5.111.1
         version: 5.111.1
@@ -51,6 +51,9 @@ importers:
       '@lit-core/elem-proxy':
         specifier: workspace:*
         version: link:../elem-proxy
+      '@lit-core/event-hoist':
+        specifier: workspace:*
+        version: link:../event-hoist
       '@lit-core/html-aot':
         specifier: workspace:*
         version: link:../html-aot
@@ -63,6 +66,9 @@ importers:
       '@lit-core/props-lower':
         specifier: workspace:*
         version: link:../props-lower
+      '@lit-core/resumable':
+        specifier: workspace:*
+        version: link:../resumable
       '@lit-core/vite-plugin':
         specifier: workspace:*
         version: link:../vite-plugin
@@ -114,7 +120,16 @@ importers:
         version: 3.10.5(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.3)
       vitest:
         specifier: ^5.0.2
-        version: 5.0.2(@types/node@26.6.3)(vite@8.3.1(@types/node@26.6.3)(terser@5.51.2))
+        version: 5.0.2(@types/node@26.6.3)(vite@8.3.1(terser@5.51.2))
+
+  packages/event-hoist:
+    devDependencies:
+      '@napi-rs/cli':
+        specifier: ^3.10.5
+        version: 3.10.5(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.3)
+      vitest:
+        specifier: ^5.0.2
+        version: 5.0.2(@types/node@26.6.3)(vite@8.3.1(terser@5.51.2))
 
   packages/html-aot:
     dependencies:
@@ -136,7 +151,7 @@ importers:
         version: 26.6.3
       vitest:
         specifier: ^5.0.2
-        version: 5.0.2(@types/node@26.6.3)(vite@8.3.1(@types/node@26.6.3)(terser@5.51.2))
+        version: 5.0.2(@types/node@26.6.3)(vite@8.3.1(terser@5.51.2))
 
   packages/html-fuse:
     devDependencies:
@@ -156,6 +171,28 @@ importers:
         specifier: ^3.10.5
         version: 3.10.5(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.3)
 
+  packages/resumable:
+    dependencies:
+      lit:
+        specifier: ^3.3.3
+        version: 3.3.3
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.3
+        version: 26.6.3
+      playwright:
+        specifier: ^1.63.0
+        version: 1.63.0
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vite:
+        specifier: ^8.3.1
+        version: 8.3.1(@types/node@26.6.3)(terser@5.51.2)
+      vitest:
+        specifier: ^5.0.2
+        version: 5.0.2(@types/node@26.6.3)(vite@8.3.1(terser@5.51.2))
+
   packages/vite-plugin:
     dependencies:
       '@lit-core/css-fuse':
@@ -167,6 +204,9 @@ importers:
       '@lit-core/elem-proxy':
         specifier: workspace:*
         version: link:../elem-proxy
+      '@lit-core/event-hoist':
+        specifier: workspace:*
+        version: link:../event-hoist
       '@lit-core/html-aot':
         specifier: workspace:*
         version: link:../html-aot
@@ -179,6 +219,9 @@ importers:
       '@lit-core/props-lower':
         specifier: workspace:*
         version: link:../props-lower
+      '@lit-core/resumable':
+        specifier: workspace:*
+        version: link:../resumable
     devDependencies:
       '@types/node':
         specifier: ^26.6.3
@@ -201,6 +244,9 @@ importers:
       '@lit-core/elem-proxy':
         specifier: workspace:*
         version: link:../elem-proxy
+      '@lit-core/event-hoist':
+        specifier: workspace:*
+        version: link:../event-hoist
       '@lit-core/html-aot':
         specifier: workspace:*
         version: link:../html-aot
@@ -213,6 +259,9 @@ importers:
       '@lit-core/props-lower':
         specifier: workspace:*
         version: link:../props-lower
+      '@lit-core/resumable':
+        specifier: workspace:*
+        version: link:../resumable
     devDependencies:
       '@types/node':
         specifier: ^26.6.3
@@ -4483,7 +4532,7 @@ snapshots:
       fsevents: 2.3.3
       terser: 5.51.2
 
-  vitest@5.0.2(@types/node@26.6.3)(vite@8.3.1(@types/node@26.6.3)(terser@5.51.2)):
+  vitest@5.0.2(@types/node@26.6.3)(vite@8.3.1(terser@5.51.2)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.2(vite@8.3.1(terser@5.51.2))

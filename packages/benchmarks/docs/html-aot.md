@@ -26,15 +26,15 @@ Ahead-of-time compilation pre-computes part bindings and template structures. Wh
 
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 5,895.20 KB | 1,740.01 KB | 832.30 KB | 909.94 KB | 464.87 KB |
+| **Baseline bundle size** | 5801.88 KB | 1739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 5895.20 KB | 1740.01 KB | 832.30 KB | 909.94 KB | 464.87 KB |
 | **Net bundle savings** | **+93.33 KB (+1.61%)** | **+0.09 KB (+0.01%)** | **+29.17 KB (+3.63%)** | **+39.89 KB (+4.58%)** | **+16.50 KB (+3.68%)** |
-| **Baseline mount latency** | 15.20 ms | 15.00 ms | 14.80 ms | 14.85 ms | 14.88 ms |
-| **Optimized mount latency** | 9.40 ms | 12.60 ms | 9.45 ms | 9.20 ms | 9.79 ms |
-| **Mount speedup** | **+38.2% faster** | **+16.0% faster** | **+36.1% faster** | **+38.0% faster** | **+34.2% faster** |
-| **Baseline update latency** | 3.48 ms | 3.44 ms | 3.40 ms | 3.41 ms | 3.41 ms |
-| **Optimized update latency** | 2.94 ms | 3.22 ms | 2.95 ms | 2.90 ms | 2.96 ms |
-| **Update speedup** | **+15.5% faster** | **+6.4% faster** | **+13.2% faster** | **+15.0% faster** | **+13.2% faster** |
+| **Baseline mount latency** | 15.12 ms | 14.96 ms | 14.80 ms | 14.84 ms | 14.88 ms |
+| **Optimized mount latency** | 9.71 ms | 9.67 ms | 9.67 ms | 9.47 ms | 9.79 ms |
+| **Mount speedup** | **+35.8% faster** | **+35.4% faster** | **+34.7% faster** | **+36.2% faster** | **+34.2% faster** |
+| **Baseline update latency** | 3.45 ms | 3.42 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Optimized update latency** | 2.95 ms | 2.94 ms | 2.94 ms | 2.91 ms | 2.96 ms |
+| **Update speedup** | **+14.5% faster** | **+14.0% faster** | **+13.5% faster** | **+14.7% faster** | **+13.2% faster** |
 
 > [!NOTE]
 > `@lit-core/html-aot` is the sole engine in `@lit-core` responsible for ahead-of-time template compilation and runtime prepare elimination. The ~35-38% mount speedup stems directly from pre-computed part indices and static HTML strings, bypassing runtime HTML parsing and caching. In contrast, `@lit-core/html-fuse` handles static fragment deduplication and does not modify the template compilation model.

@@ -87,6 +87,7 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 | `@lit-core/vite-plugin` | `packages/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
 | `@lit-core/webpack-plugin` | `packages/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack |
 | `@lit-core/benchmarks` | `packages/benchmarks` | Node.js, Vite | Multi-library bundle size and deduplication benchmark harness |
+| `@lit-core/tests` | `packages/tests` | TypeScript, Vitest, Playwright | Real component multi-framework Playwright test suite |
 
 ---
 
