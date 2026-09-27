@@ -9,7 +9,10 @@ import { lit } from '@lit-core/vite-plugin';
 import { build } from 'vite';
 import { closeBrowser, getBrowser } from './runtime.js';
 import { carbonSuite } from './suites/carbon.js';
+import { materialSuite } from './suites/material.js';
+import { momentumSuite } from './suites/momentum.js';
 import { spectrumSuite } from './suites/spectrum.js';
+import { webAwesomeSuite } from './suites/webawesome.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../..');
@@ -246,28 +249,49 @@ async function evaluateBundlePerformance(bundlePath, totalComponents, _suiteName
 }
 
 /**
- * Format markdown comparison table according to sentence case rules.
- * @param {string} suiteName
- * @param {number} componentCount
- * @param {PerformanceMetrics} baseline
- * @param {PerformanceMetrics} optimized
+ * Format unified markdown comparison table across all suites according to sentence case rules.
+ * @param {Array<{name: string, count: number, baseline: PerformanceMetrics, optimized: PerformanceMetrics}>} results
  * @returns {string}
  */
-function formatComparisonTable(suiteName, componentCount, baseline, optimized) {
-  const evalReduction = ((1 - optimized.evalTimeMs / baseline.evalTimeMs) * 100).toFixed(1);
-  const heapReduction = ((1 - optimized.heapKb / baseline.heapKb) * 100).toFixed(1);
-  const deferredPercent = ((optimized.deferredComponents / componentCount) * 100).toFixed(1);
+function formatUnifiedTable(results) {
+  const headers = ['Metric', ...results.map((r) => `${r.name} (${r.count} elements)`)];
+  const alignments = [':---', ...results.map(() => '---:')];
 
-  return `### ${suiteName} (${componentCount} components)
+  const baseCpu = results.map((r) => `${r.baseline.evalTimeMs.toFixed(2)} ms`);
+  const optCpu = results.map((r) => `${r.optimized.evalTimeMs.toFixed(2)} ms`);
+  const cpuSav = results.map((r) => {
+    const red = ((1 - r.optimized.evalTimeMs / r.baseline.evalTimeMs) * 100).toFixed(1);
+    const diff = (r.optimized.evalTimeMs - r.baseline.evalTimeMs).toFixed(2);
+    return `**-${red}% CPU time (${diff} ms)**`;
+  });
+  const baseHeap = results.map((r) => `${r.baseline.heapKb.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KB`);
+  const optHeap = results.map((r) => `${r.optimized.heapKb.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KB`);
+  const heapSav = results.map((r) => {
+    const red = ((1 - r.optimized.heapKb / r.baseline.heapKb) * 100).toFixed(1);
+    const diff = (r.optimized.heapKb - r.baseline.heapKb).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    return `**-${red}% memory (${diff} KB)**`;
+  });
+  const baseMount = results.map((r) => `${r.baseline.mountLatencyMs.toFixed(2)} ms`);
+  const optMount = results.map((r) => `${r.optimized.mountLatencyMs.toFixed(2)} ms`);
+  const mountDelta = results.map((r) => `+${(r.optimized.mountLatencyMs - r.baseline.mountLatencyMs).toFixed(2)} ms (transparent JIT upgrade)`);
+  const evalClasses = results.map((r) => `${r.optimized.evaluatedComponents} / ${r.count} (${((r.optimized.evaluatedComponents / r.count) * 100).toFixed(1)}%) [${r.optimized.deferredComponents} avoided]`);
+  const defProp = results.map((r) => `**${((r.optimized.deferredComponents / r.count) * 100).toFixed(1)}% deferred**`);
 
-| Metric | Baseline (eager Lit evaluation) | Optimized (elem-proxy) | Delta / savings |
-| :--- | ---: | ---: | ---: |
-| Script evaluation time (ms) | ${baseline.evalTimeMs.toFixed(2)} ms | ${optimized.evalTimeMs.toFixed(2)} ms | -${evalReduction}% CPU time |
-| V8 heap memory (KB) | ${baseline.heapKb.toFixed(1)} KB | ${optimized.heapKb.toFixed(1)} KB | -${heapReduction}% memory |
-| Mount latency (first 5 components) | ${baseline.mountLatencyMs.toFixed(2)} ms | ${optimized.mountLatencyMs.toFixed(2)} ms | +${(optimized.mountLatencyMs - baseline.mountLatencyMs).toFixed(2)} ms (JIT upgrade) |
-| Classes evaluated during init | ${baseline.evaluatedComponents} / ${componentCount} (100.0%) | ${optimized.evaluatedComponents} / ${componentCount} (${(100 - Number.parseFloat(deferredPercent)).toFixed(1)}%) | -${baseline.evaluatedComponents - optimized.evaluatedComponents} classes |
-| Deferred execution savings | 0 / ${componentCount} (0.0%) | ${optimized.deferredComponents} / ${componentCount} (${deferredPercent}%) | +${deferredPercent}% deferred |
-`;
+  return [
+    `| ${headers.join(' | ')} |`,
+    `| ${alignments.join(' | ')} |`,
+    `| **Baseline evaluation CPU time** | ${baseCpu.join(' | ')} |`,
+    `| **Optimized evaluation CPU time** | ${optCpu.join(' | ')} |`,
+    `| **Evaluation CPU savings** | ${cpuSav.join(' | ')} |`,
+    `| **Baseline V8 heap memory** | ${baseHeap.join(' | ')} |`,
+    `| **Optimized V8 heap memory** | ${optHeap.join(' | ')} |`,
+    `| **V8 heap memory savings** | ${heapSav.join(' | ')} |`,
+    `| **Baseline mount latency (first 5)** | ${baseMount.join(' | ')} |`,
+    `| **Optimized mount latency (first 5)** | ${optMount.join(' | ')} |`,
+    `| **Mount latency delta** | ${mountDelta.join(' | ')} |`,
+    `| **Classes evaluated during init** | ${evalClasses.join(' | ')} |`,
+    `| **Deferred execution proportion** | ${defProp.join(' | ')} |`,
+  ].join('\n');
 }
 
 async function runElemProxyBenchmarks() {
@@ -282,6 +306,9 @@ async function runElemProxyBenchmarks() {
   const suites = [
     { suite: carbonSuite, name: 'Carbon Web Components', count: 99 },
     { suite: spectrumSuite, name: 'Spectrum Web Components', count: 52 },
+    { suite: webAwesomeSuite, name: 'Web Awesome', count: 73 },
+    { suite: momentumSuite, name: 'Momentum Design', count: 97 },
+    { suite: materialSuite, name: 'Material Web', count: 28 },
   ];
 
   const results = [];
@@ -332,24 +359,20 @@ async function runElemProxyBenchmarks() {
   console.log('📊 BENCHMARK RESULTS: EAGER LIT EVALUATION VS ELEM-PROXY');
   console.log('========================================================================================\n');
 
-  let markdownReport = `# Runtime initialization benchmark: elem-proxy
+  const unifiedTableMd = formatUnifiedTable(results);
+  console.log(unifiedTableMd);
 
-Evaluates the performance impact of deferring heavy Custom Element class evaluation until DOM mount or property access via lightweight proxy stubs.
-
-## Summary of results
-
-`;
-
-  for (const res of results) {
-    const tableMd = formatComparisonTable(res.name, res.count, res.baseline, res.optimized);
-    console.log(tableMd);
-    markdownReport += `${tableMd}\n`;
+  const docPath = path.resolve(__dirname, '../docs/elem-proxy.md');
+  if (fs.existsSync(docPath)) {
+    let docContent = fs.readFileSync(docPath, 'utf8');
+    const tableRegex = /## Runtime initialization and memory comparison[\s\S]*?(?=\n---|\n## Running this benchmark)/;
+    const replacement = `## Runtime initialization and memory comparison\n\nMeasurements evaluate executing full design system bundles in an isolated V8 VM context, comparing eager class evaluation against proxy stubs that defer class definition until elements are mounted:\n\n${unifiedTableMd}\n`;
+    if (tableRegex.test(docContent)) {
+      docContent = docContent.replace(tableRegex, replacement);
+      fs.writeFileSync(docPath, docContent, 'utf8');
+      console.log(`✓ Updated ${docPath} with live 5-suite benchmark metrics\n`);
+    }
   }
-
-  // Save report to markdown artifact file
-  const reportPath = path.resolve(rootDir, 'benchmarks-elem-proxy.md');
-  fs.writeFileSync(reportPath, markdownReport);
-  console.log(`✓ Markdown benchmark report generated at: ${reportPath}\n`);
 }
 
 runElemProxyBenchmarks().catch((err) => {

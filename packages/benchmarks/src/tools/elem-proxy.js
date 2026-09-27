@@ -1,5 +1,4 @@
-import { lit } from '@lit-core/vite-plugin';
-import { normalizeInclude } from './base.js';
+import { createIsolatedToolPlugin, normalizeInclude } from './base.js';
 
 /**
  * Tool definition for @lit-core/elem-proxy
@@ -19,13 +18,9 @@ export const elemProxyTool = {
    */
   getPlugins(suite) {
     const include = normalizeInclude(suite.includePattern);
-
-    return lit({
-      cssFuse: false,
-      elemProxy: {
-        include,
-        exclude: [],
-      },
+    return createIsolatedToolPlugin('elemProxy', {
+      include,
+      exclude: [],
     });
   },
 };

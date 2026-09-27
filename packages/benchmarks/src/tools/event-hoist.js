@@ -1,5 +1,4 @@
-import { lit } from '@lit-core/vite-plugin';
-import { normalizeInclude } from './base.js';
+import { createIsolatedToolPlugin, normalizeInclude } from './base.js';
 
 /**
  * Tool definition for @lit-core/event-hoist
@@ -19,13 +18,9 @@ export const eventHoistTool = {
    */
   getPlugins(suite) {
     const include = normalizeInclude(suite.includePattern);
-
-    return lit({
-      cssFuse: false,
-      eventHoist: {
-        include,
-        exclude: [],
-      },
+    return createIsolatedToolPlugin('eventHoist', {
+      include,
+      exclude: [],
     });
   },
 };
