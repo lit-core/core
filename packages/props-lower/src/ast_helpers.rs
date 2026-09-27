@@ -153,4 +153,19 @@ impl<'a, 'b> AstHelper<'a, 'b> {
         let call = self.call_expr(callee, args, false);
         self.expr_stmt(call)
     }
+
+    /// Builds `const name = init;`
+    pub fn const_declaration(&self, name: &'a str, init: Expression<'a>) -> Statement<'a> {
+        let binding_ident = BindingPattern::new_binding_identifier(SPAN, name, self.ast);
+        let mut decls = ArenaVec::new_in(self.ast);
+        let decl = VariableDeclarator::new(SPAN, binding_ident, None, Some(init), false, self.ast);
+        decls.push(decl);
+        Statement::new_variable_declaration(
+            SPAN,
+            VariableDeclarationKind::Const,
+            decls,
+            false,
+            self.ast,
+        )
+    }
 }

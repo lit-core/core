@@ -209,4 +209,52 @@ console.log('Testing @lit-core/props-lower native addon...');
   console.log('  ✔ Compiled __decorate customElement lowering');
 }
 
-console.log('\nAll 11 integration tests passed successfully!\n');
+// Test 12: Repeating descriptor preset deduplication into frozen module constants
+{
+  const input = `
+    import {LitElement} from 'lit';
+    import {property} from 'lit/decorators.js';
+
+    class MyElement extends LitElement {
+      @property({type: Boolean, reflect: true})
+      disabled = false;
+
+      @property({type: Boolean, reflect: true})
+      checked = false;
+    }
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('const _PROP_BOOL_REFLECT = Object.freeze('), 'Should define frozen descriptor preset constant');
+  assert(res.code.includes('type: Boolean'), 'Should preserve type: Boolean in frozen constant');
+  assert(res.code.includes('reflect: true'), 'Should preserve reflect: true in frozen constant');
+  assert(res.code.includes('disabled: _PROP_BOOL_REFLECT'), 'Should reference frozen preset for disabled');
+  assert(res.code.includes('checked: _PROP_BOOL_REFLECT'), 'Should reference frozen preset for checked');
+  console.log('  ✔ Repeating descriptor preset virtualization into frozen constants');
+}
+
+// Test 13: Constructor scalar property default prototype hoisting
+{
+  const input = `
+    import {LitElement} from 'lit';
+    import {property} from 'lit/decorators.js';
+
+    class MyElement extends LitElement {
+      @property()
+      title;
+
+      constructor() {
+        super();
+        this.disabled = false;
+        this.size = 'lg';
+      }
+    }
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('MyElement.prototype.disabled = false'), 'Should hoist disabled scalar default to prototype');
+  assert(res.code.includes('MyElement.prototype.size = "lg"') || res.code.includes("MyElement.prototype.size = 'lg'"), 'Should hoist size scalar default to prototype');
+  assert(!res.code.includes('this.disabled = false'), 'Should eliminate redundant this.disabled from constructor body');
+  assert(!res.code.includes("this.size = 'lg'") && !res.code.includes('this.size = "lg"'), 'Should eliminate redundant this.size from constructor body');
+  console.log('  ✔ Constructor scalar property default prototype hoisting');
+}
+
+console.log('\nAll 13 integration tests passed successfully!\n');

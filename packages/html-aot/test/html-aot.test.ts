@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { compileHtmlAot } from '../src/index.js';
+import { compileHtmlAot } from '../lib/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const testFilesDir = path.resolve(__dirname, '../test_files');

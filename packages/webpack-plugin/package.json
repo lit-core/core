@@ -53,7 +53,7 @@
     "@lit-core/props-lower": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.3",
     "@types/webpack": "^5.28.5",
     "typescript": "^7.0.2",
     "webpack": "^5.111.1"

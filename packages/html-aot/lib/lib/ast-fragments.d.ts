@@ -27,10 +27,10 @@ export type TemplatePart = {
     ctorType: AttributeKind;
 };
 export declare const attributePartConstructors: {
-    readonly 1: "AttributePart";
-    readonly 3: "PropertyPart";
-    readonly 4: "BooleanAttributePart";
-    readonly 5: "EventPart";
+    readonly 1: 'AttributePart';
+    readonly 3: 'PropertyPart';
+    readonly 4: 'BooleanAttributePart';
+    readonly 5: 'EventPart';
 };
 export interface AttributePartConstructorAliases {
     AttributePart?: ts.Identifier;

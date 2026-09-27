@@ -3,27 +3,27 @@ packages:
   - "packages/*"
 
 allowBuilds:
-  '@carbon/colors': set this to true or false
-  '@carbon/feature-flags': set this to true or false
-  '@carbon/grid': set this to true or false
-  '@carbon/icon-helpers': set this to true or false
-  '@carbon/icons': set this to true or false
-  '@carbon/layout': set this to true or false
-  '@carbon/motion': set this to true or false
-  '@carbon/styles': set this to true or false
-  '@carbon/themes': set this to true or false
-  '@carbon/type': set this to true or false
-  '@carbon/utilities': set this to true or false
-  '@carbon/web-components': set this to true or false
-  '@ibm/plex': set this to true or false
-  '@ibm/plex-mono': set this to true or false
-  '@ibm/plex-sans': set this to true or false
-  '@ibm/plex-sans-arabic': set this to true or false
-  '@ibm/plex-sans-devanagari': set this to true or false
-  '@ibm/plex-sans-hebrew': set this to true or false
-  '@ibm/plex-sans-thai': set this to true or false
-  '@ibm/plex-sans-thai-looped': set this to true or false
-  '@ibm/plex-serif': set this to true or false
+  '@carbon/colors': false
+  '@carbon/feature-flags': false
+  '@carbon/grid': false
+  '@carbon/icon-helpers': false
+  '@carbon/icons': false
+  '@carbon/layout': false
+  '@carbon/motion': false
+  '@carbon/styles': false
+  '@carbon/themes': false
+  '@carbon/type': false
+  '@carbon/utilities': false
+  '@carbon/web-components': false
+  '@ibm/plex': false
+  '@ibm/plex-mono': false
+  '@ibm/plex-sans': false
+  '@ibm/plex-sans-arabic': false
+  '@ibm/plex-sans-devanagari': false
+  '@ibm/plex-sans-hebrew': false
+  '@ibm/plex-sans-thai': false
+  '@ibm/plex-sans-thai-looped': false
+  '@ibm/plex-serif': false
   esbuild: true
 
 onlyBuiltDependencies:

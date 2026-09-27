@@ -134,7 +134,7 @@ The `@lit-core/benchmarks` harness evaluates bundle size, build time, and runtim
 
 In addition, `@lit-core/elem-proxy` reduces initial script evaluation CPU time by **-72.8%** and V8 heap memory consumption by **-67.4%** on 99-component suites by deferring class evaluations until elements are mounted.
 
-For complete feature breakdowns, dependency versions, and diagnostics, see the [benchmarks dashboard](packages/benchmarks/README.md) and [benchmarks methodology](packages/benchmarks/docs/methodology.md).
+For complete feature breakdowns, dependency versions, and diagnostics, see the [benchmarks overview](packages/benchmarks/README.md) and individual per-feature benchmarks ([`css-fuse`](packages/benchmarks/docs/css-fuse.md), [`html-fuse`](packages/benchmarks/docs/html-fuse.md), [`elem-proxy`](packages/benchmarks/docs/elem-proxy.md), [`html-aot`](packages/benchmarks/docs/html-aot.md), [`props-lower`](packages/benchmarks/docs/props-lower.md), and [template minifiers](packages/benchmarks/docs/template-minifiers.md)).
 
 ---
 

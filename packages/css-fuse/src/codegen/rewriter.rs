@@ -36,7 +36,15 @@ pub fn rewrite_file(
         shared_rules.extend(cluster.rules.clone());
         cluster_ids.push(cluster.id.clone());
     }
-    cluster_ids.sort();
+    cluster_ids.sort_by(|a, b| {
+        let a_sub = a.starts_with("_fused_subsystem_");
+        let b_sub = b.starts_with("_fused_subsystem_");
+        match (a_sub, b_sub) {
+            (true, false) => std::cmp::Ordering::Less,
+            (false, true) => std::cmp::Ordering::Greater,
+            _ => a.cmp(b),
+        }
+    });
     cluster_ids.dedup();
 
     // Replacements: (start_byte, end_byte, replacement_string)

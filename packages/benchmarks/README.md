@@ -1,6 +1,6 @@
 # `@lit-core/benchmarks`
 
-> Empirical bundle size, build time, and runtime performance benchmarks for `@lit-core` across production Lit design systems.
+> Empirical bundle size, build overhead, and runtime performance benchmarks for `@lit-core` across production Lit design systems.
 
 The `@lit-core/benchmarks` package evaluates standard Vite production builds (**Baseline**) against optimized builds across **349 production Web Components** from 5 major enterprise design systems:
 - **Carbon Web Components** (`@carbon/web-components`, 99 elements)
@@ -29,14 +29,15 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 
 ## Executive overview (all optimizations combined)
 
-| Design system or library | Elements | Baseline size | Optimized size | Net savings | Baseline build | Optimized build | Build overhead | First render speedup |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5,801.88 KB | 2,807.99 KB | **-2,993.88 KB (-51.60%)** | 206 ms | 1,559 ms | +1,353 ms | **+37.7%** |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,603.62 KB | **-136.30 KB (-7.83%)** | 196 ms | 1,864 ms | +1,668 ms | **+37.7%** |
-| Web Awesome | 73 | 803.12 KB | 739.07 KB | **-64.05 KB (-7.98%)** | 88 ms | 656 ms | +568 ms | **+36.8%** |
-| Momentum Design | 97 | 870.05 KB | 867.13 KB | **-2.92 KB (-0.34%)** | 134 ms | 742 ms | +609 ms | **+37.4%** |
-| Material Web | 28 | 448.37 KB | 450.40 KB | **-2.03 KB (-0.45%)** | 34 ms | 355 ms | +322 ms | **+37.2%** |
-| **Total** | **349** | **9,663.34 KB** | **6,468.22 KB** | **-3,195.12 KB (-33.06%)** | **658 ms** | **5,177 ms** | **+4,518 ms** | **+36.4%** |
+| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 2,807.99 KB | 1,603.62 KB | 739.07 KB | 867.13 KB | 450.40 KB |
+| **Net bundle savings** | **-2,993.88 KB (-51.60%)** | **-136.30 KB (-7.83%)** | **-64.05 KB (-7.98%)** | **-2.92 KB (-0.34%)** | **-2.03 KB (-0.45%)** |
+| **Baseline build time** | 206 ms | 196 ms | 88 ms | 134 ms | 34 ms |
+| **Optimized build time** | 1,559 ms | 1,864 ms | 656 ms | 742 ms | 355 ms |
+| **Build overhead** | +1,353 ms | +1,668 ms | +568 ms | +609 ms | +322 ms |
+| **First render speedup** | **+37.7% faster** | **+37.7% faster** | **+36.8% faster** | **+37.4% faster** | **+37.2% faster** |
 
 ---
 
@@ -44,8 +45,8 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 
 Detailed benchmarks, full AST diagnostics, build durations, and runtime measurements are documented individually per feature:
 
-- [**`css-fuse` benchmark**](docs/css-fuse.md): Full CSS AST deduplication, 25,964 rules fused, 762 constructable sheets, and up to -51.3% size reduction.
-- [**`html-fuse` benchmark**](docs/html-fuse.md): Static HTML and SVG fragment clustering, 172 shared template constants, and consolidated innerHTML parsing.
+- [**`css-fuse` benchmark**](docs/css-fuse.md): Full CSS AST deduplication, constructable stylesheet metrics, and up to -51.3% size reduction.
+- [**`html-fuse` benchmark**](docs/html-fuse.md): Static HTML and SVG fragment clustering and consolidated innerHTML parsing.
 - [**`elem-proxy` benchmark**](docs/elem-proxy.md): Deferred element proxy stubs, -72.8% script evaluation CPU time, and -67.4% to -70.2% V8 heap memory savings.
 - [**`html-aot` benchmark**](docs/html-aot.md): Ahead-of-time Lit template compilation, eliminated runtime prepare overhead, and +38.0% render speedup.
 - [**`props-lower` benchmark**](docs/props-lower.md): Native Rust decorator lowering, zero runtime reflection, and up to -6.1% size reduction.

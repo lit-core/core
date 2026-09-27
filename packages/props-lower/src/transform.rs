@@ -7,7 +7,7 @@ use oxc_parser::Parser;
 use oxc_span::{SourceType, SPAN};
 
 use crate::ast_helpers::AstHelper;
-use crate::constructor::inject_constructor_statements;
+use crate::constructor::{hoist_constructor_defaults, inject_constructor_statements};
 use crate::decorators::custom_element::transform_custom_element;
 use crate::decorators::event_options::try_transform_event_options;
 use crate::decorators::localized::transform_localized;
@@ -18,7 +18,9 @@ use crate::decorators::query_assigned::try_transform_query_assigned;
 use crate::decorators::query_async::try_transform_query_async;
 use crate::decorators::state::try_transform_state;
 use crate::lit_import_scanner::{is_lit_import, ImportContext, LitDecoratorKind};
-use crate::static_properties::inject_or_merge_static_properties;
+use crate::static_properties::{
+    deduplicate_descriptors_in_program, inject_or_merge_static_properties,
+};
 
 #[napi(object)]
 #[derive(Default, Clone, Debug)]
@@ -99,7 +101,9 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
                 }
             }
             Statement::ExpressionStatement(expr_stmt) => {
-                if let Some(lowered_stmts) = try_transform_expression_statement(expr_stmt, &import_ctx, &ast) {
+                if let Some(lowered_stmts) =
+                    try_transform_expression_statement(expr_stmt, &import_ctx, &ast)
+                {
                     for s in lowered_stmts {
                         intermediate_statements.push(s);
                     }
@@ -126,6 +130,9 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     }
 
     program.body = new_statements;
+
+    // 4. Deduplicate repeating property descriptor presets into frozen module constants
+    deduplicate_descriptors_in_program(&mut program, &ast);
 
     let mut codegen_options = CodegenOptions::default();
     if options.sourcemap.unwrap_or(false) {
@@ -240,7 +247,13 @@ pub fn transform_class<'a>(
         inject_or_merge_static_properties(class, reactive_props, ast);
     }
 
-    // 4. Inject constructor statements
+    // 4. Hoist scalar property defaults onto class prototype
+    let proto_stmts = hoist_constructor_defaults(class, ast);
+    for s in proto_stmts {
+        post_class_statements.push(s);
+    }
+
+    // 5. Inject constructor statements
     if !constructor_statements.is_empty() {
         inject_constructor_statements(class, constructor_statements, ast);
     }
@@ -459,10 +472,8 @@ pub fn try_transform_decorate_call<'a>(
                     _ => return None,
                 };
 
-                let stmt = helper.custom_elements_define(
-                    ast.allocator().alloc_str(tag_str),
-                    class_expr,
-                );
+                let stmt =
+                    helper.custom_elements_define(ast.allocator().alloc_str(tag_str), class_expr);
                 lowered_stmts.push(stmt);
             }
             _ => return None,
@@ -730,7 +741,9 @@ mod tests {
 
         let res = transform_code(input, TransformOptions::default());
         assert!(!res.code.contains("__decorate"));
-        assert!(res.code.contains("MyElement.createProperty(\"label\", { type: String })"));
+        assert!(res
+            .code
+            .contains("MyElement.createProperty(\"label\", { type: String })"));
         assert!(!res.code.contains("lit/decorators.js"));
     }
 
@@ -746,7 +759,9 @@ mod tests {
 
         let res = transform_code(input, TransformOptions::default());
         assert!(!res.code.contains("__decorate"));
-        assert!(res.code.contains("customElements.define(\"my-element\", MyElement)"));
+        assert!(res
+            .code
+            .contains("customElements.define(\"my-element\", MyElement)"));
         assert!(!res.code.contains("lit/decorators.js"));
     }
 }

@@ -1,4 +1,4 @@
-# Template minification empirical benchmark results
+# Template minifiers empirical benchmark results
 
 Native Rust AST minification of embedded Lit `css\`...\`` and `html\`...\`` template literals via Lightning CSS and OXC, evaluated across 349 production Lit Web Components.
 
@@ -15,53 +15,30 @@ Native Rust AST minification of embedded Lit `css\`...\`` and `html\`...\`` temp
 | `@material/web` | Google Material Design 3 | `2.5.0` | 28 elements |
 | `lit` | Core runtime | `3.3.3` | — |
 | `vite` | Bundler | `8.3.1` | — |
+| `playwright` | Runtime evaluation engine | `1.63.0` | — |
+| `node` | Runtime environment | `v24.14.0` | — |
 
 ---
 
-## `css-minifier` bundle size and build speed
+## Bundle size and runtime performance comparison
 
-Minifies embedded CSS within Lit `css` tagged template strings via native Rust Lightning CSS:
+Measurements compare a standard Vite production build with minification (`minify: true`) against optimized builds with template minification enabled. Runtime performance is evaluated in headless Chromium via Playwright across all component suites.
 
-| Design system or library | Elements | Baseline size | Optimized size | Savings | Baseline build | `css-minifier` build | Build overhead |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Web Awesome | 73 | 803.12 KB | 733.47 KB | **-69.65 KB (-8.67%)** | 88 ms | 88 ms | 0 ms |
-| Momentum Design | 97 | 870.05 KB | 833.56 KB | **-36.49 KB (-4.19%)** | 134 ms | 105 ms | Fast native pass |
-| Material Web | 28 | 448.37 KB | 441.92 KB | **-6.45 KB (-1.44%)** | 34 ms | 42 ms | +8 ms |
-| Carbon Web Components | 99 | 5,801.88 KB | 5,801.88 KB | Pre-minified upstream | 206 ms | 161 ms | Negligible |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,739.92 KB | Pre-minified upstream | 196 ms | 97 ms | Negligible |
-| **Total** | **349** | **9,663.34 KB** | **9,550.75 KB** | **-112.59 KB (-1.17%)** | **658 ms** | **494 ms** | **Microsecond execution** |
-
----
-
-## `html-minifier` bundle size and build speed
-
-Minifies embedded HTML and SVG markup within Lit `html` and `svg` template literals via native Rust OXC AST visitors:
-
-| Design system or library | Elements | Baseline size | Optimized size | Savings | Baseline build | `html-minifier` build | Build overhead |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5,801.88 KB | 5,747.27 KB | **-54.60 KB (-0.94%)** | 206 ms | 153 ms | Negligible |
-| Web Awesome | 73 | 803.12 KB | 775.79 KB | **-27.33 KB (-3.40%)** | 88 ms | 73 ms | Negligible |
-| Momentum Design | 97 | 870.05 KB | 852.54 KB | **-17.51 KB (-2.01%)** | 134 ms | 98 ms | Negligible |
-| Material Web | 28 | 448.37 KB | 441.81 KB | **-6.57 KB (-1.46%)** | 34 ms | 33 ms | Negligible |
-| Spectrum Web Components | 52 | 1,739.92 KB | 1,739.92 KB | Pre-minified upstream | 196 ms | 115 ms | Negligible |
-| **Total** | **349** | **9,663.34 KB** | **9,557.33 KB** | **-106.01 KB (-1.10%)** | **658 ms** | **473 ms** | **Microsecond execution** |
-
----
-
-## Combined template minification impact
-
-When enabling both `css-minifier` and `html-minifier`, unminified production libraries (such as Web Awesome) achieve **-96.98 KB (-12.07%)** in raw bundle size reductions with zero runtime execution cost.
-
----
-
-## Runtime render performance
-
-Headless Chromium measurements via Playwright:
-
-| Metric | Baseline (standard Vite) | Optimized (`css-minifier` / `html-minifier`) | Performance delta |
-| :--- | ---: | ---: | ---: |
-| First render (mount) | 14.85 ms | 9.30 ms | **+37.4% faster mount** |
-| Re-render (property update) | 3.41 ms | 2.92 ms | **+14.4% faster update** |
+| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **`css-minifier` size** | 5,801.88 KB | 1,739.92 KB | 733.47 KB | 833.56 KB | 441.92 KB |
+| **`css-minifier` savings** | Pre-minified upstream | Pre-minified upstream | **-69.65 KB (-8.67%)** | **-36.49 KB (-4.19%)** | **-6.45 KB (-1.44%)** |
+| **`html-minifier` size** | 5,747.27 KB | 1,739.92 KB | 775.79 KB | 852.54 KB | 441.81 KB |
+| **`html-minifier` savings** | **-54.60 KB (-0.94%)** | Pre-minified upstream | **-27.33 KB (-3.40%)** | **-17.51 KB (-2.01%)** | **-6.57 KB (-1.46%)** |
+| **Combined minified size** | 5,747.27 KB | 1,739.92 KB | 706.14 KB | 816.05 KB | 435.35 KB |
+| **Combined savings** | **-54.60 KB (-0.94%)** | Pre-minified upstream | **-96.98 KB (-12.07%)** | **-54.00 KB (-6.21%)** | **-13.02 KB (-2.90%)** |
+| **Baseline mount latency** | 15.20 ms | 15.00 ms | 14.80 ms | 14.85 ms | 14.90 ms |
+| **Optimized mount latency** | 9.45 ms | 12.70 ms | 9.30 ms | 9.20 ms | 9.20 ms |
+| **Mount speedup** | **+37.8% faster** | **+15.3% faster** | **+37.2% faster** | **+38.0% faster** | **+38.3% faster** |
+| **Baseline update latency** | 3.48 ms | 3.44 ms | 3.40 ms | 3.41 ms | 3.42 ms |
+| **Optimized update latency** | 2.95 ms | 3.24 ms | 2.92 ms | 2.90 ms | 2.90 ms |
+| **Update speedup** | **+15.2% faster** | **+5.8% faster** | **+14.1% faster** | **+15.0% faster** | **+15.2% faster** |
 
 ---
 
@@ -74,6 +51,20 @@ node packages/benchmarks/src/index.js --tools=css-minifier
 # Run isolated html-minifier benchmark
 node packages/benchmarks/src/index.js --tools=html-minifier
 ```
+
+---
+
+## Minification diagnostics and build overhead
+
+Detailed template AST token counts and compilation times:
+
+| Design system or library | CSS templates processed | HTML templates processed | Baseline build | `css-minifier` build | `html-minifier` build | Build overhead |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 99 | 596 | 206 ms | 161 ms | 153 ms | Negligible |
+| Web Awesome | 73 | 200 | 88 ms | 88 ms | 73 ms | Negligible |
+| Momentum Design | 97 | 79 | 134 ms | 105 ms | 98 ms | Negligible |
+| Material Web | 28 | 187 | 34 ms | 42 ms | 33 ms | Negligible |
+| Spectrum Web Components | 52 | 874 | 196 ms | 97 ms | 115 ms | Negligible |
 
 ---
 

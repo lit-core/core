@@ -130,7 +130,7 @@ export class CompiledTemplatePass {
 
     const spoofedTemplate = ts.isNoSubstitutionTemplateLiteral(templateExpression)
       ? ([templateExpression.text] as unknown as TemplateStringsArray)
-      : ([templateExpression.head.text, ...templateExpression.templateSpans.map((s) => s.literal.text)] as unknown as TemplateStringsArray);
+      : ([templateExpression.head.text, ...templateExpression.templateSpans.map((s: ts.TemplateSpan) => s.literal.text)] as unknown as TemplateStringsArray);
 
     (spoofedTemplate as unknown as { raw: string }).raw = '';
     let html: any = '';
@@ -337,7 +337,7 @@ const containsOctalEscapeRegex = /^([^\\|\s]|\\.)*?\\(0)*[1-9]/;
 const templateContainsOctalEscapes = (templateExpression: ts.TemplateLiteral): boolean => {
   const rawTextForOctalCheck = ts.isNoSubstitutionTemplateLiteral(templateExpression)
     ? ([templateExpression.rawText] as unknown as TemplateStringsArray)
-    : ([templateExpression.head.rawText, ...templateExpression.templateSpans.map((s) => s.literal.rawText)] as unknown as TemplateStringsArray);
+    : ([templateExpression.head.rawText, ...templateExpression.templateSpans.map((s: ts.TemplateSpan) => s.literal.rawText)] as unknown as TemplateStringsArray);
 
   for (const staticString of rawTextForOctalCheck) {
     if (containsOctalEscapeRegex.test(staticString)) {

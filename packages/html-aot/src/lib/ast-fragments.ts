@@ -143,7 +143,7 @@ export const createCompiledTemplate = ({
 export const createCompiledTemplateResult = ({ f, variableName, templateExpression }: { f: ts.NodeFactory; variableName: ts.Identifier; templateExpression: ts.TemplateLiteral }) =>
   f.createObjectLiteralExpression([
     f.createPropertyAssignment(f.createComputedPropertyName(f.createStringLiteral('_$litType$')), variableName),
-    f.createPropertyAssignment('values', f.createArrayLiteralExpression(ts.isNoSubstitutionTemplateLiteral(templateExpression) ? [] : templateExpression.templateSpans.map((s) => s.expression))),
+    f.createPropertyAssignment('values', f.createArrayLiteralExpression(ts.isNoSubstitutionTemplateLiteral(templateExpression) ? [] : templateExpression.templateSpans.map((s: ts.TemplateSpan) => s.expression))),
   ]);
 
 export const createTemplateParts = ({ f, parts, attributePartConstructorNameMap }: { f: ts.NodeFactory; parts: TemplatePart[]; attributePartConstructorNameMap: AttributePartConstructorAliases }) =>

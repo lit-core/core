@@ -5,6 +5,8 @@
  * @property {string} entryPath
  * @property {string | string[]} [includePattern]
  * @property {number} componentCount
+ * @property {string} [packageName]
+ * @property {string} [version]
  * @property {Record<string, any>} [metadata]
  */
 
@@ -23,6 +25,7 @@
  * @property {string} id
  * @property {string} name
  * @property {string} description
+ * @property {string} [packageName]
  * @property {() => boolean} isAvailable
  * @property {() => Promise<SuiteContext>} setup
  * @property {() => Promise<void>} cleanup

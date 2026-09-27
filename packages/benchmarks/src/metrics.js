@@ -6,6 +6,7 @@ import zlib from 'node:zlib';
  * @property {number} rawBytes
  * @property {number} gzipBytes
  * @property {number} brotliBytes
+ * @property {number} [buildTimeMs]
  */
 
 /**
