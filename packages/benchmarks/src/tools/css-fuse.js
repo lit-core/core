@@ -7,7 +7,7 @@ import { createIsolatedToolPlugin, normalizeInclude } from './base.js';
  */
 export const cssFuseTool = {
   id: 'css-fuse',
-  name: 'cssFuse (CSS AST Deduplication)',
+  name: 'css-fuse (CSS AST deduplication)',
   description: 'Cross-component CSS AST deduplication into constructable stylesheets',
   enabled: true,
 

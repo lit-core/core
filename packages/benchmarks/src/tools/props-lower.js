@@ -7,7 +7,7 @@ import { createIsolatedToolPlugin, normalizeInclude } from './base.js';
  */
 export const propsLowerTool = {
   id: 'props-lower',
-  name: 'propsLower (Lit Decorators & Properties AOT Lowering)',
+  name: 'props-lower (AOT decorator and property lowering)',
   description: 'Native Rust AST lowering of Lit decorators (@customElement, @property, @state, @query) to static properties',
   enabled: true,
 

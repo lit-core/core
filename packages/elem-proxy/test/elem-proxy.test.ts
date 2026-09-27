@@ -1,7 +1,7 @@
 import './setup.js';
-import { describe, it, expect } from 'vitest';
+import { LitElement } from 'lit';
+import { describe, expect, it } from 'vitest';
 import { transformElemProxy } from '../src/index.js';
-import { LitElement, html, css } from 'lit';
 
 describe('elem-proxy core transform', () => {
   it('transforms @customElement decorated Lit component into proxy stub and implementation closure', () => {
@@ -226,9 +226,9 @@ describe('elem-proxy runtime behavior', () => {
       __attrBuffer: Map<string, string> | null = null;
       attributeChangedCallback(name: string, oldValue: string, newValue: string) {
         if (this.__upgraded) {
-          // @ts-ignore
+          // @ts-expect-error
           if (typeof super.attributeChangedCallback === 'function') {
-            // @ts-ignore
+            // @ts-expect-error
             super.attributeChangedCallback(name, oldValue, newValue);
           }
         } else {

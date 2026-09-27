@@ -22,6 +22,7 @@ async function runViteBuild({ entryPath, outDir, plugins = [] }) {
     fs.rmSync(outDir, { recursive: true, force: true });
   }
 
+  const startTime = performance.now();
   await build({
     root: rootDir,
     publicDir: false,
@@ -39,9 +40,14 @@ async function runViteBuild({ entryPath, outDir, plugins = [] }) {
       },
     },
   });
+  const buildTimeMs = performance.now() - startTime;
 
   const bundlePath = path.join(outDir, 'bundle.js');
-  return getFileSizes(bundlePath);
+  const sizeMetrics = getFileSizes(bundlePath);
+  return {
+    ...sizeMetrics,
+    buildTimeMs,
+  };
 }
 
 /**

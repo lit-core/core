@@ -71,16 +71,24 @@ export function createComponentSuite({ id, name, description, packageName, entry
         throw new Error(`${name} package (${packageName}) not found in node_modules.`);
       }
 
+      let version = 'unknown';
+      try {
+        const pkgJson = JSON.parse(fs.readFileSync(path.join(pkgDir, 'package.json'), 'utf8'));
+        version = pkgJson.version || 'unknown';
+      } catch {}
+
       const { entryContent, componentCount, includePattern, metadata } = resolveConfig(pkgDir);
       fs.writeFileSync(entryPath, entryContent);
 
       return {
         id,
         name,
+        packageName,
+        version,
         entryPath,
         includePattern,
         componentCount,
-        metadata: { ...metadata, packageDir: pkgDir },
+        metadata: { ...metadata, packageDir: pkgDir, version },
       };
     },
 

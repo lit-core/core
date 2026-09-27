@@ -10,7 +10,7 @@ export const spectrumSuite = createComponentSuite({
   id: 'spectrum',
   name: 'Spectrum Web Components (@spectrum-web-components)',
   description: 'Adobe Spectrum Design System Web Components built on Lit (Full Suite)',
-  packageName: '@spectrum-web-components',
+  packageName: '@spectrum-web-components/bundle',
   entryFileName: '.spectrum-entry.js',
   resolveConfig(specDir) {
     return {

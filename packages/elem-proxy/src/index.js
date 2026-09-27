@@ -56,7 +56,7 @@ export function transformElemProxy(source, options = {}) {
  * Identifies @customElement and customElements.define, collects @property/@state/static properties,
  * and emits the lightweight proxy registration stub with deferred implementation getter.
  */
-export function transformElemProxyJs(source, options = {}) {
+export function transformElemProxyJs(source, _options = {}) {
   // Check if file contains custom elements
   const hasCustomElementDec = /@customElement\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/.test(source);
   const hasCeDefine = /customElements\.define\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*([a-zA-Z0-9_$]+)\s*\)/.test(source);
@@ -178,8 +178,7 @@ export function transformElemProxyJs(source, options = {}) {
     if (staticObsMatch) {
       const arr = staticObsMatch[1];
       const itemRegex = /['"`]([^'"`]+)['"`]/g;
-      let itemMatch;
-      while ((itemMatch = itemRegex.exec(arr)) !== null) {
+      for (const itemMatch of arr.matchAll(itemRegex)) {
         observedAttributes.add(itemMatch[1]);
       }
     }

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { transformLitProps } from './src/index.js';
 
-console.log('Testing @uibit/props-lower native addon...');
+console.log('Testing @lit-core/props-lower native addon...');
 
 // Test 1: @customElement
 {

@@ -7,7 +7,7 @@ import { createIsolatedToolPlugin } from './base.js';
  */
 export const cssMinifierTool = {
   id: 'css-minifier',
-  name: 'cssMinifier (Embedded CSS Template Minification)',
+  name: 'css-minifier (embedded CSS template minification)',
   description: 'Native Rust Lightning CSS minification of embedded css`...` tagged template literals',
   enabled: true,
 

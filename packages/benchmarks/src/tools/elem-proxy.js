@@ -8,7 +8,7 @@ import { normalizeInclude } from './base.js';
  */
 export const elemProxyTool = {
   id: 'elem-proxy',
-  name: 'elemProxy (Deferred Custom Element Proxy Stubs)',
+  name: 'elem-proxy (deferred custom element proxy stubs)',
   description: 'AOT compiler transform replacing eager Custom Element registrations with lightweight proxy stubs',
   enabled: true,
 

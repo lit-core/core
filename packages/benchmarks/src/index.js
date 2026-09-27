@@ -10,6 +10,7 @@ import {
   renderMarkdownPerToolAccordion,
   renderMarkdownRuntimeTable,
   renderMarkdownTable,
+  renderMarkdownVersionsTable,
 } from './table.js';
 import { getActiveTools } from './tools/index.js';
 
@@ -97,6 +98,8 @@ async function main() {
     if (baselineRow && totalRow?.impact) {
       crossSuiteSummaries.push({
         suiteName: suite.name,
+        packageName: rows.suiteContext.packageName || suite.packageName || suite.id,
+        version: rows.suiteContext.version || 'unknown',
         componentCount: rows.suiteContext.componentCount,
         baselineRaw: baselineRow.metrics.rawBytes,
         baselineGzip: baselineRow.metrics.gzipBytes,
@@ -106,6 +109,8 @@ async function main() {
         rawPct: Math.abs(totalRow.impact.rawPercent),
         gzipSaved: Math.abs(totalRow.impact.gzipDiff),
         gzipPct: Math.abs(totalRow.impact.gzipPercent),
+        baselineBuildTimeMs: baselineRow.metrics.buildTimeMs,
+        totalBuildTimeMs: totalRow.metrics.buildTimeMs,
       });
     }
 
@@ -150,9 +155,13 @@ async function main() {
     const totalGzipSaved = totalBaselineGzip - totalOptimizedGzip;
     const totalGzipPct = totalBaselineGzip > 0 ? (totalGzipSaved / totalBaselineGzip) * 100 : 0;
     const totalComponents = crossSuiteSummaries.reduce((acc, s) => acc + s.componentCount, 0);
+    const totalBaselineBuildTime = crossSuiteSummaries.reduce((acc, s) => acc + (s.baselineBuildTimeMs || 0), 0);
+    const totalOptimizedBuildTime = crossSuiteSummaries.reduce((acc, s) => acc + (s.totalBuildTimeMs || 0), 0);
 
     crossSuiteSummaries.push({
       suiteName: 'OVERALL TOTAL (All Libraries)',
+      packageName: 'all',
+      version: '—',
       componentCount: totalComponents,
       baselineRaw: totalBaselineRaw,
       baselineGzip: totalBaselineGzip,
@@ -162,10 +171,23 @@ async function main() {
       rawPct: totalRawPct,
       gzipSaved: totalGzipSaved,
       gzipPct: totalGzipPct,
+      baselineBuildTimeMs: totalBaselineBuildTime,
+      totalBuildTimeMs: totalOptimizedBuildTime,
     });
   }
 
   if (options.format === 'markdown') {
+    const coreVersions = {
+      lit: '3.3.3',
+      vite: '8.3.1',
+      playwright: '1.63.0',
+      node: process.version,
+    };
+    const suitesForVersionTable = crossSuiteSummaries.filter((s) => !s.suiteName.includes('OVERALL TOTAL'));
+    if (suitesForVersionTable.length > 0) {
+      console.log(`\n${renderMarkdownVersionsTable(suitesForVersionTable, coreVersions)}`);
+    }
+
     if (crossSuiteSummaries.length > 1) {
       console.log(`\n${renderMarkdownOverviewTable(crossSuiteSummaries)}`);
       console.log(renderMarkdownPerToolAccordion(allResults));

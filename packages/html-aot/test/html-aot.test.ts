@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { describe, expect, it } from 'vitest';
 import { compileHtmlAot } from '../src/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -66,12 +66,10 @@ const other = someTag\`<h1>Not lit</h1>\`;
           .replace(/,\s*([}\]])/g, '$1')
           .replace(/\(i\) =>/g, 'i =>')
           .replace(/b_1 `/g, 'b_1`')
-          .replace(/\s*([{\[\]}:;,])\s*/g, '$1')
+          .replace(/\s*([{[\]}:;,])\s*/g, '$1')
           .replace(/["']/g, '"')
           .trim();
       expect(normalize(result.code)).toBe(normalize(expected));
     }
   });
 });
-
-

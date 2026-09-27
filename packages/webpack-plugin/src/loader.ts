@@ -30,12 +30,7 @@ export interface LitLoaderOptions {
   options?: LitPluginOptions;
 }
 
-export default function litWebpackLoader(
-  this: LoaderContext<LitLoaderOptions>,
-  source: string,
-  // biome-ignore lint/suspicious/noExplicitAny: Webpack sourcemap object or string
-  inputSourceMap?: any,
-) {
+export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, source: string, inputSourceMap?: any) {
   const callback = this.async();
   const loaderOptions = this.getOptions() || {};
   const pluginId = loaderOptions.pluginId;

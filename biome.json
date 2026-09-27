@@ -6,7 +6,8 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "includes": ["**", "!**/dist/**", "!**/lib/**", "!**/target/**", "!**/test_files/**", "!**/*.d.ts"]
   },
   "formatter": {
     "enabled": true,
@@ -19,7 +20,11 @@
     "rules": {
       "preset": "recommended",
       "suspicious": {
-        "noTemplateCurlyInString": "off"
+        "noTemplateCurlyInString": "off",
+        "noExplicitAny": "off"
+      },
+      "complexity": {
+        "noThisInStatic": "off"
       }
     }
   },

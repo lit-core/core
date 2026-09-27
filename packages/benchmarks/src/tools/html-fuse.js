@@ -7,7 +7,7 @@ import { createIsolatedToolPlugin, normalizeInclude } from './base.js';
  */
 export const htmlFuseTool = {
   id: 'html-fuse',
-  name: 'htmlFuse (HTML/SVG AST Deduplication)',
+  name: 'html-fuse (HTML and SVG AST deduplication)',
   description: 'Cross-component static template and SVG fragment clustering',
   enabled: true,
 

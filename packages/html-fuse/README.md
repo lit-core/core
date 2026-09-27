@@ -1,20 +1,18 @@
 # `@lit-core/html-fuse`
 
-AOT cross-component static template and SVG fragment clustering engine for Lit and Web Components.
+> Ahead-of-time (AOT) static HTML and SVG template fragment deduplication and clustering engine for Lit, built with Rust and NAPI-RS.
 
-## Overview
+`@lit-core/html-fuse` parses static HTML and SVG subtrees inside Lit `html` and `svg` template literals, clusters identical subtrees into shared virtual template modules, and leverages `lit-html`'s frozen `TemplateStringsArray` caching to eliminate duplicate `innerHTML` parsing in the browser.
 
-In Lit, `lit-html` caches compiled `<template>` elements in a global `Map<TemplateStringsArray, Template>` keyed by the frozen template literal strings array. Across large component suites (Carbon Web Components, Adobe Spectrum, Web Awesome, Material Web), components duplicate dozens of identical static HTML and SVG subtrees (e.g. icon definitions, caret chevrons, focus rings, slot wrappers, and helper text containers).
+---
 
-`@lit-core/html-fuse` mirrors `css-fuse` for HTML and SVG templates:
-- Scans `html` and `svg` tagged template literals across all components using high-speed AST visitors in native Rust (`oxc`).
-- Identifies identical static DOM subtrees and full static templates.
-- Extracts shared subtrees into hash-addressed virtual modules (`virtual:html-fuse/*`) exporting Lit `html` and `svg` tagged template expressions.
-- Rewrites component template literals, replacing duplicate inline markup with interpolations of the shared virtual template.
+## Key benefits
 
-### Runtime memory and parsing impact
+- **Zero runtime overhead**: Generates native Lit template constants ahead of time.
+- **Single-parse innerHTML caching**: Browsers parse shared subtrees once into template elements and reuse instances.
+- **Native Rust AST analysis**: High-speed fragment clustering powered by `oxc`.
 
-Because every component references the identical `TemplateStringsArray` from the shared virtual module, the browser only parses the `<template>` element with `innerHTML` once and allocates one shared `Template` cache entry in memory across the entire application.
+---
 
 ## Installation
 
@@ -22,27 +20,31 @@ Because every component references the identical `TemplateStringsArray` from the
 pnpm add -D @lit-core/html-fuse
 ```
 
-## Programmatic API
+---
 
+## Quick usage
+
+Via `@lit-core/vite-plugin`:
 ```typescript
-import { fuse, analyze, auditTemplates } from '@lit-core/html-fuse';
+import { defineConfig } from 'vite';
+import { lit } from '@lit-core/vite-plugin';
 
-const result = fuse({
-  include: ['src/**/*.ts'],
-  threshold: 2,
-  minFragmentLength: 15,
+export default defineConfig({
+  plugins: [
+    lit({
+      htmlFuse: {
+        threshold: 2,
+        minFragmentLength: 15,
+      },
+    }),
+  ],
 });
-
-console.log(`Deduplicated ${result.stats.fragmentsDeduped} static fragments into ${result.stats.fusedTemplatesCreated} shared templates`);
 ```
 
-## Options
+---
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `include` | `string[]` | `['packages/components/**/src/**/*.ts', 'src/**/*.ts']` | Glob patterns for component source files to scan |
-| `exclude` | `string[]` | `['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**']` | Glob patterns to exclude from scanning |
-| `threshold` | `number` | `2` | Minimum number of components sharing a fragment to trigger clustering |
-| `minFragmentLength` | `number` | `15` | Minimum character length of static fragment to qualify for clustering |
-| `outputDir` | `string` | `'.fused-html'` | Directory for generated template files |
-| `virtualImports` | `boolean` | `true` | Emit virtual module identifiers (`virtual:html-fuse/*`) |
+## Detailed documentation
+
+- [Static fragment clustering guide](docs/fragment-clustering.md)
+- [Ahead-of-time template compilation (`html-aot`)](../html-aot/docs/template-compilation.md)
+- [Benchmark diagnostics](../benchmarks/README.md)

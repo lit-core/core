@@ -133,7 +133,22 @@ assert(!transformedProps.code.includes('@customElement'), 'Decorators should be 
 assert(transformedProps.code.includes('customElements.define("wp-btn", WpBtn)'), 'customElements.define emitted');
 assert(transformedProps.code.includes('static properties'), 'static properties emitted');
 
-// 9. Test transformCssMinifier
+// 9. Test transformElemProxy
+const sampleElemProxy = `
+  import { LitElement } from 'lit';
+  import { customElement, property } from 'lit/decorators.js';
+
+  @customElement('wp-proxy-btn')
+  class WpProxyBtn extends LitElement {
+    @property() label = 'click';
+  }
+`;
+const transformedProxy = transformElemProxy(sampleElemProxy, '/src/wp-proxy-btn.ts');
+assert(transformedProxy, 'transformElemProxy should return proxied code');
+assert(transformedProxy.code.includes('WpProxyBtnProxy'), 'proxy stub emitted');
+assert(transformedProxy.code.includes("customElements.define('wp-proxy-btn', WpProxyBtnProxy)"), 'customElements.define emitted');
+
+// 10. Test transformCssMinifier
 const sampleLitCss = `
   import { css } from 'lit';
   export const styles = css\`

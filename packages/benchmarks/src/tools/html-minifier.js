@@ -8,7 +8,7 @@ import { createIsolatedToolPlugin } from './base.js';
  */
 export const htmlMinifierTool = {
   id: 'html-minifier',
-  name: 'htmlMinifier (Lit HTML & SVG Template Minification)',
+  name: 'html-minifier (Lit HTML and SVG template minification)',
   description: 'Native Rust OXC AST minification of html`...` and svg`...` template literals (-3.5% to -6.0% minified JS)',
   enabled: true,
 

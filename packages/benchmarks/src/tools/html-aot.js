@@ -8,7 +8,7 @@ import { createIsolatedToolPlugin } from './base.js';
  */
 export const htmlAotTool = {
   id: 'html-aot',
-  name: 'htmlAot (Ahead-of-time Lit template compilation)',
+  name: 'html-aot (ahead-of-time Lit template compilation)',
   description: 'AOT compiles Lit HTML templates into pre-parsed template objects, eliminating runtime prepare overhead',
   enabled: true,
 

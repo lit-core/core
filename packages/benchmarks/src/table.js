@@ -76,8 +76,9 @@ export function renderAsciiTable(title, rows) {
  * @returns {string}
  */
 export function renderMarkdownTable(title, rows) {
-  const headers = ['Optimization tool or mode', 'Size', 'Savings'];
-  const alignments = [':---', '---:', '---:'];
+  const hasBuildTime = rows.some((r) => r.metrics?.buildTimeMs !== undefined);
+  const headers = hasBuildTime ? ['Optimization tool or mode', 'Size', 'Savings', 'Build time'] : ['Optimization tool or mode', 'Size', 'Savings'];
+  const alignments = hasBuildTime ? [':---', '---:', '---:', '---:'] : [':---', '---:', '---:'];
 
   const lines = [];
   lines.push(`### 📊 ${title}`);
@@ -89,7 +90,12 @@ export function renderMarkdownTable(title, rows) {
     const rawSize = formatKb(r.metrics.rawBytes);
     const rawImpact = r.isBaseline ? '—' : formatImpact(r.impact?.rawDiff ?? 0, r.impact?.rawPercent ?? 0);
     const namePrefix = r.isTotal ? '**TOTAL** ' : r.isBaseline ? '*Baseline* ' : '';
-    lines.push(`| ${namePrefix}${r.name} | ${rawSize} | ${rawImpact} |`);
+    if (hasBuildTime) {
+      const buildTimeStr = r.metrics?.buildTimeMs !== undefined ? `${Math.round(r.metrics.buildTimeMs)} ms` : '—';
+      lines.push(`| ${namePrefix}${r.name} | ${rawSize} | ${rawImpact} | ${buildTimeStr} |`);
+    } else {
+      lines.push(`| ${namePrefix}${r.name} | ${rawSize} | ${rawImpact} |`);
+    }
   }
 
   lines.push('');
@@ -147,13 +153,41 @@ export function renderCrossSuiteSummary(summaryRows) {
 }
 
 /**
+ * Format benchmarked dependencies and system environment as a Markdown table.
+ * @param {Array<{ suiteName: string, packageName: string, version: string, componentCount: number }>} suitesInfo
+ * @param {Record<string, string>} coreVersions
+ * @returns {string}
+ */
+export function renderMarkdownVersionsTable(suitesInfo, coreVersions = {}) {
+  const lines = [];
+  lines.push('### 📦 Benchmarked dependency versions');
+  lines.push('');
+  lines.push('| Package | Role | Evaluated version | Elements evaluated |');
+  lines.push('| :--- | :--- | :--- | ---: |');
+
+  for (const s of suitesInfo) {
+    lines.push(`| \`${s.packageName}\` | Design system component suite | \`${s.version}\` | ${s.componentCount} elements |`);
+  }
+
+  for (const [pkg, ver] of Object.entries(coreVersions)) {
+    lines.push(`| \`${pkg}\` | Core runtime & toolchain | \`${ver}\` | — |`);
+  }
+
+  lines.push('');
+  return lines.join('\n');
+}
+
+/**
  * Format overview table of all libraries with all configs enabled in Markdown.
- * @param {Array<{ suiteName: string, componentCount: number, baselineRaw: number, baselineGzip: number, totalRaw: number, totalGzip: number, rawSaved: number, rawPct: number, gzipSaved: number, gzipPct: number }>} summaryRows
+ * @param {Array<{ suiteName: string, componentCount: number, baselineRaw: number, baselineGzip: number, totalRaw: number, totalGzip: number, rawSaved: number, rawPct: number, gzipSaved: number, gzipPct: number, baselineBuildTimeMs?: number, totalBuildTimeMs?: number, baselineRenderMs?: number, totalRenderMs?: number }>} summaryRows
  * @returns {string}
  */
 export function renderMarkdownOverviewTable(summaryRows) {
-  const headers = ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Net savings'];
-  const alignments = [':---', '---:', '---:', '---:', '---:'];
+  const hasBuildTime = summaryRows.some((s) => s.baselineBuildTimeMs !== undefined && s.totalBuildTimeMs !== undefined);
+  const headers = hasBuildTime
+    ? ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Net savings', 'Baseline build', 'Optimized build', 'Build overhead']
+    : ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Net savings'];
+  const alignments = hasBuildTime ? [':---', '---:', '---:', '---:', '---:', '---:', '---:', '---:'] : [':---', '---:', '---:', '---:', '---:'];
 
   const lines = [];
   lines.push('### 📦 Static bundle size analysis');
@@ -168,7 +202,16 @@ export function renderMarkdownOverviewTable(summaryRows) {
     const prefix = isOverall ? '**' : '';
     const suffix = isOverall ? '**' : '';
 
-    lines.push(`| ${prefix}${name}${suffix} | ${s.componentCount} | ${formatKb(s.baselineRaw)} | ${formatKb(s.totalRaw)} | ${prefix}${rawDiffStr}${suffix} |`);
+    if (hasBuildTime) {
+      const baseBuild = s.baselineBuildTimeMs !== undefined ? `${Math.round(s.baselineBuildTimeMs)} ms` : '—';
+      const optBuild = s.totalBuildTimeMs !== undefined ? `${Math.round(s.totalBuildTimeMs)} ms` : '—';
+      const overhead = s.baselineBuildTimeMs && s.totalBuildTimeMs ? `+${Math.max(0, Math.round(s.totalBuildTimeMs - s.baselineBuildTimeMs))} ms` : '—';
+      lines.push(
+        `| ${prefix}${name}${suffix} | ${s.componentCount} | ${formatKb(s.baselineRaw)} | ${formatKb(s.totalRaw)} | ${prefix}${rawDiffStr}${suffix} | ${baseBuild} | ${optBuild} | ${overhead} |`,
+      );
+    } else {
+      lines.push(`| ${prefix}${name}${suffix} | ${s.componentCount} | ${formatKb(s.baselineRaw)} | ${formatKb(s.totalRaw)} | ${prefix}${rawDiffStr}${suffix} |`);
+    }
   }
 
   lines.push('');
@@ -199,14 +242,15 @@ export function renderMarkdownPerToolAccordion(allResults) {
 
   for (const toolName of toolNames) {
     lines.push(`### ${toolName}\n`);
-    const headers = ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Savings'];
-    const alignments = [':---', '---:', '---:', '---:', '---:'];
+    const headers = ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Savings', 'Build time'];
+    const alignments = [':---', '---:', '---:', '---:', '---:', '---:'];
     lines.push(`| ${headers.join(' | ')} |`);
     lines.push(`| ${alignments.join(' | ')} |`);
 
     let totalBaseline = 0;
     let totalOptimized = 0;
     let totalElements = 0;
+    let totalBuildTime = 0;
 
     for (const res of allResults) {
       const baselineRow = res.rows.find((r) => r.isBaseline);
@@ -215,17 +259,22 @@ export function renderMarkdownPerToolAccordion(allResults) {
         const baselineSize = baselineRow.metrics.rawBytes;
         const optSize = toolRow.metrics.rawBytes;
         const savings = toolRow.impact ? formatImpact(toolRow.impact.rawDiff, toolRow.impact.rawPercent) : '—';
+        const buildTimeStr = toolRow.metrics?.buildTimeMs !== undefined ? `${Math.round(toolRow.metrics.buildTimeMs)} ms` : '—';
+        if (toolRow.metrics?.buildTimeMs) {
+          totalBuildTime += toolRow.metrics.buildTimeMs;
+        }
         totalBaseline += baselineSize;
         totalOptimized += optSize;
         totalElements += res.componentCount;
-        lines.push(`| ${res.suiteName} | ${res.componentCount} | ${formatKb(baselineSize)} | ${formatKb(optSize)} | ${savings} |`);
+        lines.push(`| ${res.suiteName} | ${res.componentCount} | ${formatKb(baselineSize)} | ${formatKb(optSize)} | ${savings} | ${buildTimeStr} |`);
       }
     }
 
     const totalDiff = totalOptimized - totalBaseline;
     const totalPct = totalBaseline > 0 ? (totalDiff / totalBaseline) * 100 : 0;
     const totalSavingsStr = totalDiff === 0 ? '—' : formatImpact(totalDiff, totalPct);
-    lines.push(`| **Total** | **${totalElements}** | **${formatKb(totalBaseline)}** | **${formatKb(totalOptimized)}** | **${totalSavingsStr}** |\n`);
+    const totalBuildTimeStr = totalBuildTime > 0 ? `${Math.round(totalBuildTime)} ms` : '—';
+    lines.push(`| **Total** | **${totalElements}** | **${formatKb(totalBaseline)}** | **${formatKb(totalOptimized)}** | **${totalSavingsStr}** | **${totalBuildTimeStr}** |\n`);
   }
 
   return lines.join('\n');
