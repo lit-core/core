@@ -20,6 +20,7 @@
     "benchmark:resumable": "node src/resumable-bench.js",
     "benchmark:markdown": "node src/index.js --format=markdown",
     "benchmark:json": "node src/index.js --format=json",
+    "benchmark:sync": "node src/index.js --update",
     "test": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },

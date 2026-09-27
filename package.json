@@ -35,6 +35,7 @@
     "benchmark:event-hoist": "pnpm --filter @lit-core/benchmarks run benchmark:event-hoist",
     "benchmark:resumable": "pnpm --filter @lit-core/benchmarks run benchmark:resumable",
     "benchmark:markdown": "pnpm --filter @lit-core/benchmarks run benchmark:markdown",
+    "benchmark:sync": "pnpm --filter @lit-core/benchmarks run benchmark:sync",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "biome format --write .",
     "format:check": "biome format ."

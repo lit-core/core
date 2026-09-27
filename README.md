@@ -36,7 +36,7 @@ Evaluated across **349 production Web Components** from 5 enterprise design syst
 | Web Awesome | 73 | 803.12 KB | 739.10 KB | **-64.02 KB (-7.97%)** | **+34.1%** |
 | Momentum Design | 97 | 870.05 KB | 867.15 KB | **-2.90 KB (-0.33%)** | **+35.4%** |
 | Material Web | 28 | 448.37 KB | 450.49 KB | **+2.11 KB (+0.47%)** | **+34.5%** |
-| **Total** | **349** | **9,663.34 KB** | **6,604.16 KB** | **-3,059.18 KB (-31.66%)** | **+35.0%** |
+| **Total** | **349** | **9,663.34 KB** | **6,604.16 KB** | **-3,059.19 KB (-31.66%)** | **+35.0%** |
 
 ### Dedicated benchmark reports
 

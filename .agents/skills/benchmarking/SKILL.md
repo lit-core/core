@@ -72,3 +72,6 @@ Each tool has its own dedicated benchmark document in `packages/benchmarks/docs/
 3. **Build overhead profiling**:
    - Native Rust transforms (`css-minifier`, `html-minifier`, `props-lower`) have near-zero overhead (<100 ms total across 100 components).
    - Node.js AST compiler passes (`html-aot`) run in JavaScript and must always use fast-path regex checks (`LIT_HTML_AOT_FAST_CHECK`) before AST parsing to prevent unneeded overhead on non-Lit modules.
+4. **Mandatory executive overview synchronization**:
+   - Whenever any benchmark pass, AST visitor, or runtime measurement logic is modified or audited, always re-evaluate the full benchmark suite across all 5 design systems with all active tools enabled (`node packages/benchmarks/src/index.js`).
+   - Immediately update the **Executive overview (all optimizations combined)** table in `packages/benchmarks/README.md` with the live, measured build times, bundle sizes, and first render speedups. Never leave stale numbers in the executive overview.

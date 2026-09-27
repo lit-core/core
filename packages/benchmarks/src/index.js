@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { runSuiteBenchmark } from './runner.js';
 import { getSuites } from './suites/index.js';
+import { syncAllBenchmarkDocs } from './sync-docs.js';
 import {
   renderAsciiRuntimeTable,
   renderAsciiTable,
@@ -22,17 +23,22 @@ const options = {
   tools: undefined,
   format: 'ascii',
   verbose: false,
+  update: true,
 };
 
 for (const arg of args) {
   if (arg.startsWith('--suite=')) {
     options.suite = arg.split('=')[1];
-  } else if (arg.startsWith('--tools=')) {
+  } else if (arg.startsWith('--tools=') || arg.startsWith('--tool=')) {
     options.tools = arg.split('=')[1].split(',');
   } else if (arg.startsWith('--format=')) {
     options.format = arg.split('=')[1];
   } else if (arg === '--verbose' || arg === '-v') {
     options.verbose = true;
+  } else if (arg === '--no-update') {
+    options.update = false;
+  } else if (arg === '--update' || arg === '--sync') {
+    options.update = true;
   } else if (arg === '--help' || arg === '-h') {
     console.log(`
 Lit Core Bundler Benchmark Runner
@@ -44,6 +50,8 @@ Options:
   --suite=<name>     Suite to run: 'webawesome', 'material', 'carbon', 'spectrum', 'momentum', or 'all' (default: all)
   --tools=<list>     Comma-separated tool ids to test (default: all active tools)
   --format=<type>    Output format: 'ascii' (default), 'markdown', or 'json'
+  --no-update        Skip automatic synchronization of markdown tables on disk
+  --update, --sync   Force automatic synchronization of markdown tables on disk (enabled by default)
   --verbose, -v      Show verbose build progress
   --help, -h         Display this help message
 `);
@@ -208,6 +216,10 @@ async function main() {
     }
   } else if (crossSuiteSummaries.length > 1 && options.format === 'ascii') {
     console.log(renderCrossSuiteSummary(crossSuiteSummaries));
+  }
+
+  if (options.update) {
+    syncAllBenchmarkDocs(allResults, { verbose: options.verbose, activeTools: tools });
   }
 
   console.log('\n✓ Benchmark run complete.\n');

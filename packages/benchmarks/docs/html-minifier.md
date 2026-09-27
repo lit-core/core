@@ -24,17 +24,17 @@ Native Rust AST minification of embedded Lit `html\`...\`` and `svg\`...\`` temp
 
 Measurements compare a standard Vite production build with minification (`minify: true`) against an identical build with `@lit-core/html-minifier` enabled. Runtime performance is evaluated in headless Chromium via Playwright across all component suites.
 
-| Metric | Carbon Web Components (99 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) | Spectrum Web Components (52 elements) |
+| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Baseline bundle size** | 5,801.88 KB | 803.12 KB | 870.05 KB | 448.37 KB | 1,739.92 KB |
-| **Optimized bundle size** | 5,747.27 KB | 775.79 KB | 852.54 KB | 441.81 KB | 1,739.92 KB |
-| **Net bundle savings** | **-54.60 KB (-0.94%)** | **-27.33 KB (-3.40%)** | **-17.51 KB (-2.01%)** | **-6.57 KB (-1.46%)** | Pre-minified upstream |
-| **Baseline mount latency** | 15.12 ms | 14.80 ms | 14.85 ms | 14.88 ms | 14.96 ms |
-| **Optimized mount latency** | 15.10 ms | 14.78 ms | 14.83 ms | 14.86 ms | 14.94 ms |
-| **Mount speedup** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** |
-| **Baseline update latency** | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms | 3.42 ms |
-| **Optimized update latency** | 3.44 ms | 3.39 ms | 3.40 ms | 3.40 ms | 3.41 ms |
-| **Update speedup** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** |
+| **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 5,747.27 KB | 1,739.92 KB | 775.79 KB | 852.54 KB | 441.81 KB |
+| **Net bundle savings** | **-54.60 KB (-0.94%)** | Pre-minified upstream | **-27.33 KB (-3.40%)** | **-17.51 KB (-2.01%)** | **-6.57 KB (-1.46%)** |
+| **Baseline mount latency** | 15.12 ms | 14.96 ms | 14.80 ms | 14.85 ms | 14.88 ms |
+| **Optimized mount latency** | 15.10 ms | 14.94 ms | 14.78 ms | 14.83 ms | 15.16 ms |
+| **Mount speedup** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** | **+0.1% (neutral)** | **-1.9% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.42 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Optimized update latency** | 3.44 ms | 3.41 ms | 3.39 ms | 3.40 ms | 3.45 ms |
+| **Update speedup** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** | **-1.2% (neutral)** |
 
 > [!NOTE]
 > `html-minifier` strips static whitespace and comments from Lit `html` and `svg` template literals ahead of time using OXC. Because template preparation, HTML parsing, and DOM instantiation pipelines remain structurally identical, runtime mount and update latencies remain neutral.

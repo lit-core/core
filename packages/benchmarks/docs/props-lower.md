@@ -27,14 +27,14 @@ Measurements compare a standard Vite production build with minification (`minify
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Baseline bundle size** | 5,801.88 KB | 1,739.92 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 5,793.47 KB | 1,633.12 KB | 800.61 KB | 871.99 KB | 445.74 KB |
-| **Net bundle savings** | **-8.41 KB (-0.14%)** | **-106.80 KB (-6.14%)** | **-2.51 KB (-0.31%)** | **+1.94 KB (+0.22%)** | **-2.63 KB (-0.59%)** |
+| **Optimized bundle size** | 5,793.47 KB | 1,633.12 KB | 800.61 KB | 871.99 KB | 448.37 KB |
+| **Net bundle savings** | **-8.41 KB (-0.14%)** | **-106.80 KB (-6.14%)** | **-2.51 KB (-0.31%)** | **+1.94 KB (+0.22%)** | **-0.00 KB (-0.00%)** |
 | **Baseline mount latency** | 15.12 ms | 15.00 ms | 14.80 ms | 14.85 ms | 14.88 ms |
-| **Optimized mount latency** | 14.88 ms | 14.78 ms | 14.60 ms | 14.65 ms | 14.68 ms |
-| **Mount speedup** | **+1.6% faster** | **+1.5% faster** | **+1.4% faster** | **+1.3% faster** | **+1.3% faster** |
+| **Optimized mount latency** | 14.88 ms | 14.78 ms | 14.60 ms | 14.65 ms | 14.88 ms |
+| **Mount speedup** | **+1.6% faster** | **+1.5% faster** | **+1.4% faster** | **+1.3% faster** | **+0.0% (neutral)** |
 | **Baseline update latency** | 3.45 ms | 3.44 ms | 3.40 ms | 3.41 ms | 3.41 ms |
-| **Optimized update latency** | 3.41 ms | 3.40 ms | 3.37 ms | 3.38 ms | 3.38 ms |
-| **Update speedup** | **+1.2% faster** | **+1.2% faster** | **+0.9% faster** | **+0.9% faster** | **+0.9% faster** |
+| **Optimized update latency** | 3.41 ms | 3.40 ms | 3.37 ms | 3.38 ms | 3.41 ms |
+| **Update speedup** | **+1.2% faster** | **+1.2% faster** | **+0.9% faster** | **+0.9% faster** | **+0.0% (neutral)** |
 
 > [!NOTE]
 > `props-lower` lowers TypeScript/TC39 decorators into standard Lit static `properties` fields ahead of time using OXC, eliminating runtime decorator polyfill helpers and decorator execution overhead during script evaluation. Because component template creation and DOM mounting are handled by Lit's template renderer, runtime mount speedups are modest (~1-2%). Ahead-of-time template rendering speedups are handled separately by `@lit-core/html-aot`.
