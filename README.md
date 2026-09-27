@@ -19,6 +19,7 @@
 | [`@lit-core/memoize`](packages/memoize/) | Ahead-of-time reactive expression auto-memoization |
 | [`@lit-core/elem-proxy`](packages/elem-proxy/) | Deferred custom element stubs and JIT class upgrade |
 | [`@lit-core/html-aot`](packages/html-aot/) | Ahead-of-time Lit template compilation |
+| [`@lit-core/native`](packages/native/) | Ahead-of-time vanilla Web Component and micro-runtime compiler |
 | [`@lit-core/css-minifier`](packages/css-minifier/) | CSS template literal minification |
 | [`@lit-core/html-minifier`](packages/html-minifier/) | HTML and SVG template literal minification |
 | [`@lit-core/resumable`](packages/resumable/) | Zero-JS SSR and interaction-driven runtime resumption |
@@ -49,11 +50,11 @@ Evaluated across **349 production Web Components** from 5 enterprise design syst
 
 | Design system or library | Elements | Baseline size | Optimized size | Net savings | First render speedup | Re-render speedup | Boot CPU savings |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5801.88 KB | 2939.11 KB | **-2862.76 KB (-49.34%)** | **+37.4%** | **+15.7%** | **-73.1%** |
+| Carbon Web Components | 99 | 5801.88 KB | 2942.83 KB | **-2859.04 KB (-49.28%)** | **+35.3%** | **+14.2%** | **-73.1%** |
 | Spectrum Web Components | 52 | 1878.08 KB | 1749.03 KB | **-129.05 KB (-6.87%)** | **+36.6%** | **+15.1%** | **-72.0%** |
-| Web Awesome | 73 | 803.12 KB | 806.86 KB | **+3.74 KB (+0.47%)** | **+35.5%** | **+14.1%** | **-73.5%** |
-| Momentum Design | 97 | 870.05 KB | 843.11 KB | **-26.94 KB (-3.10%)** | **+34.8%** | **+13.8%** | **-72.1%** |
-| Material Web | 28 | 448.37 KB | 469.43 KB | **+21.06 KB (+4.70%)** | **+35.3%** | **+14.1%** | **-72.4%** |
+| Web Awesome | 73 | 803.12 KB | 807.33 KB | **+4.21 KB (+0.52%)** | **+34.7%** | **+13.5%** | **-73.5%** |
+| Momentum Design | 97 | 870.05 KB | 843.26 KB | **-26.79 KB (-3.08%)** | **+34.6%** | **+13.5%** | **-72.1%** |
+| Material Web | 28 | 448.37 KB | 467.66 KB | **+19.29 KB (+4.30%)** | **+34.5%** | **+13.5%** | **-72.4%** |
 
 ### Dedicated benchmark reports
 
@@ -68,6 +69,7 @@ Detailed AST diagnostics, build durations, and runtime measurements are document
 - [`memoize` benchmark report](packages/benchmarks/docs/memoize.md)
 - [`elem-proxy` benchmark report](packages/benchmarks/docs/elem-proxy.md)
 - [`html-aot` benchmark report](packages/benchmarks/docs/html-aot.md)
+- [`native` benchmark report](packages/benchmarks/docs/native.md)
 - [`css-minifier` benchmark report](packages/benchmarks/docs/css-minifier.md)
 - [`html-minifier` benchmark report](packages/benchmarks/docs/html-minifier.md)
 - [`resumable` benchmark report](packages/benchmarks/docs/resumable.md)

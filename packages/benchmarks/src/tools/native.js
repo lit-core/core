@@ -9,7 +9,7 @@ export const nativeTool = {
   id: 'native',
   name: 'native (AOT vanilla Web Component compiler)',
   description: 'Ahead-of-time vanilla Custom Element and micro-runtime compiler eliminating Lit runtime dependencies',
-  enabled: false,
+  enabled: true,
 
   /**
    * Return Vite plugin(s) to test native in isolation.

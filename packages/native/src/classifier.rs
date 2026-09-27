@@ -186,6 +186,33 @@ fn classify_class<'a>(
                                 reason = Some("Dynamic sub-template loop in render".to_string());
                                 break;
                             }
+                            if render_slice.matches("html`").count() > 1 {
+                                is_complex = true;
+                                reason = Some("Multiple html template literals in render".to_string());
+                                break;
+                            }
+                            if render_slice.contains("this.render") {
+                                is_complex = true;
+                                reason = Some("Invokes helper render methods".to_string());
+                                break;
+                            }
+                            if render_slice.contains("classMap(")
+                                || render_slice.contains("styleMap(")
+                                || render_slice.contains("ifDefined(")
+                                || render_slice.contains("guard(")
+                            {
+                                is_complex = true;
+                                reason = Some("Uses Lit dynamic template directives".to_string());
+                                break;
+                            }
+                            if render_slice.contains('?')
+                                && render_slice.contains(':')
+                                && render_slice.contains("html`")
+                            {
+                                is_complex = true;
+                                reason = Some("Conditional dynamic template branches".to_string());
+                                break;
+                            }
                         }
                     }
                 }

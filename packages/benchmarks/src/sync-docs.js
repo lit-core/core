@@ -460,7 +460,21 @@ export function syncAllBenchmarkDocs(allResults, options = {}) {
   }
 
   // 3. Update dedicated tool reports in packages/benchmarks/docs/
-  const toolsToSync = ['css-fuse', 'html-fuse', 'props-lower', 'elem-proxy', 'event-hoist', 'html-aot', 'css-minifier', 'html-minifier'];
+  const toolsToSync = [
+    'css-fuse',
+    'html-fuse',
+    'props-lower',
+    'elem-proxy',
+    'event-hoist',
+    'dom-paths',
+    'dirty-mask',
+    'memoize',
+    'native',
+    'html-aot',
+    'css-minifier',
+    'html-minifier',
+    'resumable',
+  ];
 
   for (const toolId of toolsToSync) {
     if (activeTools.length > 0 && !activeTools.some((t) => t.id === toolId)) {

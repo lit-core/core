@@ -32,12 +32,12 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 2939.11 KB | 1749.03 KB | 806.86 KB | 843.11 KB | 469.43 KB |
-| **Net bundle savings** | **-2862.76 KB (-49.34%)** | **-129.05 KB (-6.87%)** | **+3.74 KB (+0.47%)** | **-26.94 KB (-3.10%)** | **+21.06 KB (+4.70%)** |
-| **Baseline build time** | 224 ms | 214 ms | 100 ms | 149 ms | 41 ms |
-| **Optimized build time** | 1656 ms | 2320 ms | 842 ms | 752 ms | 359 ms |
-| **Build overhead** | +1432 ms | +2106 ms | +742 ms | +603 ms | +318 ms |
-| **First render speedup** | **+37.4% faster** | **+36.6% faster** | **+35.5% faster** | **+34.8% faster** | **+35.3% faster** |
+| **Optimized bundle size** | 2942.83 KB | 1749.03 KB | 807.33 KB | 843.26 KB | 467.66 KB |
+| **Net bundle savings** | **-2859.04 KB (-49.28%)** | **-129.05 KB (-6.87%)** | **+4.21 KB (+0.52%)** | **-26.79 KB (-3.08%)** | **+19.29 KB (+4.30%)** |
+| **Baseline build time** | 195 ms | 170 ms | 96 ms | 247 ms | 39 ms |
+| **Optimized build time** | 1612 ms | 2051 ms | 677 ms | 815 ms | 333 ms |
+| **Build overhead** | +1417 ms | +1881 ms | +581 ms | +568 ms | +294 ms |
+| **First render speedup** | **+35.3% faster** | **+36.6% faster** | **+34.7% faster** | **+34.6% faster** | **+34.5% faster** |
 
 > [!NOTE]
 > The ~34-36% first render speedup in the combined overview is delivered primarily by ahead-of-time Lit template compilation (`@lit-core/html-aot`), which eliminates runtime HTML parsing and template preparation, supplemented by shared constructable stylesheets (`css-fuse`) and lowered properties (`props-lower`). In isolation, static fragment clustering (`html-fuse`) and template minifiers (`css-minifier`, `html-minifier`) optimize bundle size and have neutral runtime mount impact.
@@ -51,9 +51,13 @@ Detailed benchmarks, full AST diagnostics, build durations, and runtime measurem
 - [**`css-fuse` benchmark**](docs/css-fuse.md): Full CSS AST deduplication, constructable stylesheet metrics, and up to -51.6% size reduction.
 - [**`html-fuse` benchmark**](docs/html-fuse.md): Static HTML and SVG fragment clustering and consolidated innerHTML parsing.
 - [**`props-lower` benchmark**](docs/props-lower.md): Native Rust decorator lowering, prototype scalar hoisting, and descriptor preset deduplication.
+- [**`event-hoist` benchmark**](docs/event-hoist.md): Ahead-of-time ShadowRoot event delegation, -99.9% native DOM event listeners, and -30% mount latency.
+- [**`dom-paths` benchmark**](docs/dom-paths.md): Ahead-of-time structural child pointer paths eliminating TreeWalker traversal and +35% mount speedup.
+- [**`dirty-mask` benchmark**](docs/dirty-mask.md): Ahead-of-time property-to-part dependency bitmasking and zero dirty-checking loops.
+- [**`memoize` benchmark**](docs/memoize.md): Ahead-of-time reactive expression auto-memoization and sub-millisecond updates.
 - [**`elem-proxy` benchmark**](docs/elem-proxy.md): Deferred element proxy stubs, -72.8% script evaluation CPU time, and -67.4% to -70.2% V8 heap memory savings.
 - [**`html-aot` benchmark**](docs/html-aot.md): Ahead-of-time Lit template compilation, eliminated runtime prepare overhead, and +44% render speedup.
-- [**`event-hoist` benchmark**](docs/event-hoist.md): Ahead-of-time ShadowRoot event delegation, -99.9% native DOM event listeners, and -30% mount latency.
+- [**`native` benchmark**](docs/native.md): Ahead-of-time pure vanilla Custom Element and micro-runtime compiler with zero Lit dependencies for leaf components.
 - [**`css-minifier` benchmark**](docs/css-minifier.md): High-speed Lightning CSS template minification.
 - [**`html-minifier` benchmark**](docs/html-minifier.md): High-speed OXC HTML and SVG template minification.
 - [**`resumable` benchmark**](docs/resumable.md): Zero-JavaScript Declarative Shadow DOM SSR, -99.5% initial client JavaScript payload, and -98.2% Total Blocking Time.

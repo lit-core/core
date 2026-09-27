@@ -529,42 +529,76 @@ fn parse_render_template(
             }
             let expr = std::str::from_utf8(&bytes[exp_start..exp_end - 1]).unwrap_or("").trim();
 
-            // Check if this was an event binding: e.g. @click=${this._onClick}
             let preceding = &tmpl_str[..i];
-            if let Some(at_pos) = preceding.rfind('@') {
-                let event_slice = preceding[at_pos..].trim();
-                if event_slice.ends_with('=') || event_slice.ends_with("=\"") || event_slice.ends_with("='") {
-                    let ev_name = event_slice.trim_start_matches('@').trim_end_matches('=').trim_end_matches('"').trim_end_matches('\'');
-                    let clean_handler = expr.trim_start_matches("this.").trim_end_matches("()");
-                    out_events.push(EventInfo {
-                        event_name: ev_name.to_string(),
-                        handler_expr: clean_handler.to_string(),
-                        node_path: vec![0], // Direct top-level element
+            let prec_trimmed = preceding.trim_end();
+            let prec_no_quote = prec_trimmed
+                .strip_suffix('"')
+                .or_else(|| prec_trimmed.strip_suffix('\''))
+                .unwrap_or(prec_trimmed)
+                .trim_end();
+
+            if let Some(without_eq) = prec_no_quote.strip_suffix('=') {
+                let attr_token = without_eq
+                    .split(|c: char| c.is_whitespace() || c == '<' || c == '>')
+                    .filter(|s| !s.is_empty())
+                    .last()
+                    .unwrap_or("");
+
+                if let Some(ev_name) = attr_token.strip_prefix('@') {
+                    if !ev_name.is_empty()
+                        && ev_name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+                    {
+                        let clean_handler = expr.trim_start_matches("this.").trim_end_matches("()");
+                        if !clean_handler.is_empty()
+                            && clean_handler.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '$')
+                        {
+                            out_events.push(EventInfo {
+                                event_name: ev_name.to_string(),
+                                handler_expr: clean_handler.to_string(),
+                                node_path: vec![0],
+                            });
+                        }
+                        if let Some(pos) = clean_html.rfind('@') {
+                            clean_html.truncate(pos);
+                        }
+                    }
+                } else if let Some(attr_name) = attr_token.strip_prefix('?') {
+                    if !attr_name.is_empty()
+                        && attr_name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+                    {
+                        let prop_name = expr.trim_start_matches("this.");
+                        out_dynamic_bindings.push(DynamicBindingInfo {
+                            prop_name: prop_name.to_string(),
+                            node_path: vec![0],
+                            is_attribute: true,
+                            attribute_name: Some(attr_name.to_string()),
+                            is_boolean: true,
+                        });
+                        if let Some(pos) = clean_html.rfind('?') {
+                            clean_html.truncate(pos);
+                        }
+                    }
+                } else if !attr_token.is_empty()
+                    && attr_token.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.')
+                {
+                    if let Some(pos) = clean_html.rfind(attr_token) {
+                        clean_html.truncate(pos);
+                    }
+                }
+            } else {
+                let prop_name = expr.trim_start_matches("this.");
+                if !prop_name.is_empty()
+                    && prop_name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+                {
+                    out_dynamic_bindings.push(DynamicBindingInfo {
+                        prop_name: prop_name.to_string(),
+                        node_path: vec![0, 0],
+                        is_attribute: false,
+                        attribute_name: None,
+                        is_boolean: false,
                     });
                 }
-            } else if let Some(question_pos) = preceding.rfind('?') {
-                // Boolean attribute binding: ?disabled=${this.disabled}
-                let attr_slice = preceding[question_pos..].trim();
-                let attr_name = attr_slice.trim_start_matches('?').trim_end_matches('=').trim_end_matches('"').trim_end_matches('\'');
-                let prop_name = expr.trim_start_matches("this.");
-                out_dynamic_bindings.push(DynamicBindingInfo {
-                    prop_name: prop_name.to_string(),
-                    node_path: vec![0],
-                    is_attribute: true,
-                    attribute_name: Some(attr_name.to_string()),
-                    is_boolean: true,
-                });
-            } else {
-                // Text node dynamic interpolation
-                let prop_name = expr.trim_start_matches("this.");
-                out_dynamic_bindings.push(DynamicBindingInfo {
-                    prop_name: prop_name.to_string(),
-                    node_path: vec![0, 0], // Text inside top element
-                    is_attribute: false,
-                    attribute_name: None,
-                    is_boolean: false,
-                });
-                clean_html.push(' '); // placeholder text space
+                clean_html.push(' ');
             }
 
             i = exp_end;
