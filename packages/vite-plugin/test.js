@@ -1,5 +1,20 @@
 import assert from 'node:assert';
-import litDefault, { cssFuse, elemProxy, htmlMinifier, lit, litCore, litCssFuse, litElemProxy, litHtmlMinifier, litPropsLower, propsLower } from './dist/index.js';
+import litDefault, {
+  cssFuse,
+  dirtyMask,
+  domPaths,
+  elemProxy,
+  htmlMinifier,
+  lit,
+  litCore,
+  litCssFuse,
+  litDirtyMask,
+  litDomPaths,
+  litElemProxy,
+  litHtmlMinifier,
+  litPropsLower,
+  propsLower,
+} from './dist/index.js';
 
 console.log('Testing @lit-core/vite-plugin hooks and exports...');
 
@@ -12,6 +27,10 @@ assert.strictEqual(typeof propsLower, 'function', 'propsLower must be a function
 assert.strictEqual(typeof litPropsLower, 'function', 'litPropsLower must be an alias');
 assert.strictEqual(typeof elemProxy, 'function', 'elemProxy must be a function');
 assert.strictEqual(typeof litElemProxy, 'function', 'litElemProxy must be an alias');
+assert.strictEqual(typeof dirtyMask, 'function', 'dirtyMask must be a function');
+assert.strictEqual(typeof litDirtyMask, 'function', 'litDirtyMask must be an alias');
+assert.strictEqual(typeof domPaths, 'function', 'domPaths must be a function');
+assert.strictEqual(typeof litDomPaths, 'function', 'litDomPaths must be an alias');
 assert.strictEqual(typeof htmlMinifier, 'function', 'htmlMinifier must be a function');
 assert.strictEqual(typeof litHtmlMinifier, 'function', 'litHtmlMinifier must be an alias');
 
@@ -47,6 +66,67 @@ assert.strictEqual(allPlugins.length, 3);
 assert.strictEqual(allPlugins[0].name, 'css-fuse');
 assert.strictEqual(allPlugins[1].name, 'props-lower');
 assert.strictEqual(allPlugins[2].name, 'html-minifier');
+
+// Test lit({ dirtyMask: true }): includes dirty-mask
+const dirtyMaskPlugins = lit({ cssFuse: false, dirtyMask: true });
+assert.strictEqual(dirtyMaskPlugins.length, 1);
+assert.strictEqual(dirtyMaskPlugins[0].name, 'dirty-mask');
+
+// Test lit({ 'dirty-mask': true }): kebab-case option
+const kebabDirtyMaskPlugins = lit({ cssFuse: false, 'dirty-mask': true });
+assert.strictEqual(kebabDirtyMaskPlugins.length, 1);
+assert.strictEqual(kebabDirtyMaskPlugins[0].name, 'dirty-mask');
+
+// Test lit({ domPaths: true }): includes dom-paths
+const domPathsPlugins = lit({ cssFuse: false, domPaths: true });
+assert.strictEqual(domPathsPlugins.length, 1);
+assert.strictEqual(domPathsPlugins[0].name, 'dom-paths');
+
+// Test lit({ 'dom-paths': true }): kebab-case option
+const kebabDomPathsPlugins = lit({ cssFuse: false, 'dom-paths': true });
+assert.strictEqual(kebabDomPathsPlugins.length, 1);
+assert.strictEqual(kebabDomPathsPlugins[0].name, 'dom-paths');
+
+// Test standalone domPaths transform hook
+const domPathsInstance = domPaths();
+assert.strictEqual(domPathsInstance.name, 'dom-paths');
+assert.strictEqual(domPathsInstance.enforce, 'pre');
+assert.strictEqual(typeof domPathsInstance.transform, 'function');
+
+const sampleDomPathsTemplate = `
+  import { LitElement, html } from 'lit';
+  export class TestComp extends LitElement {
+    render() {
+      return html\`<div><p>Count: \${this.count}</p><button @click=\${this.inc}>+</button></div>\`;
+    }
+  }
+`;
+const transformedDomPaths = domPathsInstance.transform.call({}, sampleDomPathsTemplate, 'test-comp.ts');
+assert(transformedDomPaths, 'domPaths transform should return result');
+assert(transformedDomPaths.code.includes('static __litPartPaths = ['), 'static __litPartPaths emitted on class');
+assert(transformedDomPaths.code.includes('[0, 0, 1]'), 'path to count child part computed');
+assert(transformedDomPaths.code.includes('[0, 1]'), 'path to button attribute computed');
+
+// Test standalone dirtyMask transform hook
+const dirtyMaskInstance = dirtyMask();
+assert.strictEqual(dirtyMaskInstance.name, 'dirty-mask');
+assert.strictEqual(dirtyMaskInstance.enforce, 'pre');
+assert.strictEqual(typeof dirtyMaskInstance.transform, 'function');
+
+const sampleDirtyTemplate = `
+  import { LitElement, html } from 'lit';
+  import { property } from 'lit/decorators.js';
+  export class TestComp extends LitElement {
+    @property({ type: Number }) count = 0;
+    render() {
+      return html\`<div>\${this.count}</div>\`;
+    }
+  }
+`;
+const transformedDirty = dirtyMaskInstance.transform.call({}, sampleDirtyTemplate, 'test-comp.ts');
+assert(transformedDirty, 'dirtyMask transform should return result');
+assert(transformedDirty.code.includes('this.__litDirtyMask & 1'), 'dirty mask short-circuit generated');
+assert(transformedDirty.code.includes('noChange'), 'noChange imported and used');
 
 // Test standalone htmlMinifier transform hook
 const htmlMinifierInstance = htmlMinifier();

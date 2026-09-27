@@ -1,8 +1,31 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { LoaderContext } from 'webpack';
-import type { CssMinifierOptions, ElemProxyOptions, EventHoistOptions, HtmlAotOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions, ResumableOptions } from './options.js';
-import { transformCssMinifier, transformElemProxy, transformEventHoistPlugin, transformHtmlAot, transformHtmlMinifier, transformPropsLower, transformResumable } from './transforms.js';
+import type {
+  CssMinifierOptions,
+  DirtyMaskOptions,
+  DomPathsOptions,
+  ElemProxyOptions,
+  EventHoistOptions,
+  HtmlAotOptions,
+  HtmlMinifierOptions,
+  LitPluginOptions,
+  MemoizeOptions,
+  PropsLowerOptions,
+  ResumableOptions,
+} from './options.js';
+import {
+  transformCssMinifier,
+  transformDirtyMaskPlugin,
+  transformDomPathsPlugin,
+  transformElemProxy,
+  transformEventHoistPlugin,
+  transformHtmlAot,
+  transformHtmlMinifier,
+  transformMemoizePlugin,
+  transformPropsLower,
+  transformResumable,
+} from './transforms.js';
 
 export interface PluginState {
   transformedFiles: Map<string, string>;
@@ -100,7 +123,46 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
     }
   }
 
-  // 5. Apply css-minifier embedded CSS minification if enabled
+  // 5. Apply dirty-mask AOT bitmasking if enabled
+  const dirtyMaskOpt = options.dirtyMask ?? options['dirty-mask'];
+  if (dirtyMaskOpt) {
+    const maskOpts: DirtyMaskOptions = typeof dirtyMaskOpt === 'object' ? dirtyMaskOpt : {};
+    const result = transformDirtyMaskPlugin(currentSource, resourcePath, maskOpts);
+    if (result) {
+      currentSource = result.code;
+      if (result.map) {
+        currentMap = result.map;
+      }
+    }
+  }
+
+  // 6. Apply dom-paths AOT structural DOM path compilation if enabled
+  const domPathsOpt = options.domPaths ?? options['dom-paths'];
+  if (domPathsOpt) {
+    const domOpts: DomPathsOptions = typeof domPathsOpt === 'object' ? domPathsOpt : {};
+    const result = transformDomPathsPlugin(currentSource, resourcePath, domOpts);
+    if (result) {
+      currentSource = result.code;
+      if (result.map) {
+        currentMap = result.map;
+      }
+    }
+  }
+
+  // 7. Apply memoize auto-memoization if enabled
+  const memoizeOpt = options.memoize;
+  if (memoizeOpt) {
+    const memoizeOpts: MemoizeOptions = typeof memoizeOpt === 'object' ? memoizeOpt : {};
+    const result = transformMemoizePlugin(currentSource, resourcePath, memoizeOpts);
+    if (result) {
+      currentSource = result.code;
+      if (result.map) {
+        currentMap = result.map;
+      }
+    }
+  }
+
+  // 7. Apply css-minifier embedded CSS minification if enabled
   const cssMinifierOpt = options.cssMinifier ?? options['css-minifier'];
   if (cssMinifierOpt) {
     const cssOpts: CssMinifierOptions = typeof cssMinifierOpt === 'object' ? cssMinifierOpt : {};

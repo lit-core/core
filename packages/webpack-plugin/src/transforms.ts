@@ -2,18 +2,36 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
+import { transformDirtyMask } from '@lit-core/dirty-mask';
+import { transformDomPaths } from '@lit-core/dom-paths';
 import { transformElemProxy as runTransformElemProxy } from '@lit-core/elem-proxy';
 import { transformEventHoist } from '@lit-core/event-hoist';
 import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
+import { transformMemoize } from '@lit-core/memoize';
 import { transformLitProps } from '@lit-core/props-lower';
-import type { CssFuseOptions, CssMinifierOptions, ElemProxyOptions, EventHoistOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, PropsLowerOptions, ResumableOptions } from './options.js';
+import type {
+  CssFuseOptions,
+  CssMinifierOptions,
+  DirtyMaskOptions,
+  DomPathsOptions,
+  ElemProxyOptions,
+  EventHoistOptions,
+  HtmlAotOptions,
+  HtmlFuseOptions,
+  HtmlMinifierOptions,
+  MemoizeOptions,
+  PropsLowerOptions,
+  ResumableOptions,
+} from './options.js';
 import { matchesPattern } from './utils.js';
 
 export const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b/;
 export const LIT_ELEM_PROXY_FAST_CHECK = /@customElement\b|customElements\.define\b/;
 export const LIT_EVENT_HOIST_FAST_CHECK = /html\s*`[\s\S]*?@[a-zA-Z]/;
+export const LIT_DIRTY_MASK_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
+export const LIT_MEMOIZE_FAST_CHECK = /\brender\s*\([^)]*\)\s*\{/;
 export const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
 export const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
 
@@ -156,6 +174,71 @@ export function transformEventHoistPlugin(code: string, id: string, options: Eve
     });
 
     if (result.hoistedEventsCount === 0) {
+      return null;
+    }
+
+    return {
+      code: result.code,
+      map: result.map ? JSON.parse(result.map) : null,
+    };
+  } catch (_err) {
+    return null;
+  }
+}
+
+export function transformDirtyMaskPlugin(code: string, id: string, options: DirtyMaskOptions = {}): TransformResult | null {
+  const { sourcemap = true } = options;
+  const cleanId = id.split('?')[0] ?? id;
+
+  if (!shouldProcessFile(cleanId, options)) {
+    return null;
+  }
+
+  if (!LIT_DIRTY_MASK_FAST_CHECK.test(code)) {
+    return null;
+  }
+
+  try {
+    const result = transformDirtyMask(code, {
+      sourcemap,
+      filename: cleanId,
+    });
+
+    if (result.maskedPartsCount === 0) {
+      return null;
+    }
+
+    return {
+      code: result.code,
+      map: result.map ? JSON.parse(result.map) : null,
+    };
+  } catch (_err) {
+    return null;
+  }
+}
+
+export const LIT_DOM_PATHS_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
+
+export function transformDomPathsPlugin(code: string, id: string, options: DomPathsOptions = {}): TransformResult | null {
+  const { sourcemap = true } = options;
+  const cleanId = id.split('?')[0] ?? id;
+
+  if (!shouldProcessFile(cleanId, options)) {
+    return null;
+  }
+
+  if (!LIT_DOM_PATHS_FAST_CHECK.test(code)) {
+    return null;
+  }
+
+  try {
+    const result = transformDomPaths(code, {
+      sourcemap,
+      filename: cleanId,
+      normalizeWhitespace: options.normalizeWhitespace,
+    });
+
+    if (result.componentsCount === 0 || result.pathsCount === 0) {
       return null;
     }
 
@@ -366,4 +449,35 @@ export function transformResumable(code: string, id: string, options: ResumableO
   }
 
   return null;
+}
+
+export function transformMemoizePlugin(code: string, id: string, options: MemoizeOptions = {}): TransformResult | null {
+  const { sourcemap = true } = options;
+  const cleanId = id.split('?')[0] ?? id;
+
+  if (!shouldProcessFile(cleanId, options)) {
+    return null;
+  }
+
+  if (!LIT_MEMOIZE_FAST_CHECK.test(code)) {
+    return null;
+  }
+
+  try {
+    const result = transformMemoize(code, {
+      sourcemap,
+      filename: cleanId,
+    });
+
+    if (result.memoizedCount === 0) {
+      return null;
+    }
+
+    return {
+      code: result.code,
+      map: result.map ? JSON.parse(result.map) : null,
+    };
+  } catch (_err) {
+    return null;
+  }
 }

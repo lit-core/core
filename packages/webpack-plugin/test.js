@@ -4,6 +4,8 @@ import litDefault, {
   CssMinifierWebpackPlugin,
   cssFuse,
   cssMinifier,
+  DomPathsWebpackPlugin,
+  domPaths,
   ElemProxyWebpackPlugin,
   elemProxy,
   HtmlMinifierWebpackPlugin,
@@ -13,6 +15,7 @@ import litDefault, {
   litCore,
   litCssFuse,
   litCssMinifier,
+  litDomPaths,
   litElemProxy,
   litHtmlMinifier,
   litPropsLower,
@@ -39,6 +42,8 @@ assert.strictEqual(typeof htmlMinifier, 'function', 'htmlMinifier must be a func
 assert.strictEqual(typeof litHtmlMinifier, 'function', 'litHtmlMinifier must be an alias');
 assert.strictEqual(typeof cssMinifier, 'function', 'cssMinifier must be a function');
 assert.strictEqual(typeof litCssMinifier, 'function', 'litCssMinifier must be an alias');
+assert.strictEqual(typeof domPaths, 'function', 'domPaths must be a function');
+assert.strictEqual(typeof litDomPaths, 'function', 'litDomPaths must be an alias');
 assert.strictEqual(typeof litWebpackLoader, 'function', 'litWebpackLoader must be exported');
 
 // 2. Verify classes
@@ -46,6 +51,7 @@ assert.strictEqual(typeof LitWebpackPlugin, 'function', 'LitWebpackPlugin class 
 assert.strictEqual(typeof CssFuseWebpackPlugin, 'function', 'CssFuseWebpackPlugin class must exist');
 assert.strictEqual(typeof PropsLowerWebpackPlugin, 'function', 'PropsLowerWebpackPlugin class must exist');
 assert.strictEqual(typeof ElemProxyWebpackPlugin, 'function', 'ElemProxyWebpackPlugin class must exist');
+assert.strictEqual(typeof DomPathsWebpackPlugin, 'function', 'DomPathsWebpackPlugin class must exist');
 assert.strictEqual(typeof HtmlMinifierWebpackPlugin, 'function', 'HtmlMinifierWebpackPlugin class must exist');
 assert.strictEqual(typeof CssMinifierWebpackPlugin, 'function', 'CssMinifierWebpackPlugin class must exist');
 

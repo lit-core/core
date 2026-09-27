@@ -6,12 +6,15 @@ import { registerPluginState, unregisterPluginState } from './loader.js';
 import type {
   CssFuseOptions,
   CssMinifierOptions,
+  DirtyMaskOptions,
+  DomPathsOptions,
   ElemProxyOptions,
   EventHoistOptions,
   HtmlAotOptions,
   HtmlFuseOptions,
   HtmlMinifierOptions,
   LitPluginOptions,
+  MemoizeOptions,
   PropsLowerOptions,
   ResumableOptions,
 } from './options.js';
@@ -263,13 +266,25 @@ export class ElemProxyWebpackPlugin extends LitWebpackPlugin {
 
 export class EventHoistWebpackPlugin extends LitWebpackPlugin {
   constructor(options: EventHoistOptions = {}) {
-    super({ cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: options, htmlAot: false, cssMinifier: false, htmlMinifier: false }, 'EventHoistWebpackPlugin');
+    super(
+      { cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: options, dirtyMask: false, htmlAot: false, cssMinifier: false, htmlMinifier: false },
+      'EventHoistWebpackPlugin',
+    );
+  }
+}
+
+export class DirtyMaskWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: DirtyMaskOptions = {}) {
+    super(
+      { cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: false, dirtyMask: options, htmlAot: false, cssMinifier: false, htmlMinifier: false },
+      'DirtyMaskWebpackPlugin',
+    );
   }
 }
 
 export class HtmlAotWebpackPlugin extends LitWebpackPlugin {
   constructor(options: HtmlAotOptions = {}) {
-    super({ cssFuse: false, htmlFuse: false, propsLower: false, htmlAot: options, cssMinifier: false, htmlMinifier: false }, 'HtmlAotWebpackPlugin');
+    super({ cssFuse: false, htmlFuse: false, propsLower: false, dirtyMask: false, htmlAot: options, cssMinifier: false, htmlMinifier: false }, 'HtmlAotWebpackPlugin');
   }
 }
 
@@ -297,6 +312,36 @@ export function eventHoist(options: EventHoistOptions = {}): EventHoistWebpackPl
   return new EventHoistWebpackPlugin(options);
 }
 
+export function dirtyMask(options: DirtyMaskOptions = {}): DirtyMaskWebpackPlugin {
+  return new DirtyMaskWebpackPlugin(options);
+}
+
+export class DomPathsWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: DomPathsOptions = {}) {
+    super(
+      { cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: false, dirtyMask: false, domPaths: options, htmlAot: false, cssMinifier: false, htmlMinifier: false },
+      'DomPathsWebpackPlugin',
+    );
+  }
+}
+
+export function domPaths(options: DomPathsOptions = {}): DomPathsWebpackPlugin {
+  return new DomPathsWebpackPlugin(options);
+}
+
+export class MemoizeWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: MemoizeOptions = {}) {
+    super(
+      { cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: false, dirtyMask: false, memoize: options, htmlAot: false, cssMinifier: false, htmlMinifier: false },
+      'MemoizeWebpackPlugin',
+    );
+  }
+}
+
+export function memoize(options: MemoizeOptions = {}): MemoizeWebpackPlugin {
+  return new MemoizeWebpackPlugin(options);
+}
+
 export function cssMinifier(options: CssMinifierOptions = {}): CssMinifierWebpackPlugin {
   return new CssMinifierWebpackPlugin(options);
 }
@@ -312,7 +357,7 @@ export function htmlAot(options: HtmlAotOptions = {}): HtmlAotWebpackPlugin {
 export class ResumableWebpackPlugin extends LitWebpackPlugin {
   constructor(options: ResumableOptions = {}) {
     super(
-      { cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: false, htmlAot: false, cssMinifier: false, htmlMinifier: false, resumable: options },
+      { cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: false, dirtyMask: false, htmlAot: false, cssMinifier: false, htmlMinifier: false, resumable: options },
       'ResumableWebpackPlugin',
     );
   }
@@ -328,6 +373,9 @@ export const litHtmlFuse = htmlFuse;
 export const litPropsLower = propsLower;
 export const litElemProxy = elemProxy;
 export const litEventHoist = eventHoist;
+export const litDirtyMask = dirtyMask;
+export const litDomPaths = domPaths;
+export const litMemoize = memoize;
 export const litCssMinifier = cssMinifier;
 export const litHtmlMinifier = htmlMinifier;
 export const litHtmlAot = htmlAot;

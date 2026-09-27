@@ -12,11 +12,14 @@
     "paths": {
       "@lit-core/css-fuse": ["../css-fuse/src/index.d.ts"],
       "@lit-core/css-minifier": ["../css-minifier/src/index.d.ts"],
+      "@lit-core/dirty-mask": ["../dirty-mask/src/index.d.ts"],
+      "@lit-core/dom-paths": ["../dom-paths/src/index.d.ts"],
       "@lit-core/elem-proxy": ["../elem-proxy/src/index.d.ts"],
       "@lit-core/event-hoist": ["../event-hoist/src/index.d.ts"],
       "@lit-core/html-aot": ["../html-aot/lib/index.d.ts"],
       "@lit-core/html-fuse": ["../html-fuse/src/index.d.ts"],
       "@lit-core/html-minifier": ["../html-minifier/src/index.d.ts"],
+      "@lit-core/memoize": ["../memoize/src/index.d.ts"],
       "@lit-core/props-lower": ["../props-lower/src/index.d.ts"],
       "@lit-core/resumable": ["../resumable/lib/index.d.ts"]
     }

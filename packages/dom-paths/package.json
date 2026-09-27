@@ -1,0 +1,67 @@
+{
+  "name": "@lit-core/dom-paths",
+  "version": "0.1.0",
+  "description": "Ahead-of-time structural DOM path compiler and client runtime helper for Lit and Web Components",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./client": {
+      "types": "./src/client.d.ts",
+      "import": "./src/client.js",
+      "default": "./src/client.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "src/client.js",
+    "src/client.d.ts",
+    "src/client.ts",
+    "src/js-fallback.js",
+    "*.node"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/dom-paths"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "dom",
+    "dom-paths",
+    "treewalker",
+    "aot",
+    "oxc",
+    "performance"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "napi": {
+    "binaryName": "dom-paths",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "cargo build --release && cp target/release/libdom_paths.dylib dom-paths.darwin-arm64.node 2>/dev/null || true",
+    "build:debug": "cargo build && cp target/debug/libdom_paths.dylib dom-paths.darwin-arm64.node 2>/dev/null || true",
+    "build:client": "tsc -p tsconfig.client.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  }
+}

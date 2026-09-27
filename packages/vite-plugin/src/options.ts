@@ -249,6 +249,40 @@ export interface LitPluginOptions {
   'event-hoist'?: boolean | EventHoistOptions;
 
   /**
+   * Ahead-of-time property-to-part dependency bitmasking via @lit-core/dirty-mask.
+   * Eliminates redundant template expression evaluations and part diffs.
+   * Pass `true` or a `DirtyMaskOptions` object to enable.
+   * @default false
+   */
+  dirtyMask?: boolean | DirtyMaskOptions;
+
+  /**
+   * Kebab-case alias for `dirtyMask`.
+   */
+  'dirty-mask'?: boolean | DirtyMaskOptions;
+
+  /**
+   * Ahead-of-time structural DOM path compiler pass via @lit-core/dom-paths.
+   * Precomputes child pointer paths to eliminate runtime TreeWalker traversal.
+   * Pass `true` or a `DomPathsOptions` object to enable.
+   * @default false
+   */
+  domPaths?: boolean | DomPathsOptions;
+
+  /**
+   * Kebab-case alias for `domPaths`.
+   */
+  'dom-paths'?: boolean | DomPathsOptions;
+
+  /**
+   * Ahead-of-time reactive expression auto-memoization compiler pass via @lit-core/memoize.
+   * Analyzes JavaScript AST data flow inside Lit render() and wraps pure array pipelines in property-guarded cache slots.
+   * Pass `true` or a `MemoizeOptions` object to enable.
+   * @default false
+   */
+  memoize?: boolean | MemoizeOptions;
+
+  /**
    * Ahead-of-time SSR and runtime resumption architecture for zero component JS on initial boot.
    * Pass `true` or a `ResumableOptions` object to enable.
    * @default false
@@ -315,6 +349,28 @@ export interface EventHoistOptions {
 
 export type LitEventHoistOptions = EventHoistOptions;
 
+export interface DirtyMaskOptions {
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitDirtyMaskOptions = DirtyMaskOptions;
+
 export interface ElemProxyOptions {
   /**
    * Transformation mode:
@@ -366,4 +422,53 @@ export interface HtmlAotOptions {
 }
 
 export type LitHtmlAotOptions = HtmlAotOptions;
+
+export interface DomPathsOptions {
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Normalize whitespace between HTML tags when computing DOM paths.
+   * @default true
+   */
+  normalizeWhitespace?: boolean;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitDomPathsOptions = DomPathsOptions;
+export interface MemoizeOptions {
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitMemoizeOptions = MemoizeOptions;
 export type LitCorePluginOptions = LitPluginOptions;

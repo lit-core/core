@@ -13,6 +13,7 @@ This skill guides you through developing and building native Rust packages with 
 ## Affected packages
 - `packages/css-fuse`
 - `packages/props-lower`
+- `packages/memoize`
 - `packages/css-minifier`
 - `packages/html-minifier`
 

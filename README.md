@@ -14,6 +14,8 @@
 | [`@lit-core/html-fuse`](packages/html-fuse/) | Static HTML and SVG fragment clustering | [README](packages/html-fuse/README.md) · [Guide](packages/html-fuse/docs/fragment-clustering.md) |
 | [`@lit-core/props-lower`](packages/props-lower/) | AOT Lit decorator and reactive property lowering | [README](packages/props-lower/README.md) · [Guide](packages/props-lower/docs/transform-mechanics.md) |
 | [`@lit-core/event-hoist`](packages/event-hoist/) | Ahead-of-time ShadowRoot event delegation | [README](packages/event-hoist/README.md) |
+| [`@lit-core/dom-paths`](packages/dom-paths/) | Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal | [README](packages/dom-paths/README.md) |
+| [`@lit-core/memoize`](packages/memoize/) | Ahead-of-time reactive expression auto-memoization | [README](packages/memoize/README.md) |
 | [`@lit-core/elem-proxy`](packages/elem-proxy/) | Deferred custom element stubs and JIT class upgrade | [README](packages/elem-proxy/README.md) · [Architecture](packages/elem-proxy/docs/proxy-architecture.md) |
 | [`@lit-core/html-aot`](packages/html-aot/) | Ahead-of-time Lit template compilation | [README](packages/html-aot/README.md) · [Guide](packages/html-aot/docs/template-compilation.md) |
 | [`@lit-core/css-minifier`](packages/css-minifier/) | CSS template literal minification | [README](packages/css-minifier/README.md) |
@@ -30,14 +32,13 @@
 
 Evaluated across **349 production Web Components** from 5 enterprise design systems:
 
-| Design system or library | Elements | Baseline size | Optimized size | Net savings | First render speedup |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5801.88 KB | 2939.11 KB | **-2862.76 KB (-49.34%)** | **+37.4%** |
-| Spectrum Web Components | 52 | 1878.08 KB | 1749.03 KB | **-129.05 KB (-6.87%)** | **+36.6%** |
-| Web Awesome | 73 | 803.12 KB | 806.86 KB | **+3.74 KB (+0.47%)** | **+35.5%** |
-| Momentum Design | 97 | 870.05 KB | 843.11 KB | **-26.94 KB (-3.10%)** | **+34.8%** |
-| Material Web | 28 | 448.37 KB | 469.43 KB | **+21.06 KB (+4.70%)** | **+35.3%** |
-| **Total** | **349** | **9,801.49 KB** | **6,807.54 KB** | **-2,993.96 KB (-30.55%)** | **+35.9%** |
+| Design system or library | Elements | Baseline size | Optimized size | Net savings | First render speedup | Re-render speedup | Boot CPU savings |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 99 | 5801.88 KB | 2939.11 KB | **-2862.76 KB (-49.34%)** | **+37.4%** | **+14.8%** | **-73.1%** |
+| Spectrum Web Components | 52 | 1878.08 KB | 1749.03 KB | **-129.05 KB (-6.87%)** | **+36.6%** | **+15.1%** | **-72.0%** |
+| Web Awesome | 73 | 803.12 KB | 806.86 KB | **+3.74 KB (+0.47%)** | **+35.5%** | **+13.5%** | **-73.5%** |
+| Momentum Design | 97 | 870.05 KB | 843.11 KB | **-26.94 KB (-3.10%)** | **+34.8%** | **+13.8%** | **-72.1%** |
+| Material Web | 28 | 448.37 KB | 469.43 KB | **+21.06 KB (+4.70%)** | **+35.3%** | **+13.5%** | **-72.4%** |
 
 ### Dedicated benchmark reports
 
@@ -47,6 +48,9 @@ Detailed AST diagnostics, build durations, and runtime measurements are document
 - [`html-fuse` benchmark report](packages/benchmarks/docs/html-fuse.md)
 - [`props-lower` benchmark report](packages/benchmarks/docs/props-lower.md)
 - [`event-hoist` benchmark report](packages/benchmarks/docs/event-hoist.md)
+- [`dom-paths` benchmark report](packages/benchmarks/docs/dom-paths.md)
+- [`dirty-mask` benchmark report](packages/benchmarks/docs/dirty-mask.md)
+- [`memoize` benchmark report](packages/benchmarks/docs/memoize.md)
 - [`elem-proxy` benchmark report](packages/benchmarks/docs/elem-proxy.md)
 - [`html-aot` benchmark report](packages/benchmarks/docs/html-aot.md)
 - [`css-minifier` benchmark report](packages/benchmarks/docs/css-minifier.md)

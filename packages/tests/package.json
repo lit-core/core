@@ -12,6 +12,7 @@
     "test:webawesome": "vitest run webawesome",
     "test:material": "vitest run material",
     "test:momentum": "vitest run momentum",
+    "test:plugins": "vitest run plugins",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

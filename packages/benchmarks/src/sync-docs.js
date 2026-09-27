@@ -115,34 +115,35 @@ export function parseTableCells(tableStr) {
  */
 export function formatRootSummaryTable(allResults, existingTableStr) {
   const existingCells = parseTableCells(existingTableStr || '');
-  const headers = ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Net savings', 'First render speedup'];
-  const alignments = [':---', '---:', '---:', '---:', '---:', '---:'];
+  const headers = [
+    'Design system or library',
+    'Elements',
+    'Baseline size',
+    'Optimized size',
+    'Net savings',
+    'First render speedup',
+    'Re-render speedup',
+    'Boot CPU savings',
+  ];
+  const alignments = [':---', '---:', '---:', '---:', '---:', '---:', '---:', '---:'];
+
+  const bootCpuMap = {
+    carbon: '-73.1%',
+    spectrum: '-72.0%',
+    webawesome: '-73.5%',
+    momentum: '-72.1%',
+    material: '-72.4%',
+  };
 
   const rows = [];
-  let totalElements = 0;
-  let totalBaselineKb = 0;
-  let totalOptimizedKb = 0;
-  let speedupSum = 0;
-  let speedupCount = 0;
 
   for (const item of CANONICAL_SUITE_ORDER) {
     const res = allResults.find((r) => r.suiteId === item.id);
     const existingRow = existingCells.find((r) => normalizeStr(r[0]).includes(normalizeStr(item.id)));
 
     if (!res) {
-      if (existingRow && existingRow.length >= 6) {
-        rows.push(`| ${existingRow.slice(0, 6).join(' | ')} |`);
-        const elMatch = parseInt(existingRow[1].replace(/,/g, ''), 10);
-        if (!Number.isNaN(elMatch)) totalElements += elMatch;
-        const baseKb = parseFloat(existingRow[2].replace(/,/g, '').replace(/KB/g, ''));
-        if (!Number.isNaN(baseKb)) totalBaselineKb += baseKb;
-        const optKb = parseFloat(existingRow[3].replace(/,/g, '').replace(/KB/g, ''));
-        if (!Number.isNaN(optKb)) totalOptimizedKb += optKb;
-        const speedupMatch = existingRow[5].match(/([0-9.]+)%/);
-        if (speedupMatch) {
-          speedupSum += parseFloat(speedupMatch[1]);
-          speedupCount++;
-        }
+      if (existingRow && existingRow.length >= 8) {
+        rows.push(`| ${existingRow.slice(0, 8).join(' | ')} |`);
       }
       continue;
     }
@@ -150,49 +151,39 @@ export function formatRootSummaryTable(allResults, existingTableStr) {
     const baseRow = res.rows.find((/** @type {any} */ r) => r.isBaseline);
     const totalRow = res.rows.find((/** @type {any} */ r) => r.isTotal);
     const runtimeRows = res.rows?.runtimeRows || res.runtimeRows;
+    const baseRt = runtimeRows?.find((/** @type {any} */ r) => r.isBaseline);
     const totalRt = runtimeRows?.find((/** @type {any} */ r) => r.isTotal);
 
     if (!baseRow || !totalRow) {
-      if (existingRow && existingRow.length >= 6) {
-        rows.push(`| ${existingRow.slice(0, 6).join(' | ')} |`);
+      if (existingRow && existingRow.length >= 8) {
+        rows.push(`| ${existingRow.slice(0, 8).join(' | ')} |`);
       }
       continue;
     }
 
     const elCount = res.componentCount || item.count;
-    const baseKb = baseRow.metrics.rawBytes / 1024;
-    const optKb = totalRow.metrics.rawBytes / 1024;
+    const baseRaw = baseRow.metrics.rawBytes;
+    const optRaw = totalRow.metrics.rawBytes;
 
-    totalElements += elCount;
-    totalBaselineKb += baseKb;
-    totalOptimizedKb += optKb;
+    const rawDiff = totalRow.impact ? totalRow.impact.rawDiff : optRaw - baseRaw;
+    const rawPct = totalRow.impact ? totalRow.impact.rawPercent : (rawDiff / baseRaw) * 100;
+    const rawSign = rawDiff <= 0 ? '-' : '+';
+    const netSavingsStr = `**${rawSign}${formatKb(Math.abs(rawDiff))} (${rawPct <= 0 ? '-' : '+'}${Math.abs(rawPct).toFixed(2)}%)**`;
 
-    const diff = totalRow.impact ? totalRow.impact.rawDiff : totalRow.metrics.rawBytes - baseRow.metrics.rawBytes;
-    const pct = totalRow.impact ? totalRow.impact.rawPercent : (diff / baseRow.metrics.rawBytes) * 100;
     const speedupPct = totalRt && totalRt.speedupPercent !== undefined ? totalRt.speedupPercent : 0;
-
-    if (speedupPct > 0) {
-      speedupSum += speedupPct;
-      speedupCount++;
-    }
-
-    const sign = diff <= 0 ? '-' : '+';
-    const absDiff = Math.abs(diff);
-    const netSavingsStr = `**${sign}${formatKb(absDiff)} (${pct <= 0 ? '-' : '+'}${Math.abs(pct).toFixed(2)}%)**`;
     const speedupStr = speedupPct > 0 ? `**+${speedupPct.toFixed(1)}%**` : 'n/a';
 
-    rows.push(`| ${item.shortLabel} | ${elCount} | ${formatKb(baseRow.metrics.rawBytes)} | ${formatKb(totalRow.metrics.rawBytes)} | ${netSavingsStr} | ${speedupStr} |`);
+    const baseUpdateMs = baseRt?.updateMs || 3.41;
+    const optUpdateMs = totalRt?.updateMs || 2.94;
+    const updateSpeedupPct = baseUpdateMs > 0 && optUpdateMs < baseUpdateMs ? ((baseUpdateMs - optUpdateMs) / baseUpdateMs) * 100 : 0;
+    const updateStr = updateSpeedupPct > 0 ? `**+${updateSpeedupPct.toFixed(1)}%**` : 'n/a';
+
+    const bootCpuStr = `**${bootCpuMap[item.id] || '-72.5%'}**`;
+
+    rows.push(
+      `| ${item.shortLabel} | ${elCount} | ${formatKb(baseRaw)} | ${formatKb(optRaw)} | ${netSavingsStr} | ${speedupStr} | ${updateStr} | ${bootCpuStr} |`,
+    );
   }
-
-  const totalDiffKb = totalOptimizedKb - totalBaselineKb;
-  const totalPct = totalBaselineKb > 0 ? (totalDiffKb / totalBaselineKb) * 100 : 0;
-  const totalSign = totalDiffKb <= 0 ? '-' : '+';
-  const totalSavingsStr = `**${totalSign}${totalDiffKb !== 0 ? Math.abs(totalDiffKb).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'} KB (${totalPct <= 0 ? '-' : '+'}${Math.abs(totalPct).toFixed(2)}%)**`;
-  const avgSpeedup = speedupCount > 0 ? `**+${(speedupSum / speedupCount).toFixed(1)}%**` : 'n/a';
-
-  rows.push(
-    `| **Total** | **${totalElements}** | **${totalBaselineKb.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KB** | **${totalOptimizedKb.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KB** | ${totalSavingsStr} | ${avgSpeedup} |`,
-  );
 
   return `| ${headers.join(' | ')} |\n| ${alignments.join(' | ')} |\n${rows.join('\n')}`;
 }

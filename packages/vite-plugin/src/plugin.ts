@@ -2,25 +2,30 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
+import { transformDirtyMask } from '@lit-core/dirty-mask';
+import { transformDomPaths } from '@lit-core/dom-paths';
 import { transformElemProxy } from '@lit-core/elem-proxy';
 import { transformEventHoist } from '@lit-core/event-hoist';
 import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
+import { transformMemoize } from '@lit-core/memoize';
 import { transformLitProps } from '@lit-core/props-lower';
 import { resumable as litResumablePlugin } from '@lit-core/resumable/vite';
 import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
 import type {
   CssFuseOptions,
   CssMinifierOptions,
+  DirtyMaskOptions,
+  DomPathsOptions,
   ElemProxyOptions,
   EventHoistOptions,
   HtmlAotOptions,
   HtmlFuseOptions,
   HtmlMinifierOptions,
   LitPluginOptions,
+  MemoizeOptions,
   PropsLowerOptions,
-  ResumableOptions,
 } from './options.js';
 import { extractHtmlTemplateId, extractSheetId, formatVirtualHtmlId, formatVirtualId, isVirtualFusedId, isVirtualHtmlFusedId, matchesPattern, RESOLVED_FUSED_PREFIX } from './utils.js';
 
@@ -229,7 +234,8 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
   };
 }
 
-const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b|\bimport\b[^;]*\b(?:decorators\.js|property|customElement|state)\b/;
+const LIT_DECORATOR_FAST_CHECK =
+  /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b|\bimport\b[^;]*\b(?:decorators\.js|property|customElement|state)\b/;
 
 export function propsLower(options: PropsLowerOptions = {}): Plugin {
   const { sourcemap = true } = options;
@@ -697,6 +703,178 @@ export function eventHoist(options: EventHoistOptions = {}): Plugin {
 
 export const litEventHoist = eventHoist;
 
+const LIT_DIRTY_MASK_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
+
+export function dirtyMask(options: DirtyMaskOptions = {}): Plugin {
+  const { sourcemap = true } = options;
+
+  return {
+    name: 'dirty-mask',
+    enforce: 'pre',
+
+    transform(code: string, id: string) {
+      const cleanId = id.split('?')[0] ?? id;
+      if (!/\.[jt]sx?$/.test(cleanId)) {
+        return null;
+      }
+
+      if (options.exclude) {
+        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+        for (const pattern of excludes) {
+          if (matchesPattern(cleanId, pattern)) return null;
+        }
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
+        return null;
+      }
+
+      if (options.include) {
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+        if (!matched) return null;
+      }
+
+      if (!LIT_DIRTY_MASK_FAST_CHECK.test(code)) {
+        return null;
+      }
+
+      try {
+        const result = transformDirtyMask(code, {
+          sourcemap,
+          filename: cleanId,
+        });
+
+        if (result.maskedPartsCount === 0) {
+          return null;
+        }
+
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      } catch (_err) {
+        return null;
+      }
+    },
+  };
+}
+
+export const litDirtyMask = dirtyMask;
+
+const LIT_DOM_PATHS_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
+
+export function domPaths(options: DomPathsOptions = {}): Plugin {
+  const { sourcemap = true } = options;
+
+  return {
+    name: 'dom-paths',
+    enforce: 'pre',
+
+    transform(code: string, id: string) {
+      const cleanId = id.split('?')[0] ?? id;
+      if (!/\.[jt]sx?$/.test(cleanId)) {
+        return null;
+      }
+
+      if (options.exclude) {
+        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+        for (const pattern of excludes) {
+          if (matchesPattern(cleanId, pattern)) return null;
+        }
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
+        return null;
+      }
+
+      if (options.include) {
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+        if (!matched) return null;
+      }
+
+      if (!LIT_DOM_PATHS_FAST_CHECK.test(code)) {
+        return null;
+      }
+
+      try {
+        const result = transformDomPaths(code, {
+          sourcemap,
+          filename: cleanId,
+          normalizeWhitespace: options.normalizeWhitespace,
+        });
+
+        if (result.componentsCount === 0 || result.pathsCount === 0) {
+          return null;
+        }
+
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      } catch (_err) {
+        return null;
+      }
+    },
+  };
+}
+
+export const litDomPaths = domPaths;
+
+const LIT_MEMOIZE_FAST_CHECK = /\brender\s*\([^)]*\)\s*\{/;
+
+export function memoize(options: MemoizeOptions = {}): Plugin {
+  const { sourcemap = true } = options;
+
+  return {
+    name: 'memoize',
+    enforce: 'pre',
+
+    transform(code: string, id: string) {
+      const cleanId = id.split('?')[0] ?? id;
+      if (!/\.[jt]sx?$/.test(cleanId)) {
+        return null;
+      }
+
+      if (options.exclude) {
+        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+        for (const pattern of excludes) {
+          if (matchesPattern(cleanId, pattern)) return null;
+        }
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
+        return null;
+      }
+
+      if (options.include) {
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+        if (!matched) return null;
+      }
+
+      if (!LIT_MEMOIZE_FAST_CHECK.test(code)) {
+        return null;
+      }
+
+      try {
+        const result = transformMemoize(code, {
+          sourcemap,
+          filename: cleanId,
+        });
+
+        if (result.memoizedCount === 0) {
+          return null;
+        }
+
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      } catch (_err) {
+        return null;
+      }
+    },
+  };
+}
+
+export const litMemoize = memoize;
+
 export function lit(options: LitPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [];
 
@@ -728,6 +906,24 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
   if (eventHoistOpt) {
     const hoistOpts = typeof eventHoistOpt === 'object' ? eventHoistOpt : {};
     plugins.push(eventHoist(hoistOpts));
+  }
+
+  const dirtyMaskOpt = options.dirtyMask ?? options['dirty-mask'];
+  if (dirtyMaskOpt) {
+    const maskOpts = typeof dirtyMaskOpt === 'object' ? dirtyMaskOpt : {};
+    plugins.push(dirtyMask(maskOpts));
+  }
+
+  const domPathsOpt = options.domPaths ?? options['dom-paths'];
+  if (domPathsOpt) {
+    const domOpts = typeof domPathsOpt === 'object' ? domPathsOpt : {};
+    plugins.push(domPaths(domOpts));
+  }
+
+  const memoizeOpt = options.memoize;
+  if (memoizeOpt) {
+    const memoizeOpts = typeof memoizeOpt === 'object' ? memoizeOpt : {};
+    plugins.push(memoize(memoizeOpts));
   }
 
   const htmlAotOpt = options.htmlAot ?? options['html-aot'];
