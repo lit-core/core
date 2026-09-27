@@ -115,7 +115,7 @@ Web Components isolate styles within Shadow DOM. While this prevents global styl
 | [`@lit-core/html-minifier`](packages/html-minifier/) | `packages/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML and SVG template literal minification | [README](packages/html-minifier/README.md) |
 | [`@lit-core/vite-plugin`](packages/vite-plugin/) | `packages/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations | [Configuration](packages/vite-plugin/docs/configuration.md) · [HMR guide](packages/vite-plugin/docs/hmr.md) |
 | [`@lit-core/webpack-plugin`](packages/webpack-plugin/) | `packages/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack | [Configuration](packages/webpack-plugin/docs/configuration.md) |
-| [`@lit-core/benchmarks`](packages/benchmarks/) (private) | `packages/benchmarks` | Node.js, Vite | Empirical benchmark harness evaluating bundle reductions | [Dashboard](packages/benchmarks/README.md) · [Methodology](packages/benchmarks/docs/methodology.md) · [Metrics](packages/benchmarks/docs/metrics.md) |
+| [`@lit-core/benchmarks`](packages/benchmarks/) (private) | `packages/benchmarks` | Node.js, Vite | Empirical benchmark harness evaluating bundle reductions | [Overview](packages/benchmarks/README.md) · [Per-feature benchmarks](packages/benchmarks/docs/css-fuse.md) |
 
 ---
 
