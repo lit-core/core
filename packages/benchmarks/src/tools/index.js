@@ -3,6 +3,7 @@ import { normalizeInclude } from './base.js';
 import { cssFuseTool } from './css-fuse.js';
 import { cssMinifierTool } from './css-minifier.js';
 import { elemProxyTool } from './elem-proxy.js';
+import { eventHoistTool } from './event-hoist.js';
 import { htmlAotTool } from './html-aot.js';
 import { htmlFuseTool } from './html-fuse.js';
 import { htmlMinifierTool } from './html-minifier.js';
@@ -12,7 +13,7 @@ import { propsLowerTool } from './props-lower.js';
  * Array of all registered Vite bundler optimization tools.
  * @type {import('../types.js').BenchmarkTool[]}
  */
-export const registeredTools = [cssFuseTool, htmlFuseTool, propsLowerTool, elemProxyTool, htmlAotTool, cssMinifierTool, htmlMinifierTool];
+export const registeredTools = [cssFuseTool, htmlFuseTool, propsLowerTool, elemProxyTool, eventHoistTool, htmlAotTool, cssMinifierTool, htmlMinifierTool];
 
 /**
  * Get active tools (optionally filtered by IDs).
@@ -61,6 +62,12 @@ export async function getCombinedPlugins(tools, suite) {
         }
       : false,
     elemProxy: hasTool('elem-proxy')
+      ? {
+          include,
+          exclude: [],
+        }
+      : false,
+    eventHoist: hasTool('event-hoist')
       ? {
           include,
           exclude: [],

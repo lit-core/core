@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { LoaderContext } from 'webpack';
-import type { CssMinifierOptions, ElemProxyOptions, HtmlAotOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
-import { transformCssMinifier, transformElemProxy, transformHtmlAot, transformHtmlMinifier, transformPropsLower } from './transforms.js';
+import type { CssMinifierOptions, ElemProxyOptions, EventHoistOptions, HtmlAotOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions, ResumableOptions } from './options.js';
+import { transformCssMinifier, transformElemProxy, transformEventHoistPlugin, transformHtmlAot, transformHtmlMinifier, transformPropsLower, transformResumable } from './transforms.js';
 
 export interface PluginState {
   transformedFiles: Map<string, string>;
@@ -87,7 +87,20 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
     }
   }
 
-  // 4. Apply css-minifier embedded CSS minification if enabled
+  // 4. Apply event-hoist AOT ShadowRoot event delegation if enabled
+  const eventHoistOpt = options.eventHoist ?? options['event-hoist'];
+  if (eventHoistOpt) {
+    const hoistOpts: EventHoistOptions = typeof eventHoistOpt === 'object' ? eventHoistOpt : {};
+    const result = transformEventHoistPlugin(currentSource, resourcePath, hoistOpts);
+    if (result) {
+      currentSource = result.code;
+      if (result.map) {
+        currentMap = result.map;
+      }
+    }
+  }
+
+  // 5. Apply css-minifier embedded CSS minification if enabled
   const cssMinifierOpt = options.cssMinifier ?? options['css-minifier'];
   if (cssMinifierOpt) {
     const cssOpts: CssMinifierOptions = typeof cssMinifierOpt === 'object' ? cssMinifierOpt : {};
@@ -123,6 +136,16 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result.map) {
         currentMap = result.map;
       }
+    }
+  }
+
+  // 6. Apply resumable client adapter injection if enabled
+  const resumableOpt = options.resumable;
+  if (resumableOpt) {
+    const resumableOpts: ResumableOptions = typeof resumableOpt === 'object' ? resumableOpt : {};
+    const result = transformResumable(currentSource, resourcePath, resumableOpts);
+    if (result) {
+      currentSource = result.code;
     }
   }
 

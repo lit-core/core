@@ -48,4 +48,5 @@ export default defineConfig({
 - [Deduplication engine architecture](docs/architecture.md)
 - [Shadow DOM scoping and safety audit](docs/scoping-audit.md)
 - [Vite plugin configuration](../vite-plugin/docs/configuration.md)
-- [Benchmark results](../benchmarks/README.md)
+- [css-fuse benchmark report](../benchmarks/docs/css-fuse.md)
+- [Monorepo benchmark overview](../benchmarks/README.md)

@@ -48,4 +48,4 @@ export default defineConfig({
 - [Plugin options and configuration guide](docs/configuration.md)
 - [Hot Module Replacement and chunk scoping](docs/hmr.md)
 - [CSS deduplication architecture](../css-fuse/docs/architecture.md)
-- [Empirical benchmark results](../benchmarks/README.md)
+- [Monorepo benchmark suite](../benchmarks/README.md)

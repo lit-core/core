@@ -3,12 +3,25 @@ import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
 import { transformElemProxy } from '@lit-core/elem-proxy';
+import { transformEventHoist } from '@lit-core/event-hoist';
 import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
+import { resumable as litResumablePlugin } from '@lit-core/resumable/vite';
 import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
-import type { CssFuseOptions, CssMinifierOptions, ElemProxyOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import type {
+  CssFuseOptions,
+  CssMinifierOptions,
+  ElemProxyOptions,
+  EventHoistOptions,
+  HtmlAotOptions,
+  HtmlFuseOptions,
+  HtmlMinifierOptions,
+  LitPluginOptions,
+  PropsLowerOptions,
+  ResumableOptions,
+} from './options.js';
 import { extractHtmlTemplateId, extractSheetId, formatVirtualHtmlId, formatVirtualId, isVirtualFusedId, isVirtualHtmlFusedId, matchesPattern, RESOLVED_FUSED_PREFIX } from './utils.js';
 
 export function cssFuse(options: CssFuseOptions = {}): Plugin {
@@ -626,6 +639,64 @@ export function elemProxy(options: ElemProxyOptions = {}): Plugin {
 
 export const litElemProxy = elemProxy;
 
+const LIT_EVENT_HOIST_FAST_CHECK = /html\s*`[\s\S]*?@[a-zA-Z]/;
+
+export function eventHoist(options: EventHoistOptions = {}): Plugin {
+  const { sourcemap = true } = options;
+
+  return {
+    name: 'event-hoist',
+    enforce: 'pre',
+
+    transform(code: string, id: string) {
+      const cleanId = id.split('?')[0] ?? id;
+      if (!/\.[jt]sx?$/.test(cleanId)) {
+        return null;
+      }
+
+      if (options.exclude) {
+        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+        for (const pattern of excludes) {
+          if (matchesPattern(cleanId, pattern)) return null;
+        }
+      } else if (!options.include && cleanId.includes('/node_modules/')) {
+        return null;
+      }
+
+      if (options.include) {
+        const includes = Array.isArray(options.include) ? options.include : [options.include];
+        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+        if (!matched) return null;
+      }
+
+      if (!LIT_EVENT_HOIST_FAST_CHECK.test(code)) {
+        return null;
+      }
+
+      try {
+        const result = transformEventHoist(code, {
+          sourcemap,
+          filename: cleanId,
+          events: options.events,
+        });
+
+        if (result.hoistedEventsCount === 0) {
+          return null;
+        }
+
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      } catch (_err) {
+        return null;
+      }
+    },
+  };
+}
+
+export const litEventHoist = eventHoist;
+
 export function lit(options: LitPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [];
 
@@ -653,6 +724,12 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(elemProxy(proxyOpts));
   }
 
+  const eventHoistOpt = options.eventHoist ?? options['event-hoist'];
+  if (eventHoistOpt) {
+    const hoistOpts = typeof eventHoistOpt === 'object' ? eventHoistOpt : {};
+    plugins.push(eventHoist(hoistOpts));
+  }
+
   const htmlAotOpt = options.htmlAot ?? options['html-aot'];
   if (htmlAotOpt) {
     const aotOpts = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
@@ -671,9 +748,17 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(htmlMinifier(minifierOpts));
   }
 
+  const resumableOpt = options.resumable;
+  if (resumableOpt) {
+    const resumableOpts = typeof resumableOpt === 'object' ? resumableOpt : {};
+    plugins.push(litResumablePlugin(resumableOpts));
+  }
+
   return plugins;
 }
 
+export const resumable = litResumablePlugin;
+export const litResumable = litResumablePlugin;
 export const litCore = lit;
 export const litCssFuse = cssFuse;
 export const litPropsLower = propsLower;

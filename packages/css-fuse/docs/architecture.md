@@ -13,7 +13,7 @@ Inside Web Components, however, the Shadow DOM establishes strict style encapsul
 - Styles declared in document head have no impact on encapsulated elements.
 - Component libraries (such as IBM Carbon or Adobe Spectrum) must either embed common resets, design tokens, focus styles, and typography rules in every component's `static styles` or inject link tags dynamically at runtime.
 
-This duplication inflates bundle sizes dramatically—in IBM Carbon Web Components, over 50% of the entire package size consists of duplicate CSS declarations.
+This duplication inflates bundle sizes dramatically: in IBM Carbon Web Components, over 50% of the entire package size consists of duplicate CSS declarations.
 
 ---
 

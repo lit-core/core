@@ -70,7 +70,7 @@ fn main() {
                     serde_json::to_string_pretty(&result.diagnostics).unwrap()
                 );
             } else {
-                println!("\n🔍 Lit CSS Fuse — Shadow DOM Scoping & Contract Audit");
+                println!("\n🔍 Lit CSS Fuse: Shadow DOM Scoping & Contract Audit");
                 println!("=====================================================");
                 if result.diagnostics.is_empty() {
                     println!("✓ No scoping or contract violations found across components.");
@@ -98,7 +98,7 @@ fn main() {
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&result.stats).unwrap());
             } else {
-                println!("\n📊 Lit CSS Fuse — Deduplication Analytics");
+                println!("\n📊 Lit CSS Fuse: Deduplication Analytics");
                 println!("==========================================");
                 println!("Files scanned:          {}", result.stats.files_scanned);
                 println!("Styles extracted:       {}", result.stats.styles_extracted);
@@ -127,7 +127,7 @@ fn main() {
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&result).unwrap());
             } else {
-                println!("\n⚡ Lit CSS Fuse — Deduplication Complete");
+                println!("\n⚡ Lit CSS Fuse: Deduplication Complete");
                 println!("=========================================");
                 println!(
                     "Fused {} rules into {} shared sheets across {} components.",
@@ -147,7 +147,7 @@ fn main() {
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&result).unwrap());
             } else {
-                println!("\n⚡ Lit CSS Fuse — Deduplication Summary");
+                println!("\n⚡ Lit CSS Fuse: Deduplication Summary");
                 println!("=======================================");
                 println!(
                     "Scanned {} files, found {} rules ({} unique).",

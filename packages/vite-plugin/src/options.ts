@@ -234,7 +234,86 @@ export interface LitPluginOptions {
    * Kebab-case alias for `elemProxy`.
    */
   'elem-proxy'?: boolean | ElemProxyOptions;
+
+  /**
+   * Ahead-of-time ShadowRoot event delegation compiler pass via @lit-core/event-hoist.
+   * Hoists bubbling child event listeners to a single delegated listener on ShadowRoot.
+   * Pass `true` or an `EventHoistOptions` object to enable.
+   * @default false
+   */
+  eventHoist?: boolean | EventHoistOptions;
+
+  /**
+   * Kebab-case alias for `eventHoist`.
+   */
+  'event-hoist'?: boolean | EventHoistOptions;
+
+  /**
+   * Ahead-of-time SSR and runtime resumption architecture for zero component JS on initial boot.
+   * Pass `true` or a `ResumableOptions` object to enable.
+   * @default false
+   */
+  resumable?: boolean | ResumableOptions;
 }
+
+export interface ResumableOptions {
+  /**
+   * Include glob patterns for resumable components.
+   */
+  include?: string[];
+
+  /**
+   * Exclude glob patterns.
+   */
+  exclude?: string[];
+
+  /**
+   * Preload component chunks on idle or hover.
+   * @default true
+   */
+  preloadOnHover?: boolean;
+
+  /**
+   * Custom chunk URL resolver.
+   */
+  chunkResolver?: (tagName: string) => string;
+
+  /**
+   * Automatically inject the client adapter into component modules.
+   * @default true
+   */
+  injectAdapter?: boolean;
+}
+
+export type LitResumableOptions = ResumableOptions;
+
+export interface EventHoistOptions {
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Custom list of event names to hoist.
+   * Defaults to standard safe bubbling events (click, input, change, etc.).
+   */
+  events?: string[];
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitEventHoistOptions = EventHoistOptions;
 
 export interface ElemProxyOptions {
   /**

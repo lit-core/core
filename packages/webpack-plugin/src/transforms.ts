@@ -3,15 +3,17 @@ import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
 import { transformElemProxy as runTransformElemProxy } from '@lit-core/elem-proxy';
+import { transformEventHoist } from '@lit-core/event-hoist';
 import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
-import type { CssFuseOptions, CssMinifierOptions, ElemProxyOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, PropsLowerOptions } from './options.js';
+import type { CssFuseOptions, CssMinifierOptions, ElemProxyOptions, EventHoistOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, PropsLowerOptions, ResumableOptions } from './options.js';
 import { matchesPattern } from './utils.js';
 
 export const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b/;
 export const LIT_ELEM_PROXY_FAST_CHECK = /@customElement\b|customElements\.define\b/;
+export const LIT_EVENT_HOIST_FAST_CHECK = /html\s*`[\s\S]*?@[a-zA-Z]/;
 export const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
 export const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
 
@@ -122,6 +124,38 @@ export function transformHtmlMinifier(code: string, id: string, options: HtmlMin
     });
 
     if (result.templatesCount === 0) {
+      return null;
+    }
+
+    return {
+      code: result.code,
+      map: result.map ? JSON.parse(result.map) : null,
+    };
+  } catch (_err) {
+    return null;
+  }
+}
+
+export function transformEventHoistPlugin(code: string, id: string, options: EventHoistOptions = {}): TransformResult | null {
+  const { sourcemap = true } = options;
+  const cleanId = id.split('?')[0] ?? id;
+
+  if (!shouldProcessFile(cleanId, options)) {
+    return null;
+  }
+
+  if (!LIT_EVENT_HOIST_FAST_CHECK.test(code)) {
+    return null;
+  }
+
+  try {
+    const result = transformEventHoist(code, {
+      sourcemap,
+      filename: cleanId,
+      events: options.events,
+    });
+
+    if (result.hoistedEventsCount === 0) {
       return null;
     }
 
@@ -312,4 +346,24 @@ export function runHtmlFuseOptimization(options: HtmlFuseOptions = {}): HtmlOpti
     virtualTemplates,
     transformedFiles,
   };
+}
+
+export function transformResumable(code: string, id: string, options: ResumableOptions = {}): TransformResult | null {
+  const cleanId = id.split('?')[0] ?? id;
+  if (!shouldProcessFile(cleanId, options)) {
+    return null;
+  }
+
+  if (!LIT_ELEM_PROXY_FAST_CHECK.test(code)) {
+    return null;
+  }
+
+  if (options.injectAdapter !== false) {
+    const adapterImport = `import { installResumableAdapter } from '@lit-core/resumable/client';\ninstallResumableAdapter();\n`;
+    return {
+      code: `${adapterImport}${code}`,
+    };
+  }
+
+  return null;
 }

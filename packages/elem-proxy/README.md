@@ -46,4 +46,5 @@ export default defineConfig({
 
 - [Proxy stub architecture and JIT upgrade mechanics](docs/proxy-architecture.md)
 - [Props lowering mechanics](../props-lower/docs/transform-mechanics.md)
-- [Runtime initialization benchmark metrics](../benchmarks/README.md)
+- [elem-proxy benchmark report](../benchmarks/docs/elem-proxy.md)
+- [Monorepo benchmark overview](../benchmarks/README.md)

@@ -44,4 +44,5 @@ export default defineConfig({
 
 - [AOT template compilation mechanics](docs/template-compilation.md)
 - [HTML fragment clustering guide](../html-fuse/docs/fragment-clustering.md)
-- [Empirical runtime performance benchmarks](../benchmarks/README.md)
+- [html-aot benchmark report](../benchmarks/docs/html-aot.md)
+- [Monorepo benchmark overview](../benchmarks/README.md)

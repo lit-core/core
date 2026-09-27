@@ -23,8 +23,8 @@ export function renderAsciiTable(title, rows) {
     const rawSize = formatKb(r.metrics.rawBytes);
     const gzipSize = formatKb(r.metrics.gzipBytes);
     const brotliSize = formatKb(r.metrics.brotliBytes);
-    const rawImpact = r.isBaseline ? '—' : formatImpact(r.impact?.rawDiff ?? 0, r.impact?.rawPercent ?? 0);
-    const gzipImpact = r.isBaseline ? '—' : formatImpact(r.impact?.gzipDiff ?? 0, r.impact?.gzipPercent ?? 0);
+    const rawImpact = r.isBaseline ? 'n/a' : formatImpact(r.impact?.rawDiff ?? 0, r.impact?.rawPercent ?? 0);
+    const gzipImpact = r.isBaseline ? 'n/a' : formatImpact(r.impact?.gzipDiff ?? 0, r.impact?.gzipPercent ?? 0);
 
     return {
       cells: [r.name, rawSize, gzipSize, brotliSize, rawImpact, gzipImpact],
@@ -88,10 +88,10 @@ export function renderMarkdownTable(title, rows) {
 
   for (const r of rows) {
     const rawSize = formatKb(r.metrics.rawBytes);
-    const rawImpact = r.isBaseline ? '—' : formatImpact(r.impact?.rawDiff ?? 0, r.impact?.rawPercent ?? 0);
+    const rawImpact = r.isBaseline ? 'n/a' : formatImpact(r.impact?.rawDiff ?? 0, r.impact?.rawPercent ?? 0);
     const namePrefix = r.isTotal ? '**TOTAL** ' : r.isBaseline ? '*Baseline* ' : '';
     if (hasBuildTime) {
-      const buildTimeStr = r.metrics?.buildTimeMs !== undefined ? `${Math.round(r.metrics.buildTimeMs)} ms` : '—';
+      const buildTimeStr = r.metrics?.buildTimeMs !== undefined ? `${Math.round(r.metrics.buildTimeMs)} ms` : 'n/a';
       lines.push(`| ${namePrefix}${r.name} | ${rawSize} | ${rawImpact} | ${buildTimeStr} |`);
     } else {
       lines.push(`| ${namePrefix}${r.name} | ${rawSize} | ${rawImpact} |`);
@@ -170,7 +170,7 @@ export function renderMarkdownVersionsTable(suitesInfo, coreVersions = {}) {
   }
 
   for (const [pkg, ver] of Object.entries(coreVersions)) {
-    lines.push(`| \`${pkg}\` | Core runtime & toolchain | \`${ver}\` | — |`);
+    lines.push(`| \`${pkg}\` | Core runtime & toolchain | \`${ver}\` | n/a |`);
   }
 
   lines.push('');
@@ -203,9 +203,9 @@ export function renderMarkdownOverviewTable(summaryRows) {
     const suffix = isOverall ? '**' : '';
 
     if (hasBuildTime) {
-      const baseBuild = s.baselineBuildTimeMs !== undefined ? `${Math.round(s.baselineBuildTimeMs)} ms` : '—';
-      const optBuild = s.totalBuildTimeMs !== undefined ? `${Math.round(s.totalBuildTimeMs)} ms` : '—';
-      const overhead = s.baselineBuildTimeMs && s.totalBuildTimeMs ? `+${Math.max(0, Math.round(s.totalBuildTimeMs - s.baselineBuildTimeMs))} ms` : '—';
+      const baseBuild = s.baselineBuildTimeMs !== undefined ? `${Math.round(s.baselineBuildTimeMs)} ms` : 'n/a';
+      const optBuild = s.totalBuildTimeMs !== undefined ? `${Math.round(s.totalBuildTimeMs)} ms` : 'n/a';
+      const overhead = s.baselineBuildTimeMs && s.totalBuildTimeMs ? `+${Math.max(0, Math.round(s.totalBuildTimeMs - s.baselineBuildTimeMs))} ms` : 'n/a';
       lines.push(
         `| ${prefix}${name}${suffix} | ${s.componentCount} | ${formatKb(s.baselineRaw)} | ${formatKb(s.totalRaw)} | ${prefix}${rawDiffStr}${suffix} | ${baseBuild} | ${optBuild} | ${overhead} |`,
       );
@@ -258,8 +258,8 @@ export function renderMarkdownPerToolAccordion(allResults) {
       if (baselineRow && toolRow) {
         const baselineSize = baselineRow.metrics.rawBytes;
         const optSize = toolRow.metrics.rawBytes;
-        const savings = toolRow.impact ? formatImpact(toolRow.impact.rawDiff, toolRow.impact.rawPercent) : '—';
-        const buildTimeStr = toolRow.metrics?.buildTimeMs !== undefined ? `${Math.round(toolRow.metrics.buildTimeMs)} ms` : '—';
+        const savings = toolRow.impact ? formatImpact(toolRow.impact.rawDiff, toolRow.impact.rawPercent) : 'n/a';
+        const buildTimeStr = toolRow.metrics?.buildTimeMs !== undefined ? `${Math.round(toolRow.metrics.buildTimeMs)} ms` : 'n/a';
         if (toolRow.metrics?.buildTimeMs) {
           totalBuildTime += toolRow.metrics.buildTimeMs;
         }
@@ -272,8 +272,8 @@ export function renderMarkdownPerToolAccordion(allResults) {
 
     const totalDiff = totalOptimized - totalBaseline;
     const totalPct = totalBaseline > 0 ? (totalDiff / totalBaseline) * 100 : 0;
-    const totalSavingsStr = totalDiff === 0 ? '—' : formatImpact(totalDiff, totalPct);
-    const totalBuildTimeStr = totalBuildTime > 0 ? `${Math.round(totalBuildTime)} ms` : '—';
+    const totalSavingsStr = totalDiff === 0 ? 'n/a' : formatImpact(totalDiff, totalPct);
+    const totalBuildTimeStr = totalBuildTime > 0 ? `${Math.round(totalBuildTime)} ms` : 'n/a';
     lines.push(`| **Total** | **${totalElements}** | **${formatKb(totalBaseline)}** | **${formatKb(totalOptimized)}** | **${totalSavingsStr}** | **${totalBuildTimeStr}** |\n`);
   }
 
@@ -355,7 +355,7 @@ export function renderAsciiRuntimeTable(title, rows) {
   const formattedRows = rows.map((r) => {
     const firstRender = `${r.firstRenderMs.toFixed(2)} ms`;
     const update = `${r.updateMs.toFixed(2)} ms`;
-    const speedup = r.isBaseline ? '—' : r.speedupPercent !== undefined && r.speedupPercent !== 0 ? `${r.speedupPercent > 0 ? '+' : ''}${r.speedupPercent.toFixed(1)}%` : '—';
+    const speedup = r.isBaseline ? 'n/a' : r.speedupPercent !== undefined && r.speedupPercent !== 0 ? `${r.speedupPercent > 0 ? '+' : ''}${r.speedupPercent.toFixed(1)}%` : 'n/a';
 
     return {
       cells: [r.name, firstRender, update, speedup],
@@ -416,7 +416,7 @@ export function renderMarkdownRuntimeTable(rows) {
   for (const r of rows) {
     const firstRender = `${r.firstRenderMs.toFixed(2)} ms`;
     const update = `${r.updateMs.toFixed(2)} ms`;
-    const speedup = r.isBaseline ? '—' : r.speedupPercent !== undefined && r.speedupPercent !== 0 ? `**${r.speedupPercent > 0 ? '+' : ''}${r.speedupPercent.toFixed(1)}%**` : '—';
+    const speedup = r.isBaseline ? 'n/a' : r.speedupPercent !== undefined && r.speedupPercent !== 0 ? `**${r.speedupPercent > 0 ? '+' : ''}${r.speedupPercent.toFixed(1)}%**` : 'n/a';
     const namePrefix = r.isTotal ? '**TOTAL** ' : r.isBaseline ? '*Baseline* ' : '';
 
     lines.push(`| ${namePrefix}${r.name} | ${firstRender} | ${update} | ${speedup} |`);

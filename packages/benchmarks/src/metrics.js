@@ -77,7 +77,7 @@ export function calculateImpact(baseline, candidate) {
  */
 export function formatImpact(diffBytes, percent) {
   if (Math.abs(diffBytes) === 0) {
-    return '—';
+    return 'n/a';
   }
   const sign = diffBytes < 0 ? '-' : '+';
   const absBytes = Math.abs(diffBytes);

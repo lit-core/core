@@ -161,7 +161,7 @@ async function main() {
     crossSuiteSummaries.push({
       suiteName: 'OVERALL TOTAL (All Libraries)',
       packageName: 'all',
-      version: '—',
+      version: 'n/a',
       componentCount: totalComponents,
       baselineRaw: totalBaselineRaw,
       baselineGzip: totalBaselineGzip,

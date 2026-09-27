@@ -3,7 +3,18 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Compiler } from 'webpack';
 import { registerPluginState, unregisterPluginState } from './loader.js';
-import type { CssFuseOptions, CssMinifierOptions, ElemProxyOptions, HtmlAotOptions, HtmlFuseOptions, HtmlMinifierOptions, LitPluginOptions, PropsLowerOptions } from './options.js';
+import type {
+  CssFuseOptions,
+  CssMinifierOptions,
+  ElemProxyOptions,
+  EventHoistOptions,
+  HtmlAotOptions,
+  HtmlFuseOptions,
+  HtmlMinifierOptions,
+  LitPluginOptions,
+  PropsLowerOptions,
+  ResumableOptions,
+} from './options.js';
 import { runFuseOptimization, runHtmlFuseOptimization, runScopingAudit } from './transforms.js';
 import { BARE_FUSED_ID_REGEX, BARE_HTML_FUSED_ID_REGEX, extractHtmlTemplateId, extractSheetId, isVirtualHtmlFusedId, VIRTUAL_FUSED_PREFIX, VIRTUAL_HTML_FUSED_PREFIX } from './utils.js';
 
@@ -250,6 +261,12 @@ export class ElemProxyWebpackPlugin extends LitWebpackPlugin {
   }
 }
 
+export class EventHoistWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: EventHoistOptions = {}) {
+    super({ cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: options, htmlAot: false, cssMinifier: false, htmlMinifier: false }, 'EventHoistWebpackPlugin');
+  }
+}
+
 export class HtmlAotWebpackPlugin extends LitWebpackPlugin {
   constructor(options: HtmlAotOptions = {}) {
     super({ cssFuse: false, htmlFuse: false, propsLower: false, htmlAot: options, cssMinifier: false, htmlMinifier: false }, 'HtmlAotWebpackPlugin');
@@ -276,6 +293,10 @@ export function elemProxy(options: ElemProxyOptions = {}): ElemProxyWebpackPlugi
   return new ElemProxyWebpackPlugin(options);
 }
 
+export function eventHoist(options: EventHoistOptions = {}): EventHoistWebpackPlugin {
+  return new EventHoistWebpackPlugin(options);
+}
+
 export function cssMinifier(options: CssMinifierOptions = {}): CssMinifierWebpackPlugin {
   return new CssMinifierWebpackPlugin(options);
 }
@@ -288,13 +309,28 @@ export function htmlAot(options: HtmlAotOptions = {}): HtmlAotWebpackPlugin {
   return new HtmlAotWebpackPlugin(options);
 }
 
+export class ResumableWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: ResumableOptions = {}) {
+    super(
+      { cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: false, htmlAot: false, cssMinifier: false, htmlMinifier: false, resumable: options },
+      'ResumableWebpackPlugin',
+    );
+  }
+}
+
+export function resumable(options: ResumableOptions = {}): ResumableWebpackPlugin {
+  return new ResumableWebpackPlugin(options);
+}
+
 export const litCore = lit;
 export const litCssFuse = cssFuse;
 export const litHtmlFuse = htmlFuse;
 export const litPropsLower = propsLower;
 export const litElemProxy = elemProxy;
+export const litEventHoist = eventHoist;
 export const litCssMinifier = cssMinifier;
 export const litHtmlMinifier = htmlMinifier;
 export const litHtmlAot = htmlAot;
+export const litResumable = resumable;
 
 export default lit;

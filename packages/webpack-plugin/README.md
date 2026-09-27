@@ -2,7 +2,7 @@
 
 > Webpack 5 plugin integrating the `@lit-core` ahead-of-time compilation toolchain.
 
-`@lit-core/webpack-plugin` integrates `@lit-core` optimizations—including CSS AST deduplication, HTML fragment clustering, and decorator lowering—into Webpack 5 compilation pipelines.
+`@lit-core/webpack-plugin` integrates `@lit-core` optimizations (including CSS AST deduplication, HTML fragment clustering, and decorator lowering) into Webpack 5 compilation pipelines.
 
 ---
 
@@ -46,4 +46,4 @@ module.exports = {
 
 - [Plugin configuration guide](docs/configuration.md)
 - [Vite plugin reference](../vite-plugin/docs/configuration.md)
-- [Empirical benchmark results](../benchmarks/README.md)
+- [Monorepo benchmark suite](../benchmarks/README.md)

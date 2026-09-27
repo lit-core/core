@@ -13,10 +13,12 @@
 | [`@lit-core/css-fuse`](packages/css-fuse/) | `packages/css-fuse` | Cross-component CSS deduplication into shared constructable sheets | [README](packages/css-fuse/README.md) · [Architecture](packages/css-fuse/docs/architecture.md) |
 | [`@lit-core/html-fuse`](packages/html-fuse/) | `packages/html-fuse` | Static HTML and SVG fragment clustering | [README](packages/html-fuse/README.md) · [Guide](packages/html-fuse/docs/fragment-clustering.md) |
 | [`@lit-core/props-lower`](packages/props-lower/) | `packages/props-lower` | AOT Lit decorator and reactive property lowering | [README](packages/props-lower/README.md) · [Guide](packages/props-lower/docs/transform-mechanics.md) |
+| [`@lit-core/event-hoist`](packages/event-hoist/) | `packages/event-hoist` | Ahead-of-time ShadowRoot event delegation | [README](packages/event-hoist/README.md) |
 | [`@lit-core/elem-proxy`](packages/elem-proxy/) | `packages/elem-proxy` | Deferred Custom Element stubs and JIT class upgrade | [README](packages/elem-proxy/README.md) · [Architecture](packages/elem-proxy/docs/proxy-architecture.md) |
 | [`@lit-core/html-aot`](packages/html-aot/) | `packages/html-aot` | Ahead-of-time Lit template compilation | [README](packages/html-aot/README.md) · [Guide](packages/html-aot/docs/template-compilation.md) |
 | [`@lit-core/css-minifier`](packages/css-minifier/) | `packages/css-minifier` | High-speed CSS template literal minification | [README](packages/css-minifier/README.md) |
 | [`@lit-core/html-minifier`](packages/html-minifier/) | `packages/html-minifier` | High-speed HTML and SVG template literal minification | [README](packages/html-minifier/README.md) |
+| [`@lit-core/resumable`](packages/resumable/) | `packages/resumable` | Zero-JS SSR and interaction-driven runtime resumption | [README](packages/resumable/README.md) |
 | [`@lit-core/vite-plugin`](packages/vite-plugin/) | `packages/vite-plugin` | Unified Vite and Rollup plugin | [README](packages/vite-plugin/README.md) · [Configuration](packages/vite-plugin/docs/configuration.md) |
 | [`@lit-core/webpack-plugin`](packages/webpack-plugin/) | `packages/webpack-plugin` | Unified Webpack 5 plugin | [README](packages/webpack-plugin/README.md) · [Configuration](packages/webpack-plugin/docs/configuration.md) |
 | [`@lit-core/benchmarks`](packages/benchmarks/) | `packages/benchmarks` | Empirical benchmark harness across production design systems | [README](packages/benchmarks/README.md) · [Reports](packages/benchmarks/docs/css-fuse.md) |
@@ -45,10 +47,12 @@ Detailed AST diagnostics, build durations, and runtime measurements are document
 - [`css-fuse` benchmark report](packages/benchmarks/docs/css-fuse.md)
 - [`html-fuse` benchmark report](packages/benchmarks/docs/html-fuse.md)
 - [`props-lower` benchmark report](packages/benchmarks/docs/props-lower.md)
+- [`event-hoist` benchmark report](packages/benchmarks/docs/event-hoist.md)
 - [`elem-proxy` benchmark report](packages/benchmarks/docs/elem-proxy.md)
 - [`html-aot` benchmark report](packages/benchmarks/docs/html-aot.md)
 - [`css-minifier` benchmark report](packages/benchmarks/docs/css-minifier.md)
 - [`html-minifier` benchmark report](packages/benchmarks/docs/html-minifier.md)
+- [`resumable` benchmark report](packages/benchmarks/docs/resumable.md)
 - [Monorepo benchmark overview](packages/benchmarks/README.md)
 
 ---

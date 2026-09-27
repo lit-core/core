@@ -43,10 +43,12 @@
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
     "@lit-core/elem-proxy": "workspace:*",
+    "@lit-core/event-hoist": "workspace:*",
     "@lit-core/html-aot": "workspace:*",
     "@lit-core/html-fuse": "workspace:*",
     "@lit-core/html-minifier": "workspace:*",
-    "@lit-core/props-lower": "workspace:*"
+    "@lit-core/props-lower": "workspace:*",
+    "@lit-core/resumable": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",

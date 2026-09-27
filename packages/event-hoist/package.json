@@ -1,0 +1,57 @@
+{
+  "name": "@lit-core/event-hoist",
+  "version": "0.1.0",
+  "description": "Ahead-of-time ShadowRoot event delegation compiler pass and bundler optimization for Lit and Web Components",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "src/js-fallback.js",
+    "*.node"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/event-hoist"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "events",
+    "event-delegation",
+    "shadow-dom",
+    "aot",
+    "oxc",
+    "performance"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "napi": {
+    "binaryName": "event-hoist",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "cargo build --release && cp target/release/libevent_hoist.dylib event-hoist.darwin-arm64.node 2>/dev/null || true",
+    "build:debug": "cargo build && cp target/debug/libevent_hoist.dylib event-hoist.darwin-arm64.node 2>/dev/null || true",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.5",
+    "vitest": "^5.0.2"
+  }
+}

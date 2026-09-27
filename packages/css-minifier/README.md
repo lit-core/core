@@ -44,4 +44,5 @@ export default defineConfig({
 
 - [CSS deduplication architecture](../css-fuse/docs/architecture.md)
 - [HTML template minification](../html-minifier/README.md)
-- [Benchmark metrics](../benchmarks/README.md)
+- [css-minifier benchmark report](../benchmarks/docs/css-minifier.md)
+- [Monorepo benchmark overview](../benchmarks/README.md)

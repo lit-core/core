@@ -44,4 +44,5 @@ export default defineConfig({
 
 - [Transform mechanics and supported decorators](docs/transform-mechanics.md)
 - [Deferred Custom Element proxy architecture](../elem-proxy/docs/proxy-architecture.md)
-- [Empirical benchmark impact](../benchmarks/README.md)
+- [props-lower benchmark report](../benchmarks/docs/props-lower.md)
+- [Monorepo benchmark overview](../benchmarks/README.md)
