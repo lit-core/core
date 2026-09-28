@@ -76,7 +76,9 @@ impl ImportContext {
                                 let local_name = named.local.name.as_str();
 
                                 if is_directive || is_lit {
-                                    if let Some(kind) = DirectiveKind::from_name(imported_name.as_str()) {
+                                    if let Some(kind) =
+                                        DirectiveKind::from_name(imported_name.as_str())
+                                    {
                                         ctx.directive_bindings.insert(local_name.to_string(), kind);
                                     }
                                 }
@@ -134,9 +136,15 @@ pub fn clean_dead_imports<'a>(
                 if let Some(ref mut specifiers) = import_decl.specifiers {
                     specifiers.retain(|spec| {
                         let local_name = match spec {
-                            ImportDeclarationSpecifier::ImportSpecifier(named) => named.local.name.as_str(),
-                            ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => def.local.name.as_str(),
-                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => ns.local.name.as_str(),
+                            ImportDeclarationSpecifier::ImportSpecifier(named) => {
+                                named.local.name.as_str()
+                            }
+                            ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => {
+                                def.local.name.as_str()
+                            }
+                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                                ns.local.name.as_str()
+                            }
                         };
                         used_identifiers.contains(local_name)
                     });

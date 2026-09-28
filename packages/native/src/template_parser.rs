@@ -39,10 +39,7 @@ enum DomNode {
 
 /// Parses an HTML tagged template literal given its static string slices (quasis)
 /// and expressions (as code strings).
-pub fn parse_html_template(
-    quasis: &[&str],
-    expressions: &[&str],
-) -> ParsedTemplate {
+pub fn parse_html_template(quasis: &[&str], expressions: &[&str]) -> ParsedTemplate {
     if quasis.is_empty() {
         return ParsedTemplate {
             html: String::new(),
@@ -125,7 +122,7 @@ fn extract_attribute_binding(trimmed: &str) -> (BindingKind, String) {
     let token = without_eq
         .split(|c: char| c.is_whitespace() || c == '<' || c == '>')
         .filter(|s| !s.is_empty())
-        .last()
+        .next_back()
         .unwrap_or("");
 
     if let Some(ev) = token.strip_prefix('@') {
@@ -145,7 +142,11 @@ fn parse_html_to_tree(
     expr_meta: &[(bool, BindingKind, String)],
 ) -> Vec<DomNode> {
     let mut chars = html.char_indices().peekable();
-    let mut stack: Vec<(String, Vec<DomNode>, Vec<(BindingKind, String, usize, String)>)> = Vec::new();
+    let mut stack: Vec<(
+        String,
+        Vec<DomNode>,
+        Vec<(BindingKind, String, usize, String)>,
+    )> = Vec::new();
     let mut top_nodes: Vec<DomNode> = Vec::new();
 
     let void_elements: [&str; 14] = [
@@ -157,10 +158,10 @@ fn parse_html_to_tree(
 
     let flush_text = |buf: &mut String,
                       stack: &mut Vec<(
-                          String,
-                          Vec<DomNode>,
-                          Vec<(BindingKind, String, usize, String)>,
-                      )>,
+        String,
+        Vec<DomNode>,
+        Vec<(BindingKind, String, usize, String)>,
+    )>,
                       top: &mut Vec<DomNode>| {
         if !buf.is_empty() {
             let node = DomNode::Text(std::mem::take(buf));
@@ -182,16 +183,12 @@ fn parse_html_to_tree(
 
                 if let Some(end_comment) = rest.find("-->") {
                     let comment_content = &rest[4..end_comment];
-                    if comment_content.starts_with("__LIT_EXP_")
-                        && comment_content.ends_with("__")
+                    if comment_content.starts_with("__LIT_EXP_") && comment_content.ends_with("__")
                     {
                         let num_str = &comment_content[10..comment_content.len() - 2];
                         if let Ok(exp_idx) = num_str.parse::<usize>() {
-                            let expr_str = expressions
-                                .get(exp_idx)
-                                .copied()
-                                .unwrap_or("")
-                                .to_string();
+                            let expr_str =
+                                expressions.get(exp_idx).copied().unwrap_or("").to_string();
                             let marker = DomNode::Marker {
                                 expr_idx: exp_idx,
                                 expr_str,
@@ -283,11 +280,7 @@ fn parse_html_to_tree(
                 let mut elem_bindings = Vec::new();
                 for (expr_idx, &(is_attr, ref kind, ref name)) in expr_meta.iter().enumerate() {
                     if is_attr && tag_body.contains(&format!("__LIT_EXP_{}__", expr_idx)) {
-                        let expr_str = expressions
-                            .get(expr_idx)
-                            .copied()
-                            .unwrap_or("")
-                            .to_string();
+                        let expr_str = expressions.get(expr_idx).copied().unwrap_or("").to_string();
                         elem_bindings.push((kind.clone(), name.clone(), expr_idx, expr_str));
                     }
                 }
@@ -407,10 +400,7 @@ fn collect_bindings_and_html(
         DomNode::Text(text) => {
             html.push_str(text);
         }
-        DomNode::Marker {
-            expr_idx,
-            expr_str,
-        } => {
+        DomNode::Marker { expr_idx, expr_str } => {
             bindings.push(BindingSite {
                 kind: BindingKind::Text,
                 name: None,

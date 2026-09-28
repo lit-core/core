@@ -30,8 +30,7 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
             }
             Statement::ExportDeclaration(export_decl) => match &export_decl.declaration {
                 Declaration::ClassDeclaration(class) => {
-                    if let Some(res) =
-                        classify_class(class, forced_mode, source, &import_ctx, None)
+                    if let Some(res) = classify_class(class, forced_mode, source, &import_ctx, None)
                     {
                         results.push(res);
                     }
@@ -55,15 +54,13 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
             },
             Statement::ExportDefaultDeclaration(export_decl) => match &export_decl.declaration {
                 ExportDefaultDeclarationKind::ClassDeclaration(class) => {
-                    if let Some(res) =
-                        classify_class(class, forced_mode, source, &import_ctx, None)
+                    if let Some(res) = classify_class(class, forced_mode, source, &import_ctx, None)
                     {
                         results.push(res);
                     }
                 }
                 ExportDefaultDeclarationKind::ClassExpression(class) => {
-                    if let Some(res) =
-                        classify_class(class, forced_mode, source, &import_ctx, None)
+                    if let Some(res) = classify_class(class, forced_mode, source, &import_ctx, None)
                     {
                         results.push(res);
                     }
@@ -220,11 +217,20 @@ pub fn classify_class<'a>(
     // 2. If has lowerable directives (classMap, styleMap, ifDefined, guard) OR complex lifecycle -> Mode B
     // 3. If genuine leaf (no directives, <= 12 props, single template, no lifecycle overrides) -> Mode A vanilla
     let (mode, reason) = if has_structural_directive {
-        ("micro", Some("Contains structural Lit directives".to_string()))
+        (
+            "micro",
+            Some("Contains structural Lit directives".to_string()),
+        )
     } else if has_lowerable_directive {
-        ("micro", Some("Contains lowerable Lit directives".to_string()))
+        (
+            "micro",
+            Some("Contains lowerable Lit directives".to_string()),
+        )
     } else if has_lifecycle_override || num_html_templates > 1 || num_reactive_props > 12 {
-        ("micro", Some("Complex lifecycle or multiple templates".to_string()))
+        (
+            "micro",
+            Some("Complex lifecycle or multiple templates".to_string()),
+        )
     } else {
         ("vanilla", Some("Genuine leaf component".to_string()))
     };
@@ -247,22 +253,58 @@ fn inspect_render_statement<'a>(
     match stmt {
         Statement::ReturnStatement(ret) => {
             if let Some(arg) = &ret.argument {
-                inspect_render_expression(arg, import_ctx, has_structural, has_lowerable, num_templates);
+                inspect_render_expression(
+                    arg,
+                    import_ctx,
+                    has_structural,
+                    has_lowerable,
+                    num_templates,
+                );
             }
         }
         Statement::ExpressionStatement(expr_stmt) => {
-            inspect_render_expression(&expr_stmt.expression, import_ctx, has_structural, has_lowerable, num_templates);
+            inspect_render_expression(
+                &expr_stmt.expression,
+                import_ctx,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
         }
         Statement::IfStatement(if_stmt) => {
-            inspect_render_expression(&if_stmt.test, import_ctx, has_structural, has_lowerable, num_templates);
-            inspect_render_statement(&if_stmt.consequent, import_ctx, has_structural, has_lowerable, num_templates);
+            inspect_render_expression(
+                &if_stmt.test,
+                import_ctx,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
+            inspect_render_statement(
+                &if_stmt.consequent,
+                import_ctx,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
             if let Some(alt) = &if_stmt.alternate {
-                inspect_render_statement(alt, import_ctx, has_structural, has_lowerable, num_templates);
+                inspect_render_statement(
+                    alt,
+                    import_ctx,
+                    has_structural,
+                    has_lowerable,
+                    num_templates,
+                );
             }
         }
         Statement::BlockStatement(block) => {
             for s in &block.body {
-                inspect_render_statement(s, import_ctx, has_structural, has_lowerable, num_templates);
+                inspect_render_statement(
+                    s,
+                    import_ctx,
+                    has_structural,
+                    has_lowerable,
+                    num_templates,
+                );
             }
         }
         _ => {}
@@ -284,7 +326,13 @@ fn inspect_render_expression<'a>(
                 }
             }
             for e in &tag.quasi.expressions {
-                inspect_render_expression(e, import_ctx, has_structural, has_lowerable, num_templates);
+                inspect_render_expression(
+                    e,
+                    import_ctx,
+                    has_structural,
+                    has_lowerable,
+                    num_templates,
+                );
             }
         }
         Expression::CallExpression(call) => {
@@ -308,14 +356,38 @@ fn inspect_render_expression<'a>(
             }
             for arg in &call.arguments {
                 if let Some(e) = arg.as_expression() {
-                    inspect_render_expression(e, import_ctx, has_structural, has_lowerable, num_templates);
+                    inspect_render_expression(
+                        e,
+                        import_ctx,
+                        has_structural,
+                        has_lowerable,
+                        num_templates,
+                    );
                 }
             }
         }
         Expression::ConditionalExpression(cond) => {
-            inspect_render_expression(&cond.test, import_ctx, has_structural, has_lowerable, num_templates);
-            inspect_render_expression(&cond.consequent, import_ctx, has_structural, has_lowerable, num_templates);
-            inspect_render_expression(&cond.alternate, import_ctx, has_structural, has_lowerable, num_templates);
+            inspect_render_expression(
+                &cond.test,
+                import_ctx,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
+            inspect_render_expression(
+                &cond.consequent,
+                import_ctx,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
+            inspect_render_expression(
+                &cond.alternate,
+                import_ctx,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
         }
         _ => {}
     }

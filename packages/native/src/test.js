@@ -80,4 +80,3 @@ assert(!alertResult.code.includes('lit/directives/class-map.js'), 'Must eliminat
 assert(alertResult.code.includes('.filter(Boolean).join(" ")'), 'Must lower classMap expression');
 
 console.log('All @lit-core/native smoke tests passed!');
-

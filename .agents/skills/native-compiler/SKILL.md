@@ -19,18 +19,20 @@ This skill outlines the technical architecture, invariants, and verification wor
      - Routes dynamic list components to Mode B (micro-runtime `NativeElement`).
    - Supports override modes via `{ mode: 'vanilla-only' | 'micro-only' | 'auto' }`.
 
-2. **Mode A vanilla compiler (`src/vanilla.rs`)**:
+2. **Mode A vanilla compiler (`src/vanilla.rs`, `src/template_parser.rs`)**:
+   - Parses template HTML into exact DOM `childNodes` paths.
    - Strips all imports from `lit`, `lit-html`, `lit-element`, and `reactive-element`.
    - Rewrites component class to `class ComponentName extends HTMLElement`.
    - Instantiates constructable stylesheets via `new CSSStyleSheet()` and `replaceSync()`.
    - Injects template cloning (`document.createElement('template')`, `cloneNode(true)`) and `attachShadow({ mode: 'open' })`.
    - Generates getters, setters, and `attributeChangedCallback` for observed attributes.
-   - Compiles static bindings to direct C++ text node property mutations (`node.data = val`).
+   - Compiles static bindings to direct text node property mutations (`node.data = val`).
+   - Uses `oxc_codegen` for 100% valid AST code generation.
 
-3. **Mode B micro-runtime (`src/micro.rs` & `src/runtime/`)**:
-   - Replaces Lit runtime with lightweight `NativeElement` (≤1.5 KB total footprint).
-   - Provides batched microtask scheduling via `queueMicrotask` to coalesce state changes into single DOM render passes.
-   - Implements keyed list reconciliation (`src/runtime/reconciler.ts`) using standard DOM operations (`insertBefore`, `removeChild`).
+3. **Mode B directive lowering (`src/directive_lower.rs`)**:
+   - Replaces high-level Lit directives (`classMap`, `styleMap`, `ifDefined`, `guard`) with inline native JS expressions.
+   - Automatically eliminates dead imports from `lit/directives/*` to enable bundler tree-shaking.
+   - Preserves full compatibility with LitElement lifecycle for complex components.
 
 4. **Bundler plugin integration**:
    - Integrated into `@lit-core/vite-plugin` (position #5 in pipeline) and `@lit-core/webpack-plugin`.

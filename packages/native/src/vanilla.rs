@@ -239,10 +239,7 @@ pub fn transform_vanilla_class<'a>(
 
         if b.kind == BindingKind::Text {
             // Replace marker comment with live text node
-            members_code.push_str(&format!(
-                "    const __m_{} = {};\n",
-                idx, path_expr
-            ));
+            members_code.push_str(&format!("    const __m_{} = {};\n", idx, path_expr));
             members_code.push_str(&format!(
                 "    this.__lit_node_{} = document.createTextNode('');\n",
                 idx
@@ -253,21 +250,18 @@ pub fn transform_vanilla_class<'a>(
             ));
         } else if b.kind == BindingKind::Event {
             let ev_name = b.name.as_deref().unwrap_or("click");
-            let clean_handler = b.expr_str.trim_start_matches("this.").trim_end_matches("()");
-            members_code.push_str(&format!(
-                "    const __btn_{} = {};\n",
-                idx, path_expr
-            ));
+            let clean_handler = b
+                .expr_str
+                .trim_start_matches("this.")
+                .trim_end_matches("()");
+            members_code.push_str(&format!("    const __btn_{} = {};\n", idx, path_expr));
             members_code.push_str(&format!(
                 "    if (__btn_{}) __btn_{}.addEventListener('{}', (e) => this.{}(e));\n",
                 idx, idx, ev_name, clean_handler
             ));
         } else {
             // Attribute or boolean attribute
-            members_code.push_str(&format!(
-                "    this.__lit_node_{} = {};\n",
-                idx, path_expr
-            ));
+            members_code.push_str(&format!("    this.__lit_node_{} = {};\n", idx, path_expr));
         }
     }
 
@@ -275,11 +269,14 @@ pub fn transform_vanilla_class<'a>(
 
     // Initialize property backing stores
     for p in &properties {
-        let val = p.default_value.as_deref().unwrap_or(match p.prop_type.as_str() {
-            "number" => "0",
-            "boolean" => "false",
-            _ => "''",
-        });
+        let val = p
+            .default_value
+            .as_deref()
+            .unwrap_or(match p.prop_type.as_str() {
+                "number" => "0",
+                "boolean" => "false",
+                _ => "''",
+            });
         members_code.push_str(&format!("    this._{} = {};\n", p.name, val));
     }
     members_code.push_str("  }\n");
@@ -287,7 +284,10 @@ pub fn transform_vanilla_class<'a>(
     // Getters and setters
     for p in &properties {
         let p_name = &p.name;
-        members_code.push_str(&format!("  get {}() {{ return this._{}; }}\n", p_name, p_name));
+        members_code.push_str(&format!(
+            "  get {}() {{ return this._{}; }}\n",
+            p_name, p_name
+        ));
         members_code.push_str(&format!("  set {}(v) {{\n", p_name));
         members_code.push_str(&format!("    if (this._{} === v) return;\n", p_name));
         members_code.push_str(&format!("    this._{} = v;\n", p_name));
@@ -393,7 +393,10 @@ pub fn transform_vanilla_class<'a>(
         match &elem {
             ClassElement::MethodDefinition(m) => {
                 let m_name = m.key.static_name().unwrap_or_default();
-                if m_name == "render" || (m.r#static && m_name == "styles") || m_name == "constructor" {
+                if m_name == "render"
+                    || (m.r#static && m_name == "styles")
+                    || m_name == "constructor"
+                {
                     continue;
                 }
                 new_body_elements.push(elem);
@@ -424,10 +427,8 @@ pub fn transform_vanilla_class<'a>(
 
     // 6. Define custom element if tag_name is present
     if let Some(tag) = &target.tag_name {
-        let define_stmt = helper.define_custom_element(
-            allocator.alloc_str(tag),
-            allocator.alloc_str(comp_id),
-        );
+        let define_stmt =
+            helper.define_custom_element(allocator.alloc_str(tag), allocator.alloc_str(comp_id));
         out_post_stmts.push(define_stmt);
     }
 }

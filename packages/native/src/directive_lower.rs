@@ -193,13 +193,16 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
 
                             if !elements.is_empty() {
                                 // [elements].filter(Boolean).join(' ')
-                                let arr = Expression::new_array_expression(SPAN, elements, self.ast);
+                                let arr =
+                                    Expression::new_array_expression(SPAN, elements, self.ast);
                                 let filter_member = self.helper.static_member(arr, "filter", false);
                                 let mut filter_args = ArenaVec::new_in(self.ast);
                                 filter_args.push(Argument::from(self.helper.ident_ref("Boolean")));
-                                let filtered = self.helper.call_expr(filter_member, filter_args, false);
+                                let filtered =
+                                    self.helper.call_expr(filter_member, filter_args, false);
 
-                                let join_member = self.helper.static_member(filtered, "join", false);
+                                let join_member =
+                                    self.helper.static_member(filtered, "join", false);
                                 let mut join_args = ArenaVec::new_in(self.ast);
                                 join_args.push(Argument::from(self.helper.string_lit(" ")));
                                 let joined = self.helper.call_expr(join_member, join_args, false);

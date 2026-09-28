@@ -2,13 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { classify, transformNative } from '@lit-core/native';
-import {
-  CARBON_COMPONENTS,
-  SPECTRUM_COMPONENTS,
-  WEBAWESOME_COMPONENTS,
-  MATERIAL_COMPONENTS,
-  MOMENTUM_COMPONENTS,
-} from '../components.js';
+import { CARBON_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS } from '../components.js';
 import { readComponentSource } from '../fixtures.js';
 import { closeTestBrowser, getTestBrowser } from '../harness.js';
 

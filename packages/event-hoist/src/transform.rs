@@ -1,7 +1,7 @@
 use napi_derive::napi;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
-use oxc_ast_visit::Visit;
+use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType};
 use serde::{Deserialize, Serialize};
@@ -98,103 +98,227 @@ fn match_event_attr(quasi_str: &str) -> Option<(usize, String, Option<char>)> {
 }
 
 fn has_event_options(expr_src: &str) -> bool {
-    expr_src.contains("eventOptions")
-        || expr_src.contains("capture:")
-        || expr_src.contains("passive:")
-        || expr_src.contains("once:")
+    expr_src.contains("eventOptions(")
 }
 
-struct EventHoistVisitor<'s> {
-    source: &'s str,
-    safe_events: &'s HashSet<String>,
-    replacements: Vec<(usize, usize, String)>,
-    hoisted_events: HashSet<String>,
-    hoisted_count: u32,
-}
-
-impl<'a, 's> Visit<'a> for EventHoistVisitor<'s> {
-    fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
-        if is_lit_html_tag(&tagged.tag) {
-            let num_exprs = tagged.quasi.expressions.len();
-            for i in 0..num_exprs {
-                let prev_quasi = &tagged.quasi.quasis[i];
-                let expr = &tagged.quasi.expressions[i];
-
-                let quasi_str = &prev_quasi.value.raw;
-                if let Some((at_offset, event_name, quote)) = match_event_attr(quasi_str) {
-                    if !self.safe_events.contains(&event_name) {
-                        continue;
-                    }
-
-                    let expr_start = expr.span().start as usize;
-                    let expr_end = expr.span().end as usize;
-                    let expr_src = &self.source[expr_start..expr_end];
-
-                    if has_event_options(expr_src) {
-                        continue;
-                    }
-
-                    let attr_start = (prev_quasi.span.start as usize) + at_offset;
-
-                    // Replacement 1: Before expression
-                    let before_repl = if quote == Some('\'') {
-                        format!("data-lh-{}='${{this.__lhAction(", event_name)
-                    } else {
-                        format!("data-lh-{}=\"${{this.__lhAction(", event_name)
+fn hoist_events_in_expr<'a>(
+    expr: &mut Expression<'a>,
+    source: &str,
+    safe_events: &HashSet<String>,
+    allocator: &'a Allocator,
+    source_type: SourceType,
+    hoisted_events: &mut HashSet<String>,
+    hoisted_count: &mut u32,
+) {
+    match expr {
+        Expression::TaggedTemplateExpression(tagged) => {
+            if is_lit_html_tag(&tagged.tag) {
+                let num_exprs = tagged.quasi.expressions.len();
+                for i in 0..num_exprs {
+                    let at_info = {
+                        let prev_quasi = &tagged.quasi.quasis[i];
+                        match_event_attr(&prev_quasi.value.raw)
                     };
-                    self.replacements.push((attr_start, expr_start, before_repl));
 
-                    // Replacement 2: After expression, replace closing brace and quote
-                    let rest = &self.source[expr_end..];
-                    if let Some(brace_idx) = rest.find('}') {
-                        let close_start = expr_end;
-                        let mut close_end = expr_end + brace_idx + 1;
-                        if let Some(q) = quote {
-                            let after_brace = &self.source[close_end..];
-                            if after_brace.starts_with(q) {
-                                close_end += 1;
+                    if let Some((at_offset, event_name, quote)) = at_info {
+                        if !safe_events.contains(&event_name) {
+                            continue;
+                        }
+
+                        let expr_start = tagged.quasi.expressions[i].span().start as usize;
+                        let expr_end = tagged.quasi.expressions[i].span().end as usize;
+                        if expr_start >= expr_end || expr_end > source.len() {
+                            continue;
+                        }
+                        let expr_src = &source[expr_start..expr_end];
+                        if has_event_options(expr_src) {
+                            continue;
+                        }
+
+                        let q_char = quote.unwrap_or('"');
+
+                        // 1. Rewrite prev_quasi
+                        {
+                            let prev_quasi = &mut tagged.quasi.quasis[i];
+                            let mut raw = prev_quasi.value.raw.to_string();
+                            raw.truncate(at_offset);
+                            raw.push_str(&format!("data-lh-{}={}", event_name, q_char));
+                            prev_quasi.value.raw = allocator.alloc_str(&raw).into();
+                        }
+
+                        // 2. Wrap expr in this.__lhAction(...)
+                        {
+                            let expr_node = &mut tagged.quasi.expressions[i];
+                            let wrapped_src = format!("this.__lhAction({})", expr_src);
+                            let dummy = format!("let __x = {};", wrapped_src);
+                            let p = Parser::new(allocator, allocator.alloc_str(&dummy), source_type).parse();
+                            if let Some(Statement::VariableDeclaration(mut v)) = p.program.body.into_iter().next() {
+                                if !v.declarations.is_empty() {
+                                    if let Some(init) = v.declarations.remove(0).init {
+                                        *expr_node = init;
+                                    }
+                                }
                             }
                         }
 
-                        let after_repl = if quote == Some('\'') {
-                            ")}'".to_string()
-                        } else {
-                            ")}\"".to_string()
-                        };
-                        self.replacements.push((close_start, close_end, after_repl));
-                    }
+                        // 3. Rewrite next_quasi
+                        if i + 1 < tagged.quasi.quasis.len() {
+                            let next_quasi = &mut tagged.quasi.quasis[i + 1];
+                            let mut next_raw = next_quasi.value.raw.to_string();
+                            if quote.is_some() {
+                                if next_raw.starts_with('"') || next_raw.starts_with('\'') {
+                                    next_raw.remove(0);
+                                }
+                            }
+                            next_raw.insert(0, q_char);
+                            next_quasi.value.raw = allocator.alloc_str(&next_raw).into();
+                        }
 
-                    self.hoisted_events.insert(event_name);
-                    self.hoisted_count += 1;
+                        hoisted_events.insert(event_name);
+                        *hoisted_count += 1;
+                    } else {
+                        hoist_events_in_expr(&mut tagged.quasi.expressions[i], source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                    }
+                }
+            } else {
+                for quasi_expr in &mut tagged.quasi.expressions {
+                    hoist_events_in_expr(quasi_expr, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
                 }
             }
         }
-
-        oxc_ast_visit::walk::walk_tagged_template_expression(self, tagged);
+        Expression::CallExpression(c) => {
+            hoist_events_in_expr(&mut c.callee, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            for arg in &mut c.arguments {
+                match arg {
+                    Argument::SpreadElement(s) => {
+                        hoist_events_in_expr(&mut s.argument, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                    }
+                    _ => {
+                        if let Some(e) = arg.as_expression_mut() {
+                            hoist_events_in_expr(e, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                        }
+                    }
+                }
+            }
+        }
+        Expression::ArrowFunctionExpression(arrow) => match &mut arrow.body {
+            ArrowFunctionBody::FunctionBody(body) => {
+                for s in &mut body.statements {
+                    hoist_events_in_stmt(s, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                }
+            }
+            _ => {
+                if let Some(expr) = arrow.body.as_expression_mut() {
+                    hoist_events_in_expr(expr, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                }
+            }
+        },
+        Expression::FunctionExpression(func) => {
+            if let Some(ref mut body) = func.body {
+                for s in &mut body.statements {
+                    hoist_events_in_stmt(s, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                }
+            }
+        }
+        Expression::ArrayExpression(arr) => {
+            for el in &mut arr.elements {
+                match el {
+                    ArrayExpressionElement::SpreadElement(s) => {
+                        hoist_events_in_expr(&mut s.argument, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                    }
+                    ArrayExpressionElement::Elision(_) => {}
+                    _ => {
+                        if let Some(e) = el.as_expression_mut() {
+                            hoist_events_in_expr(e, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                        }
+                    }
+                }
+            }
+        }
+        Expression::ObjectExpression(obj) => {
+            for prop in &mut obj.properties {
+                if let ObjectPropertyKind::ObjectProperty(p) = prop {
+                    hoist_events_in_expr(&mut p.value, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                }
+            }
+        }
+        Expression::ParenthesizedExpression(p) => {
+            hoist_events_in_expr(&mut p.expression, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+        }
+        Expression::ConditionalExpression(c) => {
+            hoist_events_in_expr(&mut c.test, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            hoist_events_in_expr(&mut c.consequent, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            hoist_events_in_expr(&mut c.alternate, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+        }
+        _ => {}
     }
 }
 
-fn collect_classes<'a>(stmts: &'a [Statement<'a>], out: &mut Vec<&'a Class<'a>>) {
+fn hoist_events_in_stmt<'a>(
+    stmt: &mut Statement<'a>,
+    source: &str,
+    safe_events: &HashSet<String>,
+    allocator: &'a Allocator,
+    source_type: SourceType,
+    hoisted_events: &mut HashSet<String>,
+    hoisted_count: &mut u32,
+) {
+    match stmt {
+        Statement::ReturnStatement(ret) => {
+            if let Some(ref mut arg) = ret.argument {
+                hoist_events_in_expr(arg, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            }
+        }
+        Statement::ExpressionStatement(expr_stmt) => {
+            hoist_events_in_expr(&mut expr_stmt.expression, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+        }
+        Statement::VariableDeclaration(var_decl) => {
+            for decl in &mut var_decl.declarations {
+                if let Some(ref mut init) = decl.init {
+                    hoist_events_in_expr(init, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                }
+            }
+        }
+        Statement::BlockStatement(block) => {
+            for s in &mut block.body {
+                hoist_events_in_stmt(s, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            }
+        }
+        Statement::IfStatement(if_stmt) => {
+            hoist_events_in_expr(&mut if_stmt.test, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            hoist_events_in_stmt(&mut if_stmt.consequent, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            if let Some(ref mut alt) = if_stmt.alternate {
+                hoist_events_in_stmt(alt, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn collect_classes_mut<'a, 'b>(
+    stmts: &'b mut [Statement<'a>],
+    out: &mut Vec<&'b mut Class<'a>>,
+) {
     for stmt in stmts {
         match stmt {
             Statement::ClassDeclaration(class) => {
                 out.push(class);
             }
             Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &export_decl.declaration {
+                if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
                     out.push(class);
                 }
             }
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
-                    &export_decl.declaration
+                    &mut export_decl.declaration
                 {
                     out.push(class);
                 }
             }
             Statement::VariableDeclaration(var_decl) => {
-                for decl in &var_decl.declarations {
-                    if let Some(Expression::ClassExpression(class)) = &decl.init {
+                for decl in &mut var_decl.declarations {
+                    if let Some(Expression::ClassExpression(class)) = &mut decl.init {
                         out.push(class);
                     }
                 }
@@ -226,7 +350,7 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
     let filename = options.filename.as_deref().unwrap_or("file.ts");
     let source_type = SourceType::from_path(filename).unwrap_or_else(|_| SourceType::ts());
 
-    let parsed = Parser::new(&allocator, source, source_type).parse();
+    let mut parsed = Parser::new(&allocator, source, source_type).parse();
     if !parsed.diagnostics.is_empty() {
         return EventHoistResult {
             code: source.to_string(),
@@ -237,9 +361,8 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
         };
     }
 
-    let program = &parsed.program;
     let mut classes = Vec::new();
-    collect_classes(&program.body, &mut classes);
+    collect_classes_mut(&mut parsed.program.body, &mut classes);
 
     if classes.is_empty() {
         return EventHoistResult {
@@ -251,214 +374,203 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
         };
     }
 
-    let mut replacements: Vec<(usize, usize, String)> = Vec::new();
-    let mut total_hoisted_events_count: u32 = 0;
-    let mut all_unique_events: HashSet<String> = HashSet::new();
-    let mut transformed_components_count: u32 = 0;
+    let mut transformed_components_count = 0u32;
+    let mut total_hoisted_events_count = 0u32;
+    let mut all_unique_events = HashSet::new();
 
     for class in classes {
-        let mut visitor = EventHoistVisitor {
-            source,
-            safe_events: &safe_event_set,
-            replacements: Vec::new(),
-            hoisted_events: HashSet::new(),
-            hoisted_count: 0,
-        };
+        let mut class_hoisted_events = HashSet::new();
+        let mut class_hoisted_count = 0u32;
 
-        visitor.visit_class_body(&class.body);
+        let mut has_connected = false;
+        let mut has_first_updated = false;
+        let mut has_will_update = false;
 
-        if visitor.hoisted_count == 0 {
-            continue;
-        }
-
-        transformed_components_count += 1;
-        total_hoisted_events_count += visitor.hoisted_count;
-        for evt in &visitor.hoisted_events {
-            all_unique_events.insert(evt.clone());
-        }
-
-        // Add template replacements
-        replacements.extend(visitor.replacements);
-
-        let mut render_method_span: Option<usize> = None;
-        let mut connected_method_span: Option<usize> = None;
-        let mut first_updated_method_span: Option<usize> = None;
-        let mut will_update_method_span: Option<usize> = None;
-
-        for elem in &class.body.body {
+        for elem in class.body.body.iter_mut() {
             if let ClassElement::MethodDefinition(method) = elem {
                 let method_name = match &method.key {
                     PropertyKey::StaticIdentifier(ident) => Some(ident.name.as_str()),
                     _ => None,
                 };
 
-                if let Some(body) = &method.value.body {
+                if let Some(ref mut body) = method.value.body {
                     if method_name == Some("render") {
-                        render_method_span = Some(body.span.start as usize);
+                        for stmt in &mut body.statements {
+                            hoist_events_in_stmt(stmt, source, &safe_event_set, &allocator, source_type, &mut class_hoisted_events, &mut class_hoisted_count);
+                        }
                     } else if method_name == Some("connectedCallback") {
-                        connected_method_span = Some(body.span.start as usize);
+                        has_connected = true;
                     } else if method_name == Some("firstUpdated") {
-                        first_updated_method_span = Some(body.span.start as usize);
+                        has_first_updated = true;
                     } else if method_name == Some("willUpdate") {
-                        will_update_method_span = Some(body.span.start as usize);
+                        has_will_update = true;
                     }
                 }
             }
         }
 
-        // Inject resets and hook calls
-        if let Some(render_start) = render_method_span {
-            replacements.push((
-                render_start + 1,
-                render_start + 1,
-                "\n    this.__lhActions = [];".to_string(),
-            ));
+        if class_hoisted_count == 0 {
+            continue;
         }
 
-        if let Some(conn_start) = connected_method_span {
-            replacements.push((
-                conn_start + 1,
-                conn_start + 1,
-                "\n    this.__initLitEventHoist();".to_string(),
-            ));
+        transformed_components_count += 1;
+        total_hoisted_events_count += class_hoisted_count;
+        for evt in &class_hoisted_events {
+            all_unique_events.insert(evt.clone());
         }
 
-        if let Some(first_start) = first_updated_method_span {
-            replacements.push((
-                first_start + 1,
-                first_start + 1,
-                "\n    this.__initLitEventHoist();".to_string(),
-            ));
+        // Prepend resets and hook calls to existing methods
+        for elem in class.body.body.iter_mut() {
+            if let ClassElement::MethodDefinition(method) = elem {
+                let method_name = match &method.key {
+                    PropertyKey::StaticIdentifier(ident) => Some(ident.name.as_str()),
+                    _ => None,
+                };
+
+                if let Some(ref mut body) = method.value.body {
+                    if method_name == Some("render") {
+                        let p = Parser::new(&allocator, "this.__lhActions = [];", source_type).parse();
+                        if let Some(stmt) = p.program.body.into_iter().next() {
+                            body.statements.insert(0, stmt);
+                        }
+                    } else if method_name == Some("connectedCallback") {
+                        let p = Parser::new(&allocator, "this.__initLitEventHoist();", source_type).parse();
+                        if let Some(stmt) = p.program.body.into_iter().next() {
+                            body.statements.insert(0, stmt);
+                        }
+                    } else if method_name == Some("firstUpdated") {
+                        let p = Parser::new(&allocator, "this.__initLitEventHoist();", source_type).parse();
+                        if let Some(stmt) = p.program.body.into_iter().next() {
+                            body.statements.insert(0, stmt);
+                        }
+                    } else if method_name == Some("willUpdate") {
+                        let p = Parser::new(&allocator, "this.__lhActions = [];", source_type).parse();
+                        if let Some(stmt) = p.program.body.into_iter().next() {
+                            body.statements.insert(0, stmt);
+                        }
+                    }
+                }
+            }
         }
 
-        if let Some(will_start) = will_update_method_span {
-            replacements.push((
-                will_start + 1,
-                will_start + 1,
-                "\n    this.__lhActions = [];".to_string(),
-            ));
+        // Synthesize missing lifecycle methods
+        if !has_connected {
+            let m_src = "class __D { connectedCallback() { super.connectedCallback?.(); this.__initLitEventHoist(); } }";
+            let p = Parser::new(&allocator, m_src, source_type).parse();
+            if let Some(Statement::ClassDeclaration(mut d)) = p.program.body.into_iter().next() {
+                if !d.body.body.is_empty() {
+                    class.body.body.push(d.body.body.remove(0));
+                }
+            }
         }
 
-        // Synthesize dispatcher and delegated listener methods before class closing brace
-        let class_end = class.body.span.end as usize;
-        let mut injected = String::new();
-
-        if connected_method_span.is_none() {
-            injected.push_str(
-                r#"
-  connectedCallback() {
-    super.connectedCallback?.();
-    this.__initLitEventHoist();
-  }
-"#,
-            );
+        if !has_first_updated {
+            let m_src = "class __D { firstUpdated(changedProperties) { super.firstUpdated?.(changedProperties); this.__initLitEventHoist(); } }";
+            let p = Parser::new(&allocator, m_src, source_type).parse();
+            if let Some(Statement::ClassDeclaration(mut d)) = p.program.body.into_iter().next() {
+                if !d.body.body.is_empty() {
+                    class.body.body.push(d.body.body.remove(0));
+                }
+            }
         }
 
-        if first_updated_method_span.is_none() {
-            injected.push_str(
-                r#"
-  firstUpdated(changedProperties) {
-    super.firstUpdated?.(changedProperties);
-    this.__initLitEventHoist();
-  }
-"#,
-            );
+        if !has_will_update {
+            let m_src = "class __D { willUpdate(changedProperties) { this.__lhActions = []; super.willUpdate?.(changedProperties); } }";
+            let p = Parser::new(&allocator, m_src, source_type).parse();
+            if let Some(Statement::ClassDeclaration(mut d)) = p.program.body.into_iter().next() {
+                if !d.body.body.is_empty() {
+                    class.body.body.push(d.body.body.remove(0));
+                }
+            }
         }
 
-        if will_update_method_span.is_none() {
-            injected.push_str(
-                r#"
-  willUpdate(changedProperties) {
-    this.__lhActions = [];
-    super.willUpdate?.(changedProperties);
-  }
-"#,
-            );
-        }
-
-        let mut sorted_class_events: Vec<String> = visitor.hoisted_events.into_iter().collect();
+        let mut sorted_class_events: Vec<String> = class_hoisted_events.into_iter().collect();
         sorted_class_events.sort();
 
-        injected.push_str(
-            r#"
-  __lhActions = [];
-  __lhInitialized = false;
-
-  __initLitEventHoist() {
-    if (this.__lhInitialized) return;
-    this.__lhInitialized = true;
-    const root = this.shadowRoot || this;
-"#,
-        );
-
+        let mut listeners_str = String::new();
         for evt in &sorted_class_events {
-            injected.push_str(&format!(
+            listeners_str.push_str(&format!(
                 "    root.addEventListener('{}', (e) => this.__lhDispatch('{}', e));\n",
                 evt, evt
             ));
         }
 
-        injected.push_str(
-            r#"  }
+        let helpers_str = format!(
+            r#"class __D {{
+  __lhActions = [];
+  __lhInitialized = false;
 
-  __lhDispatch(eventName, event) {
-    const attr = `data-lh-${eventName}`;
+  __initLitEventHoist() {{
+    if (this.__lhInitialized) return;
+    this.__lhInitialized = true;
+    const root = this.shadowRoot || this;
+{}  }}
+
+  __lhDispatch(eventName, event) {{
+    const attr = `data-lh-${{eventName}}`;
     const root = this.shadowRoot || this;
     let stopped = false;
     const origStop = event.stopPropagation;
-    if (origStop) {
-      event.stopPropagation = function() {
+    if (origStop) {{
+      event.stopPropagation = function() {{
         stopped = true;
         return origStop.apply(this, arguments);
-      };
-    }
+      }};
+    }}
     const path = event.composedPath ? event.composedPath() : [];
-    if (path.length > 0) {
-      for (const node of path) {
+    if (path.length > 0) {{
+      for (const node of path) {{
         if (node === root) break;
-        if (node.nodeType === 1 && node.hasAttribute && node.hasAttribute(attr)) {
-          if (node.getRootNode && node.getRootNode() !== root) {
+        if (node.nodeType === 1 && node.hasAttribute && node.hasAttribute(attr)) {{
+          if (node.getRootNode && node.getRootNode() !== root) {{
             continue;
-          }
+          }}
           const actionId = Number(node.getAttribute(attr));
           const handler = this.__lhActions && this.__lhActions[actionId];
-          if (typeof handler === 'function') {
+          if (typeof handler === 'function') {{
             handler.call(this, event);
-          }
+          }}
           if (event.cancelBubble || stopped) break;
-        }
-      }
-    } else {
+        }}
+      }}
+    }} else {{
       let target = event.target;
-      while (target && target !== root && target.nodeType === 1) {
-        if (target.hasAttribute(attr)) {
-          if (!target.getRootNode || target.getRootNode() === root) {
+      while (target && target !== root && target.nodeType === 1) {{
+        if (target.hasAttribute(attr)) {{
+          if (!target.getRootNode || target.getRootNode() === root) {{
             const actionId = Number(target.getAttribute(attr));
             const handler = this.__lhActions && this.__lhActions[actionId];
-            if (typeof handler === 'function') {
+            if (typeof handler === 'function') {{
               handler.call(this, event);
-            }
+            }}
             if (event.cancelBubble || stopped) break;
-          }
-        }
+          }}
+        }}
         target = target.parentElement;
-      }
-    }
-  }
+      }}
+    }}
+  }}
 
-  __lhAction(handler) {
+  __lhAction(handler) {{
     if (!this.__lhActions) this.__lhActions = [];
     const id = this.__lhActions.length;
     this.__lhActions.push(handler);
     return id;
-  }
-"#,
+  }}
+}}"#,
+            listeners_str
         );
 
-        replacements.push((class_end - 1, class_end - 1, injected));
+        let p_helpers = Parser::new(&allocator, allocator.alloc_str(&helpers_str), source_type).parse();
+        if let Some(Statement::ClassDeclaration(mut d_helpers)) = p_helpers.program.body.into_iter().next() {
+            let elems = std::mem::replace(&mut d_helpers.body.body, oxc_allocator::ArenaVec::new_in(&&allocator));
+            for elem in elems {
+                class.body.body.push(elem);
+            }
+        }
     }
 
-    if replacements.is_empty() {
+    if transformed_components_count == 0 {
         return EventHoistResult {
             code: source.to_string(),
             map: None,
@@ -468,22 +580,22 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
         };
     }
 
-    // Sort replacements descending by start position to safely apply string slices
-    replacements.sort_by(|a, b| b.0.cmp(&a.0));
-
-    let mut rewritten = source.to_string();
-    for (start, end, repl) in replacements {
-        if start <= end && end <= rewritten.len() {
-            rewritten.replace_range(start..end, &repl);
+    let mut codegen_options = CodegenOptions::default();
+    if options.sourcemap.unwrap_or(false) {
+        if let Some(ref filename) = options.filename {
+            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
         }
     }
+
+    let codegen_result = Codegen::new().with_options(codegen_options).build(&parsed.program);
+    let map_json = codegen_result.map.map(|m| m.to_json_string());
 
     let mut sorted_events: Vec<String> = all_unique_events.into_iter().collect();
     sorted_events.sort();
 
     EventHoistResult {
-        code: rewritten,
-        map: None,
+        code: codegen_result.code,
+        map: map_json,
         hoisted_events_count: total_hoisted_events_count,
         events: sorted_events,
         components_count: transformed_components_count,

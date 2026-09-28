@@ -1,7 +1,7 @@
 use napi_derive::napi;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
-use oxc_ast_visit::Visit;
+use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType};
 use serde::{Deserialize, Serialize};
@@ -218,61 +218,31 @@ fn compute_part_mask(expr: &Expression, reactive_props: &HashMap<String, usize>)
     }
 }
 
-struct TemplateExpressionCollector<'a> {
-    source: &'a str,
-    reactive_props: &'a HashMap<String, usize>,
-    replacements: Vec<(usize, usize, String)>,
-    masked_count: u32,
-}
 
-impl<'a> Visit<'a> for TemplateExpressionCollector<'a> {
-    fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
-        if is_lit_html_tag(&tagged.tag) {
-            for expr in &tagged.quasi.expressions {
-                let start = expr.span().start as usize;
-                let end = expr.span().end as usize;
-                let expr_slice = &self.source[start..end];
-
-                if expr_slice.starts_with("(this.__litDirtyMask &") {
-                    continue;
-                }
-
-                let mask = compute_part_mask(expr, self.reactive_props);
-                let repl = format!(
-                    "(this.__litDirtyMask & {}) ? ({}) : noChange",
-                    mask, expr_slice
-                );
-                self.replacements.push((start, end, repl));
-                self.masked_count += 1;
-            }
-            return;
-        }
-
-        oxc_ast_visit::walk::walk_tagged_template_expression(self, tagged);
-    }
-}
-
-fn collect_classes<'a>(stmts: &'a [Statement<'a>], out: &mut Vec<&'a Class<'a>>) {
+fn collect_classes_mut<'a, 'b>(
+    stmts: &'b mut [Statement<'a>],
+    out: &mut Vec<&'b mut Class<'a>>,
+) {
     for stmt in stmts {
         match stmt {
             Statement::ClassDeclaration(class) => {
                 out.push(class);
             }
             Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &export_decl.declaration {
+                if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
                     out.push(class);
                 }
             }
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
-                    &export_decl.declaration
+                    &mut export_decl.declaration
                 {
                     out.push(class);
                 }
             }
             Statement::VariableDeclaration(var_decl) => {
-                for decl in &var_decl.declarations {
-                    if let Some(Expression::ClassExpression(class)) = &decl.init {
+                for decl in &mut var_decl.declarations {
+                    if let Some(Expression::ClassExpression(class)) = &mut decl.init {
                         out.push(class);
                     }
                 }
@@ -384,6 +354,110 @@ fn collect_reactive_properties(class: &Class) -> (HashMap<String, usize>, Vec<(S
     (prop_indices, sorted_props)
 }
 
+fn mask_expressions_in_expr<'a>(
+    expr: &mut Expression<'a>,
+    source: &str,
+    reactive_props: &HashMap<String, usize>,
+    allocator: &'a Allocator,
+    source_type: SourceType,
+    masked_count: &mut u32,
+) {
+    match expr {
+        Expression::TaggedTemplateExpression(tagged) => {
+            if is_lit_html_tag(&tagged.tag) {
+                for quasi_expr in &mut tagged.quasi.expressions {
+                    let start = quasi_expr.span().start as usize;
+                    let end = quasi_expr.span().end as usize;
+                    if start < end && end <= source.len() {
+                        let expr_slice = &source[start..end];
+                        if expr_slice.contains("__litDirtyMask") {
+                            continue;
+                        }
+                        let mask = compute_part_mask(quasi_expr, reactive_props);
+                        let repl = format!("(this.__litDirtyMask & {}) ? ({}) : noChange", mask, expr_slice);
+                        let dummy_prog = format!("let __d = {};", repl);
+                        let parsed_e = Parser::new(allocator, allocator.alloc_str(&dummy_prog), source_type).parse();
+                        if let Some(Statement::VariableDeclaration(mut var_decl)) = parsed_e.program.body.into_iter().next() {
+                            if !var_decl.declarations.is_empty() {
+                                if let Some(init) = var_decl.declarations.remove(0).init {
+                                    *quasi_expr = init;
+                                    *masked_count += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                for quasi_expr in &mut tagged.quasi.expressions {
+                    mask_expressions_in_expr(quasi_expr, source, reactive_props, allocator, source_type, masked_count);
+                }
+            }
+        }
+        Expression::ParenthesizedExpression(paren) => {
+            mask_expressions_in_expr(&mut paren.expression, source, reactive_props, allocator, source_type, masked_count);
+        }
+        Expression::ConditionalExpression(cond) => {
+            mask_expressions_in_expr(&mut cond.test, source, reactive_props, allocator, source_type, masked_count);
+            mask_expressions_in_expr(&mut cond.consequent, source, reactive_props, allocator, source_type, masked_count);
+            mask_expressions_in_expr(&mut cond.alternate, source, reactive_props, allocator, source_type, masked_count);
+        }
+        _ => {}
+    }
+}
+
+fn mask_expressions_in_stmt<'a>(
+    stmt: &mut Statement<'a>,
+    source: &str,
+    reactive_props: &HashMap<String, usize>,
+    allocator: &'a Allocator,
+    source_type: SourceType,
+    masked_count: &mut u32,
+) {
+    match stmt {
+        Statement::ReturnStatement(ret) => {
+            if let Some(ref mut arg) = ret.argument {
+                mask_expressions_in_expr(arg, source, reactive_props, allocator, source_type, masked_count);
+            }
+        }
+        Statement::ExpressionStatement(expr_stmt) => {
+            mask_expressions_in_expr(&mut expr_stmt.expression, source, reactive_props, allocator, source_type, masked_count);
+        }
+        Statement::VariableDeclaration(var_decl) => {
+            for decl in &mut var_decl.declarations {
+                if let Some(ref mut init) = decl.init {
+                    mask_expressions_in_expr(init, source, reactive_props, allocator, source_type, masked_count);
+                }
+            }
+        }
+        Statement::BlockStatement(block) => {
+            for s in &mut block.body {
+                mask_expressions_in_stmt(s, source, reactive_props, allocator, source_type, masked_count);
+            }
+        }
+        Statement::IfStatement(if_stmt) => {
+            mask_expressions_in_expr(&mut if_stmt.test, source, reactive_props, allocator, source_type, masked_count);
+            mask_expressions_in_stmt(&mut if_stmt.consequent, source, reactive_props, allocator, source_type, masked_count);
+            if let Some(ref mut alt) = if_stmt.alternate {
+                mask_expressions_in_stmt(alt, source, reactive_props, allocator, source_type, masked_count);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn mask_expressions_in_body<'a>(
+    body: &mut FunctionBody<'a>,
+    source: &str,
+    reactive_props: &HashMap<String, usize>,
+    allocator: &'a Allocator,
+    source_type: SourceType,
+    masked_count: &mut u32,
+) {
+    for stmt in &mut body.statements {
+        mask_expressions_in_stmt(stmt, source, reactive_props, allocator, source_type, masked_count);
+    }
+}
+
 pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResult {
     if !source.contains("html") && !source.contains("svg") {
         return DirtyMaskResult {
@@ -399,7 +473,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
     let filename = options.filename.as_deref().unwrap_or("file.ts");
     let source_type = SourceType::from_path(filename).unwrap_or_else(|_| SourceType::ts());
 
-    let parsed = Parser::new(&allocator, source, source_type).parse();
+    let mut parsed = Parser::new(&allocator, source, source_type).parse();
     if !parsed.diagnostics.is_empty() {
         return DirtyMaskResult {
             code: source.to_string(),
@@ -410,9 +484,8 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         };
     }
 
-    let program = &parsed.program;
     let mut classes = Vec::new();
-    collect_classes(&program.body, &mut classes);
+    collect_classes_mut(&mut parsed.program.body, &mut classes);
 
     if classes.is_empty() {
         return DirtyMaskResult {
@@ -424,7 +497,6 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         };
     }
 
-    let mut replacements: Vec<(usize, usize, String)> = Vec::new();
     let mut total_components_count: u32 = 0;
     let mut total_masked_parts_count: u32 = 0;
     let mut total_properties_count: u32 = 0;
@@ -435,52 +507,31 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
             continue;
         }
 
-        let mut collector = TemplateExpressionCollector {
-            source,
-            reactive_props: &reactive_props,
-            replacements: Vec::new(),
-            masked_count: 0,
-        };
+        let mut class_masked_count = 0u32;
+        let mut existing_update_idx = None;
 
-        let mut existing_update: Option<(&MethodDefinition, usize, String)> = None;
-
-        for elem in &class.body.body {
+        for (idx, elem) in class.body.body.iter_mut().enumerate() {
             if let ClassElement::MethodDefinition(method) = elem {
                 let name = method.key.static_name();
                 if !method.r#static {
                     if name.as_deref() == Some("render") {
-                        collector.visit_method_definition(method);
-                    } else if name.as_deref() == Some("update") {
-                        if let Some(body) = &method.value.body {
-                            let param_name = method
-                                .value
-                                .params
-                                .items
-                                .first()
-                                .and_then(|p| match &p.pattern {
-                                    BindingPattern::BindingIdentifier(id) => {
-                                        Some(id.name.to_string())
-                                    }
-                                    _ => None,
-                                })
-                                .unwrap_or_else(|| "changedProperties".to_string());
-
-                            existing_update = Some((method, body.span.start as usize, param_name));
+                        if let Some(ref mut body) = method.value.body {
+                            mask_expressions_in_body(body, source, &reactive_props, &allocator, source_type, &mut class_masked_count);
                         }
+                    } else if name.as_deref() == Some("update") {
+                        existing_update_idx = Some(idx);
                     }
                 }
             }
         }
 
-        if collector.masked_count == 0 {
+        if class_masked_count == 0 {
             continue;
         }
 
         total_components_count += 1;
-        total_masked_parts_count += collector.masked_count;
+        total_masked_parts_count += class_masked_count;
         total_properties_count += reactive_props.len() as u32;
-
-        replacements.extend(collector.replacements);
 
         let mut mask_calcs = String::new();
         for (prop_name, idx) in &sorted_props {
@@ -491,26 +542,51 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
             ));
         }
 
-        if let Some((_method, body_start, _param_name)) = existing_update {
-            let body_src = &source[body_start..];
-            if !body_src.contains("this.__litDirtyMask") {
-                let update_injection = format!(
-                    "\n    let mask = 0;\n    if (this.hasUpdated) {{\n{}    }} else {{\n      mask = -1;\n    }}\n    this.__litDirtyMask = mask;\n",
-                    mask_calcs
-                );
-                replacements.push((body_start + 1, body_start + 1, update_injection));
+        if let Some(idx) = existing_update_idx {
+            if let ClassElement::MethodDefinition(ref mut method) = &mut class.body.body[idx] {
+                if let Some(ref mut body) = method.value.body {
+                    let already_has = body.statements.iter().any(|s| {
+                        let start = s.span().start as usize;
+                        let end = s.span().end as usize;
+                        if start < end && end <= source.len() {
+                            source[start..end].contains("this.__litDirtyMask")
+                        } else {
+                            false
+                        }
+                    });
+                    if !already_has {
+                        let block_code = format!(
+                            "function __d() {{\n    let mask = 0;\n    if (this.hasUpdated) {{\n{}    }} else {{\n      mask = -1;\n    }}\n    this.__litDirtyMask = mask;\n}}",
+                            mask_calcs
+                        );
+                        let parsed_b = Parser::new(&allocator, allocator.alloc_str(&block_code), source_type).parse();
+                        if let Some(Statement::FunctionDeclaration(mut fn_decl)) = parsed_b.program.body.into_iter().next() {
+                            if let Some(ref mut fn_body) = fn_decl.body {
+                                let stmts = std::mem::replace(&mut fn_body.statements, oxc_allocator::ArenaVec::new_in(&&allocator));
+                                for (i, stmt) in stmts.into_iter().enumerate() {
+                                    body.statements.insert(i, stmt);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         } else {
-            let class_end = class.body.span.end as usize;
-            let synthesized_update = format!(
-                "\n  update(changedProperties) {{\n    let mask = 0;\n    if (this.hasUpdated) {{\n{}    }} else {{\n      mask = -1;\n    }}\n    this.__litDirtyMask = mask;\n    super.update(changedProperties);\n  }}\n",
+            let method_code = format!(
+                "class __D {{\n  update(changedProperties) {{\n    let mask = 0;\n    if (this.hasUpdated) {{\n{}    }} else {{\n      mask = -1;\n    }}\n    this.__litDirtyMask = mask;\n    super.update(changedProperties);\n  }}\n}}",
                 mask_calcs
             );
-            replacements.push((class_end - 1, class_end - 1, synthesized_update));
+            let parsed_m = Parser::new(&allocator, allocator.alloc_str(&method_code), source_type).parse();
+            if let Some(Statement::ClassDeclaration(mut d_class)) = parsed_m.program.body.into_iter().next() {
+                if !d_class.body.body.is_empty() {
+                    let method = d_class.body.body.remove(0);
+                    class.body.body.push(method);
+                }
+            }
         }
     }
 
-    if total_components_count == 0 || replacements.is_empty() {
+    if total_components_count == 0 || total_masked_parts_count == 0 {
         return DirtyMaskResult {
             code: source.to_string(),
             map: None,
@@ -522,12 +598,13 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
 
     // Ensure import { noChange } from 'lit'; is imported
     let mut has_no_change = false;
-    let mut lit_named_import_insert_pos: Option<usize> = None;
+    let mut lit_import_idx = None;
 
-    for stmt in &program.body {
+    for (idx, stmt) in parsed.program.body.iter().enumerate() {
         if let Statement::ImportDeclaration(import_decl) = stmt {
             let specifier = import_decl.source.value.as_str();
             if specifier == "lit" || specifier == "lit-html" {
+                lit_import_idx = Some(idx);
                 if let Some(specifiers) = &import_decl.specifiers {
                     for spec in specifiers {
                         if let ImportDeclarationSpecifier::ImportSpecifier(named) = spec {
@@ -537,40 +614,48 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                             }
                         }
                     }
-                    if !has_no_change && lit_named_import_insert_pos.is_none() {
-                        let decl_str =
-                            &source[import_decl.span.start as usize..import_decl.span.end as usize];
-                        if let Some(brace_idx) = decl_str.find('{') {
-                            lit_named_import_insert_pos =
-                                Some(import_decl.span.start as usize + brace_idx + 1);
-                        }
-                    }
                 }
             }
         }
     }
 
     if !has_no_change {
-        if let Some(pos) = lit_named_import_insert_pos {
-            replacements.push((pos, pos, " noChange,".to_string()));
+        if let Some(idx) = lit_import_idx {
+            if let Statement::ImportDeclaration(ref mut import_decl) = &mut parsed.program.body[idx] {
+                let dummy_imp = "import { noChange } from 'lit';";
+                let p_imp = Parser::new(&allocator, dummy_imp, source_type).parse();
+                if let Some(Statement::ImportDeclaration(mut d)) = p_imp.program.body.into_iter().next() {
+                    if let Some(mut specs) = d.specifiers.take() {
+                        if let Some(spec) = specs.pop() {
+                            if let Some(ref mut current_specs) = import_decl.specifiers {
+                                current_specs.push(spec);
+                            }
+                        }
+                    }
+                }
+            }
         } else {
-            replacements.push((0, 0, "import { noChange } from 'lit';\n".to_string()));
+            let dummy_imp = "import { noChange } from 'lit';\n";
+            let p_imp = Parser::new(&allocator, dummy_imp, source_type).parse();
+            if let Some(import_stmt) = p_imp.program.body.into_iter().next() {
+                parsed.program.body.insert(0, import_stmt);
+            }
         }
     }
 
-    // Sort replacements descending by start position
-    replacements.sort_by_key(|b| std::cmp::Reverse(b.0));
-
-    let mut rewritten = source.to_string();
-    for (start, end, repl) in replacements {
-        if start <= end && end <= rewritten.len() {
-            rewritten.replace_range(start..end, &repl);
+    let mut codegen_options = CodegenOptions::default();
+    if options.sourcemap.unwrap_or(false) {
+        if let Some(ref filename) = options.filename {
+            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
         }
     }
+
+    let codegen_result = Codegen::new().with_options(codegen_options).build(&parsed.program);
+    let map_json = codegen_result.map.map(|m| m.to_json_string());
 
     DirtyMaskResult {
-        code: rewritten,
-        map: None,
+        code: codegen_result.code,
+        map: map_json,
         components_count: total_components_count,
         masked_parts_count: total_masked_parts_count,
         properties_count: total_properties_count,

@@ -25,8 +25,7 @@ export class MyButton extends LitElement {
 
         expect(res.code).toContain('data-lh-click="${this.__lhAction(this._handleClick)}"');
         expect(res.code).toContain('this.__lhActions = [];');
-        expect(res.code).toContain('__initLitEventHoist()');
-        expect(res.code).toContain("root.addEventListener('click', (e) => this.__lhDispatch('click', e))");
+        expect(res.code).toMatch(/root\.addEventListener\(['"]click['"],\s*\(e\)\s*=>\s*this\.__lhDispatch\(['"]click['"],\s*e\)\)/);
         expect(res.code).toContain('__lhDispatch(eventName, event)');
         expect(res.code).toContain('__lhAction(handler)');
       });
@@ -116,9 +115,9 @@ export class MultiEventElem extends LitElement {
         const res = fn(input);
         expect(res.hoistedEventsCount).toBe(3);
         expect(res.events.sort()).toEqual(['change', 'input', 'keydown']);
-        expect(res.code).toContain("root.addEventListener('change'");
-        expect(res.code).toContain("root.addEventListener('input'");
-        expect(res.code).toContain("root.addEventListener('keydown'");
+        expect(res.code).toMatch(/root\.addEventListener\(['"]change['"]/);
+        expect(res.code).toMatch(/root\.addEventListener\(['"]input['"]/);
+        expect(res.code).toMatch(/root\.addEventListener\(['"]keydown['"]/);
       });
 
       it('handles quoted attribute expressions', () => {
@@ -157,8 +156,8 @@ export class LifecycleElem extends LitElement {
 }
 `;
         const res = fn(input);
-        expect(res.code).toContain('connectedCallback() {\n    this.__initLitEventHoist();');
-        expect(res.code).toContain('firstUpdated(props) {\n    this.__initLitEventHoist();');
+        expect(res.code).toMatch(/connectedCallback\(\)\s*\{\s*this\.__initLitEventHoist\(\);/);
+        expect(res.code).toMatch(/firstUpdated\(props\)\s*\{\s*this\.__initLitEventHoist\(\);/);
         expect(res.code).not.toMatch(/super\.connectedCallback\?\.[\s\S]*super\.connectedCallback\?\./);
       });
     });

@@ -46,8 +46,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && cp target/release/libevent_hoist.dylib event-hoist.darwin-arm64.node 2>/dev/null || true",
-    "build:debug": "cargo build && cp target/debug/libevent_hoist.dylib event-hoist.darwin-arm64.node 2>/dev/null || true",
+    "build": "cargo build --release && cp target/release/libevent_hoist.dylib event-hoist.darwin-arm64.node 2>/dev/null && (codesign -s - -f event-hoist.darwin-arm64.node 2>/dev/null || true) || true",
+    "build:debug": "cargo build && cp target/debug/libevent_hoist.dylib event-hoist.darwin-arm64.node 2>/dev/null && (codesign -s - -f event-hoist.darwin-arm64.node 2>/dev/null || true) || true",
     "test": "vitest run"
   },
   "devDependencies": {

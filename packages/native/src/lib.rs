@@ -8,9 +8,7 @@ pub mod template_parser;
 pub mod vanilla;
 
 use crate::import_scanner::{is_lit_directive_source, is_lit_import_source, ImportContext};
-use crate::models::{
-    ClassificationResult, ClassifyOptions, TransformOptions, TransformResult,
-};
+use crate::models::{ClassificationResult, ClassifyOptions, TransformOptions, TransformResult};
 use napi_derive::napi;
 use oxc_allocator::{Allocator, ArenaVec};
 use oxc_ast::ast::*;
@@ -85,7 +83,13 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                             continue;
                         }
                         "micro" => {
-                            micro::transform_micro_class(class, &source, &target, &ast, &import_ctx);
+                            micro::transform_micro_class(
+                                class,
+                                &source,
+                                &target,
+                                &ast,
+                                &import_ctx,
+                            );
                             new_statements.push(stmt);
                             micro_count += 1;
                             continue;
@@ -145,56 +149,62 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                     new_statements.push(stmt);
                 }
             },
-            Statement::ExportDefaultDeclaration(export_decl) => match &mut export_decl.declaration {
-                ExportDefaultDeclarationKind::ClassDeclaration(class) => {
-                    if let Some(target) =
-                        classifier::classify_class(class, forced_mode, &source, &import_ctx, None)
-                    {
-                        classifications.push(target.clone());
-                        match target.mode.as_str() {
-                            "vanilla" => {
-                                let mut pre_stmts = Vec::new();
-                                let mut post_stmts = Vec::new();
-                                vanilla::transform_vanilla_class(
-                                    class,
-                                    &source,
-                                    &target,
-                                    &ast,
-                                    &allocator,
-                                    &mut pre_stmts,
-                                    &mut post_stmts,
-                                );
-                                for s in pre_stmts {
-                                    new_statements.push(s);
+            Statement::ExportDefaultDeclaration(export_decl) => {
+                match &mut export_decl.declaration {
+                    ExportDefaultDeclarationKind::ClassDeclaration(class) => {
+                        if let Some(target) = classifier::classify_class(
+                            class,
+                            forced_mode,
+                            &source,
+                            &import_ctx,
+                            None,
+                        ) {
+                            classifications.push(target.clone());
+                            match target.mode.as_str() {
+                                "vanilla" => {
+                                    let mut pre_stmts = Vec::new();
+                                    let mut post_stmts = Vec::new();
+                                    vanilla::transform_vanilla_class(
+                                        class,
+                                        &source,
+                                        &target,
+                                        &ast,
+                                        &allocator,
+                                        &mut pre_stmts,
+                                        &mut post_stmts,
+                                    );
+                                    for s in pre_stmts {
+                                        new_statements.push(s);
+                                    }
+                                    new_statements.push(stmt);
+                                    for s in post_stmts {
+                                        new_statements.push(s);
+                                    }
+                                    vanilla_count += 1;
+                                    continue;
                                 }
-                                new_statements.push(stmt);
-                                for s in post_stmts {
-                                    new_statements.push(s);
+                                "micro" => {
+                                    micro::transform_micro_class(
+                                        class,
+                                        &source,
+                                        &target,
+                                        &ast,
+                                        &import_ctx,
+                                    );
+                                    new_statements.push(stmt);
+                                    micro_count += 1;
+                                    continue;
                                 }
-                                vanilla_count += 1;
-                                continue;
+                                _ => {}
                             }
-                            "micro" => {
-                                micro::transform_micro_class(
-                                    class,
-                                    &source,
-                                    &target,
-                                    &ast,
-                                    &import_ctx,
-                                );
-                                new_statements.push(stmt);
-                                micro_count += 1;
-                                continue;
-                            }
-                            _ => {}
                         }
+                        new_statements.push(stmt);
                     }
-                    new_statements.push(stmt);
+                    _ => {
+                        new_statements.push(stmt);
+                    }
                 }
-                _ => {
-                    new_statements.push(stmt);
-                }
-            },
+            }
             _ => {
                 new_statements.push(stmt);
             }
@@ -240,7 +250,9 @@ fn strip_lit_imports_from_program<'a>(program: &mut Program<'a>, ast: &AstBuilde
                 if let Some(ref mut specifiers) = import_decl.specifiers {
                     specifiers.retain(|spec| {
                         let name = match spec {
-                            ImportDeclarationSpecifier::ImportSpecifier(n) => n.imported.name().as_str(),
+                            ImportDeclarationSpecifier::ImportSpecifier(n) => {
+                                n.imported.name().as_str()
+                            }
                             _ => "",
                         };
                         name != "LitElement"
@@ -267,10 +279,12 @@ fn strip_lowered_directive_imports<'a>(program: &mut Program<'a>, ast: &AstBuild
     for mut stmt in program.body.drain(..) {
         if let Statement::ImportDeclaration(ref mut import_decl) = stmt {
             let src = import_decl.source.value.as_str();
-            if is_lit_directive_source(src) {
-                if src.contains("class-map") || src.contains("if-defined") || src.contains("guard") {
-                    continue;
-                }
+            if is_lit_directive_source(src)
+                && (src.contains("class-map")
+                    || src.contains("if-defined")
+                    || src.contains("guard"))
+            {
+                continue;
             }
         }
         retained.push(stmt);

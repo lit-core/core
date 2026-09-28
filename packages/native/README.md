@@ -22,10 +22,10 @@
    - Generates pure `class extends HTMLElement` with `<template>` cloning, `adoptedStyleSheets`, and direct text node updates (`node.data = val`).
    - Completely removes all imports from `lit`, `lit-html`, and `reactive-element`.
 
-2. **Mode B (micro-runtime component)**:
-   - Targets complex components containing dynamic list directives (`repeat()`, `map()`) or conditional subtrees.
-   - Generates `class extends NativeElement` utilizing `@lit-core/native/runtime` and `@lit-core/native/runtime/reconciler`.
-   - Micro-runtime footprint is ≤1.5 KB (raw 2.39 KB, gzip 0.96 KB).
+2. **Mode B (directive lowering and micro-runtime)**:
+   - Targets components containing dynamic template directives (`classMap`, `styleMap`, `ifDefined`, `guard`) or conditional logic.
+   - Lowers high-level directives into zero-dependency inline JavaScript expressions, eliminating directive imports from `lit/directives/*`.
+   - Enables tree-shaking of Lit directive modules, reducing bundle size while preserving full compatibility with `LitElement` lifecycle.
 
 ---
 

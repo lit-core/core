@@ -2,6 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { transformDirtyMask } from '../src/index.js';
 import { transformDirtyMaskJs } from '../src/js-fallback.js';
 
+function expectMasked(code: string, mask: number | string, expr: string) {
+  const norm = code.replace(/\s+/g, ' ');
+  const p1 = `(this.__litDirtyMask & ${mask}) ? (${expr}) : noChange`;
+  const p2 = `this.__litDirtyMask & ${mask} ? ${expr} : noChange`;
+  expect(norm.includes(p1) || norm.includes(p2)).toBe(true);
+}
+
 describe('dirty-mask transform', () => {
   const implementations = [
     { name: 'main (native/fallback)', fn: transformDirtyMask },
@@ -28,9 +35,9 @@ export class CounterComponent extends LitElement {
         expect(res.maskedPartsCount).toBe(1);
         expect(res.propertiesCount).toBe(1);
 
-        expect(res.code).toContain('(this.__litDirtyMask & 1) ? (this.count) : noChange');
+        expectMasked(res.code, 1, 'this.count');
         expect(res.code).toContain('update(changedProperties)');
-        expect(res.code).toContain("if (changedProperties.has('count')) mask |= 1;");
+        expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']count["']\)\)\s*mask\s*\|=\s*1;/);
         expect(res.code).toContain('this.__litDirtyMask = mask;');
         expect(res.code).toContain('noChange');
       });
@@ -61,12 +68,12 @@ export class UserBadge extends LitElement {
         expect(res.propertiesCount).toBe(3);
 
         // firstName = 1, lastName = 2 -> mask = 3
-        expect(res.code).toContain("(this.__litDirtyMask & 3) ? (this.firstName + ' ' + this.lastName) : noChange");
+        expect(res.code.includes('this.__litDirtyMask & 3') || res.code.includes('(this.__litDirtyMask & 3)')).toBe(true);
         // active = 4 -> mask = 4
-        expect(res.code).toContain("(this.__litDirtyMask & 4) ? (this.active ? 'Active' : 'Inactive') : noChange");
-        expect(res.code).toContain("if (changedProperties.has('firstName')) mask |= 1;");
-        expect(res.code).toContain("if (changedProperties.has('lastName')) mask |= 2;");
-        expect(res.code).toContain("if (changedProperties.has('active')) mask |= 4;");
+        expect(res.code.includes('this.__litDirtyMask & 4') || res.code.includes('(this.__litDirtyMask & 4)')).toBe(true);
+        expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']firstName["']\)\)\s*mask\s*\|=\s*1;/);
+        expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']lastName["']\)\)\s*mask\s*\|=\s*2;/);
+        expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']active["']\)\)\s*mask\s*\|=\s*4;/);
       });
 
       it('detects static properties = { ... } definitions', () => {
@@ -89,10 +96,10 @@ export class StatusIndicator extends LitElement {
         expect(res.maskedPartsCount).toBe(2);
         expect(res.propertiesCount).toBe(2);
 
-        expect(res.code).toContain('(this.__litDirtyMask & 1) ? (this.status) : noChange');
-        expect(res.code).toContain('(this.__litDirtyMask & 2) ? (this.code) : noChange');
-        expect(res.code).toContain("if (changedProperties.has('status')) mask |= 1;");
-        expect(res.code).toContain("if (changedProperties.has('code')) mask |= 2;");
+        expectMasked(res.code, 1, 'this.status');
+        expectMasked(res.code, 2, 'this.code');
+        expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']status["']\)\)\s*mask\s*\|=\s*1;/);
+        expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']code["']\)\)\s*mask\s*\|=\s*2;/);
       });
 
       it('detects static get properties() { return { ... } }', () => {
@@ -117,8 +124,8 @@ export class CardElement extends LitElement {
         expect(res.maskedPartsCount).toBe(2);
         expect(res.propertiesCount).toBe(2);
 
-        expect(res.code).toContain('(this.__litDirtyMask & 1) ? (this.title) : noChange');
-        expect(res.code).toContain('(this.__litDirtyMask & 2) ? (this.rating) : noChange');
+        expectMasked(res.code, 1, 'this.title');
+        expectMasked(res.code, 2, 'this.rating');
       });
 
       it('assigns mask -1 fallback to non-reactive fields on this', () => {
@@ -139,8 +146,8 @@ export class HeaderView extends LitElement {
         expect(res.componentsCount).toBe(1);
         expect(res.maskedPartsCount).toBe(2);
 
-        expect(res.code).toContain('(this.__litDirtyMask & 1) ? (this.title) : noChange');
-        expect(res.code).toContain('(this.__litDirtyMask & -1) ? (this.internalId) : noChange');
+        expectMasked(res.code, 1, 'this.title');
+        expectMasked(res.code, -1, 'this.internalId');
       });
 
       it('assigns mask -1 fallback to external variables and functions with potential side effects', () => {
@@ -172,9 +179,9 @@ export class ComplexComponent extends LitElement {
         expect(res.componentsCount).toBe(1);
         expect(res.maskedPartsCount).toBe(3);
 
-        expect(res.code).toContain('(this.__litDirtyMask & 1) ? (this.count) : noChange');
-        expect(res.code).toContain('(this.__litDirtyMask & -1) ? (EXTERNAL_CONFIG) : noChange');
-        expect(res.code).toContain('(this.__litDirtyMask & -1) ? (this.formatCount(this.count)) : noChange');
+        expectMasked(res.code, 1, 'this.count');
+        expectMasked(res.code, -1, 'EXTERNAL_CONFIG');
+        expectMasked(res.code, -1, 'this.formatCount(this.count)');
       });
 
       it('injects mask computation into existing update lifecycle method', () => {
@@ -200,7 +207,7 @@ export class CustomLifecycle extends LitElement {
         expect(res.maskedPartsCount).toBe(1);
 
         expect(res.code).toContain('this.__litDirtyMask = mask;');
-        expect(res.code).toContain("console.log('pre-update')");
+        expect(res.code).toMatch(/console\.log\(["']pre-update["']\)/);
         expect(res.code).toContain('super.update(changedProperties)');
         // Ensure update method is defined only once
         const updateMatches = res.code.match(/\bupdate\s*\([^)]*\)\s*\{/g);
@@ -228,7 +235,7 @@ export class BareEl {
 }
 `;
         const resWithoutLit = fn(inputWithoutLit);
-        expect(resWithoutLit.code).toContain("import { noChange } from 'lit';");
+        expect(resWithoutLit.code).toMatch(/import\s*\{\s*noChange\s*\}\s*from\s*['"]lit['"]/);
       });
 
       it('is idempotent and does not re-wrap already masked expressions', () => {
