@@ -15,7 +15,6 @@
   "files": [
     "src/index.js",
     "src/index.d.ts",
-    "src/js-fallback.js",
     "*.node"
   ],
   "license": "MIT",

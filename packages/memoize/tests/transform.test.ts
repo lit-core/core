@@ -1,15 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { transformMemoize } from '../src/index.js';
-import { transformMemoizeJs } from '../src/js-fallback.js';
 
 describe('memoize transform', () => {
-  const implementations = [
-    { name: 'main (native/fallback)', fn: transformMemoize },
-    { name: 'pure js fallback', fn: transformMemoizeJs },
-  ];
-
-  implementations.forEach(({ name, fn }) => {
-    describe(`${name} implementation`, () => {
+  const fn = transformMemoize;
       it('memoizes single-input array mapping', () => {
         const input = `
 export class UserList extends LitElement {
@@ -276,6 +269,4 @@ class TestComponent {
         expect(render5).not.toBe(render4);
         expect(render5).toEqual([{ text: 'blueberry' }]);
       });
-    });
-  });
 });

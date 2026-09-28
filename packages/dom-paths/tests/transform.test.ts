@@ -1,23 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { computeDomPaths, transformDomPaths } from '../src/index.js';
-import { computeDomPathsJs, transformDomPathsJs } from '../src/js-fallback.js';
 
 describe('dom-paths compiler', () => {
-  const implementations = [
-    {
-      name: 'main (native or fallback)',
-      compute: computeDomPaths,
-      transform: transformDomPaths,
-    },
-    {
-      name: 'pure js fallback',
-      compute: computeDomPathsJs,
-      transform: transformDomPathsJs,
-    },
-  ];
-
-  implementations.forEach(({ name, compute, transform }) => {
-    describe(`${name} implementation`, () => {
+  const compute = computeDomPaths;
+  const transform = transformDomPaths;
       it('computes exact paths for the prompt specification example', () => {
         const quasis = ['<div>\n  <h1>Title</h1>\n  <p>Count: ', '</p>\n  <button @click=', '>+</button>\n</div>'];
 
@@ -115,6 +101,4 @@ export class HelperUtil {
         expect(res.pathsCount).toBe(0);
         expect(res.code).toBe(input);
       });
-    });
-  });
 });

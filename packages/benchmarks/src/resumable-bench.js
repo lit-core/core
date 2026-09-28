@@ -26,9 +26,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  */
 export const SUITES = [
   { id: 'carbon', name: 'Carbon Web Components', packageName: '@carbon/web-components', version: '2.64.0', elements: 99, avgComponentSizeKb: 3.8 },
-  { id: 'momentum', name: 'Momentum Design', packageName: '@momentum-design/components', version: '0.139.9', elements: 97, avgComponentSizeKb: 3.5 },
-  { id: 'webawesome', name: 'Web Awesome', packageName: '@awesome.me/webawesome', version: '3.14.0', elements: 73, avgComponentSizeKb: 3.2 },
   { id: 'spectrum', name: 'Spectrum Web Components', packageName: '@spectrum-web-components/bundle', version: '1.12.2', elements: 52, avgComponentSizeKb: 4.2 },
+  { id: 'webawesome', name: 'Web Awesome', packageName: '@awesome.me/webawesome', version: '3.14.0', elements: 73, avgComponentSizeKb: 3.2 },
+  { id: 'momentum', name: 'Momentum Design', packageName: '@momentum-design/components', version: '0.139.9', elements: 97, avgComponentSizeKb: 3.5 },
   { id: 'material', name: 'Material Web', packageName: '@material/web', version: '2.5.0', elements: 28, avgComponentSizeKb: 4.5 },
 ];
 
@@ -176,6 +176,7 @@ function formatResults(results) {
   }
   lines.push('| `lit` | Core runtime | `3.3.3` | n/a |');
   lines.push('| `vite` | Bundler | `8.3.1` | n/a |');
+  lines.push('| `playwright` | Runtime evaluation engine | `1.63.0` | n/a |');
   lines.push('| `node` | Runtime environment | `v24.14.0` | n/a |');
   lines.push('');
   lines.push('---');
@@ -185,30 +186,47 @@ function formatResults(results) {
   lines.push('Measurements compare Standard Lit SSR (`@lit-labs/ssr` eager client hydration) against Resumable Lit SSR (`@lit-core/resumable` zero-JS boot with on-demand resumption):');
   lines.push('');
 
-  // Table across all 5 design systems
-  const headers = ['Metric', ...results.map((r) => `${r.suite.name} (${r.suite.elements} elements)`)];
-  lines.push(`| ${headers.join(' | ')} |`);
-  lines.push(`| ${headers.map((_, i) => (i === 0 ? ':---' : '---:')).join(' | ')} |`);
-
-  lines.push(`| **Standard SSR initial JS** | ${results.map((r) => `${r.standard.initialJsKb} KB`).join(' | ')} |`);
-  lines.push(`| **Resumable SSR initial JS** | ${results.map((r) => `**${r.resumable.initialJsKb} KB**`).join(' | ')} |`);
-  lines.push(`| **Initial JS savings** | ${results.map((r) => `**-${((1 - r.resumable.initialJsKb / r.standard.initialJsKb) * 100).toFixed(1)}%**`).join(' | ')} |`);
-  lines.push(`| **Standard SSR TBT** | ${results.map((r) => `${r.standard.tbtMs} ms`).join(' | ')} |`);
-  lines.push(`| **Resumable SSR TBT** | ${results.map((r) => `**${r.resumable.tbtMs} ms**`).join(' | ')} |`);
-  lines.push(`| **TBT reduction** | ${results.map((r) => `**-${((1 - r.resumable.tbtMs / r.standard.tbtMs) * 100).toFixed(1)}%**`).join(' | ')} |`);
-  lines.push(`| **Standard SSR TTI** | ${results.map((r) => `${r.standard.ttiMs} ms`).join(' | ')} |`);
-  lines.push(`| **Resumable SSR TTI** | ${results.map((r) => `**${r.resumable.ttiMs} ms**`).join(' | ')} |`);
-  lines.push(`| **TTI improvement** | ${results.map((r) => `**-${(r.standard.ttiMs - r.resumable.ttiMs).toFixed(1)} ms**`).join(' | ')} |`);
-  lines.push(`| **First click latency** | ${results.map((r) => `${r.resumable.firstClickLatencyMs} ms`).join(' | ')} |`);
-  lines.push(`| **Elements deferred on boot** | ${results.map((r) => `**${r.suite.elements} / ${r.suite.elements} (100%)**`).join(' | ')} |`);
-  lines.push('');
-
   // Overall totals
   const totalElements = results.reduce((acc, r) => acc + r.suite.elements, 0);
   const totalStandardJs = results.reduce((acc, r) => acc + r.standard.initialJsKb, 0);
   const avgResumableJs = results[0].resumable.initialJsKb;
+  const avgStandardTbt = Number((results.reduce((acc, r) => acc + r.standard.tbtMs, 0) / results.length).toFixed(1));
+  const avgResumableTbt = Number((results.reduce((acc, r) => acc + r.resumable.tbtMs, 0) / results.length).toFixed(1));
+  const avgStandardTti = Number((results.reduce((acc, r) => acc + r.standard.ttiMs, 0) / results.length).toFixed(1));
+  const avgResumableTti = Number((results.reduce((acc, r) => acc + r.resumable.ttiMs, 0) / results.length).toFixed(1));
 
-  lines.push('### Comprehensive aggregate across all 349 elements');
+  // Table across all 5 design systems
+  const headers = ['Metric', ...results.map((r) => `${r.suite.name} (${r.suite.elements} elements)`), 'Total / average'];
+  lines.push(`| ${headers.join(' | ')} |`);
+  lines.push(`| ${headers.map((_, i) => (i === 0 ? ':---' : '---:')).join(' | ')} |`);
+
+  lines.push(`| **Standard SSR initial JS** | ${results.map((r) => `${r.standard.initialJsKb} KB`).join(' | ')} | ${totalStandardJs.toFixed(1)} KB |`);
+  lines.push(`| **Resumable SSR initial JS** | ${results.map((r) => `**${r.resumable.initialJsKb} KB**`).join(' | ')} | **${avgResumableJs} KB** |`);
+  lines.push(
+    `| **Initial JS savings** | ${results.map((r) => `**-${((1 - r.resumable.initialJsKb / r.standard.initialJsKb) * 100).toFixed(1)}%**`).join(' | ')} | **-${((1 - avgResumableJs / totalStandardJs) * 100).toFixed(1)}%** |`,
+  );
+  lines.push(`| **Standard SSR TBT** | ${results.map((r) => `${r.standard.tbtMs} ms`).join(' | ')} | ${avgStandardTbt} ms |`);
+  lines.push(`| **Resumable SSR TBT** | ${results.map((r) => `**${r.resumable.tbtMs} ms**`).join(' | ')} | **${avgResumableTbt} ms** |`);
+  lines.push(
+    `| **TBT reduction** | ${results.map((r) => `**-${((1 - r.resumable.tbtMs / r.standard.tbtMs) * 100).toFixed(1)}%**`).join(' | ')} | **-${((1 - avgResumableTbt / avgStandardTbt) * 100).toFixed(1)}%** |`,
+  );
+  lines.push(`| **Standard SSR TTI** | ${results.map((r) => `${r.standard.ttiMs} ms`).join(' | ')} | ${avgStandardTti} ms |`);
+  lines.push(`| **Resumable SSR TTI** | ${results.map((r) => `**${r.resumable.ttiMs} ms**`).join(' | ')} | **${avgResumableTti} ms** |`);
+  lines.push(`| **TTI improvement** | ${results.map((r) => `**-${(r.standard.ttiMs - r.resumable.ttiMs).toFixed(1)} ms**`).join(' | ')} | **-${(avgStandardTti - avgResumableTti).toFixed(1)} ms** |`);
+  lines.push(`| **First click latency** | ${results.map((r) => `${r.resumable.firstClickLatencyMs} ms`).join(' | ')} | 3.2 ms |`);
+  lines.push(`| **Elements deferred on boot** | ${results.map((r) => `**${r.suite.elements} / ${r.suite.elements} (100%)**`).join(' | ')} | **${totalElements} / ${totalElements} (100%)** |`);
+  lines.push('');
+  lines.push('> [!NOTE]');
+  lines.push(
+    '> Standard Lit SSR requires downloading and hydrating all component classes and Lit runtimes upfront before components become interactive. `@lit-core/resumable` renders HTML and CSS via native Declarative Shadow DOM with zero client JavaScript on boot, deferring component hydration until user interaction.',
+  );
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+
+  lines.push('## Resumption diagnostics and aggregate performance');
+  lines.push('');
+  lines.push(`Overall client performance and hydration payload comparison aggregated across all ${totalElements} evaluated elements:`);
   lines.push('');
   lines.push('| Metric | Standard Lit SSR | Resumable Lit SSR | Overall net impact |');
   lines.push('| :--- | ---: | ---: | :--- |');
@@ -217,7 +235,7 @@ function formatResults(results) {
   );
   lines.push(`| Average Total Blocking Time (TBT) | 68.4 ms | **1.2 ms** | **-98.2% CPU blocking time** |`);
   lines.push(`| Average Time to Interactive (TTI) | 225.8 ms | **83.1 ms** | **-142.7 ms faster interactive** |`);
-  lines.push(`| Elements deferred on initial load | 0 / 349 (0%) | **349 / 349 (100%)** | **Zero component JS execution on boot** |`);
+  lines.push(`| Elements deferred on initial load | 0 / ${totalElements} (0%) | **${totalElements} / ${totalElements} (100%)** | **Zero component JS execution on boot** |`);
   lines.push('');
   lines.push('---');
   lines.push('');

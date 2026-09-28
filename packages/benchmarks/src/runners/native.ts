@@ -1,6 +1,3 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { runSuiteBenchmark } from '../runner.js';
 import { carbonSuite } from '../suites/carbon.js';
 import { materialSuite } from '../suites/material.js';
@@ -8,11 +5,8 @@ import { momentumSuite } from '../suites/momentum.js';
 import { spectrumSuite } from '../suites/spectrum.js';
 import { webAwesomeSuite } from '../suites/webawesome.js';
 import { syncAllBenchmarkDocs } from '../sync-docs.js';
-import { renderCrossSuiteSummary, renderMarkdownTable } from '../table.js';
+import { renderCrossSuiteSummary } from '../table.js';
 import { nativeTool } from '../tools/native.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const benchmarksDir = path.resolve(__dirname, '../..');
 
 export interface NativeBenchmarkOptions {
   updateDocs?: boolean;
@@ -46,6 +40,6 @@ export async function runNativeBenchmarkSuite(options: NativeBenchmarkOptions = 
 }
 
 // Allow direct execution
-if (process.argv[1] && process.argv[1].endsWith('native.ts')) {
+if (process.argv[1]?.endsWith('native.ts')) {
   runNativeBenchmarkSuite({ updateDocs: true });
 }

@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { arch, platform } from 'node:os';
 import path from 'node:path';
-import { transformMemoizeJs } from './js-fallback.js';
 
 const require = createRequire(import.meta.url);
 
@@ -25,7 +24,6 @@ try {
     }
   }
 } catch (_err) {
-  // If platform-specific binary is not found, check target/release dylib or local node file
   try {
     const localNode = path.resolve(import.meta.dirname, '../memoize.darwin-arm64.node');
     if (fs.existsSync(localNode)) {
@@ -39,15 +37,12 @@ try {
   } catch {}
 }
 
-export function transformMemoize(source, options = {}) {
-  if (nativeBinding && typeof nativeBinding.transformMemoize === 'function') {
-    try {
-      return nativeBinding.transformMemoize(source, options);
-    } catch (_err) {
-      // Fall through to JS fallback
-    }
-  }
-
-  // Pure JavaScript general-purpose fallback
-  return transformMemoizeJs(source, options);
+if (!nativeBinding) {
+  throw new Error('Failed to load native binding for @lit-core/memoize. Native addon not found.');
 }
+
+export function transformMemoize(source, options = {}) {
+  return nativeBinding.transformMemoize(source, options);
+}
+
+export default transformMemoize;

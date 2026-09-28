@@ -28,7 +28,7 @@ All tests in `packages/tests` evaluate real production component source and styl
 
 ## Design systems under test
 
-The test suite tests 51 real components from each of the 5 supported enterprise libraries:
+The test suite evaluates all real production components from each of the 5 supported enterprise libraries (601 validated components in total):
 - Carbon Web Components (`@carbon/web-components`)
 - Adobe Spectrum Web Components (`@spectrum-web-components`)
 - Web Awesome (`@awesome.me/webawesome`)

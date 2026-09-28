@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
 import { lit as viteLit } from '@lit-core/vite-plugin';
 import { LitWebpackPlugin } from '@lit-core/webpack-plugin';
-import { CARBON_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS } from '../components.js';
-import { readComponentSource, findComponentCssSource } from '../fixtures.js';
+import { describe, expect, it } from 'vitest';
+import { CARBON_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS } from '../components.js';
+import { findComponentCssSource, readComponentSource } from '../fixtures.js';
 
 describe('bundler plugins multi-framework integration suite', () => {
   const frameworks = [

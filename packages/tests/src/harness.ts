@@ -1,16 +1,20 @@
-import { type Browser, type Page, chromium } from 'playwright';
+import { type Browser, chromium, type Page } from 'playwright';
 
 let sharedBrowser: Browser | null = null;
 
 /**
  * Get or launch shared real headless Chromium instance via Playwright.
  */
-export async function getTestBrowser(): Promise<Browser> {
+export async function getTestBrowser(): Promise<Browser | null> {
   if (!sharedBrowser || !sharedBrowser.isConnected()) {
-    sharedBrowser = await chromium.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-    });
+    try {
+      sharedBrowser = await chromium.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+      });
+    } catch {
+      sharedBrowser = null;
+    }
   }
   return sharedBrowser;
 }

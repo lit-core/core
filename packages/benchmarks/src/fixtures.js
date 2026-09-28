@@ -217,20 +217,11 @@ export function readComponentFullSource(pkg, subpath) {
  */
 export function extractComponentTemplates(pkg, subpath) {
   const full = readComponentFullSource(pkg, subpath);
-  let tmpls = extractHtmlTemplates(full);
-  if (tmpls.length === 0) {
-    // Try regex scan for template literals containing HTML tags
-    const matches = [...full.matchAll(/`([\s\S]*?)`/g)].map((m) => m[1]);
-    tmpls = matches.filter((content) => /<[a-zA-Z0-9-]+[^>]*>/i.test(content) && content.length > 5);
-  }
-  return tmpls;
+  return extractHtmlTemplates(full);
 }
 
 /**
  * Real enterprise components registry for all 5 design systems.
  * Matches packages/tests/src/components.ts (255 production Lit Custom Elements).
  */
-export const ENTERPRISE_COMPONENTS = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'enterprise-components.json'), 'utf-8')
-);
-
+export const ENTERPRISE_COMPONENTS = JSON.parse(fs.readFileSync(path.join(__dirname, 'enterprise-components.json'), 'utf-8'));

@@ -25,7 +25,7 @@ Unlike synthetic unit tests, this test suite reads actual production component s
 
 ## Evaluated design systems
 
-Each feature is evaluated against 51 production components from each of the following 5 libraries (255 components per feature):
+Each feature is evaluated against all production components from the 5 supported design systems (601 validated components in total: 284 Carbon, 93 Spectrum, 73 Web Awesome, 54 Material Web, and 97 Momentum Design):
 
 1. **Carbon Web Components** (`@carbon/web-components`): IBM design system components.
 2. **Adobe Spectrum Web Components** (`@spectrum-web-components`): Adobe design system components.

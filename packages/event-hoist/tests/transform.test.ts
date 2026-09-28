@@ -1,15 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { transformEventHoist } from '../src/index.js';
-import { transformEventHoistJs } from '../src/js-fallback.js';
 
 describe('event-hoist transform', () => {
-  const implementations = [
-    { name: 'main (native/fallback)', fn: transformEventHoist },
-    { name: 'pure js fallback', fn: transformEventHoistJs },
-  ];
-
-  implementations.forEach(({ name, fn }) => {
-    describe(`${name} implementation`, () => {
+  const fn = transformEventHoist;
       it('hoists method bindings like @click=${this._handleClick}', () => {
         const input = `
 export class MyButton extends LitElement {
@@ -160,7 +153,6 @@ export class LifecycleElem extends LitElement {
         expect(res.code).toMatch(/firstUpdated\(props\)\s*\{\s*this\.__initLitEventHoist\(\);/);
         expect(res.code).not.toMatch(/super\.connectedCallback\?\.[\s\S]*super\.connectedCallback\?\./);
       });
-    });
   });
 
   describe('runtime dispatcher and event propagation logic', () => {
@@ -360,5 +352,4 @@ export class LifecycleElem extends LitElement {
       // Host only executed its own node, ignoring inner shadow child's data-lh-click!
       expect(calls).toEqual(['host']);
     });
-  });
 });

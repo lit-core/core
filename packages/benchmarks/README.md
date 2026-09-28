@@ -4,9 +4,9 @@
 
 The `@lit-core/benchmarks` package evaluates standard Vite production builds (**Baseline**) against optimized builds across **349 production Web Components** from 5 major enterprise design systems:
 - **Carbon Web Components** (`@carbon/web-components`, 99 elements)
-- **Momentum Design** (`@momentum-design/components`, 97 elements)
-- **Web Awesome** (`@awesome.me/webawesome`, 73 elements)
 - **Spectrum Web Components** (`@spectrum-web-components/bundle`, 52 elements)
+- **Web Awesome** (`@awesome.me/webawesome`, 73 elements)
+- **Momentum Design** (`@momentum-design/components`, 97 elements)
 - **Material Web** (`@material/web`, 28 elements)
 
 ---
@@ -20,24 +20,24 @@ The `@lit-core/benchmarks` package evaluates standard Vite production builds (**
 | `@awesome.me/webawesome` | Design system component suite | `3.14.0` | 73 elements |
 | `@momentum-design/components` | Design system component suite | `0.139.9` | 97 elements |
 | `@material/web` | Design system component suite | `2.5.0` | 28 elements |
-| `lit` | Core runtime & toolchain | `3.3.3` | n/a |
-| `vite` | Core runtime & toolchain | `8.3.1` | n/a |
-| `playwright` | Core runtime & toolchain | `1.63.0` | n/a |
-| `node` | Core runtime & toolchain | `v24.14.0` | n/a |
+| `lit` | Core runtime and toolchain | `3.3.3` | n/a |
+| `vite` | Core runtime and toolchain | `8.3.1` | n/a |
+| `playwright` | Core runtime and toolchain | `1.63.0` | n/a |
+| `node` | Core runtime and toolchain | `v24.14.0` | n/a |
 
 ---
 
 ## Executive overview (all optimizations combined)
 
-| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 2939.11 KB | 1749.03 KB | 806.86 KB | 843.34 KB | 463.18 KB |
-| **Net bundle savings** | **-2862.76 KB (-49.34%)** | **-129.05 KB (-6.87%)** | **+3.74 KB (+0.47%)** | **-26.71 KB (-3.07%)** | **+14.81 KB (+3.30%)** |
-| **Baseline build time** | 181 ms | 215 ms | 83 ms | 139 ms | 39 ms |
-| **Optimized build time** | 1918 ms | 2616 ms | 702 ms | 660 ms | 352 ms |
-| **Build overhead** | +1737 ms | +2401 ms | +619 ms | +521 ms | +313 ms |
-| **First render speedup** | **+37.4% faster** | **+36.6% faster** | **+35.5% faster** | **+35.4% faster** | **+35.6% faster** |
+| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) | Total / average |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB | 9801.50 KB |
+| **Optimized bundle size** | 2939.11 KB | 1749.03 KB | 806.86 KB | 843.34 KB | 463.18 KB | 6801.52 KB |
+| **Net bundle savings** | **-2862.76 KB (-49.34%)** | **-129.05 KB (-6.87%)** | **+3.74 KB (+0.47%)** | **-26.71 KB (-3.07%)** | **+14.81 KB (+3.30%)** | **-2999.98 KB (-30.61%)** |
+| **Baseline build time** | 181 ms | 215 ms | 83 ms | 139 ms | 39 ms | 131 ms |
+| **Optimized build time** | 1918 ms | 2616 ms | 702 ms | 660 ms | 352 ms | 1250 ms |
+| **Build overhead** | +1737 ms | +2401 ms | +619 ms | +521 ms | +313 ms | +1118 ms |
+| **First render speedup** | **+37.4% faster** | **+36.6% faster** | **+35.5% faster** | **+35.4% faster** | **+35.6% faster** | **+36.1% faster** |
 
 > [!NOTE]
 > The ~34-36% first render speedup in the combined overview is delivered primarily by ahead-of-time Lit template compilation (`@lit-core/html-aot`), which eliminates runtime HTML parsing and template preparation, supplemented by shared constructable stylesheets (`css-fuse`) and lowered properties (`props-lower`). In isolation, static fragment clustering (`html-fuse`) and template minifiers (`css-minifier`, `html-minifier`) optimize bundle size and have neutral runtime mount impact.
@@ -85,13 +85,12 @@ node packages/benchmarks/src/index.js --tools=html-aot
 node packages/benchmarks/src/index.js --tools=css-minifier
 node packages/benchmarks/src/index.js --tools=html-minifier
 
-# Run elem-proxy runtime initialization benchmarks
+# Run standalone runtime and optimization benchmarks
 pnpm run benchmark:elem-proxy
-
-# Run event-hoist runtime delegation benchmarks
 pnpm run benchmark:event-hoist
-
-# Run resumable SSR and resumption benchmarks
+pnpm run benchmark:dom-paths
+pnpm run benchmark:dirty-mask
+pnpm run benchmark:memoize
 pnpm run benchmark:resumable
 
 # Output formatted markdown report

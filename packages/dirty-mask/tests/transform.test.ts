@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { transformDirtyMask } from '../src/index.js';
-import { transformDirtyMaskJs } from '../src/js-fallback.js';
 
 function expectMasked(code: string, mask: number | string, expr: string) {
   const norm = code.replace(/\s+/g, ' ');
@@ -10,13 +9,7 @@ function expectMasked(code: string, mask: number | string, expr: string) {
 }
 
 describe('dirty-mask transform', () => {
-  const implementations = [
-    { name: 'main (native/fallback)', fn: transformDirtyMask },
-    { name: 'pure js fallback', fn: transformDirtyMaskJs },
-  ];
-
-  implementations.forEach(({ name, fn }) => {
-    describe(`${name} implementation`, () => {
+  const fn = transformDirtyMask;
       it('masks single-property bindings with incremental bit indices', () => {
         const input = `
 import { LitElement, html } from 'lit';
@@ -252,6 +245,4 @@ export class SimpleEl extends LitElement {
         const secondPass = fn(firstPass.code);
         expect(secondPass.code).toBe(firstPass.code);
       });
-    });
-  });
 });

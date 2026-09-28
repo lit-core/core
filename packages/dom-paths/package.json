@@ -23,7 +23,6 @@
     "src/client.js",
     "src/client.d.ts",
     "src/client.ts",
-    "src/js-fallback.js",
     "*.node"
   ],
   "license": "MIT",

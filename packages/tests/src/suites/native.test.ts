@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { classify, transformNative } from '@lit-core/native';
-import { CARBON_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS } from '../components.js';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { CARBON_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS } from '../components.js';
 import { readComponentSource } from '../fixtures.js';
-import { closeTestBrowser, getTestBrowser } from '../harness.js';
+import { getTestBrowser } from '../harness.js';
 
 describe('@lit-core/native Playwright Chromium and real component verification', () => {
   let browser: any;
@@ -46,7 +46,7 @@ describe('@lit-core/native Playwright Chromium and real component verification',
         for (const comp of list.slice(0, 10)) {
           let raw = readComponentSource(comp.pkg, comp.source);
           if (raw) {
-            if (raw.includes('from "../../chunks/') || raw.includes("from '../../chunks/")) {
+            if (!raw.includes('render()') && !raw.includes('render(')) {
               const chunkMatch = /from\s*['"](\.\.?\/[^'"]+)['"]/.exec(raw);
               if (chunkMatch) {
                 const srcPath = path.resolve(process.cwd(), 'node_modules', comp.pkg, comp.source);

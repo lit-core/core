@@ -1,4 +1,4 @@
-# `html-fuse` empirical benchmark results
+# `@lit-core/html-fuse` empirical benchmark results
 
 Cross-component static HTML and SVG template fragment clustering evaluated across 349 production Lit Web Components.
 
@@ -24,20 +24,35 @@ Cross-component static HTML and SVG template fragment clustering evaluated acros
 
 Measurements compare a standard Vite production build with minification (`minify: true`) against an identical build with only `@lit-core/html-fuse` enabled (`threshold: 2`, `minFragmentLength: 15`). Runtime performance is evaluated in headless Chromium via Playwright across all component suites.
 
-| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 5799.20 KB | 1876.36 KB | 801.80 KB | 869.70 KB | 446.99 KB |
-| **Net bundle savings** | **-2.68 KB (-0.05%)** | **-1.71 KB (-0.09%)** | **-1.33 KB (-0.17%)** | **-0.35 KB (-0.04%)** | **-1.38 KB (-0.31%)** |
-| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms |
-| **Optimized mount latency** | 14.96 ms | 14.88 ms | 14.92 ms | 15.00 ms | 15.08 ms |
-| **Mount speedup** | **+1.1% (neutral)** | **+1.6% (neutral)** | **-0.8% (neutral)** | **-1.1% (neutral)** | **-1.3% (neutral)** |
-| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms |
-| **Optimized update latency** | 3.42 ms | 3.41 ms | 3.42 ms | 3.43 ms | 3.44 ms |
-| **Update speedup** | **+0.9% (neutral)** | **+1.2% (neutral)** | **-0.6% (neutral)** | **-0.6% (neutral)** | **-0.9% (neutral)** |
+| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) | Total / average |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB | 9801.50 KB |
+| **Optimized bundle size** | 5799.20 KB | 1876.36 KB | 801.80 KB | 869.70 KB | 446.99 KB | 9794.05 KB |
+| **Net bundle savings** | **-2.68 KB (-0.05%)** | **-1.71 KB (-0.09%)** | **-1.33 KB (-0.17%)** | **-0.35 KB (-0.04%)** | **-1.38 KB (-0.31%)** | **-7.45 KB (-0.08%)** |
+| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms | 14.95 ms |
+| **Optimized mount latency** | 14.96 ms | 14.88 ms | 14.92 ms | 15.00 ms | 15.08 ms | 14.97 ms |
+| **Mount speedup** | **+1.1% (neutral)** | **+1.6% (neutral)** | **-0.8% (neutral)** | **-1.1% (neutral)** | **-1.3% (neutral)** | **-0.1% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms | 3.42 ms |
+| **Optimized update latency** | 3.42 ms | 3.41 ms | 3.42 ms | 3.43 ms | 3.44 ms | 3.42 ms |
+| **Update speedup** | **+0.9% (neutral)** | **+1.2% (neutral)** | **-0.6% (neutral)** | **-0.6% (neutral)** | **-0.9% (neutral)** | **+0.0% (neutral)** |
 
 > [!NOTE]
 > `html-fuse` is an ahead-of-time static fragment clustering and deduplication transform. It identifies repeated static HTML and SVG subtrees across components and clusters them into shared template constants. Because it does not alter the runtime Lit template compiler or bypass the template prepare phase (which is handled separately by `@lit-core/html-aot`), runtime mount and update latencies are neutral and remain within standard measurement noise.
+
+---
+
+## Fragment clustering diagnostics and build overhead
+
+Detailed AST scan, static template clustering diagnostics, and compilation times:
+
+| Design system or library | Fragments scanned | Duplicate fragments fused | Shared template constants | Components rewritten | Baseline build | `html-fuse` build | Build overhead |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 596 | 35 | 19 | 32 | 206 ms | 254 ms | +48 ms |
+| Spectrum Web Components | 874 | 160 | 120 | 108 | 196 ms | 449 ms | +253 ms |
+| Web Awesome | 200 | 31 | 14 | 23 | 88 ms | 133 ms | +45 ms |
+| Momentum Design | 79 | 16 | 8 | 12 | 134 ms | 161 ms | +27 ms |
+| Material Web | 187 | 29 | 11 | 27 | 34 ms | 59 ms | +25 ms |
+| **Total / average** | **1,936** | **271** | **172** | **202** | **132 ms** | **211 ms** | **+79 ms** |
 
 ---
 
@@ -53,22 +68,18 @@ node packages/benchmarks/src/index.js --suite=webawesome --tools=html-fuse
 
 ---
 
-## Fragment clustering diagnostics and build overhead
+## Architectural highlights and invariants
 
-Detailed AST scan, static template clustering diagnostics, and compilation times:
-
-| Design system or library | Fragments scanned | Duplicate fragments fused | Shared template constants | Components rewritten | Baseline build | `html-fuse` build | Build overhead |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Spectrum Web Components | 874 | 160 | 120 | 108 | 196 ms | 449 ms | +253 ms |
-| Carbon Web Components | 596 | 35 | 19 | 32 | 206 ms | 254 ms | +48 ms |
-| Web Awesome | 200 | 31 | 14 | 23 | 88 ms | 133 ms | +45 ms |
-| Material Web | 187 | 29 | 11 | 27 | 34 ms | 59 ms | +25 ms |
-| Momentum Design | 79 | 16 | 8 | 12 | 134 ms | 161 ms | +27 ms |
+- **Cross-component fragment clustering**: Identifies identical static HTML and SVG markup subtrees and hoists them into shared virtual constants.
+- **Rollup chunk scoping**: Clusters fragments strictly within chunk boundaries to prevent bundling overhead across lazy modules.
+- **Dynamic expression preservation**: Only pure static HTML subtrees devoid of dynamic template bindings (`${...}`) are candidates for deduplication.
+- **Strict general-purpose design**: Zero library-specific class or tag filters; clusters solely on structural frequency and configurable length thresholds.
 
 ---
 
 ## Related documentation
 
 - [Benchmark executive overview](../README.md)
+- [`@lit-core/html-fuse` package documentation](../../html-fuse/README.md)
 - [Fragment clustering guide](../../html-fuse/docs/fragment-clustering.md)
 - [AOT template compilation benchmark](html-aot.md)

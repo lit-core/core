@@ -116,6 +116,14 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
     }
   }
 
+  // Fallback for Momentum Design shared styles
+  if (pkg === '@momentum-design/components') {
+    const componentStylesPath = path.resolve(process.cwd(), 'node_modules/@momentum-design/components/dist/models/component/component.styles.js');
+    if (fs.existsSync(componentStylesPath)) {
+      return fs.readFileSync(componentStylesPath, 'utf-8');
+    }
+  }
+
   return initialSource;
 }
 
