@@ -13,10 +13,13 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
 # OXC stack — matching workspace versions
-oxc_allocator = "0.15.0"
-oxc_parser = "0.15.0"
-oxc_ast = "0.15.0"
-oxc_span = "0.15.0"
+oxc_allocator = "0.151.0"
+oxc_parser = "0.151.0"
+oxc_ast = "0.151.0"
+oxc_span = "0.151.0"
+oxc_codegen = "0.151.0"
+oxc_traverse = "0.151.0"
+oxc_semantic = "0.151.0"
 
 # Diagnostics / Error handling
 thiserror = "2.0"

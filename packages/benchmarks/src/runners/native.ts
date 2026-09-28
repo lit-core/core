@@ -20,13 +20,7 @@ export interface NativeBenchmarkOptions {
 }
 
 export async function runNativeBenchmarkSuite(options: NativeBenchmarkOptions = {}) {
-  const suites = [
-    carbonSuite,
-    spectrumSuite,
-    webAwesomeSuite,
-    momentumSuite,
-    materialSuite,
-  ];
+  const suites = [carbonSuite, spectrumSuite, webAwesomeSuite, momentumSuite, materialSuite];
 
   console.log('⚡ Starting @lit-core/native multi-design-system benchmark suite across 349 components...\n');
 

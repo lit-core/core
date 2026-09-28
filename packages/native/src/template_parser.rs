@@ -26,6 +26,7 @@ pub struct ParsedTemplate {
 enum DomNode {
     Element {
         tag: String,
+        static_attrs: String,
         children: Vec<DomNode>,
         bindings: Vec<(BindingKind, String, usize, String)>, // (kind, name, expr_idx, expr_str)
     },
@@ -144,6 +145,7 @@ fn parse_html_to_tree(
     let mut chars = html.char_indices().peekable();
     let mut stack: Vec<(
         String,
+        String,
         Vec<DomNode>,
         Vec<(BindingKind, String, usize, String)>,
     )> = Vec::new();
@@ -159,13 +161,14 @@ fn parse_html_to_tree(
     let flush_text = |buf: &mut String,
                       stack: &mut Vec<(
         String,
+        String,
         Vec<DomNode>,
         Vec<(BindingKind, String, usize, String)>,
     )>,
                       top: &mut Vec<DomNode>| {
         if !buf.is_empty() {
             let node = DomNode::Text(std::mem::take(buf));
-            if let Some((_, children, _)) = stack.last_mut() {
+            if let Some((_, _, children, _)) = stack.last_mut() {
                 children.push(node);
             } else {
                 top.push(node);
@@ -193,7 +196,7 @@ fn parse_html_to_tree(
                                 expr_idx: exp_idx,
                                 expr_str,
                             };
-                            if let Some((_, children, _)) = stack.last_mut() {
+                            if let Some((_, _, children, _)) = stack.last_mut() {
                                 children.push(marker);
                             } else {
                                 top_nodes.push(marker);
@@ -201,7 +204,7 @@ fn parse_html_to_tree(
                         }
                     } else {
                         let comment = DomNode::Comment(comment_content.to_string());
-                        if let Some((_, children, _)) = stack.last_mut() {
+                        if let Some((_, _, children, _)) = stack.last_mut() {
                             children.push(comment);
                         } else {
                             top_nodes.push(comment);
@@ -223,27 +226,29 @@ fn parse_html_to_tree(
                 if let Some(close_idx) = rest.find('>') {
                     let tag_name = rest[2..close_idx].trim().to_ascii_lowercase();
                     // Pop from stack until matching tag
-                    if let Some(pos) = stack.iter().rposition(|(t, _, _)| *t == tag_name) {
+                    if let Some(pos) = stack.iter().rposition(|(t, _, _, _)| *t == tag_name) {
                         while stack.len() > pos + 1 {
-                            let (t, children, bindings) = stack.pop().unwrap();
+                            let (t, attrs, children, bindings) = stack.pop().unwrap();
                             let elem = DomNode::Element {
                                 tag: t,
+                                static_attrs: attrs,
                                 children,
                                 bindings,
                             };
-                            if let Some((_, parent_children, _)) = stack.last_mut() {
+                            if let Some((_, _, parent_children, _)) = stack.last_mut() {
                                 parent_children.push(elem);
                             } else {
                                 top_nodes.push(elem);
                             }
                         }
-                        let (t, children, bindings) = stack.pop().unwrap();
+                        let (t, attrs, children, bindings) = stack.pop().unwrap();
                         let elem = DomNode::Element {
                             tag: t,
+                            static_attrs: attrs,
                             children,
                             bindings,
                         };
-                        if let Some((_, parent_children, _)) = stack.last_mut() {
+                        if let Some((_, _, parent_children, _)) = stack.last_mut() {
                             parent_children.push(elem);
                         } else {
                             top_nodes.push(elem);
@@ -270,11 +275,14 @@ fn parse_html_to_tree(
                     tag_raw
                 };
 
-                let tag_name = tag_body
+                let trimmed_body = tag_body.trim();
+                let tag_name = trimmed_body
                     .split_whitespace()
                     .next()
                     .unwrap_or("")
                     .to_ascii_lowercase();
+
+                let static_attrs = clean_static_attributes(trimmed_body, tag_name.len());
 
                 // Scan for __LIT_EXP_X__ in tag_body
                 let mut elem_bindings = Vec::new();
@@ -290,16 +298,17 @@ fn parse_html_to_tree(
                 if is_void {
                     let elem = DomNode::Element {
                         tag: tag_name,
+                        static_attrs,
                         children: Vec::new(),
                         bindings: elem_bindings,
                     };
-                    if let Some((_, children, _)) = stack.last_mut() {
+                    if let Some((_, _, children, _)) = stack.last_mut() {
                         children.push(elem);
                     } else {
                         top_nodes.push(elem);
                     }
                 } else {
-                    stack.push((tag_name, Vec::new(), elem_bindings));
+                    stack.push((tag_name, static_attrs, Vec::new(), elem_bindings));
                 }
 
                 let advance_by = end_idx + 1;
@@ -317,13 +326,14 @@ fn parse_html_to_tree(
     flush_text(&mut text_buf, &mut stack, &mut top_nodes);
 
     // Unwind any unclosed tags
-    while let Some((t, children, bindings)) = stack.pop() {
+    while let Some((t, attrs, children, bindings)) = stack.pop() {
         let elem = DomNode::Element {
             tag: t,
+            static_attrs: attrs,
             children,
             bindings,
         };
-        if let Some((_, parent_children, _)) = stack.last_mut() {
+        if let Some((_, _, parent_children, _)) = stack.last_mut() {
             parent_children.push(elem);
         } else {
             top_nodes.push(elem);
@@ -331,6 +341,50 @@ fn parse_html_to_tree(
     }
 
     top_nodes
+}
+
+fn clean_static_attributes(tag_body: &str, tag_name_len: usize) -> String {
+    if tag_name_len >= tag_body.len() {
+        return String::new();
+    }
+    let raw_attrs = &tag_body[tag_name_len..];
+    let mut result = String::new();
+    let mut in_quote = None;
+    let mut current_token = String::new();
+
+    for ch in raw_attrs.chars() {
+        match ch {
+            '"' | '\'' => {
+                current_token.push(ch);
+                if in_quote == Some(ch) {
+                    in_quote = None;
+                } else if in_quote.is_none() {
+                    in_quote = Some(ch);
+                }
+            }
+            ' ' | '\t' | '\n' | '\r' if in_quote.is_none() => {
+                if !current_token.is_empty() {
+                    if !current_token.contains("__LIT_EXP_") {
+                        if !result.is_empty() {
+                            result.push(' ');
+                        }
+                        result.push_str(&current_token);
+                    }
+                    current_token.clear();
+                }
+            }
+            _ => {
+                current_token.push(ch);
+            }
+        }
+    }
+    if !current_token.is_empty() && !current_token.contains("__LIT_EXP_") {
+        if !result.is_empty() {
+            result.push(' ');
+        }
+        result.push_str(&current_token);
+    }
+    result.trim().to_string()
 }
 
 fn find_tag_end(s: &str) -> Option<usize> {
@@ -363,6 +417,7 @@ fn collect_bindings_and_html(
     match node {
         DomNode::Element {
             tag,
+            static_attrs,
             children,
             bindings: elem_bindings,
         } => {
@@ -379,6 +434,10 @@ fn collect_bindings_and_html(
 
             html.push('<');
             html.push_str(tag);
+            if !static_attrs.is_empty() {
+                html.push(' ');
+                html.push_str(static_attrs);
+            }
             html.push('>');
 
             for (child_idx, child) in children.iter().enumerate() {

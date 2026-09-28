@@ -87,6 +87,12 @@ async function evaluateBundlePerformance(bundlePath, totalComponents, _suiteName
   <div id="container"></div>
   <script>
     window.__benchStart = performance.now();
+    window.__registeredTags = [];
+    const origDefine = customElements.define;
+    customElements.define = function(name, constructor, options) {
+      window.__registeredTags.push(name);
+      return origDefine.call(this, name, constructor, options);
+    };
   </script>
   <script type="module">
     try {
@@ -105,15 +111,17 @@ async function evaluateBundlePerformance(bundlePath, totalComponents, _suiteName
       const metrics = await page.evaluate(async (mountCount) => {
         /** @type {any} */
         const win = window;
-        const evalTime = win.__benchEvalEnd - win.__benchStart;
+        const evalTime = (win.__benchEvalEnd || performance.now()) - win.__benchStart;
         const container = document.getElementById('container');
         if (!container) return { evalTimeMs: 0, heapKb: 0, mountLatencyMs: 0 };
 
         const tMount0 = performance.now();
-        for (let i = 0; i < mountCount; i++) {
-          const div = document.createElement('div');
-          div.innerHTML = `<span>Mounted ${i}</span>`;
-          container.appendChild(div);
+        const tags = (win.__registeredTags || []).slice(0, mountCount);
+        for (const tag of tags) {
+          try {
+            const el = document.createElement(tag);
+            container.appendChild(el);
+          } catch {}
         }
         void container.offsetHeight;
         const tMount1 = performance.now();
@@ -125,14 +133,16 @@ async function evaluateBundlePerformance(bundlePath, totalComponents, _suiteName
         };
       }, 5);
 
-      return {
-        evalTimeMs: metrics.evalTimeMs > 0 ? metrics.evalTimeMs : isOptimized ? 18.4 : 64.2,
-        heapKb: metrics.heapKb > 0 ? metrics.heapKb : isOptimized ? 342.5 : 1280.0,
-        mountLatencyMs: metrics.mountLatencyMs,
-        totalComponents,
-        deferredComponents: isOptimized ? totalComponents - 5 : 0,
-        evaluatedComponents: isOptimized ? 5 : totalComponents,
-      };
+      if (metrics.evalTimeMs > 0) {
+        return {
+          evalTimeMs: metrics.evalTimeMs,
+          heapKb: metrics.heapKb,
+          mountLatencyMs: metrics.mountLatencyMs,
+          totalComponents,
+          deferredComponents: isOptimized ? totalComponents - 5 : 0,
+          evaluatedComponents: isOptimized ? 5 : totalComponents,
+        };
+      }
     } catch (_err) {
       // Fall through to precision VM evaluation
     } finally {
@@ -227,16 +237,9 @@ async function evaluateBundlePerformance(bundlePath, totalComponents, _suiteName
     totalHeapAllocated += heapDiff;
   }
 
-  // Realistic empirical factors based on eager Lit class parsing vs proxy stubs
-  const baseEvalMs = isOptimized
-    ? Number(((totalEvalMs / runs) * 0.32 + (totalComponents === 99 ? 18.6 : 12.4)).toFixed(2))
-    : Number((totalEvalMs / runs + (totalComponents === 99 ? 68.4 : 44.8)).toFixed(2));
-
-  const baseHeapKb = isOptimized
-    ? Number(((totalHeapAllocated / runs / 1024) * 0.28 + (totalComponents === 99 ? 384.2 : 246.0)).toFixed(1))
-    : Number((totalHeapAllocated / runs / 1024 + (totalComponents === 99 ? 1420.5 : 892.0)).toFixed(1));
-
-  const mountMs = isOptimized ? Number((totalMountMs / runs + 2.8).toFixed(2)) : Number((totalMountMs / runs + 1.9).toFixed(2));
+  const baseEvalMs = Number((totalEvalMs / runs).toFixed(2));
+  const baseHeapKb = Number((totalHeapAllocated / runs / 1024).toFixed(1));
+  const mountMs = Number((totalMountMs / runs).toFixed(2));
 
   return {
     evalTimeMs: baseEvalMs,
@@ -274,7 +277,9 @@ function formatUnifiedTable(results) {
   const baseMount = results.map((r) => `${r.baseline.mountLatencyMs.toFixed(2)} ms`);
   const optMount = results.map((r) => `${r.optimized.mountLatencyMs.toFixed(2)} ms`);
   const mountDelta = results.map((r) => `+${(r.optimized.mountLatencyMs - r.baseline.mountLatencyMs).toFixed(2)} ms (transparent JIT upgrade)`);
-  const evalClasses = results.map((r) => `${r.optimized.evaluatedComponents} / ${r.count} (${((r.optimized.evaluatedComponents / r.count) * 100).toFixed(1)}%) [${r.optimized.deferredComponents} avoided]`);
+  const evalClasses = results.map(
+    (r) => `${r.optimized.evaluatedComponents} / ${r.count} (${((r.optimized.evaluatedComponents / r.count) * 100).toFixed(1)}%) [${r.optimized.deferredComponents} avoided]`,
+  );
   const defProp = results.map((r) => `**${((r.optimized.deferredComponents / r.count) * 100).toFixed(1)}% deferred**`);
 
   return [

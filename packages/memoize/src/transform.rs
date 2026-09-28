@@ -1,7 +1,8 @@
 use napi_derive::napi;
-use oxc_allocator::Allocator;
+use oxc_allocator::{Allocator, Vec as ArenaVec};
 use oxc_ast::ast::*;
 use oxc_ast_visit::Visit;
+use oxc_codegen::Codegen;
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType};
 use serde::{Deserialize, Serialize};
@@ -575,23 +576,7 @@ fn collect_stmt_candidates<'a>(
     }
 }
 
-fn get_line_indent(source: &str, offset: usize) -> String {
-    let before = &source[..offset];
-    let line_start = before.rfind('\n').map(|idx| idx + 1).unwrap_or(0);
-    let line_slice = &source[line_start..offset];
-
-    let mut indent = String::new();
-    for ch in line_slice.chars() {
-        if ch == ' ' || ch == '\t' {
-            indent.push(ch);
-        } else {
-            break;
-        }
-    }
-    indent
-}
-
-fn generate_memo_block(cand: &CandidateItem, indent: &str) -> String {
+fn generate_memo_block(cand: &CandidateItem) -> String {
     let guards: Vec<String> = cand
         .dependencies
         .iter()
@@ -602,19 +587,18 @@ fn generate_memo_block(cand: &CandidateItem, indent: &str) -> String {
     let saves: Vec<String> = cand
         .dependencies
         .iter()
-        .map(|dep| format!("{}  this.__memo_{}_ref = this.{};", indent, dep, dep))
+        .map(|dep| format!("this.__memo_{}_ref = this.{};", dep, dep))
         .collect();
     let saves_str = saves.join("\n");
 
     format!(
-        "{indent}let {var_name};\n\
-         {indent}if ({guard_str}) {{\n\
-         {indent}  {var_name} = this.__memo_{val_slot}_val;\n\
-         {indent}}} else {{\n\
-         {saves_str}\n\
-         {indent}  {var_name} = this.__memo_{val_slot}_val = {expr};\n\
-         {indent}}}",
-        indent = indent,
+        "let {var_name};\n\
+         if ({guard_str}) {{\n\
+           {var_name} = this.__memo_{val_slot}_val;\n\
+         }} else {{\n\
+           {saves_str}\n\
+           {var_name} = this.__memo_{val_slot}_val = {expr};\n\
+         }}",
         var_name = cand.var_name,
         val_slot = cand.val_slot,
         guard_str = guard_str,
@@ -623,7 +607,7 @@ fn generate_memo_block(cand: &CandidateItem, indent: &str) -> String {
     )
 }
 
-fn generate_var_decl_memo_block(cand: &CandidateItem, var_name: &str, indent: &str) -> String {
+fn generate_var_decl_memo_block(cand: &CandidateItem, var_name: &str) -> String {
     let guards: Vec<String> = cand
         .dependencies
         .iter()
@@ -634,19 +618,18 @@ fn generate_var_decl_memo_block(cand: &CandidateItem, var_name: &str, indent: &s
     let saves: Vec<String> = cand
         .dependencies
         .iter()
-        .map(|dep| format!("{}  this.__memo_{}_ref = this.{};", indent, dep, dep))
+        .map(|dep| format!("this.__memo_{}_ref = this.{};", dep, dep))
         .collect();
     let saves_str = saves.join("\n");
 
     format!(
-        "{indent}let {var_name};\n\
-         {indent}if ({guard_str}) {{\n\
-         {indent}  {var_name} = this.__memo_{val_slot}_val;\n\
-         {indent}}} else {{\n\
-         {saves_str}\n\
-         {indent}  {var_name} = this.__memo_{val_slot}_val = {expr};\n\
-         {indent}}}",
-        indent = indent,
+        "let {var_name};\n\
+         if ({guard_str}) {{\n\
+           {var_name} = this.__memo_{val_slot}_val;\n\
+         }} else {{\n\
+           {saves_str}\n\
+           {var_name} = this.__memo_{val_slot}_val = {expr};\n\
+         }}",
         var_name = var_name,
         val_slot = cand.val_slot,
         guard_str = guard_str,
@@ -655,27 +638,147 @@ fn generate_var_decl_memo_block(cand: &CandidateItem, var_name: &str, indent: &s
     )
 }
 
-fn collect_classes<'a>(stmts: &'a [Statement<'a>], out: &mut Vec<&'a Class<'a>>) {
+fn replace_candidate_exprs<'a>(
+    expr: &mut Expression<'a>,
+    candidates: &[CandidateItem],
+    allocator: &'a Allocator,
+    source_type: SourceType,
+) {
+    let start = expr.span().start as usize;
+    let end = expr.span().end as usize;
+    for cand in candidates {
+        if start == cand.expr_start && end == cand.expr_end {
+            let dummy = format!("let __x = {};", cand.var_name);
+            let p = Parser::new(allocator, allocator.alloc_str(&dummy), source_type).parse();
+            if let Some(Statement::VariableDeclaration(mut v)) = p.program.body.into_iter().next() {
+                if !v.declarations.is_empty() {
+                    if let Some(init) = v.declarations.remove(0).init {
+                        *expr = init;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    match expr {
+        Expression::TaggedTemplateExpression(tagged) => {
+            for quasi_expr in &mut tagged.quasi.expressions {
+                replace_candidate_exprs(quasi_expr, candidates, allocator, source_type);
+            }
+        }
+        Expression::ParenthesizedExpression(p) => {
+            replace_candidate_exprs(&mut p.expression, candidates, allocator, source_type);
+        }
+        Expression::ConditionalExpression(c) => {
+            replace_candidate_exprs(&mut c.test, candidates, allocator, source_type);
+            replace_candidate_exprs(&mut c.consequent, candidates, allocator, source_type);
+            replace_candidate_exprs(&mut c.alternate, candidates, allocator, source_type);
+        }
+        Expression::CallExpression(c) => {
+            replace_candidate_exprs(&mut c.callee, candidates, allocator, source_type);
+            for arg in &mut c.arguments {
+                if let Some(e) = arg.as_expression_mut() {
+                    replace_candidate_exprs(e, candidates, allocator, source_type);
+                }
+            }
+        }
+        Expression::ArrowFunctionExpression(arrow) => match &mut arrow.body {
+            ArrowFunctionBody::FunctionBody(body) => {
+                for s in &mut body.statements {
+                    replace_candidates_in_stmt(s, candidates, allocator, source_type);
+                }
+            }
+            _ => {
+                if let Some(e) = arrow.body.as_expression_mut() {
+                    replace_candidate_exprs(e, candidates, allocator, source_type);
+                }
+            }
+        },
+        Expression::FunctionExpression(func) => {
+            if let Some(ref mut body) = func.body {
+                for s in &mut body.statements {
+                    replace_candidates_in_stmt(s, candidates, allocator, source_type);
+                }
+            }
+        }
+        Expression::ArrayExpression(arr) => {
+            for el in &mut arr.elements {
+                if let Some(e) = el.as_expression_mut() {
+                    replace_candidate_exprs(e, candidates, allocator, source_type);
+                }
+            }
+        }
+        Expression::ObjectExpression(obj) => {
+            for prop in &mut obj.properties {
+                if let ObjectPropertyKind::ObjectProperty(p) = prop {
+                    replace_candidate_exprs(&mut p.value, candidates, allocator, source_type);
+                }
+            }
+        }
+        _ => {}
+    }
+}
+
+fn replace_candidates_in_stmt<'a>(
+    stmt: &mut Statement<'a>,
+    candidates: &[CandidateItem],
+    allocator: &'a Allocator,
+    source_type: SourceType,
+) {
+    match stmt {
+        Statement::ReturnStatement(ret) => {
+            if let Some(ref mut arg) = ret.argument {
+                replace_candidate_exprs(arg, candidates, allocator, source_type);
+            }
+        }
+        Statement::ExpressionStatement(expr_stmt) => {
+            replace_candidate_exprs(&mut expr_stmt.expression, candidates, allocator, source_type);
+        }
+        Statement::VariableDeclaration(var_decl) => {
+            for decl in &mut var_decl.declarations {
+                if let Some(ref mut init) = decl.init {
+                    replace_candidate_exprs(init, candidates, allocator, source_type);
+                }
+            }
+        }
+        Statement::BlockStatement(block) => {
+            for s in &mut block.body {
+                replace_candidates_in_stmt(s, candidates, allocator, source_type);
+            }
+        }
+        Statement::IfStatement(if_stmt) => {
+            replace_candidate_exprs(&mut if_stmt.test, candidates, allocator, source_type);
+            replace_candidates_in_stmt(&mut if_stmt.consequent, candidates, allocator, source_type);
+            if let Some(ref mut alt) = if_stmt.alternate {
+                replace_candidates_in_stmt(alt, candidates, allocator, source_type);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn collect_classes_mut<'a, 'b>(stmts: &'b mut [Statement<'a>], out: &mut Vec<&'b mut Class<'a>>) {
     for stmt in stmts {
         match stmt {
             Statement::ClassDeclaration(class) => {
                 out.push(class);
             }
             Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &export_decl.declaration {
+                if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
                     out.push(class);
                 }
             }
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
-                    &export_decl.declaration
+                    &mut export_decl.declaration
                 {
                     out.push(class);
                 }
             }
             Statement::VariableDeclaration(var_decl) => {
-                for decl in &var_decl.declarations {
-                    if let Some(Expression::ClassExpression(class)) = &decl.init {
+                for decl in &mut var_decl.declarations {
+                    if let Some(Expression::ClassExpression(class)) = &mut decl.init {
                         out.push(class);
                     }
                 }
@@ -707,7 +810,7 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
     let filename = options.filename.as_deref().unwrap_or("file.ts");
     let source_type = SourceType::from_path(filename).unwrap_or_else(|_| SourceType::ts());
 
-    let parsed = Parser::new(&allocator, source, source_type).parse();
+    let mut parsed = Parser::new(&allocator, source, source_type).parse();
     if !parsed.diagnostics.is_empty() {
         return MemoizeResult {
             code: source.to_string(),
@@ -717,9 +820,8 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
         };
     }
 
-    let program = &parsed.program;
     let mut classes = Vec::new();
-    collect_classes(&program.body, &mut classes);
+    collect_classes_mut(&mut parsed.program.body, &mut classes);
 
     if classes.is_empty() {
         return MemoizeResult {
@@ -730,15 +832,13 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
         };
     }
 
-    let mut replacements: Vec<(usize, usize, String)> = Vec::new();
     let mut total_memoized_count: u32 = 0;
     let mut transformed_components_count: u32 = 0;
 
     for class in classes {
-        // Look for render() method
-        let mut render_body: Option<&FunctionBody> = None;
+        let mut render_body: Option<&mut FunctionBody> = None;
 
-        for elem in &class.body.body {
+        for elem in &mut class.body.body {
             if let ClassElement::MethodDefinition(method) = elem {
                 let method_name = match &method.key {
                     PropertyKey::StaticIdentifier(ident) => Some(ident.name.as_str()),
@@ -746,7 +846,7 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
                 };
 
                 if method_name == Some("render") && !method.r#static {
-                    if let Some(body) = &method.value.body {
+                    if let Some(body) = &mut method.value.body {
                         render_body = Some(body);
                         break;
                     }
@@ -758,50 +858,62 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
             continue;
         };
 
-        let mut groups: Vec<StmtCandidateGroup> = Vec::new();
         let mut used_slots: HashSet<String> = HashSet::new();
         let mut counter: usize = 0;
 
-        for stmt in &render_body.statements {
-            collect_stmt_candidates(stmt, source, &mut groups, &mut used_slots, &mut counter);
-        }
+        let old_statements = std::mem::replace(&mut render_body.statements, ArenaVec::new_in(&&allocator));
+        let mut new_statements = ArenaVec::new_in(&&allocator);
+        let mut class_modified = false;
 
-        if groups.is_empty() {
-            continue;
-        }
+        for mut stmt in old_statements {
+            let mut groups: Vec<StmtCandidateGroup> = Vec::new();
+            collect_stmt_candidates(&stmt, source, &mut groups, &mut used_slots, &mut counter);
 
-        transformed_components_count += 1;
-
-        for group in groups {
-            let indent = get_line_indent(source, group.stmt_start);
-
-            if group.is_var_decl && group.candidates.len() == 1 {
-                let cand = &group.candidates[0];
-                let var_name = group.var_name.as_deref().unwrap_or(&cand.var_name);
-                let memo_block = generate_var_decl_memo_block(cand, var_name, &indent);
-
-                // Replace the entire variable declaration statement
-                replacements.push((group.stmt_start, group.stmt_end, memo_block));
-                total_memoized_count += 1;
-            } else {
-                // Inline candidates:
-                // 1. Insert memo blocks before the statement
-                let mut blocks = Vec::new();
-                for cand in &group.candidates {
-                    blocks.push(generate_memo_block(cand, &indent));
-                    total_memoized_count += 1;
-
-                    // 2. Replace each candidate expression in template with its variable
-                    replacements.push((cand.expr_start, cand.expr_end, cand.var_name.clone()));
-                }
-
-                let combined_blocks = blocks.join("\n") + "\n";
-                replacements.push((group.stmt_start, group.stmt_start, combined_blocks));
+            if groups.is_empty() {
+                new_statements.push(stmt);
+                continue;
             }
+
+            class_modified = true;
+
+            let is_single_var_decl = groups.len() == 1 && groups[0].is_var_decl && groups[0].candidates.len() == 1;
+
+            if is_single_var_decl {
+                let cand = &groups[0].candidates[0];
+                let var_name = groups[0].var_name.as_deref().unwrap_or(&cand.var_name);
+                let memo_block = generate_var_decl_memo_block(cand, var_name);
+                total_memoized_count += 1;
+
+                let p = Parser::new(&allocator, allocator.alloc_str(&memo_block), source_type).parse();
+                for s in p.program.body {
+                    new_statements.push(s);
+                }
+            } else {
+                for group in &groups {
+                    for cand in &group.candidates {
+                        let memo_block = generate_memo_block(cand);
+                        total_memoized_count += 1;
+
+                        let p = Parser::new(&allocator, allocator.alloc_str(&memo_block), source_type).parse();
+                        for s in p.program.body {
+                            new_statements.push(s);
+                        }
+                    }
+
+                    replace_candidates_in_stmt(&mut stmt, &group.candidates, &allocator, source_type);
+                }
+                new_statements.push(stmt);
+            }
+        }
+
+        render_body.statements = new_statements;
+
+        if class_modified {
+            transformed_components_count += 1;
         }
     }
 
-    if replacements.is_empty() {
+    if transformed_components_count == 0 {
         return MemoizeResult {
             code: source.to_string(),
             map: None,
@@ -810,15 +922,8 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
         };
     }
 
-    // Sort replacements descending by start position to safely apply string slices
-    replacements.sort_by_key(|b| std::cmp::Reverse(b.0));
-
-    let mut rewritten = source.to_string();
-    for (start, end, repl) in replacements {
-        if start <= end && end <= rewritten.len() {
-            rewritten.replace_range(start..end, &repl);
-        }
-    }
+    let codegen = Codegen::new();
+    let rewritten = codegen.build(&parsed.program).code;
 
     MemoizeResult {
         code: rewritten,

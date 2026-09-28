@@ -1,6 +1,7 @@
 use napi_derive::napi;
-use oxc_allocator::Allocator;
+use oxc_allocator::{Allocator, Box as ArenaBox, Vec as ArenaVec};
 use oxc_ast::ast::*;
+use oxc_codegen::Codegen;
 use oxc_parser::Parser;
 use oxc_span::SourceType;
 use serde::{Deserialize, Serialize};
@@ -36,12 +37,8 @@ pub struct ElemProxyResult {
 struct CustomElementTarget {
     tag_name: String,
     class_name: String,
-    class_span: (usize, usize),
-    decorator_span: Option<(usize, usize)>,
-    define_stmt_span: Option<(usize, usize)>,
     is_export: bool,
     is_default_export: bool,
-    export_prefix_len: usize,
     properties: Vec<String>,
     observed_attributes: Vec<String>,
 }
@@ -281,173 +278,29 @@ fn inspect_properties_object<'a>(
     }
 }
 
-pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResult {
-    let allocator = Allocator::default();
-    let filename = options.filename.as_deref().unwrap_or("file.ts");
-    let source_type = SourceType::from_path(filename).unwrap_or_else(|_| SourceType::ts());
+fn generate_proxy_wrapper(target: &CustomElementTarget) -> String {
+    let proxy_name = format!("{}Proxy", target.class_name);
+    let getter_name = format!("__getImpl_{}", target.class_name);
+    let impl_var = format!("__impl_{}", target.class_name);
+    let props_var = format!("__props_{}", target.class_name);
 
-    let parsed = Parser::new(&allocator, source, source_type).parse();
-    if !parsed.diagnostics.is_empty() {
-        return ElemProxyResult {
-            code: source.to_string(),
-            map: None,
-            proxied_elements_count: 0,
-            elements: Vec::new(),
-        };
-    }
+    let observed_attrs_json =
+        serde_json::to_string(&target.observed_attributes).unwrap_or_else(|_| "[]".to_string());
+    let properties_json =
+        serde_json::to_string(&target.properties).unwrap_or_else(|_| "[]".to_string());
 
-    let program = &parsed.program;
+    let export_stmt = if target.is_default_export {
+        format!("export default {};\n", proxy_name)
+    } else if target.is_export {
+        format!("export {{ {} as {} }};\n", proxy_name, target.class_name)
+    } else {
+        String::new()
+    };
 
-    // Scan for customElements.define calls
-    let mut define_calls: HashMap<String, (String, (usize, usize))> = HashMap::new(); // class_name -> (tag_name, span)
-    for stmt in &program.body {
-        if let Statement::ExpressionStatement(expr_stmt) = stmt {
-            if let Expression::CallExpression(call) = &expr_stmt.expression {
-                let is_ce_define = match &call.callee {
-                    Expression::StaticMemberExpression(mem) => {
-                        mem.property.name == "define"
-                            && match &mem.object {
-                                Expression::Identifier(id) => id.name == "customElements",
-                                Expression::StaticMemberExpression(inner) => {
-                                    inner.property.name == "customElements"
-                                }
-                                _ => false,
-                            }
-                    }
-                    _ => false,
-                };
-                if is_ce_define && call.arguments.len() >= 2 {
-                    let tag = if let Some(Expression::StringLiteral(s)) =
-                        call.arguments[0].as_expression()
-                    {
-                        Some(s.value.as_str().to_string())
-                    } else {
-                        None
-                    };
-                    let cls = if let Some(Expression::Identifier(id)) =
-                        call.arguments[1].as_expression()
-                    {
-                        Some(id.name.as_str().to_string())
-                    } else {
-                        None
-                    };
-                    if let (Some(tag), Some(cls)) = (tag, cls) {
-                        define_calls.insert(
-                            cls,
-                            (
-                                tag,
-                                (expr_stmt.span.start as usize, expr_stmt.span.end as usize),
-                            ),
-                        );
-                    }
-                }
-            }
-        }
-    }
-
-    let mut targets: Vec<CustomElementTarget> = Vec::new();
-
-    // Scan classes in program body
-    for stmt in &program.body {
-        match stmt {
-            Statement::ClassDeclaration(class) => {
-                if let Some(target) = check_and_extract_target(class, false, false, 0, &define_calls) {
-                    targets.push(target);
-                }
-            }
-            Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &export_decl.declaration {
-                    let prefix_len = (class.span.start - export_decl.span.start) as usize;
-                    if let Some(target) =
-                        check_and_extract_target(class, true, false, prefix_len, &define_calls)
-                    {
-                        targets.push(target);
-                    }
-                }
-            }
-            Statement::ExportDefaultDeclaration(export_decl) => {
-                if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
-                    &export_decl.declaration
-                {
-                    let prefix_len = (class.span.start - export_decl.span.start) as usize;
-                    if let Some(target) =
-                        check_and_extract_target(class, true, true, prefix_len, &define_calls)
-                    {
-                        targets.push(target);
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-
-    if targets.is_empty() {
-        return ElemProxyResult {
-            code: source.to_string(),
-            map: None,
-            proxied_elements_count: 0,
-            elements: Vec::new(),
-        };
-    }
-
-    // Build rewritten code
-    let mut rewritten = source.to_string();
-
-    // Sort targets by span start descending so replacements don't invalidate offsets
-    // First, collect all replacement regions:
-    // A replacement region has (start, end, replacement_str)
-    let mut replacements: Vec<(usize, usize, String)> = Vec::new();
-
-    for target in &targets {
-        let class_start = target.class_span.0;
-        let class_end = target.class_span.1;
-
-        // If exported, start from the export keyword
-        let full_start = if target.is_export {
-            class_start - target.export_prefix_len
-        } else {
-            class_start
-        };
-
-        // Extract class content without export prefix
-        let mut class_source = source[class_start..class_end].to_string();
-
-        // If there was a decorator, remove it from class_source
-        if let Some((dec_start, dec_end)) = target.decorator_span {
-            let rel_start = dec_start - class_start;
-            let rel_end = dec_end - class_start;
-            if rel_end <= class_source.len() {
-                // remove decorator and any leading/trailing whitespace
-                let before = &class_source[..rel_start];
-                let after = &class_source[rel_end..];
-                class_source = format!("{}{}", before.trim_end(), after);
-            }
-        }
-
-        // Build proxy stub and implementation closure
-        let proxy_name = format!("{}Proxy", target.class_name);
-        let getter_name = format!("__getImpl_{}", target.class_name);
-        let impl_var = format!("__impl_{}", target.class_name);
-        let props_var = format!("__props_{}", target.class_name);
-
-        let observed_attrs_json =
-            serde_json::to_string(&target.observed_attributes).unwrap_or_else(|_| "[]".to_string());
-        let properties_json =
-            serde_json::to_string(&target.properties).unwrap_or_else(|_| "[]".to_string());
-
-        let export_stmt = if target.is_default_export {
-            format!("export default {proxy_name};\n")
-        } else if target.is_export {
-            format!("export {{ {proxy_name} as {} }};\n", target.class_name)
-        } else {
-            String::new()
-        };
-
-        let replacement = format!(
-            r#"let {impl_var} = null;
+    format!(
+        r#"let {impl_var} = null;
 function {getter_name}() {{
   if (!{impl_var}) {{
-    {class_source}
     {impl_var} = {class_name};
   }}
   return {impl_var};
@@ -537,37 +390,254 @@ for (const __p of {props_var}) {{
 }}
 customElements.define('{tag_name}', {proxy_name});
 {export_stmt}"#,
-            impl_var = impl_var,
-            getter_name = getter_name,
-            class_source = class_source,
-            class_name = target.class_name,
-            proxy_name = proxy_name,
-            observed_attrs_json = observed_attrs_json,
-            props_var = props_var,
-            properties_json = properties_json,
-            tag_name = target.tag_name,
-            export_stmt = export_stmt,
-        );
+        impl_var = impl_var,
+        getter_name = getter_name,
+        class_name = target.class_name,
+        proxy_name = proxy_name,
+        observed_attrs_json = observed_attrs_json,
+        props_var = props_var,
+        properties_json = properties_json,
+        tag_name = target.tag_name,
+        export_stmt = export_stmt,
+    )
+}
 
-        replacements.push((full_start, class_end, replacement));
+fn is_ce_define_for<'a>(stmt: &Statement<'a>, targets: &HashMap<String, CustomElementTarget>) -> bool {
+    if let Statement::ExpressionStatement(expr_stmt) = stmt {
+        if let Expression::CallExpression(call) = &expr_stmt.expression {
+            let is_ce_define = match &call.callee {
+                Expression::StaticMemberExpression(mem) => {
+                    mem.property.name == "define"
+                        && match &mem.object {
+                            Expression::Identifier(id) => id.name == "customElements",
+                            Expression::StaticMemberExpression(inner) => {
+                                inner.property.name == "customElements"
+                            }
+                            _ => false,
+                        }
+                }
+                _ => false,
+            };
+            if is_ce_define && call.arguments.len() >= 2 {
+                if let Some(Expression::Identifier(id)) = call.arguments[1].as_expression() {
+                    return targets.contains_key(id.name.as_str());
+                }
+            }
+        }
+    }
+    false
+}
 
-        // If there was an external customElements.define statement, remove it because we define the proxy above
-        if let Some((def_start, def_end)) = target.define_stmt_span {
-            replacements.push((def_start, def_end, String::new()));
+pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResult {
+    let allocator = Allocator::default();
+    let filename = options.filename.as_deref().unwrap_or("file.ts");
+    let source_type = SourceType::from_path(filename).unwrap_or_else(|_| SourceType::ts());
+
+    let mut parsed = Parser::new(&allocator, source, source_type).parse();
+    if !parsed.diagnostics.is_empty() {
+        return ElemProxyResult {
+            code: source.to_string(),
+            map: None,
+            proxied_elements_count: 0,
+            elements: Vec::new(),
+        };
+    }
+
+    // Scan for customElements.define calls
+    let mut define_calls: HashMap<String, String> = HashMap::new(); // class_name -> tag_name
+    for stmt in &parsed.program.body {
+        if let Statement::ExpressionStatement(expr_stmt) = stmt {
+            if let Expression::CallExpression(call) = &expr_stmt.expression {
+                let is_ce_define = match &call.callee {
+                    Expression::StaticMemberExpression(mem) => {
+                        mem.property.name == "define"
+                            && match &mem.object {
+                                Expression::Identifier(id) => id.name == "customElements",
+                                Expression::StaticMemberExpression(inner) => {
+                                    inner.property.name == "customElements"
+                                }
+                                _ => false,
+                            }
+                    }
+                    _ => false,
+                };
+                if is_ce_define && call.arguments.len() >= 2 {
+                    if let (Some(Expression::StringLiteral(s)), Some(Expression::Identifier(id))) =
+                        (call.arguments[0].as_expression(), call.arguments[1].as_expression())
+                    {
+                        define_calls.insert(id.name.as_str().to_string(), s.value.as_str().to_string());
+                    }
+                }
+            }
         }
     }
 
-    // Sort replacements descending by start position
-    replacements.sort_by(|a, b| b.0.cmp(&a.0));
+    let mut targets: HashMap<String, CustomElementTarget> = HashMap::new();
 
-    for (start, end, repl) in replacements {
-        if start <= end && end <= rewritten.len() {
-            rewritten.replace_range(start..end, &repl);
+    // Scan classes in program body
+    for stmt in &parsed.program.body {
+        match stmt {
+            Statement::ClassDeclaration(class) => {
+                if let Some(target) = check_and_extract_target(class, false, false, &define_calls) {
+                    targets.insert(target.class_name.clone(), target);
+                }
+            }
+            Statement::ExportDeclaration(export_decl) => {
+                if let Declaration::ClassDeclaration(class) = &export_decl.declaration {
+                    if let Some(target) =
+                        check_and_extract_target(class, true, false, &define_calls)
+                    {
+                        targets.insert(target.class_name.clone(), target);
+                    }
+                }
+            }
+            Statement::ExportDefaultDeclaration(export_decl) => {
+                if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
+                    &export_decl.declaration
+                {
+                    if let Some(target) =
+                        check_and_extract_target(class, true, true, &define_calls)
+                    {
+                        targets.insert(target.class_name.clone(), target);
+                    }
+                }
+            }
+            _ => {}
         }
     }
+
+    if targets.is_empty() {
+        return ElemProxyResult {
+            code: source.to_string(),
+            map: None,
+            proxied_elements_count: 0,
+            elements: Vec::new(),
+        };
+    }
+
+    let old_body = std::mem::replace(&mut parsed.program.body, ArenaVec::new_in(&&allocator));
+    let mut new_body = ArenaVec::new_in(&&allocator);
+
+    for stmt in old_body {
+        if is_ce_define_for(&stmt, &targets) {
+            continue;
+        }
+
+        let mut matched_target = None;
+        let mut class_to_wrap = None;
+
+        match stmt {
+            Statement::ClassDeclaration(mut class) => {
+                let is_match = class
+                    .id
+                    .as_ref()
+                    .map(|id| targets.contains_key(id.name.as_str()))
+                    .unwrap_or(false);
+                if is_match {
+                    let target = targets
+                        .get(class.id.as_ref().unwrap().name.as_str())
+                        .unwrap()
+                        .clone();
+                    matched_target = Some(target);
+                    class.decorators.retain(|d| extract_decorator_tag(d).is_none());
+                    class_to_wrap = Some(Statement::ClassDeclaration(class));
+                } else {
+                    new_body.push(Statement::ClassDeclaration(class));
+                }
+            }
+            Statement::ExportDeclaration(export_decl) => {
+                let export_decl = export_decl.unbox();
+                let is_match = match &export_decl.declaration {
+                    Declaration::ClassDeclaration(class) => class
+                        .id
+                        .as_ref()
+                        .map(|id| targets.contains_key(id.name.as_str()))
+                        .unwrap_or(false),
+                    _ => false,
+                };
+                if is_match {
+                    if let Declaration::ClassDeclaration(mut class) = export_decl.declaration {
+                        let target = targets
+                            .get(class.id.as_ref().unwrap().name.as_str())
+                            .unwrap()
+                            .clone();
+                        matched_target = Some(target);
+                        class.decorators.retain(|d| extract_decorator_tag(d).is_none());
+                        class_to_wrap = Some(Statement::ClassDeclaration(class));
+                    }
+                } else {
+                    new_body.push(Statement::ExportDeclaration(ArenaBox::new_in(export_decl, &&allocator)));
+                }
+            }
+            Statement::ExportDefaultDeclaration(export_decl) => {
+                let export_decl = export_decl.unbox();
+                let is_match = match &export_decl.declaration {
+                    ExportDefaultDeclarationKind::ClassDeclaration(class) => class
+                        .id
+                        .as_ref()
+                        .map(|id| targets.contains_key(id.name.as_str()))
+                        .unwrap_or(false),
+                    _ => false,
+                };
+                if is_match {
+                    if let ExportDefaultDeclarationKind::ClassDeclaration(mut class) =
+                        export_decl.declaration
+                    {
+                        let target = targets
+                            .get(class.id.as_ref().unwrap().name.as_str())
+                            .unwrap()
+                            .clone();
+                        matched_target = Some(target);
+                        class.decorators.retain(|d| extract_decorator_tag(d).is_none());
+                        class_to_wrap = Some(Statement::ClassDeclaration(class));
+                    }
+                } else {
+                    new_body.push(Statement::ExportDefaultDeclaration(ArenaBox::new_in(export_decl, &&allocator)));
+                }
+            }
+            other => {
+                new_body.push(other);
+            }
+        }
+
+        if let (Some(target), Some(class_decl)) = (matched_target, class_to_wrap) {
+            let wrapper_src = generate_proxy_wrapper(&target);
+            let mut wrapper =
+                Parser::new(&allocator, allocator.alloc_str(&wrapper_src), source_type).parse();
+            let getter_name = format!("__getImpl_{}", target.class_name);
+
+            for wrapper_stmt in &mut wrapper.program.body {
+                if let Statement::FunctionDeclaration(func) = wrapper_stmt {
+                    if func.id.as_ref().map(|id| id.name.as_str()) == Some(&getter_name) {
+                        if let Some(ref mut body) = func.body {
+                            if let Some(Statement::IfStatement(if_stmt)) =
+                                body.statements.first_mut()
+                            {
+                                if let Statement::BlockStatement(ref mut block) =
+                                    if_stmt.consequent
+                                {
+                                    block.body.insert(0, class_decl);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            for s in wrapper.program.body {
+                new_body.push(s);
+            }
+        }
+    }
+
+    parsed.program.body = new_body;
+
+    let codegen = Codegen::new();
+    let rewritten = codegen.build(&parsed.program).code;
 
     let elements_info: Vec<ProxiedElementInfo> = targets
-        .into_iter()
+        .into_values()
         .map(|t| ProxiedElementInfo {
             tag_name: t.tag_name,
             class_name: t.class_name,
@@ -590,27 +660,22 @@ fn check_and_extract_target<'a>(
     class: &Class<'a>,
     is_export: bool,
     is_default_export: bool,
-    export_prefix_len: usize,
-    define_calls: &HashMap<String, (String, (usize, usize))>,
+    define_calls: &HashMap<String, String>,
 ) -> Option<CustomElementTarget> {
     let class_name = class.id.as_ref().map(|id| id.name.as_str().to_string())?;
 
     let mut tag_name: Option<String> = None;
-    let mut dec_span: Option<(usize, usize)> = None;
 
     for dec in &class.decorators {
         if let Some(tag) = extract_decorator_tag(dec) {
             tag_name = Some(tag);
-            dec_span = Some((dec.span.start as usize, dec.span.end as usize));
             break;
         }
     }
 
-    let mut define_span: Option<(usize, usize)> = None;
     if tag_name.is_none() {
-        if let Some((tag, span)) = define_calls.get(&class_name) {
+        if let Some(tag) = define_calls.get(&class_name) {
             tag_name = Some(tag.clone());
-            define_span = Some(*span);
         }
     }
 
@@ -623,12 +688,8 @@ fn check_and_extract_target<'a>(
     Some(CustomElementTarget {
         tag_name: tag,
         class_name,
-        class_span: (class.span.start as usize, class.span.end as usize),
-        decorator_span: dec_span,
-        define_stmt_span: define_span,
         is_export,
         is_default_export,
-        export_prefix_len,
         properties,
         observed_attributes,
     })

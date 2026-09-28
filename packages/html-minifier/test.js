@@ -36,9 +36,9 @@ console.log('Testing @lit-core/html-minifier native addon...');
     \`;
   `;
   const res = minifyLitTemplates(input);
-  assert(res.code.includes(`\${title ? 'active' : 'inactive'}`), 'Should leave ternary expression untouched');
+  assert(/\${title \? ['"]active['"] : ['"]inactive['"]}/.test(res.code), 'Should leave ternary expression untouched');
   assert(res.code.includes(`@click=\${onClick}`), 'Should leave event binding untouched');
-  assert(res.code.includes(`\${items.map((it) => html\`<li id=\${it.id}>\${it.name}</li>\`)}`), 'Should preserve map closure untouched');
+  assert(/\${items\.map\(\(it\) => html`<li id=\${it\.id}>\${it\.name}<\/li>`\)}/.test(res.code), 'Should preserve map closure untouched');
   assert(res.templatesCount >= 1, 'Should count templates');
   console.log('  ✔ Dynamic expressions and binding holes preserved completely untouched');
 }

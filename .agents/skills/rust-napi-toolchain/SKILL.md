@@ -11,11 +11,24 @@ description: >-
 This skill guides you through developing and building native Rust packages with Node.js NAPI-RS bindings in the `@lit-core` monorepo.
 
 ## Affected packages
-- `packages/css-fuse`
-- `packages/props-lower`
+- `packages/native`
+- `packages/dom-paths`
+- `packages/dirty-mask`
+- `packages/event-hoist`
 - `packages/memoize`
+- `packages/elem-proxy`
 - `packages/css-minifier`
 - `packages/html-minifier`
+- `packages/css-fuse`
+- `packages/html-fuse`
+- `packages/props-lower`
+
+## AST codegen invariant (strictly no string splicing)
+
+Every Rust transform in this monorepo must adhere strictly to AST-level manipulation:
+- **Never splice code**: Strictly prohibit `replace_range`, `insert_str`, manual brace counting, regex search/replace, `.find('{')`, and raw slice span math. String splicing breaks on multiline imports, inline comments, string literals with brackets or braces, and multi-component files.
+- **Always use `oxc` AST**: Parse with `oxc_parser`, perform structural transforms on the AST using `oxc_allocator` / `AstBuilder` / `oxc_traverse`, and serialize output using `oxc_codegen`.
+- **Preserve syntax validity**: AST transforms are guaranteed syntactically valid and deterministic.
 
 ## Building native artifacts
 

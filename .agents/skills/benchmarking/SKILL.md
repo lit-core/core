@@ -19,6 +19,27 @@ This skill guides you through running, analyzing, and formatting benchmarks in `
 - `momentum`: `@momentum-design/components` (Cisco Momentum Design, 97 components)
 - `all`: Runs all five suites in sequence
 
+## Strict benchmark invariant: real enterprise components only (never mocks or toy strings)
+
+Every benchmark in `@lit-core/benchmarks`—whether whole-bundle Vite builds, per-tool isolation runs, or standalone microbenchmarks (`resumable`, `elem-proxy`, `event-hoist`, `dirty-mask`, `dom-paths`, `memoize`)—must evaluate actual production component sources, real stylesheets, and real custom element instances directly from the 5 designated libraries in `node_modules`:
+- IBM Carbon Web Components (`@carbon/web-components`)
+- Adobe Spectrum Web Components (`@spectrum-web-components`)
+- Web Awesome (`@awesome.me/webawesome`)
+- Google Material Web (`@material/web`)
+- Cisco Momentum Design (`@momentum-design/components`)
+
+**Strictly forbidden**:
+- Mock component definitions (e.g. `elem-${i}`, `mock-button`, or hand-rolled `HTMLElement` stubs in VM contexts).
+- Synthetic math loops or theoretical multipliers (e.g. `Math.sqrt(i)` to simulate CPU load).
+- Fabricated fallback arithmetic or hardcoded speedup constants (e.g. `14.8 * (1 - 0.36)`).
+- Generic HTML elements (`<div><span>Item</span></div>`) substituted in place of the bundle's actual custom elements.
+
+**Mandatory requirements**:
+- Resolve real component files and tags using `packages/tests/src/components.ts` and `packages/tests/src/fixtures.ts`.
+- Build real component suites via `packages/benchmarks/src/suites/`.
+- Mount and exercise the actual registered Custom Elements from the bundle (e.g. `<cds-button>`, `<sp-action-button>`, `<wa-button>`, `<md-filled-button>`, `<mdc-button>`) and await real `updateComplete` lifecycle promises.
+- If runtime browser execution is unavailable due to environment constraints, report unmeasured (`0 ms` / `n/a`). Never fabricate numbers.
+
 ## Execution commands
 
 ```bash

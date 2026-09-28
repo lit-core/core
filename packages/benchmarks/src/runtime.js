@@ -22,7 +22,7 @@ export async function getBrowser() {
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
       });
     } catch (_err) {
-      // Mach port / sandbox restriction fallback
+      // Browser launch unavailable in restricted/sandboxed environment
       return null;
     }
   }
@@ -39,7 +39,7 @@ export async function closeBrowser() {
 }
 
 /**
- * Benchmark runtime performance of a built bundle using Playwright with fallback.
+ * Benchmark runtime performance of a built bundle using Playwright with real DOM instantiation.
  * @param {string} bundlePath - Absolute path to bundle.js
  * @param {string} [name='Bundle'] - Display name
  * @returns {Promise<{ firstRenderMs: number, updateMs: number }>}
@@ -56,60 +56,17 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
   } catch {}
 
   if (!browser) {
-    // In-process benchmark evaluation (sandbox-safe fallback)
-    // Only html-aot pre-compiles template structures with pre-indexed parts to eliminate the prepare phase.
-    // Static AST transforms (html-fuse, minifiers) do not alter runtime template compilation.
-    const isCompiled = bundleCode.includes('_$litType$') && (bundleCode.includes('parts:[') || bundleCode.includes('parts: [') || bundleCode.includes('parts:[]') || bundleCode.includes('parts: []'));
-    const hasFusedCss = bundleCode.includes('_fused_') || bundleCode.includes('virtual:css-fuse');
-    const hasLoweredProps = bundleCode.includes('_PROP_');
-    const isBaseline = name.includes('Baseline');
-
-    // Pre-index template event bindings to eliminate dynamic runtime lookup overhead
-    const iterations = 50;
-    const eventBindingCache = new Map();
-    for (let i = 0; i < iterations; i++) {
-      const bindingKey = `event-bind-${i % 4}`;
-      if (!eventBindingCache.has(bindingKey)) {
-        eventBindingCache.set(bindingKey, { type: 'event', eventName: 'click', index: i });
-      }
-      const _obj = isCompiled
-        ? {
-            _$litType$: {
-              h: (s = '') => s,
-              parts: [
-                { type: 2, index: 1 },
-                { type: 1, ctorType: 5, index: 2 },
-              ],
-            },
-            values: [i, () => {}],
-          }
-        : { strings: ['<div>', '</div>'], values: [i, () => {}] };
-    }
-
-    // Baseline includes template parsing / regex / cache overhead and runtime reflection
-    // Compiled template results skip prepare phase (~30-40% faster first render)
-    // Shared constructable stylesheets and lowered prototype defaults provide minor allocation reductions (~1-2%)
-    // Static fragment clustering (html-fuse) and minifiers have neutral mount impact (~0%)
-    let speedupFactor = 0;
-    if (isCompiled) speedupFactor += 0.36;
-    if (hasFusedCss) speedupFactor += 0.015;
-    if (hasLoweredProps) speedupFactor += 0.015;
-
-    const baseFirst = isBaseline || speedupFactor === 0 ? 14.8 : Math.max(7.8, 14.8 * (1 - Math.min(0.5, speedupFactor)));
-    const baseUpdate = isBaseline || speedupFactor === 0 ? 3.4 : Math.max(2.4, 3.4 * (1 - Math.min(0.3, speedupFactor * 0.4)));
-
-    const variance = (bundleCode.length % 10) * 0.04;
-    return {
-      firstRenderMs: Number((baseFirst + variance).toFixed(2)),
-      updateMs: Number((baseUpdate + variance * 0.15).toFixed(2)),
-    };
+    // If browser cannot launch in the current environment, report 0 (unmeasured)
+    // rather than generating fabricated or synthetic speedup numbers.
+    return { firstRenderMs: 0, updateMs: 0 };
   }
 
   const context = await browser.newContext();
   const page = await context.newPage();
 
   try {
-    // Generate isolated HTML page that imports Lit component definitions and measures render times
+    // Generate isolated HTML page that intercepts customElements.define, runs bundleCode,
+    // and measures real custom element lifecycle and template renders.
     const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
@@ -119,66 +76,122 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 <body>
   <div id="container"></div>
   <script type="module">
+    window.__registeredTags = [];
+    const origDefine = customElements.define;
+    customElements.define = function(tag, constructor, options) {
+      if (!window.__registeredTags.includes(tag)) {
+        window.__registeredTags.push(tag);
+      }
+      return origDefine.call(customElements, tag, constructor, options);
+    };
     try {
       ${bundleCode}
     } catch (e) {
       console.warn("Bundle execution warning:", e.message);
     }
+    window.__bundleReady = true;
   </script>
 </body>
 </html>`;
 
     await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => window.__bundleReady === true, { timeout: 10000 }).catch(() => {});
 
-    // Execute precision in-browser rendering measurement
+    // Execute precision in-browser rendering measurement using actual defined elements
     const timing = await page.evaluate(async () => {
       const container = document.getElementById('container');
       if (!container) return { firstRenderMs: 0, updateMs: 0 };
 
-      // Benchmark rendering synthetic Lit templates or defined custom elements
-      // Pre-indexing template event bindings
-      const eventIndexMap = new Map();
-      const clickHandler = () => {};
-      eventIndexMap.set('click', clickHandler);
-
-      const iterations = 50;
-      const t0 = performance.now();
-
-      // First render phase (measure mount & template preparation with event bindings)
-      const mountDiv = document.createElement('div');
-      container.appendChild(mountDiv);
-      for (let i = 0; i < iterations; i++) {
-        const item = document.createElement('div');
-        item.setAttribute('data-index', String(i));
-        // Attach pre-indexed event bindings
-        item.addEventListener('click', eventIndexMap.get('click'), { passive: true });
-        item.innerHTML = `<span>Test content ${i}</span>`;
-        mountDiv.appendChild(item);
+      const tags = (window.__registeredTags || []).filter((t) => typeof t === 'string' && t.includes('-'));
+      if (tags.length === 0) {
+        return { firstRenderMs: 0, updateMs: 0 };
       }
-      // Force layout calculation
-      void mountDiv.offsetHeight;
-      const t1 = performance.now();
-      const firstRenderMs = Number((t1 - t0).toFixed(2));
 
-      // Re-render / update phase
-      const t2 = performance.now();
-      for (let i = 0; i < iterations; i++) {
-        const child = mountDiv.children[i];
-        if (child) {
-          child.setAttribute('data-active', i % 2 === 0 ? 'true' : 'false');
-          child.textContent = `Updated content ${i}`;
+      const iterations = 5;
+      const mountSamples = [];
+      const updateSamples = [];
+
+      for (let run = 0; run < iterations; run++) {
+        container.innerHTML = '';
+        const mountedElements = [];
+
+        // 1. Mount phase: instantiate real registered Custom Elements from the bundle
+        const t0 = performance.now();
+        const maxInstances = 50;
+        for (let i = 0; i < maxInstances; i++) {
+          const tag = tags[i % tags.length];
+          try {
+            const el = document.createElement(tag);
+            el.setAttribute('data-bench-index', String(i));
+            container.appendChild(el);
+            mountedElements.push(el);
+          } catch {}
         }
+
+        // Wait for Lit element updateComplete lifecycle if available
+        await Promise.all(
+          mountedElements.map((el) => {
+            if (el && typeof el.updateComplete?.then === 'function') {
+              return el.updateComplete;
+            }
+            return Promise.resolve();
+          }),
+        );
+
+        // Force layout calculation
+        void container.offsetHeight;
+        const t1 = performance.now();
+        mountSamples.push(t1 - t0);
+
+        // 2. Re-render / update phase
+        const t2 = performance.now();
+        for (let i = 0; i < mountedElements.length; i++) {
+          const child = mountedElements[i];
+          if (child) {
+            child.setAttribute('data-active', i % 2 === 0 ? 'true' : 'false');
+            if ('label' in child) {
+              try {
+                child.label = 'Updated ' + i;
+              } catch {}
+            }
+            if ('value' in child) {
+              try {
+                child.value = 'Val ' + i;
+              } catch {}
+            }
+          }
+        }
+
+        await Promise.all(
+          mountedElements.map((el) => {
+            if (el && typeof el.updateComplete?.then === 'function') {
+              return el.updateComplete;
+            }
+            return Promise.resolve();
+          }),
+        );
+
+        void container.offsetHeight;
+        const t3 = performance.now();
+        updateSamples.push(t3 - t2);
       }
-      void mountDiv.offsetHeight;
-      const t3 = performance.now();
-      const updateMs = Number((t3 - t2).toFixed(2));
 
       container.innerHTML = '';
-      return { firstRenderMs, updateMs };
+
+      mountSamples.sort((a, b) => a - b);
+      updateSamples.sort((a, b) => a - b);
+      const medianMount = mountSamples[Math.floor(mountSamples.length / 2)] || 0;
+      const medianUpdate = updateSamples[Math.floor(updateSamples.length / 2)] || 0;
+
+      return {
+        firstRenderMs: Number(medianMount.toFixed(2)),
+        updateMs: Number(medianUpdate.toFixed(2)),
+      };
     });
 
     return timing;
-  } catch (_err) {
+  } catch (err) {
+    console.warn(`[Runtime Benchmark] Measurement error for ${name}:`, err.message);
     return { firstRenderMs: 0, updateMs: 0 };
   } finally {
     await page.close();

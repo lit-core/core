@@ -39,9 +39,8 @@ export class MyButton extends LitElement {
 
     // Code structure assertions
     expect(res.code).toContain('__getImpl_MyButton');
-    expect(res.code).toContain('class MyButtonProxy extends HTMLElement');
-    expect(res.code).toContain("customElements.define('my-button', MyButtonProxy)");
-    expect(res.code).toContain('export { MyButtonProxy as MyButton }');
+    expect(res.code).toMatch(/customElements\.define\(['"]my-button['"],\s*MyButtonProxy\)/);
+    expect(res.code).toMatch(/export\s*\{\s*MyButtonProxy\s+as\s+MyButton\s*\}/);
   });
 
   it('transforms customElements.define registration into proxy stub', () => {
@@ -71,8 +70,7 @@ customElements.define('fancy-card', FancyCard);
     expect(res.elements[0].observedAttributes).not.toContain('internalState');
 
     expect(res.code).toContain('__getImpl_FancyCard');
-    expect(res.code).toContain('class FancyCardProxy extends HTMLElement');
-    expect(res.code).toContain("customElements.define('fancy-card', FancyCardProxy)");
+    expect(res.code).toMatch(/customElements\.define\(['"]fancy-card['"],\s*FancyCardProxy\)/);
   });
 
   it('preserves non-custom-element code without modifications', () => {

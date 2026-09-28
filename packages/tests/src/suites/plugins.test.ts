@@ -1,13 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { lit as viteLit } from '@lit-core/vite-plugin';
 import { LitWebpackPlugin } from '@lit-core/webpack-plugin';
-import {
-  CARBON_COMPONENTS,
-  SPECTRUM_COMPONENTS,
-  WEBAWESOME_COMPONENTS,
-  MATERIAL_COMPONENTS,
-  MOMENTUM_COMPONENTS,
-} from '../components.js';
+import { CARBON_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS } from '../components.js';
 import { readComponentSource, findComponentCssSource } from '../fixtures.js';
 
 describe('bundler plugins multi-framework integration suite', () => {
@@ -47,11 +41,7 @@ describe('bundler plugins multi-framework integration suite', () => {
 
         for (const p of plugins) {
           if (typeof p.transform === 'function') {
-            const transformed = await (p.transform as any).call(
-              { error: () => {}, warn: () => {} },
-              rawSource,
-              comp.source
-            );
+            const transformed = await (p.transform as any).call({ error: () => {}, warn: () => {} }, rawSource, comp.source);
             if (transformed) {
               const code = typeof transformed === 'string' ? transformed : transformed.code;
               expect(code).toBeDefined();
@@ -67,10 +57,7 @@ describe('bundler plugins multi-framework integration suite', () => {
       expect(cssFusePlugin).toBeDefined();
 
       if (cssFusePlugin && typeof cssFusePlugin.resolveId === 'function') {
-        const resolved = await (cssFusePlugin.resolveId as any).call(
-          {},
-          'virtual:css-fuse/shared-sheet-abc'
-        );
+        const resolved = await (cssFusePlugin.resolveId as any).call({}, 'virtual:css-fuse/shared-sheet-abc');
         expect(resolved).toBeDefined();
       }
     });

@@ -153,7 +153,12 @@ pub fn rewrite_file(
     }
 
     let imports_header = format!("{}\n", import_lines.join("\n"));
-    transformed_code = format!("{}{}", imports_header, transformed_code);
+    let insert_pos = find_import_insertion_index(&transformed_code);
+    if insert_pos == 0 {
+        transformed_code = format!("{}{}", imports_header, transformed_code);
+    } else {
+        transformed_code.insert_str(insert_pos, &imports_header);
+    }
 
     Some(RewrittenFileInfo {
         file_path: file_path.to_string(),
@@ -161,6 +166,37 @@ pub fn rewrite_file(
         transformed_code,
         fused_imports: cluster_ids,
     })
+}
+
+fn find_import_insertion_index(code: &str) -> usize {
+    let mut index = 0;
+    // Skip shebang if present
+    if code.starts_with("#!") {
+        if let Some(pos) = code.find('\n') {
+            index = pos + 1;
+        } else {
+            index = code.len();
+        }
+    }
+    // Skip leading directives (e.g. "use strict"; or "use client";)
+    let rest = &code[index..];
+    let trimmed = rest.trim_start();
+    let leading_ws = rest.len() - trimmed.len();
+    let check_str = &rest[leading_ws..];
+
+    if check_str.starts_with("\"use strict\"")
+        || check_str.starts_with("'use strict'")
+        || check_str.starts_with("\"use client\"")
+        || check_str.starts_with("'use client'")
+    {
+        if let Some(semi_pos) = check_str.find(';') {
+            index += leading_ws + semi_pos + 1;
+            if index < code.len() && code.as_bytes()[index] == b'\n' {
+                index += 1;
+            }
+        }
+    }
+    index
 }
 
 fn compute_relative_import(from_file: &str, output_dir: &str, cluster_id: &str) -> String {

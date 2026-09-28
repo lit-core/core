@@ -128,4 +128,9 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
    - Keep markdown concise, high-signal, and easy to read.
    - Avoid repetitive tables and redundant prose.
    - Follow the sentence case instruction strictly.
+7. **AST codegen invariant (strictly no string splicing)**:
+   - Never use string manipulation (`replace_range`, `insert_str`, manual brace counting, regex search/replace, `.find('{')`, raw slice span math) to synthesize or rewrite JavaScript, TypeScript, or CSS AST structures.
+   - Always parse code with `oxc_parser`, perform structural transforms on the AST using `oxc_allocator` / `AstBuilder` / `oxc_traverse`, and emit valid output using `oxc_codegen`.
+   - String splicing breaks on multiline imports, inline comments, string literals with brackets or braces, and multi-component files. AST transformation is deterministic and preserves syntax validity.
+
 

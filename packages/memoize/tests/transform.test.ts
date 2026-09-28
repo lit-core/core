@@ -29,8 +29,7 @@ export class UserList extends LitElement {
         expect(res.code).toContain('let _memoized_items;');
         expect(res.code).toContain('if (this.__memo_items_ref === this.items)');
         expect(res.code).toContain('_memoized_items = this.__memo_items_val;');
-        expect(res.code).toContain('this.__memo_items_ref = this.items;');
-        expect(res.code).toContain('_memoized_items = this.__memo_items_val = this.items.map(x => html`<li>${x}</li>`);');
+        expect(res.code).toMatch(/_memoized_items = this\.__memo_items_val = this\.items\.map\(\(?x\)? => html`<li>\$\{x\}<\/li>`\);/);
         expect(res.code).toContain('${_memoized_items}');
       });
 
@@ -77,7 +76,9 @@ export class SortedTable extends LitElement {
         expect(res.componentsCount).toBe(1);
         expect(res.code).toContain('let _memoized_items;');
         expect(res.code).toContain('this.__memo_items_ref === this.items');
-        expect(res.code).toContain('_memoized_items = this.__memo_items_val = this.items.filter(x => x.active).sort((a, b) => a.order - b.order).map(x => html`<tr><td>${x.name}</td></tr>`);');
+        expect(res.code).toMatch(
+          /_memoized_items = this\.__memo_items_val = this\.items\.filter\(\(?x\)? => x\.active\)\.sort\(\(a, b\) => a\.order - b\.order\)\.map\(\(?x\)? => html`<tr><td>\$\{x\.name\}<\/td><\/tr>`\);/,
+        );
       });
 
       it('memoizes variable declarations inside render()', () => {
@@ -96,7 +97,7 @@ export class TableView extends LitElement {
         expect(res.code).toContain('if (this.__memo_items_ref === this.items)');
         expect(res.code).toContain('rows = this.__memo_items_val;');
         expect(res.code).toContain('this.__memo_items_ref = this.items;');
-        expect(res.code).toContain('rows = this.__memo_items_val = this.items.filter(x => x.active).map(x => html`<tr><td>${x.name}</td></tr>`);');
+        expect(res.code).toMatch(/rows = this\.__memo_items_val = this\.items\.filter\(\(?x\)? => x\.active\)\.map\(\(?x\)? => html`<tr><td>\$\{x\.name\}<\/td><\/tr>`\);/);
         expect(res.code).toContain('return html`<table>${rows}</table>`;');
       });
 

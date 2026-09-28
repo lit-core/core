@@ -47,15 +47,15 @@ Measurements evaluate executing full design system bundles in an isolated V8 VM 
 
 | Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| **Baseline evaluation CPU time** | 115.89 ms | 48.82 ms | 48.45 ms | 47.78 ms | 50.77 ms |
-| **Optimized evaluation CPU time** | 31.21 ms | 13.66 ms | 12.83 ms | 13.34 ms | 14.02 ms |
-| **Evaluation CPU savings** | **-73.1% CPU time (-84.68 ms)** | **-72.0% CPU time (-35.16 ms)** | **-73.5% CPU time (-35.62 ms)** | **-72.1% CPU time (-34.44 ms)** | **-72.4% CPU time (-36.75 ms)** |
-| **Baseline V8 heap memory** | 160,338.4 KB | 173,528.0 KB | 205,461.1 KB | 204,305.6 KB | 227,366.2 KB |
-| **Optimized V8 heap memory** | 38,544.7 KB | 44,588.1 KB | 60,669.7 KB | 59,094.9 KB | 64,826.1 KB |
-| **V8 heap memory savings** | **-76.0% memory (-121,793.7 KB)** | **-74.3% memory (-128,939.9 KB)** | **-70.5% memory (-144,791.4 KB)** | **-71.1% memory (-145,210.7 KB)** | **-71.5% memory (-162,540.1 KB)** |
-| **Baseline mount latency (first 5)** | 1.90 ms | 1.90 ms | 1.90 ms | 1.90 ms | 1.90 ms |
-| **Optimized mount latency (first 5)** | 2.80 ms | 2.80 ms | 2.80 ms | 2.80 ms | 2.80 ms |
-| **Mount latency delta** | +0.90 ms (transparent JIT upgrade) | +0.90 ms (transparent JIT upgrade) | +0.90 ms (transparent JIT upgrade) | +0.90 ms (transparent JIT upgrade) | +0.90 ms (transparent JIT upgrade) |
+| **Baseline evaluation CPU time** | 49.69 ms | 4.30 ms | 3.92 ms | 3.04 ms | 5.99 ms |
+| **Optimized evaluation CPU time** | 45.05 ms | 3.89 ms | 1.34 ms | 3.44 ms | 5.10 ms |
+| **Evaluation CPU savings** | **-9.3% CPU time (-4.64 ms)** | **-9.5% CPU time (-0.41 ms)** | **-65.8% CPU time (-2.58 ms)** | **--13.2% CPU time (0.40 ms)** | **-14.9% CPU time (-0.89 ms)** |
+| **Baseline V8 heap memory** | 159,113.9 KB | 172,780.1 KB | 204,573.1 KB | 203,730.2 KB | 226,758.5 KB |
+| **Optimized V8 heap memory** | 136,436.1 KB | 158,468.1 KB | 215,795.8 KB | 210,487.6 KB | 230,931.6 KB |
+| **V8 heap memory savings** | **-14.3% memory (-22,677.8 KB)** | **-8.3% memory (-14,312.0 KB)** | **--5.5% memory (11,222.7 KB)** | **--3.3% memory (6,757.4 KB)** | **--1.8% memory (4,173.1 KB)** |
+| **Baseline mount latency (first 5)** | 0.02 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
+| **Optimized mount latency (first 5)** | 0.01 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
+| **Mount latency delta** | +-0.01 ms (transparent JIT upgrade) | +0.00 ms (transparent JIT upgrade) | +0.00 ms (transparent JIT upgrade) | +0.00 ms (transparent JIT upgrade) | +0.00 ms (transparent JIT upgrade) |
 | **Classes evaluated during init** | 5 / 99 (5.1%) [94 avoided] | 5 / 52 (9.6%) [47 avoided] | 5 / 73 (6.8%) [68 avoided] | 5 / 97 (5.2%) [92 avoided] | 5 / 28 (17.9%) [23 avoided] |
 | **Deferred execution proportion** | **94.9% deferred** | **90.4% deferred** | **93.2% deferred** | **94.8% deferred** | **82.1% deferred** |
 

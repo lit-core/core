@@ -14,7 +14,13 @@ This skill guides you through executing and expanding the Playwright Chromium te
 
 All tests in `packages/tests` evaluate real production component source and stylesheet files directly from `node_modules`. Synthetic or hand-rolled toy strings are never used in test assertions.
 
-Every test:
+**Strictly forbidden**:
+- Mock component definitions (e.g. `elem-${i}`, `test-card`, or synthetic HTML classes).
+- Toy strings or hand-rolled snippets substituting for actual production components.
+
+**Mandatory requirements**:
+- Always resolve and test real component definitions directly from the 5 enterprise libraries via `packages/tests/src/components.ts` and `packages/tests/src/fixtures.ts`.
+- Every test:
 1. Reads actual component source or styles from `node_modules` via `fixtures.ts`
 2. Runs the `@lit-core` transform function under test
 3. Verifies AST output and metadata
@@ -32,19 +38,17 @@ The test suite tests 51 real components from each of the 5 supported enterprise 
 ## Execution commands
 
 ```bash
-# Run all 2,305 real component tests
+# Run all real component tests
 pnpm --filter @lit-core/tests test
 
-# Run a specific feature test file
-npx vitest run packages/tests/src/css-fuse.test.ts
-npx vitest run packages/tests/src/props-lower.test.ts
-npx vitest run packages/tests/src/css-minifier.test.ts
-npx vitest run packages/tests/src/html-minifier.test.ts
-npx vitest run packages/tests/src/html-fuse.test.ts
-npx vitest run packages/tests/src/elem-proxy.test.ts
-npx vitest run packages/tests/src/event-hoist.test.ts
-npx vitest run packages/tests/src/html-aot.test.ts
-npx vitest run packages/tests/src/resumable.test.ts
+# Run a specific design system suite
+npx vitest run packages/tests/src/suites/carbon.test.ts
+npx vitest run packages/tests/src/suites/spectrum.test.ts
+npx vitest run packages/tests/src/suites/webawesome.test.ts
+npx vitest run packages/tests/src/suites/material.test.ts
+npx vitest run packages/tests/src/suites/momentum.test.ts
+npx vitest run packages/tests/src/suites/native.test.ts
+npx vitest run packages/tests/src/suites/plugins.test.ts
 ```
 
 ## Test registry structure

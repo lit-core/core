@@ -9,12 +9,7 @@ export async function getTestBrowser(): Promise<Browser> {
   if (!sharedBrowser || !sharedBrowser.isConnected()) {
     sharedBrowser = await chromium.launch({
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-      ],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
     });
   }
   return sharedBrowser;
@@ -84,19 +79,14 @@ export async function getShadowText(page: Page, hostSelector: string, innerSelec
       const target = hostEl.shadowRoot.querySelector(inner);
       return target ? (target.textContent || '').trim() : '';
     },
-    { host: hostSelector, inner: innerSelector }
+    { host: hostSelector, inner: innerSelector },
   );
 }
 
 /**
  * Helper to get computed style inside shadow DOM.
  */
-export async function getShadowComputedStyle(
-  page: Page,
-  hostSelector: string,
-  innerSelector: string,
-  propertyName: string
-): Promise<string> {
+export async function getShadowComputedStyle(page: Page, hostSelector: string, innerSelector: string, propertyName: string): Promise<string> {
   return page.evaluate(
     ({ host, inner, prop }) => {
       const hostEl = document.querySelector(host);
@@ -105,6 +95,6 @@ export async function getShadowComputedStyle(
       if (!target) return '';
       return window.getComputedStyle(target).getPropertyValue(prop);
     },
-    { host: hostSelector, inner: innerSelector, prop: propertyName }
+    { host: hostSelector, inner: innerSelector, prop: propertyName },
   );
 }

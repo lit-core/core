@@ -41,6 +41,7 @@ This skill outlines the technical architecture, invariants, and verification wor
 ## Non-negotiable invariants
 
 - **Strictly general-purpose**: Never hardcode library-specific heuristics, tag whitelists, or vendor class names. All classification must rely on AST analysis.
+- **AST codegen invariant (strictly no string splicing)**: Never use string manipulation (`replace_range`, `insert_str`, manual brace counting, regex, `.find('{')`, raw slice span math) to synthesize or rewrite code. Always manipulate AST nodes with `oxc_allocator` / `AstBuilder` and emit code with `oxc_codegen`.
 - **Zero runtime dependencies for Mode A**: Mode A output must have zero runtime dependencies on Lit packages.
 - **Micro-runtime budget**: Mode B micro-runtime must remain ≤1.5 KB gzipped.
 - **Sentence case documentation**: All documentation, comments, and summaries must use sentence case headings and descriptions.

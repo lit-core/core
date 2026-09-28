@@ -42,13 +42,7 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
       initialDir = dir;
       try {
         const files = fs.readdirSync(dir);
-        const styleFile = files.find(
-          (f) =>
-            f.endsWith('.styles.js') ||
-            f.endsWith('.scss.js') ||
-            f.endsWith('.css.js') ||
-            f.endsWith('.cssresult.js')
-        );
+        const styleFile = files.find((f) => f.endsWith('.styles.js') || f.endsWith('.scss.js') || f.endsWith('.css.js') || f.endsWith('.cssresult.js'));
         if (styleFile) {
           initialSource = fs.readFileSync(path.join(dir, styleFile), 'utf-8');
         } else {
@@ -63,12 +57,7 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
   if (initialSource) {
     // If it re-exports from a chunk or sibling file, follow the import
     const chunkImport = /from\s*['"](\.\.?\/[^'"]+)['"]/.exec(initialSource);
-    if (
-      chunkImport &&
-      !initialSource.includes('css`') &&
-      !initialSource.includes('css(') &&
-      !initialSource.includes(':host')
-    ) {
+    if (chunkImport && !initialSource.includes('css`') && !initialSource.includes('css(') && !initialSource.includes(':host')) {
       const chunkPath = path.resolve(initialDir, chunkImport[1]);
       let resolvedChunk = chunkPath;
       if (fs.existsSync(resolvedChunk) && fs.statSync(resolvedChunk).isDirectory()) {
@@ -104,12 +93,7 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
       try {
         const files = fs.readdirSync(searchDir);
         for (const f of files) {
-          if (
-            f.endsWith('.styles.js') ||
-            f.endsWith('.scss.js') ||
-            f.endsWith('.css.js') ||
-            f.endsWith('.cssresult.js')
-          ) {
+          if (f.endsWith('.styles.js') || f.endsWith('.scss.js') || f.endsWith('.css.js') || f.endsWith('.cssresult.js')) {
             const content = fs.readFileSync(path.join(searchDir, f), 'utf-8');
             if (extractCssFromModule(content).length > 0) {
               return content;
@@ -122,17 +106,11 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
 
   // Fallback for Web Awesome shared styles
   if (pkg === '@awesome.me/webawesome') {
-    const hostStylesPath = path.resolve(
-      process.cwd(),
-      'node_modules/@awesome.me/webawesome/dist/styles/component/host.styles.js'
-    );
+    const hostStylesPath = path.resolve(process.cwd(), 'node_modules/@awesome.me/webawesome/dist/styles/component/host.styles.js');
     if (fs.existsSync(hostStylesPath)) {
       return fs.readFileSync(hostStylesPath, 'utf-8');
     }
-    const hostStylesTs = path.resolve(
-      process.cwd(),
-      'node_modules/@awesome.me/webawesome/dist/styles/component/host.styles.ts'
-    );
+    const hostStylesTs = path.resolve(process.cwd(), 'node_modules/@awesome.me/webawesome/dist/styles/component/host.styles.ts');
     if (fs.existsSync(hostStylesTs)) {
       return fs.readFileSync(hostStylesTs, 'utf-8');
     }
@@ -175,18 +153,4 @@ export function extractCssFromModule(source: string): string {
   }
 
   return '';
-}
-
-/**
- * Extract HTML template strings from Lit component source code.
- */
-export function extractHtmlTemplates(source: string): string[] {
-  const templates: string[] = [];
-  const matches = source.matchAll(/html\s*`([\s\S]*?)`/g);
-  for (const match of matches) {
-    if (match[1] && match[1].trim().length > 0) {
-      templates.push(match[1]);
-    }
-  }
-  return templates;
 }

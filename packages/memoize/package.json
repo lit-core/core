@@ -45,8 +45,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && cp target/release/libmemoize.dylib memoize.darwin-arm64.node 2>/dev/null || true",
-    "build:debug": "cargo build && cp target/debug/libmemoize.dylib memoize.darwin-arm64.node 2>/dev/null || true",
+    "build": "cargo build --release && cp target/release/libmemoize.dylib memoize.darwin-arm64.node 2>/dev/null && (codesign -s - -f memoize.darwin-arm64.node 2>/dev/null || true) || true",
+    "build:debug": "cargo build && cp target/debug/libmemoize.dylib memoize.darwin-arm64.node 2>/dev/null && (codesign -s - -f memoize.darwin-arm64.node 2>/dev/null || true) || true",
     "test": "vitest run"
   },
   "devDependencies": {

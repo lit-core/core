@@ -115,7 +115,7 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
       const toolBundle = path.join(toolOutDir, 'bundle.js');
       const toolRuntime = await measureBundleRuntime(toolBundle, tool.name);
-      const speedup = baselineRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - toolRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
+      const speedup = baselineRuntime.firstRenderMs > 0 && toolRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - toolRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
 
       runtimeRows.push({
         name: tool.name,
@@ -168,7 +168,7 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
     const totalBundle = path.join(totalOutDir, 'bundle.js');
     const totalRuntime = tools.length === 1 && runtimeRows[1] ? runtimeRows[1] : fs.existsSync(totalBundle) ? await measureBundleRuntime(totalBundle, 'TOTAL') : baselineRuntime;
-    const totalSpeedup = baselineRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - totalRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
+    const totalSpeedup = baselineRuntime.firstRenderMs > 0 && totalRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - totalRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
 
     runtimeRows.push({
       name: 'TOTAL (All Optimizations Combined)',
@@ -265,4 +265,3 @@ export async function runSingleToolBenchmark(toolId, options = {}) {
 
   console.log(`\n✓ ${tools[0].name} benchmark complete across ${suites.length} suites.\n`);
 }
-

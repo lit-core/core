@@ -44,8 +44,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && cp target/release/libelem_proxy.dylib elem-proxy.darwin-arm64.node 2>/dev/null || true",
-    "build:debug": "cargo build && cp target/debug/libelem_proxy.dylib elem-proxy.darwin-arm64.node 2>/dev/null || true",
+    "build": "cargo build --release && cp target/release/libelem_proxy.dylib elem-proxy.darwin-arm64.node 2>/dev/null && (codesign -s - -f elem-proxy.darwin-arm64.node 2>/dev/null || true) || true",
+    "build:debug": "cargo build && cp target/debug/libelem_proxy.dylib elem-proxy.darwin-arm64.node 2>/dev/null && (codesign -s - -f elem-proxy.darwin-arm64.node 2>/dev/null || true) || true",
     "test": "vitest run"
   },
   "devDependencies": {

@@ -115,16 +115,7 @@ export function parseTableCells(tableStr) {
  */
 export function formatRootSummaryTable(allResults, existingTableStr) {
   const existingCells = parseTableCells(existingTableStr || '');
-  const headers = [
-    'Design system or library',
-    'Elements',
-    'Baseline size',
-    'Optimized size',
-    'Net savings',
-    'First render speedup',
-    'Re-render speedup',
-    'Boot CPU savings',
-  ];
+  const headers = ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Net savings', 'First render speedup', 'Re-render speedup', 'Boot CPU savings'];
   const alignments = [':---', '---:', '---:', '---:', '---:', '---:', '---:', '---:'];
 
   const bootCpuMap = {
@@ -142,8 +133,10 @@ export function formatRootSummaryTable(allResults, existingTableStr) {
     const existingRow = existingCells.find((r) => normalizeStr(r[0]).includes(normalizeStr(item.id)));
 
     if (!res) {
-      if (existingRow && existingRow.length >= 8) {
-        rows.push(`| ${existingRow.slice(0, 8).join(' | ')} |`);
+      if (existingRow && existingRow.length >= 2) {
+        const padded = [...existingRow];
+        while (padded.length < 8) padded.push('n/a');
+        rows.push(`| ${padded.slice(0, 8).join(' | ')} |`);
       }
       continue;
     }
@@ -155,8 +148,10 @@ export function formatRootSummaryTable(allResults, existingTableStr) {
     const totalRt = runtimeRows?.find((/** @type {any} */ r) => r.isTotal);
 
     if (!baseRow || !totalRow) {
-      if (existingRow && existingRow.length >= 8) {
-        rows.push(`| ${existingRow.slice(0, 8).join(' | ')} |`);
+      if (existingRow && existingRow.length >= 2) {
+        const padded = [...existingRow];
+        while (padded.length < 8) padded.push('n/a');
+        rows.push(`| ${padded.slice(0, 8).join(' | ')} |`);
       }
       continue;
     }
@@ -180,9 +175,38 @@ export function formatRootSummaryTable(allResults, existingTableStr) {
 
     const bootCpuStr = `**${bootCpuMap[item.id] || '-72.5%'}**`;
 
-    rows.push(
-      `| ${item.shortLabel} | ${elCount} | ${formatKb(baseRaw)} | ${formatKb(optRaw)} | ${netSavingsStr} | ${speedupStr} | ${updateStr} | ${bootCpuStr} |`,
-    );
+    rows.push(`| ${item.shortLabel} | ${elCount} | ${formatKb(baseRaw)} | ${formatKb(optRaw)} | ${netSavingsStr} | ${speedupStr} | ${updateStr} | ${bootCpuStr} |`);
+  }
+
+  const existingTotalRow = existingCells.find((r) => normalizeStr(r[0]).includes('total'));
+  if (existingTotalRow) {
+    let totalElements = 0;
+    let totalBase = 0;
+    let totalOpt = 0;
+    for (const r of rows) {
+      const cells = r
+        .split('|')
+        .slice(1, -1)
+        .map((c) => c.trim());
+      const el = parseInt(cells[1], 10);
+      if (!Number.isNaN(el)) totalElements += el;
+      const baseMatch = cells[2]?.match(/([\d,.]+)\s*KB/i);
+      const optMatch = cells[3]?.match(/([\d,.]+)\s*KB/i);
+      if (baseMatch) totalBase += parseFloat(baseMatch[1].replace(/,/g, ''));
+      if (optMatch) totalOpt += parseFloat(optMatch[1].replace(/,/g, ''));
+    }
+    const totalDiff = totalOpt - totalBase;
+    const totalPct = totalBase > 0 ? (totalDiff / totalBase) * 100 : 0;
+    const sign = totalDiff <= 0 ? '-' : '+';
+    const totalSavingsStr = `**${sign}${formatKb(Math.abs(totalDiff))} (${totalPct <= 0 ? '-' : '+'}${Math.abs(totalPct).toFixed(2)}%)**`;
+
+    const padded = [...existingTotalRow];
+    while (padded.length < 8) padded.push('n/a');
+    if (totalElements > 0) padded[1] = `**${totalElements}**`;
+    if (totalBase > 0) padded[2] = `**${formatKb(totalBase * 1024)}**`;
+    if (totalOpt > 0) padded[3] = `**${formatKb(totalOpt * 1024)}**`;
+    if (totalBase > 0) padded[4] = totalSavingsStr;
+    rows.push(`| ${padded.slice(0, 8).join(' | ')} |`);
   }
 
   return `| ${headers.join(' | ')} |\n| ${alignments.join(' | ')} |\n${rows.join('\n')}`;
@@ -460,21 +484,7 @@ export function syncAllBenchmarkDocs(allResults, options = {}) {
   }
 
   // 3. Update dedicated tool reports in packages/benchmarks/docs/
-  const toolsToSync = [
-    'css-fuse',
-    'html-fuse',
-    'props-lower',
-    'elem-proxy',
-    'event-hoist',
-    'dom-paths',
-    'dirty-mask',
-    'memoize',
-    'native',
-    'html-aot',
-    'css-minifier',
-    'html-minifier',
-    'resumable',
-  ];
+  const toolsToSync = ['css-fuse', 'html-fuse', 'props-lower', 'elem-proxy', 'event-hoist', 'dom-paths', 'dirty-mask', 'memoize', 'native', 'html-aot', 'css-minifier', 'html-minifier', 'resumable'];
 
   for (const toolId of toolsToSync) {
     if (activeTools.length > 0 && !activeTools.some((t) => t.id === toolId)) {

@@ -90,8 +90,13 @@ describe('@lit-core/native Playwright Chromium and real component verification',
           @property({ type: String }) label = 'Initial';
           @property({ type: Boolean, reflect: true }) disabled = false;
 
+          _clicked = 0;
+          handleClick() {
+            this._clicked++;
+          }
+
           render() {
-            return html\`<button id="btn"><span id="txt">\${this.label}</span></button>\`;
+            return html\`<button id="btn" @click=\${this.handleClick}><span id="txt">\${this.label}</span></button>\`;
           }
         }
       `;
@@ -100,7 +105,7 @@ describe('@lit-core/native Playwright Chromium and real component verification',
       expect(transformed.vanillaCount).toBe(1);
 
       const componentCode = `
-        ${transformed.code}
+        ${transformed.code.replace(/export\s+class/, 'class')}
 
         const el = document.createElement('pw-vanilla-button');
         el.label = 'Click Me';

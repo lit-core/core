@@ -28,6 +28,7 @@
     "dev": "turbo run dev",
     "lint": "biome check .",
     "test": "turbo run test",
+    "test:rust": "for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask; do cargo test --manifest-path packages/$pkg/Cargo.toml; done",
     "typecheck": "turbo run typecheck",
     "benchmark": "pnpm --filter @lit-core/benchmarks run benchmark",
     "benchmark:webawesome": "pnpm --filter @lit-core/benchmarks run benchmark:webawesome",

@@ -8,11 +8,11 @@ Ahead-of-time Declarative Shadow DOM (DSD) SSR and event-driven runtime resumpti
 
 | Package | Role | Version evaluated | Elements evaluated |
 | :--- | :--- | :--- | ---: |
-| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 99 elements |
-| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 52 elements |
-| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 73 elements |
-| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 97 elements |
-| `@material/web` | Google Material Design 3 | `2.5.0` | 28 elements |
+| `@carbon/web-components` | Carbon Web Components | `2.64.0` | 99 elements |
+| `@momentum-design/components` | Momentum Design | `0.139.9` | 97 elements |
+| `@awesome.me/webawesome` | Web Awesome | `3.14.0` | 73 elements |
+| `@spectrum-web-components/bundle` | Spectrum Web Components | `1.12.2` | 52 elements |
+| `@material/web` | Material Web | `2.5.0` | 28 elements |
 | `lit` | Core runtime | `3.3.3` | n/a |
 | `vite` | Bundler | `8.3.1` | n/a |
 | `node` | Runtime environment | `v24.14.0` | n/a |
@@ -23,19 +23,19 @@ Ahead-of-time Declarative Shadow DOM (DSD) SSR and event-driven runtime resumpti
 
 Measurements compare Standard Lit SSR (`@lit-labs/ssr` eager client hydration) against Resumable Lit SSR (`@lit-core/resumable` zero-JS boot with on-demand resumption):
 
-| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
+| Metric | Carbon Web Components (99 elements) | Momentum Design (97 elements) | Web Awesome (73 elements) | Spectrum Web Components (52 elements) | Material Web (28 elements) |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| **Standard SSR initial JS** | 403.2 KB | 245.4 KB | 260.6 KB | 366.5 KB | 153 KB |
+| **Standard SSR initial JS** | 403.2 KB | 366.5 KB | 260.6 KB | 245.4 KB | 153 KB |
 | **Resumable SSR initial JS** | **1.39 KB** | **1.39 KB** | **1.39 KB** | **1.39 KB** | **1.39 KB** |
-| **Initial JS savings** | **-99.7%** | **-99.4%** | **-99.5%** | **-99.6%** | **-99.1%** |
-| **Standard SSR TBT** | 182.6 ms | 63.2 ms | 79.7 ms | 98.5 ms | 43.4 ms |
-| **Resumable SSR TBT** | **1.2 ms** | **1.2 ms** | **1.2 ms** | **1.2 ms** | **1.2 ms** |
-| **TBT reduction** | **-99.3%** | **-98.1%** | **-98.5%** | **-98.8%** | **-97.2%** |
-| **Standard SSR TTI** | 353 ms | 214.6 ms | 233 ms | 264.5 ms | 183.8 ms |
-| **Resumable SSR TTI** | **82.1 ms** | **82.1 ms** | **82.1 ms** | **82.1 ms** | **82.1 ms** |
-| **TTI improvement** | **-270.9 ms** | **-132.5 ms** | **-150.9 ms** | **-182.4 ms** | **-101.7 ms** |
+| **Initial JS savings** | **-99.7%** | **-99.6%** | **-99.5%** | **-99.4%** | **-99.1%** |
+| **Standard SSR TBT** | 31.5 ms | 30.5 ms | 23.3 ms | 16.9 ms | 10.1 ms |
+| **Resumable SSR TBT** | **0.5 ms** | **0.5 ms** | **0.5 ms** | **0.5 ms** | **0.5 ms** |
+| **TBT reduction** | **-98.4%** | **-98.4%** | **-97.9%** | **-97.0%** | **-95.0%** |
+| **Standard SSR TTI** | 181.9 ms | 176.5 ms | 156.6 ms | 148.3 ms | 130.5 ms |
+| **Resumable SSR TTI** | **75.6 ms** | **75.6 ms** | **75.6 ms** | **75.6 ms** | **75.6 ms** |
+| **TTI improvement** | **-106.3 ms** | **-100.9 ms** | **-81.0 ms** | **-72.7 ms** | **-54.9 ms** |
 | **First click latency** | 3.2 ms | 3.2 ms | 3.2 ms | 3.2 ms | 3.2 ms |
-| **Elements deferred on boot** | **99 / 99 (100%)** | **52 / 52 (100%)** | **73 / 73 (100%)** | **97 / 97 (100%)** | **28 / 28 (100%)** |
+| **Elements deferred on boot** | **99 / 99 (100%)** | **97 / 97 (100%)** | **73 / 73 (100%)** | **52 / 52 (100%)** | **28 / 28 (100%)** |
 
 ### Comprehensive aggregate across all 349 elements
 

@@ -33,7 +33,7 @@
     "benchmark:markdown": "node src/index.js --format=markdown",
     "benchmark:json": "node src/index.js --format=json",
     "benchmark:sync": "node src/index.js --update",
-    "test": "tsc --noEmit",
+    "test": "tsc --noEmit && vitest run test",
     "typecheck": "tsc --noEmit"
   },
   "repository": {
@@ -70,6 +70,7 @@
     "@momentum-design/components": "^0.139.9",
     "@spectrum-web-components/bundle": "^1.12.2",
     "@types/node": "^26.6.3",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
   }
 }

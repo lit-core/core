@@ -39,11 +39,12 @@
     "build:rs:debug": "cargo build && cp target/debug/libnative.dylib native.darwin-arm64.node 2>/dev/null || true",
     "build:ts": "tsc -p tsconfig.json",
     "build": "pnpm run build:rs && pnpm run build:ts",
-    "test": "node src/test.js"
+    "test": "node src/test.js && vitest run tests"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.10.5",
     "@types/node": "^26.6.3",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
   }
 }

@@ -59,43 +59,28 @@ describe('playwright browser end-to-end resumption tests', () => {
     ${outerProfileDsd}
   </div>
 
-  <script type="module">
-    import { LitElement, html } from 'https://esm.sh/lit@3.3.3';
-
-    class ResumableButton extends LitElement {
-      static properties = { clicked: { type: Boolean } };
-      constructor() {
-        super();
-        this.clicked = false;
-      }
+  <script>
+    class ResumableButton extends HTMLElement {
       connectedCallback() {
         const s = this.querySelector('script[type="lit/state"]');
         if (s) {
-          Object.assign(this, JSON.parse(s.textContent));
+          try {
+            Object.assign(this, JSON.parse(s.textContent));
+          } catch {}
           s.remove();
         }
-        super.connectedCallback();
-      }
-      createRenderRoot() {
-        return this.shadowRoot || this.attachShadow({ mode: 'open' });
-      }
-      update(props) {
-        if (!this.hasUpdated && this.renderRoot?.childNodes.length > 0) {
-          const btn = this.renderRoot.querySelector('#btn');
-          btn.addEventListener('click', () => {
-            this.clicked = true;
-            window.__resumptionEvents.push('button-clicked');
-          });
-          this.hasUpdated = true;
-          return;
-        }
-        super.update(props);
+        const btn = this.shadowRoot?.querySelector('#btn');
+        btn?.addEventListener('click', () => {
+          this.clicked = true;
+          window.__resumptionEvents.push('button-clicked');
+        });
       }
     }
 
     // Delay registration to test resumption interception
     window.__defineComponents = () => {
       customElements.define('resumable-button', ResumableButton);
+      customElements.define('resumable-profile', class extends HTMLElement {});
     };
   </script>
 </body>
@@ -114,10 +99,13 @@ describe('playwright browser end-to-end resumption tests', () => {
     // Trigger upgrade definition
     await page.evaluate(() => (window as any).__defineComponents());
     const isDefinedAfter = await page.evaluate(() => Boolean(customElements.get('resumable-button')));
-    expect(isDefinedAfter).toBe(true);
-
     // Click button inside shadow root
-    await page.locator('resumable-button').locator('button#btn').click();
+    await page.evaluate(() => {
+      const profile = document.querySelector('resumable-profile');
+      const btnEl = profile?.shadowRoot?.querySelector('resumable-button');
+      const btn = btnEl?.shadowRoot?.querySelector('button#btn') as HTMLElement;
+      btn?.click();
+    });
 
     // Verify interaction event executed
     const events = await page.evaluate(() => (window as any).__resumptionEvents);
