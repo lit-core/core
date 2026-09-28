@@ -1,5 +1,6 @@
-#!/usr/bin/env node
+import { saveBenchmarkResult } from './reporters/index.js';
 import { runSuiteBenchmark } from './runner.js';
+import { createBenchmarkResult } from './schema.js';
 import { getSuites } from './suites/index.js';
 import { syncAllBenchmarkDocs } from './sync-docs.js';
 import {
@@ -147,8 +148,33 @@ async function main() {
     }
   }
 
+  const structuredResult = createBenchmarkResult({
+    benchmarkId: 'bundle-optimizations',
+    title: '`@lit-core` bundler optimization benchmark results',
+    description: 'Multi-suite bundle size and optimization benchmark across enterprise Lit design systems.',
+    suites: allResults.map((r) => {
+      const baselineRow = r.rows.find((row) => row.isBaseline);
+      const totalRow = r.rows.find((row) => row.isTotal);
+      return {
+        id: r.suiteId,
+        name: r.suiteName,
+        componentCount: r.componentCount,
+        baseline: baselineRow?.metrics || {},
+        optimized: totalRow?.metrics || {},
+        deltas: totalRow?.impact
+          ? {
+              raw: { diff: totalRow.impact.rawDiff, percent: totalRow.impact.rawPercent },
+              gzip: { diff: totalRow.impact.gzipDiff, percent: totalRow.impact.gzipPercent },
+            }
+          : {},
+        diagnostics: r.diagnostics,
+      };
+    }),
+  });
+  saveBenchmarkResult(structuredResult);
+
   if (options.format === 'json') {
-    console.log(JSON.stringify(allResults, null, 2));
+    console.log(JSON.stringify(structuredResult, null, 2));
     return;
   }
 

@@ -1,34 +1,12 @@
 #!/usr/bin/env node
-import fs from 'node:fs';
-import path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { transformDomPaths } from '@lit-core/dom-paths';
 import { resolveNodeByPath } from '@lit-core/dom-paths/client';
 import { ENTERPRISE_COMPONENTS, readComponentFullSource } from './fixtures.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-/**
- * @typedef {Object} DomPathsBenchmarkMetrics
- * @property {number} instancesCount
- * @property {number} treeWalkerCalls
- * @property {number} nodesVisited
- * @property {number} mountLatencyMs
- * @property {number} heapKb
- */
-
-/**
- * @typedef {Object} SuiteResult
- * @property {string} id
- * @property {string} name
- * @property {string} pkg
- * @property {number} componentsScanned
- * @property {number} templatesCount
- * @property {number} pathsCount
- * @property {DomPathsBenchmarkMetrics} baseline
- * @property {DomPathsBenchmarkMetrics} optimized
- */
+import { calculateDelta, formatDuration, formatKb, formatNumber, formatPercent } from './format.js';
+import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, syncDocFile } from './reporters/index.js';
+import { createBenchmarkResult } from './schema.js';
 
 /**
  * Builds a DOM fragment tree representation directly from compiled AST numeric paths.
@@ -37,6 +15,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 function createTemplateTreeFromPaths(paths) {
   let totalNodes = 0;
 
+  /**
+   * @param {string} name
+   * @param {number} nodeType
+   * @param {string} [data]
+   * @returns {{ nodeName: string, nodeType: number, childNodes: any[], data: string }}
+   */
   function createNode(name, nodeType, data = '') {
     totalNodes++;
     return { nodeName: name, nodeType, childNodes: [], data };
@@ -50,9 +34,7 @@ function createTemplateTreeFromPaths(paths) {
       const idx = path[depth];
       while (curr.childNodes.length <= idx) {
         const isTarget = depth === path.length - 1 && curr.childNodes.length === idx;
-        const child = isTarget
-          ? createNode('#comment', 8, '?lit$0$')
-          : createNode('DIV', 1);
+        const child = isTarget ? createNode('#comment', 8, '?lit$0$') : createNode('DIV', 1);
         curr.childNodes.push(child);
       }
       curr = curr.childNodes[idx];
@@ -99,45 +81,64 @@ function runStandardLitTreeWalker(root, counters) {
 }
 
 /**
- * Direct path resolution using pre-computed path indices (optimized).
- * Directly resolves target nodes without walking the entire tree.
+ * @lit-core/dom-paths direct path resolution (optimized).
+ * Directly resolves nodes via pre-computed child indices.
  * @param {any} root
  * @param {number[][]} paths
  * @param {{ nodesVisited: number }} counters
  * @returns {any[]}
  */
 function runDomPathsResolution(root, paths, counters) {
-  const parts = new Array(paths.length);
-  for (let i = 0; i < paths.length; i++) {
-    const p = paths[i];
-    counters.nodesVisited += p.length;
-    parts[i] = resolveNodeByPath(root, p);
+  const parts = [];
+  for (const path of paths) {
+    counters.nodesVisited += path.length;
+    const node = resolveNodeByPath(root, path);
+    if (node) {
+      parts.push(node);
+    }
   }
   return parts;
 }
 
 /**
- * Measure mount latency across real enterprise component templates.
- * @param {Array<{ root: any, paths: number[][] }>} templatePool
- * @param {number} instancesCount
- * @param {boolean} isOptimized
- * @returns {DomPathsBenchmarkMetrics}
+ * Deep clones template node tree for realistic mounting.
+ * @param {any} node
  */
-function measureMountLatency(templatePool, instancesCount, isOptimized) {
-  const counters = { nodesVisited: 0 };
-  let treeWalkerCalls = 0;
+function cloneTree(node) {
+  return {
+    nodeName: node.nodeName,
+    nodeType: node.nodeType,
+    data: node.data,
+    childNodes: (node.childNodes || []).map(cloneTree),
+  };
+}
 
+/**
+ * Measure mount latency and node traversal overhead.
+ * @param {ReturnType<typeof createTemplateTreeFromPaths>[]} templates
+ * @param {number} totalInstances
+ * @param {boolean} isOptimized
+ */
+function measureMountLatency(templates, totalInstances, isOptimized) {
+  const instances = [];
+  for (let i = 0; i < totalInstances; i++) {
+    const tmpl = templates[i % templates.length];
+    instances.push({
+      tree: cloneTree(tmpl.root),
+      paths: tmpl.paths,
+    });
+  }
+
+  const counters = { nodesVisited: 0, treeWalkerCalls: 0 };
   const initialHeap = process.memoryUsage().heapUsed;
   const t0 = performance.now();
 
-  for (let i = 0; i < instancesCount; i++) {
-    const template = templatePool[i % templatePool.length];
-
-    if (!isOptimized) {
-      treeWalkerCalls++;
-      runStandardLitTreeWalker(template.root, counters);
+  for (const inst of instances) {
+    if (isOptimized) {
+      runDomPathsResolution(inst.tree, inst.paths, counters);
     } else {
-      runDomPathsResolution(template.root, template.paths, counters);
+      counters.treeWalkerCalls++;
+      runStandardLitTreeWalker(inst.tree, counters);
     }
   }
 
@@ -146,56 +147,36 @@ function measureMountLatency(templatePool, instancesCount, isOptimized) {
   const heapDiffKb = Math.max(0, (finalHeap - initialHeap) / 1024);
 
   return {
-    instancesCount,
-    treeWalkerCalls,
+    instancesCount: totalInstances,
+    treeWalkerCalls: counters.treeWalkerCalls,
     nodesVisited: counters.nodesVisited,
     mountLatencyMs: Number((t1 - t0).toFixed(2)),
     heapKb: Number(heapDiffKb.toFixed(1)),
   };
 }
 
-/**
- * Format markdown comparison table with sentence case.
- * @param {string} heading
- * @param {number} instances
- * @param {DomPathsBenchmarkMetrics} baseline
- * @param {DomPathsBenchmarkMetrics} optimized
- */
-function formatComparisonTable(heading, instances, baseline, optimized) {
-  const latencyDiff = (((optimized.mountLatencyMs - baseline.mountLatencyMs) / (baseline.mountLatencyMs || 0.01)) * 100).toFixed(1);
-  const nodesDiff = (((optimized.nodesVisited - baseline.nodesVisited) / (baseline.nodesVisited || 1)) * 100).toFixed(1);
-  const walkerDiff = baseline.treeWalkerCalls > 0 ? '-100.0' : '0.0';
-
-  return `### ${heading} (${instances.toLocaleString()} instances mounted)
-
-| Metric | Standard Lit (baseline) | @lit-core/dom-paths | Improvement |
-| :--- | ---: | ---: | ---: |
-| Component mount latency | ${baseline.mountLatencyMs.toFixed(2)} ms | ${optimized.mountLatencyMs.toFixed(2)} ms | **${latencyDiff}%** |
-| Runtime TreeWalker invocations | ${baseline.treeWalkerCalls.toLocaleString()} | ${optimized.treeWalkerCalls.toLocaleString()} | **${walkerDiff}%** |
-| DOM nodes visited during mount | ${baseline.nodesVisited.toLocaleString()} | ${optimized.nodesVisited.toLocaleString()} | **${nodesDiff}%** |
-| Heap memory allocation | ${baseline.heapKb.toFixed(1)} KB | ${optimized.heapKb.toFixed(1)} KB | - |
-`;
-}
-
-const ENTERPRISE_SUITES = [
-  { id: 'carbon', name: 'IBM Carbon Web Components', pkg: '@carbon/web-components' },
-  { id: 'spectrum', name: 'Adobe Spectrum Web Components', pkg: '@spectrum-web-components' },
-  { id: 'webawesome', name: 'Web Awesome', pkg: '@awesome.me/webawesome' },
-  { id: 'momentum', name: 'Cisco Momentum Design', pkg: '@momentum-design/components' },
-  { id: 'material', name: 'Google Material Web', pkg: '@material/web' },
+export const ENTERPRISE_SUITES = [
+  { id: 'carbon', name: 'IBM Carbon Web Components', shortName: 'IBM Carbon', pkg: '@carbon/web-components' },
+  { id: 'spectrum', name: 'Adobe Spectrum Web Components', shortName: 'Adobe Spectrum', pkg: '@spectrum-web-components' },
+  { id: 'webawesome', name: 'Web Awesome', shortName: 'Web Awesome', pkg: '@awesome.me/webawesome' },
+  { id: 'momentum', name: 'Cisco Momentum Design', shortName: 'Cisco Momentum', pkg: '@momentum-design/components' },
+  { id: 'material', name: 'Google Material Web', shortName: 'Google Material Web', pkg: '@material/web' },
 ];
 
-async function runDomPathsBenchmarks() {
-  console.log('\n========================================================================================');
-  console.log('⚡ LIT-CORE MOUNT LATENCY BENCHMARK: DOM-PATHS (5 ENTERPRISE DESIGN SYSTEMS)');
-  console.log('========================================================================================');
-  console.log('Evaluating mount latency and TreeWalker elimination on real production component templates.\n');
-
-  /** @type {SuiteResult[]} */
-  const suiteResults = [];
+/**
+ * Execute pure dom-paths benchmark measurements without formatting or disk I/O.
+ * Returns a typed BenchmarkRunResult.
+ * @param {Object} [options]
+ * @param {boolean} [options.verbose=false]
+ * @returns {Promise<import('./types.js').BenchmarkRunResult>}
+ */
+export async function runDomPathsBenchmarks(options = {}) {
+  const suites = [];
 
   for (const suite of ENTERPRISE_SUITES) {
-    console.log(`⏳ Evaluating design system: ${suite.name} (${suite.pkg})...`);
+    if (options.verbose) {
+      console.log(`  Evaluating design system: ${suite.name}...`);
+    }
     const components = ENTERPRISE_COMPONENTS[suite.id] || [];
 
     const templatePool = [];
@@ -271,156 +252,105 @@ async function runDomPathsBenchmarks() {
       heapKb: Number((oHeap / runs).toFixed(1)),
     };
 
-    suiteResults.push({
+    const latDelta = calculateDelta(baseline.mountLatencyMs, optimized.mountLatencyMs);
+    const nodesDelta = calculateDelta(baseline.nodesVisited, optimized.nodesVisited);
+    const walkerDelta = calculateDelta(baseline.treeWalkerCalls, optimized.treeWalkerCalls);
+
+    suites.push({
       id: suite.id,
       name: suite.name,
-      pkg: suite.pkg,
-      componentsScanned: components.length,
-      templatesCount: templatePool.length,
-      pathsCount: suitePathsCount,
+      shortName: suite.shortName,
+      packageName: suite.pkg,
+      componentCount: components.length,
       baseline,
       optimized,
+      deltas: {
+        latency: latDelta,
+        nodes: nodesDelta,
+        walker: walkerDelta,
+      },
+      diagnostics: {
+        componentsScanned: components.length,
+        templatesCount: templatePool.length,
+        pathsCount: suitePathsCount,
+        traversalReduction: nodesDelta.formattedPercent,
+        buildOverhead: 'Fast native pass',
+      },
     });
-
-    const speedup = (baseline.mountLatencyMs / (optimized.mountLatencyMs || 0.01)).toFixed(1);
-    console.log(`  ✓ ${suite.name}: ${baseline.mountLatencyMs.toFixed(2)} ms → ${optimized.mountLatencyMs.toFixed(2)} ms (${speedup}x speedup, TreeWalker calls: ${baseline.treeWalkerCalls} → 0)`);
   }
 
-  // Compute total and averages
-  const totalComponents = suiteResults.reduce((acc, s) => acc + s.componentsScanned, 0);
-  const totalTemplates = suiteResults.reduce((acc, s) => acc + s.templatesCount, 0);
-  const totalPaths = suiteResults.reduce((acc, s) => acc + s.pathsCount, 0);
-  const avgBaselineLatency = suiteResults.reduce((acc, s) => acc + s.baseline.mountLatencyMs, 0) / suiteResults.length;
-  const avgOptimizedLatency = suiteResults.reduce((acc, s) => acc + s.optimized.mountLatencyMs, 0) / suiteResults.length;
-  const totalBaselineWalker = suiteResults.reduce((acc, s) => acc + s.baseline.treeWalkerCalls, 0);
-  const totalBaselineNodes = suiteResults.reduce((acc, s) => acc + s.baseline.nodesVisited, 0);
-  const totalOptimizedNodes = suiteResults.reduce((acc, s) => acc + s.optimized.nodesVisited, 0);
-
-  const avgSpeedupPct = (((avgOptimizedLatency - avgBaselineLatency) / avgBaselineLatency) * 100).toFixed(1);
-  const totalNodesPct = (((totalOptimizedNodes - totalBaselineNodes) / totalBaselineNodes) * 100).toFixed(1);
-
-  // 3. Format unified comparison matrix and diagnostics
-  const headers = ['Metric', ...suiteResults.map((s) => s.name.replace(' Web Components', '').replace(' Design', '')), 'Total / average'];
-  const alignments = [':---', ...suiteResults.map(() => '---:'), '---:'];
-
-  const baseMountRow = [...suiteResults.map((s) => `${s.baseline.mountLatencyMs.toFixed(2)} ms`), `${avgBaselineLatency.toFixed(2)} ms`];
-  const optMountRow = [...suiteResults.map((s) => `${s.optimized.mountLatencyMs.toFixed(2)} ms`), `${avgOptimizedLatency.toFixed(2)} ms`];
-  const mountSpeedupRow = [
-    ...suiteResults.map((s) => {
-      const p = (((s.optimized.mountLatencyMs - s.baseline.mountLatencyMs) / (s.baseline.mountLatencyMs || 0.01)) * 100).toFixed(1);
-      return `**${p}%**`;
-    }),
-    `**${avgSpeedupPct}%**`,
-  ];
-  const baseWalkerRow = [...suiteResults.map((s) => s.baseline.treeWalkerCalls.toLocaleString()), totalBaselineWalker.toLocaleString()];
-  const optWalkerRow = [...suiteResults.map(() => '0'), '0'];
-  const walkerRedRow = [...suiteResults.map(() => '**-100.0%**'), '**-100.0%**'];
-  const baseNodesRow = [...suiteResults.map((s) => s.baseline.nodesVisited.toLocaleString()), totalBaselineNodes.toLocaleString()];
-  const optNodesRow = [...suiteResults.map((s) => s.optimized.nodesVisited.toLocaleString()), totalOptimizedNodes.toLocaleString()];
-  const nodeRedRow = [
-    ...suiteResults.map((s) => {
-      const p = (((s.optimized.nodesVisited - s.baseline.nodesVisited) / (s.baseline.nodesVisited || 1)) * 100).toFixed(1);
-      return `**${p}%**`;
-    }),
-    `**${totalNodesPct}%**`,
-  ];
-  const baseHeapRow = [...suiteResults.map((s) => `${s.baseline.heapKb.toFixed(1)} KB`), `${(suiteResults.reduce((acc, s) => acc + s.baseline.heapKb, 0) / suiteResults.length).toFixed(1)} KB`];
-  const optHeapRow = [...suiteResults.map((s) => `${s.optimized.heapKb.toFixed(1)} KB`), `${(suiteResults.reduce((acc, s) => acc + s.optimized.heapKb, 0) / suiteResults.length).toFixed(1)} KB`];
-
-  const reportLines = [
-    '# `@lit-core/dom-paths` empirical benchmark results',
-    '',
-    'Ahead-of-time structural DOM child pointer path compilation evaluated across 255 production Web Components to eliminate runtime TreeWalker traversal during component mount.',
-    '',
-    '---',
-    '',
-    '## Benchmarked dependency versions',
-    '',
-    '| Package | Role | Version evaluated | Elements evaluated |',
-    '| :--- | :--- | :--- | ---: |',
-    '| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 51 elements |',
-    '| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 51 elements |',
-    '| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 51 elements |',
-    '| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 51 elements |',
-    '| `@material/web` | Google Material Design 3 | `2.5.0` | 51 elements |',
-    '| `lit` | Core runtime | `3.3.3` | n/a |',
-    '| `vite` | Bundler | `8.3.1` | n/a |',
-    '| `playwright` | Runtime evaluation engine | `1.63.0` | n/a |',
-    '| `node` | Runtime environment | `v24.14.0` | n/a |',
-    '',
-    '---',
-    '',
-    '## Mount latency and DOM traversal performance comparison',
-    '',
-    'Measurements compare standard Lit runtime TreeWalker comment-node discovery against `@lit-core/dom-paths` direct child pointer indexing (`resolveNodeByPath`) across 500 instantiated component batches:',
-    '',
-    `| ${headers.join(' | ')} |`,
-    `| ${alignments.join(' | ')} |`,
-    `| **Baseline mount latency** | ${baseMountRow.join(' | ')} |`,
-    `| **Optimized mount latency** | ${optMountRow.join(' | ')} |`,
-    `| **Mount speedup** | ${mountSpeedupRow.join(' | ')} |`,
-    `| **Baseline TreeWalker invocations** | ${baseWalkerRow.join(' | ')} |`,
-    `| **Optimized TreeWalker invocations** | ${optWalkerRow.join(' | ')} |`,
-    `| **TreeWalker elimination** | ${walkerRedRow.join(' | ')} |`,
-    `| **Baseline DOM nodes visited** | ${baseNodesRow.join(' | ')} |`,
-    `| **Optimized DOM nodes visited** | ${optNodesRow.join(' | ')} |`,
-    `| **Node traversal reduction** | ${nodeRedRow.join(' | ')} |`,
-    `| **Baseline heap memory** | ${baseHeapRow.join(' | ')} |`,
-    `| **Optimized heap memory** | ${optHeapRow.join(' | ')} |`,
-    '',
-    '> [!NOTE]',
-    '> `@lit-core/dom-paths` precomputes exact numeric child index paths (`[0, 2, 1]`) at build time using AST traversal. At runtime, the client resolves target comment and element nodes in nanoseconds via native `.childNodes[i]` indexing, completely bypassing `document.createTreeWalker` recursive scans and cutting mount latency by 75-88%.',
-    '',
-    '---',
-    '',
-    '## Traversal diagnostics and path compilation',
-    '',
-    'Detailed template extraction, static path counts, and compilation diagnostics across enterprise design systems:',
-    '',
-    '| Design system or library | Components scanned | Templates extracted | Static paths generated | Traversal reduction | Build overhead |',
-    '| :--- | ---: | ---: | ---: | ---: | :--- |',
-  ];
-
-  for (const s of suiteResults) {
-    const nodePct = (((s.optimized.nodesVisited - s.baseline.nodesVisited) / (s.baseline.nodesVisited || 1)) * 100).toFixed(1);
-    reportLines.push(`| ${s.name} | ${s.componentsScanned} | ${s.templatesCount} | ${s.pathsCount} | **${nodePct}%** | Fast native pass |`);
-  }
-
-  reportLines.push(`| **Total / average** | **${totalComponents}** | **${totalTemplates}** | **${totalPaths}** | **${totalNodesPct}%** | **Negligible** |`);
-  reportLines.push('');
-  reportLines.push('---');
-  reportLines.push('');
-  reportLines.push('## Running this benchmark');
-  reportLines.push('');
-  reportLines.push('```bash');
-  reportLines.push('# Run standalone dom-paths mount latency benchmark');
-  reportLines.push('node packages/benchmarks/src/dom-paths-bench.js');
-  reportLines.push('```');
-  reportLines.push('');
-  reportLines.push('---');
-  reportLines.push('');
-  reportLines.push('## Architectural highlights and invariants');
-  reportLines.push('');
-  reportLines.push('- **100% elimination of TreeWalker overhead**: Nodes are indexed directly by fixed child paths, completely bypassing `document.createTreeWalker` during component initialization.');
-  reportLines.push('- **Evaluated on production templates**: Traversal paths and node counts are derived directly from the real templates across all 5 enterprise design systems in `node_modules`.');
-  reportLines.push('- **Zero runtime allocations**: Node resolution is executed with micro-operations (`node.childNodes[i]`) requiring zero extra memory allocations.');
-  reportLines.push('- **DOM structural fidelity**: Whitespace normalization and text node merging guarantee exact path alignment between build time and browser DOM.');
-  reportLines.push('');
-  reportLines.push('---');
-  reportLines.push('');
-  reportLines.push('## Related documentation');
-  reportLines.push('');
-  reportLines.push('- [Benchmark executive overview](../README.md)');
-  reportLines.push('- [`@lit-core/dom-paths` package documentation](../../dom-paths/README.md)');
-  reportLines.push('- [Ahead-of-time template compilation](../docs/html-aot.md)');
-  reportLines.push('');
-
-  const outDoc = path.join(__dirname, '../docs/dom-paths.md');
-  fs.writeFileSync(outDoc, reportLines.join('\n'), 'utf-8');
-  console.log(`\n✓ Synchronized benchmark documentation to: ${outDoc}\n`);
+  return createBenchmarkResult({
+    benchmarkId: 'dom-paths',
+    title: '`@lit-core/dom-paths` empirical benchmark results',
+    description: 'Ahead-of-time structural DOM child pointer path compilation evaluated across 255 production Web Components to eliminate runtime TreeWalker traversal during component mount.',
+    suites,
+  });
 }
 
-runDomPathsBenchmarks().catch((err) => {
-  console.error('Benchmark failed:', err);
-  process.exit(1);
-});
+/**
+ * Format dom-paths benchmark results into a standardized markdown document.
+ * Strictly omits any total columns or rows.
+ * @param {import('./types.js').BenchmarkRunResult} result
+ * @returns {string}
+ */
+export function formatDomPathsDoc(result) {
+  return renderBenchmarkDoc({
+    title: result.title,
+    leadParagraph: result.description,
+    comparisonHeading: 'Mount latency and DOM traversal performance comparison',
+    comparisonDescription:
+      'Measurements compare standard Lit runtime TreeWalker comment-node discovery against `@lit-core/dom-paths` direct child pointer indexing (`resolveNodeByPath`) across 500 instantiated component batches:',
+    suites: result.suites,
+    metrics: [
+      { label: 'Baseline mount latency', getValue: (s) => formatDuration(s.baseline.mountLatencyMs) },
+      { label: 'Optimized mount latency', getValue: (s) => formatDuration(s.optimized.mountLatencyMs) },
+      { label: 'Mount speedup', getValue: (s) => `**${s.deltas.latency.formattedPercent}**` },
+      { label: 'Baseline TreeWalker invocations', getValue: (s) => formatNumber(s.baseline.treeWalkerCalls) },
+      { label: 'Optimized TreeWalker invocations', getValue: (s) => formatNumber(s.optimized.treeWalkerCalls) },
+      { label: 'TreeWalker elimination', getValue: (s) => `**${s.deltas.walker.formattedPercent}**` },
+      { label: 'Baseline DOM nodes visited', getValue: (s) => formatNumber(s.baseline.nodesVisited) },
+      { label: 'Optimized DOM nodes visited', getValue: (s) => formatNumber(s.optimized.nodesVisited) },
+      { label: 'Node traversal reduction', getValue: (s) => `**${s.deltas.nodes.formattedPercent}**` },
+      { label: 'Baseline heap memory', getValue: (s) => formatKb(s.baseline.heapKb * 1024, { decimals: 1 }) },
+      { label: 'Optimized heap memory', getValue: (s) => formatKb(s.optimized.heapKb * 1024, { decimals: 1 }) },
+    ],
+    note: '`@lit-core/dom-paths` precomputes exact numeric child index paths (`[0, 2, 1]`) at build time using AST traversal. At runtime, the client resolves target comment and element nodes in nanoseconds via native `.childNodes[i]` indexing, completely bypassing `document.createTreeWalker` recursive scans and cutting mount latency by 75-88%.',
+    diagnosticsHeading: 'Traversal diagnostics and path compilation',
+    diagnosticsDescription: 'Detailed template extraction, static path counts, and compilation diagnostics across enterprise design systems:',
+    diagnosticsColumns: [
+      { header: 'Components scanned', getValue: (s) => formatNumber(s.diagnostics.componentsScanned) },
+      { header: 'Templates extracted', getValue: (s) => formatNumber(s.diagnostics.templatesCount) },
+      { header: 'Static paths generated', getValue: (s) => formatNumber(s.diagnostics.pathsCount) },
+      { header: 'Traversal reduction', getValue: (s) => `**${s.diagnostics.traversalReduction}**` },
+      { header: 'Build overhead', align: 'left', getValue: (s) => s.diagnostics.buildOverhead },
+    ],
+    runCommand: 'node packages/benchmarks/src/dom-paths-bench.js',
+    invariants: [
+      '**100% elimination of TreeWalker overhead**: Nodes are indexed directly by fixed child paths, completely bypassing `document.createTreeWalker` during component initialization.',
+      '**Evaluated on production templates**: Traversal paths and node counts are derived directly from the real templates across all 5 enterprise design systems in `node_modules`.',
+      '**Zero runtime allocations**: Node resolution is executed with micro-operations (`node.childNodes[i]`) requiring zero extra memory allocations.',
+      '**DOM structural fidelity**: Whitespace normalization and text node merging guarantee exact path alignment between build time and browser DOM.',
+    ],
+    relatedDocs: [
+      { label: 'Benchmark executive overview', url: '../README.md' },
+      { label: '`@lit-core/dom-paths` package documentation', url: '../../dom-paths/README.md' },
+      { label: 'Ahead-of-time template compilation', url: '../docs/html-aot.md' },
+    ],
+  });
+}
+
+// CLI execution
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  printBenchmarkHeader('dom-paths', 'Evaluating runtime TreeWalker elimination vs direct child pointer indexing.');
+  runDomPathsBenchmarks({ verbose: true })
+    .then((result) => {
+      const jsonPath = saveBenchmarkResult(result);
+      const doc = formatDomPathsDoc(result);
+      const docPath = syncDocFile('dom-paths.md', doc);
+      printBenchmarkFooter('dom-paths', { jsonPath, docPath });
+    })
+    .catch((err) => {
+      console.error('Benchmark failed:', err);
+      process.exit(1);
+    });
+}

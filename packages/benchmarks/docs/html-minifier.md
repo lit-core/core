@@ -24,17 +24,17 @@ Native Rust AST minification of embedded Lit `html\`...\`` and `svg\`...\`` temp
 
 Measurements compare a standard Vite production build with minification (`minify: true`) against an identical build with `@lit-core/html-minifier` enabled. Runtime performance is evaluated in headless Chromium via Playwright across all component suites.
 
-| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) | Total / average |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB | 9801.50 KB |
-| **Optimized bundle size** | 5747.27 KB | 1856.52 KB | 775.79 KB | 852.54 KB | 441.81 KB | 9673.93 KB |
-| **Net bundle savings** | **-54.60 KB (-0.94%)** | **-21.56 KB (-1.15%)** | **-27.33 KB (-3.40%)** | **-17.51 KB (-2.01%)** | **-6.57 KB (-1.46%)** | **-127.57 KB (-1.30%)** |
-| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms | 14.95 ms |
-| **Optimized mount latency** | 14.96 ms | 14.92 ms | 14.84 ms | 14.88 ms | 15.16 ms | 14.95 ms |
-| **Mount speedup** | **+1.1% (neutral)** | **+1.3% (neutral)** | **-0.3% (neutral)** | **-0.3% (neutral)** | **-1.9% (neutral)** | **+0.0% (neutral)** |
-| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms | 3.42 ms |
-| **Optimized update latency** | 3.42 ms | 3.42 ms | 3.41 ms | 3.41 ms | 3.45 ms | 3.42 ms |
-| **Update speedup** | **+0.9% (neutral)** | **+0.9% (neutral)** | **-0.3% (neutral)** | **+0.0% (neutral)** | **-1.2% (neutral)** | **+0.0% (neutral)** |
+| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 5747.27 KB | 1856.52 KB | 775.79 KB | 852.54 KB | 441.81 KB |
+| **Net bundle savings** | **-54.60 KB (-0.94%)** | **-21.56 KB (-1.15%)** | **-27.33 KB (-3.40%)** | **-17.51 KB (-2.01%)** | **-6.57 KB (-1.46%)** |
+| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms |
+| **Optimized mount latency** | 14.96 ms | 14.92 ms | 14.84 ms | 14.88 ms | 15.16 ms |
+| **Mount speedup** | **+1.1% (neutral)** | **+1.3% (neutral)** | **-0.3% (neutral)** | **-0.3% (neutral)** | **-1.9% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Optimized update latency** | 3.42 ms | 3.42 ms | 3.41 ms | 3.41 ms | 3.45 ms |
+| **Update speedup** | **+0.9% (neutral)** | **+0.9% (neutral)** | **-0.3% (neutral)** | **+0.0% (neutral)** | **-1.2% (neutral)** |
 
 > [!NOTE]
 > `html-minifier` strips static whitespace and comments from Lit `html` and `svg` template literals ahead of time using OXC. Because template preparation, HTML parsing, and DOM instantiation pipelines remain structurally identical, runtime mount and update latencies remain neutral.
@@ -52,7 +52,6 @@ Template processing diagnostics and compilation durations:
 | Web Awesome | 200 | 85 ms | 69 ms | Negligible native pass |
 | Momentum Design | 79 | 134 ms | 98 ms | Negligible native pass |
 | Material Web | 187 | 34 ms | 33 ms | Negligible native pass |
-| **Total / average** | **1,936** | **132 ms** | **94 ms** | **Negligible native pass** |
 
 ---
 

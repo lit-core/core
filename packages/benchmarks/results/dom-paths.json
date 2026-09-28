@@ -1,0 +1,283 @@
+{
+  "schemaVersion": "1.0.0",
+  "benchmarkId": "dom-paths",
+  "title": "`@lit-core/dom-paths` empirical benchmark results",
+  "description": "Ahead-of-time structural DOM child pointer path compilation evaluated across 255 production Web Components to eliminate runtime TreeWalker traversal during component mount.",
+  "timestamp": "2026-09-28T21:18:22.496Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "a724976",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "suites": [
+    {
+      "id": "carbon",
+      "name": "IBM Carbon Web Components",
+      "shortName": "IBM Carbon",
+      "packageName": "@carbon/web-components",
+      "componentCount": 51,
+      "baseline": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 500,
+        "nodesVisited": 1863,
+        "mountLatencyMs": 0.15,
+        "heapKb": 174.5
+      },
+      "optimized": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 0,
+        "nodesVisited": 4629,
+        "mountLatencyMs": 0.11,
+        "heapKb": 317
+      },
+      "deltas": {
+        "latency": {
+          "diff": -0.039999999999999994,
+          "percent": -26.666666666666668,
+          "formattedDiff": "-0.0",
+          "formattedPercent": "-26.7%",
+          "isReduction": true
+        },
+        "nodes": {
+          "diff": 2766,
+          "percent": 148.47020933977456,
+          "formattedDiff": "2,766.0",
+          "formattedPercent": "+148.5%",
+          "isReduction": false
+        },
+        "walker": {
+          "diff": -500,
+          "percent": -100,
+          "formattedDiff": "-500.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "componentsScanned": 51,
+        "templatesCount": 60,
+        "pathsCount": 350,
+        "traversalReduction": "+148.5%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "spectrum",
+      "name": "Adobe Spectrum Web Components",
+      "shortName": "Adobe Spectrum",
+      "packageName": "@spectrum-web-components",
+      "componentCount": 51,
+      "baseline": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 500,
+        "nodesVisited": 1000,
+        "mountLatencyMs": 0.07,
+        "heapKb": 141
+      },
+      "optimized": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 0,
+        "nodesVisited": 1000,
+        "mountLatencyMs": 0.06,
+        "heapKb": 193.3
+      },
+      "deltas": {
+        "latency": {
+          "diff": -0.010000000000000009,
+          "percent": -14.285714285714295,
+          "formattedDiff": "-0.0",
+          "formattedPercent": "-14.3%",
+          "isReduction": true
+        },
+        "nodes": {
+          "diff": 0,
+          "percent": 0,
+          "formattedDiff": "0.0",
+          "formattedPercent": "0.0%",
+          "isReduction": false
+        },
+        "walker": {
+          "diff": -500,
+          "percent": -100,
+          "formattedDiff": "-500.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "componentsScanned": 51,
+        "templatesCount": 1,
+        "pathsCount": 0,
+        "traversalReduction": "0.0%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "webawesome",
+      "name": "Web Awesome",
+      "shortName": "Web Awesome",
+      "packageName": "@awesome.me/webawesome",
+      "componentCount": 51,
+      "baseline": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 500,
+        "nodesVisited": 2861,
+        "mountLatencyMs": 0.12,
+        "heapKb": 185.1
+      },
+      "optimized": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 0,
+        "nodesVisited": 7346,
+        "mountLatencyMs": 0.1,
+        "heapKb": 199.4
+      },
+      "deltas": {
+        "latency": {
+          "diff": -0.01999999999999999,
+          "percent": -16.66666666666666,
+          "formattedDiff": "-0.0",
+          "formattedPercent": "-16.7%",
+          "isReduction": true
+        },
+        "nodes": {
+          "diff": 4485,
+          "percent": 156.76336945124083,
+          "formattedDiff": "4,485.0",
+          "formattedPercent": "+156.8%",
+          "isReduction": false
+        },
+        "walker": {
+          "diff": -500,
+          "percent": -100,
+          "formattedDiff": "-500.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "componentsScanned": 51,
+        "templatesCount": 44,
+        "pathsCount": 331,
+        "traversalReduction": "+156.8%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "momentum",
+      "name": "Cisco Momentum Design",
+      "shortName": "Cisco Momentum",
+      "packageName": "@momentum-design/components",
+      "componentCount": 51,
+      "baseline": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 500,
+        "nodesVisited": 2103,
+        "mountLatencyMs": 0.11,
+        "heapKb": 147.7
+      },
+      "optimized": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 0,
+        "nodesVisited": 4531,
+        "mountLatencyMs": 0.03,
+        "heapKb": 122.5
+      },
+      "deltas": {
+        "latency": {
+          "diff": -0.08,
+          "percent": -72.72727272727273,
+          "formattedDiff": "-0.1",
+          "formattedPercent": "-72.7%",
+          "isReduction": true
+        },
+        "nodes": {
+          "diff": 2428,
+          "percent": 115.45411317165954,
+          "formattedDiff": "2,428.0",
+          "formattedPercent": "+115.5%",
+          "isReduction": false
+        },
+        "walker": {
+          "diff": -500,
+          "percent": -100,
+          "formattedDiff": "-500.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "componentsScanned": 51,
+        "templatesCount": 63,
+        "pathsCount": 337,
+        "traversalReduction": "+115.5%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "material",
+      "name": "Google Material Web",
+      "shortName": "Google Material Web",
+      "packageName": "@material/web",
+      "componentCount": 51,
+      "baseline": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 500,
+        "nodesVisited": 1843,
+        "mountLatencyMs": 0.1,
+        "heapKb": 156.2
+      },
+      "optimized": {
+        "instancesCount": 500,
+        "treeWalkerCalls": 0,
+        "nodesVisited": 3498,
+        "mountLatencyMs": 0.02,
+        "heapKb": 109.9
+      },
+      "deltas": {
+        "latency": {
+          "diff": -0.08,
+          "percent": -80,
+          "formattedDiff": "-0.1",
+          "formattedPercent": "-80.0%",
+          "isReduction": true
+        },
+        "nodes": {
+          "diff": 1655,
+          "percent": 89.79924036896365,
+          "formattedDiff": "1,655.0",
+          "formattedPercent": "+89.8%",
+          "isReduction": false
+        },
+        "walker": {
+          "diff": -500,
+          "percent": -100,
+          "formattedDiff": "-500.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "componentsScanned": 51,
+        "templatesCount": 30,
+        "pathsCount": 130,
+        "traversalReduction": "+89.8%",
+        "buildOverhead": "Fast native pass"
+      }
+    }
+  ]
+}

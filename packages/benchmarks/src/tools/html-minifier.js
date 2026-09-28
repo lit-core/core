@@ -14,7 +14,7 @@ export const htmlMinifierTool = {
 
   /**
    * Return Vite plugin(s) to test htmlMinifier in isolation.
-   * @param {import('../types.js').SuiteContext} _suite
+   * @param {import('../types.js').SuiteContext} suite
    * @returns {import('vite').Plugin[]}
    */
   getPlugins(suite) {

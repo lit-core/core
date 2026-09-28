@@ -49,4 +49,33 @@
  * }} SuiteBenchmarkResult
  */
 
+/**
+ * @template [TMetrics=Record<string, number>]
+ * @template [TDiagnostics=Record<string, any>]
+ * @typedef {Object} BenchmarkSuiteResult
+ * @property {string} id
+ * @property {string} name
+ * @property {string} [packageName]
+ * @property {string} [version]
+ * @property {number} [componentCount]
+ * @property {TMetrics} baseline
+ * @property {TMetrics} optimized
+ * @property {Record<string, { diff: number, percent: number, isImprovement?: boolean }>} [deltas]
+ * @property {TDiagnostics} [diagnostics]
+ */
+
+/**
+ * @template [TMetrics=Record<string, number>]
+ * @template [TDiagnostics=Record<string, any>]
+ * @typedef {Object} BenchmarkRunResult
+ * @property {string} schemaVersion
+ * @property {string} benchmarkId
+ * @property {string} title
+ * @property {string} description
+ * @property {string} timestamp
+ * @property {Record<string, any>} environment
+ * @property {Array<BenchmarkSuiteResult<TMetrics, TDiagnostics>>} suites
+ * @property {Record<string, any>} [summary]
+ */
+
 export {};

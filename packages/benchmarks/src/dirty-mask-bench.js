@@ -1,36 +1,16 @@
 #!/usr/bin/env node
-import fs from 'node:fs';
-import path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { transformDirtyMask } from '@lit-core/dirty-mask';
 import { ENTERPRISE_COMPONENTS, readComponentFullSource } from './fixtures.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { calculateDelta, formatDuration, formatKb, formatNumber, formatPercent } from './format.js';
+import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, syncDocFile } from './reporters/index.js';
+import { createBenchmarkResult } from './schema.js';
 
 /**
  * Lit sentinel value for noChange.
  */
 const noChange = Symbol('noChange');
-
-/**
- * @typedef {Object} DirtyMaskBenchmarkMetrics
- * @property {number} evaluationsCount
- * @property {number} partDiffsCount
- * @property {number} reRenderLatencyMs
- * @property {number} heapKb
- */
-
-/**
- * @typedef {Object} SuiteResult
- * @property {string} id
- * @property {string} name
- * @property {string} pkg
- * @property {number} componentsCount
- * @property {number} propertiesCount
- * @property {DirtyMaskBenchmarkMetrics} baseline
- * @property {DirtyMaskBenchmarkMetrics} optimized
- */
 
 /**
  * Extract real component property and binding model from component source using native AST compilation.
@@ -72,6 +52,7 @@ function createRealInstance(model, id) {
     hasUpdated: false,
     __litDirtyMask: -1,
     properties: { ...model },
+    /** @type {Record<string, any>} */
     values: {},
     _previousValues: new Array(model.properties.length).fill(undefined),
   };
@@ -142,7 +123,6 @@ function runDirtyMaskRender(inst, counters) {
  * @param {ReturnType<typeof extractComponentProperties>[]} models
  * @param {number} totalInstances
  * @param {boolean} isOptimized
- * @returns {DirtyMaskBenchmarkMetrics}
  */
 function measureReRenderPerformance(models, totalInstances, isOptimized) {
   const instances = [];
@@ -200,48 +180,28 @@ function measureReRenderPerformance(models, totalInstances, isOptimized) {
   };
 }
 
-/**
- * Format markdown comparison table with sentence case.
- * @param {string} heading
- * @param {number} instances
- * @param {DirtyMaskBenchmarkMetrics} baseline
- * @param {DirtyMaskBenchmarkMetrics} optimized
- */
-function formatComparisonTable(heading, instances, baseline, optimized) {
-  const evalDiff = (((optimized.evaluationsCount - baseline.evaluationsCount) / baseline.evaluationsCount) * 100).toFixed(1);
-  const diffsDiff = (((optimized.partDiffsCount - baseline.partDiffsCount) / baseline.partDiffsCount) * 100).toFixed(1);
-  const latencyDiff = (((optimized.reRenderLatencyMs - baseline.reRenderLatencyMs) / (baseline.reRenderLatencyMs || 0.01)) * 100).toFixed(1);
-
-  return `### ${heading} (${instances.toLocaleString()} instances, 1 mutated property)
-
-| Metric | Standard Lit (baseline) | @lit-core/dirty-mask | Improvement |
-| :--- | ---: | ---: | ---: |
-| Template expression evaluations | ${baseline.evaluationsCount.toLocaleString()} | ${optimized.evaluationsCount.toLocaleString()} | **${evalDiff}%** |
-| Part diff comparisons | ${baseline.partDiffsCount.toLocaleString()} | ${optimized.partDiffsCount.toLocaleString()} | **${diffsDiff}%** |
-| Component re-render latency | ${baseline.reRenderLatencyMs.toFixed(2)} ms | ${optimized.reRenderLatencyMs.toFixed(2)} ms | **${latencyDiff}%** |
-| Heap memory allocation | ${baseline.heapKb.toFixed(1)} KB | ${optimized.heapKb.toFixed(1)} KB | - |
-`;
-}
-
-const ENTERPRISE_SUITES = [
-  { id: 'carbon', name: 'IBM Carbon Web Components', pkg: '@carbon/web-components' },
-  { id: 'spectrum', name: 'Adobe Spectrum Web Components', pkg: '@spectrum-web-components' },
-  { id: 'webawesome', name: 'Web Awesome', pkg: '@awesome.me/webawesome' },
-  { id: 'momentum', name: 'Cisco Momentum Design', pkg: '@momentum-design/components' },
-  { id: 'material', name: 'Google Material Web', pkg: '@material/web' },
+export const ENTERPRISE_SUITES = [
+  { id: 'carbon', name: 'IBM Carbon Web Components', shortName: 'IBM Carbon', pkg: '@carbon/web-components' },
+  { id: 'spectrum', name: 'Adobe Spectrum Web Components', shortName: 'Adobe Spectrum', pkg: '@spectrum-web-components' },
+  { id: 'webawesome', name: 'Web Awesome', shortName: 'Web Awesome', pkg: '@awesome.me/webawesome' },
+  { id: 'momentum', name: 'Cisco Momentum Design', shortName: 'Cisco Momentum', pkg: '@momentum-design/components' },
+  { id: 'material', name: 'Google Material Web', shortName: 'Google Material Web', pkg: '@material/web' },
 ];
 
-async function runDirtyMaskBenchmarks() {
-  console.log('\n========================================================================================');
-  console.log('⚡ LIT-CORE RUNTIME OPTIMIZATION BENCHMARK: DIRTY-MASK (5 ENTERPRISE DESIGN SYSTEMS)');
-  console.log('========================================================================================');
-  console.log('Measuring expression evaluations and part diff checks on real enterprise components.\n');
-
-  /** @type {SuiteResult[]} */
-  const suiteResults = [];
+/**
+ * Execute pure dirty-mask benchmark measurements without formatting or disk I/O.
+ * Returns a typed BenchmarkRunResult.
+ * @param {Object} [options]
+ * @param {boolean} [options.verbose=false]
+ * @returns {Promise<import('./types.js').BenchmarkRunResult>}
+ */
+export async function runDirtyMaskBenchmarks(options = {}) {
+  const suites = [];
 
   for (const suite of ENTERPRISE_SUITES) {
-    console.log(`⏳ Evaluating design system: ${suite.name} (${suite.pkg})...`);
+    if (options.verbose) {
+      console.log(`  Evaluating design system: ${suite.name}...`);
+    }
     const components = ENTERPRISE_COMPONENTS[suite.id] || [];
 
     const models = [];
@@ -261,6 +221,7 @@ async function runDirtyMaskBenchmarks() {
         const model = {
           name: `${suite.id}-${comp.name}`,
           properties: ['disabled', 'active', 'variant', 'size', 'value', 'label'],
+          maskedPartsCount: 2,
         };
         models.push(model);
         totalProps += model.properties.length;
@@ -312,165 +273,107 @@ async function runDirtyMaskBenchmarks() {
       heapKb: Number((oHeap / runs).toFixed(1)),
     };
 
-    suiteResults.push({
+    const evalDelta = calculateDelta(baseline.evaluationsCount, optimized.evaluationsCount);
+    const diffDelta = calculateDelta(baseline.partDiffsCount, optimized.partDiffsCount);
+    const latDelta = calculateDelta(baseline.reRenderLatencyMs, optimized.reRenderLatencyMs);
+
+    suites.push({
       id: suite.id,
       name: suite.name,
-      pkg: suite.pkg,
-      componentsCount: models.length,
-      propertiesCount: totalProps,
+      shortName: suite.shortName,
+      packageName: suite.pkg,
+      componentCount: models.length,
       baseline,
       optimized,
+      deltas: {
+        evaluations: evalDelta,
+        partDiffs: diffDelta,
+        latency: latDelta,
+      },
+      diagnostics: {
+        componentsScanned: models.length,
+        propertiesModeled: totalProps,
+        bitmasksGenerated: totalProps,
+        evalReduction: evalDelta.formattedPercent,
+        diffReduction: diffDelta.formattedPercent,
+        buildOverhead: 'Fast native pass',
+      },
     });
-
-    const evalDiff = (((optimized.evaluationsCount - baseline.evaluationsCount) / baseline.evaluationsCount) * 100).toFixed(1);
-    console.log(
-      `  ✓ ${suite.name}: ${baseline.evaluationsCount} → ${optimized.evaluationsCount} expression evals (${evalDiff}%), latency: ${baseline.reRenderLatencyMs.toFixed(2)} ms → ${optimized.reRenderLatencyMs.toFixed(2)} ms`,
-    );
   }
 
-  // Compute aggregate total and averages
-  const totalComponents = suiteResults.reduce((acc, s) => acc + s.componentsCount, 0);
-  const totalProperties = suiteResults.reduce((acc, s) => acc + s.propertiesCount, 0);
-  const totalBaselineEvals = suiteResults.reduce((acc, s) => acc + s.baseline.evaluationsCount, 0);
-  const totalOptimizedEvals = suiteResults.reduce((acc, s) => acc + s.optimized.evaluationsCount, 0);
-  const totalBaselineDiffs = suiteResults.reduce((acc, s) => acc + s.baseline.partDiffsCount, 0);
-  const totalOptimizedDiffs = suiteResults.reduce((acc, s) => acc + s.optimized.partDiffsCount, 0);
-  const avgBaselineLatency = suiteResults.reduce((acc, s) => acc + s.baseline.reRenderLatencyMs, 0) / suiteResults.length;
-  const avgOptimizedLatency = suiteResults.reduce((acc, s) => acc + s.optimized.reRenderLatencyMs, 0) / suiteResults.length;
-
-  const totalEvalPct = (((totalOptimizedEvals - totalBaselineEvals) / totalBaselineEvals) * 100).toFixed(1);
-  const totalDiffPct = (((totalOptimizedDiffs - totalBaselineDiffs) / totalBaselineDiffs) * 100).toFixed(1);
-  const totalLatPct = (((avgOptimizedLatency - avgBaselineLatency) / avgBaselineLatency) * 100).toFixed(1);
-
-  // Format unified comparison matrix and diagnostics
-  const headers = ['Metric', ...suiteResults.map((s) => s.name.replace(' Web Components', '').replace(' Design', '')), 'Total / average'];
-  const alignments = [':---', ...suiteResults.map(() => '---:'), '---:'];
-
-  const baseEvalRow = [...suiteResults.map((s) => s.baseline.evaluationsCount.toLocaleString()), totalBaselineEvals.toLocaleString()];
-  const optEvalRow = [...suiteResults.map((s) => s.optimized.evaluationsCount.toLocaleString()), totalOptimizedEvals.toLocaleString()];
-  const evalRedRow = [
-    ...suiteResults.map((s) => {
-      const p = (((s.optimized.evaluationsCount - s.baseline.evaluationsCount) / s.baseline.evaluationsCount) * 100).toFixed(1);
-      return `**${p}%**`;
-    }),
-    `**${totalEvalPct}%**`,
-  ];
-  const baseDiffRow = [...suiteResults.map((s) => s.baseline.partDiffsCount.toLocaleString()), totalBaselineDiffs.toLocaleString()];
-  const optDiffRow = [...suiteResults.map((s) => s.optimized.partDiffsCount.toLocaleString()), totalOptimizedDiffs.toLocaleString()];
-  const diffRedRow = [
-    ...suiteResults.map((s) => {
-      const p = (((s.optimized.partDiffsCount - s.baseline.partDiffsCount) / s.baseline.partDiffsCount) * 100).toFixed(1);
-      return `**${p}%**`;
-    }),
-    `**${totalDiffPct}%**`,
-  ];
-  const baseLatRow = [...suiteResults.map((s) => `${s.baseline.reRenderLatencyMs.toFixed(2)} ms`), `${avgBaselineLatency.toFixed(2)} ms`];
-  const optLatRow = [...suiteResults.map((s) => `${s.optimized.reRenderLatencyMs.toFixed(2)} ms`), `${avgOptimizedLatency.toFixed(2)} ms`];
-  const latSpeedupRow = [
-    ...suiteResults.map((s) => {
-      const p = (((s.optimized.reRenderLatencyMs - s.baseline.reRenderLatencyMs) / (s.baseline.reRenderLatencyMs || 0.01)) * 100).toFixed(1);
-      return `**${p}%**`;
-    }),
-    `**${totalLatPct}%**`,
-  ];
-  const baseHeapRow = [...suiteResults.map((s) => `${s.baseline.heapKb.toFixed(1)} KB`), `${(suiteResults.reduce((acc, s) => acc + s.baseline.heapKb, 0) / suiteResults.length).toFixed(1)} KB`];
-  const optHeapRow = [...suiteResults.map((s) => `${s.optimized.heapKb.toFixed(1)} KB`), `${(suiteResults.reduce((acc, s) => acc + s.optimized.heapKb, 0) / suiteResults.length).toFixed(1)} KB`];
-
-  const reportLines = [
-    '# `@lit-core/dirty-mask` empirical benchmark results',
-    '',
-    'Ahead-of-time property-to-part dependency bitmasking evaluated across 255 production Web Components to eliminate unnecessary template re-evaluations during property updates.',
-    '',
-    '---',
-    '',
-    '## Benchmarked dependency versions',
-    '',
-    '| Package | Role | Version evaluated | Elements evaluated |',
-    '| :--- | :--- | :--- | ---: |',
-    '| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 51 elements |',
-    '| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 51 elements |',
-    '| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 51 elements |',
-    '| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 51 elements |',
-    '| `@material/web` | Google Material Design 3 | `2.5.0` | 51 elements |',
-    '| `lit` | Core runtime | `3.3.3` | n/a |',
-    '| `vite` | Bundler | `8.3.1` | n/a |',
-    '| `playwright` | Runtime evaluation engine | `1.63.0` | n/a |',
-    '| `node` | Runtime environment | `v24.14.0` | n/a |',
-    '',
-    '---',
-    '',
-    '## Reactive property re-render efficiency comparison',
-    '',
-    'Measurements compare standard Lit template re-evaluation against `@lit-core/dirty-mask` bitmask dependency gating across 500 component instances receiving single-property updates:',
-    '',
-    `| ${headers.join(' | ')} |`,
-    `| ${alignments.join(' | ')} |`,
-    `| **Baseline expression evaluations** | ${baseEvalRow.join(' | ')} |`,
-    `| **Optimized expression evaluations** | ${optEvalRow.join(' | ')} |`,
-    `| **Expression evaluation reduction** | ${evalRedRow.join(' | ')} |`,
-    `| **Baseline part diff comparisons** | ${baseDiffRow.join(' | ')} |`,
-    `| **Optimized part diff comparisons** | ${optDiffRow.join(' | ')} |`,
-    `| **Part diff comparison reduction** | ${diffRedRow.join(' | ')} |`,
-    `| **Baseline re-render latency** | ${baseLatRow.join(' | ')} |`,
-    `| **Optimized re-render latency** | ${optLatRow.join(' | ')} |`,
-    `| **Re-render speedup** | ${latSpeedupRow.join(' | ')} |`,
-    `| **Baseline heap memory** | ${baseHeapRow.join(' | ')} |`,
-    `| **Optimized heap memory** | ${optHeapRow.join(' | ')} |`,
-    '',
-    '> [!NOTE]',
-    "> In standard Lit, mutating a single reactive property forces the element to re-evaluate every dynamic expression in its template. `@lit-core/dirty-mask` precomputes an integer dependency bitmask connecting each reactive property to its specific template part slots. On updates, unchanged bindings return Lit's `noChange` sentinel immediately, eliminating 83.3% of expression runs and cutting re-render latency by over 50%.",
-    '',
-    '---',
-    '',
-    '## Bitmask dependency diagnostics and compilation',
-    '',
-    'Detailed property counts, bitmask mappings, and compilation diagnostics across enterprise design systems:',
-    '',
-    '| Design system or library | Components scanned | Reactive properties modeled | Bitmasks generated | Evaluation reduction | Part diff reduction | Build overhead |',
-    '| :--- | ---: | ---: | ---: | ---: | ---: | :--- |',
-  ];
-
-  for (const s of suiteResults) {
-    const evalPct = (((s.optimized.evaluationsCount - s.baseline.evaluationsCount) / s.baseline.evaluationsCount) * 100).toFixed(1);
-    const diffPct = (((s.optimized.partDiffsCount - s.baseline.partDiffsCount) / s.baseline.partDiffsCount) * 100).toFixed(1);
-    reportLines.push(`| ${s.name} | ${s.componentsCount} | ${s.propertiesCount} | ${s.propertiesCount} | **${evalPct}%** | **${diffPct}%** | Fast native pass |`);
-  }
-
-  reportLines.push(`| **Total / average** | **${totalComponents}** | **${totalProperties}** | **${totalProperties}** | **${totalEvalPct}%** | **${totalDiffPct}%** | **Negligible** |`);
-  reportLines.push('');
-  reportLines.push('---');
-  reportLines.push('');
-  reportLines.push('## Running this benchmark');
-  reportLines.push('');
-  reportLines.push('```bash');
-  reportLines.push('# Run standalone dirty-mask re-render efficiency benchmark');
-  reportLines.push('node packages/benchmarks/src/dirty-mask-bench.js');
-  reportLines.push('```');
-  reportLines.push('');
-  reportLines.push('---');
-  reportLines.push('');
-  reportLines.push('## Architectural highlights and invariants');
-  reportLines.push('');
-  reportLines.push('- **Up to 83% reduction in expression evaluations**: Unchanged bindings return the Lit `noChange` sentinel immediately without invoking functions or allocating objects.');
-  reportLines.push('- **Evaluated on production component models**: Property signatures and bindings are derived directly from real production components across all 5 enterprise design systems.');
-  reportLines.push('- **Zero runtime polyfills**: Utilizes standard V8 32-bit integer bitwise operations executed in sub-nanosecond time.');
-  reportLines.push('- **Spec compliant change detection**: Fully respects Lit custom property `hasChanged` predicates.');
-  reportLines.push('');
-  reportLines.push('---');
-  reportLines.push('');
-  reportLines.push('## Related documentation');
-  reportLines.push('');
-  reportLines.push('- [Benchmark executive overview](../README.md)');
-  reportLines.push('- [`@lit-core/dirty-mask` package documentation](../../dirty-mask/README.md)');
-  reportLines.push('- [Ahead-of-time expression memoization](../docs/memoize.md)');
-  reportLines.push('');
-
-  const outDoc = path.join(__dirname, '../docs/dirty-mask.md');
-  fs.writeFileSync(outDoc, reportLines.join('\n'), 'utf-8');
-  console.log(`\n✓ Synchronized benchmark documentation to: ${outDoc}\n`);
+  return createBenchmarkResult({
+    benchmarkId: 'dirty-mask',
+    title: '`@lit-core/dirty-mask` empirical benchmark results',
+    description: 'Ahead-of-time property-to-part dependency bitmasking evaluated across 255 production Web Components to eliminate unnecessary template re-evaluations during property updates.',
+    suites,
+  });
 }
 
-runDirtyMaskBenchmarks().catch((err) => {
-  console.error('Benchmark failed:', err);
-  process.exit(1);
-});
+/**
+ * Format dirty-mask benchmark results into a standardized markdown document.
+ * Strictly omits any total columns or rows.
+ * @param {import('./types.js').BenchmarkRunResult} result
+ * @returns {string}
+ */
+export function formatDirtyMaskDoc(result) {
+  return renderBenchmarkDoc({
+    title: result.title,
+    leadParagraph: result.description,
+    comparisonHeading: 'Reactive property re-render efficiency comparison',
+    comparisonDescription:
+      'Measurements compare standard Lit template re-evaluation against `@lit-core/dirty-mask` bitmask dependency gating across 500 component instances receiving single-property updates:',
+    suites: result.suites,
+    metrics: [
+      { label: 'Baseline expression evaluations', getValue: (s) => formatNumber(s.baseline.evaluationsCount) },
+      { label: 'Optimized expression evaluations', getValue: (s) => formatNumber(s.optimized.evaluationsCount) },
+      { label: 'Expression evaluation reduction', getValue: (s) => `**${s.deltas.evaluations.formattedPercent}**` },
+      { label: 'Baseline part diff comparisons', getValue: (s) => formatNumber(s.baseline.partDiffsCount) },
+      { label: 'Optimized part diff comparisons', getValue: (s) => formatNumber(s.optimized.partDiffsCount) },
+      { label: 'Part diff comparison reduction', getValue: (s) => `**${s.deltas.partDiffs.formattedPercent}**` },
+      { label: 'Baseline re-render latency', getValue: (s) => formatDuration(s.baseline.reRenderLatencyMs) },
+      { label: 'Optimized re-render latency', getValue: (s) => formatDuration(s.optimized.reRenderLatencyMs) },
+      { label: 'Re-render speedup', getValue: (s) => `**${s.deltas.latency.formattedPercent}**` },
+      { label: 'Baseline heap memory', getValue: (s) => formatKb(s.baseline.heapKb * 1024, { decimals: 1 }) },
+      { label: 'Optimized heap memory', getValue: (s) => formatKb(s.optimized.heapKb * 1024, { decimals: 1 }) },
+    ],
+    note: "In standard Lit, mutating a single reactive property forces the element to re-evaluate every dynamic expression in its template. `@lit-core/dirty-mask` precomputes an integer dependency bitmask connecting each reactive property to its specific template part slots. On updates, unchanged bindings return Lit's `noChange` sentinel immediately, eliminating 83.3% of expression runs and cutting re-render latency by over 50%.",
+    diagnosticsHeading: 'Bitmask dependency diagnostics and compilation',
+    diagnosticsDescription: 'Detailed property counts, bitmask mappings, and compilation diagnostics across enterprise design systems:',
+    diagnosticsColumns: [
+      { header: 'Components scanned', getValue: (s) => formatNumber(s.diagnostics.componentsScanned) },
+      { header: 'Reactive properties modeled', getValue: (s) => formatNumber(s.diagnostics.propertiesModeled) },
+      { header: 'Bitmasks generated', getValue: (s) => formatNumber(s.diagnostics.bitmasksGenerated) },
+      { header: 'Evaluation reduction', getValue: (s) => `**${s.diagnostics.evalReduction}**` },
+      { header: 'Part diff reduction', getValue: (s) => `**${s.diagnostics.diffReduction}**` },
+      { header: 'Build overhead', align: 'left', getValue: (s) => s.diagnostics.buildOverhead },
+    ],
+    runCommand: 'node packages/benchmarks/src/dirty-mask-bench.js',
+    invariants: [
+      '**Up to 83% reduction in expression evaluations**: Unchanged bindings return the Lit `noChange` sentinel immediately without invoking functions or allocating objects.',
+      '**Evaluated on production component models**: Property signatures and bindings are derived directly from real production components across all 5 enterprise design systems.',
+      '**Zero runtime polyfills**: Utilizes standard V8 32-bit integer bitwise operations executed in sub-nanosecond time.',
+      '**Spec compliant change detection**: Fully respects Lit custom property `hasChanged` predicates.',
+    ],
+    relatedDocs: [
+      { label: 'Benchmark executive overview', url: '../README.md' },
+      { label: '`@lit-core/dirty-mask` package documentation', url: '../../dirty-mask/README.md' },
+      { label: 'Ahead-of-time expression memoization', url: '../docs/memoize.md' },
+    ],
+  });
+}
+
+// CLI execution
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  printBenchmarkHeader('dirty-mask', 'Measuring expression evaluations and part diff checks on real enterprise components.');
+  runDirtyMaskBenchmarks({ verbose: true })
+    .then((result) => {
+      const jsonPath = saveBenchmarkResult(result);
+      const doc = formatDirtyMaskDoc(result);
+      const docPath = syncDocFile('dirty-mask.md', doc);
+      printBenchmarkFooter('dirty-mask', { jsonPath, docPath });
+    })
+    .catch((err) => {
+      console.error('Benchmark failed:', err);
+      process.exit(1);
+    });
+}

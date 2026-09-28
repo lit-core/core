@@ -24,17 +24,17 @@ Native Rust AST minification of embedded Lit `css\`...\`` template literals via 
 
 Measurements compare a standard Vite production build with minification (`minify: true`) against an identical build with `@lit-core/css-minifier` enabled. Runtime performance is evaluated in headless Chromium via Playwright across all component suites.
 
-| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) | Total / average |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB | 9801.50 KB |
-| **Optimized bundle size** | 5759.60 KB | 1877.23 KB | 733.47 KB | 833.56 KB | 441.92 KB | 9645.78 KB |
-| **Net bundle savings** | **-42.27 KB (-0.73%)** | **-0.84 KB (-0.04%)** | **-69.65 KB (-8.67%)** | **-36.49 KB (-4.19%)** | **-6.45 KB (-1.44%)** | **-155.72 KB (-1.59%)** |
-| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms | 14.95 ms |
-| **Optimized mount latency** | 14.88 ms | 15.00 ms | 14.96 ms | 14.88 ms | 14.80 ms | 14.90 ms |
-| **Mount speedup** | **+1.6% (neutral)** | **+0.8% (neutral)** | **-1.1% (neutral)** | **-0.3% (neutral)** | **+0.5% (neutral)** | **+0.3% (neutral)** |
-| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms | 3.42 ms |
-| **Optimized update latency** | 3.41 ms | 3.43 ms | 3.42 ms | 3.41 ms | 3.40 ms | 3.41 ms |
-| **Update speedup** | **+1.2% (neutral)** | **+0.6% (neutral)** | **-0.6% (neutral)** | **+0.0% (neutral)** | **+0.3% (neutral)** | **+0.3% (neutral)** |
+| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 5759.60 KB | 1877.23 KB | 733.47 KB | 833.56 KB | 441.92 KB |
+| **Net bundle savings** | **-42.27 KB (-0.73%)** | **-0.84 KB (-0.04%)** | **-69.65 KB (-8.67%)** | **-36.49 KB (-4.19%)** | **-6.45 KB (-1.44%)** |
+| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 0.00 ms |
+| **Optimized mount latency** | 14.88 ms | 15.00 ms | 14.96 ms | 14.88 ms | 0.00 ms |
+| **Mount speedup** | **+1.6% (neutral)** | **+0.8% (neutral)** | **-1.1% (neutral)** | **-0.3% (neutral)** | **+0.0% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 0.00 ms |
+| **Optimized update latency** | 3.41 ms | 3.43 ms | 3.42 ms | 3.41 ms | 0.00 ms |
+| **Update speedup** | **+1.2% (neutral)** | **+0.6% (neutral)** | **-0.6% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** |
 
 > [!NOTE]
 > `css-minifier` optimizes embedded CSS ASTs using Lightning CSS, removing comments, redundant whitespace, and duplicate declarations at build time. Because it does not alter stylesheet instantiation, DOM adoption, or the Lit rendering cycle, runtime mount and update latencies remain neutral.
@@ -52,7 +52,6 @@ Template processing diagnostics and compilation durations:
 | Web Awesome | 73 | 85 ms | 69 ms | Negligible native pass |
 | Momentum Design | 97 | 134 ms | 105 ms | Negligible native pass |
 | Material Web | 28 | 34 ms | 42 ms | +8 ms |
-| **Total / average** | **349** | **132 ms** | **115 ms** | **Negligible native pass** |
 
 ---
 

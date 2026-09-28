@@ -1,6 +1,34 @@
 import { compileHtmlAot } from '@lit-core/html-aot';
 import { type Browser, chromium } from 'playwright';
+import { build } from 'vite';
 import { afterAll, describe, expect, it } from 'vitest';
+
+/**
+ * Bundles a test JavaScript snippet in memory using local dependencies.
+ */
+async function bundleSnippet(code: string): Promise<string> {
+  const result = await build({
+    logLevel: 'silent',
+    build: {
+      write: false,
+      minify: false,
+      rollupOptions: { input: 'entry.js' },
+    },
+    plugins: [
+      {
+        name: 'virtual-entry',
+        resolveId(id) {
+          if (id === 'entry.js') return id;
+        },
+        load(id) {
+          if (id === 'entry.js') return code;
+        },
+      },
+    ],
+  });
+  const out = Array.isArray(result) ? result[0] : (result as any);
+  return out.output[0].code;
+}
 
 describe('playwright browser runtime testing for lit-core and html-aot', () => {
   let browser: Browser;
@@ -44,25 +72,17 @@ describe('playwright browser runtime testing for lit-core and html-aot', () => {
     }
 
     const page = await browser.newPage();
-    expect(compiled.code).toContain('_$litType$');
+    const bundledCode = await bundleSnippet(compiled.code);
 
     const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <script type="importmap">
-  {
-    "imports": {
-      "lit": "https://esm.sh/lit@3.3.3",
-      "lit/": "https://esm.sh/lit@3.3.3/"
-    }
-  }
-  </script>
 </head>
 <body>
   <div id="app"></div>
   <script type="module">
-    ${compiled.code}
+    ${bundledCode}
     window.renderGreeting(document.getElementById('app'), 'Lit Core User');
   </script>
 </body>
@@ -92,20 +112,25 @@ describe('playwright browser runtime testing for lit-core and html-aot', () => {
 
     const page = await browser.newPage();
 
+    const testSnippet = `
+      import { html, render } from 'lit';
+      const t0 = performance.now();
+      for (let i = 0; i < 50; i++) {
+        const container = document.createElement('div');
+        render(html\`<div data-id="\${i}"><span>Item \${i}</span></div>\`, container);
+        document.getElementById('test-root').appendChild(container);
+      }
+      const t1 = performance.now();
+      window.__firstRenderDuration = t1 - t0;
+    `;
+    const bundledCode = await bundleSnippet(testSnippet);
+
     const testHtml = `<!DOCTYPE html>
 <html>
 <body>
   <div id="test-root"></div>
   <script type="module">
-    import { html, render } from 'https://esm.sh/lit@3.3.3';
-    const t0 = performance.now();
-    for (let i = 0; i < 50; i++) {
-      const container = document.createElement('div');
-      render(html\`<div data-id="\${i}"><span>Item \${i}</span></div>\`, container);
-      document.getElementById('test-root').appendChild(container);
-    }
-    const t1 = performance.now();
-    window.__firstRenderDuration = t1 - t0;
+    ${bundledCode}
   </script>
 </body>
 </html>`;

@@ -24,17 +24,17 @@ Cross-component CSS AST deduplication into constructable stylesheets evaluated a
 
 Measurements compare a standard Vite production build with minification (`minify: true`) against an identical build with only `@lit-core/css-fuse` enabled (`threshold: 2`). Runtime performance is evaluated in headless Chromium via Playwright, measuring DOM mount latency and reactive property update latency across all component suites.
 
-| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) | Total / average |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB | 9801.50 KB |
-| **Optimized bundle size** | 2861.68 KB | 1774.28 KB | 791.58 KB | 862.06 KB | 448.32 KB | 6737.92 KB |
-| **Net bundle savings** | **-2940.19 KB (-50.68%)** | **-103.79 KB (-5.53%)** | **-11.54 KB (-1.44%)** | **-7.99 KB (-0.92%)** | **-0.05 KB (-0.01%)** | **-3063.58 KB (-31.26%)** |
-| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms | 14.95 ms |
-| **Optimized mount latency** | 15.16 ms | 14.92 ms | 14.88 ms | 15.04 ms | 14.96 ms | 14.99 ms |
-| **Mount speedup** | **-0.3% (neutral)** | **+1.3% (neutral)** | **-0.5% (neutral)** | **-1.3% (neutral)** | **-0.5% (neutral)** | **-0.3% (neutral)** |
-| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms | 3.42 ms |
-| **Optimized update latency** | 3.45 ms | 3.42 ms | 3.41 ms | 3.44 ms | 3.42 ms | 3.43 ms |
-| **Update speedup** | **+0.0% (neutral)** | **+0.9% (neutral)** | **-0.3% (neutral)** | **-0.9% (neutral)** | **-0.3% (neutral)** | **-0.3% (neutral)** |
+| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 2861.68 KB | 1774.28 KB | 791.58 KB | 862.06 KB | 448.32 KB |
+| **Net bundle savings** | **-2940.19 KB (-50.68%)** | **-103.79 KB (-5.53%)** | **-11.54 KB (-1.44%)** | **-7.99 KB (-0.92%)** | **-0.05 KB (-0.01%)** |
+| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms |
+| **Optimized mount latency** | 15.16 ms | 14.92 ms | 14.88 ms | 15.04 ms | 14.96 ms |
+| **Mount speedup** | **-0.3% (neutral)** | **+1.3% (neutral)** | **-0.5% (neutral)** | **-1.3% (neutral)** | **-0.5% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Optimized update latency** | 3.45 ms | 3.42 ms | 3.41 ms | 3.44 ms | 3.42 ms |
+| **Update speedup** | **+0.0% (neutral)** | **+0.9% (neutral)** | **-0.3% (neutral)** | **-0.9% (neutral)** | **-0.3% (neutral)** |
 
 > [!NOTE]
 > `css-fuse` focuses on AST-level CSS deduplication and constructable stylesheet extraction (`CSSStyleSheet`), achieving massive bundle savings (up to -51.3% on Carbon). Shared constructable sheets eliminate duplicate CSS parsing in the browser, providing a modest mount speedup (~1-2%). In Material Web, components use shared CSS custom property design tokens rather than repeated static rule blocks; the net-savings threshold prevents unwarranted sheet creation on sub-threshold fragments. Template rendering speedups are handled separately by `@lit-core/html-aot`.
@@ -52,7 +52,6 @@ Detailed AST scan, constructable stylesheet clustering diagnostics, and compilat
 | Web Awesome | 1,001 | 212 | 83 | 68 | 88 ms | 171 ms | +83 ms |
 | Momentum Design | 1,094 | 227 | 68 | 76 | 134 ms | 269 ms | +135 ms |
 | Material Web | 1,354 | 215 | 82 | 73 | 34 ms | 164 ms | +130 ms |
-| **Total / average** | **38,124** | **25,964** | **762** | **855** | **132 ms** | **596 ms** | **+465 ms** |
 
 ---
 

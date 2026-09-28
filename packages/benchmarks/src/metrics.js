@@ -32,15 +32,9 @@ export function getFileSizes(filePath) {
   return { rawBytes, gzipBytes, brotliBytes };
 }
 
-/**
- * Format bytes into human readable KB.
- * @param {number} bytes
- * @param {number} [decimals=2]
- * @returns {string}
- */
-export function formatKb(bytes, decimals = 2) {
-  return `${(bytes / 1024).toFixed(decimals)} KB`;
-}
+import { formatImpact, formatKb } from './format.js';
+
+export { formatImpact, formatKb };
 
 /**
  * Calculate difference and percent reduction between baseline and candidate.
@@ -67,21 +61,4 @@ export function calculateImpact(baseline, candidate) {
     brotliDiff,
     brotliPercent,
   };
-}
-
-/**
- * Format impact string (e.g. "-71.99 KB (-8.96%)" or "+0.00 KB (0.00%)").
- * @param {number} diffBytes
- * @param {number} percent
- * @returns {string}
- */
-export function formatImpact(diffBytes, percent) {
-  if (Math.abs(diffBytes) === 0) {
-    return 'n/a';
-  }
-  const sign = diffBytes < 0 ? '-' : '+';
-  const absBytes = Math.abs(diffBytes);
-  const formattedBytes = `${sign}${formatKb(absBytes)}`;
-  const formattedPct = `${percent.toFixed(2)}%`;
-  return `${formattedBytes} (${formattedPct})`;
 }

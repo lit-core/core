@@ -63,14 +63,12 @@ Some text here.
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | Carbon Web Components | 99 | 5,801.88 KB | 2,807.41 KB | **-2,994.47 KB (-51.61%)** | **+35.8%** |
 | Spectrum Web Components | 52 | 1,739.92 KB | 1,740.01 KB | **+0.09 KB (+0.01%)** | **+35.4%** |
-| **Total** | **151** | **7,541.80 KB** | **4,547.42 KB** | **-2,994.38 KB (-39.70%)** | **+35.6%** |
 `;
 
     const formatted = formatRootSummaryTable(allResults, existingTable);
     expect(formatted).toContain('Carbon Web Components');
     expect(formatted).toContain('Spectrum Web Components');
-    expect(formatted).toContain('**Total**');
-    expect(formatted).toContain('151');
+    expect(formatted).not.toContain('**Total**');
   });
 
   it('formats executive overview table merging fresh results with existing columns', () => {

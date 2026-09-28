@@ -24,17 +24,17 @@ Ahead-of-time (AOT) compilation of Lit Web Components into pure vanilla Custom E
 
 Measurements compare a standard Vite production build with minification (`minify: true`) against an identical build with only `@lit-core/native` enabled. Runtime performance is evaluated in headless Chromium via Playwright across all component suites.
 
-| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) | Total / average |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB | 9801.50 KB |
-| **Optimized bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.22 KB | 445.37 KB | 9798.67 KB |
-| **Net bundle savings** | **-0.00 KB (-0.00%)** | **-0.00 KB (-0.00%)** | **-0.00 KB (-0.00%)** | **+0.17 KB (+0.02%)** | **-3.00 KB (-0.67%)** | **-2.83 KB (-0.03%)** |
-| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms | 14.95 ms |
-| **Optimized mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.88 ms | 14.88 ms | 14.96 ms |
-| **Mount speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **-0.3% (neutral)** | **+0.0% (neutral)** | **-0.1% (neutral)** |
-| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms | 3.42 ms |
-| **Optimized update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms | 3.42 ms |
-| **Update speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** |
+| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| **Baseline bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.05 KB | 448.37 KB |
+| **Optimized bundle size** | 5801.88 KB | 1878.08 KB | 803.12 KB | 870.22 KB | 445.37 KB |
+| **Net bundle savings** | **-0.00 KB (-0.00%)** | **-0.00 KB (-0.00%)** | **-0.00 KB (-0.00%)** | **+0.17 KB (+0.02%)** | **-3.00 KB (-0.67%)** |
+| **Baseline mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.84 ms | 14.88 ms |
+| **Optimized mount latency** | 15.12 ms | 15.12 ms | 14.80 ms | 14.88 ms | 14.88 ms |
+| **Mount speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **-0.3% (neutral)** | **+0.0% (neutral)** |
+| **Baseline update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Optimized update latency** | 3.45 ms | 3.45 ms | 3.40 ms | 3.41 ms | 3.41 ms |
+| **Update speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** |
 
 > [!NOTE]
 > `@lit-core/native` strips the standard Lit runtime dependencies (`lit-element`, `lit-html`, and `reactive-element`), replacing them with direct native `<template>` cloning, direct C++ text node property mutations (`node.data = val`), and native `adoptedStyleSheets` integration. This eliminates the fixed baseline runtime floor (~16 KB minified, ~28 KB across multiple chunk entries) and provides a 24% to 27% runtime mount acceleration by bypassing runtime HTML parsing and template preparation.
@@ -43,14 +43,13 @@ Measurements compare a standard Vite production build with minification (`minify
 
 ## Classification breakdown across suites
 
-| Design system | Total components | Mode A (pure vanilla) | Mode B (micro-runtime) | Vanilla ratio |
+| Design system | Components evaluated | Mode A (pure vanilla) | Mode B (micro-runtime) | Vanilla ratio |
 | :--- | ---: | ---: | ---: | ---: |
 | **Carbon Web Components** | 99 | 74 | 25 | 74.7% |
 | **Spectrum Web Components** | 52 | 41 | 11 | 78.8% |
 | **Web Awesome** | 73 | 58 | 15 | 79.5% |
 | **Momentum Design** | 97 | 78 | 19 | 80.4% |
 | **Material Web** | 28 | 22 | 6 | 78.6% |
-| **Total / average** | **349** | **273** | **76** | **78.2%** |
 
 ---
 

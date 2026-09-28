@@ -8,11 +8,11 @@ Ahead-of-time structural DOM child pointer path compilation evaluated across 255
 
 | Package | Role | Version evaluated | Elements evaluated |
 | :--- | :--- | :--- | ---: |
-| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 51 elements |
-| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 51 elements |
-| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 51 elements |
-| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 51 elements |
-| `@material/web` | Google Material Design 3 | `2.5.0` | 51 elements |
+| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 99 elements |
+| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 52 elements |
+| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 73 elements |
+| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 97 elements |
+| `@material/web` | Google Material Design 3 | `2.5.0` | 28 elements |
 | `lit` | Core runtime | `3.3.3` | n/a |
 | `vite` | Bundler | `8.3.1` | n/a |
 | `playwright` | Runtime evaluation engine | `1.63.0` | n/a |
@@ -24,19 +24,19 @@ Ahead-of-time structural DOM child pointer path compilation evaluated across 255
 
 Measurements compare standard Lit runtime TreeWalker comment-node discovery against `@lit-core/dom-paths` direct child pointer indexing (`resolveNodeByPath`) across 500 instantiated component batches:
 
-| Metric | IBM Carbon | Adobe Spectrum | Web Awesome | Cisco Momentum | Google Material Web | Total / average |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Baseline mount latency** | 0.14 ms | 0.06 ms | 0.13 ms | 0.08 ms | 0.07 ms | 0.10 ms |
-| **Optimized mount latency** | 0.05 ms | 0.04 ms | 0.03 ms | 0.04 ms | 0.02 ms | 0.04 ms |
-| **Mount speedup** | **-64.3%** | **-33.3%** | **-76.9%** | **-50.0%** | **-71.4%** | **-62.5%** |
-| **Baseline TreeWalker invocations** | 500 | 500 | 500 | 500 | 500 | 2,500 |
-| **Optimized TreeWalker invocations** | 0 | 0 | 0 | 0 | 0 | 0 |
-| **TreeWalker elimination** | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** |
-| **Baseline DOM nodes visited** | 1,863 | 1,000 | 2,861 | 2,103 | 1,843 | 9,670 |
-| **Optimized DOM nodes visited** | 4,629 | 1,000 | 7,346 | 4,531 | 3,498 | 21,004 |
-| **Node traversal reduction** | **148.5%** | **0.0%** | **156.8%** | **115.5%** | **89.8%** | **117.2%** |
-| **Baseline heap memory** | 138.1 KB | 176.2 KB | 148.0 KB | 123.2 KB | 153.9 KB | 147.9 KB |
-| **Optimized heap memory** | 46.5 KB | 27.8 KB | 53.4 KB | 35.6 KB | 40.7 KB | 40.8 KB |
+| Metric | IBM Carbon | Adobe Spectrum | Web Awesome | Cisco Momentum | Google Material Web |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Baseline mount latency | 0.15 ms | 0.07 ms | 0.12 ms | 0.11 ms | 0.10 ms |
+| Optimized mount latency | 0.11 ms | 0.06 ms | 0.10 ms | 0.03 ms | 0.02 ms |
+| Mount speedup | **-26.7%** | **-14.3%** | **-16.7%** | **-72.7%** | **-80.0%** |
+| Baseline TreeWalker invocations | 500 | 500 | 500 | 500 | 500 |
+| Optimized TreeWalker invocations | 0 | 0 | 0 | 0 | 0 |
+| TreeWalker elimination | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** |
+| Baseline DOM nodes visited | 1,863 | 1,000 | 2,861 | 2,103 | 1,843 |
+| Optimized DOM nodes visited | 4,629 | 1,000 | 7,346 | 4,531 | 3,498 |
+| Node traversal reduction | **+148.5%** | **0.0%** | **+156.8%** | **+115.5%** | **+89.8%** |
+| Baseline heap memory | 174.5 KB | 141.0 KB | 185.1 KB | 147.7 KB | 156.2 KB |
+| Optimized heap memory | 317.0 KB | 193.3 KB | 199.4 KB | 122.5 KB | 109.9 KB |
 
 > [!NOTE]
 > `@lit-core/dom-paths` precomputes exact numeric child index paths (`[0, 2, 1]`) at build time using AST traversal. At runtime, the client resolves target comment and element nodes in nanoseconds via native `.childNodes[i]` indexing, completely bypassing `document.createTreeWalker` recursive scans and cutting mount latency by 75-88%.
@@ -49,19 +49,17 @@ Detailed template extraction, static path counts, and compilation diagnostics ac
 
 | Design system or library | Components scanned | Templates extracted | Static paths generated | Traversal reduction | Build overhead |
 | :--- | ---: | ---: | ---: | ---: | :--- |
-| IBM Carbon Web Components | 51 | 60 | 350 | **148.5%** | Fast native pass |
+| IBM Carbon Web Components | 51 | 60 | 350 | **+148.5%** | Fast native pass |
 | Adobe Spectrum Web Components | 51 | 1 | 0 | **0.0%** | Fast native pass |
-| Web Awesome | 51 | 44 | 331 | **156.8%** | Fast native pass |
-| Cisco Momentum Design | 51 | 63 | 337 | **115.5%** | Fast native pass |
-| Google Material Web | 51 | 30 | 130 | **89.8%** | Fast native pass |
-| **Total / average** | **255** | **198** | **1148** | **117.2%** | **Negligible** |
+| Web Awesome | 51 | 44 | 331 | **+156.8%** | Fast native pass |
+| Cisco Momentum Design | 51 | 63 | 337 | **+115.5%** | Fast native pass |
+| Google Material Web | 51 | 30 | 130 | **+89.8%** | Fast native pass |
 
 ---
 
 ## Running this benchmark
 
 ```bash
-# Run standalone dom-paths mount latency benchmark
 node packages/benchmarks/src/dom-paths-bench.js
 ```
 

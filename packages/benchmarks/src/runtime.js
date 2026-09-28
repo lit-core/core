@@ -95,14 +95,15 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 </html>`;
 
     await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => window.__bundleReady === true, { timeout: 10000 }).catch(() => {});
+    await page.waitForFunction(() => (/** @type {any} */ (window)).__bundleReady === true, { timeout: 10000 }).catch(() => {});
 
     // Execute precision in-browser rendering measurement using actual defined elements
     const timing = await page.evaluate(async () => {
       const container = document.getElementById('container');
       if (!container) return { firstRenderMs: 0, updateMs: 0 };
 
-      const tags = (window.__registeredTags || []).filter((t) => typeof t === 'string' && t.includes('-'));
+      const win = /** @type {any} */ (window);
+      const tags = (win.__registeredTags || []).filter((/** @type {any} */ t) => typeof t === 'string' && t.includes('-'));
       if (tags.length === 0) {
         return { firstRenderMs: 0, updateMs: 0 };
       }
@@ -191,7 +192,8 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 
     return timing;
   } catch (err) {
-    console.warn(`[Runtime Benchmark] Measurement error for ${name}:`, err.message);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[Runtime Benchmark] Measurement error for ${name}:`, msg);
     return { firstRenderMs: 0, updateMs: 0 };
   } finally {
     await page.close();

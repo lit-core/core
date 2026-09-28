@@ -8,11 +8,11 @@ Ahead-of-time ShadowRoot event delegation evaluated across 255 production Web Co
 
 | Package | Role | Version evaluated | Elements evaluated |
 | :--- | :--- | :--- | ---: |
-| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 51 elements |
-| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 51 elements |
-| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 51 elements |
-| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 51 elements |
-| `@material/web` | Google Material Design 3 | `2.5.0` | 51 elements |
+| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 99 elements |
+| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 52 elements |
+| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 73 elements |
+| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 97 elements |
+| `@material/web` | Google Material Design 3 | `2.5.0` | 28 elements |
 | `lit` | Core runtime | `3.3.3` | n/a |
 | `vite` | Bundler | `8.3.1` | n/a |
 | `playwright` | Runtime evaluation engine | `1.63.0` | n/a |
@@ -24,14 +24,14 @@ Ahead-of-time ShadowRoot event delegation evaluated across 255 production Web Co
 
 Measurements compare standard per-element Lit event bindings (`@click=${...}`) against `@lit-core/event-hoist` single ShadowRoot delegated listeners across 500 instantiated component items:
 
-| Metric | Carbon (@carbon/web-components) | Adobe Spectrum (@spectrum-web-components) | Web Awesome (@awesome.me/webawesome) | Cisco Momentum (@momentum-design/components) | Google Material Web (@material/web) | Total / average |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Interactive items rendered** | 500 | 500 | 500 | 500 | 500 | 2,500 |
-| **Baseline DOM event listeners** | 1,500 | 1,000 | 31,500 | 1,500 | 6,500 | 42,000 |
-| **Optimized DOM event listeners** | 1 | 1 | 9 | 1 | 4 | 16 |
-| **Event listener reduction** | **-99.9%** | **-99.9%** | **-100.0%** | **-99.9%** | **-99.9%** | **-100.0%** |
-| **Root ShadowRoot listeners** | 1 | 1 | 9 | 1 | 4 | 16 |
-| **Unique event types handled** | 2 | 2 | 9 | 2 | 4 | 9 |
+| Metric | Carbon | Adobe Spectrum | Web Awesome | Cisco Momentum | Google Material Web |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Interactive items rendered | 500 | 500 | 500 | 500 | 500 |
+| Baseline DOM event listeners | 1,500 | 1,000 | 31,500 | 1,500 | 6,500 |
+| Optimized DOM event listeners | 1 | 1 | 9 | 1 | 4 |
+| Event listener reduction | **-99.9%** | **-99.9%** | **-100.0%** | **-99.9%** | **-99.9%** |
+| Root ShadowRoot listeners | 1 | 1 | 9 | 1 | 4 |
+| Unique event types handled | 2 | 2 | 9 | 2 | 4 |
 
 > [!NOTE]
 > Rather than allocating separate JavaScript event listener closures and attaching them to every individual DOM node inside a component template, `@lit-core/event-hoist` binds a single listener on the component host or ShadowRoot. On user interactions, the root listener checks `event.composedPath()` against pre-computed part indices to invoke handlers, eliminating 99.9% of event listener registrations.
@@ -44,19 +44,17 @@ Detailed template event extraction, hoisted component counts, and compilation di
 
 | Design system or library | Components scanned | Hoisted components | Unique event types | Hoisted event types | Listener reduction | Build overhead |
 | :--- | ---: | ---: | ---: | :--- | ---: | :--- |
-| Carbon Web Components (@carbon/web-components) | 51 | 0 | 2 | `click, change` | **-99.9%** | Fast native pass |
-| Adobe Spectrum Web Components (@spectrum-web-components) | 51 | 0 | 2 | `click, change` | **-99.9%** | Fast native pass |
-| Web Awesome (@awesome.me/webawesome) | 51 | 18 | 9 | `keydown, click, mousedown, change, input, keyup, pointerdown, touchstart, pointerup` | **-100.0%** | Fast native pass |
-| Cisco Momentum Design (@momentum-design/components) | 51 | 0 | 2 | `click, change` | **-99.9%** | Fast native pass |
-| Google Material Web (@material/web) | 51 | 7 | 4 | `change, input, click, keydown` | **-99.9%** | Fast native pass |
-| **Total / average** | **255** | **25** | **9** | `All standard events` | **-100.0%** | **Negligible** |
+| Carbon Web Components | 51 | 0 | 2 | `click, change` | **-99.9%** | Fast native pass |
+| Adobe Spectrum Web Components | 51 | 0 | 2 | `click, change` | **-99.9%** | Fast native pass |
+| Web Awesome | 51 | 18 | 9 | `keydown, click, mousedown, change, input, keyup, pointerdown, touchstart, pointerup` | **-100.0%** | Fast native pass |
+| Cisco Momentum Design | 51 | 0 | 2 | `click, change` | **-99.9%** | Fast native pass |
+| Google Material Web | 51 | 7 | 4 | `change, input, click, keydown` | **-99.9%** | Fast native pass |
 
 ---
 
 ## Running this benchmark
 
 ```bash
-# Run standalone event-hoist delegation benchmark
 node packages/benchmarks/src/event-hoist-bench.js
 ```
 

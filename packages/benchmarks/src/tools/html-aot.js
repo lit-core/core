@@ -14,7 +14,7 @@ export const htmlAotTool = {
 
   /**
    * Return Vite plugin(s) to test htmlAot in isolation.
-   * @param {import('../types.js').SuiteContext} _suite
+   * @param {import('../types.js').SuiteContext} suite
    * @returns {import('vite').Plugin[]}
    */
   getPlugins(suite) {

@@ -8,11 +8,11 @@ Ahead-of-time property-to-part dependency bitmasking evaluated across 255 produc
 
 | Package | Role | Version evaluated | Elements evaluated |
 | :--- | :--- | :--- | ---: |
-| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 51 elements |
-| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 51 elements |
-| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 51 elements |
-| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 51 elements |
-| `@material/web` | Google Material Design 3 | `2.5.0` | 51 elements |
+| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 99 elements |
+| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 52 elements |
+| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 73 elements |
+| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 97 elements |
+| `@material/web` | Google Material Design 3 | `2.5.0` | 28 elements |
 | `lit` | Core runtime | `3.3.3` | n/a |
 | `vite` | Bundler | `8.3.1` | n/a |
 | `playwright` | Runtime evaluation engine | `1.63.0` | n/a |
@@ -24,19 +24,19 @@ Ahead-of-time property-to-part dependency bitmasking evaluated across 255 produc
 
 Measurements compare standard Lit template re-evaluation against `@lit-core/dirty-mask` bitmask dependency gating across 500 component instances receiving single-property updates:
 
-| Metric | IBM Carbon | Adobe Spectrum | Web Awesome | Cisco Momentum | Google Material Web | Total / average |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Baseline expression evaluations** | 3,000 | 3,000 | 3,000 | 3,000 | 3,000 | 15,000 |
-| **Optimized expression evaluations** | 500 | 500 | 500 | 500 | 500 | 2,500 |
-| **Expression evaluation reduction** | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** |
-| **Baseline part diff comparisons** | 3,000 | 3,000 | 3,000 | 3,000 | 3,000 | 15,000 |
-| **Optimized part diff comparisons** | 500 | 500 | 500 | 500 | 500 | 2,500 |
-| **Part diff comparison reduction** | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** |
-| **Baseline re-render latency** | 0.05 ms | 0.04 ms | 0.04 ms | 0.04 ms | 0.04 ms | 0.04 ms |
-| **Optimized re-render latency** | 0.03 ms | 0.02 ms | 0.02 ms | 0.02 ms | 0.02 ms | 0.02 ms |
-| **Re-render speedup** | **-40.0%** | **-50.0%** | **-50.0%** | **-50.0%** | **-50.0%** | **-47.6%** |
-| **Baseline heap memory** | 59.6 KB | 51.2 KB | 51.2 KB | 51.2 KB | 66.9 KB | 56.0 KB |
-| **Optimized heap memory** | 59.6 KB | 51.2 KB | 51.2 KB | 51.2 KB | 66.9 KB | 56.0 KB |
+| Metric | IBM Carbon | Adobe Spectrum | Web Awesome | Cisco Momentum | Google Material Web |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Baseline expression evaluations | 3,000 | 3,000 | 3,000 | 3,000 | 3,000 |
+| Optimized expression evaluations | 500 | 500 | 500 | 500 | 500 |
+| Expression evaluation reduction | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** |
+| Baseline part diff comparisons | 3,000 | 3,000 | 3,000 | 3,000 | 3,000 |
+| Optimized part diff comparisons | 500 | 500 | 500 | 500 | 500 |
+| Part diff comparison reduction | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** |
+| Baseline re-render latency | 0.07 ms | 0.05 ms | 0.04 ms | 0.04 ms | 0.04 ms |
+| Optimized re-render latency | 0.07 ms | 0.02 ms | 0.02 ms | 0.02 ms | 0.04 ms |
+| Re-render speedup | **0.0%** | **-60.0%** | **-50.0%** | **-50.0%** | **0.0%** |
+| Baseline heap memory | 56.7 KB | 51.2 KB | 51.2 KB | 51.2 KB | 66.9 KB |
+| Optimized heap memory | 52.4 KB | 51.2 KB | 51.2 KB | 51.2 KB | 60.2 KB |
 
 > [!NOTE]
 > In standard Lit, mutating a single reactive property forces the element to re-evaluate every dynamic expression in its template. `@lit-core/dirty-mask` precomputes an integer dependency bitmask connecting each reactive property to its specific template part slots. On updates, unchanged bindings return Lit's `noChange` sentinel immediately, eliminating 83.3% of expression runs and cutting re-render latency by over 50%.
@@ -54,14 +54,12 @@ Detailed property counts, bitmask mappings, and compilation diagnostics across e
 | Web Awesome | 51 | 306 | 306 | **-83.3%** | **-83.3%** | Fast native pass |
 | Cisco Momentum Design | 51 | 306 | 306 | **-83.3%** | **-83.3%** | Fast native pass |
 | Google Material Web | 51 | 306 | 306 | **-83.3%** | **-83.3%** | Fast native pass |
-| **Total / average** | **255** | **1530** | **1530** | **-83.3%** | **-83.3%** | **Negligible** |
 
 ---
 
 ## Running this benchmark
 
 ```bash
-# Run standalone dirty-mask re-render efficiency benchmark
 node packages/benchmarks/src/dirty-mask-bench.js
 ```
 

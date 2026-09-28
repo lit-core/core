@@ -33,6 +33,7 @@
     "benchmark:markdown": "node src/index.js --format=markdown",
     "benchmark:json": "node src/index.js --format=json",
     "benchmark:sync": "node src/index.js --update",
+    "benchmark:compare": "node src/compare.js",
     "test": "tsc --noEmit && vitest run test",
     "typecheck": "tsc --noEmit"
   },

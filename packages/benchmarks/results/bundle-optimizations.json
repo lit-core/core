@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "benchmarkId": "bundle-optimizations",
+  "title": "`@lit-core` bundler optimization benchmark results",
+  "description": "Multi-suite bundle size and optimization benchmark across enterprise Lit design systems.",
+  "timestamp": "2026-09-28T21:14:33.064Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "a724976",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "suites": [
+    {
+      "id": "material",
+      "name": "Material Web (@material/web)",
+      "componentCount": 28,
+      "baseline": {
+        "rawBytes": 459132,
+        "gzipBytes": 78467,
+        "brotliBytes": 59861,
+        "buildTimeMs": 46.20745900000003
+      },
+      "optimized": {
+        "rawBytes": 452530,
+        "gzipBytes": 77911,
+        "brotliBytes": 59579,
+        "buildTimeMs": 61.960207999999966
+      },
+      "deltas": {
+        "raw": {
+          "diff": -6602,
+          "percent": -1.437930704024115
+        },
+        "gzip": {
+          "diff": -556,
+          "percent": -0.7085781283851811
+        }
+      },
+      "diagnostics": {}
+    }
+  ]
+}

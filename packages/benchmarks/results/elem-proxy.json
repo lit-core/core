@@ -1,0 +1,263 @@
+{
+  "schemaVersion": "1.0.0",
+  "benchmarkId": "elem-proxy",
+  "title": "`@lit-core/elem-proxy` empirical benchmark results",
+  "description": "Deferred Custom Element proxy stubs evaluated across 349 production Lit Web Components to measure script evaluation CPU time, V8 heap memory footprint, and mount latency.",
+  "timestamp": "2026-09-28T21:18:26.488Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "a724976",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "suites": [
+    {
+      "id": "carbon",
+      "name": "Carbon Web Components",
+      "shortName": "Carbon",
+      "packageName": "@carbon/web-components",
+      "componentCount": 99,
+      "baseline": {
+        "evalTimeMs": 47.93,
+        "heapKb": 159017.7,
+        "mountLatencyMs": 0,
+        "totalComponents": 99,
+        "deferredComponents": 0,
+        "evaluatedComponents": 99
+      },
+      "optimized": {
+        "evalTimeMs": 39.05,
+        "heapKb": 136421,
+        "mountLatencyMs": 0,
+        "totalComponents": 99,
+        "deferredComponents": 94,
+        "evaluatedComponents": 5
+      },
+      "deltas": {
+        "cpu": {
+          "diff": -8.880000000000003,
+          "percent": -18.527018568746094,
+          "formattedDiff": "-8.9",
+          "formattedPercent": "-18.5%",
+          "isReduction": true
+        },
+        "heap": {
+          "diff": -22596.70000000001,
+          "percent": -14.210179118425186,
+          "formattedDiff": "-22,596.7",
+          "formattedPercent": "-14.2%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "evaluatedCount": "5 / 99 (5.1%)",
+        "deferredCount": "94 avoided",
+        "deferredProportion": "94.9% deferred",
+        "cpuSavings": "-18.5%",
+        "heapSavings": "-14.2%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "spectrum",
+      "name": "Spectrum Web Components",
+      "shortName": "Spectrum",
+      "packageName": "@spectrum-web-components/bundle",
+      "componentCount": 52,
+      "baseline": {
+        "evalTimeMs": 4.02,
+        "heapKb": 172765.3,
+        "mountLatencyMs": 0,
+        "totalComponents": 52,
+        "deferredComponents": 0,
+        "evaluatedComponents": 52
+      },
+      "optimized": {
+        "evalTimeMs": 3.98,
+        "heapKb": 158457.8,
+        "mountLatencyMs": 0.01,
+        "totalComponents": 52,
+        "deferredComponents": 47,
+        "evaluatedComponents": 5
+      },
+      "deltas": {
+        "cpu": {
+          "diff": -0.03999999999999959,
+          "percent": -0.9950248756218805,
+          "formattedDiff": "-0.0",
+          "formattedPercent": "-1.0%",
+          "isReduction": true
+        },
+        "heap": {
+          "diff": -14307.5,
+          "percent": -8.281466243510707,
+          "formattedDiff": "-14,307.5",
+          "formattedPercent": "-8.3%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "evaluatedCount": "5 / 52 (9.6%)",
+        "deferredCount": "47 avoided",
+        "deferredProportion": "90.4% deferred",
+        "cpuSavings": "-1.0%",
+        "heapSavings": "-8.3%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "webawesome",
+      "name": "Web Awesome",
+      "shortName": "Web Awesome",
+      "packageName": "@awesome.me/webawesome",
+      "componentCount": 73,
+      "baseline": {
+        "evalTimeMs": 3.64,
+        "heapKb": 204703.4,
+        "mountLatencyMs": 0,
+        "totalComponents": 73,
+        "deferredComponents": 0,
+        "evaluatedComponents": 73
+      },
+      "optimized": {
+        "evalTimeMs": 1.3,
+        "heapKb": 215928.8,
+        "mountLatencyMs": 0,
+        "totalComponents": 73,
+        "deferredComponents": 68,
+        "evaluatedComponents": 5
+      },
+      "deltas": {
+        "cpu": {
+          "diff": -2.34,
+          "percent": -64.28571428571428,
+          "formattedDiff": "-2.3",
+          "formattedPercent": "-64.3%",
+          "isReduction": true
+        },
+        "heap": {
+          "diff": 11225.399999999994,
+          "percent": 5.483738912006344,
+          "formattedDiff": "11,225.4",
+          "formattedPercent": "+5.5%",
+          "isReduction": false
+        }
+      },
+      "diagnostics": {
+        "evaluatedCount": "5 / 73 (6.8%)",
+        "deferredCount": "68 avoided",
+        "deferredProportion": "93.2% deferred",
+        "cpuSavings": "-64.3%",
+        "heapSavings": "+5.5%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "momentum",
+      "name": "Momentum Design",
+      "shortName": "Momentum",
+      "packageName": "@momentum-design/components",
+      "componentCount": 97,
+      "baseline": {
+        "evalTimeMs": 3.11,
+        "heapKb": 203601.8,
+        "mountLatencyMs": 0,
+        "totalComponents": 97,
+        "deferredComponents": 0,
+        "evaluatedComponents": 97
+      },
+      "optimized": {
+        "evalTimeMs": 3.1,
+        "heapKb": 210363.4,
+        "mountLatencyMs": 0,
+        "totalComponents": 97,
+        "deferredComponents": 92,
+        "evaluatedComponents": 5
+      },
+      "deltas": {
+        "cpu": {
+          "diff": -0.009999999999999787,
+          "percent": -0.32154340836012174,
+          "formattedDiff": "-0.0",
+          "formattedPercent": "-0.3%",
+          "isReduction": true
+        },
+        "heap": {
+          "diff": 6761.600000000006,
+          "percent": 3.3209922505596743,
+          "formattedDiff": "6,761.6",
+          "formattedPercent": "+3.3%",
+          "isReduction": false
+        }
+      },
+      "diagnostics": {
+        "evaluatedCount": "5 / 97 (5.2%)",
+        "deferredCount": "92 avoided",
+        "deferredProportion": "94.8% deferred",
+        "cpuSavings": "-0.3%",
+        "heapSavings": "+3.3%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "material",
+      "name": "Material Web",
+      "shortName": "Material Web",
+      "packageName": "@material/web",
+      "componentCount": 28,
+      "baseline": {
+        "evalTimeMs": 6.11,
+        "heapKb": 226659.8,
+        "mountLatencyMs": 0,
+        "totalComponents": 28,
+        "deferredComponents": 0,
+        "evaluatedComponents": 28
+      },
+      "optimized": {
+        "evalTimeMs": 5.25,
+        "heapKb": 230827.4,
+        "mountLatencyMs": 0,
+        "totalComponents": 28,
+        "deferredComponents": 23,
+        "evaluatedComponents": 5
+      },
+      "deltas": {
+        "cpu": {
+          "diff": -0.8600000000000003,
+          "percent": -14.075286415711952,
+          "formattedDiff": "-0.9",
+          "formattedPercent": "-14.1%",
+          "isReduction": true
+        },
+        "heap": {
+          "diff": 4167.600000000006,
+          "percent": 1.8387027607012825,
+          "formattedDiff": "4,167.6",
+          "formattedPercent": "+1.8%",
+          "isReduction": false
+        }
+      },
+      "diagnostics": {
+        "evaluatedCount": "5 / 28 (17.9%)",
+        "deferredCount": "23 avoided",
+        "deferredProportion": "82.1% deferred",
+        "cpuSavings": "-14.1%",
+        "heapSavings": "+1.8%",
+        "buildOverhead": "Fast native pass"
+      }
+    }
+  ]
+}

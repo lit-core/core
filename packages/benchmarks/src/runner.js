@@ -252,9 +252,14 @@ export async function runSingleToolBenchmark(toolId, options = {}) {
       crossSuiteSummaries.push({
         suiteName: suite.name,
         componentCount: rows.suiteContext.componentCount,
-        baseline: baseline.metrics,
-        optimized: optimized.metrics,
-        impact: optimized.impact,
+        baselineRaw: baseline.metrics.rawBytes,
+        baselineGzip: baseline.metrics.gzipBytes,
+        totalRaw: optimized.metrics.rawBytes,
+        totalGzip: optimized.metrics.gzipBytes,
+        rawSaved: Math.abs(optimized.impact.rawDiff),
+        rawPct: Math.abs(optimized.impact.rawPercent),
+        gzipSaved: Math.abs(optimized.impact.gzipDiff),
+        gzipPct: Math.abs(optimized.impact.gzipPercent),
       });
     }
   }

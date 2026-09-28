@@ -29,7 +29,7 @@ export async function runNativeBenchmarkSuite(options: NativeBenchmarkOptions = 
   }
 
   console.log('\nBenchmark execution complete.');
-  console.log(renderCrossSuiteSummary(suiteResults));
+  console.log(renderCrossSuiteSummary(suiteResults as any));
 
   if (options.updateDocs !== false) {
     console.log('Synchronizing benchmark documentation...');

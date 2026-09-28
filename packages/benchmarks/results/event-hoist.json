@@ -1,0 +1,218 @@
+{
+  "schemaVersion": "1.0.0",
+  "benchmarkId": "event-hoist",
+  "title": "`@lit-core/event-hoist` empirical benchmark results",
+  "description": "Ahead-of-time ShadowRoot event delegation evaluated across 255 production Web Components to eliminate per-element DOM event listener allocations.",
+  "timestamp": "2026-09-28T21:18:23.122Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "a724976",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "suites": [
+    {
+      "id": "carbon",
+      "name": "Carbon Web Components",
+      "shortName": "Carbon",
+      "packageName": "@carbon/web-components",
+      "componentCount": 51,
+      "baseline": {
+        "itemsRendered": 500,
+        "domEventListeners": 1500,
+        "rootListeners": 0,
+        "uniqueEventTypes": 2,
+        "transformTimeMs": 183.94
+      },
+      "optimized": {
+        "itemsRendered": 500,
+        "domEventListeners": 1,
+        "rootListeners": 1,
+        "uniqueEventTypes": 2,
+        "transformTimeMs": 183.94
+      },
+      "deltas": {
+        "listeners": {
+          "diff": -1499,
+          "percent": -99.93333333333332,
+          "formattedDiff": "-1,499.0",
+          "formattedPercent": "-99.9%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "hoistedComponents": 0,
+        "uniqueEventTypesCount": 2,
+        "eventTypesStr": "click, change",
+        "listenerReduction": "-99.9%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "spectrum",
+      "name": "Adobe Spectrum Web Components",
+      "shortName": "Adobe Spectrum",
+      "packageName": "@spectrum-web-components",
+      "componentCount": 51,
+      "baseline": {
+        "itemsRendered": 500,
+        "domEventListeners": 1000,
+        "rootListeners": 0,
+        "uniqueEventTypes": 2,
+        "transformTimeMs": 31.28
+      },
+      "optimized": {
+        "itemsRendered": 500,
+        "domEventListeners": 1,
+        "rootListeners": 1,
+        "uniqueEventTypes": 2,
+        "transformTimeMs": 31.28
+      },
+      "deltas": {
+        "listeners": {
+          "diff": -999,
+          "percent": -99.9,
+          "formattedDiff": "-999.0",
+          "formattedPercent": "-99.9%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "hoistedComponents": 0,
+        "uniqueEventTypesCount": 2,
+        "eventTypesStr": "click, change",
+        "listenerReduction": "-99.9%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "webawesome",
+      "name": "Web Awesome",
+      "shortName": "Web Awesome",
+      "packageName": "@awesome.me/webawesome",
+      "componentCount": 51,
+      "baseline": {
+        "itemsRendered": 500,
+        "domEventListeners": 31500,
+        "rootListeners": 0,
+        "uniqueEventTypes": 9,
+        "transformTimeMs": 30.08
+      },
+      "optimized": {
+        "itemsRendered": 500,
+        "domEventListeners": 9,
+        "rootListeners": 9,
+        "uniqueEventTypes": 9,
+        "transformTimeMs": 30.08
+      },
+      "deltas": {
+        "listeners": {
+          "diff": -31491,
+          "percent": -99.97142857142856,
+          "formattedDiff": "-31,491.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "hoistedComponents": 18,
+        "uniqueEventTypesCount": 9,
+        "eventTypesStr": "keydown, click, mousedown, change, input, keyup, pointerdown, touchstart, pointerup",
+        "listenerReduction": "-100.0%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "momentum",
+      "name": "Cisco Momentum Design",
+      "shortName": "Cisco Momentum",
+      "packageName": "@momentum-design/components",
+      "componentCount": 51,
+      "baseline": {
+        "itemsRendered": 500,
+        "domEventListeners": 1500,
+        "rootListeners": 0,
+        "uniqueEventTypes": 2,
+        "transformTimeMs": 83.93
+      },
+      "optimized": {
+        "itemsRendered": 500,
+        "domEventListeners": 1,
+        "rootListeners": 1,
+        "uniqueEventTypes": 2,
+        "transformTimeMs": 83.93
+      },
+      "deltas": {
+        "listeners": {
+          "diff": -1499,
+          "percent": -99.93333333333332,
+          "formattedDiff": "-1,499.0",
+          "formattedPercent": "-99.9%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "hoistedComponents": 0,
+        "uniqueEventTypesCount": 2,
+        "eventTypesStr": "click, change",
+        "listenerReduction": "-99.9%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "material",
+      "name": "Google Material Web",
+      "shortName": "Google Material Web",
+      "packageName": "@material/web",
+      "componentCount": 51,
+      "baseline": {
+        "itemsRendered": 500,
+        "domEventListeners": 6500,
+        "rootListeners": 0,
+        "uniqueEventTypes": 4,
+        "transformTimeMs": 32.43
+      },
+      "optimized": {
+        "itemsRendered": 500,
+        "domEventListeners": 4,
+        "rootListeners": 4,
+        "uniqueEventTypes": 4,
+        "transformTimeMs": 32.43
+      },
+      "deltas": {
+        "listeners": {
+          "diff": -6496,
+          "percent": -99.93846153846154,
+          "formattedDiff": "-6,496.0",
+          "formattedPercent": "-99.9%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "hoistedComponents": 7,
+        "uniqueEventTypesCount": 4,
+        "eventTypesStr": "change, input, click, keydown",
+        "listenerReduction": "-99.9%",
+        "buildOverhead": "Fast native pass"
+      }
+    }
+  ]
+}

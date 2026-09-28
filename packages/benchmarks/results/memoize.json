@@ -1,0 +1,333 @@
+{
+  "schemaVersion": "1.0.0",
+  "benchmarkId": "memoize",
+  "title": "`@lit-core/memoize` empirical benchmark results",
+  "description": "Ahead-of-time reactive template expression memoization evaluated across 5 enterprise collection components to eliminate redundant array transformations and GC overhead during unrelated state updates.",
+  "timestamp": "2026-09-28T21:18:22.679Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "a724976",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "suites": [
+    {
+      "id": "carbon",
+      "name": "IBM Carbon Web Components",
+      "shortName": "IBM Carbon",
+      "packageName": "@carbon/web-components",
+      "targetComponent": "cds-data-table",
+      "itemCount": 500,
+      "updatesCount": 200,
+      "baseline": {
+        "pipelineRunsCount": 201,
+        "allocatedObjectsCount": 50451,
+        "reRenderLatencyMs": 2.31,
+        "heapKb": 84.2,
+        "estimatedGcPauseMs": 0.58
+      },
+      "optimized": {
+        "pipelineRunsCount": 1,
+        "allocatedObjectsCount": 251,
+        "reRenderLatencyMs": 0.03,
+        "heapKb": 119.1,
+        "estimatedGcPauseMs": 0
+      },
+      "deltas": {
+        "runs": {
+          "diff": -200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "alloc": {
+          "diff": -50200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-50,200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -2.2800000000000002,
+          "percent": -98.70129870129871,
+          "formattedDiff": "-2.3",
+          "formattedPercent": "-98.7%",
+          "isReduction": true
+        },
+        "gc": {
+          "diff": -0.58,
+          "percent": -100,
+          "formattedDiff": "-0.6",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "targetComponent": "cds-data-table",
+        "itemCount": 500,
+        "expressionsMemoized": 2,
+        "cacheSlotsAllocated": 2,
+        "invalidationChecks": 200,
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "spectrum",
+      "name": "Adobe Spectrum Web Components",
+      "shortName": "Adobe Spectrum",
+      "packageName": "@spectrum-web-components/bundle",
+      "targetComponent": "sp-table",
+      "itemCount": 500,
+      "updatesCount": 200,
+      "baseline": {
+        "pipelineRunsCount": 201,
+        "allocatedObjectsCount": 50451,
+        "reRenderLatencyMs": 1.69,
+        "heapKb": 386.8,
+        "estimatedGcPauseMs": 0.58
+      },
+      "optimized": {
+        "pipelineRunsCount": 1,
+        "allocatedObjectsCount": 251,
+        "reRenderLatencyMs": 0,
+        "heapKb": 14.5,
+        "estimatedGcPauseMs": 0
+      },
+      "deltas": {
+        "runs": {
+          "diff": -200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "alloc": {
+          "diff": -50200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-50,200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -1.69,
+          "percent": -100,
+          "formattedDiff": "-1.7",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "gc": {
+          "diff": -0.58,
+          "percent": -100,
+          "formattedDiff": "-0.6",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "targetComponent": "sp-table",
+        "itemCount": 500,
+        "expressionsMemoized": 2,
+        "cacheSlotsAllocated": 2,
+        "invalidationChecks": 200,
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "webawesome",
+      "name": "Web Awesome",
+      "shortName": "Web Awesome",
+      "packageName": "@awesome.me/webawesome",
+      "targetComponent": "wa-select",
+      "itemCount": 500,
+      "updatesCount": 200,
+      "baseline": {
+        "pipelineRunsCount": 201,
+        "allocatedObjectsCount": 50451,
+        "reRenderLatencyMs": 1.83,
+        "heapKb": 0,
+        "estimatedGcPauseMs": 0.58
+      },
+      "optimized": {
+        "pipelineRunsCount": 1,
+        "allocatedObjectsCount": 251,
+        "reRenderLatencyMs": 0,
+        "heapKb": 14.5,
+        "estimatedGcPauseMs": 0
+      },
+      "deltas": {
+        "runs": {
+          "diff": -200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "alloc": {
+          "diff": -50200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-50,200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -1.83,
+          "percent": -100,
+          "formattedDiff": "-1.8",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "gc": {
+          "diff": -0.58,
+          "percent": -100,
+          "formattedDiff": "-0.6",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "targetComponent": "wa-select",
+        "itemCount": 500,
+        "expressionsMemoized": 2,
+        "cacheSlotsAllocated": 2,
+        "invalidationChecks": 200,
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "momentum",
+      "name": "Cisco Momentum Design",
+      "shortName": "Cisco Momentum",
+      "packageName": "@momentum-design/components",
+      "targetComponent": "mdc-list",
+      "itemCount": 500,
+      "updatesCount": 200,
+      "baseline": {
+        "pipelineRunsCount": 201,
+        "allocatedObjectsCount": 50451,
+        "reRenderLatencyMs": 1.82,
+        "heapKb": 0,
+        "estimatedGcPauseMs": 0.58
+      },
+      "optimized": {
+        "pipelineRunsCount": 1,
+        "allocatedObjectsCount": 251,
+        "reRenderLatencyMs": 0,
+        "heapKb": 14.5,
+        "estimatedGcPauseMs": 0
+      },
+      "deltas": {
+        "runs": {
+          "diff": -200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "alloc": {
+          "diff": -50200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-50,200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -1.82,
+          "percent": -100,
+          "formattedDiff": "-1.8",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "gc": {
+          "diff": -0.58,
+          "percent": -100,
+          "formattedDiff": "-0.6",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "targetComponent": "mdc-list",
+        "itemCount": 500,
+        "expressionsMemoized": 2,
+        "cacheSlotsAllocated": 2,
+        "invalidationChecks": 200,
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "material",
+      "name": "Google Material Web",
+      "shortName": "Google Material Web",
+      "packageName": "@material/web",
+      "targetComponent": "md-list",
+      "itemCount": 500,
+      "updatesCount": 200,
+      "baseline": {
+        "pipelineRunsCount": 201,
+        "allocatedObjectsCount": 50451,
+        "reRenderLatencyMs": 1.69,
+        "heapKb": 0,
+        "estimatedGcPauseMs": 0.58
+      },
+      "optimized": {
+        "pipelineRunsCount": 1,
+        "allocatedObjectsCount": 251,
+        "reRenderLatencyMs": 0,
+        "heapKb": 14.5,
+        "estimatedGcPauseMs": 0
+      },
+      "deltas": {
+        "runs": {
+          "diff": -200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "alloc": {
+          "diff": -50200,
+          "percent": -99.50248756218906,
+          "formattedDiff": "-50,200.0",
+          "formattedPercent": "-99.5%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -1.69,
+          "percent": -100,
+          "formattedDiff": "-1.7",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "gc": {
+          "diff": -0.58,
+          "percent": -100,
+          "formattedDiff": "-0.6",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "targetComponent": "md-list",
+        "itemCount": 500,
+        "expressionsMemoized": 2,
+        "cacheSlotsAllocated": 2,
+        "invalidationChecks": 200,
+        "buildOverhead": "Fast native pass"
+      }
+    }
+  ]
+}

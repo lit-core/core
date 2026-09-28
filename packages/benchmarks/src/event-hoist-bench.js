@@ -1,39 +1,25 @@
 #!/usr/bin/env node
-import fs from 'node:fs';
-import path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { transformEventHoist } from '@lit-core/event-hoist';
 import { ENTERPRISE_COMPONENTS, extractComponentTemplates, readComponentFullSource } from './fixtures.js';
+import { calculateDelta, formatDuration, formatNumber, formatPercent } from './format.js';
+import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, syncDocFile } from './reporters/index.js';
+import { createBenchmarkResult } from './schema.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-/**
- * @typedef {Object} SuiteHoistMetrics
- * @property {string} suiteId
- * @property {string} suiteName
- * @property {number} totalComponents
- * @property {number} hoistedComponents
- * @property {number} totalEventsHoisted
- * @property {string[]} eventTypes
- * @property {number} baselineListeners500
- * @property {number} optimizedListeners500
- * @property {number} transformTimeMs
- */
-
-const SUITE_LABELS = {
-  carbon: 'Carbon Web Components (@carbon/web-components)',
-  spectrum: 'Adobe Spectrum Web Components (@spectrum-web-components)',
-  webawesome: 'Web Awesome (@awesome.me/webawesome)',
-  material: 'Google Material Web (@material/web)',
-  momentum: 'Cisco Momentum Design (@momentum-design/components)',
+/** @type {Record<string, { name: string, shortName: string, pkg: string }>} */
+export const SUITE_LABELS = {
+  carbon: { name: 'Carbon Web Components', shortName: 'Carbon', pkg: '@carbon/web-components' },
+  spectrum: { name: 'Adobe Spectrum Web Components', shortName: 'Adobe Spectrum', pkg: '@spectrum-web-components' },
+  webawesome: { name: 'Web Awesome', shortName: 'Web Awesome', pkg: '@awesome.me/webawesome' },
+  momentum: { name: 'Cisco Momentum Design', shortName: 'Cisco Momentum', pkg: '@momentum-design/components' },
+  material: { name: 'Google Material Web', shortName: 'Google Material Web', pkg: '@material/web' },
 };
 
 /**
  * Measure real event hoisting across production enterprise component libraries.
  * @param {string} suiteId
  * @param {typeof ENTERPRISE_COMPONENTS['carbon']} components
- * @returns {SuiteHoistMetrics}
  */
 function evaluateSuiteEventHoist(suiteId, components) {
   const t0 = performance.now();
@@ -68,9 +54,6 @@ function evaluateSuiteEventHoist(suiteId, components) {
   }
   const transformTimeMs = Number((performance.now() - t0).toFixed(2));
 
-  // If a component with event bindings is mounted N times in a list:
-  // Standard Lit attaches a listener for each instance * each binding
-  // Event-hoist attaches exactly 1 delegated listener per unique event type on ShadowRoot
   const instances = 500;
   const avgBindings = totalEventsHoisted > 0 ? totalEventsHoisted : Math.max(1, Math.round(totalBindingsInTemplates / components.length));
   const uniqueEventTypesCount = Math.max(1, eventTypesSet.size);
@@ -80,7 +63,7 @@ function evaluateSuiteEventHoist(suiteId, components) {
 
   return {
     suiteId,
-    suiteName: SUITE_LABELS[suiteId] || suiteId,
+    suiteMeta: SUITE_LABELS[suiteId] || { name: suiteId, shortName: suiteId, pkg: suiteId },
     totalComponents: components.length,
     hoistedComponents,
     totalEventsHoisted,
@@ -92,160 +75,132 @@ function evaluateSuiteEventHoist(suiteId, components) {
 }
 
 /**
- * Format markdown benchmark report according to sentence case rules.
- * @param {SuiteHoistMetrics[]} results
+ * Execute pure event-hoist benchmark measurements without formatting or disk I/O.
+ * Returns a typed BenchmarkRunResult.
+ * @param {Object} [options]
+ * @param {boolean} [options.verbose=false]
+ * @returns {Promise<import('./types.js').BenchmarkRunResult>}
+ */
+export async function runEventHoistBenchmarks(options = {}) {
+  const suites = [];
+  const canonicalOrder = ['carbon', 'spectrum', 'webawesome', 'momentum', 'material'];
+
+  for (const suiteId of canonicalOrder) {
+    const meta = SUITE_LABELS[suiteId];
+    if (options.verbose) {
+      console.log(`  Evaluating design system: ${meta.name}...`);
+    }
+    const components = ENTERPRISE_COMPONENTS[suiteId] || [];
+    const metrics = evaluateSuiteEventHoist(suiteId, components);
+
+    const baseline = {
+      itemsRendered: 500,
+      domEventListeners: metrics.baselineListeners500,
+      rootListeners: 0,
+      uniqueEventTypes: metrics.eventTypes.length || 2,
+      transformTimeMs: metrics.transformTimeMs,
+    };
+
+    const optimized = {
+      itemsRendered: 500,
+      domEventListeners: metrics.optimizedListeners500,
+      rootListeners: metrics.optimizedListeners500,
+      uniqueEventTypes: metrics.eventTypes.length || 2,
+      transformTimeMs: metrics.transformTimeMs,
+    };
+
+    const listenerDelta = calculateDelta(baseline.domEventListeners, optimized.domEventListeners);
+
+    suites.push({
+      id: suiteId,
+      name: meta.name,
+      shortName: meta.shortName,
+      packageName: meta.pkg,
+      componentCount: metrics.totalComponents,
+      baseline,
+      optimized,
+      deltas: {
+        listeners: listenerDelta,
+      },
+      diagnostics: {
+        totalComponents: metrics.totalComponents,
+        hoistedComponents: metrics.hoistedComponents,
+        uniqueEventTypesCount: metrics.eventTypes.length || 2,
+        eventTypesStr: metrics.eventTypes.length > 0 ? metrics.eventTypes.join(', ') : 'click, change',
+        listenerReduction: listenerDelta.formattedPercent,
+        buildOverhead: 'Fast native pass',
+      },
+    });
+  }
+
+  return createBenchmarkResult({
+    benchmarkId: 'event-hoist',
+    title: '`@lit-core/event-hoist` empirical benchmark results',
+    description: 'Ahead-of-time ShadowRoot event delegation evaluated across 255 production Web Components to eliminate per-element DOM event listener allocations.',
+    suites,
+  });
+}
+
+/**
+ * Format event-hoist benchmark results into a standardized markdown document.
+ * Strictly omits any total columns or rows.
+ * @param {import('./types.js').BenchmarkRunResult} result
  * @returns {string}
  */
-function formatReport(results) {
-  const totalComponents = results.reduce((acc, r) => acc + r.totalComponents, 0);
-  const totalHoisted = results.reduce((acc, r) => acc + r.hoistedComponents, 0);
-  const totalBaseListeners = results.reduce((acc, r) => acc + r.baselineListeners500, 0);
-  const totalOptListeners = results.reduce((acc, r) => acc + r.optimizedListeners500, 0);
-  const totalListenerRedPct = (((totalBaseListeners - totalOptListeners) / totalBaseListeners) * 100).toFixed(1);
-
-  const headers = ['Metric', ...results.map((r) => r.suiteName.replace(' Web Components', '').replace(' Design', '')), 'Total / average'];
-  const alignments = [':---', ...results.map(() => '---:'), '---:'];
-
-  const itemsRow = [...results.map(() => '500'), '2,500'];
-  const baseListRow = [...results.map((r) => r.baselineListeners500.toLocaleString()), totalBaseListeners.toLocaleString()];
-  const optListRow = [...results.map((r) => r.optimizedListeners500.toLocaleString()), totalOptListeners.toLocaleString()];
-  const listRedRow = [
-    ...results.map((r) => {
-      const p = (((r.baselineListeners500 - r.optimizedListeners500) / r.baselineListeners500) * 100).toFixed(1);
-      return `**-${p}%**`;
-    }),
-    `**-${totalListenerRedPct}%**`,
-  ];
-  const rootListRow = [...results.map((r) => r.optimizedListeners500.toLocaleString()), totalOptListeners.toLocaleString()];
-  const uniqueTypesRow = [...results.map((r) => String(r.eventTypes.length || 2)), '9'];
-
-  const lines = [
-    '# `@lit-core/event-hoist` empirical benchmark results',
-    '',
-    'Ahead-of-time ShadowRoot event delegation evaluated across 255 production Web Components to eliminate per-element DOM event listener allocations.',
-    '',
-    '---',
-    '',
-    '## Benchmarked dependency versions',
-    '',
-    '| Package | Role | Version evaluated | Elements evaluated |',
-    '| :--- | :--- | :--- | ---: |',
-    '| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 51 elements |',
-    '| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 51 elements |',
-    '| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 51 elements |',
-    '| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 51 elements |',
-    '| `@material/web` | Google Material Design 3 | `2.5.0` | 51 elements |',
-    '| `lit` | Core runtime | `3.3.3` | n/a |',
-    '| `vite` | Bundler | `8.3.1` | n/a |',
-    '| `playwright` | Runtime evaluation engine | `1.63.0` | n/a |',
-    '| `node` | Runtime environment | `v24.14.0` | n/a |',
-    '',
-    '---',
-    '',
-    '## Event listener allocation and dispatch performance comparison',
-    '',
-    'Measurements compare standard per-element Lit event bindings (`@click=${...}`) against `@lit-core/event-hoist` single ShadowRoot delegated listeners across 500 instantiated component items:',
-    '',
-    `| ${headers.join(' | ')} |`,
-    `| ${alignments.join(' | ')} |`,
-    `| **Interactive items rendered** | ${itemsRow.join(' | ')} |`,
-    `| **Baseline DOM event listeners** | ${baseListRow.join(' | ')} |`,
-    `| **Optimized DOM event listeners** | ${optListRow.join(' | ')} |`,
-    `| **Event listener reduction** | ${listRedRow.join(' | ')} |`,
-    `| **Root ShadowRoot listeners** | ${rootListRow.join(' | ')} |`,
-    `| **Unique event types handled** | ${uniqueTypesRow.join(' | ')} |`,
-    '',
-    '> [!NOTE]',
-    '> Rather than allocating separate JavaScript event listener closures and attaching them to every individual DOM node inside a component template, `@lit-core/event-hoist` binds a single listener on the component host or ShadowRoot. On user interactions, the root listener checks `event.composedPath()` against pre-computed part indices to invoke handlers, eliminating 99.9% of event listener registrations.',
-    '',
-    '---',
-    '',
-    '## Event delegation compilation diagnostics',
-    '',
-    'Detailed template event extraction, hoisted component counts, and compilation diagnostics across enterprise design systems:',
-    '',
-    '| Design system or library | Components scanned | Hoisted components | Unique event types | Hoisted event types | Listener reduction | Build overhead |',
-    '| :--- | ---: | ---: | ---: | :--- | ---: | :--- |',
-  ];
-
-  for (const r of results) {
-    const reductionPct = (((r.baselineListeners500 - r.optimizedListeners500) / r.baselineListeners500) * 100).toFixed(1);
-    const eventTypesStr = r.eventTypes.length > 0 ? r.eventTypes.join(', ') : 'click, change';
-    lines.push(`| ${r.suiteName} | ${r.totalComponents} | ${r.hoistedComponents} | ${r.eventTypes.length || 2} | \`${eventTypesStr}\` | **-${reductionPct}%** | Fast native pass |`);
-  }
-
-  lines.push(`| **Total / average** | **${totalComponents}** | **${totalHoisted}** | **9** | \`All standard events\` | **-${totalListenerRedPct}%** | **Negligible** |`);
-  lines.push('');
-  lines.push('---');
-  lines.push('');
-  lines.push('## Running this benchmark');
-  lines.push('');
-  lines.push('```bash');
-  lines.push('# Run standalone event-hoist delegation benchmark');
-  lines.push('node packages/benchmarks/src/event-hoist-bench.js');
-  lines.push('```');
-  lines.push('');
-  lines.push('---');
-  lines.push('');
-  lines.push('## Architectural highlights and invariants');
-  lines.push('');
-  lines.push('- **Zero per-element listener overhead**: Dispatches interactive template events through a single root listener on the ShadowRoot.');
-  lines.push('- **High compilation speed**: AST event analysis and hoisting across real component source files completes in single-digit milliseconds per suite.');
-  lines.push('- **100% specification compliant**: Preserves `event.composedPath()`, `stopPropagation()`, and target resolution transparently without altering Lit template semantics.');
-  lines.push('- **Zero runtime polyfills**: Leverages standard Web Component ShadowRoot event bubbling mechanics.');
-  lines.push('');
-  lines.push('---');
-  lines.push('');
-  lines.push('## Related documentation');
-  lines.push('');
-  lines.push('- [Benchmark executive overview](../README.md)');
-  lines.push('- [`@lit-core/event-hoist` package documentation](../../event-hoist/README.md)');
-  lines.push('- [Ahead-of-time DOM paths compilation](../docs/dom-paths.md)');
-  lines.push('');
-
-  return lines.join('\n');
+export function formatEventHoistDoc(result) {
+  return renderBenchmarkDoc({
+    title: result.title,
+    leadParagraph: result.description,
+    comparisonHeading: 'Event listener allocation and dispatch performance comparison',
+    comparisonDescription:
+      'Measurements compare standard per-element Lit event bindings (`@click=${...}`) against `@lit-core/event-hoist` single ShadowRoot delegated listeners across 500 instantiated component items:',
+    suites: result.suites,
+    metrics: [
+      { label: 'Interactive items rendered', getValue: (s) => formatNumber(s.baseline.itemsRendered) },
+      { label: 'Baseline DOM event listeners', getValue: (s) => formatNumber(s.baseline.domEventListeners) },
+      { label: 'Optimized DOM event listeners', getValue: (s) => formatNumber(s.optimized.domEventListeners) },
+      { label: 'Event listener reduction', getValue: (s) => `**${s.deltas.listeners.formattedPercent}**` },
+      { label: 'Root ShadowRoot listeners', getValue: (s) => formatNumber(s.optimized.rootListeners) },
+      { label: 'Unique event types handled', getValue: (s) => formatNumber(s.optimized.uniqueEventTypes) },
+    ],
+    note: 'Rather than allocating separate JavaScript event listener closures and attaching them to every individual DOM node inside a component template, `@lit-core/event-hoist` binds a single listener on the component host or ShadowRoot. On user interactions, the root listener checks `event.composedPath()` against pre-computed part indices to invoke handlers, eliminating 99.9% of event listener registrations.',
+    diagnosticsHeading: 'Event delegation compilation diagnostics',
+    diagnosticsDescription: 'Detailed template event extraction, hoisted component counts, and compilation diagnostics across enterprise design systems:',
+    diagnosticsColumns: [
+      { header: 'Components scanned', getValue: (s) => formatNumber(s.diagnostics.totalComponents) },
+      { header: 'Hoisted components', getValue: (s) => formatNumber(s.diagnostics.hoistedComponents) },
+      { header: 'Unique event types', getValue: (s) => formatNumber(s.diagnostics.uniqueEventTypesCount) },
+      { header: 'Hoisted event types', align: 'left', getValue: (s) => `\`${s.diagnostics.eventTypesStr}\`` },
+      { header: 'Listener reduction', getValue: (s) => `**${s.diagnostics.listenerReduction}**` },
+      { header: 'Build overhead', align: 'left', getValue: (s) => s.diagnostics.buildOverhead },
+    ],
+    runCommand: 'node packages/benchmarks/src/event-hoist-bench.js',
+    invariants: [
+      '**Zero per-element listener overhead**: Dispatches interactive template events through a single root listener on the ShadowRoot.',
+      '**High compilation speed**: AST event analysis and hoisting across real component source files completes in single-digit milliseconds per suite.',
+      '**100% specification compliant**: Preserves `event.composedPath()`, `stopPropagation()`, and target resolution transparently without altering Lit template semantics.',
+      '**Zero runtime polyfills**: Leverages standard Web Component ShadowRoot event bubbling mechanics.',
+    ],
+    relatedDocs: [
+      { label: 'Benchmark executive overview', url: '../README.md' },
+      { label: '`@lit-core/event-hoist` package documentation', url: '../../event-hoist/README.md' },
+      { label: 'Ahead-of-time DOM paths compilation', url: '../docs/dom-paths.md' },
+    ],
+  });
 }
 
-async function runEventHoistBenchmarks() {
-  console.log('\n========================================================================================');
-  console.log('⚡ LIT-CORE RUNTIME INITIALIZATION BENCHMARK: EVENT-HOIST');
-  console.log('========================================================================================');
-  console.log('Evaluating native DOM event listener allocations across real production components.\n');
-
-  const results = [];
-
-  const canonicalOrder = ['carbon', 'spectrum', 'webawesome', 'momentum', 'material'];
-  for (const suiteId of canonicalOrder) {
-    const components = ENTERPRISE_COMPONENTS[suiteId] || [];
-    console.log(`⏳ Evaluating real components for: ${SUITE_LABELS[suiteId] || suiteId} (${components.length} components)...`);
-    const metrics = evaluateSuiteEventHoist(suiteId, components);
-    results.push(metrics);
-    console.log(
-      `  ✓ Analyzed ${metrics.totalComponents} real components (${metrics.hoistedComponents} with hoisted events: ${metrics.eventTypes.join(', ') || 'standard'}) in ${metrics.transformTimeMs} ms`,
-    );
-  }
-
-  const report = formatReport(results);
-  const outPath = path.join(__dirname, '../docs/event-hoist.md');
-  fs.writeFileSync(outPath, report, 'utf-8');
-  console.log(`\n✓ Synchronized benchmark documentation to: ${outPath}\n`);
-
-  console.log('========================================================================================');
-  console.log('📊 BENCHMARK RESULTS: EVENT LISTENER DELEGATION ACROSS 5 DESIGN SYSTEMS');
-  console.log('========================================================================================\n');
-  console.table(
-    results.map((r) => ({
-      'Design system': r.suiteName,
-      Components: r.totalComponents,
-      'Hoisted components': r.hoistedComponents,
-      'Baseline (500 items)': `${r.baselineListeners500} listeners`,
-      'Optimized (500 items)': `${r.optimizedListeners500} listeners`,
-      'Listener savings': `-${(((r.baselineListeners500 - r.optimizedListeners500) / r.baselineListeners500) * 100).toFixed(1)}%`,
-    })),
-  );
+// CLI execution
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  printBenchmarkHeader('event-hoist', 'Evaluating native DOM event listener allocations across real production components.');
+  runEventHoistBenchmarks({ verbose: true })
+    .then((result) => {
+      const jsonPath = saveBenchmarkResult(result);
+      const doc = formatEventHoistDoc(result);
+      const docPath = syncDocFile('event-hoist.md', doc);
+      printBenchmarkFooter('event-hoist', { jsonPath, docPath });
+    })
+    .catch((err) => {
+      console.error('Benchmark failed:', err);
+      process.exit(1);
+    });
 }
-
-runEventHoistBenchmarks().catch((err) => {
-  console.error('Benchmark failed:', err);
-  process.exit(1);
-});

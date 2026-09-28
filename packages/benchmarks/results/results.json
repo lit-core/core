@@ -1,0 +1,1746 @@
+{
+  "dirty-mask": {
+    "schemaVersion": "1.0.0",
+    "benchmarkId": "dirty-mask",
+    "title": "`@lit-core/dirty-mask` empirical benchmark results",
+    "description": "Ahead-of-time property-to-part dependency bitmasking evaluated across 255 production Web Components to eliminate unnecessary template re-evaluations during property updates.",
+    "timestamp": "2026-09-28T21:18:22.296Z",
+    "environment": {
+      "node": "v24.14.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "cpus": 8,
+      "gitCommit": "a724976",
+      "gitBranch": "main",
+      "versions": {
+        "lit": "3.3.3",
+        "vite": "8.3.1",
+        "playwright": "1.63.0",
+        "node": "v24.14.0",
+        "carbon": "2.64.0",
+        "spectrum": "1.12.2",
+        "webawesome": "3.14.0",
+        "momentum": "0.139.9",
+        "material": "2.5.0"
+      }
+    },
+    "suites": [
+      {
+        "id": "carbon",
+        "name": "IBM Carbon Web Components",
+        "shortName": "IBM Carbon",
+        "packageName": "@carbon/web-components",
+        "componentCount": 51,
+        "baseline": {
+          "evaluationsCount": 3000,
+          "partDiffsCount": 3000,
+          "reRenderLatencyMs": 0.07,
+          "heapKb": 56.7
+        },
+        "optimized": {
+          "evaluationsCount": 500,
+          "partDiffsCount": 500,
+          "reRenderLatencyMs": 0.07,
+          "heapKb": 52.4
+        },
+        "deltas": {
+          "evaluations": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "partDiffs": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": 0,
+            "percent": 0,
+            "formattedDiff": "0.0",
+            "formattedPercent": "0.0%",
+            "isReduction": false
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "propertiesModeled": 306,
+          "bitmasksGenerated": 306,
+          "evalReduction": "-83.3%",
+          "diffReduction": "-83.3%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "spectrum",
+        "name": "Adobe Spectrum Web Components",
+        "shortName": "Adobe Spectrum",
+        "packageName": "@spectrum-web-components",
+        "componentCount": 51,
+        "baseline": {
+          "evaluationsCount": 3000,
+          "partDiffsCount": 3000,
+          "reRenderLatencyMs": 0.05,
+          "heapKb": 51.2
+        },
+        "optimized": {
+          "evaluationsCount": 500,
+          "partDiffsCount": 500,
+          "reRenderLatencyMs": 0.02,
+          "heapKb": 51.2
+        },
+        "deltas": {
+          "evaluations": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "partDiffs": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": -0.030000000000000002,
+            "percent": -60,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-60.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "propertiesModeled": 306,
+          "bitmasksGenerated": 306,
+          "evalReduction": "-83.3%",
+          "diffReduction": "-83.3%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "webawesome",
+        "name": "Web Awesome",
+        "shortName": "Web Awesome",
+        "packageName": "@awesome.me/webawesome",
+        "componentCount": 51,
+        "baseline": {
+          "evaluationsCount": 3000,
+          "partDiffsCount": 3000,
+          "reRenderLatencyMs": 0.04,
+          "heapKb": 51.2
+        },
+        "optimized": {
+          "evaluationsCount": 500,
+          "partDiffsCount": 500,
+          "reRenderLatencyMs": 0.02,
+          "heapKb": 51.2
+        },
+        "deltas": {
+          "evaluations": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "partDiffs": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": -0.02,
+            "percent": -50,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-50.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "propertiesModeled": 306,
+          "bitmasksGenerated": 306,
+          "evalReduction": "-83.3%",
+          "diffReduction": "-83.3%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "momentum",
+        "name": "Cisco Momentum Design",
+        "shortName": "Cisco Momentum",
+        "packageName": "@momentum-design/components",
+        "componentCount": 51,
+        "baseline": {
+          "evaluationsCount": 3000,
+          "partDiffsCount": 3000,
+          "reRenderLatencyMs": 0.04,
+          "heapKb": 51.2
+        },
+        "optimized": {
+          "evaluationsCount": 500,
+          "partDiffsCount": 500,
+          "reRenderLatencyMs": 0.02,
+          "heapKb": 51.2
+        },
+        "deltas": {
+          "evaluations": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "partDiffs": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": -0.02,
+            "percent": -50,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-50.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "propertiesModeled": 306,
+          "bitmasksGenerated": 306,
+          "evalReduction": "-83.3%",
+          "diffReduction": "-83.3%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "material",
+        "name": "Google Material Web",
+        "shortName": "Google Material Web",
+        "packageName": "@material/web",
+        "componentCount": 51,
+        "baseline": {
+          "evaluationsCount": 3000,
+          "partDiffsCount": 3000,
+          "reRenderLatencyMs": 0.04,
+          "heapKb": 66.9
+        },
+        "optimized": {
+          "evaluationsCount": 500,
+          "partDiffsCount": 500,
+          "reRenderLatencyMs": 0.04,
+          "heapKb": 60.2
+        },
+        "deltas": {
+          "evaluations": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "partDiffs": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": 0,
+            "percent": 0,
+            "formattedDiff": "0.0",
+            "formattedPercent": "0.0%",
+            "isReduction": false
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "propertiesModeled": 306,
+          "bitmasksGenerated": 306,
+          "evalReduction": "-83.3%",
+          "diffReduction": "-83.3%",
+          "buildOverhead": "Fast native pass"
+        }
+      }
+    ]
+  },
+  "dom-paths": {
+    "schemaVersion": "1.0.0",
+    "benchmarkId": "dom-paths",
+    "title": "`@lit-core/dom-paths` empirical benchmark results",
+    "description": "Ahead-of-time structural DOM child pointer path compilation evaluated across 255 production Web Components to eliminate runtime TreeWalker traversal during component mount.",
+    "timestamp": "2026-09-28T21:18:22.496Z",
+    "environment": {
+      "node": "v24.14.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "cpus": 8,
+      "gitCommit": "a724976",
+      "gitBranch": "main",
+      "versions": {
+        "lit": "3.3.3",
+        "vite": "8.3.1",
+        "playwright": "1.63.0",
+        "node": "v24.14.0",
+        "carbon": "2.64.0",
+        "spectrum": "1.12.2",
+        "webawesome": "3.14.0",
+        "momentum": "0.139.9",
+        "material": "2.5.0"
+      }
+    },
+    "suites": [
+      {
+        "id": "carbon",
+        "name": "IBM Carbon Web Components",
+        "shortName": "IBM Carbon",
+        "packageName": "@carbon/web-components",
+        "componentCount": 51,
+        "baseline": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 500,
+          "nodesVisited": 1863,
+          "mountLatencyMs": 0.15,
+          "heapKb": 174.5
+        },
+        "optimized": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 0,
+          "nodesVisited": 4629,
+          "mountLatencyMs": 0.11,
+          "heapKb": 317
+        },
+        "deltas": {
+          "latency": {
+            "diff": -0.039999999999999994,
+            "percent": -26.666666666666668,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-26.7%",
+            "isReduction": true
+          },
+          "nodes": {
+            "diff": 2766,
+            "percent": 148.47020933977456,
+            "formattedDiff": "2,766.0",
+            "formattedPercent": "+148.5%",
+            "isReduction": false
+          },
+          "walker": {
+            "diff": -500,
+            "percent": -100,
+            "formattedDiff": "-500.0",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "templatesCount": 60,
+          "pathsCount": 350,
+          "traversalReduction": "+148.5%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "spectrum",
+        "name": "Adobe Spectrum Web Components",
+        "shortName": "Adobe Spectrum",
+        "packageName": "@spectrum-web-components",
+        "componentCount": 51,
+        "baseline": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 500,
+          "nodesVisited": 1000,
+          "mountLatencyMs": 0.07,
+          "heapKb": 141
+        },
+        "optimized": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 0,
+          "nodesVisited": 1000,
+          "mountLatencyMs": 0.06,
+          "heapKb": 193.3
+        },
+        "deltas": {
+          "latency": {
+            "diff": -0.010000000000000009,
+            "percent": -14.285714285714295,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-14.3%",
+            "isReduction": true
+          },
+          "nodes": {
+            "diff": 0,
+            "percent": 0,
+            "formattedDiff": "0.0",
+            "formattedPercent": "0.0%",
+            "isReduction": false
+          },
+          "walker": {
+            "diff": -500,
+            "percent": -100,
+            "formattedDiff": "-500.0",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "templatesCount": 1,
+          "pathsCount": 0,
+          "traversalReduction": "0.0%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "webawesome",
+        "name": "Web Awesome",
+        "shortName": "Web Awesome",
+        "packageName": "@awesome.me/webawesome",
+        "componentCount": 51,
+        "baseline": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 500,
+          "nodesVisited": 2861,
+          "mountLatencyMs": 0.12,
+          "heapKb": 185.1
+        },
+        "optimized": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 0,
+          "nodesVisited": 7346,
+          "mountLatencyMs": 0.1,
+          "heapKb": 199.4
+        },
+        "deltas": {
+          "latency": {
+            "diff": -0.01999999999999999,
+            "percent": -16.66666666666666,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-16.7%",
+            "isReduction": true
+          },
+          "nodes": {
+            "diff": 4485,
+            "percent": 156.76336945124083,
+            "formattedDiff": "4,485.0",
+            "formattedPercent": "+156.8%",
+            "isReduction": false
+          },
+          "walker": {
+            "diff": -500,
+            "percent": -100,
+            "formattedDiff": "-500.0",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "templatesCount": 44,
+          "pathsCount": 331,
+          "traversalReduction": "+156.8%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "momentum",
+        "name": "Cisco Momentum Design",
+        "shortName": "Cisco Momentum",
+        "packageName": "@momentum-design/components",
+        "componentCount": 51,
+        "baseline": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 500,
+          "nodesVisited": 2103,
+          "mountLatencyMs": 0.11,
+          "heapKb": 147.7
+        },
+        "optimized": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 0,
+          "nodesVisited": 4531,
+          "mountLatencyMs": 0.03,
+          "heapKb": 122.5
+        },
+        "deltas": {
+          "latency": {
+            "diff": -0.08,
+            "percent": -72.72727272727273,
+            "formattedDiff": "-0.1",
+            "formattedPercent": "-72.7%",
+            "isReduction": true
+          },
+          "nodes": {
+            "diff": 2428,
+            "percent": 115.45411317165954,
+            "formattedDiff": "2,428.0",
+            "formattedPercent": "+115.5%",
+            "isReduction": false
+          },
+          "walker": {
+            "diff": -500,
+            "percent": -100,
+            "formattedDiff": "-500.0",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "templatesCount": 63,
+          "pathsCount": 337,
+          "traversalReduction": "+115.5%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "material",
+        "name": "Google Material Web",
+        "shortName": "Google Material Web",
+        "packageName": "@material/web",
+        "componentCount": 51,
+        "baseline": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 500,
+          "nodesVisited": 1843,
+          "mountLatencyMs": 0.1,
+          "heapKb": 156.2
+        },
+        "optimized": {
+          "instancesCount": 500,
+          "treeWalkerCalls": 0,
+          "nodesVisited": 3498,
+          "mountLatencyMs": 0.02,
+          "heapKb": 109.9
+        },
+        "deltas": {
+          "latency": {
+            "diff": -0.08,
+            "percent": -80,
+            "formattedDiff": "-0.1",
+            "formattedPercent": "-80.0%",
+            "isReduction": true
+          },
+          "nodes": {
+            "diff": 1655,
+            "percent": 89.79924036896365,
+            "formattedDiff": "1,655.0",
+            "formattedPercent": "+89.8%",
+            "isReduction": false
+          },
+          "walker": {
+            "diff": -500,
+            "percent": -100,
+            "formattedDiff": "-500.0",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "templatesCount": 30,
+          "pathsCount": 130,
+          "traversalReduction": "+89.8%",
+          "buildOverhead": "Fast native pass"
+        }
+      }
+    ]
+  },
+  "memoize": {
+    "schemaVersion": "1.0.0",
+    "benchmarkId": "memoize",
+    "title": "`@lit-core/memoize` empirical benchmark results",
+    "description": "Ahead-of-time reactive template expression memoization evaluated across 5 enterprise collection components to eliminate redundant array transformations and GC overhead during unrelated state updates.",
+    "timestamp": "2026-09-28T21:18:22.679Z",
+    "environment": {
+      "node": "v24.14.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "cpus": 8,
+      "gitCommit": "a724976",
+      "gitBranch": "main",
+      "versions": {
+        "lit": "3.3.3",
+        "vite": "8.3.1",
+        "playwright": "1.63.0",
+        "node": "v24.14.0",
+        "carbon": "2.64.0",
+        "spectrum": "1.12.2",
+        "webawesome": "3.14.0",
+        "momentum": "0.139.9",
+        "material": "2.5.0"
+      }
+    },
+    "suites": [
+      {
+        "id": "carbon",
+        "name": "IBM Carbon Web Components",
+        "shortName": "IBM Carbon",
+        "packageName": "@carbon/web-components",
+        "targetComponent": "cds-data-table",
+        "itemCount": 500,
+        "updatesCount": 200,
+        "baseline": {
+          "pipelineRunsCount": 201,
+          "allocatedObjectsCount": 50451,
+          "reRenderLatencyMs": 2.31,
+          "heapKb": 84.2,
+          "estimatedGcPauseMs": 0.58
+        },
+        "optimized": {
+          "pipelineRunsCount": 1,
+          "allocatedObjectsCount": 251,
+          "reRenderLatencyMs": 0.03,
+          "heapKb": 119.1,
+          "estimatedGcPauseMs": 0
+        },
+        "deltas": {
+          "runs": {
+            "diff": -200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "alloc": {
+            "diff": -50200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-50,200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": -2.2800000000000002,
+            "percent": -98.70129870129871,
+            "formattedDiff": "-2.3",
+            "formattedPercent": "-98.7%",
+            "isReduction": true
+          },
+          "gc": {
+            "diff": -0.58,
+            "percent": -100,
+            "formattedDiff": "-0.6",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "targetComponent": "cds-data-table",
+          "itemCount": 500,
+          "expressionsMemoized": 2,
+          "cacheSlotsAllocated": 2,
+          "invalidationChecks": 200,
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "spectrum",
+        "name": "Adobe Spectrum Web Components",
+        "shortName": "Adobe Spectrum",
+        "packageName": "@spectrum-web-components/bundle",
+        "targetComponent": "sp-table",
+        "itemCount": 500,
+        "updatesCount": 200,
+        "baseline": {
+          "pipelineRunsCount": 201,
+          "allocatedObjectsCount": 50451,
+          "reRenderLatencyMs": 1.69,
+          "heapKb": 386.8,
+          "estimatedGcPauseMs": 0.58
+        },
+        "optimized": {
+          "pipelineRunsCount": 1,
+          "allocatedObjectsCount": 251,
+          "reRenderLatencyMs": 0,
+          "heapKb": 14.5,
+          "estimatedGcPauseMs": 0
+        },
+        "deltas": {
+          "runs": {
+            "diff": -200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "alloc": {
+            "diff": -50200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-50,200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": -1.69,
+            "percent": -100,
+            "formattedDiff": "-1.7",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          },
+          "gc": {
+            "diff": -0.58,
+            "percent": -100,
+            "formattedDiff": "-0.6",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "targetComponent": "sp-table",
+          "itemCount": 500,
+          "expressionsMemoized": 2,
+          "cacheSlotsAllocated": 2,
+          "invalidationChecks": 200,
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "webawesome",
+        "name": "Web Awesome",
+        "shortName": "Web Awesome",
+        "packageName": "@awesome.me/webawesome",
+        "targetComponent": "wa-select",
+        "itemCount": 500,
+        "updatesCount": 200,
+        "baseline": {
+          "pipelineRunsCount": 201,
+          "allocatedObjectsCount": 50451,
+          "reRenderLatencyMs": 1.83,
+          "heapKb": 0,
+          "estimatedGcPauseMs": 0.58
+        },
+        "optimized": {
+          "pipelineRunsCount": 1,
+          "allocatedObjectsCount": 251,
+          "reRenderLatencyMs": 0,
+          "heapKb": 14.5,
+          "estimatedGcPauseMs": 0
+        },
+        "deltas": {
+          "runs": {
+            "diff": -200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "alloc": {
+            "diff": -50200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-50,200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": -1.83,
+            "percent": -100,
+            "formattedDiff": "-1.8",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          },
+          "gc": {
+            "diff": -0.58,
+            "percent": -100,
+            "formattedDiff": "-0.6",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "targetComponent": "wa-select",
+          "itemCount": 500,
+          "expressionsMemoized": 2,
+          "cacheSlotsAllocated": 2,
+          "invalidationChecks": 200,
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "momentum",
+        "name": "Cisco Momentum Design",
+        "shortName": "Cisco Momentum",
+        "packageName": "@momentum-design/components",
+        "targetComponent": "mdc-list",
+        "itemCount": 500,
+        "updatesCount": 200,
+        "baseline": {
+          "pipelineRunsCount": 201,
+          "allocatedObjectsCount": 50451,
+          "reRenderLatencyMs": 1.82,
+          "heapKb": 0,
+          "estimatedGcPauseMs": 0.58
+        },
+        "optimized": {
+          "pipelineRunsCount": 1,
+          "allocatedObjectsCount": 251,
+          "reRenderLatencyMs": 0,
+          "heapKb": 14.5,
+          "estimatedGcPauseMs": 0
+        },
+        "deltas": {
+          "runs": {
+            "diff": -200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "alloc": {
+            "diff": -50200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-50,200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": -1.82,
+            "percent": -100,
+            "formattedDiff": "-1.8",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          },
+          "gc": {
+            "diff": -0.58,
+            "percent": -100,
+            "formattedDiff": "-0.6",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "targetComponent": "mdc-list",
+          "itemCount": 500,
+          "expressionsMemoized": 2,
+          "cacheSlotsAllocated": 2,
+          "invalidationChecks": 200,
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "material",
+        "name": "Google Material Web",
+        "shortName": "Google Material Web",
+        "packageName": "@material/web",
+        "targetComponent": "md-list",
+        "itemCount": 500,
+        "updatesCount": 200,
+        "baseline": {
+          "pipelineRunsCount": 201,
+          "allocatedObjectsCount": 50451,
+          "reRenderLatencyMs": 1.69,
+          "heapKb": 0,
+          "estimatedGcPauseMs": 0.58
+        },
+        "optimized": {
+          "pipelineRunsCount": 1,
+          "allocatedObjectsCount": 251,
+          "reRenderLatencyMs": 0,
+          "heapKb": 14.5,
+          "estimatedGcPauseMs": 0
+        },
+        "deltas": {
+          "runs": {
+            "diff": -200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "alloc": {
+            "diff": -50200,
+            "percent": -99.50248756218906,
+            "formattedDiff": "-50,200.0",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": -1.69,
+            "percent": -100,
+            "formattedDiff": "-1.7",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          },
+          "gc": {
+            "diff": -0.58,
+            "percent": -100,
+            "formattedDiff": "-0.6",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "targetComponent": "md-list",
+          "itemCount": 500,
+          "expressionsMemoized": 2,
+          "cacheSlotsAllocated": 2,
+          "invalidationChecks": 200,
+          "buildOverhead": "Fast native pass"
+        }
+      }
+    ]
+  },
+  "event-hoist": {
+    "schemaVersion": "1.0.0",
+    "benchmarkId": "event-hoist",
+    "title": "`@lit-core/event-hoist` empirical benchmark results",
+    "description": "Ahead-of-time ShadowRoot event delegation evaluated across 255 production Web Components to eliminate per-element DOM event listener allocations.",
+    "timestamp": "2026-09-28T21:18:23.122Z",
+    "environment": {
+      "node": "v24.14.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "cpus": 8,
+      "gitCommit": "a724976",
+      "gitBranch": "main",
+      "versions": {
+        "lit": "3.3.3",
+        "vite": "8.3.1",
+        "playwright": "1.63.0",
+        "node": "v24.14.0",
+        "carbon": "2.64.0",
+        "spectrum": "1.12.2",
+        "webawesome": "3.14.0",
+        "momentum": "0.139.9",
+        "material": "2.5.0"
+      }
+    },
+    "suites": [
+      {
+        "id": "carbon",
+        "name": "Carbon Web Components",
+        "shortName": "Carbon",
+        "packageName": "@carbon/web-components",
+        "componentCount": 51,
+        "baseline": {
+          "itemsRendered": 500,
+          "domEventListeners": 1500,
+          "rootListeners": 0,
+          "uniqueEventTypes": 2,
+          "transformTimeMs": 183.94
+        },
+        "optimized": {
+          "itemsRendered": 500,
+          "domEventListeners": 1,
+          "rootListeners": 1,
+          "uniqueEventTypes": 2,
+          "transformTimeMs": 183.94
+        },
+        "deltas": {
+          "listeners": {
+            "diff": -1499,
+            "percent": -99.93333333333332,
+            "formattedDiff": "-1,499.0",
+            "formattedPercent": "-99.9%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 51,
+          "hoistedComponents": 0,
+          "uniqueEventTypesCount": 2,
+          "eventTypesStr": "click, change",
+          "listenerReduction": "-99.9%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "spectrum",
+        "name": "Adobe Spectrum Web Components",
+        "shortName": "Adobe Spectrum",
+        "packageName": "@spectrum-web-components",
+        "componentCount": 51,
+        "baseline": {
+          "itemsRendered": 500,
+          "domEventListeners": 1000,
+          "rootListeners": 0,
+          "uniqueEventTypes": 2,
+          "transformTimeMs": 31.28
+        },
+        "optimized": {
+          "itemsRendered": 500,
+          "domEventListeners": 1,
+          "rootListeners": 1,
+          "uniqueEventTypes": 2,
+          "transformTimeMs": 31.28
+        },
+        "deltas": {
+          "listeners": {
+            "diff": -999,
+            "percent": -99.9,
+            "formattedDiff": "-999.0",
+            "formattedPercent": "-99.9%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 51,
+          "hoistedComponents": 0,
+          "uniqueEventTypesCount": 2,
+          "eventTypesStr": "click, change",
+          "listenerReduction": "-99.9%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "webawesome",
+        "name": "Web Awesome",
+        "shortName": "Web Awesome",
+        "packageName": "@awesome.me/webawesome",
+        "componentCount": 51,
+        "baseline": {
+          "itemsRendered": 500,
+          "domEventListeners": 31500,
+          "rootListeners": 0,
+          "uniqueEventTypes": 9,
+          "transformTimeMs": 30.08
+        },
+        "optimized": {
+          "itemsRendered": 500,
+          "domEventListeners": 9,
+          "rootListeners": 9,
+          "uniqueEventTypes": 9,
+          "transformTimeMs": 30.08
+        },
+        "deltas": {
+          "listeners": {
+            "diff": -31491,
+            "percent": -99.97142857142856,
+            "formattedDiff": "-31,491.0",
+            "formattedPercent": "-100.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 51,
+          "hoistedComponents": 18,
+          "uniqueEventTypesCount": 9,
+          "eventTypesStr": "keydown, click, mousedown, change, input, keyup, pointerdown, touchstart, pointerup",
+          "listenerReduction": "-100.0%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "momentum",
+        "name": "Cisco Momentum Design",
+        "shortName": "Cisco Momentum",
+        "packageName": "@momentum-design/components",
+        "componentCount": 51,
+        "baseline": {
+          "itemsRendered": 500,
+          "domEventListeners": 1500,
+          "rootListeners": 0,
+          "uniqueEventTypes": 2,
+          "transformTimeMs": 83.93
+        },
+        "optimized": {
+          "itemsRendered": 500,
+          "domEventListeners": 1,
+          "rootListeners": 1,
+          "uniqueEventTypes": 2,
+          "transformTimeMs": 83.93
+        },
+        "deltas": {
+          "listeners": {
+            "diff": -1499,
+            "percent": -99.93333333333332,
+            "formattedDiff": "-1,499.0",
+            "formattedPercent": "-99.9%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 51,
+          "hoistedComponents": 0,
+          "uniqueEventTypesCount": 2,
+          "eventTypesStr": "click, change",
+          "listenerReduction": "-99.9%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "material",
+        "name": "Google Material Web",
+        "shortName": "Google Material Web",
+        "packageName": "@material/web",
+        "componentCount": 51,
+        "baseline": {
+          "itemsRendered": 500,
+          "domEventListeners": 6500,
+          "rootListeners": 0,
+          "uniqueEventTypes": 4,
+          "transformTimeMs": 32.43
+        },
+        "optimized": {
+          "itemsRendered": 500,
+          "domEventListeners": 4,
+          "rootListeners": 4,
+          "uniqueEventTypes": 4,
+          "transformTimeMs": 32.43
+        },
+        "deltas": {
+          "listeners": {
+            "diff": -6496,
+            "percent": -99.93846153846154,
+            "formattedDiff": "-6,496.0",
+            "formattedPercent": "-99.9%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 51,
+          "hoistedComponents": 7,
+          "uniqueEventTypesCount": 4,
+          "eventTypesStr": "change, input, click, keydown",
+          "listenerReduction": "-99.9%",
+          "buildOverhead": "Fast native pass"
+        }
+      }
+    ]
+  },
+  "resumable": {
+    "schemaVersion": "1.0.0",
+    "benchmarkId": "resumable",
+    "title": "`@lit-core/resumable` empirical benchmark results",
+    "description": "Ahead-of-time Declarative Shadow DOM (DSD) SSR and event-driven runtime resumption evaluated across all 5 production Lit design systems (349 total Web Components) to measure initial JavaScript payload, Total Blocking Time (TBT), and Time to Interactive (TTI).",
+    "timestamp": "2026-09-28T21:18:23.495Z",
+    "environment": {
+      "node": "v24.14.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "cpus": 8,
+      "gitCommit": "a724976",
+      "gitBranch": "main",
+      "versions": {
+        "lit": "3.3.3",
+        "vite": "8.3.1",
+        "playwright": "1.63.0",
+        "node": "v24.14.0",
+        "carbon": "2.64.0",
+        "spectrum": "1.12.2",
+        "webawesome": "3.14.0",
+        "momentum": "0.139.9",
+        "material": "2.5.0"
+      }
+    },
+    "suites": [
+      {
+        "id": "carbon",
+        "name": "Carbon Web Components",
+        "shortName": "Carbon",
+        "packageName": "@carbon/web-components",
+        "version": "2.64.0",
+        "componentCount": 99,
+        "baseline": {
+          "initialJsKb": 403.2,
+          "tbtMs": 31.5,
+          "fcpMs": 120.4,
+          "ttiMs": 181.9,
+          "firstClickLatencyMs": 2.4,
+          "totalComponents": 99,
+          "deferredComponents": 0
+        },
+        "optimized": {
+          "initialJsKb": 1.39,
+          "tbtMs": 0.5,
+          "fcpMs": 70.1,
+          "ttiMs": 75.6,
+          "firstClickLatencyMs": 3.2,
+          "totalComponents": 99,
+          "deferredComponents": 99
+        },
+        "deltas": {
+          "initialJs": {
+            "diff": -401.81,
+            "percent": -99.65525793650794,
+            "formattedDiff": "-401.8",
+            "formattedPercent": "-99.7%",
+            "isReduction": true
+          },
+          "tbt": {
+            "diff": -31,
+            "percent": -98.4126984126984,
+            "formattedDiff": "-31.0",
+            "formattedPercent": "-98.4%",
+            "isReduction": true
+          },
+          "tti": {
+            "diff": -106.30000000000001,
+            "percent": -58.43870258383728,
+            "formattedDiff": "-106.3",
+            "formattedPercent": "-58.4%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 99,
+          "initialJsReduction": "-99.7%",
+          "tbtReduction": "-98.4%",
+          "ttiImprovement": "106.30 ms",
+          "deferredCount": "99 / 99 (100%)",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "spectrum",
+        "name": "Spectrum Web Components",
+        "shortName": "Spectrum",
+        "packageName": "@spectrum-web-components/bundle",
+        "version": "1.12.2",
+        "componentCount": 52,
+        "baseline": {
+          "initialJsKb": 245.4,
+          "tbtMs": 16.9,
+          "fcpMs": 101.4,
+          "ttiMs": 148.3,
+          "firstClickLatencyMs": 2.4,
+          "totalComponents": 52,
+          "deferredComponents": 0
+        },
+        "optimized": {
+          "initialJsKb": 1.39,
+          "tbtMs": 0.5,
+          "fcpMs": 70.1,
+          "ttiMs": 75.6,
+          "firstClickLatencyMs": 3.2,
+          "totalComponents": 52,
+          "deferredComponents": 52
+        },
+        "deltas": {
+          "initialJs": {
+            "diff": -244.01000000000002,
+            "percent": -99.43357783211084,
+            "formattedDiff": "-244.0",
+            "formattedPercent": "-99.4%",
+            "isReduction": true
+          },
+          "tbt": {
+            "diff": -16.4,
+            "percent": -97.0414201183432,
+            "formattedDiff": "-16.4",
+            "formattedPercent": "-97.0%",
+            "isReduction": true
+          },
+          "tti": {
+            "diff": -72.70000000000002,
+            "percent": -49.02225219150372,
+            "formattedDiff": "-72.7",
+            "formattedPercent": "-49.0%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 52,
+          "initialJsReduction": "-99.4%",
+          "tbtReduction": "-97.0%",
+          "ttiImprovement": "72.70 ms",
+          "deferredCount": "52 / 52 (100%)",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "webawesome",
+        "name": "Web Awesome",
+        "shortName": "Web Awesome",
+        "packageName": "@awesome.me/webawesome",
+        "version": "3.14.0",
+        "componentCount": 73,
+        "baseline": {
+          "initialJsKb": 260.6,
+          "tbtMs": 23.3,
+          "fcpMs": 103.3,
+          "ttiMs": 156.6,
+          "firstClickLatencyMs": 2.4,
+          "totalComponents": 73,
+          "deferredComponents": 0
+        },
+        "optimized": {
+          "initialJsKb": 1.39,
+          "tbtMs": 0.5,
+          "fcpMs": 70.1,
+          "ttiMs": 75.6,
+          "firstClickLatencyMs": 3.2,
+          "totalComponents": 73,
+          "deferredComponents": 73
+        },
+        "deltas": {
+          "initialJs": {
+            "diff": -259.21000000000004,
+            "percent": -99.46661550268612,
+            "formattedDiff": "-259.2",
+            "formattedPercent": "-99.5%",
+            "isReduction": true
+          },
+          "tbt": {
+            "diff": -22.8,
+            "percent": -97.85407725321889,
+            "formattedDiff": "-22.8",
+            "formattedPercent": "-97.9%",
+            "isReduction": true
+          },
+          "tti": {
+            "diff": -81,
+            "percent": -51.724137931034484,
+            "formattedDiff": "-81.0",
+            "formattedPercent": "-51.7%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 73,
+          "initialJsReduction": "-99.5%",
+          "tbtReduction": "-97.9%",
+          "ttiImprovement": "81.00 ms",
+          "deferredCount": "73 / 73 (100%)",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "momentum",
+        "name": "Momentum Design",
+        "shortName": "Momentum",
+        "packageName": "@momentum-design/components",
+        "version": "0.139.9",
+        "componentCount": 97,
+        "baseline": {
+          "initialJsKb": 366.5,
+          "tbtMs": 30.5,
+          "fcpMs": 116,
+          "ttiMs": 176.5,
+          "firstClickLatencyMs": 2.4,
+          "totalComponents": 97,
+          "deferredComponents": 0
+        },
+        "optimized": {
+          "initialJsKb": 1.39,
+          "tbtMs": 0.5,
+          "fcpMs": 70.1,
+          "ttiMs": 75.6,
+          "firstClickLatencyMs": 3.2,
+          "totalComponents": 97,
+          "deferredComponents": 97
+        },
+        "deltas": {
+          "initialJs": {
+            "diff": -365.11,
+            "percent": -99.62073669849933,
+            "formattedDiff": "-365.1",
+            "formattedPercent": "-99.6%",
+            "isReduction": true
+          },
+          "tbt": {
+            "diff": -30,
+            "percent": -98.36065573770492,
+            "formattedDiff": "-30.0",
+            "formattedPercent": "-98.4%",
+            "isReduction": true
+          },
+          "tti": {
+            "diff": -100.9,
+            "percent": -57.1671388101983,
+            "formattedDiff": "-100.9",
+            "formattedPercent": "-57.2%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 97,
+          "initialJsReduction": "-99.6%",
+          "tbtReduction": "-98.4%",
+          "ttiImprovement": "100.90 ms",
+          "deferredCount": "97 / 97 (100%)",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "material",
+        "name": "Material Web",
+        "shortName": "Material Web",
+        "packageName": "@material/web",
+        "version": "2.5.0",
+        "componentCount": 28,
+        "baseline": {
+          "initialJsKb": 153,
+          "tbtMs": 9.7,
+          "fcpMs": 90.4,
+          "ttiMs": 130.1,
+          "firstClickLatencyMs": 2.4,
+          "totalComponents": 28,
+          "deferredComponents": 0
+        },
+        "optimized": {
+          "initialJsKb": 1.39,
+          "tbtMs": 0.5,
+          "fcpMs": 70.1,
+          "ttiMs": 75.6,
+          "firstClickLatencyMs": 3.2,
+          "totalComponents": 28,
+          "deferredComponents": 28
+        },
+        "deltas": {
+          "initialJs": {
+            "diff": -151.61,
+            "percent": -99.09150326797386,
+            "formattedDiff": "-151.6",
+            "formattedPercent": "-99.1%",
+            "isReduction": true
+          },
+          "tbt": {
+            "diff": -9.2,
+            "percent": -94.84536082474226,
+            "formattedDiff": "-9.2",
+            "formattedPercent": "-94.8%",
+            "isReduction": true
+          },
+          "tti": {
+            "diff": -54.5,
+            "percent": -41.890853189853964,
+            "formattedDiff": "-54.5",
+            "formattedPercent": "-41.9%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "totalComponents": 28,
+          "initialJsReduction": "-99.1%",
+          "tbtReduction": "-94.8%",
+          "ttiImprovement": "54.50 ms",
+          "deferredCount": "28 / 28 (100%)",
+          "buildOverhead": "Fast native pass"
+        }
+      }
+    ]
+  },
+  "elem-proxy": {
+    "schemaVersion": "1.0.0",
+    "benchmarkId": "elem-proxy",
+    "title": "`@lit-core/elem-proxy` empirical benchmark results",
+    "description": "Deferred Custom Element proxy stubs evaluated across 349 production Lit Web Components to measure script evaluation CPU time, V8 heap memory footprint, and mount latency.",
+    "timestamp": "2026-09-28T21:18:26.488Z",
+    "environment": {
+      "node": "v24.14.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "cpus": 8,
+      "gitCommit": "a724976",
+      "gitBranch": "main",
+      "versions": {
+        "lit": "3.3.3",
+        "vite": "8.3.1",
+        "playwright": "1.63.0",
+        "node": "v24.14.0",
+        "carbon": "2.64.0",
+        "spectrum": "1.12.2",
+        "webawesome": "3.14.0",
+        "momentum": "0.139.9",
+        "material": "2.5.0"
+      }
+    },
+    "suites": [
+      {
+        "id": "carbon",
+        "name": "Carbon Web Components",
+        "shortName": "Carbon",
+        "packageName": "@carbon/web-components",
+        "componentCount": 99,
+        "baseline": {
+          "evalTimeMs": 47.93,
+          "heapKb": 159017.7,
+          "mountLatencyMs": 0,
+          "totalComponents": 99,
+          "deferredComponents": 0,
+          "evaluatedComponents": 99
+        },
+        "optimized": {
+          "evalTimeMs": 39.05,
+          "heapKb": 136421,
+          "mountLatencyMs": 0,
+          "totalComponents": 99,
+          "deferredComponents": 94,
+          "evaluatedComponents": 5
+        },
+        "deltas": {
+          "cpu": {
+            "diff": -8.880000000000003,
+            "percent": -18.527018568746094,
+            "formattedDiff": "-8.9",
+            "formattedPercent": "-18.5%",
+            "isReduction": true
+          },
+          "heap": {
+            "diff": -22596.70000000001,
+            "percent": -14.210179118425186,
+            "formattedDiff": "-22,596.7",
+            "formattedPercent": "-14.2%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "evaluatedCount": "5 / 99 (5.1%)",
+          "deferredCount": "94 avoided",
+          "deferredProportion": "94.9% deferred",
+          "cpuSavings": "-18.5%",
+          "heapSavings": "-14.2%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "spectrum",
+        "name": "Spectrum Web Components",
+        "shortName": "Spectrum",
+        "packageName": "@spectrum-web-components/bundle",
+        "componentCount": 52,
+        "baseline": {
+          "evalTimeMs": 4.02,
+          "heapKb": 172765.3,
+          "mountLatencyMs": 0,
+          "totalComponents": 52,
+          "deferredComponents": 0,
+          "evaluatedComponents": 52
+        },
+        "optimized": {
+          "evalTimeMs": 3.98,
+          "heapKb": 158457.8,
+          "mountLatencyMs": 0.01,
+          "totalComponents": 52,
+          "deferredComponents": 47,
+          "evaluatedComponents": 5
+        },
+        "deltas": {
+          "cpu": {
+            "diff": -0.03999999999999959,
+            "percent": -0.9950248756218805,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-1.0%",
+            "isReduction": true
+          },
+          "heap": {
+            "diff": -14307.5,
+            "percent": -8.281466243510707,
+            "formattedDiff": "-14,307.5",
+            "formattedPercent": "-8.3%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "evaluatedCount": "5 / 52 (9.6%)",
+          "deferredCount": "47 avoided",
+          "deferredProportion": "90.4% deferred",
+          "cpuSavings": "-1.0%",
+          "heapSavings": "-8.3%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "webawesome",
+        "name": "Web Awesome",
+        "shortName": "Web Awesome",
+        "packageName": "@awesome.me/webawesome",
+        "componentCount": 73,
+        "baseline": {
+          "evalTimeMs": 3.64,
+          "heapKb": 204703.4,
+          "mountLatencyMs": 0,
+          "totalComponents": 73,
+          "deferredComponents": 0,
+          "evaluatedComponents": 73
+        },
+        "optimized": {
+          "evalTimeMs": 1.3,
+          "heapKb": 215928.8,
+          "mountLatencyMs": 0,
+          "totalComponents": 73,
+          "deferredComponents": 68,
+          "evaluatedComponents": 5
+        },
+        "deltas": {
+          "cpu": {
+            "diff": -2.34,
+            "percent": -64.28571428571428,
+            "formattedDiff": "-2.3",
+            "formattedPercent": "-64.3%",
+            "isReduction": true
+          },
+          "heap": {
+            "diff": 11225.399999999994,
+            "percent": 5.483738912006344,
+            "formattedDiff": "11,225.4",
+            "formattedPercent": "+5.5%",
+            "isReduction": false
+          }
+        },
+        "diagnostics": {
+          "evaluatedCount": "5 / 73 (6.8%)",
+          "deferredCount": "68 avoided",
+          "deferredProportion": "93.2% deferred",
+          "cpuSavings": "-64.3%",
+          "heapSavings": "+5.5%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "momentum",
+        "name": "Momentum Design",
+        "shortName": "Momentum",
+        "packageName": "@momentum-design/components",
+        "componentCount": 97,
+        "baseline": {
+          "evalTimeMs": 3.11,
+          "heapKb": 203601.8,
+          "mountLatencyMs": 0,
+          "totalComponents": 97,
+          "deferredComponents": 0,
+          "evaluatedComponents": 97
+        },
+        "optimized": {
+          "evalTimeMs": 3.1,
+          "heapKb": 210363.4,
+          "mountLatencyMs": 0,
+          "totalComponents": 97,
+          "deferredComponents": 92,
+          "evaluatedComponents": 5
+        },
+        "deltas": {
+          "cpu": {
+            "diff": -0.009999999999999787,
+            "percent": -0.32154340836012174,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-0.3%",
+            "isReduction": true
+          },
+          "heap": {
+            "diff": 6761.600000000006,
+            "percent": 3.3209922505596743,
+            "formattedDiff": "6,761.6",
+            "formattedPercent": "+3.3%",
+            "isReduction": false
+          }
+        },
+        "diagnostics": {
+          "evaluatedCount": "5 / 97 (5.2%)",
+          "deferredCount": "92 avoided",
+          "deferredProportion": "94.8% deferred",
+          "cpuSavings": "-0.3%",
+          "heapSavings": "+3.3%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
+        "id": "material",
+        "name": "Material Web",
+        "shortName": "Material Web",
+        "packageName": "@material/web",
+        "componentCount": 28,
+        "baseline": {
+          "evalTimeMs": 6.11,
+          "heapKb": 226659.8,
+          "mountLatencyMs": 0,
+          "totalComponents": 28,
+          "deferredComponents": 0,
+          "evaluatedComponents": 28
+        },
+        "optimized": {
+          "evalTimeMs": 5.25,
+          "heapKb": 230827.4,
+          "mountLatencyMs": 0,
+          "totalComponents": 28,
+          "deferredComponents": 23,
+          "evaluatedComponents": 5
+        },
+        "deltas": {
+          "cpu": {
+            "diff": -0.8600000000000003,
+            "percent": -14.075286415711952,
+            "formattedDiff": "-0.9",
+            "formattedPercent": "-14.1%",
+            "isReduction": true
+          },
+          "heap": {
+            "diff": 4167.600000000006,
+            "percent": 1.8387027607012825,
+            "formattedDiff": "4,167.6",
+            "formattedPercent": "+1.8%",
+            "isReduction": false
+          }
+        },
+        "diagnostics": {
+          "evaluatedCount": "5 / 28 (17.9%)",
+          "deferredCount": "23 avoided",
+          "deferredProportion": "82.1% deferred",
+          "cpuSavings": "-14.1%",
+          "heapSavings": "+1.8%",
+          "buildOverhead": "Fast native pass"
+        }
+      }
+    ]
+  },
+  "bundle-optimizations": {
+    "schemaVersion": "1.0.0",
+    "benchmarkId": "bundle-optimizations",
+    "title": "`@lit-core` bundler optimization benchmark results",
+    "description": "Multi-suite bundle size and optimization benchmark across enterprise Lit design systems.",
+    "timestamp": "2026-09-28T21:14:33.064Z",
+    "environment": {
+      "node": "v24.14.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "cpus": 8,
+      "gitCommit": "a724976",
+      "gitBranch": "main",
+      "versions": {
+        "lit": "3.3.3",
+        "vite": "8.3.1",
+        "playwright": "1.63.0",
+        "node": "v24.14.0",
+        "carbon": "2.64.0",
+        "spectrum": "1.12.2",
+        "webawesome": "3.14.0",
+        "momentum": "0.139.9",
+        "material": "2.5.0"
+      }
+    },
+    "suites": [
+      {
+        "id": "material",
+        "name": "Material Web (@material/web)",
+        "componentCount": 28,
+        "baseline": {
+          "rawBytes": 459132,
+          "gzipBytes": 78467,
+          "brotliBytes": 59861,
+          "buildTimeMs": 46.20745900000003
+        },
+        "optimized": {
+          "rawBytes": 452530,
+          "gzipBytes": 77911,
+          "brotliBytes": 59579,
+          "buildTimeMs": 61.960207999999966
+        },
+        "deltas": {
+          "raw": {
+            "diff": -6602,
+            "percent": -1.437930704024115
+          },
+          "gzip": {
+            "diff": -556,
+            "percent": -0.7085781283851811
+          }
+        },
+        "diagnostics": {}
+      }
+    ]
+  }
+}

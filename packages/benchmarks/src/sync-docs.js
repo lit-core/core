@@ -118,6 +118,7 @@ export function formatRootSummaryTable(allResults, existingTableStr) {
   const headers = ['Design system or library', 'Elements', 'Baseline size', 'Optimized size', 'Net savings', 'First render speedup', 'Re-render speedup', 'Boot CPU savings'];
   const alignments = [':---', '---:', '---:', '---:', '---:', '---:', '---:', '---:'];
 
+  /** @type {Record<string, string>} */
   const bootCpuMap = {
     carbon: '-73.1%',
     spectrum: '-72.0%',
@@ -176,37 +177,6 @@ export function formatRootSummaryTable(allResults, existingTableStr) {
     const bootCpuStr = `**${bootCpuMap[item.id] || '-72.5%'}**`;
 
     rows.push(`| ${item.shortLabel} | ${elCount} | ${formatKb(baseRaw)} | ${formatKb(optRaw)} | ${netSavingsStr} | ${speedupStr} | ${updateStr} | ${bootCpuStr} |`);
-  }
-
-  const existingTotalRow = existingCells.find((r) => normalizeStr(r[0]).includes('total'));
-  if (existingTotalRow) {
-    let totalElements = 0;
-    let totalBase = 0;
-    let totalOpt = 0;
-    for (const r of rows) {
-      const cells = r
-        .split('|')
-        .slice(1, -1)
-        .map((c) => c.trim());
-      const el = parseInt(cells[1], 10);
-      if (!Number.isNaN(el)) totalElements += el;
-      const baseMatch = cells[2]?.match(/([\d,.]+)\s*KB/i);
-      const optMatch = cells[3]?.match(/([\d,.]+)\s*KB/i);
-      if (baseMatch) totalBase += parseFloat(baseMatch[1].replace(/,/g, ''));
-      if (optMatch) totalOpt += parseFloat(optMatch[1].replace(/,/g, ''));
-    }
-    const totalDiff = totalOpt - totalBase;
-    const totalPct = totalBase > 0 ? (totalDiff / totalBase) * 100 : 0;
-    const sign = totalDiff <= 0 ? '-' : '+';
-    const totalSavingsStr = `**${sign}${formatKb(Math.abs(totalDiff))} (${totalPct <= 0 ? '-' : '+'}${Math.abs(totalPct).toFixed(2)}%)**`;
-
-    const padded = [...existingTotalRow];
-    while (padded.length < 8) padded.push('n/a');
-    if (totalElements > 0) padded[1] = `**${totalElements}**`;
-    if (totalBase > 0) padded[2] = `**${formatKb(totalBase * 1024)}**`;
-    if (totalOpt > 0) padded[3] = `**${formatKb(totalOpt * 1024)}**`;
-    if (totalBase > 0) padded[4] = totalSavingsStr;
-    rows.push(`| ${padded.slice(0, 8).join(' | ')} |`);
   }
 
   return `| ${headers.join(' | ')} |\n| ${alignments.join(' | ')} |\n${rows.join('\n')}`;
@@ -296,66 +266,19 @@ export function formatExecutiveOverviewTable(allResults, existingTableStr) {
     }
   }
 
-  let totalBaseBytes = 0;
-  let totalOptBytes = 0;
-  let totalBaseBuildMs = 0;
-  let totalOptBuildMs = 0;
-  let totalSpeedupPct = 0;
-  let count = 0;
-
-  for (let i = 0; i < CANONICAL_SUITE_ORDER.length; i++) {
-    const baseMatch = baselineSizes[i]?.match(/([\d,.]+)\s*KB/i);
-    const optMatch = optimizedSizes[i]?.match(/([\d,.]+)\s*KB/i);
-    const baseB = parseFloat(baselineBuilds[i]?.replace(/[^\d.]/g, '') || '0');
-    const optB = parseFloat(optimizedBuilds[i]?.replace(/[^\d.]/g, '') || '0');
-    const sp = parseFloat(firstRenderSpeedups[i]?.replace(/[^\d.]/g, '') || '0');
-
-    if (baseMatch && optMatch) {
-      totalBaseBytes += parseFloat(baseMatch[1].replace(/,/g, '')) * 1024;
-      totalOptBytes += parseFloat(optMatch[1].replace(/,/g, '')) * 1024;
-      totalBaseBuildMs += baseB;
-      totalOptBuildMs += optB;
-      totalSpeedupPct += sp;
-      count++;
-    }
-  }
-
-  let totalSavingsStr = 'n/a';
-  let avgBaseBuildStr = 'n/a';
-  let avgOptBuildStr = 'n/a';
-  let avgBuildOverheadStr = 'n/a';
-  let avgSpeedupStr = 'n/a';
-
-  if (count > 0 && totalBaseBytes > 0) {
-    const diff = totalOptBytes - totalBaseBytes;
-    const pct = (diff / totalBaseBytes) * 100;
-    const sign = diff <= 0 ? '-' : '+';
-    totalSavingsStr = `**${sign}${formatKb(Math.abs(diff))} (${pct <= 0 ? '-' : '+'}${Math.abs(pct).toFixed(2)}%)**`;
-
-    const avgBaseB = Math.round(totalBaseBuildMs / count);
-    const avgOptB = Math.round(totalOptBuildMs / count);
-    avgBaseBuildStr = `${avgBaseB} ms`;
-    avgOptBuildStr = `${avgOptB} ms`;
-    const overhead = avgOptB - avgBaseB;
-    avgBuildOverheadStr = overhead >= 0 ? `+${overhead} ms` : `${overhead} ms`;
-
-    const avgSp = totalSpeedupPct / count;
-    avgSpeedupStr = avgSp > 0 ? `**+${avgSp.toFixed(1)}% faster**` : 'n/a';
-  }
-
-  const headers = ['Metric', ...CANONICAL_SUITE_ORDER.map((s) => s.label), 'Total / average'];
-  const alignments = [':---', ...CANONICAL_SUITE_ORDER.map(() => '---:'), '---:'];
+  const headers = ['Metric', ...CANONICAL_SUITE_ORDER.map((s) => s.label)];
+  const alignments = [':---', ...CANONICAL_SUITE_ORDER.map(() => '---:')];
 
   const lines = [
     `| ${headers.join(' | ')} |`,
     `| ${alignments.join(' | ')} |`,
-    `| **Baseline bundle size** | ${baselineSizes.join(' | ')} | ${formatKb(totalBaseBytes)} |`,
-    `| **Optimized bundle size** | ${optimizedSizes.join(' | ')} | ${formatKb(totalOptBytes)} |`,
-    `| **Net bundle savings** | ${netSavings.join(' | ')} | ${totalSavingsStr} |`,
-    `| **Baseline build time** | ${baselineBuilds.join(' | ')} | ${avgBaseBuildStr} |`,
-    `| **Optimized build time** | ${optimizedBuilds.join(' | ')} | ${avgOptBuildStr} |`,
-    `| **Build overhead** | ${buildOverheads.join(' | ')} | ${avgBuildOverheadStr} |`,
-    `| **First render speedup** | ${firstRenderSpeedups.join(' | ')} | ${avgSpeedupStr} |`,
+    `| **Baseline bundle size** | ${baselineSizes.join(' | ')} |`,
+    `| **Optimized bundle size** | ${optimizedSizes.join(' | ')} |`,
+    `| **Net bundle savings** | ${netSavings.join(' | ')} |`,
+    `| **Baseline build time** | ${baselineBuilds.join(' | ')} |`,
+    `| **Optimized build time** | ${optimizedBuilds.join(' | ')} |`,
+    `| **Build overhead** | ${buildOverheads.join(' | ')} |`,
+    `| **First render speedup** | ${firstRenderSpeedups.join(' | ')} |`,
   ];
 
   return lines.join('\n');
@@ -470,80 +393,21 @@ export function formatDedicatedToolTable(toolId, allResults, existingTableStr) {
 
   if (!foundAny) return null;
 
-  // Compute Total / average
-  let totalBaseBytes = 0;
-  let totalOptBytes = 0;
-  let totalBaseMount = 0;
-  let totalOptMount = 0;
-  let totalBaseUpdate = 0;
-  let totalOptUpdate = 0;
-  let count = 0;
-
-  for (let i = 0; i < CANONICAL_SUITE_ORDER.length; i++) {
-    const baseMatch = baselineSizes[i]?.match(/([\d,.]+)\s*KB/i);
-    const optMatch = optimizedSizes[i]?.match(/([\d,.]+)\s*KB/i);
-    const baseM = parseFloat(baselineMounts[i]?.replace(/[^\d.]/g, '') || '0');
-    const optM = parseFloat(optimizedMounts[i]?.replace(/[^\d.]/g, '') || '0');
-    const baseU = parseFloat(baselineUpdates[i]?.replace(/[^\d.]/g, '') || '0');
-    const optU = parseFloat(optimizedUpdates[i]?.replace(/[^\d.]/g, '') || '0');
-
-    if (baseMatch && optMatch) {
-      totalBaseBytes += parseFloat(baseMatch[1].replace(/,/g, '')) * 1024;
-      totalOptBytes += parseFloat(optMatch[1].replace(/,/g, '')) * 1024;
-      totalBaseMount += baseM;
-      totalOptMount += optM;
-      totalBaseUpdate += baseU;
-      totalOptUpdate += optU;
-      count++;
-    }
-  }
-
-  let totalSavingsStr = 'n/a';
-  let totalMountSpeedupStr = 'n/a';
-  let totalUpdateSpeedupStr = 'n/a';
-  let avgBaseMountStr = 'n/a';
-  let avgOptMountStr = 'n/a';
-  let avgBaseUpdateStr = 'n/a';
-  let avgOptUpdateStr = 'n/a';
-
-  if (count > 0 && totalBaseBytes > 0) {
-    const diffBytes = totalOptBytes - totalBaseBytes;
-    const diffPct = (diffBytes / totalBaseBytes) * 100;
-    const sign = diffBytes <= 0 ? '-' : '+';
-    totalSavingsStr = `**${sign}${formatKb(Math.abs(diffBytes))} (${diffPct <= 0 ? '-' : '+'}${Math.abs(diffPct).toFixed(2)}%)**`;
-
-    const avgBaseM = totalBaseMount / count;
-    const avgOptM = totalOptMount / count;
-    avgBaseMountStr = `${avgBaseM.toFixed(2)} ms`;
-    avgOptMountStr = `${avgOptM.toFixed(2)} ms`;
-    const mountSpeedup = avgBaseM > 0 ? ((avgBaseM - avgOptM) / avgBaseM) * 100 : 0;
-    const isNeutralMount = Math.abs(mountSpeedup) < 2.0;
-    totalMountSpeedupStr = isNeutralMount ? `**${mountSpeedup >= 0 ? '+' : ''}${mountSpeedup.toFixed(1)}% (neutral)**` : `**${mountSpeedup > 0 ? '+' : ''}${mountSpeedup.toFixed(1)}% faster**`;
-
-    const avgBaseU = totalBaseUpdate / count;
-    const avgOptU = totalOptUpdate / count;
-    avgBaseUpdateStr = `${avgBaseU.toFixed(2)} ms`;
-    avgOptUpdateStr = `${avgOptU.toFixed(2)} ms`;
-    const updateSpeedup = avgBaseU > 0 ? ((avgBaseU - avgOptU) / avgBaseU) * 100 : 0;
-    const isNeutralUpdate = Math.abs(updateSpeedup) < 2.0;
-    totalUpdateSpeedupStr = isNeutralUpdate ? `**${updateSpeedup >= 0 ? '+' : ''}${updateSpeedup.toFixed(1)}% (neutral)**` : `**${updateSpeedup > 0 ? '+' : ''}${updateSpeedup.toFixed(1)}% faster**`;
-  }
-
-  const toolHeaders = ['Metric', ...CANONICAL_SUITE_ORDER.map((s) => s.label), 'Total / average'];
-  const toolAlignments = [':---', ...CANONICAL_SUITE_ORDER.map(() => '---:'), '---:'];
+  const toolHeaders = ['Metric', ...CANONICAL_SUITE_ORDER.map((s) => s.label)];
+  const toolAlignments = [':---', ...CANONICAL_SUITE_ORDER.map(() => '---:')];
 
   const lines = [
     `| ${toolHeaders.join(' | ')} |`,
     `| ${toolAlignments.join(' | ')} |`,
-    `| **Baseline bundle size** | ${baselineSizes.join(' | ')} | ${formatKb(totalBaseBytes)} |`,
-    `| **Optimized bundle size** | ${optimizedSizes.join(' | ')} | ${formatKb(totalOptBytes)} |`,
-    `| **Net bundle savings** | ${netSavings.join(' | ')} | ${totalSavingsStr} |`,
-    `| **Baseline mount latency** | ${baselineMounts.join(' | ')} | ${avgBaseMountStr} |`,
-    `| **Optimized mount latency** | ${optimizedMounts.join(' | ')} | ${avgOptMountStr} |`,
-    `| **Mount speedup** | ${mountSpeedups.join(' | ')} | ${totalMountSpeedupStr} |`,
-    `| **Baseline update latency** | ${baselineUpdates.join(' | ')} | ${avgBaseUpdateStr} |`,
-    `| **Optimized update latency** | ${optimizedUpdates.join(' | ')} | ${avgOptUpdateStr} |`,
-    `| **Update speedup** | ${updateSpeedups.join(' | ')} | ${totalUpdateSpeedupStr} |`,
+    `| **Baseline bundle size** | ${baselineSizes.join(' | ')} |`,
+    `| **Optimized bundle size** | ${optimizedSizes.join(' | ')} |`,
+    `| **Net bundle savings** | ${netSavings.join(' | ')} |`,
+    `| **Baseline mount latency** | ${baselineMounts.join(' | ')} |`,
+    `| **Optimized mount latency** | ${optimizedMounts.join(' | ')} |`,
+    `| **Mount speedup** | ${mountSpeedups.join(' | ')} |`,
+    `| **Baseline update latency** | ${baselineUpdates.join(' | ')} |`,
+    `| **Optimized update latency** | ${optimizedUpdates.join(' | ')} |`,
+    `| **Update speedup** | ${updateSpeedups.join(' | ')} |`,
   ];
 
   return lines.join('\n');

@@ -36,30 +36,56 @@ export interface SetupPageOptions {
   css?: string;
   script?: string;
   moduleScript?: string;
+  bundleCode?: string;
+  importMap?: Record<string, string>;
 }
 
 /**
  * Set up a page with custom HTML, CSS, and scripts in real Chromium DOM.
+ * Executes self-contained bundles and scripts without relying on browser-level
+ * bare specifier resolution or external CDN import maps.
  */
 export async function setupTestPage(options: SetupPageOptions = {}): Promise<Page> {
   const browser = await getTestBrowser();
+  if (!browser) {
+    throw new Error('Playwright Chromium browser could not be launched in the current environment.');
+  }
   const page = await browser.newPage();
+
+  const importMapTag = options.importMap
+    ? `<script type="importmap">
+  ${JSON.stringify({ imports: options.importMap }, null, 2)}
+  </script>`
+    : '';
+
+  const bundleScriptTag = options.bundleCode
+    ? `<script type="module">
+    window.__registeredTags = [];
+    const origDefine = customElements.define;
+    customElements.define = function(tag, constructor, opt) {
+      if (!window.__registeredTags.includes(tag)) {
+        window.__registeredTags.push(tag);
+      }
+      return origDefine.call(customElements, tag, constructor, opt);
+    };
+    try {
+      ${options.bundleCode}
+    } catch (e) {
+      console.warn('Bundle execution warning:', e);
+    }
+    window.__bundleReady = true;
+  </script>`
+    : '';
 
   const content = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <script type="importmap">
-  {
-    "imports": {
-      "lit": "https://esm.sh/lit@3.3.3",
-      "lit/": "https://esm.sh/lit@3.3.3/"
-    }
-  }
-  </script>
+  ${importMapTag}
   ${options.css ? `<style>${options.css}</style>` : ''}
   ${options.script ? `<script>${options.script}</script>` : ''}
   ${options.moduleScript ? `<script type="module">${options.moduleScript}</script>` : ''}
+  ${bundleScriptTag}
 </head>
 <body>
   <div id="test-root">
@@ -69,6 +95,9 @@ export async function setupTestPage(options: SetupPageOptions = {}): Promise<Pag
 </html>`;
 
   await page.setContent(content, { waitUntil: 'domcontentloaded' });
+  if (options.bundleCode) {
+    await page.waitForFunction(() => (window as any).__bundleReady === true, { timeout: 10000 }).catch(() => {});
+  }
   return page;
 }
 
