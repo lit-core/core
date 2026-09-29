@@ -70,16 +70,14 @@ export function formatPercent(value, options = {}) {
 /**
  * Format bytes into human-readable kilobytes (KB) with digit grouping.
  * @param {number} bytes
- * @param {Object} [options]
- * @param {number} [options.decimals=2]
- * @param {boolean} [options.unit=true]
- * @param {string} [options.locale='en-US']
+ * @param {{ decimals?: number, unit?: boolean, locale?: string } | number} [options]
  * @returns {string}
  */
 export function formatKb(bytes, options = {}) {
-  const decimals = typeof options === 'number' ? options : (options.decimals ?? 2);
-  const showUnit = typeof options === 'object' && options.unit !== undefined ? options.unit : true;
-  const locale = typeof options === 'object' && options.locale ? options.locale : 'en-US';
+  const optObj = typeof options === 'object' && options !== null ? options : {};
+  const decimals = typeof options === 'number' ? options : (optObj.decimals ?? 2);
+  const showUnit = typeof options === 'object' && optObj.unit !== undefined ? optObj.unit : true;
+  const locale = typeof options === 'object' && optObj.locale ? optObj.locale : 'en-US';
 
   const kb = bytes / 1024;
   const formatted = formatNumber(kb, { decimals, minDecimals: decimals, locale });

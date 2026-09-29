@@ -1,4 +1,4 @@
-import { renderStateScript, serializeComponentState, type StateSerializerOptions } from './state-serializer.js';
+import { renderStateScript, type StateSerializerOptions, serializeComponentState } from './state-serializer.js';
 
 export interface DsdRenderOptions {
   tagName: string;

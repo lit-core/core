@@ -3,9 +3,9 @@
  * Traverses native C++ .childNodes pointers in nanoseconds, eliminating
  * runtime TreeWalker comment-node and element discovery during component mount.
  *
- * @param {Node} root The root container node (ShadowRoot, DocumentFragment, or Element)
- * @param {number[]} path Array of child indices from root to the target node
- * @returns {Node} The resolved DOM Node
+ * @param root The root container node (ShadowRoot, DocumentFragment, or Element)
+ * @param path Array of child indices from root to the target node
+ * @returns The resolved DOM Node
  */
 export function resolveNodeByPath(root, path) {
   let cur = root;
@@ -14,13 +14,12 @@ export function resolveNodeByPath(root, path) {
   }
   return cur;
 }
-
 /**
  * Resolves multiple target nodes from an array of precomputed structural paths.
  *
- * @param {Node} root The root container node
- * @param {number[][]} paths Array of child index paths
- * @returns {Node[]} Array of resolved DOM Nodes
+ * @param root The root container node
+ * @param paths Array of child index paths
+ * @returns Array of resolved DOM Nodes
  */
 export function resolveNodesByPaths(root, paths) {
   const len = paths.length;
@@ -30,16 +29,13 @@ export function resolveNodesByPaths(root, paths) {
   }
   return nodes;
 }
-
 /**
  * Prepares component parts directly via precomputed structural paths,
  * bypassing document.createTreeWalker.
  *
- * @template T
- * @param {Node} root The root container node (e.g. this.shadowRoot)
- * @param {number[][]} paths Precomputed static __litPartPaths
- * @param {(node: Node, index: number) => T} [callback] Callback invoked for each resolved part node
- * @returns {T[]}
+ * @param root The root container node (e.g. this.shadowRoot)
+ * @param paths Precomputed static __litPartPaths
+ * @param callback Callback invoked for each resolved part node
  */
 export function preparePartsWithPaths(root, paths, callback) {
   const len = paths.length;

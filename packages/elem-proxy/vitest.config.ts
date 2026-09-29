@@ -3,6 +3,6 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    setupFiles: [path.resolve(import.meta.dirname, './test/setup.ts')],
+    setupFiles: [path.resolve(import.meta.dirname, './tests/setup.ts')],
   },
 });

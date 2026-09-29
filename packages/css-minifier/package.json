@@ -52,7 +52,7 @@
   "scripts": {
     "build": "cargo build --release && cp target/release/libcss_minifier.dylib css-minifier.darwin-arm64.node 2>/dev/null || true",
     "build:debug": "cargo build && cp target/debug/libcss_minifier.dylib css-minifier.darwin-arm64.node 2>/dev/null || true",
-    "test": "node test.js"
+    "test": "node tests/minifier.test.js"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.10.5"

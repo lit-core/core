@@ -38,8 +38,8 @@
     "build:rs": "cargo build --release && cp target/release/libnative.dylib native.darwin-arm64.node 2>/dev/null || true",
     "build:rs:debug": "cargo build && cp target/debug/libnative.dylib native.darwin-arm64.node 2>/dev/null || true",
     "build:ts": "tsc -p tsconfig.json",
-    "build": "pnpm run build:rs && pnpm run build:ts",
-    "test": "node src/test.js && vitest run tests"
+    "build": "npm run build:rs && npm run build:ts",
+    "test": "vitest run tests"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.10.5",

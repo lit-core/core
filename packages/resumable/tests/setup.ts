@@ -127,20 +127,21 @@ class MockFocusEvent extends MockEvent {
 function parseAttributesString(attrStr: string): Map<string, string> {
   const map = new Map<string, string>();
   const attrRegex = /([a-zA-Z0-9_-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^>\s]+)))?/g;
-  let match: RegExpExecArray | null;
-  while ((match = attrRegex.exec(attrStr)) !== null) {
+  let match = attrRegex.exec(attrStr);
+  while (match !== null) {
     const key = match[1];
     const val = match[2] ?? match[3] ?? match[4] ?? '';
     map.set(key, val);
+    match = attrRegex.exec(attrStr);
   }
   return map;
 }
 
 function parseHtmlIntoNode(html: string, parentNode: any): void {
   const tagRegex = /<([a-zA-Z0-9_-]+)((?:\s+[a-zA-Z0-9_-]+(?:=(?:"[^"]*"|'[^']*'|[^>\s]+))?)*)\s*(?:\/>|>([\s\S]*?)<\/\1>|>)/gi;
-  let match: RegExpExecArray | null;
+  let match = tagRegex.exec(html);
 
-  while ((match = tagRegex.exec(html)) !== null) {
+  while (match !== null) {
     const tagName = match[1].toUpperCase();
     const attrStr = match[2] || '';
     const inner = match[3] || '';
@@ -164,6 +165,7 @@ function parseHtmlIntoNode(html: string, parentNode: any): void {
     }
 
     parentNode.appendChild(el);
+    match = tagRegex.exec(html);
   }
 }
 

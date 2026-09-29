@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/benchmarks" },
+    { "path": "./packages/dirty-mask" },
+    { "path": "./packages/dom-paths" },
+    { "path": "./packages/elem-proxy" },
+    { "path": "./packages/event-hoist" },
+    { "path": "./packages/html-aot" },
+    { "path": "./packages/memoize" },
+    { "path": "./packages/native" },
+    { "path": "./packages/resumable" },
+    { "path": "./packages/tests" },
+    { "path": "./packages/vite-plugin" },
+    { "path": "./packages/webpack-plugin" }
+  ]
+}

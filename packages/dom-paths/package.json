@@ -53,9 +53,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && cp target/release/libdom_paths.dylib dom-paths.darwin-arm64.node 2>/dev/null && (codesign -s - -f dom-paths.darwin-arm64.node 2>/dev/null || true) || true",
-    "build:debug": "cargo build && cp target/debug/libdom_paths.dylib dom-paths.darwin-arm64.node 2>/dev/null && (codesign -s - -f dom-paths.darwin-arm64.node 2>/dev/null || true) || true",
-    "build:client": "tsc -p tsconfig.client.json",
+    "build": "cargo build --release && cp target/release/libdom_paths.dylib dom-paths.darwin-arm64.node 2>/dev/null && (codesign -s - -f dom-paths.darwin-arm64.node 2>/dev/null || true) || true && tsc -p tsconfig.json",
+    "build:debug": "cargo build && cp target/debug/libdom_paths.dylib dom-paths.darwin-arm64.node 2>/dev/null && (codesign -s - -f dom-paths.darwin-arm64.node 2>/dev/null || true) || true && tsc -p tsconfig.json",
     "test": "vitest run"
   },
   "devDependencies": {

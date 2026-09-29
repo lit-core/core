@@ -131,9 +131,11 @@ describe('@lit-core/native Playwright Chromium and real component verification',
 
       // Verify property reactivity
       await page.evaluate(() => {
-        const el = document.querySelector('pw-vanilla-button');
-        el.label = 'Updated Text';
-        el.disabled = true;
+        const el = document.querySelector('pw-vanilla-button') as any;
+        if (el) {
+          el.label = 'Updated Text';
+          el.disabled = true;
+        }
       });
 
       const updatedText = await page.evaluate(() => {
@@ -151,11 +153,11 @@ describe('@lit-core/native Playwright Chromium and real component verification',
       // Verify event listener
       await page.evaluate(() => {
         const el = document.querySelector('pw-vanilla-button');
-        el?.shadowRoot?.querySelector('#btn')?.click();
+        (el?.shadowRoot?.querySelector('#btn') as any)?.click();
       });
 
       const clickCount = await page.evaluate(() => {
-        const el = document.querySelector('pw-vanilla-button');
+        const el = document.querySelector('pw-vanilla-button') as any;
         return el?._clicked;
       });
       expect(clickCount).toBe(1);
@@ -213,12 +215,14 @@ describe('@lit-core/native Playwright Chromium and real component verification',
 
       // Mutate count
       await page.evaluate(() => {
-        const el = document.querySelector('pw-micro-element');
-        el.count = 42;
+        const el = document.querySelector('pw-micro-element') as any;
+        if (el) {
+          el.count = 42;
+        }
       });
 
       // Wait microtask
-      await page.evaluate(() => new Promise((r) => queueMicrotask(r)));
+      await page.evaluate(() => new Promise((r) => queueMicrotask(() => r(null))));
 
       const renderedCount = await page.evaluate(() => {
         const el = document.querySelector('pw-micro-element');

@@ -95,7 +95,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 </html>`;
 
     await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => (/** @type {any} */ (window)).__bundleReady === true, { timeout: 10000 }).catch(() => {});
+    await page.waitForFunction(() => /** @type {any} */ (window).__bundleReady === true, { timeout: 10000 }).catch(() => {});
 
     // Execute precision in-browser rendering measurement using actual defined elements
     const timing = await page.evaluate(async () => {

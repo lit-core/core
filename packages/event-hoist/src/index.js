@@ -11,19 +11,7 @@ const currentPlatform = platform();
 const currentArch = arch();
 
 // Standard safe bubbling event types supported for ShadowRoot delegation
-export const SAFE_BUBBLING_EVENTS = [
-  'click',
-  'dblclick',
-  'input',
-  'change',
-  'keydown',
-  'keyup',
-  'keypress',
-  'pointerdown',
-  'pointerup',
-  'focusin',
-  'focusout',
-];
+export const SAFE_BUBBLING_EVENTS = ['click', 'dblclick', 'input', 'change', 'keydown', 'keyup', 'keypress', 'pointerdown', 'pointerup', 'focusin', 'focusout'];
 
 // Try loading platform-specific native addon
 try {

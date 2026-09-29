@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!**/dist/**", "!**/lib/**", "!**/target/**", "!**/test_files/**", "!**/*.d.ts"]
+    "includes": ["**", "!**/dist", "!**/lib", "!**/target", "!**/test_files", "!**/*.d.ts"]
   },
   "formatter": {
     "enabled": true,

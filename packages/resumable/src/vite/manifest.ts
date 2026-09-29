@@ -10,15 +10,16 @@ const CUSTOM_ELEMENT_REGEX = /(?:@customElement\s*\(\s*['"]([a-zA-Z0-9_-]+)['"]\
  */
 export function extractCustomElementTags(code: string): string[] {
   const tags = new Set<string>();
-  let match: RegExpExecArray | null;
 
   // Reset regex index
   CUSTOM_ELEMENT_REGEX.lastIndex = 0;
-  while ((match = CUSTOM_ELEMENT_REGEX.exec(code)) !== null) {
+  let match = CUSTOM_ELEMENT_REGEX.exec(code);
+  while (match !== null) {
     const tag = match[1] || match[2];
-    if (tag && tag.includes('-')) {
+    if (tag?.includes('-')) {
       tags.add(tag.toLowerCase());
     }
+    match = CUSTOM_ELEMENT_REGEX.exec(code);
   }
 
   return Array.from(tags);

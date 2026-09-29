@@ -66,5 +66,5 @@ This skill outlines the technical architecture, invariants, and verification wor
    ```
 5. Run benchmarks across enterprise design systems:
    ```bash
-   node packages/benchmarks/src/runners/native.js
+   node packages/benchmarks/src/native-bench.js
    ```

@@ -60,7 +60,7 @@
     "build:debug": "cargo build && cp target/debug/libcss_fuse.dylib css-fuse.darwin-arm64.node 2>/dev/null || true; cp target/debug/css-fuse-bin bin/css-fuse-bin 2>/dev/null || true",
     "prepublishOnly": "napi prepublish -t npm",
     "version": "napi version",
-    "test": "node src/test.js"
+    "test": "node tests/fuse.test.js"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.10.5"

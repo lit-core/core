@@ -57,7 +57,7 @@ Measurements compare a standard Vite production build with minification (`minify
 
 ```bash
 # Run isolated native compiler benchmark across all libraries
-node packages/benchmarks/src/runners/native.js
+node packages/benchmarks/src/native-bench.js
 
 # Or run via CLI flag
 node packages/benchmarks/src/index.js --tools=native

@@ -1,7 +1,7 @@
 import './setup.js';
 import { describe, expect, it, vi } from 'vitest';
 import { generateInlineLoader, initLoader, ResumableLoader } from '../src/client/loader.js';
-import { createReplayedEvent, replayEvent, replayQueue, RESUMED_EVENT_FLAG } from '../src/client/replay.js';
+import { createReplayedEvent, RESUMED_EVENT_FLAG, replayEvent, replayQueue } from '../src/client/replay.js';
 
 describe('resumable client loader and event replay', () => {
   it('generates a compact inline loader under 1.5 KB', () => {

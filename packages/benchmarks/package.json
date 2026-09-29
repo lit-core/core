@@ -12,7 +12,8 @@
     "./tools": "./src/tools/index.js",
     "./table": "./src/table.js",
     "./runtime": "./src/runtime.js",
-    "./resumable": "./src/resumable-bench.js"
+    "./resumable": "./src/resumable-bench.js",
+    "./native": "./src/native-bench.js"
   },
   "license": "MIT",
   "engines": {
@@ -29,12 +30,13 @@
     "benchmark:dirty-mask": "node src/dirty-mask-bench.js",
     "benchmark:dom-paths": "node src/dom-paths-bench.js",
     "benchmark:memoize": "node src/memoize-bench.js",
+    "benchmark:native": "node src/native-bench.js",
     "benchmark:resumable": "node src/resumable-bench.js",
     "benchmark:markdown": "node src/index.js --format=markdown",
     "benchmark:json": "node src/index.js --format=json",
     "benchmark:sync": "node src/index.js --update",
     "benchmark:compare": "node src/compare.js",
-    "test": "tsc --noEmit && vitest run test",
+    "test": "tsc --noEmit && vitest run tests",
     "typecheck": "tsc --noEmit"
   },
   "repository": {

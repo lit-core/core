@@ -52,7 +52,7 @@
   "scripts": {
     "build": "cargo build --release && cp target/release/libprops_lower.dylib props-lower.darwin-arm64.node 2>/dev/null || true",
     "build:debug": "cargo build && cp target/debug/libprops_lower.dylib props-lower.darwin-arm64.node 2>/dev/null || true",
-    "test": "node test.js"
+    "test": "node tests/transform.test.js"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.10.5"

@@ -1,18 +1,32 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.resolve(__dirname, '../../..');
+
+export function resolvePackageDir(pkg: string): string {
+  const possiblePaths = [path.join(rootDir, 'node_modules', pkg), path.resolve(process.cwd(), 'node_modules', pkg), path.resolve(__dirname, '../node_modules', pkg)];
+  const found = possiblePaths.find((p) => fs.existsSync(p));
+  if (!found) {
+    throw new Error(`Package not found in node_modules: ${pkg}`);
+  }
+  return fs.realpathSync(found);
+}
 
 /**
  * Resolve path relative to root directory.
  */
 export function resolveWorkspacePath(...segments: string[]): string {
-  return path.resolve(process.cwd(), ...segments);
+  return path.resolve(rootDir, ...segments);
 }
 
 /**
  * Read component source file from node_modules.
  */
 export function readComponentSource(pkg: string, subpath: string): string {
-  const filePath = path.resolve(process.cwd(), 'node_modules', pkg, subpath);
+  const pkgDir = resolvePackageDir(pkg);
+  const filePath = path.join(pkgDir, subpath);
   if (!fs.existsSync(filePath)) {
     throw new Error(`Component file not found at: ${filePath}`);
   }
@@ -28,7 +42,8 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
   let initialDir = '';
 
   if (cssSubpath) {
-    const directPath = path.resolve(process.cwd(), 'node_modules', pkg, cssSubpath);
+    const pkgDir = resolvePackageDir(pkg);
+    const directPath = path.join(pkgDir, cssSubpath);
     if (fs.existsSync(directPath)) {
       initialSource = fs.readFileSync(directPath, 'utf-8');
       initialDir = path.dirname(directPath);
@@ -36,7 +51,8 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
   }
 
   if (!initialSource && sourceSubpath) {
-    const srcFile = path.resolve(process.cwd(), 'node_modules', pkg, sourceSubpath);
+    const pkgDir = resolvePackageDir(pkg);
+    const srcFile = path.join(pkgDir, sourceSubpath);
     if (fs.existsSync(srcFile)) {
       const dir = path.dirname(srcFile);
       initialDir = dir;

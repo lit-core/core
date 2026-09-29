@@ -5,11 +5,14 @@ node_modules
 # Build outputs and caches
 dist
 build
+lib
 out
 .turbo
 .next
 coverage
 *.tsbuildinfo
+*.map
+.pnpm-workspace-state-*.json
 
 # Rust build artifacts and native binaries
 target

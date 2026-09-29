@@ -1,4 +1,4 @@
-import { type BufferedEvent, replayQueue, RESUMED_EVENT_FLAG } from './replay.js';
+import { type BufferedEvent, RESUMED_EVENT_FLAG, replayQueue } from './replay.js';
 
 export interface LoaderOptions {
   /**

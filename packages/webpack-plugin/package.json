@@ -27,7 +27,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "node test.js && node test/integration.test.js"
+    "test": "node tests/unit.test.js && node tests/integration.test.js"
   },
   "keywords": [
     "css",
