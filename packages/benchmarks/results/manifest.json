@@ -1,0 +1,333 @@
+{
+  "schemaVersion": "2.0.0",
+  "generatedAt": "2026-09-29T20:57:54.342Z",
+  "canonicalComponentCount": 20,
+  "canonicalComponents": [
+    "button",
+    "checkbox",
+    "radio",
+    "switch",
+    "text-input",
+    "select",
+    "dialog",
+    "badge",
+    "tabs",
+    "progress-bar",
+    "spinner",
+    "slider",
+    "menu",
+    "divider",
+    "icon",
+    "icon-button",
+    "card",
+    "elevation",
+    "list",
+    "chips"
+  ],
+  "libraries": [
+    {
+      "id": "carbon",
+      "name": "Carbon Web Components",
+      "packageName": "@carbon/web-components",
+      "componentCount": 20
+    },
+    {
+      "id": "spectrum",
+      "name": "Spectrum Web Components",
+      "packageName": "@spectrum-web-components",
+      "componentCount": 20
+    },
+    {
+      "id": "webawesome",
+      "name": "Web Awesome",
+      "packageName": "@awesome.me/webawesome",
+      "componentCount": 20
+    },
+    {
+      "id": "material",
+      "name": "Material Web",
+      "packageName": "@material/web",
+      "componentCount": 20
+    },
+    {
+      "id": "momentum",
+      "name": "Momentum Design",
+      "packageName": "@momentum-design/components",
+      "componentCount": 20
+    }
+  ],
+  "features": [
+    {
+      "id": "baseline",
+      "name": "Baseline (Standard Vite)",
+      "description": "Standard Vite build without any lit-core optimization plugins",
+      "category": "baseline"
+    },
+    {
+      "id": "css-fuse",
+      "name": "CSS AST deduplication (css-fuse)",
+      "description": "Cross-component CSS deduplication into shared constructable stylesheets",
+      "category": "styles"
+    },
+    {
+      "id": "css-minifier",
+      "name": "CSS template minification (css-minifier)",
+      "description": "High-speed CSS template literal minifier powered by Lightning CSS",
+      "category": "styles"
+    },
+    {
+      "id": "html-fuse",
+      "name": "HTML fragment clustering (html-fuse)",
+      "description": "Cross-component static HTML and SVG fragment clustering",
+      "category": "templates"
+    },
+    {
+      "id": "html-aot",
+      "name": "AOT template compilation (html-aot)",
+      "description": "Ahead-of-time Lit template compilation eliminating runtime prepare phase",
+      "category": "templates"
+    },
+    {
+      "id": "html-minifier",
+      "name": "HTML template minification (html-minifier)",
+      "description": "High-speed HTML template literal minifier powered by OXC",
+      "category": "templates"
+    },
+    {
+      "id": "props-lower",
+      "name": "Lit decorator lowering (props-lower)",
+      "description": "Ahead-of-time decorator lowering and prototype descriptor preset hoisting",
+      "category": "reactivity"
+    },
+    {
+      "id": "dirty-mask",
+      "name": "Dependency bitmasking (dirty-mask)",
+      "description": "Ahead-of-time property-to-part dependency bitmasking",
+      "category": "reactivity"
+    },
+    {
+      "id": "memoize",
+      "name": "Expression memoization (memoize)",
+      "description": "Ahead-of-time reactive expression auto-memoization",
+      "category": "reactivity"
+    },
+    {
+      "id": "dom-paths",
+      "name": "Structural DOM paths (dom-paths)",
+      "description": "Structural DOM path compiler eliminating TreeWalker mounting traversal",
+      "category": "dom"
+    },
+    {
+      "id": "event-hoist",
+      "name": "ShadowRoot event delegation (event-hoist)",
+      "description": "Ahead-of-time ShadowRoot event delegation",
+      "category": "dom"
+    },
+    {
+      "id": "elem-proxy",
+      "name": "Element proxy stubs (elem-proxy)",
+      "description": "AOT Custom Element proxy stubs for deferred registration and lazy loading",
+      "category": "registration"
+    },
+    {
+      "id": "native",
+      "name": "Vanilla Web Component compiler (native)",
+      "description": "Ahead-of-time vanilla Web Component compilation with micro-runtime reconciler",
+      "category": "runtime"
+    },
+    {
+      "id": "resumable",
+      "name": "Zero-JS resumption (resumable)",
+      "description": "Zero-JavaScript SSR and interaction-driven runtime resumption",
+      "category": "resumption"
+    },
+    {
+      "id": "all",
+      "name": "All optimizations combined",
+      "description": "Combined impact of all enabled optimization tools simultaneously",
+      "category": "combined"
+    }
+  ],
+  "runs": [
+    {
+      "suiteId": "carbon",
+      "featureId": "baseline",
+      "path": "carbon/baseline.json",
+      "rawBytes": 1438781,
+      "gzipBytes": 186286,
+      "brotliBytes": 98045,
+      "buildTimeMs": 100.44145799999978,
+      "rawPercent": 0,
+      "gzipPercent": 0,
+      "brotliPercent": 0,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:56:46.686Z"
+    },
+    {
+      "suiteId": "carbon",
+      "featureId": "css-fuse",
+      "path": "carbon/css-fuse.json",
+      "rawBytes": 924632,
+      "gzipBytes": 142332,
+      "brotliBytes": 102139,
+      "buildTimeMs": 654.0215409999998,
+      "rawPercent": -35.7350423726752,
+      "gzipPercent": -23.59490246180604,
+      "brotliPercent": 4.17563363761538,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:56:58.071Z"
+    },
+    {
+      "suiteId": "carbon",
+      "featureId": "html-aot",
+      "path": "carbon/html-aot.json",
+      "rawBytes": 1471400,
+      "gzipBytes": 192127,
+      "brotliBytes": 101614,
+      "buildTimeMs": 562.4344590000001,
+      "rawPercent": 2.26712751975457,
+      "gzipPercent": 3.135501325918212,
+      "brotliPercent": 3.6401652302514154,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:07.486Z"
+    },
+    {
+      "suiteId": "carbon",
+      "featureId": "props-lower",
+      "path": "carbon/props-lower.json",
+      "rawBytes": 1435852,
+      "gzipBytes": 186159,
+      "brotliBytes": 97588,
+      "buildTimeMs": 73.63079200000004,
+      "rawPercent": -0.20357510976305634,
+      "gzipPercent": -0.06817474206327905,
+      "brotliPercent": -0.4661124993625376,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:11.454Z"
+    },
+    {
+      "suiteId": "material",
+      "featureId": "baseline",
+      "path": "material/baseline.json",
+      "rawBytes": 269272,
+      "gzipBytes": 56943,
+      "brotliBytes": 46024,
+      "buildTimeMs": 52.36883399999999,
+      "rawPercent": 0,
+      "gzipPercent": 0,
+      "brotliPercent": 0,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:41.407Z"
+    },
+    {
+      "suiteId": "material",
+      "featureId": "css-fuse",
+      "path": "material/css-fuse.json",
+      "rawBytes": 271126,
+      "gzipBytes": 57539,
+      "brotliBytes": 46726,
+      "buildTimeMs": 260.3043339999999,
+      "rawPercent": 0.688523129029383,
+      "gzipPercent": 1.0466606957835027,
+      "brotliPercent": 1.5252911524422041,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:44.971Z"
+    },
+    {
+      "suiteId": "momentum",
+      "featureId": "baseline",
+      "path": "momentum/baseline.json",
+      "rawBytes": 346264,
+      "gzipBytes": 74162,
+      "brotliBytes": 59626,
+      "buildTimeMs": 87.60637499999996,
+      "rawPercent": 0,
+      "gzipPercent": 0,
+      "brotliPercent": 0,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:50.213Z"
+    },
+    {
+      "suiteId": "momentum",
+      "featureId": "css-fuse",
+      "path": "momentum/css-fuse.json",
+      "rawBytes": 343567,
+      "gzipBytes": 74061,
+      "brotliBytes": 59701,
+      "buildTimeMs": 253.081417,
+      "rawPercent": -0.7788854746667283,
+      "gzipPercent": -0.13618834443515546,
+      "brotliPercent": 0.12578405393620232,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:54.300Z"
+    },
+    {
+      "suiteId": "spectrum",
+      "featureId": "baseline",
+      "path": "spectrum/baseline.json",
+      "rawBytes": 819094,
+      "gzipBytes": 146775,
+      "brotliBytes": 111368,
+      "buildTimeMs": 147.48299999999995,
+      "rawPercent": 0,
+      "gzipPercent": 0,
+      "brotliPercent": 0,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:15.555Z"
+    },
+    {
+      "suiteId": "spectrum",
+      "featureId": "css-fuse",
+      "path": "spectrum/css-fuse.json",
+      "rawBytes": 821938,
+      "gzipBytes": 149017,
+      "brotliBytes": 113698,
+      "buildTimeMs": 2023.932667,
+      "rawPercent": 0.3472128961999478,
+      "gzipPercent": 1.5275080906148868,
+      "brotliPercent": 2.092162919330508,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:22.312Z"
+    },
+    {
+      "suiteId": "webawesome",
+      "featureId": "baseline",
+      "path": "webawesome/baseline.json",
+      "rawBytes": 370946,
+      "gzipBytes": 86902,
+      "brotliBytes": 69583,
+      "buildTimeMs": 63.183625000000006,
+      "rawPercent": 0,
+      "gzipPercent": 0,
+      "brotliPercent": 0,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:31.724Z"
+    },
+    {
+      "suiteId": "webawesome",
+      "featureId": "css-fuse",
+      "path": "webawesome/css-fuse.json",
+      "rawBytes": 366050,
+      "gzipBytes": 86140,
+      "brotliBytes": 69282,
+      "buildTimeMs": 200.80179100000004,
+      "rawPercent": -1.3198686601284284,
+      "gzipPercent": -0.8768497848150791,
+      "brotliPercent": -0.4325769225241798,
+      "firstRenderMs": 0,
+      "speedupPercent": 0,
+      "timestamp": "2026-09-29T20:57:38.049Z"
+    }
+  ]
+}

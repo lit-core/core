@@ -20,7 +20,19 @@ import type {
 } from './options.js';
 import { buildManifest, compileResumableLoader, extractCustomElementTags } from '@lit-core/resumable';
 import { runFuseOptimization, runHtmlFuseOptimization, runScopingAudit } from './transforms.js';
-import { BARE_FUSED_ID_REGEX, BARE_HTML_FUSED_ID_REGEX, extractHtmlTemplateId, extractSheetId, isVirtualHtmlFusedId, VIRTUAL_FUSED_PREFIX, VIRTUAL_HTML_FUSED_PREFIX } from './utils.js';
+import {
+  BARE_FUSED_ID_REGEX,
+  BARE_HTML_FUSED_ID_REGEX,
+  extractHtmlTemplateId,
+  extractLitCoreVirtualSubpath,
+  extractSheetId,
+  isVirtualHtmlFusedId,
+  isVirtualLitCoreId,
+  VIRTUAL_FUSED_PREFIX,
+  VIRTUAL_HTML_FUSED_PREFIX,
+  VIRTUAL_LIT_CORE_PREFIX,
+} from './utils.js';
+import { getVirtualLitCoreModule } from './virtual.js';
 
 let loaderPath = fileURLToPath(new URL('./loader.js', import.meta.url));
 if (!fs.existsSync(loaderPath)) {
@@ -168,59 +180,73 @@ export class LitWebpackPlugin {
 
         callback();
       });
+    }
 
-      // Hook Webpack 5 virtual resource scheme loader
-      compiler.hooks.compilation.tap(this.name, (compilation) => {
-        const NormalModule = compiler.webpack?.NormalModule;
-        if (NormalModule?.getCompilationHooks) {
-          const hooks = NormalModule.getCompilationHooks(compilation);
-          hooks.readResourceForScheme.for('virtual').tapPromise(this.name, async (resource: string) => {
-            if (isVirtualHtmlFusedId(resource) || resource.includes('html-fuse')) {
-              const templateId = extractHtmlTemplateId(resource);
-              const code =
-                this.virtualTemplates.get(templateId) ||
-                this.virtualTemplates.get(path.basename(templateId)) ||
-                this.virtualTemplates.get(templateId.replace(/\.js$/, '')) ||
-                this.virtualTemplates.get(`${templateId}.js`);
-
-              if (code !== undefined) {
-                return Buffer.from(code);
-              }
-
-              throw new Error(`[html-fuse] Virtual shared template not found: ${resource}`);
+    // Hook Webpack 5 virtual resource scheme loader
+    compiler.hooks.compilation.tap(this.name, (compilation) => {
+      const NormalModule = compiler.webpack?.NormalModule;
+      if (NormalModule?.getCompilationHooks) {
+        const hooks = NormalModule.getCompilationHooks(compilation);
+        hooks.readResourceForScheme.for('virtual').tapPromise(this.name, async (resource: string) => {
+          if (isVirtualLitCoreId(resource) || resource.includes('lit-core')) {
+            const subpath = extractLitCoreVirtualSubpath(resource);
+            const code = getVirtualLitCoreModule(subpath);
+            if (code !== undefined) {
+              return Buffer.from(code);
             }
+          }
 
-            const sheetId = extractSheetId(resource);
+          if (isVirtualHtmlFusedId(resource) || resource.includes('html-fuse')) {
+            const templateId = extractHtmlTemplateId(resource);
             const code =
-              this.virtualSheets.get(sheetId) || this.virtualSheets.get(path.basename(sheetId)) || this.virtualSheets.get(sheetId.replace(/\.js$/, '')) || this.virtualSheets.get(`${sheetId}.js`);
+              this.virtualTemplates.get(templateId) ||
+              this.virtualTemplates.get(path.basename(templateId)) ||
+              this.virtualTemplates.get(templateId.replace(/\.js$/, '')) ||
+              this.virtualTemplates.get(`${templateId}.js`);
 
             if (code !== undefined) {
               return Buffer.from(code);
             }
 
-            throw new Error(`[css-fuse] Virtual constructable stylesheet not found: ${resource}`);
-          });
+            throw new Error(`[html-fuse] Virtual shared template not found: ${resource}`);
+          }
+
+          const sheetId = extractSheetId(resource);
+          const code =
+            this.virtualSheets.get(sheetId) || this.virtualSheets.get(path.basename(sheetId)) || this.virtualSheets.get(sheetId.replace(/\.js$/, '')) || this.virtualSheets.get(`${sheetId}.js`);
+
+          if (code !== undefined) {
+            return Buffer.from(code);
+          }
+
+          throw new Error(`[virtual] Virtual resource not found: ${resource}`);
+        });
+      }
+    });
+
+    // Redirect legacy, bare, or unprefixed imports to virtual:...
+    compiler.hooks.normalModuleFactory.tap(this.name, (nmf) => {
+      nmf.hooks.resolve.tap(this.name, (resolveData) => {
+        if (!resolveData.request) return;
+        if (resolveData.request.startsWith('@lit-core/resumable/client')) {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}resumable-adapter.js`;
+        } else if (resolveData.request.startsWith('@lit-core/native/runtime')) {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}native-runtime.js`;
+        } else if (resolveData.request.startsWith('@lit-core/dom-paths/client')) {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}dom-paths.js`;
+        } else if (BARE_HTML_FUSED_ID_REGEX.test(resolveData.request)) {
+          const filename = resolveData.request.endsWith('.js') ? resolveData.request : `${resolveData.request}.js`;
+          resolveData.request = `${VIRTUAL_HTML_FUSED_PREFIX}${filename}`;
+        } else if (resolveData.request.startsWith('virtual:lit-html-fuse/')) {
+          resolveData.request = resolveData.request.replace('virtual:lit-html-fuse/', VIRTUAL_HTML_FUSED_PREFIX);
+        } else if (BARE_FUSED_ID_REGEX.test(resolveData.request)) {
+          const filename = resolveData.request.endsWith('.js') ? resolveData.request : `${resolveData.request}.js`;
+          resolveData.request = `${VIRTUAL_FUSED_PREFIX}${filename}`;
+        } else if (resolveData.request.startsWith('virtual:lit-css-fuse/')) {
+          resolveData.request = resolveData.request.replace('virtual:lit-css-fuse/', VIRTUAL_FUSED_PREFIX);
         }
       });
-
-      // Redirect legacy or unprefixed imports to virtual:...
-      compiler.hooks.normalModuleFactory.tap(this.name, (nmf) => {
-        nmf.hooks.resolve.tap(this.name, (resolveData) => {
-          if (!resolveData.request) return;
-          if (BARE_HTML_FUSED_ID_REGEX.test(resolveData.request)) {
-            const filename = resolveData.request.endsWith('.js') ? resolveData.request : `${resolveData.request}.js`;
-            resolveData.request = `${VIRTUAL_HTML_FUSED_PREFIX}${filename}`;
-          } else if (resolveData.request.startsWith('virtual:lit-html-fuse/')) {
-            resolveData.request = resolveData.request.replace('virtual:lit-html-fuse/', VIRTUAL_HTML_FUSED_PREFIX);
-          } else if (BARE_FUSED_ID_REGEX.test(resolveData.request)) {
-            const filename = resolveData.request.endsWith('.js') ? resolveData.request : `${resolveData.request}.js`;
-            resolveData.request = `${VIRTUAL_FUSED_PREFIX}${filename}`;
-          } else if (resolveData.request.startsWith('virtual:lit-css-fuse/')) {
-            resolveData.request = resolveData.request.replace('virtual:lit-css-fuse/', VIRTUAL_FUSED_PREFIX);
-          }
-        });
-      });
-    }
+    });
 
     const resumableOpt = options.resumable ? (typeof options.resumable === 'object' ? options.resumable : {}) : null;
     if (resumableOpt) {

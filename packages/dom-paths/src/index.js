@@ -42,6 +42,7 @@ if (!nativeBinding) {
   throw new Error('Failed to load native binding for @lit-core/dom-paths. Native addon not found.');
 }
 
+export { DOM_PATHS_SOURCE } from './virtual.js';
 export { preparePartsWithPaths, resolveNodeByPath, resolveNodesByPaths };
 
 /**

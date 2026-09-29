@@ -1,0 +1,185 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "carbon-html-aot",
+  "suite": {
+    "id": "carbon",
+    "name": "Carbon Web Components (@carbon/web-components)",
+    "packageName": "@carbon/web-components",
+    "version": "2.64.0",
+    "componentCount": 20,
+    "components": [
+      {
+        "concept": "button",
+        "tag": "cds-button",
+        "label": "Button",
+        "path": "es/components/button/index.js"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "cds-checkbox",
+        "label": "Checkbox",
+        "path": "es/components/checkbox/index.js"
+      },
+      {
+        "concept": "radio",
+        "tag": "cds-radio-button",
+        "label": "Radio button",
+        "path": "es/components/radio-button/index.js"
+      },
+      {
+        "concept": "switch",
+        "tag": "cds-toggle",
+        "label": "Switch / toggle",
+        "path": "es/components/toggle/index.js"
+      },
+      {
+        "concept": "text-input",
+        "tag": "cds-text-input",
+        "label": "Text input / field",
+        "path": "es/components/text-input/index.js"
+      },
+      {
+        "concept": "select",
+        "tag": "cds-select",
+        "label": "Select / dropdown",
+        "path": "es/components/select/index.js"
+      },
+      {
+        "concept": "dialog",
+        "tag": "cds-modal",
+        "label": "Dialog / modal",
+        "path": "es/components/modal/index.js"
+      },
+      {
+        "concept": "badge",
+        "tag": "cds-tag",
+        "label": "Badge / tag",
+        "path": "es/components/tag/index.js"
+      },
+      {
+        "concept": "tabs",
+        "tag": "cds-tabs",
+        "label": "Tabs",
+        "path": "es/components/tabs/index.js"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "cds-progress-bar",
+        "label": "Progress bar",
+        "path": "es/components/progress-bar/index.js"
+      },
+      {
+        "concept": "spinner",
+        "tag": "cds-loading",
+        "label": "Spinner / loader",
+        "path": "es/components/loading/index.js"
+      },
+      {
+        "concept": "slider",
+        "tag": "cds-slider",
+        "label": "Slider",
+        "path": "es/components/slider/index.js"
+      },
+      {
+        "concept": "menu",
+        "tag": "cds-overflow-menu",
+        "label": "Menu / popover",
+        "path": "es/components/overflow-menu/index.js"
+      },
+      {
+        "concept": "divider",
+        "tag": "cds-skeleton-text",
+        "label": "Divider",
+        "path": "es/components/skeleton-text/index.js"
+      },
+      {
+        "concept": "icon",
+        "tag": "cds-icon",
+        "label": "Icon",
+        "path": "es/components/icon/index.js"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "cds-icon-button",
+        "label": "Icon button",
+        "path": "es/components/icon-button/index.js"
+      },
+      {
+        "concept": "card",
+        "tag": "cds-tile",
+        "label": "Card / tile",
+        "path": "es/components/tile/index.js"
+      },
+      {
+        "concept": "elevation",
+        "tag": "cds-popover",
+        "label": "Elevation / focus",
+        "path": "es/components/popover/index.js"
+      },
+      {
+        "concept": "list",
+        "tag": "cds-structured-list",
+        "label": "List / structured",
+        "path": "es/components/structured-list/index.js"
+      },
+      {
+        "concept": "chips",
+        "tag": "cds-content-switcher",
+        "label": "Chips / segmented",
+        "path": "es/components/content-switcher/index.js"
+      }
+    ]
+  },
+  "feature": {
+    "id": "html-aot",
+    "name": "AOT template compilation (html-aot)",
+    "description": "Ahead-of-time Lit template compilation eliminating runtime prepare phase",
+    "isBaseline": false
+  },
+  "timestamp": "2026-09-29T20:57:07.486Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "3e38fce",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 1471400,
+    "gzipBytes": 192127,
+    "brotliBytes": 101614,
+    "buildTimeMs": 562.4344590000001
+  },
+  "baseline": {
+    "rawBytes": 1438781,
+    "gzipBytes": 186286,
+    "brotliBytes": 98045,
+    "buildTimeMs": 100.44145799999978
+  },
+  "deltas": {
+    "rawBytes": 32619,
+    "rawPercent": 2.26712751975457,
+    "gzipBytes": 5841,
+    "gzipPercent": 3.135501325918212,
+    "brotliBytes": 3569,
+    "brotliPercent": 3.6401652302514154,
+    "buildTimeMs": 461.9930010000003
+  },
+  "runtime": {
+    "firstRenderMs": 0,
+    "updateMs": 0,
+    "speedupPercent": 0
+  }
+}

@@ -21,5 +21,6 @@ if (platform() === 'darwin') {
   throw new Error(`Unsupported platform: ${platform()} ${arch()}`);
 }
 
+export { NATIVE_RUNTIME_SOURCE } from './virtual.js';
 export const { classify, transformNative } = nativeBinding;
 export default transformNative;

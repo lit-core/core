@@ -225,4 +225,80 @@ assert(loaderResult, 'Loader must execute callback');
 assert(!loaderResult.code.includes('@customElement'), 'Loader should lower decorators');
 assert(!loaderResult.code.includes('<!-- comment -->'), 'Loader should strip comments');
 
+// 9. Test Webpack virtual scheme resolution and redirection
+let virtualResourceHook = null;
+let resolveHook = null;
+const mockCompiler = {
+  getInfrastructureLogger: () => ({ warn: () => {}, error: () => {}, info: () => {} }),
+  options: { mode: 'production', module: { rules: [] } },
+  hooks: {
+    beforeCompile: { tapAsync: () => {} },
+    compilation: {
+      tap: (name, cb) => {
+        const mockCompilation = {};
+        cb(mockCompilation);
+      },
+    },
+    normalModuleFactory: {
+      tap: (name, cb) => {
+        const mockNmf = {
+          hooks: {
+            resolve: {
+              tap: (n, fn) => {
+                resolveHook = fn;
+              },
+            },
+          },
+        };
+        cb(mockNmf);
+      },
+    },
+    shutdown: { tap: () => {} },
+  },
+  webpack: {
+    NormalModule: {
+      getCompilationHooks: () => ({
+        readResourceForScheme: {
+          for: (scheme) => ({
+            tapPromise: (name, fn) => {
+              virtualResourceHook = fn;
+            },
+          }),
+        },
+      }),
+    },
+  },
+};
+
+const pluginInst = lit();
+pluginInst.apply(mockCompiler);
+
+assert(typeof virtualResourceHook === 'function', 'readResourceForScheme must be registered');
+assert(typeof resolveHook === 'function', 'resolve hook must be registered');
+
+// Test readResourceForScheme for virtual:lit-core/*
+(async () => {
+  const adapterBuf = await virtualResourceHook('virtual:lit-core/resumable-adapter');
+  assert(adapterBuf.toString().includes('installResumableAdapter'), 'Adapter buffer must contain installResumableAdapter');
+
+  const nativeBuf = await virtualResourceHook('virtual:lit-core/native-runtime');
+  assert(nativeBuf.toString().includes('NativeElement'), 'Native buffer must contain NativeElement');
+
+  const domBuf = await virtualResourceHook('virtual:lit-core/dom-paths');
+  assert(domBuf.toString().includes('preparePartsWithPaths'), 'Dom paths buffer must contain preparePartsWithPaths');
+
+  // Test resolution redirection for bare imports
+  const req1 = { request: '@lit-core/resumable/client' };
+  resolveHook(req1);
+  assert.strictEqual(req1.request, 'virtual:lit-core/resumable-adapter.js');
+
+  const req2 = { request: '@lit-core/native/runtime' };
+  resolveHook(req2);
+  assert.strictEqual(req2.request, 'virtual:lit-core/native-runtime.js');
+
+  const req3 = { request: '@lit-core/dom-paths/client' };
+  resolveHook(req3);
+  assert.strictEqual(req3.request, 'virtual:lit-core/dom-paths.js');
+})();
+
 console.log('✓ Webpack plugin hooks, classes, options, and loader verified successfully.');

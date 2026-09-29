@@ -90,6 +90,48 @@ export function extractHtmlTemplateId(resolvedId: string): string {
   return resolvedId;
 }
 
+export const VIRTUAL_LIT_CORE_PREFIX = 'virtual:lit-core/';
+export const RESOLVED_LIT_CORE_PREFIX = '\0virtual:lit-core/';
+
+export function isVirtualLitCoreId(id: string): boolean {
+  return (
+    id.startsWith(VIRTUAL_LIT_CORE_PREFIX) ||
+    id.startsWith(RESOLVED_LIT_CORE_PREFIX) ||
+    id.startsWith('@lit-core/resumable/client') ||
+    id.startsWith('@lit-core/native/runtime') ||
+    id.startsWith('@lit-core/dom-paths/client')
+  );
+}
+
+export function formatVirtualLitCoreId(id: string): string {
+  if (id.startsWith(VIRTUAL_LIT_CORE_PREFIX)) {
+    return RESOLVED_LIT_CORE_PREFIX + id.slice(VIRTUAL_LIT_CORE_PREFIX.length);
+  }
+  if (id.startsWith(RESOLVED_LIT_CORE_PREFIX)) {
+    return id;
+  }
+  if (id.startsWith('@lit-core/resumable/client')) {
+    return `${RESOLVED_LIT_CORE_PREFIX}resumable-adapter.js`;
+  }
+  if (id.startsWith('@lit-core/native/runtime')) {
+    return `${RESOLVED_LIT_CORE_PREFIX}native-runtime.js`;
+  }
+  if (id.startsWith('@lit-core/dom-paths/client')) {
+    return `${RESOLVED_LIT_CORE_PREFIX}dom-paths.js`;
+  }
+  return id;
+}
+
+export function extractLitCoreVirtualSubpath(resolvedId: string): string {
+  let subpath = resolvedId;
+  if (subpath.startsWith(RESOLVED_LIT_CORE_PREFIX)) {
+    subpath = subpath.slice(RESOLVED_LIT_CORE_PREFIX.length);
+  } else if (subpath.startsWith(VIRTUAL_LIT_CORE_PREFIX)) {
+    subpath = subpath.slice(VIRTUAL_LIT_CORE_PREFIX.length);
+  }
+  return subpath.replace(/\.[jt]s$/, '');
+}
+
 const globRegexCache = new Map<string, RegExp>();
 
 export function globToRegex(glob: string): RegExp {

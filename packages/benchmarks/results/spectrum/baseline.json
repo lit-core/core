@@ -1,0 +1,170 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "spectrum-baseline",
+  "suite": {
+    "id": "spectrum",
+    "name": "Spectrum Web Components (@spectrum-web-components)",
+    "packageName": "@spectrum-web-components/bundle",
+    "version": "1.12.2",
+    "componentCount": 20,
+    "components": [
+      {
+        "concept": "button",
+        "tag": "sp-button",
+        "label": "Button",
+        "path": "button/sp-button.js"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "sp-checkbox",
+        "label": "Checkbox",
+        "path": "checkbox/sp-checkbox.js"
+      },
+      {
+        "concept": "radio",
+        "tag": "sp-radio",
+        "label": "Radio button",
+        "path": "radio/sp-radio.js"
+      },
+      {
+        "concept": "switch",
+        "tag": "sp-switch",
+        "label": "Switch / toggle",
+        "path": "switch/sp-switch.js"
+      },
+      {
+        "concept": "text-input",
+        "tag": "sp-textfield",
+        "label": "Text input / field",
+        "path": "textfield/sp-textfield.js"
+      },
+      {
+        "concept": "select",
+        "tag": "sp-picker",
+        "label": "Select / dropdown",
+        "path": "picker/sp-picker.js"
+      },
+      {
+        "concept": "dialog",
+        "tag": "sp-dialog",
+        "label": "Dialog / modal",
+        "path": "dialog/sp-dialog.js"
+      },
+      {
+        "concept": "badge",
+        "tag": "sp-badge",
+        "label": "Badge / tag",
+        "path": "badge/sp-badge.js"
+      },
+      {
+        "concept": "tabs",
+        "tag": "sp-tabs",
+        "label": "Tabs",
+        "path": "tabs/sp-tabs.js"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "sp-progress-bar",
+        "label": "Progress bar",
+        "path": "progress-bar/sp-progress-bar.js"
+      },
+      {
+        "concept": "spinner",
+        "tag": "sp-progress-circle",
+        "label": "Spinner / loader",
+        "path": "progress-circle/sp-progress-circle.js"
+      },
+      {
+        "concept": "slider",
+        "tag": "sp-slider",
+        "label": "Slider",
+        "path": "slider/sp-slider.js"
+      },
+      {
+        "concept": "menu",
+        "tag": "sp-menu",
+        "label": "Menu / popover",
+        "path": "menu/sp-menu.js"
+      },
+      {
+        "concept": "divider",
+        "tag": "sp-divider",
+        "label": "Divider",
+        "path": "divider/sp-divider.js"
+      },
+      {
+        "concept": "icon",
+        "tag": "sp-icon",
+        "label": "Icon",
+        "path": "icon/sp-icon.js"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "sp-action-button",
+        "label": "Icon button",
+        "path": "action-button/sp-action-button.js"
+      },
+      {
+        "concept": "card",
+        "tag": "sp-card",
+        "label": "Card / tile",
+        "path": "card/sp-card.js"
+      },
+      {
+        "concept": "elevation",
+        "tag": "sp-popover",
+        "label": "Elevation / focus",
+        "path": "popover/sp-popover.js"
+      },
+      {
+        "concept": "list",
+        "tag": "sp-sidenav",
+        "label": "List / structured",
+        "path": "sidenav/sp-sidenav.js"
+      },
+      {
+        "concept": "chips",
+        "tag": "sp-action-group",
+        "label": "Chips / segmented",
+        "path": "action-group/sp-action-group.js"
+      }
+    ]
+  },
+  "feature": {
+    "id": "baseline",
+    "name": "Baseline (Standard Vite)",
+    "description": "Standard Vite build without any lit-core optimization plugins",
+    "isBaseline": true
+  },
+  "timestamp": "2026-09-29T20:57:15.555Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "3e38fce",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 819094,
+    "gzipBytes": 146775,
+    "brotliBytes": 111368,
+    "buildTimeMs": 147.48299999999995
+  },
+  "runtime": {
+    "firstRenderMs": 0,
+    "updateMs": 0,
+    "speedupPercent": 0
+  }
+}

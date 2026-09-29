@@ -1,4 +1,12 @@
-import { parseComponentState } from '../server/state-serializer.js';
+/**
+ * Parse state from serialized script text content.
+ */
+export function parseComponentState(scriptContent: string): Record<string, unknown> {
+  if (!scriptContent || !scriptContent.trim()) {
+    return {};
+  }
+  return JSON.parse(scriptContent.trim());
+}
 
 export interface ResumableElement extends HTMLElement {
   hasUpdated?: boolean;

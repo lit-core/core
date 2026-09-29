@@ -6,7 +6,7 @@ import { compileResumableLoader } from '@lit-core/resumable/client';
 import { renderToDsd } from '@lit-core/resumable/server';
 import { ENTERPRISE_COMPONENTS, extractComponentTemplates, extractCssFromModule, findComponentCssSource } from './fixtures.js';
 import { calculateDelta, formatDuration, formatNumber } from './format.js';
-import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, saveResumableArtifactHtml, syncDocFile } from './reporters/index.js';
+import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 
 export const SUITES = [
@@ -157,21 +157,6 @@ export async function measureResumablePerformance(suite) {
     dsdMarkups.push(markup);
     _totalDsdBytes += Buffer.byteLength(markup, 'utf8');
   }
-
-  try {
-    saveResumableArtifactHtml({
-      suiteName: suite.name,
-      suiteId: suite.id,
-      dsdMarkups,
-      loaderScript: compileResumableLoader({ idleHydration: false }),
-      metrics: {
-        standardInitialJsKb,
-        resumableInitialJsKb,
-        totalComponents,
-        totalDsdBytes: _totalDsdBytes,
-      },
-    });
-  } catch {}
 
   // Measure execution of standard client hydration registration in V8 context
   const t0Standard = performance.now();
@@ -331,68 +316,13 @@ export async function runResumableBenchmark(options = {}) {
   });
 }
 
-/**
- * Format resumable benchmark results into a standardized markdown document.
- * Strictly omits any total columns or rows.
- * @param {import('./types.js').BenchmarkRunResult} result
- * @returns {string}
- */
-export function formatResumableDoc(result) {
-  return renderBenchmarkDoc({
-    title: result.title,
-    leadParagraph: result.description,
-    comparisonHeading: 'Runtime resumption and client performance comparison',
-    comparisonDescription: 'Measurements compare Standard Lit SSR (`@lit-labs/ssr` eager client hydration) against Resumable Lit SSR (`@lit-core/resumable` zero-JS boot with on-demand resumption):',
-    suites: result.suites,
-    metrics: [
-      { label: 'Standard SSR initial JS', getValue: (s) => `${formatNumber(s.baseline.initialJsKb, { decimals: 1 })} KB` },
-      { label: 'Resumable SSR initial JS', getValue: (s) => `**${formatNumber(s.optimized.initialJsKb, { decimals: 2 })} KB**` },
-      { label: 'Initial JS savings', getValue: (s) => `**${s.deltas.initialJs.formattedPercent}**` },
-      { label: 'Standard SSR TBT', getValue: (s) => formatDuration(s.baseline.tbtMs, { decimals: 1 }) },
-      { label: 'Resumable SSR TBT', getValue: (s) => `**${formatDuration(s.optimized.tbtMs, { decimals: 1 })}**` },
-      { label: 'TBT reduction', getValue: (s) => `**${s.deltas.tbt.formattedPercent}**` },
-      { label: 'Standard SSR TTI', getValue: (s) => formatDuration(s.baseline.ttiMs, { decimals: 1 }) },
-      { label: 'Resumable SSR TTI', getValue: (s) => `**${formatDuration(s.optimized.ttiMs, { decimals: 1 })}**` },
-      { label: 'TTI improvement', getValue: (s) => `**-${formatDuration(Math.abs(s.deltas.tti.diff), { decimals: 1 })}**` },
-      { label: 'First click latency', getValue: (s) => formatDuration(s.optimized.firstClickLatencyMs, { decimals: 1 }) },
-      { label: 'Elements deferred on boot', getValue: (s) => `**${s.componentCount} / ${s.componentCount} (100%)**` },
-    ],
-    note: 'Standard Lit SSR requires downloading and hydrating all component classes and Lit runtimes upfront before components become interactive. `@lit-core/resumable` renders HTML and CSS via native Declarative Shadow DOM with zero client JavaScript on boot, deferring component hydration until user interaction.',
-    diagnosticsHeading: 'Resumption diagnostics and payload analysis',
-    diagnosticsDescription: 'Detailed payload reduction, CPU blocking time improvements, and deferred element proportions across design systems:',
-    diagnosticsColumns: [
-      { header: 'Components evaluated', getValue: (s) => formatNumber(s.diagnostics.totalComponents) },
-      { header: 'Initial JS reduction', getValue: (s) => `**${s.diagnostics.initialJsReduction}**` },
-      { header: 'TBT reduction', getValue: (s) => `**${s.diagnostics.tbtReduction}**` },
-      { header: 'TTI speedup', getValue: (s) => `**-${s.diagnostics.ttiImprovement}**` },
-      { header: 'Deferred proportion', getValue: (s) => `**${s.diagnostics.deferredCount}**` },
-      { header: 'Build overhead', align: 'left', getValue: (s) => s.diagnostics.buildOverhead },
-    ],
-    runCommand: 'node packages/benchmarks/src/resumable-bench.js',
-    invariants: [
-      '**Zero component JavaScript on boot**: Declarative Shadow DOM renders natively in browser C++ parser with zero hydration scripts.',
-      '**Interaction-driven resumption**: Global micro-loader buffers interaction events in FIFO order and re-dispatches to upgraded components.',
-      '**Zero DOM recreation**: Component upgrade attaches to existing shadow root nodes with reference equality, eliminating visual flicker.',
-      '**Near-instant first click**: Preload-on-hover resolves component chunks ahead of click execution for sub-5ms latency.',
-      '**Strict general-purpose design**: Zero library-specific hacks or component tag whitelists; works transparently with any valid Lit element.',
-    ],
-    relatedDocs: [
-      { label: 'Benchmark executive overview', url: '../README.md' },
-      { label: 'Deferred proxy architecture', url: './elem-proxy.md' },
-      { label: 'Event hoisting architecture', url: './event-hoist.md' },
-    ],
-  });
-}
-
 // CLI execution
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   printBenchmarkHeader('resumable', 'Evaluating SSR Declarative Shadow DOM rendering and zero-JS runtime resumption.');
   runResumableBenchmark({ verbose: true })
     .then((result) => {
       const jsonPath = saveBenchmarkResult(result);
-      const doc = formatResumableDoc(result);
-      const docPath = syncDocFile('resumable.md', doc);
-      printBenchmarkFooter('resumable', { jsonPath, docPath });
+      printBenchmarkFooter('resumable', { jsonPath });
     })
     .catch((err) => {
       console.error('Benchmark failed:', err);

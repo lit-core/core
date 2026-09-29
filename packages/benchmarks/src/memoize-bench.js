@@ -2,7 +2,7 @@
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { calculateDelta, formatDuration, formatKb, formatNumber, formatPercent } from './format.js';
-import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, syncDocFile } from './reporters/index.js';
+import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 
 /**
@@ -268,71 +268,13 @@ export async function runMemoizeBenchmarks(options = {}) {
   });
 }
 
-/**
- * Format memoize benchmark results into a standardized markdown document.
- * Strictly omits any total columns or rows.
- * @param {import('./types.js').BenchmarkRunResult} result
- * @returns {string}
- */
-export function formatMemoizeDoc(result) {
-  return renderBenchmarkDoc({
-    title: result.title,
-    leadParagraph: result.description,
-    comparisonHeading: 'Reactive expression memoization efficiency comparison',
-    comparisonDescription:
-      'Measurements compare standard inline Lit template expressions against `@lit-core/memoize` cached slots across 500-item collection components undergoing 200 unrelated state updates:',
-    suites: result.suites,
-    metrics: [
-      { label: 'Collection items rendered', getValue: (s) => formatNumber(s.itemCount) },
-      { label: 'Unrelated state updates', getValue: (s) => formatNumber(s.updatesCount) },
-      { label: 'Baseline pipeline executions', getValue: (s) => formatNumber(s.baseline.pipelineRunsCount) },
-      { label: 'Optimized pipeline executions', getValue: (s) => formatNumber(s.optimized.pipelineRunsCount) },
-      { label: 'Pipeline execution reduction', getValue: (s) => `**${s.deltas.runs.formattedPercent}**` },
-      { label: 'Baseline object allocations', getValue: (s) => formatNumber(s.baseline.allocatedObjectsCount) },
-      { label: 'Optimized object allocations', getValue: (s) => formatNumber(s.optimized.allocatedObjectsCount) },
-      { label: 'Allocation reduction', getValue: (s) => `**${s.deltas.alloc.formattedPercent}**` },
-      { label: 'Baseline re-render latency', getValue: (s) => formatDuration(s.baseline.reRenderLatencyMs) },
-      { label: 'Optimized re-render latency', getValue: (s) => formatDuration(s.optimized.reRenderLatencyMs) },
-      { label: 'Re-render speedup', getValue: (s) => `**${s.deltas.latency.formattedPercent}**` },
-      { label: 'Baseline estimated GC pause', getValue: (s) => formatDuration(s.baseline.estimatedGcPauseMs) },
-      { label: 'Optimized estimated GC pause', getValue: (s) => formatDuration(s.optimized.estimatedGcPauseMs) },
-      { label: 'GC pause reduction', getValue: (s) => `**${s.deltas.gc.formattedPercent}**` },
-    ],
-    note: 'In standard Lit templates, pure collection operations (`.filter()`, `.map()`, `.sort()`) re-execute unconditionally on every render cycle even when their source collections have not mutated. `@lit-core/memoize` creates input-guarded cache slots at build time, returning reference-stable cached arrays and skipping 99.5% of pipeline re-executions.',
-    diagnosticsHeading: 'Memoization diagnostics and cache slot analysis',
-    diagnosticsDescription: 'Detailed cache slot allocations, invalidation checks, and compilation diagnostics across enterprise collection components:',
-    diagnosticsColumns: [
-      { header: 'Target component', align: 'left', getValue: (s) => `\`<${s.diagnostics.targetComponent}>\`` },
-      { header: 'Items rendered', getValue: (s) => formatNumber(s.diagnostics.itemCount) },
-      { header: 'Expressions memoized', getValue: (s) => formatNumber(s.diagnostics.expressionsMemoized) },
-      { header: 'Cache slots allocated', getValue: (s) => formatNumber(s.diagnostics.cacheSlotsAllocated) },
-      { header: 'Invalidation checks', getValue: (s) => formatNumber(s.diagnostics.invalidationChecks) },
-      { header: 'Build overhead', align: 'left', getValue: (s) => s.diagnostics.buildOverhead },
-    ],
-    runCommand: 'node packages/benchmarks/src/memoize-bench.js',
-    invariants: [
-      '**99.5% reduction in pipeline re-executions**: Pure array transformations are skipped entirely during unrelated state mutations.',
-      '**Elimination of transient GC pressure**: Prevents re-allocating thousands of intermediate array and object instances per render cycle.',
-      '**Reference stability for Lit ChildPart**: Returning the cached array reference allows Lit to perform reference equality checks (`Object.is`) and skip DOM reconciliations completely.',
-      '**Input-guarded cache slots**: Cache invalidates only when upstream source inputs mutate by reference.',
-    ],
-    relatedDocs: [
-      { label: 'Benchmark executive overview', url: '../README.md' },
-      { label: '`@lit-core/memoize` package documentation', url: '../../memoize/README.md' },
-      { label: 'Ahead-of-time dirty mask optimization', url: '../docs/dirty-mask.md' },
-    ],
-  });
-}
-
 // CLI execution
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   printBenchmarkHeader('memoize', 'Evaluating array pipeline re-executions and GC latency.');
   runMemoizeBenchmarks({ verbose: true })
     .then((result) => {
       const jsonPath = saveBenchmarkResult(result);
-      const doc = formatMemoizeDoc(result);
-      const docPath = syncDocFile('memoize.md', doc);
-      printBenchmarkFooter('memoize', { jsonPath, docPath });
+      printBenchmarkFooter('memoize', { jsonPath });
     })
     .catch((err) => {
       console.error('Benchmark failed:', err);

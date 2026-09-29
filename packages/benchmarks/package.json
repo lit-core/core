@@ -21,9 +21,11 @@
   },
   "scripts": {
     "benchmark": "node src/index.js",
+    "benchmark:carbon": "node src/index.js --suite=carbon",
+    "benchmark:spectrum": "node src/index.js --suite=spectrum",
     "benchmark:webawesome": "node src/index.js --suite=webawesome",
+    "benchmark:material": "node src/index.js --suite=material",
     "benchmark:momentum": "node src/index.js --suite=momentum",
-    "benchmark:lit-ds": "node src/index.js --suite=lit-ds",
     "benchmark:all": "node src/index.js --suite=all",
     "benchmark:elem-proxy": "node src/elem-proxy-bench.js",
     "benchmark:event-hoist": "node src/event-hoist-bench.js",
@@ -32,10 +34,11 @@
     "benchmark:memoize": "node src/memoize-bench.js",
     "benchmark:native": "node src/native-bench.js",
     "benchmark:resumable": "node src/resumable-bench.js",
-    "benchmark:markdown": "node src/index.js --format=markdown",
     "benchmark:json": "node src/index.js --format=json",
-    "benchmark:sync": "node src/index.js --update",
     "benchmark:compare": "node src/compare.js",
+    "viewer:dev": "vite viewer",
+    "viewer:build": "vite build viewer --base=./ && cp -r results viewer/dist/results",
+    "viewer:preview": "vite preview viewer",
     "test": "tsc --noEmit && vitest run tests",
     "typecheck": "tsc --noEmit"
   },
@@ -64,16 +67,21 @@
     "@lit-core/vite-plugin": "workspace:*"
   },
   "devDependencies": {
-    "lit": "^3.3.3",
-    "playwright": "^1.63.0",
-    "vite": "^8.3.1",
     "@awesome.me/webawesome": "^3.14.0",
     "@carbon/web-components": "^2.64.0",
     "@material/web": "^2.5.0",
     "@momentum-design/components": "^0.139.9",
     "@spectrum-web-components/bundle": "^1.12.2",
     "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "lit": "^3.3.3",
+    "playwright": "^1.63.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "typescript": "^7.0.2",
+    "vite": "^8.3.1",
     "vitest": "^5.0.2"
   }
 }

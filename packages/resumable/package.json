@@ -17,6 +17,11 @@
       "import": "./lib/server/index.js",
       "default": "./lib/server/index.js"
     },
+    "./compiler": {
+      "types": "./lib/compiler/index.d.ts",
+      "import": "./lib/compiler/index.js",
+      "default": "./lib/compiler/index.js"
+    },
     "./client": {
       "types": "./lib/client/index.d.ts",
       "import": "./lib/client/index.js",

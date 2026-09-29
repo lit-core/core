@@ -26,6 +26,7 @@ export interface TransformResult {
   classifications: ClassificationResult[];
 }
 
+export declare const NATIVE_RUNTIME_SOURCE: string;
 export function classify(source: string, options?: ClassifyOptions): ClassificationResult[];
 export function transformNative(source: string, options?: TransformOptions): TransformResult;
 export default transformNative;

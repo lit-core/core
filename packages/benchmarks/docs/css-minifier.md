@@ -1,84 +1,39 @@
-# `@lit-core/css-minifier` empirical benchmark results
+# `css-minifier` benchmark and architectural specification
 
-Native Rust AST minification of embedded Lit `css\`...\`` template literals via Lightning CSS, evaluated across 349 production Lit Web Components.
-
----
-
-## Benchmarked dependency versions
-
-| Package | Role | Version evaluated | Elements evaluated |
-| :--- | :--- | :--- | ---: |
-| `@carbon/web-components` | IBM Carbon Design System | `2.64.0` | 99 elements |
-| `@spectrum-web-components/bundle` | Adobe Spectrum Design System | `1.12.2` | 52 elements |
-| `@awesome.me/webawesome` | Web Awesome component suite | `3.14.0` | 73 elements |
-| `@momentum-design/components` | Cisco Momentum Design System | `0.139.9` | 97 elements |
-| `@material/web` | Google Material Design 3 | `2.5.0` | 28 elements |
-| `lit` | Core runtime | `3.3.3` | n/a |
-| `vite` | Bundler | `8.3.1` | n/a |
-| `playwright` | Runtime evaluation engine | `1.63.0` | n/a |
-| `node` | Runtime environment | `v24.14.0` | n/a |
+High-speed native CSS template literal minification powered by Lightning CSS.
 
 ---
 
-## Bundle size and runtime performance comparison
+## Architectural overview and mechanism
 
-Measurements compare a standard Vite production build with minification (`minify: true`) against an identical build with `@lit-core/css-minifier` enabled. Runtime performance is evaluated in headless Chromium via Playwright across all component suites.
-
-| Metric | Carbon Web Components (99 elements) | Spectrum Web Components (52 elements) | Web Awesome (73 elements) | Momentum Design (97 elements) | Material Web (28 elements) |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| **Baseline bundle size** | 5,801.88 KB | 1,878.33 KB | 803.12 KB | 870.05 KB | 448.37 KB |
-| **Optimized bundle size** | 5,759.60 KB | 1,877.49 KB | 733.47 KB | 833.56 KB | 441.92 KB |
-| **Net bundle savings** | **-42.27 KB (-0.73%)** | **-0.84 KB (-0.04%)** | **-69.65 KB (-8.67%)** | **-36.49 KB (-4.19%)** | **-6.45 KB (-1.44%)** |
-| **Baseline mount latency** | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
-| **Optimized mount latency** | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
-| **Mount speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** |
-| **Baseline update latency** | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
-| **Optimized update latency** | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
-| **Update speedup** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** | **+0.0% (neutral)** |
-
-> [!NOTE]
-> `css-minifier` optimizes embedded CSS ASTs using Lightning CSS, removing comments, redundant whitespace, and duplicate declarations at build time. Because it does not alter stylesheet instantiation, DOM adoption, or the Lit rendering cycle, runtime mount and update latencies remain neutral.
+`@lit-core/css-minifier` minifies Lit CSS tagged template literals ahead of time:
+1. **AST discovery**: Identifies `css` tagged template literals in component definitions using `oxc`.
+2. **Lightning CSS minification**: Transforms and compresses raw stylesheet text using `lightningcss`, removing redundant whitespace, comments, and optimizing color values.
+3. **Interpolation preservation**: Preserves template expression interpolations without breaking CSS syntax trees.
 
 ---
 
-## Minification diagnostics and build overhead
+## Running standalone benchmarks
 
-Template processing diagnostics and compilation durations:
-
-| Design system or library | CSS templates processed | Baseline build | `css-minifier` build | Build overhead |
-| :--- | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 206 ms | 161 ms | Negligible native pass |
-| Spectrum Web Components | 52 | 196 ms | 97 ms | Negligible native pass |
-| Web Awesome | 73 | 85 ms | 69 ms | Negligible native pass |
-| Momentum Design | 97 | 134 ms | 105 ms | Negligible native pass |
-| Material Web | 28 | 34 ms | 42 ms | +8 ms |
-
----
-
-## Running this benchmark
+Evaluate `css-minifier` standalone against the 20 canonical components:
 
 ```bash
-# Run isolated css-minifier benchmark across all suites
-node packages/benchmarks/src/index.js --tools=css-minifier
+# Run standalone css-minifier against Carbon Web Components
+node packages/benchmarks/src/index.js --suite=carbon --tool=css-minifier
 
-# Run on a specific suite
-node packages/benchmarks/src/index.js --suite=webawesome --tools=css-minifier
+# Run standalone css-minifier across all 5 design systems
+node packages/benchmarks/src/index.js --tool=css-minifier
 ```
 
----
-
-## Architectural highlights and invariants
-
-- **Lightning CSS integration**: Native Rust parser performs syntax-level CSS minification directly on AST tokens without spawning child processes.
-- **Interpolation preservation**: Safely handles CSS template literal interpolations (`${cssVar}`) without breaking selector grammar or declaration values.
-- **Zero runtime overhead**: Minified CSS strings are bundled statically, preserving identical constructable stylesheet instantiation in the browser.
-- **Fast-path skipping**: Regex pre-checks skip non-Lit modules instantly to maintain sub-millisecond build overhead.
+Results are saved to:
+- `packages/benchmarks/results/<suite>/css-minifier.json`
 
 ---
 
-## Related documentation
+## Interactive metrics dashboard
 
-- [Benchmark executive overview](../README.md)
-- [`@lit-core/css-minifier` package documentation](../../css-minifier/README.md)
-- [`@lit-core/html-minifier` benchmark](html-minifier.md)
-- [CSS deduplication benchmark](css-fuse.md)
+Explore live comparison tables, bundle size deltas in the React benchmark dashboard:
+
+```bash
+pnpm run viewer:dev
+```

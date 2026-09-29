@@ -1,0 +1,12 @@
+{
+  "name": "@lit-core/benchmark-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Interactive dashboard and showcase viewer for lit-core benchmarks",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --base=./",
+    "preview": "vite preview"
+  }
+}

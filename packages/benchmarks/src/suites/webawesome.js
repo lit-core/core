@@ -1,28 +1,27 @@
 import path from 'node:path';
-import { createComponentSuite, scanComponentEntries } from './base.js';
+import { createComponentSuite } from './base.js';
+import { getCanonicalSuiteConfig } from './canonical-components.js';
 
 /**
  * Web Awesome benchmark suite definition.
- * Tests full-suite bundling of 70+ components from @awesome.me/webawesome.
+ * 20 handpicked canonical enterprise UI components built on Lit.
  * @type {import('../types.js').BenchmarkSuite}
  */
 export const webAwesomeSuite = createComponentSuite({
   id: 'webawesome',
-  name: 'Web Awesome (Full Component Suite)',
-  description: '70+ production web components with shared styling and chunks',
+  name: 'Web Awesome (20 Canonical Components)',
+  description: '20 handpicked production web components with shared styling and chunks',
   packageName: '@awesome.me/webawesome',
   entryFileName: '.webawesome-entry.js',
   resolveConfig(compDirRoot) {
-    const compDir = path.join(compDirRoot, 'dist/components');
-    const components = scanComponentEntries(compDir, (name, dir) => path.join(dir, `${name}.js`));
-    const entryContent = components.map((c) => `import '@awesome.me/webawesome/dist/components/${c.name}/${c.name}.js';`).join('\n');
+    const { entryContent, componentCount, components } = getCanonicalSuiteConfig('webawesome');
     const includePattern = path.join(compDirRoot, 'dist/**/*.js');
 
     return {
       entryContent,
-      componentCount: components.length,
+      componentCount,
       includePattern,
-      metadata: { compDir, components: components.map((c) => c.name) },
+      metadata: { compDirRoot, components },
     };
   },
 });

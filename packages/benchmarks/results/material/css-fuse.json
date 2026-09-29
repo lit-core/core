@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "material-css-fuse",
+  "suite": {
+    "id": "material",
+    "name": "Material Web (@material/web)",
+    "packageName": "@material/web",
+    "version": "2.5.0",
+    "componentCount": 20,
+    "components": [
+      {
+        "concept": "button",
+        "tag": "md-filled-button",
+        "label": "Button",
+        "path": "button/filled-button.js"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "md-checkbox",
+        "label": "Checkbox",
+        "path": "checkbox/checkbox.js"
+      },
+      {
+        "concept": "radio",
+        "tag": "md-radio",
+        "label": "Radio button",
+        "path": "radio/radio.js"
+      },
+      {
+        "concept": "switch",
+        "tag": "md-switch",
+        "label": "Switch / toggle",
+        "path": "switch/switch.js"
+      },
+      {
+        "concept": "text-input",
+        "tag": "md-filled-text-field",
+        "label": "Text input / field",
+        "path": "textfield/filled-text-field.js"
+      },
+      {
+        "concept": "select",
+        "tag": "md-filled-select",
+        "label": "Select / dropdown",
+        "path": "select/filled-select.js"
+      },
+      {
+        "concept": "dialog",
+        "tag": "md-dialog",
+        "label": "Dialog / modal",
+        "path": "dialog/dialog.js"
+      },
+      {
+        "concept": "badge",
+        "tag": "md-badge",
+        "label": "Badge / tag",
+        "path": "labs/badge/badge.js"
+      },
+      {
+        "concept": "tabs",
+        "tag": "md-tabs",
+        "label": "Tabs",
+        "path": "tabs/tabs.js"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "md-linear-progress",
+        "label": "Progress bar",
+        "path": "progress/linear-progress.js"
+      },
+      {
+        "concept": "spinner",
+        "tag": "md-circular-progress",
+        "label": "Spinner / loader",
+        "path": "progress/circular-progress.js"
+      },
+      {
+        "concept": "slider",
+        "tag": "md-slider",
+        "label": "Slider",
+        "path": "slider/slider.js"
+      },
+      {
+        "concept": "menu",
+        "tag": "md-menu",
+        "label": "Menu / popover",
+        "path": "menu/menu.js"
+      },
+      {
+        "concept": "divider",
+        "tag": "md-divider",
+        "label": "Divider",
+        "path": "divider/divider.js"
+      },
+      {
+        "concept": "icon",
+        "tag": "md-icon",
+        "label": "Icon",
+        "path": "icon/icon.js"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "md-icon-button",
+        "label": "Icon button",
+        "path": "iconbutton/icon-button.js"
+      },
+      {
+        "concept": "card",
+        "tag": "md-elevation",
+        "label": "Card / tile",
+        "path": "elevation/elevation.js"
+      },
+      {
+        "concept": "elevation",
+        "tag": "md-focus-ring",
+        "label": "Elevation / focus",
+        "path": "focus/md-focus-ring.js"
+      },
+      {
+        "concept": "list",
+        "tag": "md-list",
+        "label": "List / structured",
+        "path": "list/list.js"
+      },
+      {
+        "concept": "chips",
+        "tag": "md-chip-set",
+        "label": "Chips / segmented",
+        "path": "chips/chip-set.js"
+      }
+    ]
+  },
+  "feature": {
+    "id": "css-fuse",
+    "name": "CSS AST deduplication (css-fuse)",
+    "description": "Cross-component CSS deduplication into shared constructable stylesheets",
+    "isBaseline": false
+  },
+  "timestamp": "2026-09-29T20:57:44.971Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "3e38fce",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 271126,
+    "gzipBytes": 57539,
+    "brotliBytes": 46726,
+    "buildTimeMs": 260.3043339999999
+  },
+  "baseline": {
+    "rawBytes": 269272,
+    "gzipBytes": 56943,
+    "brotliBytes": 46024,
+    "buildTimeMs": 52.36883399999999
+  },
+  "deltas": {
+    "rawBytes": 1854,
+    "rawPercent": 0.688523129029383,
+    "gzipBytes": 596,
+    "gzipPercent": 1.0466606957835027,
+    "brotliBytes": 702,
+    "brotliPercent": 1.5252911524422041,
+    "buildTimeMs": 207.93549999999993
+  },
+  "runtime": {
+    "firstRenderMs": 0,
+    "updateMs": 0,
+    "speedupPercent": 0
+  },
+  "diagnostics": {
+    "rulesScanned": 1354,
+    "rulesDeduped": 212,
+    "fusedSheetsCreated": 82,
+    "componentsRewritten": 73,
+    "bytesSavedEstimate": 7420
+  }
+}

@@ -8,7 +8,7 @@ import vm from 'node:vm';
 import { lit } from '@lit-core/vite-plugin';
 import { build } from 'vite';
 import { calculateDelta, formatDuration, formatKb, formatNumber, formatPercent } from './format.js';
-import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, syncDocFile } from './reporters/index.js';
+import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { closeBrowser, getBrowser } from './runtime.js';
 import { createBenchmarkResult } from './schema.js';
 import { carbonSuite } from './suites/carbon.js';
@@ -280,68 +280,13 @@ export async function runElemProxyBenchmarks(options = {}) {
   });
 }
 
-/**
- * Format elem-proxy benchmark results into a standardized markdown document.
- * Strictly omits any total columns or rows.
- * @param {import('./types.js').BenchmarkRunResult} result
- * @returns {string}
- */
-export function formatElemProxyDoc(result) {
-  return renderBenchmarkDoc({
-    title: result.title,
-    leadParagraph: result.description,
-    comparisonHeading: 'Runtime initialization and memory comparison',
-    comparisonDescription:
-      'Measurements evaluate executing full design system bundles in an isolated V8 VM context, comparing eager class evaluation against proxy stubs that defer class definition until elements are mounted:',
-    suites: result.suites,
-    metrics: [
-      { label: 'Baseline evaluation CPU time', getValue: (s) => formatDuration(s.baseline.evalTimeMs) },
-      { label: 'Optimized evaluation CPU time', getValue: (s) => formatDuration(s.optimized.evalTimeMs) },
-      { label: 'Evaluation CPU savings', getValue: (s) => `**${s.deltas.cpu.formattedPercent}**` },
-      { label: 'Baseline V8 heap memory', getValue: (s) => `${formatNumber(s.baseline.heapKb, { decimals: 1 })} KB` },
-      { label: 'Optimized V8 heap memory', getValue: (s) => `${formatNumber(s.optimized.heapKb, { decimals: 1 })} KB` },
-      { label: 'V8 heap memory savings', getValue: (s) => `**${s.deltas.heap.formattedPercent}**` },
-      { label: 'Baseline mount latency (first 5)', getValue: (s) => formatDuration(s.baseline.mountLatencyMs) },
-      { label: 'Optimized mount latency (first 5)', getValue: (s) => formatDuration(s.optimized.mountLatencyMs) },
-      { label: 'Mount latency delta', getValue: () => '+0.00 ms (transparent JIT upgrade)' },
-      { label: 'Classes evaluated during init', getValue: (s) => `${s.diagnostics.evaluatedCount} [${s.diagnostics.deferredCount}]` },
-      { label: 'Deferred execution proportion', getValue: (s) => `**${s.diagnostics.deferredProportion}**` },
-    ],
-    note: '`elem-proxy` transforms Custom Element registration sites into lightweight proxy stubs, deferring upstream class parsing and evaluation until first DOM mount or property access. Bundle size impact is neutral as proxy stubs are minimal. The primary performance gains are massive script evaluation CPU savings (-72% to -73%) and V8 heap memory footprint reduction (-70% to -76%) during initial application boot.',
-    diagnosticsHeading: 'Deferred execution diagnostics and class evaluation analysis',
-    diagnosticsDescription: 'Detailed counts of deferred components, evaluation CPU improvements, and V8 memory savings across design systems:',
-    diagnosticsColumns: [
-      { header: 'Components evaluated', getValue: (s) => formatNumber(s.componentCount) },
-      { header: 'Classes evaluated on boot', getValue: (s) => s.diagnostics.evaluatedCount },
-      { header: 'Deferred proportion', getValue: (s) => `**${s.diagnostics.deferredProportion}**` },
-      { header: 'CPU time reduction', getValue: (s) => `**${s.diagnostics.cpuSavings}**` },
-      { header: 'V8 memory reduction', getValue: (s) => `**${s.diagnostics.heapSavings}**` },
-      { header: 'Build overhead', align: 'left', getValue: (s) => s.diagnostics.buildOverhead },
-    ],
-    runCommand: 'node packages/benchmarks/src/elem-proxy-bench.js',
-    invariants: [
-      '**Deferred class evaluation**: Eliminates initial JS execution blocking by deferring customElements.define until first DOM mount.',
-      '**Transparent upgrade on mount**: Elements upgrade just-in-time when attached to the DOM without layout shifts.',
-      '**Zero runtime dependencies**: Pure ES6 Proxy mechanism with zero third-party polyfills.',
-      '**Strict general-purpose design**: Zero library-specific hacks or component tag whitelists; works transparently with any valid Lit element.',
-    ],
-    relatedDocs: [
-      { label: 'Benchmark executive overview', url: '../README.md' },
-      { label: '`@lit-core/elem-proxy` package documentation', url: '../../elem-proxy/README.md' },
-      { label: 'Ahead-of-time DOM paths compilation', url: '../docs/dom-paths.md' },
-    ],
-  });
-}
-
 // CLI execution
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   printBenchmarkHeader('elem-proxy', 'Evaluating initial script evaluation CPU time, V8 heap memory, and mount latency.');
   runElemProxyBenchmarks({ verbose: true })
     .then((result) => {
       const jsonPath = saveBenchmarkResult(result);
-      const doc = formatElemProxyDoc(result);
-      const docPath = syncDocFile('elem-proxy.md', doc);
-      printBenchmarkFooter('elem-proxy', { jsonPath, docPath });
+      printBenchmarkFooter('elem-proxy', { jsonPath });
     })
     .catch((err) => {
       console.error('Benchmark failed:', err);

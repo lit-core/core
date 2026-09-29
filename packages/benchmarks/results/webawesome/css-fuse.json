@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "webawesome-css-fuse",
+  "suite": {
+    "id": "webawesome",
+    "name": "Web Awesome (20 Canonical Components)",
+    "packageName": "@awesome.me/webawesome",
+    "version": "3.14.0",
+    "componentCount": 20,
+    "components": [
+      {
+        "concept": "button",
+        "tag": "wa-button",
+        "label": "Button",
+        "path": "dist/components/button/button.js"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "wa-checkbox",
+        "label": "Checkbox",
+        "path": "dist/components/checkbox/checkbox.js"
+      },
+      {
+        "concept": "radio",
+        "tag": "wa-radio",
+        "label": "Radio button",
+        "path": "dist/components/radio/radio.js"
+      },
+      {
+        "concept": "switch",
+        "tag": "wa-switch",
+        "label": "Switch / toggle",
+        "path": "dist/components/switch/switch.js"
+      },
+      {
+        "concept": "text-input",
+        "tag": "wa-input",
+        "label": "Text input / field",
+        "path": "dist/components/input/input.js"
+      },
+      {
+        "concept": "select",
+        "tag": "wa-select",
+        "label": "Select / dropdown",
+        "path": "dist/components/select/select.js"
+      },
+      {
+        "concept": "dialog",
+        "tag": "wa-dialog",
+        "label": "Dialog / modal",
+        "path": "dist/components/dialog/dialog.js"
+      },
+      {
+        "concept": "badge",
+        "tag": "wa-badge",
+        "label": "Badge / tag",
+        "path": "dist/components/badge/badge.js"
+      },
+      {
+        "concept": "tabs",
+        "tag": "wa-tab-group",
+        "label": "Tabs",
+        "path": "dist/components/tab-group/tab-group.js"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "wa-progress-bar",
+        "label": "Progress bar",
+        "path": "dist/components/progress-bar/progress-bar.js"
+      },
+      {
+        "concept": "spinner",
+        "tag": "wa-spinner",
+        "label": "Spinner / loader",
+        "path": "dist/components/spinner/spinner.js"
+      },
+      {
+        "concept": "slider",
+        "tag": "wa-slider",
+        "label": "Slider",
+        "path": "dist/components/slider/slider.js"
+      },
+      {
+        "concept": "menu",
+        "tag": "wa-dropdown",
+        "label": "Menu / popover",
+        "path": "dist/components/dropdown/dropdown.js"
+      },
+      {
+        "concept": "divider",
+        "tag": "wa-divider",
+        "label": "Divider",
+        "path": "dist/components/divider/divider.js"
+      },
+      {
+        "concept": "icon",
+        "tag": "wa-icon",
+        "label": "Icon",
+        "path": "dist/components/icon/icon.js"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "wa-copy-button",
+        "label": "Icon button",
+        "path": "dist/components/copy-button/copy-button.js"
+      },
+      {
+        "concept": "card",
+        "tag": "wa-card",
+        "label": "Card / tile",
+        "path": "dist/components/card/card.js"
+      },
+      {
+        "concept": "elevation",
+        "tag": "wa-popover",
+        "label": "Elevation / focus",
+        "path": "dist/components/popover/popover.js"
+      },
+      {
+        "concept": "list",
+        "tag": "wa-details",
+        "label": "List / structured",
+        "path": "dist/components/details/details.js"
+      },
+      {
+        "concept": "chips",
+        "tag": "wa-breadcrumb",
+        "label": "Chips / segmented",
+        "path": "dist/components/breadcrumb/breadcrumb.js"
+      }
+    ]
+  },
+  "feature": {
+    "id": "css-fuse",
+    "name": "CSS AST deduplication (css-fuse)",
+    "description": "Cross-component CSS deduplication into shared constructable stylesheets",
+    "isBaseline": false
+  },
+  "timestamp": "2026-09-29T20:57:38.049Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "3e38fce",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 366050,
+    "gzipBytes": 86140,
+    "brotliBytes": 69282,
+    "buildTimeMs": 200.80179100000004
+  },
+  "baseline": {
+    "rawBytes": 370946,
+    "gzipBytes": 86902,
+    "brotliBytes": 69583,
+    "buildTimeMs": 63.183625000000006
+  },
+  "deltas": {
+    "rawBytes": -4896,
+    "rawPercent": -1.3198686601284284,
+    "gzipBytes": -762,
+    "gzipPercent": -0.8768497848150791,
+    "brotliBytes": -301,
+    "brotliPercent": -0.4325769225241798,
+    "buildTimeMs": 137.61816600000003
+  },
+  "runtime": {
+    "firstRenderMs": 0,
+    "updateMs": 0,
+    "speedupPercent": 0
+  },
+  "diagnostics": {
+    "rulesScanned": 1001,
+    "rulesDeduped": 205,
+    "fusedSheetsCreated": 86,
+    "componentsRewritten": 68,
+    "bytesSavedEstimate": 7175
+  }
+}

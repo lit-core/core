@@ -1,5 +1,6 @@
 import type { Plugin, ResolvedConfig } from 'vite';
-import { compileResumableLoader } from '../client/compiler.js';
+import { compileResumableLoader, transformResumableComponent } from '../compiler/index.js';
+import { RESUMABLE_ADAPTER_SOURCE } from '../virtual.js';
 import { buildManifest, extractCustomElementTags } from './manifest.js';
 
 export interface ResumableOptions {
@@ -31,6 +32,9 @@ export interface ResumableOptions {
   injectAdapter?: boolean;
 }
 
+const VIRTUAL_ADAPTER_ID = 'virtual:lit-core/resumable-adapter';
+const RESOLVED_VIRTUAL_ADAPTER_ID = '\0virtual:lit-core/resumable-adapter';
+
 export function resumable(options: ResumableOptions = {}): Plugin {
   let config: ResolvedConfig;
   const chunkToTags = new Map<string, string[]>();
@@ -44,6 +48,23 @@ export function resumable(options: ResumableOptions = {}): Plugin {
 
     configResolved(resolvedConfig) {
       config = resolvedConfig;
+    },
+
+    resolveId(id) {
+      if (id === VIRTUAL_ADAPTER_ID || id === `${VIRTUAL_ADAPTER_ID}.js` || id === '@lit-core/resumable/client' || id === '@lit-core/resumable/client.js') {
+        return RESOLVED_VIRTUAL_ADAPTER_ID;
+      }
+      return undefined;
+    },
+
+    load(id) {
+      if (id === RESOLVED_VIRTUAL_ADAPTER_ID) {
+        return {
+          code: RESUMABLE_ADAPTER_SOURCE,
+          map: null,
+        };
+      }
+      return undefined;
     },
 
     transform(code: string, id: string) {
@@ -63,12 +84,17 @@ export function resumable(options: ResumableOptions = {}): Plugin {
       chunkToTags.set(relativeId, tags);
 
       if (injectAdapter) {
-        // Ensure installResumableAdapter is initialized when the component chunk loads
-        const adapterImport = `import { installResumableAdapter } from '@lit-core/resumable/client';\ninstallResumableAdapter();\n`;
-        return {
-          code: `${adapterImport}${code}`,
-          map: null,
-        };
+        const result = transformResumableComponent(code, {
+          filename: cleanId,
+          virtualModule: VIRTUAL_ADAPTER_ID,
+        });
+
+        if (result.transformed) {
+          return {
+            code: result.code,
+            map: result.map ? JSON.parse(result.map) : null,
+          };
+        }
       }
 
       return null;

@@ -3,12 +3,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
 import { calculateImpact, getFileSizes } from './metrics.js';
-import { saveArtifactHtml } from './reporters/html-artifact-reporter.js';
+import { FEATURE_METADATA, loadStandaloneResult, saveStandaloneResult } from './reporters/json-reporter.js';
 import { closeBrowser, measureBundleRuntime } from './runtime.js';
+import { getEnvironmentMetadata } from './schema.js';
 import { getCombinedPlugins } from './tools/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../..');
+const defaultResultsDir = path.resolve(__dirname, '../results');
 
 /**
  * Run a Vite build for benchmark purposes.
@@ -18,7 +20,7 @@ const rootDir = path.resolve(__dirname, '../../..');
  * @param {import('vite').Plugin[]} [options.plugins]
  * @returns {Promise<import('./metrics.js').SizeMetrics>}
  */
-async function runViteBuild({ entryPath, outDir, plugins = [] }) {
+export async function runViteBuild({ entryPath, outDir, plugins = [] }) {
   if (fs.existsSync(outDir)) {
     fs.rmSync(outDir, { recursive: true, force: true });
   }
@@ -53,13 +55,201 @@ async function runViteBuild({ entryPath, outDir, plugins = [] }) {
 }
 
 /**
+ * Execute a standalone benchmark for a specific suite and a single tool (or baseline / all).
+ * Persists the result directly to packages/benchmarks/results/<suiteId>/<featureId>.json
+ * and the HTML showcase to packages/benchmarks/results/<suiteId>/<featureId>.html.
+ * @param {Object} params
+ * @param {import('./types.js').BenchmarkSuite} params.suite
+ * @param {import('./types.js').BenchmarkTool | 'baseline' | 'all'} params.tool
+ * @param {Object} [params.options]
+ * @param {boolean} [params.options.verbose]
+ * @param {string} [params.options.outDir]
+ * @param {import('./types.js').BenchmarkTool[]} [params.allTools]
+ * @returns {Promise<any>}
+ */
+export async function runStandaloneBenchmark({ suite, tool, options = {}, allTools = [] }) {
+  const isBaseline = tool === 'baseline';
+  const isAll = tool === 'all';
+  const toolId = isBaseline ? 'baseline' : isAll ? 'all' : tool.id;
+  const toolName = isBaseline ? FEATURE_METADATA.baseline.name : isAll ? FEATURE_METADATA.all.name : FEATURE_METADATA[tool.id]?.name || tool.name;
+  const toolDesc = isBaseline ? FEATURE_METADATA.baseline.description : isAll ? FEATURE_METADATA.all.description : FEATURE_METADATA[tool.id]?.description || tool.description;
+
+  const tempBaseDir = path.join(__dirname, `../.temp-bench-${suite.id}-${toolId}-${Date.now()}`);
+  fs.mkdirSync(tempBaseDir, { recursive: true });
+
+  const suiteContext = await suite.setup();
+
+  try {
+    if (options.verbose) {
+      console.log(`\n[${suite.name}] 🏗️  Running standalone benchmark for: ${toolName}...`);
+    }
+
+    // 1. If running a non-baseline feature, check for cached baseline or build baseline first
+    let baselineMetrics = null;
+    let baselineRuntime = null;
+
+    if (!isBaseline) {
+      const cached = loadStandaloneResult(suite.id, 'baseline', options.outDir);
+      if (cached?.metrics && cached?.runtime) {
+        baselineMetrics = cached.metrics;
+        baselineRuntime = cached.runtime;
+        if (options.verbose) {
+          console.log(`[${suite.name}] ℹ️  Using existing baseline (${baselineMetrics.rawBytes} bytes)`);
+        }
+      } else {
+        if (options.verbose) {
+          console.log(`[${suite.name}] ℹ️  No baseline found; building baseline first...`);
+        }
+        const baselineOutDir = path.join(tempBaseDir, 'dist-baseline');
+        baselineMetrics = await runViteBuild({
+          entryPath: suiteContext.entryPath,
+          outDir: baselineOutDir,
+          plugins: [],
+        });
+        const baselineBundle = path.join(baselineOutDir, 'bundle.js');
+        const rt = await measureBundleRuntime(baselineBundle, 'Baseline');
+        baselineRuntime = {
+          firstRenderMs: rt.firstRenderMs,
+          updateMs: rt.updateMs,
+          speedupPercent: 0,
+        };
+
+        // Save baseline JSON for future reuse
+        const baselineResult = {
+          schemaVersion: '2.0.0',
+          id: `${suite.id}-baseline`,
+          suite: {
+            id: suite.id,
+            name: suiteContext.name || suite.name,
+            packageName: suiteContext.packageName || suite.packageName,
+            version: suiteContext.version || 'unknown',
+            componentCount: suiteContext.componentCount,
+            components: suiteContext.metadata?.components || [],
+          },
+          feature: {
+            id: 'baseline',
+            name: FEATURE_METADATA.baseline.name,
+            description: FEATURE_METADATA.baseline.description,
+            isBaseline: true,
+          },
+          timestamp: new Date().toISOString(),
+          environment: getEnvironmentMetadata(),
+          metrics: baselineMetrics,
+          runtime: baselineRuntime,
+        };
+        saveStandaloneResult({
+          suiteId: suite.id,
+          featureId: 'baseline',
+          result: baselineResult,
+          outDir: options.outDir,
+        });
+      }
+    }
+
+    // 2. Build the target bundle
+    const targetOutDir = path.join(tempBaseDir, `dist-${toolId}`);
+    /** @type {import('vite').Plugin[]} */
+    let plugins = [];
+    if (!isBaseline) {
+      if (isAll) {
+        plugins = await getCombinedPlugins(allTools, suiteContext);
+      } else {
+        plugins = await tool.getPlugins(suiteContext);
+      }
+    }
+
+    const metrics = await runViteBuild({
+      entryPath: suiteContext.entryPath,
+      outDir: targetOutDir,
+      plugins,
+    });
+
+    const bundlePath = path.join(targetOutDir, 'bundle.js');
+    const runtimeMeasure = await measureBundleRuntime(bundlePath, toolName);
+
+    let deltas = null;
+    let speedup = 0;
+    if (!isBaseline && baselineMetrics) {
+      const impact = calculateImpact(baselineMetrics, metrics);
+      deltas = {
+        rawBytes: impact.rawDiff,
+        rawPercent: impact.rawPercent,
+        gzipBytes: impact.gzipDiff,
+        gzipPercent: impact.gzipPercent,
+        brotliBytes: impact.brotliDiff,
+        brotliPercent: impact.brotliPercent,
+        buildTimeMs: (metrics.buildTimeMs || 0) - (baselineMetrics.buildTimeMs || 0),
+      };
+
+      if (baselineRuntime?.firstRenderMs > 0 && runtimeMeasure.firstRenderMs > 0) {
+        speedup = ((baselineRuntime.firstRenderMs - runtimeMeasure.firstRenderMs) / baselineRuntime.firstRenderMs) * 100;
+      }
+    }
+
+    /** @type {Record<string, any>} */
+    let diagnostics = {};
+    if (!isBaseline && !isAll && typeof tool.getDiagnostics === 'function') {
+      try {
+        const diag = await tool.getDiagnostics(suiteContext);
+        if (diag) diagnostics = diag;
+      } catch {}
+    }
+
+    const standaloneResult = {
+      schemaVersion: '2.0.0',
+      id: `${suite.id}-${toolId}`,
+      suite: {
+        id: suite.id,
+        name: suiteContext.name || suite.name,
+        packageName: suiteContext.packageName || suite.packageName,
+        version: suiteContext.version || 'unknown',
+        componentCount: suiteContext.componentCount,
+        components: suiteContext.metadata?.components || [],
+      },
+      feature: {
+        id: toolId,
+        name: toolName,
+        description: toolDesc,
+        isBaseline,
+      },
+      timestamp: new Date().toISOString(),
+      environment: getEnvironmentMetadata(),
+      metrics,
+      ...(isBaseline ? {} : { baseline: baselineMetrics }),
+      ...(deltas ? { deltas } : {}),
+      runtime: {
+        firstRenderMs: runtimeMeasure.firstRenderMs,
+        updateMs: runtimeMeasure.updateMs,
+        speedupPercent: speedup,
+      },
+      ...(Object.keys(diagnostics).length > 0 ? { diagnostics } : {}),
+    };
+
+    saveStandaloneResult({
+      suiteId: suite.id,
+      featureId: toolId,
+      result: standaloneResult,
+      outDir: options.outDir,
+    });
+
+    return standaloneResult;
+  } finally {
+    await closeBrowser();
+    await suite.cleanup();
+    if (fs.existsSync(tempBaseDir)) {
+      fs.rmSync(tempBaseDir, { recursive: true, force: true });
+    }
+  }
+}
+
+/**
  * Execute a benchmark run for a specific suite across all active tools.
+ * Also persists standalone JSON results and HTML showcases for baseline, each tool, and combined bundle.
  * @param {import('./types.js').BenchmarkSuite} suite
  * @param {import('./types.js').BenchmarkTool[]} tools
  * @param {Object} [options]
  * @param {boolean} [options.verbose]
- * @param {boolean} [options.saveArtifacts]
- * @param {string} [options.artifactsDir]
+ * @param {string} [options.outDir]
  * @returns {Promise<import('./types.js').SuiteBenchmarkResult>}
  */
 export async function runSuiteBenchmark(suite, tools, options = {}) {
@@ -70,8 +260,6 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
   const rows = [];
   /** @type {Record<string, any>} */
   const diagnostics = {};
-  /** @type {string[]} */
-  const artifacts = [];
 
   try {
     // 1. BASELINE BUILD (Standard Vite, 0 optimizations)
@@ -87,22 +275,8 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
     const runtimeRows = [];
     const baselineBundle = path.join(baselineOutDir, 'bundle.js');
-    if (options.saveArtifacts !== false) {
-      const artifactPath = saveArtifactHtml({
-        bundlePath: baselineBundle,
-        suiteName: suite.name,
-        suiteId: suite.id,
-        variant: 'baseline',
-        metrics: baselineMetrics,
-        outDir: options.artifactsDir ? path.join(options.artifactsDir, suite.id) : undefined,
-        metadata: suiteContext.metadata,
-      });
-      if (artifactPath) {
-        artifacts.push(artifactPath);
-      }
-    }
-
     const baselineRuntime = await measureBundleRuntime(baselineBundle, 'Baseline');
+
     runtimeRows.push({
       name: 'Baseline (Standard Vite)',
       firstRenderMs: baselineRuntime.firstRenderMs,
@@ -115,6 +289,39 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       description: 'Standard Vite build without optimization plugins',
       metrics: baselineMetrics,
       isBaseline: true,
+    });
+
+    // Save baseline standalone JSON
+    saveStandaloneResult({
+      suiteId: suite.id,
+      featureId: 'baseline',
+      result: {
+        schemaVersion: '2.0.0',
+        id: `${suite.id}-baseline`,
+        suite: {
+          id: suite.id,
+          name: suiteContext.name || suite.name,
+          packageName: suiteContext.packageName || suite.packageName,
+          version: suiteContext.version || 'unknown',
+          componentCount: suiteContext.componentCount,
+          components: suiteContext.metadata?.components || [],
+        },
+        feature: {
+          id: 'baseline',
+          name: FEATURE_METADATA.baseline.name,
+          description: FEATURE_METADATA.baseline.description,
+          isBaseline: true,
+        },
+        timestamp: new Date().toISOString(),
+        environment: getEnvironmentMetadata(),
+        metrics: baselineMetrics,
+        runtime: {
+          firstRenderMs: baselineRuntime.firstRenderMs,
+          updateMs: baselineRuntime.updateMs,
+          speedupPercent: 0,
+        },
+      },
+      outDir: options.outDir,
     });
 
     // 2. RUN EACH TOOL IN ISOLATION
@@ -132,23 +339,7 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       });
 
       const impact = calculateImpact(baselineMetrics, toolMetrics);
-
       const toolBundle = path.join(toolOutDir, 'bundle.js');
-      if (options.saveArtifacts !== false) {
-        const artifactPath = saveArtifactHtml({
-          bundlePath: toolBundle,
-          suiteName: suite.name,
-          suiteId: suite.id,
-          variant: tool.id,
-          metrics: toolMetrics,
-          outDir: options.artifactsDir ? path.join(options.artifactsDir, suite.id) : undefined,
-          metadata: suiteContext.metadata,
-        });
-        if (artifactPath) {
-          artifacts.push(artifactPath);
-        }
-      }
-
       const toolRuntime = await measureBundleRuntime(toolBundle, tool.name);
       const speedup = baselineRuntime.firstRenderMs > 0 && toolRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - toolRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
 
@@ -166,12 +357,59 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
         impact,
       });
 
+      /** @type {Record<string, any>} */
+      let toolDiag = {};
       if (typeof tool.getDiagnostics === 'function') {
         const diag = await tool.getDiagnostics(suiteContext);
         if (diag) {
+          toolDiag = diag;
           diagnostics[tool.id] = diag;
         }
       }
+
+      // Save standalone JSON for this tool
+      saveStandaloneResult({
+        suiteId: suite.id,
+        featureId: tool.id,
+        result: {
+          schemaVersion: '2.0.0',
+          id: `${suite.id}-${tool.id}`,
+          suite: {
+            id: suite.id,
+            name: suiteContext.name || suite.name,
+            packageName: suiteContext.packageName || suite.packageName,
+            version: suiteContext.version || 'unknown',
+            componentCount: suiteContext.componentCount,
+            components: suiteContext.metadata?.components || [],
+          },
+          feature: {
+            id: tool.id,
+            name: FEATURE_METADATA[tool.id]?.name || tool.name,
+            description: FEATURE_METADATA[tool.id]?.description || tool.description,
+            isBaseline: false,
+          },
+          timestamp: new Date().toISOString(),
+          environment: getEnvironmentMetadata(),
+          metrics: toolMetrics,
+          baseline: baselineMetrics,
+          deltas: {
+            rawBytes: impact.rawDiff,
+            rawPercent: impact.rawPercent,
+            gzipBytes: impact.gzipDiff,
+            gzipPercent: impact.gzipPercent,
+            brotliBytes: impact.brotliDiff,
+            brotliPercent: impact.brotliPercent,
+            buildTimeMs: (toolMetrics.buildTimeMs || 0) - (baselineMetrics.buildTimeMs || 0),
+          },
+          runtime: {
+            firstRenderMs: toolRuntime.firstRenderMs,
+            updateMs: toolRuntime.updateMs,
+            speedupPercent: speedup,
+          },
+          ...(Object.keys(toolDiag).length > 0 ? { diagnostics: toolDiag } : {}),
+        },
+        outDir: options.outDir,
+      });
     }
 
     // 3. RUN TOTAL / COMBINED (All Tools Enabled)
@@ -184,7 +422,6 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
     const totalOutDir = path.join(tempBaseDir, 'dist-total');
 
     if (tools.length === 1) {
-      // Single tool: combined matches that tool's metrics
       const singleToolRow = rows[1];
       totalMetrics = singleToolRow.metrics;
       totalImpact = singleToolRow.impact;
@@ -202,23 +439,6 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
     }
 
     const totalBundle = path.join(totalOutDir, 'bundle.js');
-    const bundleToSave = fs.existsSync(totalBundle) ? totalBundle : tools.length === 1 ? path.join(tempBaseDir, `dist-${tools[0].id}`, 'bundle.js') : null;
-
-    if (options.saveArtifacts !== false && bundleToSave && fs.existsSync(bundleToSave)) {
-      const artifactPath = saveArtifactHtml({
-        bundlePath: bundleToSave,
-        suiteName: suite.name,
-        suiteId: suite.id,
-        variant: 'combined',
-        metrics: totalMetrics,
-        outDir: options.artifactsDir ? path.join(options.artifactsDir, suite.id) : undefined,
-        metadata: suiteContext.metadata,
-      });
-      if (artifactPath) {
-        artifacts.push(artifactPath);
-      }
-    }
-
     const totalRuntime = tools.length === 1 && runtimeRows[1] ? runtimeRows[1] : fs.existsSync(totalBundle) ? await measureBundleRuntime(totalBundle, 'TOTAL') : baselineRuntime;
     const totalSpeedup = baselineRuntime.firstRenderMs > 0 && totalRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - totalRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
 
@@ -238,92 +458,63 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       isTotal: true,
     });
 
-    if (options.verbose && artifacts.length > 0) {
-      console.log(`[${suite.name}] 📄 Saved ${artifacts.length} HTML benchmark artifacts`);
+    // Save combined standalone JSON
+    if (tools.length > 1) {
+      saveStandaloneResult({
+        suiteId: suite.id,
+        featureId: 'all',
+        result: {
+          schemaVersion: '2.0.0',
+          id: `${suite.id}-all`,
+          suite: {
+            id: suite.id,
+            name: suiteContext.name || suite.name,
+            packageName: suiteContext.packageName || suite.packageName,
+            version: suiteContext.version || 'unknown',
+            componentCount: suiteContext.componentCount,
+            components: suiteContext.metadata?.components || [],
+          },
+          feature: {
+            id: 'all',
+            name: FEATURE_METADATA.all.name,
+            description: FEATURE_METADATA.all.description,
+            isBaseline: false,
+          },
+          timestamp: new Date().toISOString(),
+          environment: getEnvironmentMetadata(),
+          metrics: totalMetrics,
+          baseline: baselineMetrics,
+          deltas: totalImpact
+            ? {
+                rawBytes: totalImpact.rawDiff,
+                rawPercent: totalImpact.rawPercent,
+                gzipBytes: totalImpact.gzipDiff,
+                gzipPercent: totalImpact.gzipPercent,
+                brotliBytes: totalImpact.brotliDiff,
+                brotliPercent: totalImpact.brotliPercent,
+                buildTimeMs: (totalMetrics.buildTimeMs || 0) - (baselineMetrics.buildTimeMs || 0),
+              }
+            : {},
+          runtime: {
+            firstRenderMs: totalRuntime.firstRenderMs,
+            updateMs: totalRuntime.updateMs,
+            speedupPercent: totalSpeedup,
+          },
+        },
+        outDir: options.outDir,
+      });
     }
 
-    // Attach metadata
-    const result = Object.assign(rows, {
+    return Object.assign(rows, {
       diagnostics,
       suiteContext,
       runtimeRows,
-      artifacts,
     });
-
-    return result;
   } finally {
     await closeBrowser();
-    // Teardown suite resources and clean up temp build artifacts
     await suite.cleanup();
     if (fs.existsSync(tempBaseDir)) {
       fs.rmSync(tempBaseDir, { recursive: true, force: true });
     }
   }
-}
-
-/**
- * Convenience runner for single-package benchmarks across frameworks.
- * @param {string} toolId
- * @param {Object} [options]
- * @param {string} [options.suite]
- * @param {boolean} [options.verbose]
- */
-export async function runSingleToolBenchmark(toolId, options = {}) {
-  const { getSuites } = await import('./suites/index.js');
-  const { getActiveTools } = await import('./tools/index.js');
-  const { renderAsciiTable, renderAsciiRuntimeTable, renderCrossSuiteSummary } = await import('./table.js');
-
-  const suiteFilter = options.suite || 'all';
-  const suites = getSuites(suiteFilter);
-  const tools = getActiveTools([toolId]);
-
-  if (suites.length === 0) {
-    console.error(`❌ No benchmark suites matched '${suiteFilter}'. Available: webawesome, material, carbon, spectrum, momentum`);
-    process.exit(1);
-  }
-
-  if (tools.length === 0) {
-    console.error(`❌ Tool '${toolId}' is not recognized or not enabled.`);
-    process.exit(1);
-  }
-
-  console.log(`\n========================================================================================`);
-  console.log(`⚡ LIT-CORE BENCHMARK: ${tools[0].name.toUpperCase()}`);
-  console.log(`========================================================================================`);
-  console.log(`Suites: ${suites.map((s) => s.name).join(', ')}`);
-
-  const crossSuiteSummaries = [];
-
-  for (const suite of suites) {
-    console.log(`\n⏳ Evaluating ${suite.name} with ${tools[0].name}...`);
-    const rows = await runSuiteBenchmark(suite, tools, { verbose: options.verbose });
-
-    console.log(renderAsciiTable(suite.name, rows));
-    if (rows.runtimeRows) {
-      console.log(renderAsciiRuntimeTable(suite.name, rows.runtimeRows));
-    }
-
-    const baseline = rows.find((r) => r.isBaseline);
-    const optimized = rows.find((r) => !r.isBaseline);
-    if (baseline && optimized && optimized.impact) {
-      crossSuiteSummaries.push({
-        suiteName: suite.name,
-        componentCount: rows.suiteContext.componentCount,
-        baselineRaw: baseline.metrics.rawBytes,
-        baselineGzip: baseline.metrics.gzipBytes,
-        totalRaw: optimized.metrics.rawBytes,
-        totalGzip: optimized.metrics.gzipBytes,
-        rawSaved: Math.abs(optimized.impact.rawDiff),
-        rawPct: Math.abs(optimized.impact.rawPercent),
-        gzipSaved: Math.abs(optimized.impact.gzipDiff),
-        gzipPct: Math.abs(optimized.impact.gzipPercent),
-      });
-    }
-  }
-
-  if (crossSuiteSummaries.length > 1) {
-    console.log(renderCrossSuiteSummary(crossSuiteSummaries));
-  }
-
-  console.log(`\n✓ ${tools[0].name} benchmark complete across ${suites.length} suites.\n`);
 }

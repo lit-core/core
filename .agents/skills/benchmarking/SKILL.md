@@ -2,26 +2,30 @@
 name: benchmarking
 description: >-
   Execute, analyze, and format bundle size and deduplication benchmarks for lit-core.
-  Use when running benchmarks across Carbon, Spectrum, Web Awesome, or Material Web,
-  comparing optimization impacts, or formatting benchmark markdown reports.
+  Use when running benchmarks across Carbon, Spectrum, Web Awesome, Material Web, or Momentum,
+  comparing optimization impacts, or inspecting JSON outputs and the React benchmark viewer.
 ---
 
 # Benchmark execution and reporting guide
 
-This skill guides you through running, analyzing, and formatting benchmarks in `@lit-core/benchmarks`.
+This skill guides you through running, analyzing, and inspecting benchmarks in `@lit-core/benchmarks`.
 
-## Available suites
+## Available suites and canonical component parity
 
-- `carbon`: `@carbon/web-components` (IBM Carbon, 99 components)
-- `spectrum`: `@spectrum-web-components` (Adobe Spectrum, 52 components)
-- `webawesome`: `@awesome.me/webawesome` (73 components)
-- `material`: `@material/web` (Google Material Design 3, 28 components)
-- `momentum`: `@momentum-design/components` (Cisco Momentum Design, 97 components)
-- `all`: Runs all five suites in sequence
+To guarantee fair, consistent benchmarks, each suite evaluates an identical set of **20 canonical UI components** representing an enterprise dashboard:
+- `carbon`: `@carbon/web-components` (IBM Carbon, 20 canonical components)
+- `spectrum`: `@spectrum-web-components` (Adobe Spectrum, 20 canonical components)
+- `webawesome`: `@awesome.me/webawesome` (Web Awesome, 20 canonical components)
+- `material`: `@material/web` (Google Material Web, 20 canonical components)
+- `momentum`: `@momentum-design/components` (Cisco Momentum Design, 20 canonical components)
+
+Canonical component mapping is defined in `packages/benchmarks/src/suites/canonical-components.js`.
+
+---
 
 ## Strict benchmark invariant: real enterprise components only (never mocks or toy strings)
 
-Every benchmark in `@lit-core/benchmarks`—whether whole-bundle Vite builds, per-tool isolation runs, or standalone microbenchmarks (`resumable`, `elem-proxy`, `event-hoist`, `dirty-mask`, `dom-paths`, `memoize`)—must evaluate actual production component sources, real stylesheets, and real custom element instances directly from the 5 designated libraries in `node_modules`:
+Every benchmark in `@lit-core/benchmarks`—whether whole-bundle Vite builds, per-tool isolation runs, or standalone microbenchmarks—must evaluate actual production component sources, real stylesheets, and real custom element instances directly from the 5 designated libraries in `node_modules`:
 - IBM Carbon Web Components (`@carbon/web-components`)
 - Adobe Spectrum Web Components (`@spectrum-web-components`)
 - Web Awesome (`@awesome.me/webawesome`)
@@ -31,68 +35,69 @@ Every benchmark in `@lit-core/benchmarks`—whether whole-bundle Vite builds, pe
 **Strictly forbidden**:
 - Mock component definitions (e.g. `elem-${i}`, `mock-button`, or hand-rolled `HTMLElement` stubs in VM contexts).
 - Synthetic math loops or theoretical multipliers (e.g. `Math.sqrt(i)` to simulate CPU load).
-- Fabricated fallback arithmetic or hardcoded speedup constants (e.g. `14.8 * (1 - 0.36)`).
+- Fabricated fallback arithmetic or hardcoded speedup constants.
 - Generic HTML elements (`<div><span>Item</span></div>`) substituted in place of the bundle's actual custom elements.
 
-**Mandatory requirements**:
-- Resolve real component files and tags using `packages/tests/src/components.ts` and `packages/tests/src/fixtures.ts`.
-- Build real component suites via `packages/benchmarks/src/suites/`.
-- Mount and exercise the actual registered Custom Elements from the bundle (e.g. `<cds-button>`, `<sp-action-button>`, `<wa-button>`, `<md-filled-button>`, `<mdc-button>`) and await real `updateComplete` lifecycle promises.
-- If runtime browser execution is unavailable due to environment constraints, report unmeasured (`0 ms` / `n/a`). Never fabricate numbers.
+---
 
 ## Execution commands
 
+Every feature and baseline has standalone execution support:
+
 ```bash
-# Run all benchmark suites with terminal tables
-pnpm run benchmark
+# Run standalone benchmark for a specific library and tool
+node packages/benchmarks/src/index.js --suite=carbon --tool=baseline
+node packages/benchmarks/src/index.js --suite=carbon --tool=css-fuse
+node packages/benchmarks/src/index.js --suite=carbon --tool=html-aot
 
-# Run an individual suite
+# Run all features for a single design system
+pnpm run benchmark:carbon
+pnpm run benchmark:spectrum
 pnpm run benchmark:webawesome
+pnpm run benchmark:material
 pnpm run benchmark:momentum
-node packages/benchmarks/src/index.js --suite=carbon
-node packages/benchmarks/src/index.js --suite=spectrum
-node packages/benchmarks/src/index.js --suite=material
-node packages/benchmarks/src/index.js --suite=momentum
 
-# Run isolated tools
-node packages/benchmarks/src/index.js --tools=css-fuse
-node packages/benchmarks/src/index.js --tools=html-fuse
-node packages/benchmarks/src/index.js --tools=props-lower
-node packages/benchmarks/src/index.js --tools=html-aot
-node packages/benchmarks/src/index.js --tools=css-minifier
-node packages/benchmarks/src/index.js --tools=html-minifier
+# Run a specific feature across all design systems
+node packages/benchmarks/src/index.js --tool=css-fuse
+node packages/benchmarks/src/index.js --tool=props-lower
+node packages/benchmarks/src/index.js --tool=all
 
-# Run elem-proxy runtime initialization benchmarks
-pnpm run benchmark:elem-proxy
-
-# Generate clean markdown output
-pnpm run benchmark:markdown
+# Run all suites in sequence
+pnpm run benchmark:all
 ```
 
-## Mandatory benchmark structure: one benchmark per package
+---
 
-Each tool has its own dedicated benchmark document in `packages/benchmarks/docs/`. **NEVER merge separate tools into one document**:
+## Standalone JSON artifacts
 
-- `packages/benchmarks/docs/css-fuse.md`: CSS AST deduplication and constructable stylesheets.
-- `packages/benchmarks/docs/html-fuse.md`: Static HTML and SVG fragment clustering.
-- `packages/benchmarks/docs/props-lower.md`: Decorator lowering, descriptor preset deduplication, prototype scalar hoisting.
-- `packages/benchmarks/docs/elem-proxy.md`: Deferred element proxy stubs, script evaluation CPU time, heap memory.
-- `packages/benchmarks/docs/html-aot.md`: Ahead-of-time Lit template compilation and runtime prepare elimination.
-- `packages/benchmarks/docs/css-minifier.md`: Embedded CSS template literal minification via Lightning CSS.
-- `packages/benchmarks/docs/html-minifier.md`: Embedded HTML/SVG template literal minification via OXC.
+Every benchmark run produces decoupled standalone outputs in `packages/benchmarks/results/`:
+- `results/manifest.json`: Index manifest recording all libraries, features, and executed run metrics.
+- `results/<suite>/<feature>.json`: Pure quantitative metrics and AST diagnostics (schema 2.0.0).
 
-## Reporting and formatting rules
+---
 
-1. **Avoid repetitive tables**:
-   - Present a single **Results summary** table comparing Baseline vs. Optimized (Minified JS, Gzip, Brotli, and delta savings).
-   - Present a separate **Deduplication diagnostics** table for AST metrics (rules scanned, duplicate rules fused, shared sheets created, chunks rewritten).
-   - Do NOT duplicate rows across multiple nested accordions.
-2. **Casing and punctuation**:
-   - Always use sentence case for all table headers, section titles, and descriptions. Do not uppercase every word.
-   - Strictly NO em dashes (`—` or `--`). Use `n/a` or `-` for non-applicable values.
-3. **Build overhead profiling**:
-   - Native Rust transforms (`css-minifier`, `html-minifier`, `props-lower`) have near-zero overhead (<100 ms total across 100 components).
-   - Node.js AST compiler passes (`html-aot`) run in JavaScript and must always use fast-path regex checks (`LIT_HTML_AOT_FAST_CHECK`) before AST parsing to prevent unneeded overhead on non-Lit modules.
-4. **Mandatory executive overview synchronization**:
-   - Whenever any benchmark pass, AST visitor, or runtime measurement logic is modified or audited, always re-evaluate the full benchmark suite across all 5 design systems with all active tools enabled (`node packages/benchmarks/src/index.js`).
-   - Immediately update the **Executive overview (all optimizations combined)** table in `packages/benchmarks/README.md` with the live, measured build times, bundle sizes, and first render speedups. Never leave stale numbers in the executive overview.
+## Interactive React benchmark viewer dashboard
+
+The React application in `packages/benchmarks/viewer` provides visual exploration with strictly zero bundled or hardcoded data:
+
+```bash
+# Launch development viewer server
+pnpm run viewer:dev
+
+# Build static production dashboard for GitHub Pages deployment
+pnpm run viewer:build
+
+# Preview static production dashboard locally
+pnpm run viewer:preview
+```
+
+---
+
+## Writing and casing rules
+
+1. **Sentence case rule (strictly mandatory)**:
+   - Always use sentence case for markdown headings (`#`, `##`, `###`), table headers, bullet items, and descriptions.
+   - Never use Title Case for headers or labels.
+   - Preserve code identifiers and brand names (`Lit`, `Vite`, `AST`, `Rollup`, `HTML`, `CSSStyleSheet`, `oxc`, `lightningcss`, `Carbon Web Components`, `GitHub Pages`).
+2. **Strictly no em dashes**:
+   - Use `-` or `n/a` instead of `—` or `--`.

@@ -12,6 +12,7 @@ import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformMemoize } from '@lit-core/memoize';
 import { transformNative } from '@lit-core/native';
 import { transformLitProps } from '@lit-core/props-lower';
+import { transformResumableComponent } from '@lit-core/resumable';
 import type {
   CssFuseOptions,
   CssMinifierOptions,
@@ -477,10 +478,20 @@ export function transformResumable(code: string, id: string, options: ResumableO
   }
 
   if (options.injectAdapter !== false) {
-    const adapterImport = `import { installResumableAdapter } from '@lit-core/resumable/client';\ninstallResumableAdapter();\n`;
-    return {
-      code: `${adapterImport}${code}`,
-    };
+    try {
+      const result = transformResumableComponent(code, {
+        filename: cleanId,
+        virtualModule: 'virtual:lit-core/resumable-adapter',
+      });
+      if (result.transformed) {
+        return {
+          code: result.code,
+          map: result.map ? JSON.parse(result.map) : null,
+        };
+      }
+    } catch (_err) {
+      return null;
+    }
   }
 
   return null;

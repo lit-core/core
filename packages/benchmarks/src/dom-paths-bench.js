@@ -5,7 +5,7 @@ import { transformDomPaths } from '@lit-core/dom-paths';
 import { resolveNodeByPath } from '@lit-core/dom-paths/client';
 import { ENTERPRISE_COMPONENTS, readComponentFullSource } from './fixtures.js';
 import { calculateDelta, formatDuration, formatKb, formatNumber, formatPercent } from './format.js';
-import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, syncDocFile } from './reporters/index.js';
+import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 
 /**
@@ -287,67 +287,13 @@ export async function runDomPathsBenchmarks(options = {}) {
   });
 }
 
-/**
- * Format dom-paths benchmark results into a standardized markdown document.
- * Strictly omits any total columns or rows.
- * @param {import('./types.js').BenchmarkRunResult} result
- * @returns {string}
- */
-export function formatDomPathsDoc(result) {
-  return renderBenchmarkDoc({
-    title: result.title,
-    leadParagraph: result.description,
-    comparisonHeading: 'Mount latency and DOM traversal performance comparison',
-    comparisonDescription:
-      'Measurements compare standard Lit runtime TreeWalker comment-node discovery against `@lit-core/dom-paths` direct child pointer indexing (`resolveNodeByPath`) across 500 instantiated component batches:',
-    suites: result.suites,
-    metrics: [
-      { label: 'Baseline mount latency', getValue: (s) => formatDuration(s.baseline.mountLatencyMs) },
-      { label: 'Optimized mount latency', getValue: (s) => formatDuration(s.optimized.mountLatencyMs) },
-      { label: 'Mount speedup', getValue: (s) => `**${s.deltas.latency.formattedPercent}**` },
-      { label: 'Baseline TreeWalker invocations', getValue: (s) => formatNumber(s.baseline.treeWalkerCalls) },
-      { label: 'Optimized TreeWalker invocations', getValue: (s) => formatNumber(s.optimized.treeWalkerCalls) },
-      { label: 'TreeWalker elimination', getValue: (s) => `**${s.deltas.walker.formattedPercent}**` },
-      { label: 'Baseline DOM nodes visited', getValue: (s) => formatNumber(s.baseline.nodesVisited) },
-      { label: 'Optimized DOM nodes visited', getValue: (s) => formatNumber(s.optimized.nodesVisited) },
-      { label: 'Node traversal reduction', getValue: (s) => `**${s.deltas.nodes.formattedPercent}**` },
-      { label: 'Baseline heap memory', getValue: (s) => formatKb(s.baseline.heapKb * 1024, { decimals: 1 }) },
-      { label: 'Optimized heap memory', getValue: (s) => formatKb(s.optimized.heapKb * 1024, { decimals: 1 }) },
-    ],
-    note: '`@lit-core/dom-paths` precomputes exact numeric child index paths (`[0, 2, 1]`) at build time using AST traversal. At runtime, the client resolves target comment and element nodes in nanoseconds via native `.childNodes[i]` indexing, completely bypassing `document.createTreeWalker` recursive scans and cutting mount latency by 75-88%.',
-    diagnosticsHeading: 'Traversal diagnostics and path compilation',
-    diagnosticsDescription: 'Detailed template extraction, static path counts, and compilation diagnostics across enterprise design systems:',
-    diagnosticsColumns: [
-      { header: 'Components scanned', getValue: (s) => formatNumber(s.diagnostics.componentsScanned) },
-      { header: 'Templates extracted', getValue: (s) => formatNumber(s.diagnostics.templatesCount) },
-      { header: 'Static paths generated', getValue: (s) => formatNumber(s.diagnostics.pathsCount) },
-      { header: 'Traversal reduction', getValue: (s) => `**${s.diagnostics.traversalReduction}**` },
-      { header: 'Build overhead', align: 'left', getValue: (s) => s.diagnostics.buildOverhead },
-    ],
-    runCommand: 'node packages/benchmarks/src/dom-paths-bench.js',
-    invariants: [
-      '**100% elimination of TreeWalker overhead**: Nodes are indexed directly by fixed child paths, completely bypassing `document.createTreeWalker` during component initialization.',
-      '**Evaluated on production templates**: Traversal paths and node counts are derived directly from the real templates across all 5 enterprise design systems in `node_modules`.',
-      '**Zero runtime allocations**: Node resolution is executed with micro-operations (`node.childNodes[i]`) requiring zero extra memory allocations.',
-      '**DOM structural fidelity**: Whitespace normalization and text node merging guarantee exact path alignment between build time and browser DOM.',
-    ],
-    relatedDocs: [
-      { label: 'Benchmark executive overview', url: '../README.md' },
-      { label: '`@lit-core/dom-paths` package documentation', url: '../../dom-paths/README.md' },
-      { label: 'Ahead-of-time template compilation', url: '../docs/html-aot.md' },
-    ],
-  });
-}
-
 // CLI execution
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   printBenchmarkHeader('dom-paths', 'Evaluating runtime TreeWalker elimination vs direct child pointer indexing.');
   runDomPathsBenchmarks({ verbose: true })
     .then((result) => {
       const jsonPath = saveBenchmarkResult(result);
-      const doc = formatDomPathsDoc(result);
-      const docPath = syncDocFile('dom-paths.md', doc);
-      printBenchmarkFooter('dom-paths', { jsonPath, docPath });
+      printBenchmarkFooter('dom-paths', { jsonPath });
     })
     .catch((err) => {
       console.error('Benchmark failed:', err);

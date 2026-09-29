@@ -154,6 +154,13 @@ export interface LitPluginOptions {
   cssFuse?: boolean | CssFuseOptions;
 
   /**
+   * Universal virtual module provider for @lit-core runtime helpers (virtual:lit-core/*).
+   * Automatically enabled when needed or can be explicitly declared.
+   * @default false
+   */
+  virtual?: boolean;
+
+  /**
    * Cross-component static template and SVG fragment clustering.
    * Pass `true` or an `HtmlFuseOptions` object to enable.
    * @default false

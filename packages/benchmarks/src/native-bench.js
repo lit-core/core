@@ -6,7 +6,6 @@ import { materialSuite } from './suites/material.js';
 import { momentumSuite } from './suites/momentum.js';
 import { spectrumSuite } from './suites/spectrum.js';
 import { webAwesomeSuite } from './suites/webawesome.js';
-import { syncAllBenchmarkDocs } from './sync-docs.js';
 import { renderCrossSuiteSummary } from './table.js';
 import { nativeTool } from './tools/native.js';
 
@@ -61,11 +60,6 @@ export async function runNativeBenchmarkSuite(options = {}) {
   console.log('\nBenchmark execution complete.');
   if (crossSuiteSummaries.length > 0) {
     console.log(renderCrossSuiteSummary(crossSuiteSummaries));
-  }
-
-  if (options.updateDocs !== false) {
-    console.log('Synchronizing benchmark documentation...');
-    syncAllBenchmarkDocs(allResults, { activeTools: [nativeTool] });
   }
 
   return allResults;

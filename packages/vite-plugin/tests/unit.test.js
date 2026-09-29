@@ -219,4 +219,28 @@ assert.strictEqual(v2, '\0virtual:css-fuse/_fused_abc.js');
 const regularResolved = plugin.resolveId.call({}, 'regular-file.ts');
 assert.strictEqual(regularResolved, undefined);
 
+// Test virtual:lit-core/* module resolution and loading
+const vAdapter = plugin.resolveId.call({}, 'virtual:lit-core/resumable-adapter');
+assert.strictEqual(vAdapter, '\0virtual:lit-core/resumable-adapter');
+const loadedAdapter = plugin.load.call({}, '\0virtual:lit-core/resumable-adapter');
+assert(loadedAdapter?.code.includes('installResumableAdapter'), 'resumable adapter code loaded');
+
+const vNative = plugin.resolveId.call({}, 'virtual:lit-core/native-runtime');
+assert.strictEqual(vNative, '\0virtual:lit-core/native-runtime');
+const loadedNative = plugin.load.call({}, '\0virtual:lit-core/native-runtime');
+assert(loadedNative?.code.includes('NativeElement'), 'native runtime code loaded');
+
+const vDomPaths = plugin.resolveId.call({}, 'virtual:lit-core/dom-paths');
+assert.strictEqual(vDomPaths, '\0virtual:lit-core/dom-paths');
+const loadedDomPaths = plugin.load.call({}, '\0virtual:lit-core/dom-paths');
+assert(loadedDomPaths?.code.includes('preparePartsWithPaths'), 'dom paths code loaded');
+
+// Test bare client/runtime import redirection
+const vBareAdapter = plugin.resolveId.call({}, '@lit-core/resumable/client');
+assert.strictEqual(vBareAdapter, '\0virtual:lit-core/resumable-adapter.js');
+const vBareNative = plugin.resolveId.call({}, '@lit-core/native/runtime');
+assert.strictEqual(vBareNative, '\0virtual:lit-core/native-runtime.js');
+const vBareDomPaths = plugin.resolveId.call({}, '@lit-core/dom-paths/client');
+assert.strictEqual(vBareDomPaths, '\0virtual:lit-core/dom-paths.js');
+
 console.log('✓ Vite plugin hooks and options verified successfully.');

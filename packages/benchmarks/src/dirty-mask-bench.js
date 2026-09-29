@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { transformDirtyMask } from '@lit-core/dirty-mask';
 import { ENTERPRISE_COMPONENTS, readComponentFullSource } from './fixtures.js';
 import { calculateDelta, formatDuration, formatKb, formatNumber, formatPercent } from './format.js';
-import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, syncDocFile } from './reporters/index.js';
+import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 
 /**
@@ -309,68 +309,13 @@ export async function runDirtyMaskBenchmarks(options = {}) {
   });
 }
 
-/**
- * Format dirty-mask benchmark results into a standardized markdown document.
- * Strictly omits any total columns or rows.
- * @param {import('./types.js').BenchmarkRunResult} result
- * @returns {string}
- */
-export function formatDirtyMaskDoc(result) {
-  return renderBenchmarkDoc({
-    title: result.title,
-    leadParagraph: result.description,
-    comparisonHeading: 'Reactive property re-render efficiency comparison',
-    comparisonDescription:
-      'Measurements compare standard Lit template re-evaluation against `@lit-core/dirty-mask` bitmask dependency gating across 500 component instances receiving single-property updates:',
-    suites: result.suites,
-    metrics: [
-      { label: 'Baseline expression evaluations', getValue: (s) => formatNumber(s.baseline.evaluationsCount) },
-      { label: 'Optimized expression evaluations', getValue: (s) => formatNumber(s.optimized.evaluationsCount) },
-      { label: 'Expression evaluation reduction', getValue: (s) => `**${s.deltas.evaluations.formattedPercent}**` },
-      { label: 'Baseline part diff comparisons', getValue: (s) => formatNumber(s.baseline.partDiffsCount) },
-      { label: 'Optimized part diff comparisons', getValue: (s) => formatNumber(s.optimized.partDiffsCount) },
-      { label: 'Part diff comparison reduction', getValue: (s) => `**${s.deltas.partDiffs.formattedPercent}**` },
-      { label: 'Baseline re-render latency', getValue: (s) => formatDuration(s.baseline.reRenderLatencyMs) },
-      { label: 'Optimized re-render latency', getValue: (s) => formatDuration(s.optimized.reRenderLatencyMs) },
-      { label: 'Re-render speedup', getValue: (s) => `**${s.deltas.latency.formattedPercent}**` },
-      { label: 'Baseline heap memory', getValue: (s) => formatKb(s.baseline.heapKb * 1024, { decimals: 1 }) },
-      { label: 'Optimized heap memory', getValue: (s) => formatKb(s.optimized.heapKb * 1024, { decimals: 1 }) },
-    ],
-    note: "In standard Lit, mutating a single reactive property forces the element to re-evaluate every dynamic expression in its template. `@lit-core/dirty-mask` precomputes an integer dependency bitmask connecting each reactive property to its specific template part slots. On updates, unchanged bindings return Lit's `noChange` sentinel immediately, eliminating 83.3% of expression runs and cutting re-render latency by over 50%.",
-    diagnosticsHeading: 'Bitmask dependency diagnostics and compilation',
-    diagnosticsDescription: 'Detailed property counts, bitmask mappings, and compilation diagnostics across enterprise design systems:',
-    diagnosticsColumns: [
-      { header: 'Components scanned', getValue: (s) => formatNumber(s.diagnostics.componentsScanned) },
-      { header: 'Reactive properties modeled', getValue: (s) => formatNumber(s.diagnostics.propertiesModeled) },
-      { header: 'Bitmasks generated', getValue: (s) => formatNumber(s.diagnostics.bitmasksGenerated) },
-      { header: 'Evaluation reduction', getValue: (s) => `**${s.diagnostics.evalReduction}**` },
-      { header: 'Part diff reduction', getValue: (s) => `**${s.diagnostics.diffReduction}**` },
-      { header: 'Build overhead', align: 'left', getValue: (s) => s.diagnostics.buildOverhead },
-    ],
-    runCommand: 'node packages/benchmarks/src/dirty-mask-bench.js',
-    invariants: [
-      '**Up to 83% reduction in expression evaluations**: Unchanged bindings return the Lit `noChange` sentinel immediately without invoking functions or allocating objects.',
-      '**Evaluated on production component models**: Property signatures and bindings are derived directly from real production components across all 5 enterprise design systems.',
-      '**Zero runtime polyfills**: Utilizes standard V8 32-bit integer bitwise operations executed in sub-nanosecond time.',
-      '**Spec compliant change detection**: Fully respects Lit custom property `hasChanged` predicates.',
-    ],
-    relatedDocs: [
-      { label: 'Benchmark executive overview', url: '../README.md' },
-      { label: '`@lit-core/dirty-mask` package documentation', url: '../../dirty-mask/README.md' },
-      { label: 'Ahead-of-time expression memoization', url: '../docs/memoize.md' },
-    ],
-  });
-}
-
 // CLI execution
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   printBenchmarkHeader('dirty-mask', 'Measuring expression evaluations and part diff checks on real enterprise components.');
   runDirtyMaskBenchmarks({ verbose: true })
     .then((result) => {
       const jsonPath = saveBenchmarkResult(result);
-      const doc = formatDirtyMaskDoc(result);
-      const docPath = syncDocFile('dirty-mask.md', doc);
-      printBenchmarkFooter('dirty-mask', { jsonPath, docPath });
+      printBenchmarkFooter('dirty-mask', { jsonPath });
     })
     .catch((err) => {
       console.error('Benchmark failed:', err);

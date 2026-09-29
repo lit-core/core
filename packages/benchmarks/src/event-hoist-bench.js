@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { transformEventHoist } from '@lit-core/event-hoist';
 import { ENTERPRISE_COMPONENTS, extractComponentTemplates, readComponentFullSource } from './fixtures.js';
 import { calculateDelta, formatDuration, formatNumber, formatPercent } from './format.js';
-import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, syncDocFile } from './reporters/index.js';
+import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 
 /** @type {Record<string, { name: string, shortName: string, pkg: string }>} */
@@ -141,63 +141,13 @@ export async function runEventHoistBenchmarks(options = {}) {
   });
 }
 
-/**
- * Format event-hoist benchmark results into a standardized markdown document.
- * Strictly omits any total columns or rows.
- * @param {import('./types.js').BenchmarkRunResult} result
- * @returns {string}
- */
-export function formatEventHoistDoc(result) {
-  return renderBenchmarkDoc({
-    title: result.title,
-    leadParagraph: result.description,
-    comparisonHeading: 'Event listener allocation and dispatch performance comparison',
-    comparisonDescription:
-      'Measurements compare standard per-element Lit event bindings (`@click=${...}`) against `@lit-core/event-hoist` single ShadowRoot delegated listeners across 500 instantiated component items:',
-    suites: result.suites,
-    metrics: [
-      { label: 'Interactive items rendered', getValue: (s) => formatNumber(s.baseline.itemsRendered) },
-      { label: 'Baseline DOM event listeners', getValue: (s) => formatNumber(s.baseline.domEventListeners) },
-      { label: 'Optimized DOM event listeners', getValue: (s) => formatNumber(s.optimized.domEventListeners) },
-      { label: 'Event listener reduction', getValue: (s) => `**${s.deltas.listeners.formattedPercent}**` },
-      { label: 'Root ShadowRoot listeners', getValue: (s) => formatNumber(s.optimized.rootListeners) },
-      { label: 'Unique event types handled', getValue: (s) => formatNumber(s.optimized.uniqueEventTypes) },
-    ],
-    note: 'Rather than allocating separate JavaScript event listener closures and attaching them to every individual DOM node inside a component template, `@lit-core/event-hoist` binds a single listener on the component host or ShadowRoot. On user interactions, the root listener checks `event.composedPath()` against pre-computed part indices to invoke handlers, eliminating 99.9% of event listener registrations.',
-    diagnosticsHeading: 'Event delegation compilation diagnostics',
-    diagnosticsDescription: 'Detailed template event extraction, hoisted component counts, and compilation diagnostics across enterprise design systems:',
-    diagnosticsColumns: [
-      { header: 'Components scanned', getValue: (s) => formatNumber(s.diagnostics.totalComponents) },
-      { header: 'Hoisted components', getValue: (s) => formatNumber(s.diagnostics.hoistedComponents) },
-      { header: 'Unique event types', getValue: (s) => formatNumber(s.diagnostics.uniqueEventTypesCount) },
-      { header: 'Hoisted event types', align: 'left', getValue: (s) => `\`${s.diagnostics.eventTypesStr}\`` },
-      { header: 'Listener reduction', getValue: (s) => `**${s.diagnostics.listenerReduction}**` },
-      { header: 'Build overhead', align: 'left', getValue: (s) => s.diagnostics.buildOverhead },
-    ],
-    runCommand: 'node packages/benchmarks/src/event-hoist-bench.js',
-    invariants: [
-      '**Zero per-element listener overhead**: Dispatches interactive template events through a single root listener on the ShadowRoot.',
-      '**High compilation speed**: AST event analysis and hoisting across real component source files completes in single-digit milliseconds per suite.',
-      '**100% specification compliant**: Preserves `event.composedPath()`, `stopPropagation()`, and target resolution transparently without altering Lit template semantics.',
-      '**Zero runtime polyfills**: Leverages standard Web Component ShadowRoot event bubbling mechanics.',
-    ],
-    relatedDocs: [
-      { label: 'Benchmark executive overview', url: '../README.md' },
-      { label: '`@lit-core/event-hoist` package documentation', url: '../../event-hoist/README.md' },
-      { label: 'Ahead-of-time DOM paths compilation', url: '../docs/dom-paths.md' },
-    ],
-  });
-}
-
 // CLI execution
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   printBenchmarkHeader('event-hoist', 'Evaluating native DOM event listener allocations across real production components.');
   runEventHoistBenchmarks({ verbose: true })
     .then((result) => {
       const jsonPath = saveBenchmarkResult(result);
-      const doc = formatEventHoistDoc(result);
-      const docPath = syncDocFile('event-hoist.md', doc);
-      printBenchmarkFooter('event-hoist', { jsonPath, docPath });
+      printBenchmarkFooter('event-hoist', { jsonPath });
     })
     .catch((err) => {
       console.error('Benchmark failed:', err);

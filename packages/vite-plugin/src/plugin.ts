@@ -29,7 +29,20 @@ import type {
   NativeOptions,
   PropsLowerOptions,
 } from './options.js';
-import { extractHtmlTemplateId, extractSheetId, formatVirtualHtmlId, formatVirtualId, isVirtualFusedId, isVirtualHtmlFusedId, matchesPattern, RESOLVED_FUSED_PREFIX } from './utils.js';
+import {
+  extractHtmlTemplateId,
+  extractLitCoreVirtualSubpath,
+  extractSheetId,
+  formatVirtualHtmlId,
+  formatVirtualId,
+  formatVirtualLitCoreId,
+  isVirtualFusedId,
+  isVirtualHtmlFusedId,
+  isVirtualLitCoreId,
+  matchesPattern,
+  RESOLVED_FUSED_PREFIX,
+} from './utils.js';
+import { getVirtualLitCoreModule } from './virtual.js';
 
 export function cssFuse(options: CssFuseOptions = {}): Plugin {
   let config: ResolvedConfig;
@@ -144,6 +157,9 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
     },
 
     resolveId(id) {
+      if (isVirtualLitCoreId(id)) {
+        return formatVirtualLitCoreId(id);
+      }
       if (isVirtualFusedId(id)) {
         return formatVirtualId(id);
       }
@@ -151,6 +167,16 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
     },
 
     load(id) {
+      if (isVirtualLitCoreId(id)) {
+        const subpath = extractLitCoreVirtualSubpath(id);
+        const code = getVirtualLitCoreModule(subpath);
+        if (code) {
+          return {
+            code,
+            map: null,
+          };
+        }
+      }
       if (isVirtualFusedId(id)) {
         const sheetId = extractSheetId(id);
         const code = virtualSheets.get(sheetId) || virtualSheets.get(sheetId.replace(/\.js$/, '')) || virtualSheets.get(`${sheetId}.js`);
@@ -935,8 +961,40 @@ export function memoize(options: MemoizeOptions = {}): Plugin {
 
 export const litMemoize = memoize;
 
+export function litVirtual(): Plugin {
+  return {
+    name: 'lit-virtual',
+    enforce: 'pre',
+
+    resolveId(id) {
+      if (isVirtualLitCoreId(id)) {
+        return formatVirtualLitCoreId(id);
+      }
+      return undefined;
+    },
+
+    load(id) {
+      if (isVirtualLitCoreId(id)) {
+        const subpath = extractLitCoreVirtualSubpath(id);
+        const code = getVirtualLitCoreModule(subpath);
+        if (code) {
+          return {
+            code,
+            map: null,
+          };
+        }
+      }
+      return undefined;
+    },
+  };
+}
+
 export function lit(options: LitPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [];
+
+  if (options.virtual) {
+    plugins.push(litVirtual());
+  }
 
   const { cssFuse: cssFuseOpt = true } = options;
   if (cssFuseOpt !== false) {
@@ -1022,6 +1080,7 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
 export const resumable = litResumablePlugin;
 export const litResumable = litResumablePlugin;
 export const litCore = lit;
+export const litVirtualPlugin = litVirtual;
 export const litCssFuse = cssFuse;
 export const litPropsLower = propsLower;
 export default lit;

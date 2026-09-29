@@ -161,4 +161,33 @@ describe('hydration-free client adapter and state hydration', () => {
     expect(output).not.toContain('@input');
     expect(output).toContain('Static description');
   });
+
+  it('injects virtual:lit-core/resumable-adapter import into custom element source via OXC AST transform', async () => {
+    const { transformResumableComponent } = await import('../src/compiler/index.js');
+    const source = `import { LitElement, html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+
+@customElement('my-counter')
+export class MyCounter extends LitElement {
+  render() {
+    return html\`<button>Count</button>\`;
+  }
+}
+`;
+
+    const res = transformResumableComponent(source, {
+      filename: 'my-counter.ts',
+      virtualModule: 'virtual:lit-core/resumable-adapter',
+    });
+
+    expect(res.transformed).toBe(true);
+    expect(res.code).toContain('virtual:lit-core/resumable-adapter');
+    expect(res.code).toContain('installResumableAdapter');
+    expect(res.code).toContain('installResumableAdapter();');
+    expect(res.code).toContain('class MyCounter extends LitElement');
+
+    // Should not re-transform if already injected
+    const secondPass = transformResumableComponent(res.code, { filename: 'my-counter.ts' });
+    expect(secondPass.transformed).toBe(false);
+  });
 });

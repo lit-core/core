@@ -22,6 +22,8 @@ export declare function transformDomPaths(
   options?: DomPathsOptions
 ): DomPathsResult;
 
+export declare const DOM_PATHS_SOURCE: string;
+
 export declare function resolveNodeByPath(root: Node, path: number[]): Node;
 
 export declare function resolveNodesByPaths(root: Node, paths: number[][]): Node[];
