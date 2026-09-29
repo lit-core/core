@@ -3,13 +3,13 @@
   "benchmarkId": "dom-paths",
   "title": "`@lit-core/dom-paths` empirical benchmark results",
   "description": "Ahead-of-time structural DOM child pointer path compilation evaluated across 255 production Web Components to eliminate runtime TreeWalker traversal during component mount.",
-  "timestamp": "2026-09-28T21:18:22.496Z",
+  "timestamp": "2026-09-29T20:31:35.182Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a724976",
+    "gitCommit": "a49119e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -34,22 +34,22 @@
         "instancesCount": 500,
         "treeWalkerCalls": 500,
         "nodesVisited": 1863,
-        "mountLatencyMs": 0.15,
-        "heapKb": 174.5
+        "mountLatencyMs": 0.16,
+        "heapKb": 174
       },
       "optimized": {
         "instancesCount": 500,
         "treeWalkerCalls": 0,
         "nodesVisited": 4629,
-        "mountLatencyMs": 0.11,
-        "heapKb": 317
+        "mountLatencyMs": 0.1,
+        "heapKb": 323.9
       },
       "deltas": {
         "latency": {
-          "diff": -0.039999999999999994,
-          "percent": -26.666666666666668,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-26.7%",
+          "diff": -0.06,
+          "percent": -37.5,
+          "formattedDiff": "-0.1",
+          "formattedPercent": "-37.5%",
           "isReduction": true
         },
         "nodes": {
@@ -85,22 +85,22 @@
         "instancesCount": 500,
         "treeWalkerCalls": 500,
         "nodesVisited": 1000,
-        "mountLatencyMs": 0.07,
-        "heapKb": 141
+        "mountLatencyMs": 0.09,
+        "heapKb": 174.7
       },
       "optimized": {
         "instancesCount": 500,
         "treeWalkerCalls": 0,
         "nodesVisited": 1000,
-        "mountLatencyMs": 0.06,
-        "heapKb": 193.3
+        "mountLatencyMs": 0.07,
+        "heapKb": 158.2
       },
       "deltas": {
         "latency": {
-          "diff": -0.010000000000000009,
-          "percent": -14.285714285714295,
+          "diff": -0.01999999999999999,
+          "percent": -22.222222222222214,
           "formattedDiff": "-0.0",
-          "formattedPercent": "-14.3%",
+          "formattedPercent": "-22.2%",
           "isReduction": true
         },
         "nodes": {
@@ -136,22 +136,22 @@
         "instancesCount": 500,
         "treeWalkerCalls": 500,
         "nodesVisited": 2861,
-        "mountLatencyMs": 0.12,
-        "heapKb": 185.1
+        "mountLatencyMs": 0.15,
+        "heapKb": 165.7
       },
       "optimized": {
         "instancesCount": 500,
         "treeWalkerCalls": 0,
         "nodesVisited": 7346,
-        "mountLatencyMs": 0.1,
-        "heapKb": 199.4
+        "mountLatencyMs": 0.08,
+        "heapKb": 263.5
       },
       "deltas": {
         "latency": {
-          "diff": -0.01999999999999999,
-          "percent": -16.66666666666666,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-16.7%",
+          "diff": -0.06999999999999999,
+          "percent": -46.666666666666664,
+          "formattedDiff": "-0.1",
+          "formattedPercent": "-46.7%",
           "isReduction": true
         },
         "nodes": {
@@ -187,8 +187,8 @@
         "instancesCount": 500,
         "treeWalkerCalls": 500,
         "nodesVisited": 2103,
-        "mountLatencyMs": 0.11,
-        "heapKb": 147.7
+        "mountLatencyMs": 0.09,
+        "heapKb": 162.5
       },
       "optimized": {
         "instancesCount": 500,
@@ -199,10 +199,10 @@
       },
       "deltas": {
         "latency": {
-          "diff": -0.08,
-          "percent": -72.72727272727273,
+          "diff": -0.06,
+          "percent": -66.66666666666666,
           "formattedDiff": "-0.1",
-          "formattedPercent": "-72.7%",
+          "formattedPercent": "-66.7%",
           "isReduction": true
         },
         "nodes": {

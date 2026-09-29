@@ -34,9 +34,9 @@ Measurements compare standard inline Lit template expressions against `@lit-core
 | Baseline object allocations | 50,451 | 50,451 | 50,451 | 50,451 | 50,451 |
 | Optimized object allocations | 251 | 251 | 251 | 251 | 251 |
 | Allocation reduction | **-99.5%** | **-99.5%** | **-99.5%** | **-99.5%** | **-99.5%** |
-| Baseline re-render latency | 2.31 ms | 1.69 ms | 1.83 ms | 1.82 ms | 1.69 ms |
-| Optimized re-render latency | 0.03 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
-| Re-render speedup | **-98.7%** | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** |
+| Baseline re-render latency | 2.49 ms | 2.11 ms | 2.09 ms | 3.52 ms | 2.09 ms |
+| Optimized re-render latency | 0.01 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
+| Re-render speedup | **-99.6%** | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** |
 | Baseline estimated GC pause | 0.58 ms | 0.58 ms | 0.58 ms | 0.58 ms | 0.58 ms |
 | Optimized estimated GC pause | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
 | GC pause reduction | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** |

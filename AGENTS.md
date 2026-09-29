@@ -39,6 +39,8 @@ Welcome to the `@lit-core` monorepo. This file outlines core architectural princ
 >     - Restricting element, tag, attribute, or style extraction to whitelists designed to make specific benchmarks or libraries pass or look favorable.
 >     - Hardcoding non-standard external library decorator wrappers (e.g. `carbonElement`) into core decorator lowering or regex detection rather than parsing standard Lit decorators (`@customElement`, `@property`, `@state`, etc.).
 >     - Hardcoding arbitrary package-specific paths, component namespaces, or vendor conventions into general-purpose transforms.
+    - Synthesizing client scripts or loader code via string interpolation templates (e.g. `format!`) or naive path fallbacks (e.g. `'/components/' + tag + '.js'`) rather than AST-driven injection and bundler manifests.
+    - Requiring downstream consumers to install, import, or initialize manual runtime packages or client loader modules.
 >   - ✅ **Required general-purpose design**:
 >     - Rely exclusively on official Web Component, DOM, HTML, CSS, JavaScript, and Lit language specifications.
 >     - Static fragment deduplication must inspect any valid HTML, SVG, or custom element subtree structurally and hierarchically based on syntax and configurable length/frequency thresholds, never class name or tag whitelists.
@@ -133,5 +135,11 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
    - Never use string manipulation (`replace_range`, `insert_str`, manual brace counting, regex search/replace, `.find('{')`, raw slice span math) to synthesize or rewrite JavaScript, TypeScript, or CSS AST structures.
    - Always parse code with `oxc_parser`, perform structural transforms on the AST using `oxc_allocator` / `AstBuilder` / `oxc_traverse`, and emit valid output using `oxc_codegen`.
    - String splicing breaks on multiline imports, inline comments, string literals with brackets or braces, and multi-component files. AST transformation is deterministic and preserves syntax validity.
+8. **Zero consumer runtime overhead and automated bundler injection**:
+   - Downstream consumers must never be required to manually import, wire up, or configure runtime microloaders, client adapters, or orchestration scripts.
+   - All runtime execution hooks (such as resumable event delegation, custom element chunk loaders, or hydration adapters) must be synthesized ahead of time via `oxc` AST compilation and automatically injected by bundler plugins (`@lit-core/webpack-plugin`, `@lit-core/vite-plugin`).
+   - Consumers write standard Lit components and only add the bundler plugin. Zero additional runtime dependencies, zero manual imports, and zero configuration boilerplate.
+   - Strictly prohibit opinionated path conventions (such as naive `/components/*` fallback assumptions). Manifests and chunk URLs must be resolved dynamically by the bundler plugin across any codebase.
+
 
 

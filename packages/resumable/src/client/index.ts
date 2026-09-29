@@ -1,3 +1,3 @@
 export * from './adapter.js';
-export * from './loader.js';
+export * from './compiler.js';
 export * from './replay.js';

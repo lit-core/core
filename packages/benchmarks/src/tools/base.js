@@ -18,7 +18,7 @@ export function normalizeInclude(pattern) {
  * @returns {import('vite').Plugin[]}
  */
 export function createIsolatedToolPlugin(toolKey, toolOptions) {
-  const allFeatures = ['cssFuse', 'htmlFuse', 'propsLower', 'elemProxy', 'native', 'eventHoist', 'htmlAot', 'cssMinifier', 'htmlMinifier'];
+  const allFeatures = ['cssFuse', 'htmlFuse', 'propsLower', 'elemProxy', 'native', 'eventHoist', 'htmlAot', 'cssMinifier', 'htmlMinifier', 'dirtyMask', 'domPaths', 'memoize', 'resumable'];
 
   /** @type {Record<string, any>} */
   const config = {};

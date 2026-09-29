@@ -369,6 +369,71 @@ export class CompFull extends LitElement {
 
     console.log('✓ Props lowering, CSS & HTML minification verified in Webpack bundle.');
 
+    // -----------------------------------------------------------
+    // TEST 6: Automated Resumable Microloader Asset & Manifest Generation
+    // -----------------------------------------------------------
+    console.log('\n[Test 6] Verifying automated resumable microloader asset emission & dynamic chunk manifest in Webpack...');
+
+    fs.writeFileSync(
+      path.join(fixtureDir, 'comp-resumable.ts'),
+      `import { LitElement, html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+
+@customElement('resumable-card')
+export class ResumableCard extends LitElement {
+  render() {
+    return html\`<button @click=\${() => console.log('clicked')}>Click me</button>\`;
+  }
+}
+`,
+    );
+
+    const outDirResumable = path.join(fixtureDir, 'dist-resumable');
+    await runWebpack({
+      context: fixtureDir,
+      mode: 'production',
+      optimization: {
+        minimize: false,
+      },
+      externals: {
+        lit: 'lit',
+        'lit/decorators.js': 'lit/decorators.js',
+        '@lit-core/resumable/client': 'litResumableClient',
+      },
+      entry: {
+        card: path.join(fixtureDir, 'comp-resumable.ts'),
+      },
+      output: {
+        path: outDirResumable,
+        filename: '[name].js',
+        clean: true,
+      },
+      resolve: {
+        extensions: ['.ts', '.js'],
+        extensionAlias: {
+          '.js': ['.ts', '.js'],
+        },
+      },
+      plugins: [
+        lit({
+          cssFuse: false,
+          propsLower: true,
+          resumable: true,
+        }),
+      ],
+    });
+
+    const loaderAssetPath = path.join(outDirResumable, 'resumable-loader.js');
+    assert(fs.existsSync(loaderAssetPath), 'resumable-loader.js must be emitted into Webpack output assets');
+
+    const emittedLoaderCode = fs.readFileSync(loaderAssetPath, 'utf-8');
+    assert(emittedLoaderCode.includes('__lit_resumed__'), 'Emitted microloader must contain resumption flag');
+    assert(emittedLoaderCode.includes('resumable-card'), 'Emitted microloader must map resumable-card in manifest');
+    assert(emittedLoaderCode.includes('/card.js'), 'Emitted microloader must point to generated chunk file');
+    assert(emittedLoaderCode.length < 1500, 'Emitted microloader must stay within the 1.5 KB budget');
+
+    console.log('✓ Automated resumable microloader asset emission and dynamic manifest verified in Webpack.');
+
     console.log('\n🎉 ALL WEBPACK INTEGRATION TESTS PASSED SUCCESSFULLY!\n');
   } finally {
     cleanupFixtures();

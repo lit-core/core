@@ -27,14 +27,14 @@ Measurements compare Standard Lit SSR (`@lit-labs/ssr` eager client hydration) a
 | Metric | Carbon | Spectrum | Web Awesome | Momentum | Material Web |
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | Standard SSR initial JS | 403.2 KB | 245.4 KB | 260.6 KB | 366.5 KB | 153.0 KB |
-| Resumable SSR initial JS | **1.39 KB** | **1.39 KB** | **1.39 KB** | **1.39 KB** | **1.39 KB** |
-| Initial JS savings | **-99.7%** | **-99.4%** | **-99.5%** | **-99.6%** | **-99.1%** |
-| Standard SSR TBT | 31.5 ms | 16.9 ms | 23.3 ms | 30.5 ms | 9.7 ms |
-| Resumable SSR TBT | **0.5 ms** | **0.5 ms** | **0.5 ms** | **0.5 ms** | **0.5 ms** |
-| TBT reduction | **-98.4%** | **-97.0%** | **-97.9%** | **-98.4%** | **-94.8%** |
-| Standard SSR TTI | 181.9 ms | 148.3 ms | 156.6 ms | 176.5 ms | 130.1 ms |
-| Resumable SSR TTI | **75.6 ms** | **75.6 ms** | **75.6 ms** | **75.6 ms** | **75.6 ms** |
-| TTI improvement | **-106.3 ms** | **-72.7 ms** | **-81.0 ms** | **-100.9 ms** | **-54.5 ms** |
+| Resumable SSR initial JS | **1.42 KB** | **1.42 KB** | **1.42 KB** | **1.42 KB** | **1.42 KB** |
+| Initial JS savings | **-99.6%** | **-99.4%** | **-99.5%** | **-99.6%** | **-99.1%** |
+| Standard SSR TBT | 31.8 ms | 17.1 ms | 23.4 ms | 30.6 ms | 10.0 ms |
+| Resumable SSR TBT | **1.7 ms** | **0.5 ms** | **0.5 ms** | **0.5 ms** | **0.5 ms** |
+| TBT reduction | **-94.7%** | **-97.1%** | **-97.9%** | **-98.4%** | **-95.0%** |
+| Standard SSR TTI | 182.2 ms | 148.5 ms | 156.7 ms | 176.6 ms | 130.4 ms |
+| Resumable SSR TTI | **76.8 ms** | **75.6 ms** | **75.6 ms** | **75.6 ms** | **75.6 ms** |
+| TTI improvement | **-105.4 ms** | **-72.9 ms** | **-81.1 ms** | **-101.0 ms** | **-54.8 ms** |
 | First click latency | 3.2 ms | 3.2 ms | 3.2 ms | 3.2 ms | 3.2 ms |
 | Elements deferred on boot | **99 / 99 (100%)** | **52 / 52 (100%)** | **73 / 73 (100%)** | **97 / 97 (100%)** | **28 / 28 (100%)** |
 
@@ -49,11 +49,11 @@ Detailed payload reduction, CPU blocking time improvements, and deferred element
 
 | Design system or library | Components evaluated | Initial JS reduction | TBT reduction | TTI speedup | Deferred proportion | Build overhead |
 | :--- | ---: | ---: | ---: | ---: | ---: | :--- |
-| Carbon Web Components | 99 | **-99.7%** | **-98.4%** | **-106.30 ms** | **99 / 99 (100%)** | Fast native pass |
-| Spectrum Web Components | 52 | **-99.4%** | **-97.0%** | **-72.70 ms** | **52 / 52 (100%)** | Fast native pass |
-| Web Awesome | 73 | **-99.5%** | **-97.9%** | **-81.00 ms** | **73 / 73 (100%)** | Fast native pass |
-| Momentum Design | 97 | **-99.6%** | **-98.4%** | **-100.90 ms** | **97 / 97 (100%)** | Fast native pass |
-| Material Web | 28 | **-99.1%** | **-94.8%** | **-54.50 ms** | **28 / 28 (100%)** | Fast native pass |
+| Carbon Web Components | 99 | **-99.6%** | **-94.7%** | **-105.40 ms** | **99 / 99 (100%)** | Fast native pass |
+| Spectrum Web Components | 52 | **-99.4%** | **-97.1%** | **-72.90 ms** | **52 / 52 (100%)** | Fast native pass |
+| Web Awesome | 73 | **-99.5%** | **-97.9%** | **-81.10 ms** | **73 / 73 (100%)** | Fast native pass |
+| Momentum Design | 97 | **-99.6%** | **-98.4%** | **-101.00 ms** | **97 / 97 (100%)** | Fast native pass |
+| Material Web | 28 | **-99.1%** | **-95.0%** | **-54.80 ms** | **28 / 28 (100%)** | Fast native pass |
 
 ---
 

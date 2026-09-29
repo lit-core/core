@@ -47,3 +47,6 @@ Thumbs.db
 **/.temp-bench*
 **/*-entry.js
 **/.*-entry.js
+packages/benchmarks/artifacts/
+**/artifacts/*.html
+**/artifacts/**/*.html

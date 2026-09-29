@@ -4,13 +4,13 @@
     "benchmarkId": "dirty-mask",
     "title": "`@lit-core/dirty-mask` empirical benchmark results",
     "description": "Ahead-of-time property-to-part dependency bitmasking evaluated across 255 production Web Components to eliminate unnecessary template re-evaluations during property updates.",
-    "timestamp": "2026-09-28T21:18:22.296Z",
+    "timestamp": "2026-09-29T20:31:30.933Z",
     "environment": {
       "node": "v24.14.0",
       "platform": "darwin",
       "arch": "arm64",
       "cpus": 8,
-      "gitCommit": "a724976",
+      "gitCommit": "a49119e",
       "gitBranch": "main",
       "versions": {
         "lit": "3.3.3",
@@ -34,13 +34,13 @@
         "baseline": {
           "evaluationsCount": 3000,
           "partDiffsCount": 3000,
-          "reRenderLatencyMs": 0.07,
-          "heapKb": 56.7
+          "reRenderLatencyMs": 0.05,
+          "heapKb": 59.1
         },
         "optimized": {
           "evaluationsCount": 500,
           "partDiffsCount": 500,
-          "reRenderLatencyMs": 0.07,
+          "reRenderLatencyMs": 0.03,
           "heapKb": 52.4
         },
         "deltas": {
@@ -59,11 +59,11 @@
             "isReduction": true
           },
           "latency": {
-            "diff": 0,
-            "percent": 0,
-            "formattedDiff": "0.0",
-            "formattedPercent": "0.0%",
-            "isReduction": false
+            "diff": -0.020000000000000004,
+            "percent": -40.00000000000001,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-40.0%",
+            "isReduction": true
           }
         },
         "diagnostics": {
@@ -84,64 +84,14 @@
         "baseline": {
           "evaluationsCount": 3000,
           "partDiffsCount": 3000,
-          "reRenderLatencyMs": 0.05,
-          "heapKb": 51.2
-        },
-        "optimized": {
-          "evaluationsCount": 500,
-          "partDiffsCount": 500,
-          "reRenderLatencyMs": 0.02,
-          "heapKb": 51.2
-        },
-        "deltas": {
-          "evaluations": {
-            "diff": -2500,
-            "percent": -83.33333333333334,
-            "formattedDiff": "-2,500.0",
-            "formattedPercent": "-83.3%",
-            "isReduction": true
-          },
-          "partDiffs": {
-            "diff": -2500,
-            "percent": -83.33333333333334,
-            "formattedDiff": "-2,500.0",
-            "formattedPercent": "-83.3%",
-            "isReduction": true
-          },
-          "latency": {
-            "diff": -0.030000000000000002,
-            "percent": -60,
-            "formattedDiff": "-0.0",
-            "formattedPercent": "-60.0%",
-            "isReduction": true
-          }
-        },
-        "diagnostics": {
-          "componentsScanned": 51,
-          "propertiesModeled": 306,
-          "bitmasksGenerated": 306,
-          "evalReduction": "-83.3%",
-          "diffReduction": "-83.3%",
-          "buildOverhead": "Fast native pass"
-        }
-      },
-      {
-        "id": "webawesome",
-        "name": "Web Awesome",
-        "shortName": "Web Awesome",
-        "packageName": "@awesome.me/webawesome",
-        "componentCount": 51,
-        "baseline": {
-          "evaluationsCount": 3000,
-          "partDiffsCount": 3000,
           "reRenderLatencyMs": 0.04,
-          "heapKb": 51.2
+          "heapKb": 51.3
         },
         "optimized": {
           "evaluationsCount": 500,
           "partDiffsCount": 500,
           "reRenderLatencyMs": 0.02,
-          "heapKb": 51.2
+          "heapKb": 51.3
         },
         "deltas": {
           "evaluations": {
@@ -176,6 +126,56 @@
         }
       },
       {
+        "id": "webawesome",
+        "name": "Web Awesome",
+        "shortName": "Web Awesome",
+        "packageName": "@awesome.me/webawesome",
+        "componentCount": 51,
+        "baseline": {
+          "evaluationsCount": 3000,
+          "partDiffsCount": 3000,
+          "reRenderLatencyMs": 0.06,
+          "heapKb": 51.3
+        },
+        "optimized": {
+          "evaluationsCount": 500,
+          "partDiffsCount": 500,
+          "reRenderLatencyMs": 0.02,
+          "heapKb": 51.3
+        },
+        "deltas": {
+          "evaluations": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "partDiffs": {
+            "diff": -2500,
+            "percent": -83.33333333333334,
+            "formattedDiff": "-2,500.0",
+            "formattedPercent": "-83.3%",
+            "isReduction": true
+          },
+          "latency": {
+            "diff": -0.039999999999999994,
+            "percent": -66.66666666666666,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-66.7%",
+            "isReduction": true
+          }
+        },
+        "diagnostics": {
+          "componentsScanned": 51,
+          "propertiesModeled": 306,
+          "bitmasksGenerated": 306,
+          "evalReduction": "-83.3%",
+          "diffReduction": "-83.3%",
+          "buildOverhead": "Fast native pass"
+        }
+      },
+      {
         "id": "momentum",
         "name": "Cisco Momentum Design",
         "shortName": "Cisco Momentum",
@@ -185,13 +185,13 @@
           "evaluationsCount": 3000,
           "partDiffsCount": 3000,
           "reRenderLatencyMs": 0.04,
-          "heapKb": 51.2
+          "heapKb": 51.3
         },
         "optimized": {
           "evaluationsCount": 500,
           "partDiffsCount": 500,
           "reRenderLatencyMs": 0.02,
-          "heapKb": 51.2
+          "heapKb": 51.3
         },
         "deltas": {
           "evaluations": {
@@ -234,14 +234,14 @@
         "baseline": {
           "evaluationsCount": 3000,
           "partDiffsCount": 3000,
-          "reRenderLatencyMs": 0.04,
-          "heapKb": 66.9
+          "reRenderLatencyMs": 0.06,
+          "heapKb": 60.2
         },
         "optimized": {
           "evaluationsCount": 500,
           "partDiffsCount": 500,
-          "reRenderLatencyMs": 0.04,
-          "heapKb": 60.2
+          "reRenderLatencyMs": 0.02,
+          "heapKb": 66.9
         },
         "deltas": {
           "evaluations": {
@@ -259,11 +259,11 @@
             "isReduction": true
           },
           "latency": {
-            "diff": 0,
-            "percent": 0,
-            "formattedDiff": "0.0",
-            "formattedPercent": "0.0%",
-            "isReduction": false
+            "diff": -0.039999999999999994,
+            "percent": -66.66666666666666,
+            "formattedDiff": "-0.0",
+            "formattedPercent": "-66.7%",
+            "isReduction": true
           }
         },
         "diagnostics": {
@@ -282,13 +282,13 @@
     "benchmarkId": "dom-paths",
     "title": "`@lit-core/dom-paths` empirical benchmark results",
     "description": "Ahead-of-time structural DOM child pointer path compilation evaluated across 255 production Web Components to eliminate runtime TreeWalker traversal during component mount.",
-    "timestamp": "2026-09-28T21:18:22.496Z",
+    "timestamp": "2026-09-29T20:31:35.182Z",
     "environment": {
       "node": "v24.14.0",
       "platform": "darwin",
       "arch": "arm64",
       "cpus": 8,
-      "gitCommit": "a724976",
+      "gitCommit": "a49119e",
       "gitBranch": "main",
       "versions": {
         "lit": "3.3.3",
@@ -313,22 +313,22 @@
           "instancesCount": 500,
           "treeWalkerCalls": 500,
           "nodesVisited": 1863,
-          "mountLatencyMs": 0.15,
-          "heapKb": 174.5
+          "mountLatencyMs": 0.16,
+          "heapKb": 174
         },
         "optimized": {
           "instancesCount": 500,
           "treeWalkerCalls": 0,
           "nodesVisited": 4629,
-          "mountLatencyMs": 0.11,
-          "heapKb": 317
+          "mountLatencyMs": 0.1,
+          "heapKb": 323.9
         },
         "deltas": {
           "latency": {
-            "diff": -0.039999999999999994,
-            "percent": -26.666666666666668,
-            "formattedDiff": "-0.0",
-            "formattedPercent": "-26.7%",
+            "diff": -0.06,
+            "percent": -37.5,
+            "formattedDiff": "-0.1",
+            "formattedPercent": "-37.5%",
             "isReduction": true
           },
           "nodes": {
@@ -364,22 +364,22 @@
           "instancesCount": 500,
           "treeWalkerCalls": 500,
           "nodesVisited": 1000,
-          "mountLatencyMs": 0.07,
-          "heapKb": 141
+          "mountLatencyMs": 0.09,
+          "heapKb": 174.7
         },
         "optimized": {
           "instancesCount": 500,
           "treeWalkerCalls": 0,
           "nodesVisited": 1000,
-          "mountLatencyMs": 0.06,
-          "heapKb": 193.3
+          "mountLatencyMs": 0.07,
+          "heapKb": 158.2
         },
         "deltas": {
           "latency": {
-            "diff": -0.010000000000000009,
-            "percent": -14.285714285714295,
+            "diff": -0.01999999999999999,
+            "percent": -22.222222222222214,
             "formattedDiff": "-0.0",
-            "formattedPercent": "-14.3%",
+            "formattedPercent": "-22.2%",
             "isReduction": true
           },
           "nodes": {
@@ -415,22 +415,22 @@
           "instancesCount": 500,
           "treeWalkerCalls": 500,
           "nodesVisited": 2861,
-          "mountLatencyMs": 0.12,
-          "heapKb": 185.1
+          "mountLatencyMs": 0.15,
+          "heapKb": 165.7
         },
         "optimized": {
           "instancesCount": 500,
           "treeWalkerCalls": 0,
           "nodesVisited": 7346,
-          "mountLatencyMs": 0.1,
-          "heapKb": 199.4
+          "mountLatencyMs": 0.08,
+          "heapKb": 263.5
         },
         "deltas": {
           "latency": {
-            "diff": -0.01999999999999999,
-            "percent": -16.66666666666666,
-            "formattedDiff": "-0.0",
-            "formattedPercent": "-16.7%",
+            "diff": -0.06999999999999999,
+            "percent": -46.666666666666664,
+            "formattedDiff": "-0.1",
+            "formattedPercent": "-46.7%",
             "isReduction": true
           },
           "nodes": {
@@ -466,8 +466,8 @@
           "instancesCount": 500,
           "treeWalkerCalls": 500,
           "nodesVisited": 2103,
-          "mountLatencyMs": 0.11,
-          "heapKb": 147.7
+          "mountLatencyMs": 0.09,
+          "heapKb": 162.5
         },
         "optimized": {
           "instancesCount": 500,
@@ -478,10 +478,10 @@
         },
         "deltas": {
           "latency": {
-            "diff": -0.08,
-            "percent": -72.72727272727273,
+            "diff": -0.06,
+            "percent": -66.66666666666666,
             "formattedDiff": "-0.1",
-            "formattedPercent": "-72.7%",
+            "formattedPercent": "-66.7%",
             "isReduction": true
           },
           "nodes": {
@@ -565,13 +565,13 @@
     "benchmarkId": "memoize",
     "title": "`@lit-core/memoize` empirical benchmark results",
     "description": "Ahead-of-time reactive template expression memoization evaluated across 5 enterprise collection components to eliminate redundant array transformations and GC overhead during unrelated state updates.",
-    "timestamp": "2026-09-28T21:18:22.679Z",
+    "timestamp": "2026-09-29T20:31:39.308Z",
     "environment": {
       "node": "v24.14.0",
       "platform": "darwin",
       "arch": "arm64",
       "cpus": 8,
-      "gitCommit": "a724976",
+      "gitCommit": "a49119e",
       "gitBranch": "main",
       "versions": {
         "lit": "3.3.3",
@@ -597,15 +597,15 @@
         "baseline": {
           "pipelineRunsCount": 201,
           "allocatedObjectsCount": 50451,
-          "reRenderLatencyMs": 2.31,
-          "heapKb": 84.2,
+          "reRenderLatencyMs": 2.49,
+          "heapKb": 329.3,
           "estimatedGcPauseMs": 0.58
         },
         "optimized": {
           "pipelineRunsCount": 1,
           "allocatedObjectsCount": 251,
-          "reRenderLatencyMs": 0.03,
-          "heapKb": 119.1,
+          "reRenderLatencyMs": 0.01,
+          "heapKb": 14.5,
           "estimatedGcPauseMs": 0
         },
         "deltas": {
@@ -624,10 +624,10 @@
             "isReduction": true
           },
           "latency": {
-            "diff": -2.2800000000000002,
-            "percent": -98.70129870129871,
-            "formattedDiff": "-2.3",
-            "formattedPercent": "-98.7%",
+            "diff": -2.4800000000000004,
+            "percent": -99.59839357429719,
+            "formattedDiff": "-2.5",
+            "formattedPercent": "-99.6%",
             "isReduction": true
           },
           "gc": {
@@ -658,8 +658,8 @@
         "baseline": {
           "pipelineRunsCount": 201,
           "allocatedObjectsCount": 50451,
-          "reRenderLatencyMs": 1.69,
-          "heapKb": 386.8,
+          "reRenderLatencyMs": 2.11,
+          "heapKb": 9.3,
           "estimatedGcPauseMs": 0.58
         },
         "optimized": {
@@ -685,9 +685,9 @@
             "isReduction": true
           },
           "latency": {
-            "diff": -1.69,
+            "diff": -2.11,
             "percent": -100,
-            "formattedDiff": "-1.7",
+            "formattedDiff": "-2.1",
             "formattedPercent": "-100.0%",
             "isReduction": true
           },
@@ -719,7 +719,7 @@
         "baseline": {
           "pipelineRunsCount": 201,
           "allocatedObjectsCount": 50451,
-          "reRenderLatencyMs": 1.83,
+          "reRenderLatencyMs": 2.09,
           "heapKb": 0,
           "estimatedGcPauseMs": 0.58
         },
@@ -746,9 +746,9 @@
             "isReduction": true
           },
           "latency": {
-            "diff": -1.83,
+            "diff": -2.09,
             "percent": -100,
-            "formattedDiff": "-1.8",
+            "formattedDiff": "-2.1",
             "formattedPercent": "-100.0%",
             "isReduction": true
           },
@@ -780,7 +780,7 @@
         "baseline": {
           "pipelineRunsCount": 201,
           "allocatedObjectsCount": 50451,
-          "reRenderLatencyMs": 1.82,
+          "reRenderLatencyMs": 3.52,
           "heapKb": 0,
           "estimatedGcPauseMs": 0.58
         },
@@ -807,9 +807,9 @@
             "isReduction": true
           },
           "latency": {
-            "diff": -1.82,
+            "diff": -3.52,
             "percent": -100,
-            "formattedDiff": "-1.8",
+            "formattedDiff": "-3.5",
             "formattedPercent": "-100.0%",
             "isReduction": true
           },
@@ -841,7 +841,7 @@
         "baseline": {
           "pipelineRunsCount": 201,
           "allocatedObjectsCount": 50451,
-          "reRenderLatencyMs": 1.69,
+          "reRenderLatencyMs": 2.09,
           "heapKb": 0,
           "estimatedGcPauseMs": 0.58
         },
@@ -868,9 +868,9 @@
             "isReduction": true
           },
           "latency": {
-            "diff": -1.69,
+            "diff": -2.09,
             "percent": -100,
-            "formattedDiff": "-1.7",
+            "formattedDiff": "-2.1",
             "formattedPercent": "-100.0%",
             "isReduction": true
           },
@@ -898,13 +898,13 @@
     "benchmarkId": "event-hoist",
     "title": "`@lit-core/event-hoist` empirical benchmark results",
     "description": "Ahead-of-time ShadowRoot event delegation evaluated across 255 production Web Components to eliminate per-element DOM event listener allocations.",
-    "timestamp": "2026-09-28T21:18:23.122Z",
+    "timestamp": "2026-09-29T20:31:27.766Z",
     "environment": {
       "node": "v24.14.0",
       "platform": "darwin",
       "arch": "arm64",
       "cpus": 8,
-      "gitCommit": "a724976",
+      "gitCommit": "a49119e",
       "gitBranch": "main",
       "versions": {
         "lit": "3.3.3",
@@ -930,14 +930,14 @@
           "domEventListeners": 1500,
           "rootListeners": 0,
           "uniqueEventTypes": 2,
-          "transformTimeMs": 183.94
+          "transformTimeMs": 265.94
         },
         "optimized": {
           "itemsRendered": 500,
           "domEventListeners": 1,
           "rootListeners": 1,
           "uniqueEventTypes": 2,
-          "transformTimeMs": 183.94
+          "transformTimeMs": 265.94
         },
         "deltas": {
           "listeners": {
@@ -968,14 +968,14 @@
           "domEventListeners": 1000,
           "rootListeners": 0,
           "uniqueEventTypes": 2,
-          "transformTimeMs": 31.28
+          "transformTimeMs": 92.87
         },
         "optimized": {
           "itemsRendered": 500,
           "domEventListeners": 1,
           "rootListeners": 1,
           "uniqueEventTypes": 2,
-          "transformTimeMs": 31.28
+          "transformTimeMs": 92.87
         },
         "deltas": {
           "listeners": {
@@ -1006,14 +1006,14 @@
           "domEventListeners": 31500,
           "rootListeners": 0,
           "uniqueEventTypes": 9,
-          "transformTimeMs": 30.08
+          "transformTimeMs": 38.67
         },
         "optimized": {
           "itemsRendered": 500,
           "domEventListeners": 9,
           "rootListeners": 9,
           "uniqueEventTypes": 9,
-          "transformTimeMs": 30.08
+          "transformTimeMs": 38.67
         },
         "deltas": {
           "listeners": {
@@ -1044,14 +1044,14 @@
           "domEventListeners": 1500,
           "rootListeners": 0,
           "uniqueEventTypes": 2,
-          "transformTimeMs": 83.93
+          "transformTimeMs": 106.87
         },
         "optimized": {
           "itemsRendered": 500,
           "domEventListeners": 1,
           "rootListeners": 1,
           "uniqueEventTypes": 2,
-          "transformTimeMs": 83.93
+          "transformTimeMs": 106.87
         },
         "deltas": {
           "listeners": {
@@ -1082,14 +1082,14 @@
           "domEventListeners": 6500,
           "rootListeners": 0,
           "uniqueEventTypes": 4,
-          "transformTimeMs": 32.43
+          "transformTimeMs": 50.72
         },
         "optimized": {
           "itemsRendered": 500,
           "domEventListeners": 4,
           "rootListeners": 4,
           "uniqueEventTypes": 4,
-          "transformTimeMs": 32.43
+          "transformTimeMs": 50.72
         },
         "deltas": {
           "listeners": {
@@ -1116,13 +1116,13 @@
     "benchmarkId": "resumable",
     "title": "`@lit-core/resumable` empirical benchmark results",
     "description": "Ahead-of-time Declarative Shadow DOM (DSD) SSR and event-driven runtime resumption evaluated across all 5 production Lit design systems (349 total Web Components) to measure initial JavaScript payload, Total Blocking Time (TBT), and Time to Interactive (TTI).",
-    "timestamp": "2026-09-28T21:18:23.495Z",
+    "timestamp": "2026-09-29T20:31:17.087Z",
     "environment": {
       "node": "v24.14.0",
       "platform": "darwin",
       "arch": "arm64",
       "cpus": 8,
-      "gitCommit": "a724976",
+      "gitCommit": "a49119e",
       "gitBranch": "main",
       "versions": {
         "lit": "3.3.3",
@@ -1146,50 +1146,50 @@
         "componentCount": 99,
         "baseline": {
           "initialJsKb": 403.2,
-          "tbtMs": 31.5,
+          "tbtMs": 31.8,
           "fcpMs": 120.4,
-          "ttiMs": 181.9,
+          "ttiMs": 182.2,
           "firstClickLatencyMs": 2.4,
           "totalComponents": 99,
           "deferredComponents": 0
         },
         "optimized": {
-          "initialJsKb": 1.39,
-          "tbtMs": 0.5,
+          "initialJsKb": 1.42,
+          "tbtMs": 1.7,
           "fcpMs": 70.1,
-          "ttiMs": 75.6,
+          "ttiMs": 76.8,
           "firstClickLatencyMs": 3.2,
           "totalComponents": 99,
           "deferredComponents": 99
         },
         "deltas": {
           "initialJs": {
-            "diff": -401.81,
-            "percent": -99.65525793650794,
+            "diff": -401.78,
+            "percent": -99.64781746031746,
             "formattedDiff": "-401.8",
-            "formattedPercent": "-99.7%",
+            "formattedPercent": "-99.6%",
             "isReduction": true
           },
           "tbt": {
-            "diff": -31,
-            "percent": -98.4126984126984,
-            "formattedDiff": "-31.0",
-            "formattedPercent": "-98.4%",
+            "diff": -30.1,
+            "percent": -94.65408805031447,
+            "formattedDiff": "-30.1",
+            "formattedPercent": "-94.7%",
             "isReduction": true
           },
           "tti": {
-            "diff": -106.30000000000001,
-            "percent": -58.43870258383728,
-            "formattedDiff": "-106.3",
-            "formattedPercent": "-58.4%",
+            "diff": -105.39999999999999,
+            "percent": -57.84851811196488,
+            "formattedDiff": "-105.4",
+            "formattedPercent": "-57.8%",
             "isReduction": true
           }
         },
         "diagnostics": {
           "totalComponents": 99,
-          "initialJsReduction": "-99.7%",
-          "tbtReduction": "-98.4%",
-          "ttiImprovement": "106.30 ms",
+          "initialJsReduction": "-99.6%",
+          "tbtReduction": "-94.7%",
+          "ttiImprovement": "105.40 ms",
           "deferredCount": "99 / 99 (100%)",
           "buildOverhead": "Fast native pass"
         }
@@ -1203,15 +1203,15 @@
         "componentCount": 52,
         "baseline": {
           "initialJsKb": 245.4,
-          "tbtMs": 16.9,
+          "tbtMs": 17.1,
           "fcpMs": 101.4,
-          "ttiMs": 148.3,
+          "ttiMs": 148.5,
           "firstClickLatencyMs": 2.4,
           "totalComponents": 52,
           "deferredComponents": 0
         },
         "optimized": {
-          "initialJsKb": 1.39,
+          "initialJsKb": 1.42,
           "tbtMs": 0.5,
           "fcpMs": 70.1,
           "ttiMs": 75.6,
@@ -1221,32 +1221,32 @@
         },
         "deltas": {
           "initialJs": {
-            "diff": -244.01000000000002,
-            "percent": -99.43357783211084,
+            "diff": -243.98000000000002,
+            "percent": -99.42135289323554,
             "formattedDiff": "-244.0",
             "formattedPercent": "-99.4%",
             "isReduction": true
           },
           "tbt": {
-            "diff": -16.4,
-            "percent": -97.0414201183432,
-            "formattedDiff": "-16.4",
-            "formattedPercent": "-97.0%",
+            "diff": -16.6,
+            "percent": -97.07602339181287,
+            "formattedDiff": "-16.6",
+            "formattedPercent": "-97.1%",
             "isReduction": true
           },
           "tti": {
-            "diff": -72.70000000000002,
-            "percent": -49.02225219150372,
-            "formattedDiff": "-72.7",
-            "formattedPercent": "-49.0%",
+            "diff": -72.9,
+            "percent": -49.09090909090909,
+            "formattedDiff": "-72.9",
+            "formattedPercent": "-49.1%",
             "isReduction": true
           }
         },
         "diagnostics": {
           "totalComponents": 52,
           "initialJsReduction": "-99.4%",
-          "tbtReduction": "-97.0%",
-          "ttiImprovement": "72.70 ms",
+          "tbtReduction": "-97.1%",
+          "ttiImprovement": "72.90 ms",
           "deferredCount": "52 / 52 (100%)",
           "buildOverhead": "Fast native pass"
         }
@@ -1260,15 +1260,15 @@
         "componentCount": 73,
         "baseline": {
           "initialJsKb": 260.6,
-          "tbtMs": 23.3,
+          "tbtMs": 23.4,
           "fcpMs": 103.3,
-          "ttiMs": 156.6,
+          "ttiMs": 156.7,
           "firstClickLatencyMs": 2.4,
           "totalComponents": 73,
           "deferredComponents": 0
         },
         "optimized": {
-          "initialJsKb": 1.39,
+          "initialJsKb": 1.42,
           "tbtMs": 0.5,
           "fcpMs": 70.1,
           "ttiMs": 75.6,
@@ -1278,24 +1278,24 @@
         },
         "deltas": {
           "initialJs": {
-            "diff": -259.21000000000004,
-            "percent": -99.46661550268612,
+            "diff": -259.18,
+            "percent": -99.45510360706062,
             "formattedDiff": "-259.2",
             "formattedPercent": "-99.5%",
             "isReduction": true
           },
           "tbt": {
-            "diff": -22.8,
-            "percent": -97.85407725321889,
-            "formattedDiff": "-22.8",
+            "diff": -22.9,
+            "percent": -97.86324786324786,
+            "formattedDiff": "-22.9",
             "formattedPercent": "-97.9%",
             "isReduction": true
           },
           "tti": {
-            "diff": -81,
-            "percent": -51.724137931034484,
-            "formattedDiff": "-81.0",
-            "formattedPercent": "-51.7%",
+            "diff": -81.1,
+            "percent": -51.754945756222085,
+            "formattedDiff": "-81.1",
+            "formattedPercent": "-51.8%",
             "isReduction": true
           }
         },
@@ -1303,7 +1303,7 @@
           "totalComponents": 73,
           "initialJsReduction": "-99.5%",
           "tbtReduction": "-97.9%",
-          "ttiImprovement": "81.00 ms",
+          "ttiImprovement": "81.10 ms",
           "deferredCount": "73 / 73 (100%)",
           "buildOverhead": "Fast native pass"
         }
@@ -1317,15 +1317,15 @@
         "componentCount": 97,
         "baseline": {
           "initialJsKb": 366.5,
-          "tbtMs": 30.5,
+          "tbtMs": 30.6,
           "fcpMs": 116,
-          "ttiMs": 176.5,
+          "ttiMs": 176.6,
           "firstClickLatencyMs": 2.4,
           "totalComponents": 97,
           "deferredComponents": 0
         },
         "optimized": {
-          "initialJsKb": 1.39,
+          "initialJsKb": 1.42,
           "tbtMs": 0.5,
           "fcpMs": 70.1,
           "ttiMs": 75.6,
@@ -1335,23 +1335,23 @@
         },
         "deltas": {
           "initialJs": {
-            "diff": -365.11,
-            "percent": -99.62073669849933,
+            "diff": -365.08,
+            "percent": -99.61255115961801,
             "formattedDiff": "-365.1",
             "formattedPercent": "-99.6%",
             "isReduction": true
           },
           "tbt": {
-            "diff": -30,
-            "percent": -98.36065573770492,
-            "formattedDiff": "-30.0",
+            "diff": -30.1,
+            "percent": -98.36601307189542,
+            "formattedDiff": "-30.1",
             "formattedPercent": "-98.4%",
             "isReduction": true
           },
           "tti": {
-            "diff": -100.9,
-            "percent": -57.1671388101983,
-            "formattedDiff": "-100.9",
+            "diff": -101,
+            "percent": -57.19139297848245,
+            "formattedDiff": "-101.0",
             "formattedPercent": "-57.2%",
             "isReduction": true
           }
@@ -1360,7 +1360,7 @@
           "totalComponents": 97,
           "initialJsReduction": "-99.6%",
           "tbtReduction": "-98.4%",
-          "ttiImprovement": "100.90 ms",
+          "ttiImprovement": "101.00 ms",
           "deferredCount": "97 / 97 (100%)",
           "buildOverhead": "Fast native pass"
         }
@@ -1374,15 +1374,15 @@
         "componentCount": 28,
         "baseline": {
           "initialJsKb": 153,
-          "tbtMs": 9.7,
+          "tbtMs": 10,
           "fcpMs": 90.4,
-          "ttiMs": 130.1,
+          "ttiMs": 130.4,
           "firstClickLatencyMs": 2.4,
           "totalComponents": 28,
           "deferredComponents": 0
         },
         "optimized": {
-          "initialJsKb": 1.39,
+          "initialJsKb": 1.42,
           "tbtMs": 0.5,
           "fcpMs": 70.1,
           "ttiMs": 75.6,
@@ -1392,32 +1392,32 @@
         },
         "deltas": {
           "initialJs": {
-            "diff": -151.61,
-            "percent": -99.09150326797386,
+            "diff": -151.58,
+            "percent": -99.07189542483661,
             "formattedDiff": "-151.6",
             "formattedPercent": "-99.1%",
             "isReduction": true
           },
           "tbt": {
-            "diff": -9.2,
-            "percent": -94.84536082474226,
-            "formattedDiff": "-9.2",
-            "formattedPercent": "-94.8%",
+            "diff": -9.5,
+            "percent": -95,
+            "formattedDiff": "-9.5",
+            "formattedPercent": "-95.0%",
             "isReduction": true
           },
           "tti": {
-            "diff": -54.5,
-            "percent": -41.890853189853964,
-            "formattedDiff": "-54.5",
-            "formattedPercent": "-41.9%",
+            "diff": -54.80000000000001,
+            "percent": -42.02453987730062,
+            "formattedDiff": "-54.8",
+            "formattedPercent": "-42.0%",
             "isReduction": true
           }
         },
         "diagnostics": {
           "totalComponents": 28,
           "initialJsReduction": "-99.1%",
-          "tbtReduction": "-94.8%",
-          "ttiImprovement": "54.50 ms",
+          "tbtReduction": "-95.0%",
+          "ttiImprovement": "54.80 ms",
           "deferredCount": "28 / 28 (100%)",
           "buildOverhead": "Fast native pass"
         }
@@ -1429,13 +1429,13 @@
     "benchmarkId": "elem-proxy",
     "title": "`@lit-core/elem-proxy` empirical benchmark results",
     "description": "Deferred Custom Element proxy stubs evaluated across 349 production Lit Web Components to measure script evaluation CPU time, V8 heap memory footprint, and mount latency.",
-    "timestamp": "2026-09-28T21:18:26.488Z",
+    "timestamp": "2026-09-29T20:31:24.391Z",
     "environment": {
       "node": "v24.14.0",
       "platform": "darwin",
       "arch": "arm64",
       "cpus": 8,
-      "gitCommit": "a724976",
+      "gitCommit": "a49119e",
       "gitBranch": "main",
       "versions": {
         "lit": "3.3.3",
@@ -1457,16 +1457,16 @@
         "packageName": "@carbon/web-components",
         "componentCount": 99,
         "baseline": {
-          "evalTimeMs": 47.93,
-          "heapKb": 159017.7,
+          "evalTimeMs": 50.52,
+          "heapKb": 127453.8,
           "mountLatencyMs": 0,
           "totalComponents": 99,
           "deferredComponents": 0,
           "evaluatedComponents": 99
         },
         "optimized": {
-          "evalTimeMs": 39.05,
-          "heapKb": 136421,
+          "evalTimeMs": 42.47,
+          "heapKb": 136493.6,
           "mountLatencyMs": 0,
           "totalComponents": 99,
           "deferredComponents": 94,
@@ -1474,26 +1474,26 @@
         },
         "deltas": {
           "cpu": {
-            "diff": -8.880000000000003,
-            "percent": -18.527018568746094,
-            "formattedDiff": "-8.9",
-            "formattedPercent": "-18.5%",
+            "diff": -8.050000000000004,
+            "percent": -15.934283452098185,
+            "formattedDiff": "-8.1",
+            "formattedPercent": "-15.9%",
             "isReduction": true
           },
           "heap": {
-            "diff": -22596.70000000001,
-            "percent": -14.210179118425186,
-            "formattedDiff": "-22,596.7",
-            "formattedPercent": "-14.2%",
-            "isReduction": true
+            "diff": 9039.800000000003,
+            "percent": 7.092609243506276,
+            "formattedDiff": "9,039.8",
+            "formattedPercent": "+7.1%",
+            "isReduction": false
           }
         },
         "diagnostics": {
           "evaluatedCount": "5 / 99 (5.1%)",
           "deferredCount": "94 avoided",
           "deferredProportion": "94.9% deferred",
-          "cpuSavings": "-18.5%",
-          "heapSavings": "-14.2%",
+          "cpuSavings": "-15.9%",
+          "heapSavings": "+7.1%",
           "buildOverhead": "Fast native pass"
         }
       },
@@ -1504,34 +1504,34 @@
         "packageName": "@spectrum-web-components/bundle",
         "componentCount": 52,
         "baseline": {
-          "evalTimeMs": 4.02,
-          "heapKb": 172765.3,
+          "evalTimeMs": 3.91,
+          "heapKb": 173040.7,
           "mountLatencyMs": 0,
           "totalComponents": 52,
           "deferredComponents": 0,
           "evaluatedComponents": 52
         },
         "optimized": {
-          "evalTimeMs": 3.98,
-          "heapKb": 158457.8,
-          "mountLatencyMs": 0.01,
+          "evalTimeMs": 3.82,
+          "heapKb": 106655.7,
+          "mountLatencyMs": 0,
           "totalComponents": 52,
           "deferredComponents": 47,
           "evaluatedComponents": 5
         },
         "deltas": {
           "cpu": {
-            "diff": -0.03999999999999959,
-            "percent": -0.9950248756218805,
-            "formattedDiff": "-0.0",
-            "formattedPercent": "-1.0%",
+            "diff": -0.0900000000000003,
+            "percent": -2.301790281329931,
+            "formattedDiff": "-0.1",
+            "formattedPercent": "-2.3%",
             "isReduction": true
           },
           "heap": {
-            "diff": -14307.5,
-            "percent": -8.281466243510707,
-            "formattedDiff": "-14,307.5",
-            "formattedPercent": "-8.3%",
+            "diff": -66385.00000000001,
+            "percent": -38.36380689629666,
+            "formattedDiff": "-66,385.0",
+            "formattedPercent": "-38.4%",
             "isReduction": true
           }
         },
@@ -1539,8 +1539,8 @@
           "evaluatedCount": "5 / 52 (9.6%)",
           "deferredCount": "47 avoided",
           "deferredProportion": "90.4% deferred",
-          "cpuSavings": "-1.0%",
-          "heapSavings": "-8.3%",
+          "cpuSavings": "-2.3%",
+          "heapSavings": "-38.4%",
           "buildOverhead": "Fast native pass"
         }
       },
@@ -1551,16 +1551,16 @@
         "packageName": "@awesome.me/webawesome",
         "componentCount": 73,
         "baseline": {
-          "evalTimeMs": 3.64,
-          "heapKb": 204703.4,
+          "evalTimeMs": 3.96,
+          "heapKb": 153021.2,
           "mountLatencyMs": 0,
           "totalComponents": 73,
           "deferredComponents": 0,
           "evaluatedComponents": 73
         },
         "optimized": {
-          "evalTimeMs": 1.3,
-          "heapKb": 215928.8,
+          "evalTimeMs": 1.51,
+          "heapKb": 164249.8,
           "mountLatencyMs": 0,
           "totalComponents": 73,
           "deferredComponents": 68,
@@ -1568,17 +1568,17 @@
         },
         "deltas": {
           "cpu": {
-            "diff": -2.34,
-            "percent": -64.28571428571428,
-            "formattedDiff": "-2.3",
-            "formattedPercent": "-64.3%",
+            "diff": -2.45,
+            "percent": -61.86868686868687,
+            "formattedDiff": "-2.5",
+            "formattedPercent": "-61.9%",
             "isReduction": true
           },
           "heap": {
-            "diff": 11225.399999999994,
-            "percent": 5.483738912006344,
-            "formattedDiff": "11,225.4",
-            "formattedPercent": "+5.5%",
+            "diff": 11228.599999999977,
+            "percent": 7.337937488400284,
+            "formattedDiff": "11,228.6",
+            "formattedPercent": "+7.3%",
             "isReduction": false
           }
         },
@@ -1586,8 +1586,8 @@
           "evaluatedCount": "5 / 73 (6.8%)",
           "deferredCount": "68 avoided",
           "deferredProportion": "93.2% deferred",
-          "cpuSavings": "-64.3%",
-          "heapSavings": "+5.5%",
+          "cpuSavings": "-61.9%",
+          "heapSavings": "+7.3%",
           "buildOverhead": "Fast native pass"
         }
       },
@@ -1598,16 +1598,16 @@
         "packageName": "@momentum-design/components",
         "componentCount": 97,
         "baseline": {
-          "evalTimeMs": 3.11,
-          "heapKb": 203601.8,
+          "evalTimeMs": 3.29,
+          "heapKb": 116104.3,
           "mountLatencyMs": 0,
           "totalComponents": 97,
           "deferredComponents": 0,
           "evaluatedComponents": 97
         },
         "optimized": {
-          "evalTimeMs": 3.1,
-          "heapKb": 210363.4,
+          "evalTimeMs": 3.47,
+          "heapKb": 122866.4,
           "mountLatencyMs": 0,
           "totalComponents": 97,
           "deferredComponents": 92,
@@ -1615,17 +1615,17 @@
         },
         "deltas": {
           "cpu": {
-            "diff": -0.009999999999999787,
-            "percent": -0.32154340836012174,
-            "formattedDiff": "-0.0",
-            "formattedPercent": "-0.3%",
-            "isReduction": true
+            "diff": 0.18000000000000016,
+            "percent": 5.471124620060795,
+            "formattedDiff": "0.2",
+            "formattedPercent": "+5.5%",
+            "isReduction": false
           },
           "heap": {
-            "diff": 6761.600000000006,
-            "percent": 3.3209922505596743,
-            "formattedDiff": "6,761.6",
-            "formattedPercent": "+3.3%",
+            "diff": 6762.099999999991,
+            "percent": 5.824159828705733,
+            "formattedDiff": "6,762.1",
+            "formattedPercent": "+5.8%",
             "isReduction": false
           }
         },
@@ -1633,8 +1633,8 @@
           "evaluatedCount": "5 / 97 (5.2%)",
           "deferredCount": "92 avoided",
           "deferredProportion": "94.8% deferred",
-          "cpuSavings": "-0.3%",
-          "heapSavings": "+3.3%",
+          "cpuSavings": "+5.5%",
+          "heapSavings": "+5.8%",
           "buildOverhead": "Fast native pass"
         }
       },
@@ -1645,16 +1645,16 @@
         "packageName": "@material/web",
         "componentCount": 28,
         "baseline": {
-          "evalTimeMs": 6.11,
-          "heapKb": 226659.8,
+          "evalTimeMs": 6.67,
+          "heapKb": 139159.5,
           "mountLatencyMs": 0,
           "totalComponents": 28,
           "deferredComponents": 0,
           "evaluatedComponents": 28
         },
         "optimized": {
-          "evalTimeMs": 5.25,
-          "heapKb": 230827.4,
+          "evalTimeMs": 5.31,
+          "heapKb": 143322.8,
           "mountLatencyMs": 0,
           "totalComponents": 28,
           "deferredComponents": 23,
@@ -1662,17 +1662,17 @@
         },
         "deltas": {
           "cpu": {
-            "diff": -0.8600000000000003,
-            "percent": -14.075286415711952,
-            "formattedDiff": "-0.9",
-            "formattedPercent": "-14.1%",
+            "diff": -1.3600000000000003,
+            "percent": -20.38980509745128,
+            "formattedDiff": "-1.4",
+            "formattedPercent": "-20.4%",
             "isReduction": true
           },
           "heap": {
-            "diff": 4167.600000000006,
-            "percent": 1.8387027607012825,
-            "formattedDiff": "4,167.6",
-            "formattedPercent": "+1.8%",
+            "diff": 4163.299999999988,
+            "percent": 2.9917468803782628,
+            "formattedDiff": "4,163.3",
+            "formattedPercent": "+3.0%",
             "isReduction": false
           }
         },
@@ -1680,8 +1680,8 @@
           "evaluatedCount": "5 / 28 (17.9%)",
           "deferredCount": "23 avoided",
           "deferredProportion": "82.1% deferred",
-          "cpuSavings": "-14.1%",
-          "heapSavings": "+1.8%",
+          "cpuSavings": "-20.4%",
+          "heapSavings": "+3.0%",
           "buildOverhead": "Fast native pass"
         }
       }
@@ -1692,13 +1692,13 @@
     "benchmarkId": "bundle-optimizations",
     "title": "`@lit-core` bundler optimization benchmark results",
     "description": "Multi-suite bundle size and optimization benchmark across enterprise Lit design systems.",
-    "timestamp": "2026-09-28T21:14:33.064Z",
+    "timestamp": "2026-09-29T20:30:09.975Z",
     "environment": {
       "node": "v24.14.0",
       "platform": "darwin",
       "arch": "arm64",
       "cpus": 8,
-      "gitCommit": "a724976",
+      "gitCommit": "a49119e",
       "gitBranch": "main",
       "versions": {
         "lit": "3.3.3",
@@ -1714,6 +1714,49 @@
     },
     "suites": [
       {
+        "id": "webawesome",
+        "name": "Web Awesome (Full Component Suite)",
+        "componentCount": 73,
+        "baseline": {
+          "rawBytes": 822396,
+          "gzipBytes": 195007,
+          "brotliBytes": 146435,
+          "buildTimeMs": 109.62012500000003
+        },
+        "optimized": {
+          "rawBytes": 849415,
+          "gzipBytes": 192410,
+          "brotliBytes": 143187,
+          "buildTimeMs": 748.2438750000001
+        },
+        "deltas": {
+          "raw": {
+            "diff": 27019,
+            "percent": 3.2854002208181945
+          },
+          "gzip": {
+            "diff": -2597,
+            "percent": -1.3317470654899568
+          }
+        },
+        "diagnostics": {
+          "css-fuse": {
+            "rulesScanned": 1001,
+            "rulesDeduped": 205,
+            "fusedSheetsCreated": 86,
+            "componentsRewritten": 68,
+            "bytesSavedEstimate": 7175
+          },
+          "html-fuse": {
+            "fragmentsScanned": 200,
+            "fragmentsDeduped": 31,
+            "fusedTemplatesCreated": 14,
+            "componentsRewritten": 23,
+            "bytesSavedEstimate": 1431
+          }
+        }
+      },
+      {
         "id": "material",
         "name": "Material Web (@material/web)",
         "componentCount": 28,
@@ -1721,25 +1764,169 @@
           "rawBytes": 459132,
           "gzipBytes": 78467,
           "brotliBytes": 59861,
-          "buildTimeMs": 46.20745900000003
+          "buildTimeMs": 42.07999999999811
         },
         "optimized": {
-          "rawBytes": 452530,
-          "gzipBytes": 77911,
-          "brotliBytes": 59579,
-          "buildTimeMs": 61.960207999999966
+          "rawBytes": 474484,
+          "gzipBytes": 82823,
+          "brotliBytes": 62245,
+          "buildTimeMs": 385.9359170000025
         },
         "deltas": {
           "raw": {
-            "diff": -6602,
-            "percent": -1.437930704024115
+            "diff": 15352,
+            "percent": 3.3437007222323865
           },
           "gzip": {
-            "diff": -556,
-            "percent": -0.7085781283851811
+            "diff": 4356,
+            "percent": 5.551378286413397
           }
         },
-        "diagnostics": {}
+        "diagnostics": {
+          "css-fuse": {
+            "rulesScanned": 1354,
+            "rulesDeduped": 212,
+            "fusedSheetsCreated": 82,
+            "componentsRewritten": 73,
+            "bytesSavedEstimate": 7420
+          },
+          "html-fuse": {
+            "fragmentsScanned": 187,
+            "fragmentsDeduped": 29,
+            "fusedTemplatesCreated": 11,
+            "componentsRewritten": 27,
+            "bytesSavedEstimate": 1519
+          }
+        }
+      },
+      {
+        "id": "carbon",
+        "name": "Carbon Web Components (@carbon/web-components)",
+        "componentCount": 99,
+        "baseline": {
+          "rawBytes": 5941120,
+          "gzipBytes": 725947,
+          "brotliBytes": 290664,
+          "buildTimeMs": 195.92233300000225
+        },
+        "optimized": {
+          "rawBytes": 3039197,
+          "gzipBytes": 471137,
+          "brotliBytes": 307250,
+          "buildTimeMs": 1763.7085829999996
+        },
+        "deltas": {
+          "raw": {
+            "diff": -2901923,
+            "percent": -48.84471278142842
+          },
+          "gzip": {
+            "diff": -254810,
+            "percent": -35.10035856612122
+          }
+        },
+        "diagnostics": {
+          "css-fuse": {
+            "rulesScanned": 23881,
+            "rulesDeduped": 14896,
+            "fusedSheetsCreated": 170,
+            "componentsRewritten": 102,
+            "bytesSavedEstimate": 521360
+          },
+          "html-fuse": {
+            "fragmentsScanned": 596,
+            "fragmentsDeduped": 35,
+            "fusedTemplatesCreated": 19,
+            "componentsRewritten": 32,
+            "bytesSavedEstimate": 1265
+          }
+        }
+      },
+      {
+        "id": "spectrum",
+        "name": "Spectrum Web Components (@spectrum-web-components)",
+        "componentCount": 52,
+        "baseline": {
+          "rawBytes": 1923409,
+          "gzipBytes": 320113,
+          "brotliBytes": 222784,
+          "buildTimeMs": 180.83000000000175
+        },
+        "optimized": {
+          "rawBytes": 1791264,
+          "gzipBytes": 312298,
+          "brotliBytes": 227568,
+          "buildTimeMs": 2671.9830000000075
+        },
+        "deltas": {
+          "raw": {
+            "diff": -132145,
+            "percent": -6.870353627335632
+          },
+          "gzip": {
+            "diff": -7815,
+            "percent": -2.441325406965665
+          }
+        },
+        "diagnostics": {
+          "css-fuse": {
+            "rulesScanned": 10794,
+            "rulesDeduped": 10033,
+            "fusedSheetsCreated": 571,
+            "componentsRewritten": 536,
+            "bytesSavedEstimate": 351155
+          },
+          "html-fuse": {
+            "fragmentsScanned": 874,
+            "fragmentsDeduped": 160,
+            "fusedTemplatesCreated": 120,
+            "componentsRewritten": 108,
+            "bytesSavedEstimate": 38106
+          }
+        }
+      },
+      {
+        "id": "momentum",
+        "name": "Momentum Design (@momentum-design/components)",
+        "componentCount": 97,
+        "baseline": {
+          "rawBytes": 890931,
+          "gzipBytes": 196506,
+          "brotliBytes": 151475,
+          "buildTimeMs": 143.95750000001863
+        },
+        "optimized": {
+          "rawBytes": 872658,
+          "gzipBytes": 200146,
+          "brotliBytes": 153681,
+          "buildTimeMs": 756.0688329999975
+        },
+        "deltas": {
+          "raw": {
+            "diff": -18273,
+            "percent": -2.0510005825366946
+          },
+          "gzip": {
+            "diff": 3640,
+            "percent": 1.8523607421656336
+          }
+        },
+        "diagnostics": {
+          "css-fuse": {
+            "rulesScanned": 1094,
+            "rulesDeduped": 227,
+            "fusedSheetsCreated": 70,
+            "componentsRewritten": 76,
+            "bytesSavedEstimate": 7945
+          },
+          "html-fuse": {
+            "fragmentsScanned": 79,
+            "fragmentsDeduped": 16,
+            "fusedTemplatesCreated": 8,
+            "componentsRewritten": 12,
+            "bytesSavedEstimate": 526
+          }
+        }
       }
     ]
   }

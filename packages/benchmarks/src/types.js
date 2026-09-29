@@ -46,6 +46,7 @@
  *   diagnostics?: Record<string, any>;
  *   suiteContext: SuiteContext;
  *   runtimeRows?: RuntimeRow[];
+ *   artifacts?: string[];
  * }} SuiteBenchmarkResult
  */
 

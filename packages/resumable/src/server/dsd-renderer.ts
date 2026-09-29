@@ -121,6 +121,8 @@ export function renderComponentToDsd(component: any, options: ComponentDsdOption
 
 /**
  * Render a Lit TemplateResult to plain HTML string without runtime client dependencies.
+ * Serializes @event and .onEvent listener bindings into resumes-on-* marker attributes
+ * so client micro-loader can perform zero-overhead, fine-grained interaction detection.
  */
 export function renderTemplateResult(result: any): string {
   if (!result || typeof result !== 'object') {
@@ -137,15 +139,35 @@ export function renderTemplateResult(result: any): string {
   }
 
   let html = '';
+  let stripLeadingQuote: string | null = null;
+
   for (let i = 0; i < strings.length; i++) {
-    html += strings[i];
+    let str = strings[i];
+    if (stripLeadingQuote && str.startsWith(stripLeadingQuote)) {
+      str = str.slice(stripLeadingQuote.length);
+      stripLeadingQuote = null;
+    }
+
     if (i < values.length) {
       const val = values[i];
-      if (val === null || val === undefined || val === false) {
+      if (typeof val === 'function') {
+        // Event listener or directive in template
+        const match = str.match(/(?:@|\.on)([a-zA-Z0-9_-]+)\s*=\s*(["']?)$/);
+        if (match) {
+          const eventName = match[1].toLowerCase();
+          const quote = match[2];
+          if (quote) {
+            stripLeadingQuote = quote;
+          }
+          str = str.slice(0, match.index) + `resumes-on-${eventName} `;
+        }
+        html += str;
         continue;
       }
-      if (typeof val === 'function') {
-        // Event listener or directive in template, skip in static markup
+
+      html += str;
+
+      if (val === null || val === undefined || val === false) {
         continue;
       }
       if (Array.isArray(val)) {
@@ -155,6 +177,8 @@ export function renderTemplateResult(result: any): string {
       } else {
         html += String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
+    } else {
+      html += str;
     }
   }
 

@@ -1,5 +1,5 @@
 import type { Plugin, ResolvedConfig } from 'vite';
-import { generateInlineLoader } from '../client/loader.js';
+import { compileResumableLoader } from '../client/compiler.js';
 import { buildManifest, extractCustomElementTags } from './manifest.js';
 
 export interface ResumableOptions {
@@ -101,9 +101,8 @@ export function resumable(options: ResumableOptions = {}): Plugin {
         });
       }
 
-      const loaderScript = generateInlineLoader(manifest, { preloadOnHover });
-      const manifestScript = `<script>window.__LIT_RESUMABLE_MANIFEST__=${JSON.stringify(manifest)};</script>`;
-      const injection = `${manifestScript}\n<script>${loaderScript}</script>`;
+      const loaderScript = compileResumableLoader({ manifest, preloadOnHover });
+      const injection = `<script>${loaderScript}</script>`;
 
       if (html.includes('</head>')) {
         return html.replace('</head>', `${injection}\n</head>`);
@@ -116,5 +115,6 @@ export function resumable(options: ResumableOptions = {}): Plugin {
   };
 }
 
+export { buildManifest, extractCustomElementTags } from './manifest.js';
 export const litResumable = resumable;
 export default resumable;

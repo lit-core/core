@@ -3,13 +3,13 @@
   "benchmarkId": "event-hoist",
   "title": "`@lit-core/event-hoist` empirical benchmark results",
   "description": "Ahead-of-time ShadowRoot event delegation evaluated across 255 production Web Components to eliminate per-element DOM event listener allocations.",
-  "timestamp": "2026-09-28T21:18:23.122Z",
+  "timestamp": "2026-09-29T20:31:27.766Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a724976",
+    "gitCommit": "a49119e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -35,14 +35,14 @@
         "domEventListeners": 1500,
         "rootListeners": 0,
         "uniqueEventTypes": 2,
-        "transformTimeMs": 183.94
+        "transformTimeMs": 265.94
       },
       "optimized": {
         "itemsRendered": 500,
         "domEventListeners": 1,
         "rootListeners": 1,
         "uniqueEventTypes": 2,
-        "transformTimeMs": 183.94
+        "transformTimeMs": 265.94
       },
       "deltas": {
         "listeners": {
@@ -73,14 +73,14 @@
         "domEventListeners": 1000,
         "rootListeners": 0,
         "uniqueEventTypes": 2,
-        "transformTimeMs": 31.28
+        "transformTimeMs": 92.87
       },
       "optimized": {
         "itemsRendered": 500,
         "domEventListeners": 1,
         "rootListeners": 1,
         "uniqueEventTypes": 2,
-        "transformTimeMs": 31.28
+        "transformTimeMs": 92.87
       },
       "deltas": {
         "listeners": {
@@ -111,14 +111,14 @@
         "domEventListeners": 31500,
         "rootListeners": 0,
         "uniqueEventTypes": 9,
-        "transformTimeMs": 30.08
+        "transformTimeMs": 38.67
       },
       "optimized": {
         "itemsRendered": 500,
         "domEventListeners": 9,
         "rootListeners": 9,
         "uniqueEventTypes": 9,
-        "transformTimeMs": 30.08
+        "transformTimeMs": 38.67
       },
       "deltas": {
         "listeners": {
@@ -149,14 +149,14 @@
         "domEventListeners": 1500,
         "rootListeners": 0,
         "uniqueEventTypes": 2,
-        "transformTimeMs": 83.93
+        "transformTimeMs": 106.87
       },
       "optimized": {
         "itemsRendered": 500,
         "domEventListeners": 1,
         "rootListeners": 1,
         "uniqueEventTypes": 2,
-        "transformTimeMs": 83.93
+        "transformTimeMs": 106.87
       },
       "deltas": {
         "listeners": {
@@ -187,14 +187,14 @@
         "domEventListeners": 6500,
         "rootListeners": 0,
         "uniqueEventTypes": 4,
-        "transformTimeMs": 32.43
+        "transformTimeMs": 50.72
       },
       "optimized": {
         "itemsRendered": 500,
         "domEventListeners": 4,
         "rootListeners": 4,
         "uniqueEventTypes": 4,
-        "transformTimeMs": 32.43
+        "transformTimeMs": 50.72
       },
       "deltas": {
         "listeners": {

@@ -3,31 +3,57 @@
   "version": "0.1.0",
   "description": "Ahead-of-time template compiler for Lit and Web Components",
   "type": "module",
-  "main": "lib/index.js",
-  "module": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "types": "src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./lib/index.d.ts",
-      "import": "./lib/index.js",
-      "default": "./lib/index.js"
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
     }
   },
   "files": [
-    "lib"
+    "src/index.js",
+    "src/index.d.ts",
+    "lib/index.js",
+    "lib/index.d.ts",
+    "*.node"
   ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/html-aot"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "html-aot",
+    "compiler",
+    "oxc",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "napi": {
+    "binaryName": "html-aot",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
   "scripts": {
-    "build": "tsc --build",
+    "build": "cargo build --release --offline && cp target/release/libhtml_aot.dylib html-aot.darwin-arm64.node 2>/dev/null && (codesign -s - -f html-aot.darwin-arm64.node 2>/dev/null || true) || true",
+    "build:debug": "cargo build --offline && cp target/debug/libhtml_aot.dylib html-aot.darwin-arm64.node 2>/dev/null && (codesign -s - -f html-aot.darwin-arm64.node 2>/dev/null || true) || true",
     "test": "vitest run"
   },
-  "dependencies": {
-    "@parse5/tools": "^0.7.0",
-    "lit-html": "^3.3.3",
-    "parse5": "^8.0.1",
-    "typescript": "^7.0.2"
-  },
   "devDependencies": {
+    "@napi-rs/cli": "^3.10.5",
     "@types/node": "^26.6.3",
+    "typescript": "^7.0.2",
     "vitest": "^5.0.2"
   }
 }

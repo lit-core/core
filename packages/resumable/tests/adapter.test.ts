@@ -2,7 +2,7 @@ import './setup.js';
 import { html, LitElement } from 'lit';
 import { describe, expect, it } from 'vitest';
 import { restoreComponentState, withResumable } from '../src/client/adapter.js';
-import { renderToDsd } from '../src/server/dsd-renderer.js';
+import { renderToDsd, renderTemplateResult } from '../src/server/dsd-renderer.js';
 import { extractComponentState, serializeComponentState } from '../src/server/state-serializer.js';
 
 describe('hydration-free client adapter and state hydration', () => {
@@ -138,5 +138,27 @@ describe('hydration-free client adapter and state hydration', () => {
     expect(actionTriggered).toBe(true);
 
     container.remove();
+  });
+
+  it('serializes template event listeners into resumes-on-* attributes for DSD', () => {
+    const fn1 = () => {};
+    const fn2 = () => {};
+
+    // Standard Lit tagged template
+    const template = html`
+      <div class="container">
+        <button @click=${fn1} class="primary">Submit</button>
+        <input @input=${fn2} type="text" />
+        <p>Static description</p>
+      </div>
+    `;
+
+    const output = renderTemplateResult(template);
+
+    expect(output).toContain('resumes-on-click');
+    expect(output).toContain('resumes-on-input');
+    expect(output).not.toContain('@click');
+    expect(output).not.toContain('@input');
+    expect(output).toContain('Static description');
   });
 });

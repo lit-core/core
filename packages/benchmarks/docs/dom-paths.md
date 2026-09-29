@@ -26,17 +26,17 @@ Measurements compare standard Lit runtime TreeWalker comment-node discovery agai
 
 | Metric | IBM Carbon | Adobe Spectrum | Web Awesome | Cisco Momentum | Google Material Web |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| Baseline mount latency | 0.15 ms | 0.07 ms | 0.12 ms | 0.11 ms | 0.10 ms |
-| Optimized mount latency | 0.11 ms | 0.06 ms | 0.10 ms | 0.03 ms | 0.02 ms |
-| Mount speedup | **-26.7%** | **-14.3%** | **-16.7%** | **-72.7%** | **-80.0%** |
+| Baseline mount latency | 0.16 ms | 0.09 ms | 0.15 ms | 0.09 ms | 0.10 ms |
+| Optimized mount latency | 0.10 ms | 0.07 ms | 0.08 ms | 0.03 ms | 0.02 ms |
+| Mount speedup | **-37.5%** | **-22.2%** | **-46.7%** | **-66.7%** | **-80.0%** |
 | Baseline TreeWalker invocations | 500 | 500 | 500 | 500 | 500 |
 | Optimized TreeWalker invocations | 0 | 0 | 0 | 0 | 0 |
 | TreeWalker elimination | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** | **-100.0%** |
 | Baseline DOM nodes visited | 1,863 | 1,000 | 2,861 | 2,103 | 1,843 |
 | Optimized DOM nodes visited | 4,629 | 1,000 | 7,346 | 4,531 | 3,498 |
 | Node traversal reduction | **+148.5%** | **0.0%** | **+156.8%** | **+115.5%** | **+89.8%** |
-| Baseline heap memory | 174.5 KB | 141.0 KB | 185.1 KB | 147.7 KB | 156.2 KB |
-| Optimized heap memory | 317.0 KB | 193.3 KB | 199.4 KB | 122.5 KB | 109.9 KB |
+| Baseline heap memory | 174.0 KB | 174.7 KB | 165.7 KB | 162.5 KB | 156.2 KB |
+| Optimized heap memory | 323.9 KB | 158.2 KB | 263.5 KB | 122.5 KB | 109.9 KB |
 
 > [!NOTE]
 > `@lit-core/dom-paths` precomputes exact numeric child index paths (`[0, 2, 1]`) at build time using AST traversal. At runtime, the client resolves target comment and element nodes in nanoseconds via native `.childNodes[i]` indexing, completely bypassing `document.createTreeWalker` recursive scans and cutting mount latency by 75-88%.

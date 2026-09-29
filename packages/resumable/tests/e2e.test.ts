@@ -1,6 +1,6 @@
 import { type Browser, chromium } from 'playwright';
 import { afterAll, describe, expect, it } from 'vitest';
-import { generateInlineLoader } from '../src/client/loader.js';
+import { compileResumableLoader } from '../src/client/compiler.js';
 import { renderToDsd } from '../src/server/dsd-renderer.js';
 
 describe('playwright browser end-to-end resumption tests', () => {
@@ -43,7 +43,7 @@ describe('playwright browser end-to-end resumption tests', () => {
       state: { role: 'editor', userId: 42 },
     });
 
-    const inlineLoader = generateInlineLoader();
+    const inlineLoader = compileResumableLoader();
 
     const htmlContent = `<!DOCTYPE html>
 <html>

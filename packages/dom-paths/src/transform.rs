@@ -73,10 +73,7 @@ impl<'a> Visit<'a> for TemplateCollector {
     }
 }
 
-fn collect_classes_mut<'a, 'b>(
-    stmts: &'b mut [Statement<'a>],
-    out: &mut Vec<&'b mut Class<'a>>,
-) {
+fn collect_classes_mut<'a, 'b>(stmts: &'b mut [Statement<'a>], out: &mut Vec<&'b mut Class<'a>>) {
     for stmt in stmts {
         match stmt {
             Statement::ClassDeclaration(class) => {
@@ -215,19 +212,19 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
             for part in &part_descriptors {
                 let mut path_elements = ArenaVec::new_in(&ast);
                 for idx in &part.path {
-                    path_elements.push(ArrayExpressionElement::from(Expression::new_numeric_literal(
-                        SPAN,
-                        *idx as f64,
-                        None,
-                        NumberBase::Decimal,
-                        &ast,
-                    )));
+                    path_elements.push(ArrayExpressionElement::from(
+                        Expression::new_numeric_literal(
+                            SPAN,
+                            *idx as f64,
+                            None,
+                            NumberBase::Decimal,
+                            &ast,
+                        ),
+                    ));
                 }
-                elements.push(ArrayExpressionElement::from(Expression::new_array_expression(
-                    SPAN,
-                    path_elements,
-                    &ast,
-                )));
+                elements.push(ArrayExpressionElement::from(
+                    Expression::new_array_expression(SPAN, path_elements, &ast),
+                ));
             }
 
             let array_expr = Expression::new_array_expression(SPAN, elements, &ast);
@@ -250,6 +247,89 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
                 &ast,
             );
 
+            // Construct AST node for `static __litPartNodes(root) { return [ ... ]; }`
+            let mut node_elements = ArenaVec::new_in(&ast);
+            for part in &part_descriptors {
+                let mut cur_expr = Expression::new_identifier(SPAN, "root", &ast);
+                for idx in &part.path {
+                    let child_nodes_member = Expression::new_static_member_expression(
+                        SPAN,
+                        cur_expr,
+                        IdentifierName::new(SPAN, "childNodes", &ast),
+                        false,
+                        &ast,
+                    );
+                    let num_expr = Expression::new_numeric_literal(
+                        SPAN,
+                        *idx as f64,
+                        None,
+                        NumberBase::Decimal,
+                        &ast,
+                    );
+                    cur_expr = Expression::new_computed_member_expression(
+                        SPAN,
+                        child_nodes_member,
+                        num_expr,
+                        false,
+                        &ast,
+                    );
+                }
+                node_elements.push(ArrayExpressionElement::from(cur_expr));
+            }
+
+            let return_array = Expression::new_array_expression(SPAN, node_elements, &ast);
+            let mut ret_stmts = ArenaVec::new_in(&ast);
+            ret_stmts.push(Statement::new_return_statement(
+                SPAN,
+                Some(return_array),
+                &ast,
+            ));
+            let func_body = FunctionBody::boxed(SPAN, ArenaVec::new_in(&ast), ret_stmts, &ast);
+
+            let param_pat = BindingPattern::new_binding_identifier(SPAN, "root", &ast);
+            let formal_param = FormalParameter::new_plain(SPAN, param_pat, &ast);
+            let mut params_vec = ArenaVec::new_in(&ast);
+            params_vec.push(formal_param);
+            let params = FormalParameters::boxed(
+                SPAN,
+                FormalParameterKind::FormalParameter,
+                params_vec,
+                None,
+                &ast,
+            );
+
+            let func = Function::boxed(
+                SPAN,
+                FunctionType::FunctionExpression,
+                None,
+                false,
+                false,
+                false,
+                None,
+                None,
+                params,
+                None,
+                Some(func_body),
+                &ast,
+            );
+
+            let method_key = PropertyKey::new_static_identifier(SPAN, "__litPartNodes", &ast);
+            let method_def = ClassElement::new_method_definition(
+                SPAN,
+                MethodDefinitionType::MethodDefinition,
+                ArenaVec::new_in(&ast),
+                method_key,
+                func,
+                MethodDefinitionKind::Method,
+                false,
+                true, // static = true
+                false,
+                false,
+                None,
+                &ast,
+            );
+
+            class.body.body.insert(0, method_def);
             class.body.body.insert(0, prop_def);
         }
     }
@@ -271,7 +351,9 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         }
     }
 
-    let codegen_result = Codegen::new().with_options(codegen_options).build(&parsed.program);
+    let codegen_result = Codegen::new()
+        .with_options(codegen_options)
+        .build(&parsed.program);
     let map_json = codegen_result.map.map(|m| m.to_json_string());
 
     DomPathsResult {

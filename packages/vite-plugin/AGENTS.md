@@ -19,6 +19,11 @@ Use sentence case for all headings, options descriptions, comments, and document
    - Ensures virtual stylesheets are aligned with Rollup chunk boundaries to prevent shared styles from leaking across route boundaries or entry points.
 4. **HMR handling**:
    - Updates virtual stylesheet contents on module updates without forcing full page reloads.
+5. **Zero consumer runtime overhead**:
+   - Automatically injects compiler-synthesized code (such as resumable microloaders and adapters) ahead of time into HTML entry points or bundle chunks.
+   - Downstream consumers do not install, import, or manage runtime loaders manually.
+   - Strictly prohibit naive path fallbacks (such as `/components/*`); resolve all chunk mappings dynamically through Vite / Rollup build manifests.
+
 
 ---
 

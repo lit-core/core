@@ -226,6 +226,9 @@ class MockElement extends MockNode {
   tagName = 'DIV';
   attributes = new Map<string, string>();
   listeners = new Map<string, Array<{ fn: Function; capture: boolean }>>();
+  get localName(): string {
+    return this.tagName.toLowerCase();
+  }
   shadowRoot: any = null;
   _textContent = '';
   _innerHTML = '';
@@ -260,6 +263,9 @@ class MockElement extends MockNode {
 
   getAttribute(name: string): string | null {
     return this.attributes.get(name) ?? null;
+  }
+  getAttributeNames(): string[] {
+    return [...this.attributes.keys()];
   }
   setAttribute(name: string, value: string) {
     this.attributes.set(name, String(value));
@@ -296,7 +302,10 @@ class MockElement extends MockNode {
   }
 
   dispatchEvent(event: any): boolean {
-    event.target = this;
+    if (!event.target) {
+      event.target = this;
+    }
+    event.currentTarget = this;
     const list = this.listeners.get(event.type) || [];
     for (const item of [...list]) {
       item.fn.call(this, event);
@@ -499,6 +508,7 @@ const documentMock = {
 const windowMock = {
   document: documentMock,
   customElements,
+  innerHeight: 800,
   Event: MockEvent,
   CustomEvent: MockCustomEvent,
   MouseEvent: MockMouseEvent,

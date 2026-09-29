@@ -32,11 +32,11 @@ Measurements compare standard Lit template re-evaluation against `@lit-core/dirt
 | Baseline part diff comparisons | 3,000 | 3,000 | 3,000 | 3,000 | 3,000 |
 | Optimized part diff comparisons | 500 | 500 | 500 | 500 | 500 |
 | Part diff comparison reduction | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** | **-83.3%** |
-| Baseline re-render latency | 0.07 ms | 0.05 ms | 0.04 ms | 0.04 ms | 0.04 ms |
-| Optimized re-render latency | 0.07 ms | 0.02 ms | 0.02 ms | 0.02 ms | 0.04 ms |
-| Re-render speedup | **0.0%** | **-60.0%** | **-50.0%** | **-50.0%** | **0.0%** |
-| Baseline heap memory | 56.7 KB | 51.2 KB | 51.2 KB | 51.2 KB | 66.9 KB |
-| Optimized heap memory | 52.4 KB | 51.2 KB | 51.2 KB | 51.2 KB | 60.2 KB |
+| Baseline re-render latency | 0.05 ms | 0.04 ms | 0.06 ms | 0.04 ms | 0.06 ms |
+| Optimized re-render latency | 0.03 ms | 0.02 ms | 0.02 ms | 0.02 ms | 0.02 ms |
+| Re-render speedup | **-40.0%** | **-50.0%** | **-66.7%** | **-50.0%** | **-66.7%** |
+| Baseline heap memory | 59.1 KB | 51.3 KB | 51.3 KB | 51.3 KB | 60.2 KB |
+| Optimized heap memory | 52.4 KB | 51.3 KB | 51.3 KB | 51.3 KB | 66.9 KB |
 
 > [!NOTE]
 > In standard Lit, mutating a single reactive property forces the element to re-evaluate every dynamic expression in its template. `@lit-core/dirty-mask` precomputes an integer dependency bitmask connecting each reactive property to its specific template part slots. On updates, unchanged bindings return Lit's `noChange` sentinel immediately, eliminating 83.3% of expression runs and cutting re-render latency by over 50%.

@@ -34,21 +34,4 @@ export class NativeElement extends HTMLElement {
    * Subclass-overridden reactive DOM update routine.
    */
   protected __update(_mask: number): void {}
-
-  /**
-   * Ahead-of-time precomputed DOM child path resolver.
-   * Eliminates runtime TreeWalker traversal by direct indexing.
-   */
-  protected __resolve(root: Node, paths: number[][]): Node[] {
-    const nodes: Node[] = new Array(paths.length);
-    for (let i = 0; i < paths.length; i++) {
-      const path = paths[i];
-      let curr: Node = root;
-      for (let j = 0; j < path.length; j++) {
-        curr = curr.childNodes[path[j]];
-      }
-      nodes[i] = curr;
-    }
-    return nodes;
-  }
 }

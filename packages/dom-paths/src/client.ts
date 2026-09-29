@@ -23,6 +23,10 @@ export function resolveNodeByPath(root: Node, path: number[]): Node {
  * @returns Array of resolved DOM Nodes
  */
 export function resolveNodesByPaths(root: Node, paths: number[][]): Node[] {
+  const ctor = ((root as ShadowRoot).host?.constructor ?? root.constructor) as any;
+  if (typeof ctor?.__litPartNodes === 'function') {
+    return ctor.__litPartNodes(root);
+  }
   const len = paths.length;
   const nodes = new Array(len);
   for (let i = 0; i < len; i++) {
@@ -40,6 +44,17 @@ export function resolveNodesByPaths(root: Node, paths: number[][]): Node[] {
  * @param callback Callback invoked for each resolved part node
  */
 export function preparePartsWithPaths<T = Node>(root: Node, paths: number[][], callback?: (node: Node, index: number) => T): T[] {
+  const ctor = ((root as ShadowRoot).host?.constructor ?? root.constructor) as any;
+  if (typeof ctor?.__litPartNodes === 'function') {
+    const nodes: Node[] = ctor.__litPartNodes(root);
+    if (!callback) return nodes as unknown as T[];
+    const len = nodes.length;
+    const parts = new Array(len);
+    for (let i = 0; i < len; i++) {
+      parts[i] = callback(nodes[i], i);
+    }
+    return parts;
+  }
   const len = paths.length;
   const parts = new Array(len);
   for (let i = 0; i < len; i++) {

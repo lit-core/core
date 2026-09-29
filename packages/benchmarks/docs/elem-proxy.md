@@ -26,14 +26,14 @@ Measurements evaluate executing full design system bundles in an isolated V8 VM 
 
 | Metric | Carbon | Spectrum | Web Awesome | Momentum | Material Web |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| Baseline evaluation CPU time | 47.93 ms | 4.02 ms | 3.64 ms | 3.11 ms | 6.11 ms |
-| Optimized evaluation CPU time | 39.05 ms | 3.98 ms | 1.30 ms | 3.10 ms | 5.25 ms |
-| Evaluation CPU savings | **-18.5%** | **-1.0%** | **-64.3%** | **-0.3%** | **-14.1%** |
-| Baseline V8 heap memory | 159,017.7 KB | 172,765.3 KB | 204,703.4 KB | 203,601.8 KB | 226,659.8 KB |
-| Optimized V8 heap memory | 136,421.0 KB | 158,457.8 KB | 215,928.8 KB | 210,363.4 KB | 230,827.4 KB |
-| V8 heap memory savings | **-14.2%** | **-8.3%** | **+5.5%** | **+3.3%** | **+1.8%** |
+| Baseline evaluation CPU time | 50.52 ms | 3.91 ms | 3.96 ms | 3.29 ms | 6.67 ms |
+| Optimized evaluation CPU time | 42.47 ms | 3.82 ms | 1.51 ms | 3.47 ms | 5.31 ms |
+| Evaluation CPU savings | **-15.9%** | **-2.3%** | **-61.9%** | **+5.5%** | **-20.4%** |
+| Baseline V8 heap memory | 127,453.8 KB | 173,040.7 KB | 153,021.2 KB | 116,104.3 KB | 139,159.5 KB |
+| Optimized V8 heap memory | 136,493.6 KB | 106,655.7 KB | 164,249.8 KB | 122,866.4 KB | 143,322.8 KB |
+| V8 heap memory savings | **+7.1%** | **-38.4%** | **+7.3%** | **+5.8%** | **+3.0%** |
 | Baseline mount latency (first 5) | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
-| Optimized mount latency (first 5) | 0.00 ms | 0.01 ms | 0.00 ms | 0.00 ms | 0.00 ms |
+| Optimized mount latency (first 5) | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms | 0.00 ms |
 | Mount latency delta | +0.00 ms (transparent JIT upgrade) | +0.00 ms (transparent JIT upgrade) | +0.00 ms (transparent JIT upgrade) | +0.00 ms (transparent JIT upgrade) | +0.00 ms (transparent JIT upgrade) |
 | Classes evaluated during init | 5 / 99 (5.1%) [94 avoided] | 5 / 52 (9.6%) [47 avoided] | 5 / 73 (6.8%) [68 avoided] | 5 / 97 (5.2%) [92 avoided] | 5 / 28 (17.9%) [23 avoided] |
 | Deferred execution proportion | **94.9% deferred** | **90.4% deferred** | **93.2% deferred** | **94.8% deferred** | **82.1% deferred** |
@@ -49,11 +49,11 @@ Detailed counts of deferred components, evaluation CPU improvements, and V8 memo
 
 | Design system or library | Components evaluated | Classes evaluated on boot | Deferred proportion | CPU time reduction | V8 memory reduction | Build overhead |
 | :--- | ---: | ---: | ---: | ---: | ---: | :--- |
-| Carbon Web Components | 99 | 5 / 99 (5.1%) | **94.9% deferred** | **-18.5%** | **-14.2%** | Fast native pass |
-| Spectrum Web Components | 52 | 5 / 52 (9.6%) | **90.4% deferred** | **-1.0%** | **-8.3%** | Fast native pass |
-| Web Awesome | 73 | 5 / 73 (6.8%) | **93.2% deferred** | **-64.3%** | **+5.5%** | Fast native pass |
-| Momentum Design | 97 | 5 / 97 (5.2%) | **94.8% deferred** | **-0.3%** | **+3.3%** | Fast native pass |
-| Material Web | 28 | 5 / 28 (17.9%) | **82.1% deferred** | **-14.1%** | **+1.8%** | Fast native pass |
+| Carbon Web Components | 99 | 5 / 99 (5.1%) | **94.9% deferred** | **-15.9%** | **+7.1%** | Fast native pass |
+| Spectrum Web Components | 52 | 5 / 52 (9.6%) | **90.4% deferred** | **-2.3%** | **-38.4%** | Fast native pass |
+| Web Awesome | 73 | 5 / 73 (6.8%) | **93.2% deferred** | **-61.9%** | **+7.3%** | Fast native pass |
+| Momentum Design | 97 | 5 / 97 (5.2%) | **94.8% deferred** | **+5.5%** | **+5.8%** | Fast native pass |
+| Material Web | 28 | 5 / 28 (17.9%) | **82.1% deferred** | **-20.4%** | **+3.0%** | Fast native pass |
 
 ---
 

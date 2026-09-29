@@ -18,6 +18,7 @@ import type {
   PropsLowerOptions,
   ResumableOptions,
 } from './options.js';
+import { buildManifest, compileResumableLoader, extractCustomElementTags } from '@lit-core/resumable';
 import { runFuseOptimization, runHtmlFuseOptimization, runScopingAudit } from './transforms.js';
 import { BARE_FUSED_ID_REGEX, BARE_HTML_FUSED_ID_REGEX, extractHtmlTemplateId, extractSheetId, isVirtualHtmlFusedId, VIRTUAL_FUSED_PREFIX, VIRTUAL_HTML_FUSED_PREFIX } from './utils.js';
 
@@ -216,6 +217,69 @@ export class LitWebpackPlugin {
             resolveData.request = `${VIRTUAL_FUSED_PREFIX}${filename}`;
           } else if (resolveData.request.startsWith('virtual:lit-css-fuse/')) {
             resolveData.request = resolveData.request.replace('virtual:lit-css-fuse/', VIRTUAL_FUSED_PREFIX);
+          }
+        });
+      });
+    }
+
+    const resumableOpt = options.resumable ? (typeof options.resumable === 'object' ? options.resumable : {}) : null;
+    if (resumableOpt) {
+      compiler.hooks.thisCompilation.tap(this.name, (compilation) => {
+        const stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS;
+        compilation.hooks.processAssets.tapPromise({ name: this.name, stage }, async (assets) => {
+          const chunkMap = new Map<string, string[]>();
+          const rawPublicPath = compilation.outputOptions.publicPath;
+          const publicPath = typeof rawPublicPath === 'string' && rawPublicPath !== 'auto' ? rawPublicPath : '/';
+
+          for (const chunk of compilation.chunks) {
+            const tags = new Set<string>();
+            for (const file of chunk.files) {
+              if (file.endsWith('.js') && !file.includes('resumable-loader')) {
+                const asset = compilation.getAsset(file);
+                if (asset) {
+                  const content = asset.source.source().toString();
+                  const foundTags = extractCustomElementTags(content);
+                  for (const t of foundTags) {
+                    tags.add(t);
+                  }
+                }
+              }
+            }
+            if (tags.size > 0) {
+              const primaryFile = Array.from(chunk.files).find((f) => f.endsWith('.js')) || chunk.name;
+              if (primaryFile) {
+                chunkMap.set(primaryFile, Array.from(tags));
+              }
+            }
+          }
+
+          const manifest = buildManifest(chunkMap, {
+            chunkResolver: resumableOpt.chunkResolver,
+            basePath: publicPath,
+          });
+
+          const loaderCode = compileResumableLoader({
+            manifest,
+            preloadOnHover: resumableOpt.preloadOnHover !== false,
+          });
+
+          const RawSource = compiler.webpack.sources.RawSource;
+          compilation.emitAsset('resumable-loader.js', new RawSource(loaderCode));
+
+          for (const [filename, asset] of Object.entries(assets)) {
+            if (filename.endsWith('.html')) {
+              const html = asset.source().toString();
+              const scriptTag = `<script>${loaderCode}</script>`;
+              let modifiedHtml: string;
+              if (html.includes('</head>')) {
+                modifiedHtml = html.replace('</head>', `${scriptTag}\n</head>`);
+              } else if (html.includes('<body')) {
+                modifiedHtml = html.replace('<body', `${scriptTag}\n<body`);
+              } else {
+                modifiedHtml = `${scriptTag}\n${html}`;
+              }
+              compilation.updateAsset(filename, new RawSource(modifiedHtml));
+            }
           }
         });
       });

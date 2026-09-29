@@ -2,11 +2,11 @@
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-import { generateInlineLoader } from '@lit-core/resumable/client';
+import { compileResumableLoader } from '@lit-core/resumable/client';
 import { renderToDsd } from '@lit-core/resumable/server';
-import { ENTERPRISE_COMPONENTS, extractComponentTemplates } from './fixtures.js';
+import { ENTERPRISE_COMPONENTS, extractComponentTemplates, extractCssFromModule, findComponentCssSource } from './fixtures.js';
 import { calculateDelta, formatDuration, formatNumber } from './format.js';
-import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, syncDocFile } from './reporters/index.js';
+import { printBenchmarkFooter, printBenchmarkHeader, renderBenchmarkDoc, saveBenchmarkResult, saveResumableArtifactHtml, syncDocFile } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 
 export const SUITES = [
@@ -16,6 +16,86 @@ export const SUITES = [
   { id: 'momentum', name: 'Momentum Design', shortName: 'Momentum', packageName: '@momentum-design/components', version: '0.139.9', elements: 97, avgComponentSizeKb: 3.5 },
   { id: 'material', name: 'Material Web', shortName: 'Material Web', packageName: '@material/web', version: '2.5.0', elements: 28, avgComponentSizeKb: 4.5 },
 ];
+
+/**
+ * Clean raw Lit component template syntax into valid, semantic HTML suitable for Declarative Shadow DOM.
+ * Eliminates raw JavaScript interpolation syntax like ${iconLoader(...)} or ${title}.
+ * @param {string} raw
+ * @param {{ name: string, tag: string }} comp
+ * @returns {string}
+ */
+export function cleanTemplateForDsd(raw, comp) {
+  if (!raw) return '';
+  let clean = raw;
+
+  // 1. Prefix
+  clean = clean.replace(/\$\{(?:"cds"|prefix)\}/g, 'cds');
+
+  // 2. Events: @click=${...}, @click="${...}", @click="fn" -> resumes-on-click=""
+  clean = clean.replace(/@([a-zA-Z0-9_-]+)=(?:"?\$\{[^}]*\}?"|"[^"]*"|'[^']*'|[^>\s]+)/g, 'resumes-on-$1=""');
+
+  // 3. Properties: .foo=${...}, .foo="${...}", .foo="bar" -> strip
+  clean = clean.replace(/\.[a-zA-Z0-9_-]+=(?:"?\$\{[^}]*\}?"|"[^"]*"|'[^']*'|[^>\s]+)/g, '');
+
+  // 4. Boolean attrs: ?disabled=${...}, ?disabled="${...}" -> strip
+  clean = clean.replace(/\?([a-zA-Z0-9_-]+)=(?:"?\$\{[^}]*\}?"|"[^"]*"|'[^']*'|[^>\s]+)/g, '');
+
+  // 5. Icons -> clean SVG icon
+  clean = clean.replace(/\$\{(?:iconLoader|\S*icon\S*)\([^)]*\)\}/gi, '<svg class="cds--btn__icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M6 3l5 5-5 5z"/></svg>');
+
+  // 6. Text & labels
+  clean = clean.replace(/\$\{[^}]*(?:title|tooltipText|helperText|labelText|legendText|labelTitle)[^}]*\}/gi, comp.name || 'Text');
+
+  // 7. Classes
+  clean = clean.replace(/\$\{classes\}/g, 'cds--btn cds--btn--primary');
+  clean = clean.replace(/\$\{contentClasses\}/g, 'cds--accordion__content');
+  clean = clean.replace(/\$\{tooltipClasses\}/g, 'cds--tooltip');
+
+  // 8. ifDefined & nested html
+  clean = clean.replace(/ifDefined\([^)]*\)/g, '');
+  clean = clean.replace(/html`([\s\S]*?)`/g, '$1');
+
+  // 9. Iteratively strip all remaining ${...} interpolations
+  while (clean.includes('${')) {
+    clean = clean.replace(/\$\{[^{}]*\}/g, '');
+    if (!/\$\{[^{}]*\}/.test(clean) && clean.includes('${')) {
+      clean = clean.replace(/\$\{[\s\S]*?\}/g, '');
+      break;
+    }
+  }
+
+  // 10. Clean up syntax artifacts: stray backticks, braces, dangling equals, empty invalid attrs
+  clean = clean.replace(/[`}]/g, '');
+  clean = clean.replace(/\s[a-zA-Z0-9_-]+=\s*(?=[>\s])/g, ' ');
+  clean = clean.replace(/\s(id|for|role|tabindex|aria-[a-z-]+|style|class)=""/g, '');
+  clean = clean
+    .replace(/\s{2,}/g, ' ')
+    .replace(/> </g, '><')
+    .trim();
+
+  return clean;
+}
+
+/**
+ * Provide accessible, semantic fallback shadow markup for a component when template extraction is partial.
+ * @param {{ name: string, tag: string }} comp
+ * @returns {string}
+ */
+export function getSemanticFallback(comp) {
+  const tag = comp.tag.toLowerCase();
+  const name = comp.name
+    .split('-')
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(' ');
+  if (tag.includes('button')) return `<button class="cds--btn cds--btn--primary" type="button" resumes-on-click=""><slot>${name}</slot></button>`;
+  if (tag.includes('checkbox'))
+    return `<div class="cds--checkbox-wrapper"><label class="cds--checkbox-label"><input type="checkbox" class="cds--checkbox" resumes-on-change="" /><span class="cds--checkbox-label-text"><slot>${name}</slot></span></label></div>`;
+  if (tag.includes('input') || tag.includes('text')) return `<div class="cds--text-input-wrapper"><input class="cds--text-input" placeholder="${name}..." resumes-on-input="" /></div>`;
+  if (tag.includes('select')) return `<div class="cds--select"><select class="cds--select-input" resumes-on-change=""><option>${name} 1</option><option>${name} 2</option></select></div>`;
+  if (tag.includes('loading'))
+    return `<div class="cds--loading"><svg viewBox="0 0 100 100" width="36" height="36"><circle cx="50" cy="50" r="44" stroke="currentColor" fill="none" stroke-width="8"/></svg></div>`;
+  return `<div class="cds--card" resumes-on-click=""><slot>${name}</slot></div>`;
+}
 
 /**
  * Simulates SSR and client execution for Standard Lit SSR vs Resumable SSR.
@@ -30,30 +110,68 @@ export async function measureResumablePerformance(suite) {
   const standardInitialJsKb = Number((totalComponents * avgComponentSizeKb + litRuntimeSizeKb + ssrClientHydrationRuntimeKb).toFixed(1));
 
   // Resumable SSR: initial JS is only the micro-loader injected in <head>
-  const inlineLoaderScript = generateInlineLoader();
+  const inlineLoaderScript = compileResumableLoader();
   const resumableInitialJsKb = Number((Buffer.byteLength(inlineLoaderScript, 'utf8') / 1024).toFixed(2));
 
   // Measure real DSD rendering across the suite components using real component templates
   let _totalDsdBytes = 0;
   const components = ENTERPRISE_COMPONENTS[suite.id] || [];
+  const dsdMarkups = [];
 
   for (const comp of components) {
-    let shadowHtml = `<slot name="icon"></slot><slot></slot>`;
+    let shadowHtml = '';
     try {
       const tmpls = extractComponentTemplates(comp.pkg, comp.source);
-      if (tmpls.length > 0 && tmpls[0].length > 5) {
-        shadowHtml = tmpls[0];
+      if (tmpls.length > 0) {
+        const bestTmpl = tmpls.reduce((a, b) => (b.length > a.length ? b : a), '');
+        shadowHtml = cleanTemplateForDsd(bestTmpl, comp);
       }
     } catch {}
+
+    if (!shadowHtml || shadowHtml.length < 10 || !/<[a-z]/i.test(shadowHtml)) {
+      shadowHtml = getSemanticFallback(comp);
+    }
+
+    let styles = '';
+    try {
+      const cssSource = findComponentCssSource(comp.pkg, comp.css, comp.source);
+      if (cssSource) {
+        styles = extractCssFromModule(cssSource);
+      }
+    } catch {}
+
+    const cleanName = comp.name
+      .split('-')
+      .map((/** @type {string} */ p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(' ');
+    const lightDom = `<span>${cleanName}</span>`;
 
     const markup = renderToDsd({
       tagName: comp.tag,
       shadowHtml,
+      styles,
+      lightDom,
       attributes: { 'data-resumable': 'true', id: `resumed-${comp.name}` },
       state: { name: comp.name, tag: comp.tag },
     });
+    dsdMarkups.push(markup);
     _totalDsdBytes += Buffer.byteLength(markup, 'utf8');
   }
+
+  try {
+    saveResumableArtifactHtml({
+      suiteName: suite.name,
+      suiteId: suite.id,
+      dsdMarkups,
+      loaderScript: compileResumableLoader({ idleHydration: false }),
+      metrics: {
+        standardInitialJsKb,
+        resumableInitialJsKb,
+        totalComponents,
+        totalDsdBytes: _totalDsdBytes,
+      },
+    });
+  } catch {}
 
   // Measure execution of standard client hydration registration in V8 context
   const t0Standard = performance.now();
@@ -94,16 +212,36 @@ export async function measureResumablePerformance(suite) {
 
   // Measure execution of Resumable micro-loader in V8 context
   const t0Loader = performance.now();
-  const contextResumable = vm.createContext({
-    window: {},
+  /** @type {any} */
+  const winObj = {
+    requestIdleCallback: /** @param {any} cb */ (cb) => setTimeout(cb, 50),
+    cancelIdleCallback: /** @param {any} id */ (id) => clearTimeout(id),
     addEventListener: () => {},
     removeEventListener: () => {},
-    document: {
-      addEventListener: () => {},
-      createElement: () => ({ appendChild: () => {}, setAttribute: () => {} }),
-      head: { appendChild: () => {} },
-    },
+  };
+  const docObj = {
+    addEventListener: () => {},
+    createElement: () => ({ appendChild: () => {}, setAttribute: () => {} }),
+    head: { appendChild: () => {} },
+    querySelectorAll: () => [],
+  };
+  const ceObj = {
+    define: () => {},
+    get: () => null,
+    whenDefined: () => Promise.resolve(),
+  };
+  const contextResumable = vm.createContext({
+    window: winObj,
+    document: docObj,
+    customElements: ceObj,
+    setTimeout,
+    clearTimeout,
+    addEventListener: () => {},
+    removeEventListener: () => {},
   });
+  winObj.window = winObj;
+  winObj.document = docObj;
+  winObj.customElements = ceObj;
   vm.runInContext(inlineLoaderScript, contextResumable);
   const loaderEvalDuration = performance.now() - t0Loader;
 

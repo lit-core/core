@@ -3,13 +3,13 @@
   "benchmarkId": "bundle-optimizations",
   "title": "`@lit-core` bundler optimization benchmark results",
   "description": "Multi-suite bundle size and optimization benchmark across enterprise Lit design systems.",
-  "timestamp": "2026-09-28T21:14:33.064Z",
+  "timestamp": "2026-09-29T20:30:09.975Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a724976",
+    "gitCommit": "a49119e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -25,6 +25,49 @@
   },
   "suites": [
     {
+      "id": "webawesome",
+      "name": "Web Awesome (Full Component Suite)",
+      "componentCount": 73,
+      "baseline": {
+        "rawBytes": 822396,
+        "gzipBytes": 195007,
+        "brotliBytes": 146435,
+        "buildTimeMs": 109.62012500000003
+      },
+      "optimized": {
+        "rawBytes": 849415,
+        "gzipBytes": 192410,
+        "brotliBytes": 143187,
+        "buildTimeMs": 748.2438750000001
+      },
+      "deltas": {
+        "raw": {
+          "diff": 27019,
+          "percent": 3.2854002208181945
+        },
+        "gzip": {
+          "diff": -2597,
+          "percent": -1.3317470654899568
+        }
+      },
+      "diagnostics": {
+        "css-fuse": {
+          "rulesScanned": 1001,
+          "rulesDeduped": 205,
+          "fusedSheetsCreated": 86,
+          "componentsRewritten": 68,
+          "bytesSavedEstimate": 7175
+        },
+        "html-fuse": {
+          "fragmentsScanned": 200,
+          "fragmentsDeduped": 31,
+          "fusedTemplatesCreated": 14,
+          "componentsRewritten": 23,
+          "bytesSavedEstimate": 1431
+        }
+      }
+    },
+    {
       "id": "material",
       "name": "Material Web (@material/web)",
       "componentCount": 28,
@@ -32,25 +75,169 @@
         "rawBytes": 459132,
         "gzipBytes": 78467,
         "brotliBytes": 59861,
-        "buildTimeMs": 46.20745900000003
+        "buildTimeMs": 42.07999999999811
       },
       "optimized": {
-        "rawBytes": 452530,
-        "gzipBytes": 77911,
-        "brotliBytes": 59579,
-        "buildTimeMs": 61.960207999999966
+        "rawBytes": 474484,
+        "gzipBytes": 82823,
+        "brotliBytes": 62245,
+        "buildTimeMs": 385.9359170000025
       },
       "deltas": {
         "raw": {
-          "diff": -6602,
-          "percent": -1.437930704024115
+          "diff": 15352,
+          "percent": 3.3437007222323865
         },
         "gzip": {
-          "diff": -556,
-          "percent": -0.7085781283851811
+          "diff": 4356,
+          "percent": 5.551378286413397
         }
       },
-      "diagnostics": {}
+      "diagnostics": {
+        "css-fuse": {
+          "rulesScanned": 1354,
+          "rulesDeduped": 212,
+          "fusedSheetsCreated": 82,
+          "componentsRewritten": 73,
+          "bytesSavedEstimate": 7420
+        },
+        "html-fuse": {
+          "fragmentsScanned": 187,
+          "fragmentsDeduped": 29,
+          "fusedTemplatesCreated": 11,
+          "componentsRewritten": 27,
+          "bytesSavedEstimate": 1519
+        }
+      }
+    },
+    {
+      "id": "carbon",
+      "name": "Carbon Web Components (@carbon/web-components)",
+      "componentCount": 99,
+      "baseline": {
+        "rawBytes": 5941120,
+        "gzipBytes": 725947,
+        "brotliBytes": 290664,
+        "buildTimeMs": 195.92233300000225
+      },
+      "optimized": {
+        "rawBytes": 3039197,
+        "gzipBytes": 471137,
+        "brotliBytes": 307250,
+        "buildTimeMs": 1763.7085829999996
+      },
+      "deltas": {
+        "raw": {
+          "diff": -2901923,
+          "percent": -48.84471278142842
+        },
+        "gzip": {
+          "diff": -254810,
+          "percent": -35.10035856612122
+        }
+      },
+      "diagnostics": {
+        "css-fuse": {
+          "rulesScanned": 23881,
+          "rulesDeduped": 14896,
+          "fusedSheetsCreated": 170,
+          "componentsRewritten": 102,
+          "bytesSavedEstimate": 521360
+        },
+        "html-fuse": {
+          "fragmentsScanned": 596,
+          "fragmentsDeduped": 35,
+          "fusedTemplatesCreated": 19,
+          "componentsRewritten": 32,
+          "bytesSavedEstimate": 1265
+        }
+      }
+    },
+    {
+      "id": "spectrum",
+      "name": "Spectrum Web Components (@spectrum-web-components)",
+      "componentCount": 52,
+      "baseline": {
+        "rawBytes": 1923409,
+        "gzipBytes": 320113,
+        "brotliBytes": 222784,
+        "buildTimeMs": 180.83000000000175
+      },
+      "optimized": {
+        "rawBytes": 1791264,
+        "gzipBytes": 312298,
+        "brotliBytes": 227568,
+        "buildTimeMs": 2671.9830000000075
+      },
+      "deltas": {
+        "raw": {
+          "diff": -132145,
+          "percent": -6.870353627335632
+        },
+        "gzip": {
+          "diff": -7815,
+          "percent": -2.441325406965665
+        }
+      },
+      "diagnostics": {
+        "css-fuse": {
+          "rulesScanned": 10794,
+          "rulesDeduped": 10033,
+          "fusedSheetsCreated": 571,
+          "componentsRewritten": 536,
+          "bytesSavedEstimate": 351155
+        },
+        "html-fuse": {
+          "fragmentsScanned": 874,
+          "fragmentsDeduped": 160,
+          "fusedTemplatesCreated": 120,
+          "componentsRewritten": 108,
+          "bytesSavedEstimate": 38106
+        }
+      }
+    },
+    {
+      "id": "momentum",
+      "name": "Momentum Design (@momentum-design/components)",
+      "componentCount": 97,
+      "baseline": {
+        "rawBytes": 890931,
+        "gzipBytes": 196506,
+        "brotliBytes": 151475,
+        "buildTimeMs": 143.95750000001863
+      },
+      "optimized": {
+        "rawBytes": 872658,
+        "gzipBytes": 200146,
+        "brotliBytes": 153681,
+        "buildTimeMs": 756.0688329999975
+      },
+      "deltas": {
+        "raw": {
+          "diff": -18273,
+          "percent": -2.0510005825366946
+        },
+        "gzip": {
+          "diff": 3640,
+          "percent": 1.8523607421656336
+        }
+      },
+      "diagnostics": {
+        "css-fuse": {
+          "rulesScanned": 1094,
+          "rulesDeduped": 227,
+          "fusedSheetsCreated": 70,
+          "componentsRewritten": 76,
+          "bytesSavedEstimate": 7945
+        },
+        "html-fuse": {
+          "fragmentsScanned": 79,
+          "fragmentsDeduped": 16,
+          "fusedTemplatesCreated": 8,
+          "componentsRewritten": 12,
+          "bytesSavedEstimate": 526
+        }
+      }
     }
   ]
 }

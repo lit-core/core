@@ -22,6 +22,10 @@ export function resolveNodeByPath(root, path) {
  * @returns Array of resolved DOM Nodes
  */
 export function resolveNodesByPaths(root, paths) {
+  const ctor = root.host?.constructor ?? root.constructor;
+  if (typeof ctor?.__litPartNodes === 'function') {
+    return ctor.__litPartNodes(root);
+  }
   const len = paths.length;
   const nodes = new Array(len);
   for (let i = 0; i < len; i++) {
@@ -38,6 +42,17 @@ export function resolveNodesByPaths(root, paths) {
  * @param callback Callback invoked for each resolved part node
  */
 export function preparePartsWithPaths(root, paths, callback) {
+  const ctor = root.host?.constructor ?? root.constructor;
+  if (typeof ctor?.__litPartNodes === 'function') {
+    const nodes = ctor.__litPartNodes(root);
+    if (!callback) return nodes;
+    const len = nodes.length;
+    const parts = new Array(len);
+    for (let i = 0; i < len; i++) {
+      parts[i] = callback(nodes[i], i);
+    }
+    return parts;
+  }
   const len = paths.length;
   const parts = new Array(len);
   for (let i = 0; i < len; i++) {

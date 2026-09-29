@@ -2,19 +2,37 @@ import { lit } from '@lit-core/vite-plugin';
 import { normalizeInclude } from './base.js';
 import { cssFuseTool } from './css-fuse.js';
 import { cssMinifierTool } from './css-minifier.js';
+import { dirtyMaskTool } from './dirty-mask.js';
+import { domPathsTool } from './dom-paths.js';
 import { elemProxyTool } from './elem-proxy.js';
 import { eventHoistTool } from './event-hoist.js';
 import { htmlAotTool } from './html-aot.js';
 import { htmlFuseTool } from './html-fuse.js';
 import { htmlMinifierTool } from './html-minifier.js';
+import { memoizeTool } from './memoize.js';
 import { nativeTool } from './native.js';
 import { propsLowerTool } from './props-lower.js';
+import { resumableTool } from './resumable.js';
 
 /**
  * Array of all registered Vite bundler optimization tools.
  * @type {import('../types.js').BenchmarkTool[]}
  */
-export const registeredTools = [cssFuseTool, htmlFuseTool, propsLowerTool, elemProxyTool, nativeTool, eventHoistTool, htmlAotTool, cssMinifierTool, htmlMinifierTool];
+export const registeredTools = [
+  cssFuseTool,
+  htmlFuseTool,
+  propsLowerTool,
+  elemProxyTool,
+  nativeTool,
+  eventHoistTool,
+  htmlAotTool,
+  cssMinifierTool,
+  htmlMinifierTool,
+  dirtyMaskTool,
+  domPathsTool,
+  memoizeTool,
+  resumableTool,
+];
 
 /**
  * Get active tools (optionally filtered by IDs).
@@ -98,5 +116,48 @@ export async function getCombinedPlugins(tools, suite) {
           exclude: [],
         }
       : false,
+    dirtyMask: hasTool('dirty-mask')
+      ? {
+          include,
+          exclude: [],
+        }
+      : false,
+    domPaths: hasTool('dom-paths')
+      ? {
+          include,
+          exclude: [],
+          normalizeWhitespace: true,
+        }
+      : false,
+    memoize: hasTool('memoize')
+      ? {
+          include,
+          exclude: [],
+        }
+      : false,
+    resumable: hasTool('resumable')
+      ? {
+          include,
+          exclude: [],
+          preloadOnHover: true,
+          injectAdapter: true,
+        }
+      : false,
   });
 }
+
+export {
+  cssFuseTool,
+  cssMinifierTool,
+  dirtyMaskTool,
+  domPathsTool,
+  elemProxyTool,
+  eventHoistTool,
+  htmlAotTool,
+  htmlFuseTool,
+  htmlMinifierTool,
+  memoizeTool,
+  nativeTool,
+  propsLowerTool,
+  resumableTool,
+};

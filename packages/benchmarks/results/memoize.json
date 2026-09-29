@@ -3,13 +3,13 @@
   "benchmarkId": "memoize",
   "title": "`@lit-core/memoize` empirical benchmark results",
   "description": "Ahead-of-time reactive template expression memoization evaluated across 5 enterprise collection components to eliminate redundant array transformations and GC overhead during unrelated state updates.",
-  "timestamp": "2026-09-28T21:18:22.679Z",
+  "timestamp": "2026-09-29T20:31:39.308Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a724976",
+    "gitCommit": "a49119e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -35,15 +35,15 @@
       "baseline": {
         "pipelineRunsCount": 201,
         "allocatedObjectsCount": 50451,
-        "reRenderLatencyMs": 2.31,
-        "heapKb": 84.2,
+        "reRenderLatencyMs": 2.49,
+        "heapKb": 329.3,
         "estimatedGcPauseMs": 0.58
       },
       "optimized": {
         "pipelineRunsCount": 1,
         "allocatedObjectsCount": 251,
-        "reRenderLatencyMs": 0.03,
-        "heapKb": 119.1,
+        "reRenderLatencyMs": 0.01,
+        "heapKb": 14.5,
         "estimatedGcPauseMs": 0
       },
       "deltas": {
@@ -62,10 +62,10 @@
           "isReduction": true
         },
         "latency": {
-          "diff": -2.2800000000000002,
-          "percent": -98.70129870129871,
-          "formattedDiff": "-2.3",
-          "formattedPercent": "-98.7%",
+          "diff": -2.4800000000000004,
+          "percent": -99.59839357429719,
+          "formattedDiff": "-2.5",
+          "formattedPercent": "-99.6%",
           "isReduction": true
         },
         "gc": {
@@ -96,8 +96,8 @@
       "baseline": {
         "pipelineRunsCount": 201,
         "allocatedObjectsCount": 50451,
-        "reRenderLatencyMs": 1.69,
-        "heapKb": 386.8,
+        "reRenderLatencyMs": 2.11,
+        "heapKb": 9.3,
         "estimatedGcPauseMs": 0.58
       },
       "optimized": {
@@ -123,9 +123,9 @@
           "isReduction": true
         },
         "latency": {
-          "diff": -1.69,
+          "diff": -2.11,
           "percent": -100,
-          "formattedDiff": "-1.7",
+          "formattedDiff": "-2.1",
           "formattedPercent": "-100.0%",
           "isReduction": true
         },
@@ -157,7 +157,7 @@
       "baseline": {
         "pipelineRunsCount": 201,
         "allocatedObjectsCount": 50451,
-        "reRenderLatencyMs": 1.83,
+        "reRenderLatencyMs": 2.09,
         "heapKb": 0,
         "estimatedGcPauseMs": 0.58
       },
@@ -184,9 +184,9 @@
           "isReduction": true
         },
         "latency": {
-          "diff": -1.83,
+          "diff": -2.09,
           "percent": -100,
-          "formattedDiff": "-1.8",
+          "formattedDiff": "-2.1",
           "formattedPercent": "-100.0%",
           "isReduction": true
         },
@@ -218,7 +218,7 @@
       "baseline": {
         "pipelineRunsCount": 201,
         "allocatedObjectsCount": 50451,
-        "reRenderLatencyMs": 1.82,
+        "reRenderLatencyMs": 3.52,
         "heapKb": 0,
         "estimatedGcPauseMs": 0.58
       },
@@ -245,9 +245,9 @@
           "isReduction": true
         },
         "latency": {
-          "diff": -1.82,
+          "diff": -3.52,
           "percent": -100,
-          "formattedDiff": "-1.8",
+          "formattedDiff": "-3.5",
           "formattedPercent": "-100.0%",
           "isReduction": true
         },
@@ -279,7 +279,7 @@
       "baseline": {
         "pipelineRunsCount": 201,
         "allocatedObjectsCount": 50451,
-        "reRenderLatencyMs": 1.69,
+        "reRenderLatencyMs": 2.09,
         "heapKb": 0,
         "estimatedGcPauseMs": 0.58
       },
@@ -306,9 +306,9 @@
           "isReduction": true
         },
         "latency": {
-          "diff": -1.69,
+          "diff": -2.09,
           "percent": -100,
-          "formattedDiff": "-1.7",
+          "formattedDiff": "-2.1",
           "formattedPercent": "-100.0%",
           "isReduction": true
         },

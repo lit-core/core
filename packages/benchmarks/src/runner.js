@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
 import { calculateImpact, getFileSizes } from './metrics.js';
+import { saveArtifactHtml } from './reporters/html-artifact-reporter.js';
 import { closeBrowser, measureBundleRuntime } from './runtime.js';
 import { getCombinedPlugins } from './tools/index.js';
 
@@ -57,6 +58,8 @@ async function runViteBuild({ entryPath, outDir, plugins = [] }) {
  * @param {import('./types.js').BenchmarkTool[]} tools
  * @param {Object} [options]
  * @param {boolean} [options.verbose]
+ * @param {boolean} [options.saveArtifacts]
+ * @param {string} [options.artifactsDir]
  * @returns {Promise<import('./types.js').SuiteBenchmarkResult>}
  */
 export async function runSuiteBenchmark(suite, tools, options = {}) {
@@ -67,6 +70,8 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
   const rows = [];
   /** @type {Record<string, any>} */
   const diagnostics = {};
+  /** @type {string[]} */
+  const artifacts = [];
 
   try {
     // 1. BASELINE BUILD (Standard Vite, 0 optimizations)
@@ -82,6 +87,21 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
     const runtimeRows = [];
     const baselineBundle = path.join(baselineOutDir, 'bundle.js');
+    if (options.saveArtifacts !== false) {
+      const artifactPath = saveArtifactHtml({
+        bundlePath: baselineBundle,
+        suiteName: suite.name,
+        suiteId: suite.id,
+        variant: 'baseline',
+        metrics: baselineMetrics,
+        outDir: options.artifactsDir ? path.join(options.artifactsDir, suite.id) : undefined,
+        metadata: suiteContext.metadata,
+      });
+      if (artifactPath) {
+        artifacts.push(artifactPath);
+      }
+    }
+
     const baselineRuntime = await measureBundleRuntime(baselineBundle, 'Baseline');
     runtimeRows.push({
       name: 'Baseline (Standard Vite)',
@@ -114,6 +134,21 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       const impact = calculateImpact(baselineMetrics, toolMetrics);
 
       const toolBundle = path.join(toolOutDir, 'bundle.js');
+      if (options.saveArtifacts !== false) {
+        const artifactPath = saveArtifactHtml({
+          bundlePath: toolBundle,
+          suiteName: suite.name,
+          suiteId: suite.id,
+          variant: tool.id,
+          metrics: toolMetrics,
+          outDir: options.artifactsDir ? path.join(options.artifactsDir, suite.id) : undefined,
+          metadata: suiteContext.metadata,
+        });
+        if (artifactPath) {
+          artifacts.push(artifactPath);
+        }
+      }
+
       const toolRuntime = await measureBundleRuntime(toolBundle, tool.name);
       const speedup = baselineRuntime.firstRenderMs > 0 && toolRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - toolRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
 
@@ -167,6 +202,23 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
     }
 
     const totalBundle = path.join(totalOutDir, 'bundle.js');
+    const bundleToSave = fs.existsSync(totalBundle) ? totalBundle : tools.length === 1 ? path.join(tempBaseDir, `dist-${tools[0].id}`, 'bundle.js') : null;
+
+    if (options.saveArtifacts !== false && bundleToSave && fs.existsSync(bundleToSave)) {
+      const artifactPath = saveArtifactHtml({
+        bundlePath: bundleToSave,
+        suiteName: suite.name,
+        suiteId: suite.id,
+        variant: 'combined',
+        metrics: totalMetrics,
+        outDir: options.artifactsDir ? path.join(options.artifactsDir, suite.id) : undefined,
+        metadata: suiteContext.metadata,
+      });
+      if (artifactPath) {
+        artifacts.push(artifactPath);
+      }
+    }
+
     const totalRuntime = tools.length === 1 && runtimeRows[1] ? runtimeRows[1] : fs.existsSync(totalBundle) ? await measureBundleRuntime(totalBundle, 'TOTAL') : baselineRuntime;
     const totalSpeedup = baselineRuntime.firstRenderMs > 0 && totalRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - totalRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
 
@@ -186,11 +238,16 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       isTotal: true,
     });
 
+    if (options.verbose && artifacts.length > 0) {
+      console.log(`[${suite.name}] 📄 Saved ${artifacts.length} HTML benchmark artifacts`);
+    }
+
     // Attach metadata
     const result = Object.assign(rows, {
       diagnostics,
       suiteContext,
       runtimeRows,
+      artifacts,
     });
 
     return result;
