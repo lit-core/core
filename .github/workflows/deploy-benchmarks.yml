@@ -68,7 +68,7 @@ jobs:
         run: pnpm --filter @lit-core/benchmarks run viewer:build
 
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: packages/benchmarks/viewer/dist
 
