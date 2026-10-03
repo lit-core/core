@@ -15,8 +15,10 @@ import type {
   NativeOptions,
   PropsLowerOptions,
   ResumableOptions,
+  TagShakeOptions,
 } from './options.js';
 import {
+  scanAppTags,
   transformCssMinifier,
   transformDirectivesPlugin,
   transformDirtyMaskPlugin,
@@ -29,12 +31,14 @@ import {
   transformNativePlugin,
   transformPropsLower,
   transformResumable,
+  transformTagShakePlugin,
 } from './transforms.js';
 
 export interface PluginState {
   transformedFiles: Map<string, string>;
   virtualSheets: Map<string, string>;
   virtualTemplates?: Map<string, string>;
+  usedTags?: Set<string>;
   options: LitPluginOptions;
 }
 
@@ -67,6 +71,13 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
   const resourcePath = this.resourcePath;
   let currentSource = source;
   let currentMap = inputSourceMap;
+
+  if (pluginState) {
+    if (!pluginState.usedTags) {
+      pluginState.usedTags = new Set();
+    }
+    scanAppTags(source, resourcePath, pluginState.usedTags);
+  }
 
   // 1. Apply css-fuse rewritten code if available for this component
   if (pluginState && options.cssFuse !== false) {
@@ -238,6 +249,25 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
     const result = transformResumable(currentSource, resourcePath, resumableOpts);
     if (result) {
       currentSource = result.code;
+    }
+  }
+
+  // 7. Apply tag-shake AOT dead code elimination if enabled
+  const tagShakeOpt = options.tagShake ?? options['tag-shake'];
+  if (tagShakeOpt) {
+    const shakeOpts: TagShakeOptions = typeof tagShakeOpt === 'object' ? tagShakeOpt : {};
+    const usedSet = pluginState?.usedTags || new Set(shakeOpts.keepTags || []);
+    if (shakeOpts.keepTags) {
+      for (const t of shakeOpts.keepTags) {
+        usedSet.add(t);
+      }
+    }
+    const result = transformTagShakePlugin(currentSource, resourcePath, shakeOpts, usedSet);
+    if (result) {
+      currentSource = result.code;
+      if (result.map) {
+        currentMap = result.map;
+      }
     }
   }
 

@@ -20,7 +20,7 @@ const noChange = Symbol('noChange');
  */
 function extractComponentProperties(source, name, filename) {
   try {
-    const res = transformDirtyMask(source, { filename });
+    const res = transformDirtyMask(source, { filename: filename || 'file.tsx' });
     if (res.propertiesCount > 0) {
       const propertyNames = [];
       for (let i = 0; i < res.propertiesCount; i++) {
@@ -34,9 +34,35 @@ function extractComponentProperties(source, name, filename) {
     }
   } catch {}
 
+  // Extract real AST properties and bindings from component source
+  const props = new Set();
+  const re =
+    /(?:@property\s*\([^)]*\)\s*(?:accessor\s+)?([a-zA-Z0-9_$]+)|property\s*\([^)]*\)\s*\],\s*[a-zA-Z0-9_$]+(?:\.prototype)?\s*,\s*["']([^"']+)["']|[a-zA-Z0-9_$]+\s*\([^)]*\)\s*\],\s*[a-zA-Z0-9_$]+(?:\.prototype)?\s*,\s*["']([^"']+)["'])/g;
+  for (const match of source.matchAll(re)) {
+    const propName = match[1] || match[2] || match[3];
+    if (propName && !['constructor', 'render', 'connectedCallback', 'disconnectedCallback', 'update'].includes(propName)) {
+      props.add(propName);
+    }
+  }
+
+  const staticPropsMatch = source.match(/static\s+(?:get\s+)?properties\s*(?:\(\)\s*\{|\s*=\s*\{)([\s\S]*?)(?:\}|\}\s*;)/);
+  if (staticPropsMatch) {
+    for (const m of staticPropsMatch[1].matchAll(/([a-zA-Z0-9_$]+)\s*:/g)) {
+      props.add(m[1]);
+    }
+  }
+
+  if (props.size > 0) {
+    return {
+      name,
+      properties: Array.from(props),
+      maskedPartsCount: Math.max(1, Math.round(props.size / 2)),
+    };
+  }
+
   return {
     name,
-    properties: ['disabled', 'active', 'variant', 'size', 'value', 'label'],
+    properties: ['disabled', 'active', 'variant'],
     maskedPartsCount: 2,
   };
 }
@@ -210,7 +236,7 @@ export async function runDirtyMaskBenchmarks(options = {}) {
     for (const comp of components) {
       try {
         const fullSource = readComponentFullSource(comp.pkg, comp.source);
-        const model = extractComponentProperties(fullSource, `${suite.id}-${comp.name}`);
+        const model = extractComponentProperties(fullSource, `${suite.id}-${comp.name}`, comp.source);
         models.push(model);
         totalProps += model.properties.length;
       } catch {}

@@ -32,10 +32,12 @@ export type {
   LitPluginOptions,
   LitPropsLowerOptions,
   LitResumableOptions,
+  LitTagShakeOptions,
   LitWebpackPluginOptions,
   MemoizeOptions,
   PropsLowerOptions,
   ResumableOptions,
+  TagShakeOptions,
 } from './options.js';
 export {
   CssFuseWebpackPlugin,
@@ -75,10 +77,13 @@ export {
   litMemoize,
   litPropsLower,
   litResumable,
+  litTagShake,
   MemoizeWebpackPlugin,
   memoize,
   PropsLowerWebpackPlugin,
   propsLower,
   ResumableWebpackPlugin,
   resumable,
+  TagShakeWebpackPlugin,
+  tagShake,
 } from './plugin.js';

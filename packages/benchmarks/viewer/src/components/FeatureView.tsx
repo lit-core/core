@@ -74,6 +74,7 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
                   const run = featureRuns.find((r) => r.suiteId === lib.id);
                   const isSelected = selectedSuiteId === lib.id;
                   const isBaseline = selectedFeatureId === 'baseline';
+                  const baselineRun = runs.find((r) => r.suiteId === lib.id && r.featureId === 'baseline');
 
                   if (!run) {
                     return (
@@ -88,6 +89,14 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
                       </tr>
                     );
                   }
+
+                  const gzipDelta =
+                    baselineRun?.gzipBytes && baselineRun.gzipBytes > 0 && run.gzipBytes ? ((run.gzipBytes - baselineRun.gzipBytes) / baselineRun.gzipBytes) * 100 : (run.gzipPercent ?? 0);
+                  const rawDelta = baselineRun?.rawBytes && baselineRun.rawBytes > 0 && run.rawBytes ? ((run.rawBytes - baselineRun.rawBytes) / baselineRun.rawBytes) * 100 : (run.rawPercent ?? 0);
+                  const speedup =
+                    baselineRun?.firstRenderMs && run.firstRenderMs && baselineRun.firstRenderMs > 0
+                      ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100
+                      : run.speedupPercent;
 
                   return (
                     <tr
@@ -105,37 +114,37 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
                         className={`py-3.5 px-6 text-right tabular-nums ${
                           isBaseline
                             ? 'text-zinc-500 font-light'
-                            : (run.gzipPercent ?? 0) <= -0.1
+                            : gzipDelta <= -0.1
                               ? 'text-emerald-700 font-normal'
-                              : Math.abs(run.gzipPercent ?? 0) <= 0.1
+                              : Math.abs(gzipDelta) <= 0.1
                                 ? 'text-zinc-500 font-light'
                                 : 'text-rose-700 font-normal'
                         }`}
                       >
-                        {isBaseline ? 'baseline' : run.gzipPercent > 0 ? `+${run.gzipPercent.toFixed(1)}%` : `${run.gzipPercent.toFixed(1)}%`}
+                        {isBaseline ? 'baseline' : gzipDelta > 0 ? `+${gzipDelta.toFixed(1)}%` : `${gzipDelta.toFixed(1)}%`}
                       </td>
                       <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-700">{(run.rawBytes / 1024).toFixed(1)} KB</td>
                       <td
                         className={`py-3.5 px-6 text-right tabular-nums ${
                           isBaseline
                             ? 'text-zinc-500 font-light'
-                            : (run.rawPercent ?? 0) <= -0.1
+                            : rawDelta <= -0.1
                               ? 'text-emerald-700 font-normal'
-                              : Math.abs(run.rawPercent ?? 0) <= 0.1
+                              : Math.abs(rawDelta) <= 0.1
                                 ? 'text-zinc-500 font-light'
                                 : 'text-rose-700 font-normal'
                         }`}
                       >
-                        {isBaseline ? 'baseline' : run.rawPercent > 0 ? `+${run.rawPercent.toFixed(1)}%` : `${run.rawPercent.toFixed(1)}%`}
+                        {isBaseline ? 'baseline' : rawDelta > 0 ? `+${rawDelta.toFixed(1)}%` : `${rawDelta.toFixed(1)}%`}
                       </td>
                       <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-600">{run.buildTimeMs ? `${run.buildTimeMs.toFixed(0)} ms` : '—'}</td>
                       <td className="py-3.5 px-6 text-right tabular-nums">
                         {run.firstRenderMs ? (
                           <div className="flex flex-col items-end">
                             <span className="text-zinc-950 font-normal">{run.firstRenderMs.toFixed(2)} ms</span>
-                            {run.speedupPercent && Math.abs(run.speedupPercent) > 0.5 ? (
-                              <span className={`text-base font-light tabular-nums ${run.speedupPercent > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                                {run.speedupPercent > 0 ? `+${run.speedupPercent.toFixed(1)}%` : `${run.speedupPercent.toFixed(1)}%`}
+                            {speedup !== undefined && Math.abs(speedup) > 0.5 ? (
+                              <span className={`text-base font-light tabular-nums ${speedup > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                                {speedup > 0 ? `+${speedup.toFixed(1)}%` : `${speedup.toFixed(1)}%`}
                               </span>
                             ) : null}
                           </div>
@@ -160,6 +169,7 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
           deltas={selectedResult.deltas}
           runtime={selectedResult.runtime}
           isBaseline={selectedResult.feature.isBaseline}
+          baselineRun={runs.find((r) => r.suiteId === selectedSuiteId && r.featureId === 'baseline')}
         />
       )}
 

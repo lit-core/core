@@ -47,6 +47,7 @@
     "benchmark:memoize": "pnpm --filter @lit-core/benchmarks run benchmark:memoize",
     "benchmark:native": "pnpm --filter @lit-core/benchmarks run benchmark:native",
     "benchmark:resumable": "pnpm --filter @lit-core/benchmarks run benchmark:resumable",
+    "benchmark:tag-shake": "pnpm --filter @lit-core/benchmarks run benchmark:tag-shake",
     "viewer:dev": "pnpm --filter @lit-core/benchmarks run viewer:dev",
     "viewer:build": "pnpm --filter @lit-core/benchmarks run viewer:build",
     "viewer:preview": "pnpm --filter @lit-core/benchmarks run viewer:preview",
@@ -65,6 +66,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@momentum-design/components": "^0.140.1",
+    "@types/node": "^26.6.4",
     "@types/webpack": "^5.28.5",
     "playwright": "^1.63.0",
     "turbo": "^2.11.7",

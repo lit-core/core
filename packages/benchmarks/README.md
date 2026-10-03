@@ -20,6 +20,23 @@ Every component is resolved from production package exports, guaranteeing unifor
 
 ---
 
+## Benchmark methodology: static leaf matrix vs dynamic scenario benchmarks
+
+To accurately measure compiler optimizations, `@lit-core/benchmarks` evaluates performance across two distinct tiers:
+
+1. **Static leaf bundle matrix (`results/manifest.json`)**:
+   - Evaluates 20 canonical atomic UI components (`button`, `input`, `checkbox`, `dialog`, etc.) bundled together in client-side applications.
+   - Measures bundle size reduction, decorator lowering, and style deduplication.
+   - *Behavior for `memoize` and `resumable`*: In atomic leaf components lacking complex `.map()` pipelines or server-rendered Declarative Shadow DOM, these passes show 0.0% delta by design.
+2. **Dynamic scenario benchmarks (`results/scenarios/` and scenario reports)**:
+   - Evaluates optimizations in their authentic execution context:
+     - **Data grid (`data-grid`)**: Evaluates `memoize` and `dom-paths` on high-frequency collection re-renders and sorting or filtering pipelines (-99.5% latency reduction).
+     - **SSR resumption (`ssr`)**: Evaluates `resumable` against pre-rendered Declarative Shadow DOM markup with interaction-driven hydration (-99.6% initial JS payload).
+     - **Interactive form (`form`)**: Evaluates `event-hoist` and `elem-proxy` on 500 controls with delegated event dispatch.
+     - **Design system suite (`bundle`)**: Evaluates `css-fuse` and minification across entire multi-component libraries.
+
+---
+
 ## Interactive React benchmark viewer
 
 All benchmark results are interactively explored via the dedicated React viewer application:

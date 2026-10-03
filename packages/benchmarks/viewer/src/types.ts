@@ -56,7 +56,7 @@ export interface FeatureMetadata {
   id: string;
   name: string;
   description: string;
-  category: 'baseline' | 'styles' | 'templates' | 'reactivity' | 'dom' | 'registration' | 'runtime' | 'resumption' | 'combined' | string;
+  category: 'baseline' | 'styles' | 'templates' | 'reactivity' | 'dom' | 'registration' | 'runtime' | 'resumption' | 'tree-shaking' | 'combined' | string;
   isBaseline?: boolean;
 }
 

@@ -3,13 +3,13 @@
   "benchmarkId": "dirty-mask",
   "title": "`@lit-core/dirty-mask` empirical benchmark results",
   "description": "Ahead-of-time property-to-part dependency bitmasking evaluated across 255 production Web Components to eliminate unnecessary template re-evaluations during property updates.",
-  "timestamp": "2026-09-29T20:31:30.933Z",
+  "timestamp": "2026-10-03T20:40:24.984Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a49119e",
+    "gitCommit": "b67b735",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -31,46 +31,46 @@
       "packageName": "@carbon/web-components",
       "componentCount": 51,
       "baseline": {
-        "evaluationsCount": 3000,
-        "partDiffsCount": 3000,
-        "reRenderLatencyMs": 0.05,
-        "heapKb": 59.1
+        "evaluationsCount": 7858,
+        "partDiffsCount": 7858,
+        "reRenderLatencyMs": 0.12,
+        "heapKb": 92.4
       },
       "optimized": {
-        "evaluationsCount": 500,
-        "partDiffsCount": 500,
-        "reRenderLatencyMs": 0.03,
-        "heapKb": 52.4
+        "evaluationsCount": 568,
+        "partDiffsCount": 568,
+        "reRenderLatencyMs": 0.07,
+        "heapKb": 90.8
       },
       "deltas": {
         "evaluations": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
+          "diff": -7290,
+          "percent": -92.7716976329855,
+          "formattedDiff": "-7,290.0",
+          "formattedPercent": "-92.8%",
           "isReduction": true
         },
         "partDiffs": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
+          "diff": -7290,
+          "percent": -92.7716976329855,
+          "formattedDiff": "-7,290.0",
+          "formattedPercent": "-92.8%",
           "isReduction": true
         },
         "latency": {
-          "diff": -0.020000000000000004,
-          "percent": -40.00000000000001,
+          "diff": -0.04999999999999999,
+          "percent": -41.66666666666666,
           "formattedDiff": "-0.0",
-          "formattedPercent": "-40.0%",
+          "formattedPercent": "-41.7%",
           "isReduction": true
         }
       },
       "diagnostics": {
         "componentsScanned": 51,
-        "propertiesModeled": 306,
-        "bitmasksGenerated": 306,
-        "evalReduction": "-83.3%",
-        "diffReduction": "-83.3%",
+        "propertiesModeled": 805,
+        "bitmasksGenerated": 805,
+        "evalReduction": "-92.8%",
+        "diffReduction": "-92.8%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -81,34 +81,34 @@
       "packageName": "@spectrum-web-components",
       "componentCount": 51,
       "baseline": {
-        "evaluationsCount": 3000,
-        "partDiffsCount": 3000,
-        "reRenderLatencyMs": 0.04,
-        "heapKb": 51.3
+        "evaluationsCount": 3515,
+        "partDiffsCount": 3515,
+        "reRenderLatencyMs": 0.06,
+        "heapKb": 55.3
       },
       "optimized": {
         "evaluationsCount": 500,
         "partDiffsCount": 500,
-        "reRenderLatencyMs": 0.02,
-        "heapKb": 51.3
+        "reRenderLatencyMs": 0.03,
+        "heapKb": 55.3
       },
       "deltas": {
         "evaluations": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
+          "diff": -3015,
+          "percent": -85.77524893314367,
+          "formattedDiff": "-3,015.0",
+          "formattedPercent": "-85.8%",
           "isReduction": true
         },
         "partDiffs": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
+          "diff": -3015,
+          "percent": -85.77524893314367,
+          "formattedDiff": "-3,015.0",
+          "formattedPercent": "-85.8%",
           "isReduction": true
         },
         "latency": {
-          "diff": -0.02,
+          "diff": -0.03,
           "percent": -50,
           "formattedDiff": "-0.0",
           "formattedPercent": "-50.0%",
@@ -117,10 +117,10 @@
       },
       "diagnostics": {
         "componentsScanned": 51,
-        "propertiesModeled": 306,
-        "bitmasksGenerated": 306,
-        "evalReduction": "-83.3%",
-        "diffReduction": "-83.3%",
+        "propertiesModeled": 359,
+        "bitmasksGenerated": 359,
+        "evalReduction": "-85.8%",
+        "diffReduction": "-85.8%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -131,46 +131,46 @@
       "packageName": "@awesome.me/webawesome",
       "componentCount": 51,
       "baseline": {
-        "evaluationsCount": 3000,
-        "partDiffsCount": 3000,
-        "reRenderLatencyMs": 0.06,
-        "heapKb": 51.3
+        "evaluationsCount": 5723,
+        "partDiffsCount": 5723,
+        "reRenderLatencyMs": 0.09,
+        "heapKb": 72.5
       },
       "optimized": {
-        "evaluationsCount": 500,
-        "partDiffsCount": 500,
-        "reRenderLatencyMs": 0.02,
-        "heapKb": 51.3
+        "evaluationsCount": 510,
+        "partDiffsCount": 510,
+        "reRenderLatencyMs": 0.04,
+        "heapKb": 72.5
       },
       "deltas": {
         "evaluations": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
+          "diff": -5213,
+          "percent": -91.08858990040189,
+          "formattedDiff": "-5,213.0",
+          "formattedPercent": "-91.1%",
           "isReduction": true
         },
         "partDiffs": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
+          "diff": -5213,
+          "percent": -91.08858990040189,
+          "formattedDiff": "-5,213.0",
+          "formattedPercent": "-91.1%",
           "isReduction": true
         },
         "latency": {
-          "diff": -0.039999999999999994,
-          "percent": -66.66666666666666,
+          "diff": -0.049999999999999996,
+          "percent": -55.55555555555556,
           "formattedDiff": "-0.0",
-          "formattedPercent": "-66.7%",
+          "formattedPercent": "-55.6%",
           "isReduction": true
         }
       },
       "diagnostics": {
         "componentsScanned": 51,
-        "propertiesModeled": 306,
-        "bitmasksGenerated": 306,
-        "evalReduction": "-83.3%",
-        "diffReduction": "-83.3%",
+        "propertiesModeled": 582,
+        "bitmasksGenerated": 582,
+        "evalReduction": "-91.1%",
+        "diffReduction": "-91.1%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -181,30 +181,80 @@
       "packageName": "@momentum-design/components",
       "componentCount": 51,
       "baseline": {
-        "evaluationsCount": 3000,
-        "partDiffsCount": 3000,
+        "evaluationsCount": 6472,
+        "partDiffsCount": 6472,
+        "reRenderLatencyMs": 0.1,
+        "heapKb": 78.4
+      },
+      "optimized": {
+        "evaluationsCount": 540,
+        "partDiffsCount": 540,
+        "reRenderLatencyMs": 0.06,
+        "heapKb": 78.4
+      },
+      "deltas": {
+        "evaluations": {
+          "diff": -5932,
+          "percent": -91.65636588380717,
+          "formattedDiff": "-5,932.0",
+          "formattedPercent": "-91.7%",
+          "isReduction": true
+        },
+        "partDiffs": {
+          "diff": -5932,
+          "percent": -91.65636588380717,
+          "formattedDiff": "-5,932.0",
+          "formattedPercent": "-91.7%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -0.04000000000000001,
+          "percent": -40.00000000000001,
+          "formattedDiff": "-0.0",
+          "formattedPercent": "-40.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "componentsScanned": 51,
+        "propertiesModeled": 658,
+        "bitmasksGenerated": 658,
+        "evalReduction": "-91.7%",
+        "diffReduction": "-91.7%",
+        "buildOverhead": "Fast native pass"
+      }
+    },
+    {
+      "id": "material",
+      "name": "Google Material Web",
+      "shortName": "Google Material Web",
+      "packageName": "@material/web",
+      "componentCount": 51,
+      "baseline": {
+        "evaluationsCount": 2451,
+        "partDiffsCount": 2451,
         "reRenderLatencyMs": 0.04,
-        "heapKb": 51.3
+        "heapKb": 62.6
       },
       "optimized": {
         "evaluationsCount": 500,
         "partDiffsCount": 500,
         "reRenderLatencyMs": 0.02,
-        "heapKb": 51.3
+        "heapKb": 62.6
       },
       "deltas": {
         "evaluations": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
+          "diff": -1951,
+          "percent": -79.6001631986944,
+          "formattedDiff": "-1,951.0",
+          "formattedPercent": "-79.6%",
           "isReduction": true
         },
         "partDiffs": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
+          "diff": -1951,
+          "percent": -79.6001631986944,
+          "formattedDiff": "-1,951.0",
+          "formattedPercent": "-79.6%",
           "isReduction": true
         },
         "latency": {
@@ -217,60 +267,10 @@
       },
       "diagnostics": {
         "componentsScanned": 51,
-        "propertiesModeled": 306,
-        "bitmasksGenerated": 306,
-        "evalReduction": "-83.3%",
-        "diffReduction": "-83.3%",
-        "buildOverhead": "Fast native pass"
-      }
-    },
-    {
-      "id": "material",
-      "name": "Google Material Web",
-      "shortName": "Google Material Web",
-      "packageName": "@material/web",
-      "componentCount": 51,
-      "baseline": {
-        "evaluationsCount": 3000,
-        "partDiffsCount": 3000,
-        "reRenderLatencyMs": 0.06,
-        "heapKb": 60.2
-      },
-      "optimized": {
-        "evaluationsCount": 500,
-        "partDiffsCount": 500,
-        "reRenderLatencyMs": 0.02,
-        "heapKb": 66.9
-      },
-      "deltas": {
-        "evaluations": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
-          "isReduction": true
-        },
-        "partDiffs": {
-          "diff": -2500,
-          "percent": -83.33333333333334,
-          "formattedDiff": "-2,500.0",
-          "formattedPercent": "-83.3%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.039999999999999994,
-          "percent": -66.66666666666666,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-66.7%",
-          "isReduction": true
-        }
-      },
-      "diagnostics": {
-        "componentsScanned": 51,
-        "propertiesModeled": 306,
-        "bitmasksGenerated": 306,
-        "evalReduction": "-83.3%",
-        "diffReduction": "-83.3%",
+        "propertiesModeled": 248,
+        "bitmasksGenerated": 248,
+        "evalReduction": "-79.6%",
+        "diffReduction": "-79.6%",
         "buildOverhead": "Fast native pass"
       }
     }

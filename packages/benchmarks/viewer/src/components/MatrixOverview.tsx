@@ -35,23 +35,66 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
   const allRuns = runs.filter((r) => r.featureId === 'all');
 
   const calcAverage = (values: Array<number | undefined>): number | undefined => {
-    const valid = values.filter((v): v is number => typeof v === 'number' && v > 0);
+    const valid = values.filter((v): v is number => typeof v === 'number' && !Number.isNaN(v));
     if (valid.length === 0) return undefined;
     return valid.reduce((sum, v) => sum + v, 0) / valid.length;
   };
 
+  const calcSpeedupAverage = (
+    key: 'firstRenderMs' | 'updateMs' | 'scriptEvalMs' | 'registrationMs',
+    fallbackKey: 'speedupPercent' | 'updateSpeedupPercent' | 'evalSpeedupPercent' | 'registrationSpeedupPercent',
+  ): number | undefined => {
+    const deltas: number[] = [];
+    for (const r of allRuns) {
+      const base = runMap[r.suiteId]?.baseline;
+      const baseVal = base?.[key];
+      const targetVal = r[key];
+      if (baseVal && baseVal > 0 && targetVal && targetVal > 0) {
+        deltas.push(((baseVal - targetVal) / baseVal) * 100);
+      } else if (typeof r[fallbackKey] === 'number' && r[fallbackKey] !== 0) {
+        deltas.push(r[fallbackKey] as number);
+      }
+    }
+    if (deltas.length === 0) return undefined;
+    return deltas.reduce((sum, v) => sum + v, 0) / deltas.length;
+  };
+
+  const calcHeapSavingsAverage = (): number | undefined => {
+    const deltas: number[] = [];
+    for (const r of allRuns) {
+      const base = runMap[r.suiteId]?.baseline;
+      const baseVal = base?.heapUsedBytes;
+      const targetVal = r.heapUsedBytes;
+      if (baseVal && baseVal > 0 && targetVal && targetVal > 0) {
+        deltas.push(((baseVal - targetVal) / baseVal) * 100);
+      } else if (typeof r.memorySavingsPercent === 'number' && r.memorySavingsPercent !== 0) {
+        deltas.push(r.memorySavingsPercent);
+      }
+    }
+    if (deltas.length === 0) return undefined;
+    return deltas.reduce((sum, v) => sum + v, 0) / deltas.length;
+  };
+
   const avgGzipPercent = (() => {
-    const valid = allRuns.map((r) => r.gzipPercent).filter((v): v is number => typeof v === 'number' && v !== 0);
-    if (valid.length === 0) return undefined;
-    return valid.reduce((sum, v) => sum + v, 0) / valid.length;
+    const deltas: number[] = [];
+    for (const r of allRuns) {
+      const base = runMap[r.suiteId]?.baseline;
+      if (base?.gzipBytes && base.gzipBytes > 0 && r.gzipBytes && r.gzipBytes > 0) {
+        deltas.push(((r.gzipBytes - base.gzipBytes) / base.gzipBytes) * 100);
+      } else if (typeof r.gzipPercent === 'number' && r.gzipPercent !== 0) {
+        deltas.push(r.gzipPercent);
+      }
+    }
+    if (deltas.length === 0) return undefined;
+    return deltas.reduce((sum, v) => sum + v, 0) / deltas.length;
   })();
 
-  const avgRenderSpeedup = calcAverage(allRuns.map((r) => r.speedupPercent));
-  const avgUpdateSpeedup = calcAverage(allRuns.map((r) => r.updateSpeedupPercent));
-  const avgEvalSpeedup = calcAverage(allRuns.map((r) => r.evalSpeedupPercent));
-  const avgRegSpeedup = calcAverage(allRuns.map((r) => r.registrationSpeedupPercent));
+  const avgRenderSpeedup = calcSpeedupAverage('firstRenderMs', 'speedupPercent');
+  const avgUpdateSpeedup = calcSpeedupAverage('updateMs', 'updateSpeedupPercent');
+  const avgEvalSpeedup = calcSpeedupAverage('scriptEvalMs', 'evalSpeedupPercent');
+  const avgRegSpeedup = calcSpeedupAverage('registrationMs', 'registrationSpeedupPercent');
   const avgRegMs = calcAverage(allRuns.map((r) => r.registrationMs));
-  const avgHeapSavings = calcAverage(allRuns.map((r) => r.memorySavingsPercent));
+  const avgHeapSavings = calcHeapSavingsAverage();
 
   function getSpeedupColorClass(speedupVal?: number): string {
     if (speedupVal === undefined || speedupVal === 0) {
@@ -84,35 +127,42 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       return <span className="text-base font-light text-zinc-400">—</span>;
     }
 
+    const baselineRun = libId ? runMap[libId]?.baseline : undefined;
+
     if (category === 'payload') {
+      const baseBytes = baselineRun ? (payloadFormat === 'gzip' ? baselineRun.gzipBytes : payloadFormat === 'brotli' ? baselineRun.brotliBytes : baselineRun.rawBytes) : undefined;
+
+      const candBytes = payloadFormat === 'gzip' ? run.gzipBytes : payloadFormat === 'brotli' ? run.brotliBytes : run.rawBytes;
+
+      const deltaPercent =
+        baseBytes && baseBytes > 0 && candBytes && candBytes > 0
+          ? ((candBytes - baseBytes) / baseBytes) * 100
+          : payloadFormat === 'gzip'
+            ? run.gzipPercent
+            : payloadFormat === 'brotli'
+              ? run.brotliPercent
+              : run.rawPercent;
+
+      const numVal = deltaPercent ?? 0;
+      const colorClass = getReductionColorClass(numVal, 0.1);
+
       if (payloadUnit === 'percent') {
         if (isBaseline) {
           return <span className="text-base font-light text-zinc-500">baseline</span>;
         }
-        const val = payloadFormat === 'gzip' ? run.gzipPercent : payloadFormat === 'brotli' ? run.brotliPercent : run.rawPercent;
-
-        const numVal = val ?? 0;
-        const colorClass = getReductionColorClass(numVal, 0.1);
 
         return <span className={`tabular-nums text-base ${colorClass}`}>{numVal > 0 ? `+${numVal.toFixed(1)}%` : `${numVal.toFixed(1)}%`}</span>;
       }
 
       // payloadUnit === 'kb'
-      const bytes = payloadFormat === 'gzip' ? run.gzipBytes : payloadFormat === 'brotli' ? run.brotliBytes : run.rawBytes;
-      const kbFormatted = `${(bytes / 1024).toFixed(1)} KB`;
+      const kbFormatted = `${(candBytes / 1024).toFixed(1)} KB`;
 
       if (isBaseline) {
         return <span className="tabular-nums text-base font-light text-zinc-600">{kbFormatted}</span>;
       }
 
-      const val = payloadFormat === 'gzip' ? run.gzipPercent : payloadFormat === 'brotli' ? run.brotliPercent : run.rawPercent;
-      const numVal = val ?? 0;
-      const colorClass = getReductionColorClass(numVal, 0.1);
-
       return <span className={`tabular-nums text-base ${colorClass}`}>{kbFormatted}</span>;
     }
-
-    const baselineRun = libId ? runMap[libId]?.baseline : undefined;
 
     // category === 'performance'
     if (perfMetric === 'firstRender') {
@@ -121,11 +171,9 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       }
 
       const speedup =
-        run.speedupPercent !== undefined && run.speedupPercent !== 0
-          ? run.speedupPercent
-          : baselineRun?.firstRenderMs && baselineRun.firstRenderMs > 0
-            ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100
-            : 0;
+        baselineRun?.firstRenderMs && baselineRun.firstRenderMs > 0 && run.firstRenderMs > 0
+          ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100
+          : (run.speedupPercent ?? 0);
 
       if (perfUnit === 'ms') {
         const msFormatted = `${run.firstRenderMs.toFixed(1)} ms`;
@@ -140,8 +188,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      if (speedup === 0) {
-        return <span className="text-base font-light text-zinc-400">—</span>;
+      if (Math.abs(speedup) <= 0.5) {
+        return <span className="text-base font-light text-zinc-500">0.0%</span>;
       }
       return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{speedup > 0 ? `+${speedup.toFixed(1)}%` : `${speedup.toFixed(1)}%`}</span>;
     }
@@ -151,12 +199,7 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-400">—</span>;
       }
 
-      const speedup =
-        run.updateSpeedupPercent !== undefined && run.updateSpeedupPercent !== 0
-          ? run.updateSpeedupPercent
-          : baselineRun?.updateMs && baselineRun.updateMs > 0
-            ? ((baselineRun.updateMs - run.updateMs) / baselineRun.updateMs) * 100
-            : 0;
+      const speedup = baselineRun?.updateMs && baselineRun.updateMs > 0 && run.updateMs > 0 ? ((baselineRun.updateMs - run.updateMs) / baselineRun.updateMs) * 100 : (run.updateSpeedupPercent ?? 0);
 
       if (perfUnit === 'ms') {
         const msFormatted = `${run.updateMs.toFixed(2)} ms`;
@@ -171,8 +214,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      if (speedup === 0) {
-        return <span className="text-base font-light text-zinc-400">—</span>;
+      if (Math.abs(speedup) <= 0.5) {
+        return <span className="text-base font-light text-zinc-500">0.0%</span>;
       }
       return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{speedup > 0 ? `+${speedup.toFixed(1)}%` : `${speedup.toFixed(1)}%`}</span>;
     }
@@ -183,11 +226,9 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       }
 
       const speedup =
-        run.evalSpeedupPercent !== undefined && run.evalSpeedupPercent !== 0
-          ? run.evalSpeedupPercent
-          : baselineRun?.scriptEvalMs && baselineRun.scriptEvalMs > 0
-            ? ((baselineRun.scriptEvalMs - run.scriptEvalMs) / baselineRun.scriptEvalMs) * 100
-            : 0;
+        baselineRun?.scriptEvalMs && baselineRun.scriptEvalMs > 0 && run.scriptEvalMs > 0
+          ? ((baselineRun.scriptEvalMs - run.scriptEvalMs) / baselineRun.scriptEvalMs) * 100
+          : (run.evalSpeedupPercent ?? 0);
 
       if (perfUnit === 'ms') {
         const msFormatted = `${run.scriptEvalMs.toFixed(2)} ms`;
@@ -202,8 +243,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      if (speedup === 0) {
-        return <span className="text-base font-light text-zinc-400">—</span>;
+      if (Math.abs(speedup) <= 0.5) {
+        return <span className="text-base font-light text-zinc-500">0.0%</span>;
       }
       return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{speedup > 0 ? `+${speedup.toFixed(1)}%` : `${speedup.toFixed(1)}%`}</span>;
     }
@@ -214,11 +255,9 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       }
 
       const speedup =
-        run.registrationSpeedupPercent !== undefined && run.registrationSpeedupPercent !== 0
-          ? run.registrationSpeedupPercent
-          : baselineRun?.registrationMs && baselineRun.registrationMs > 0
-            ? ((baselineRun.registrationMs - run.registrationMs) / baselineRun.registrationMs) * 100
-            : 0;
+        baselineRun?.registrationMs && baselineRun.registrationMs > 0 && run.registrationMs > 0
+          ? ((baselineRun.registrationMs - run.registrationMs) / baselineRun.registrationMs) * 100
+          : (run.registrationSpeedupPercent ?? 0);
 
       if (perfUnit === 'ms') {
         const msFormatted = `${run.registrationMs.toFixed(2)} ms`;
@@ -233,8 +272,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      if (speedup === 0) {
-        return <span className="text-base font-light text-zinc-400">—</span>;
+      if (Math.abs(speedup) <= 0.5) {
+        return <span className="text-base font-light text-zinc-500">0.0%</span>;
       }
       return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{speedup > 0 ? `+${speedup.toFixed(1)}%` : `${speedup.toFixed(1)}%`}</span>;
     }
@@ -245,11 +284,9 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       }
 
       const savings =
-        run.memorySavingsPercent !== undefined && run.memorySavingsPercent !== 0
-          ? run.memorySavingsPercent
-          : baselineRun?.heapUsedBytes && baselineRun.heapUsedBytes > 0
-            ? ((baselineRun.heapUsedBytes - run.heapUsedBytes) / baselineRun.heapUsedBytes) * 100
-            : 0;
+        baselineRun?.heapUsedBytes && baselineRun.heapUsedBytes > 0 && run.heapUsedBytes > 0
+          ? ((baselineRun.heapUsedBytes - run.heapUsedBytes) / baselineRun.heapUsedBytes) * 100
+          : (run.memorySavingsPercent ?? 0);
 
       if (perfUnit === 'ms') {
         const kbFormatted = `${(run.heapUsedBytes / 1024).toFixed(1)} KB`;
@@ -264,8 +301,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      if (savings === 0) {
-        return <span className="text-base font-light text-zinc-400">—</span>;
+      if (Math.abs(savings) <= 0.5) {
+        return <span className="text-base font-light text-zinc-500">0.0%</span>;
       }
       return <span className={`tabular-nums text-base ${getSpeedupColorClass(savings)}`}>{savings > 0 ? `+${savings.toFixed(1)}%` : `${savings.toFixed(1)}%`}</span>;
     }
@@ -275,7 +312,7 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       return <span className="text-base font-light text-zinc-400">—</span>;
     }
 
-    const buildDelta = baselineRun?.buildTimeMs && baselineRun.buildTimeMs > 0 ? ((run.buildTimeMs - baselineRun.buildTimeMs) / baselineRun.buildTimeMs) * 100 : undefined;
+    const buildDelta = baselineRun?.buildTimeMs && baselineRun.buildTimeMs > 0 && run.buildTimeMs > 0 ? ((run.buildTimeMs - baselineRun.buildTimeMs) / baselineRun.buildTimeMs) * 100 : undefined;
 
     if (perfUnit === 'ms') {
       const msFormatted = `${run.buildTimeMs.toFixed(0)} ms`;
@@ -687,6 +724,17 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Methodology note delineating static leaf matrix vs dynamic scenarios */}
+        <div className="p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5 flex flex-col gap-2">
+          <h3 className="text-base font-medium text-zinc-950 tracking-tight">Understanding matrix vs scenario benchmarks</h3>
+          <p className="text-base font-light text-zinc-600 leading-relaxed">
+            The cross-library matrix evaluates 20 canonical atomic UI components (buttons, inputs, checkboxes, dialogs) bundled into static client-side applications. Optimizations designed for dynamic
+            data collections (such as reactive array pipeline caching in <code className="text-base font-normal text-zinc-900">memoize</code>, which yields -99.5% update latency in data tables) or
+            server-rendered Declarative Shadow DOM (such as interaction-driven hydration in <code className="text-base font-normal text-zinc-900">resumable</code>, which reduces initial JavaScript
+            payload by -99.6%) show 0.0% delta on static leaf components by design. To review these optimizations in their target execution contexts, inspect the dedicated scenario benchmarks.
+          </p>
         </div>
       </div>
     </div>

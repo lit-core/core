@@ -136,13 +136,13 @@
     "description": "Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T20:17:54.692Z",
+  "timestamp": "2026-10-03T20:19:59.095Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "9795425",
+    "gitCommit": "b67b735",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -160,13 +160,13 @@
     "rawBytes": 368348,
     "gzipBytes": 85644,
     "brotliBytes": 68682,
-    "buildTimeMs": 84.95370799999995
+    "buildTimeMs": 149.31512499999997
   },
   "baseline": {
     "rawBytes": 370946,
     "gzipBytes": 86902,
     "brotliBytes": 69583,
-    "buildTimeMs": 56.696916999999985
+    "buildTimeMs": 70.97725000000003
   },
   "deltas": {
     "rawBytes": -2598,
@@ -175,18 +175,18 @@
     "gzipPercent": -1.4476076499965478,
     "brotliBytes": -901,
     "brotliPercent": -1.2948565023065979,
-    "buildTimeMs": 28.256790999999964
+    "buildTimeMs": 78.33787499999994
   },
   "runtime": {
-    "firstRenderMs": 57.7,
+    "firstRenderMs": 53.4,
     "updateMs": 0.9,
-    "scriptEvalMs": 2.7,
-    "registrationMs": 0.9,
+    "scriptEvalMs": 4.2,
+    "registrationMs": 1.7,
     "heapUsedBytes": 68148,
-    "speedupPercent": 47.40200546946217,
-    "updateSpeedupPercent": 9.999999999999998,
-    "evalSpeedupPercent": 76.92307692307693,
-    "registrationSpeedupPercent": 75,
+    "speedupPercent": -30.24390243902439,
+    "updateSpeedupPercent": 43.75,
+    "evalSpeedupPercent": 32.25806451612903,
+    "registrationSpeedupPercent": 29.166666666666668,
     "memorySavingsPercent": 13.529837205466242
   }
 }

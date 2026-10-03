@@ -20,7 +20,7 @@ export const spectrumSuite = createComponentSuite({
     return {
       entryContent,
       componentCount,
-      includePattern: path.join(spectrumDir, '**/*.js'),
+      includePattern: [path.join(spectrumDir, '**/*.js'), '**/@spectrum-web-components*/**/*.js'],
       metadata: { specDir, spectrumDir, components },
     };
   },

@@ -19,6 +19,7 @@ import type {
   MemoizeOptions,
   PropsLowerOptions,
   ResumableOptions,
+  TagShakeOptions,
 } from './options.js';
 import { runFuseOptimization, runHtmlFuseOptimization, runScopingAudit } from './transforms.js';
 import {
@@ -471,6 +472,19 @@ export function resumable(options: ResumableOptions = {}): ResumableWebpackPlugi
   return new ResumableWebpackPlugin(options);
 }
 
+export class TagShakeWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: TagShakeOptions = {}) {
+    super(
+      { cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: false, dirtyMask: false, htmlAot: false, cssMinifier: false, htmlMinifier: false, tagShake: options },
+      'TagShakeWebpackPlugin',
+    );
+  }
+}
+
+export function tagShake(options: TagShakeOptions = {}): TagShakeWebpackPlugin {
+  return new TagShakeWebpackPlugin(options);
+}
+
 export const litCore = lit;
 export const litCssFuse = cssFuse;
 export const litHtmlFuse = htmlFuse;
@@ -485,5 +499,6 @@ export const litCssMinifier = cssMinifier;
 export const litHtmlMinifier = htmlMinifier;
 export const litHtmlAot = htmlAot;
 export const litResumable = resumable;
+export const litTagShake = tagShake;
 
 export default lit;

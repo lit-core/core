@@ -25,10 +25,12 @@ export type {
   LitPluginOptions,
   LitPropsLowerOptions,
   LitResumableOptions,
+  LitTagShakeOptions,
   MemoizeOptions,
   NativeOptions,
   PropsLowerOptions,
   ResumableOptions,
+  TagShakeOptions,
 } from './options.js';
 export {
   cssFuse,
@@ -58,8 +60,10 @@ export {
   litNative,
   litPropsLower,
   litResumable,
+  litTagShake,
   memoize,
   native,
   propsLower,
   resumable,
+  tagShake,
 } from './plugin.js';

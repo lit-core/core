@@ -81,6 +81,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({ manifest, selectedSuit
           deltas={selectedResult.deltas}
           runtime={selectedResult.runtime}
           isBaseline={selectedResult.feature.isBaseline}
+          baselineRun={baselineRun}
         />
       )}
 
@@ -126,29 +127,53 @@ export const LibraryView: React.FC<LibraryViewProps> = ({ manifest, selectedSuit
                 )}
 
                 {/* 2. All optimizations combined row */}
-                {allRun && (
-                  <tr
-                    className={`transition-colors cursor-pointer ${selectedFeatureId === 'all' ? 'bg-emerald-100/80 font-medium' : 'bg-emerald-50/50 hover:bg-emerald-100/40'}`}
-                    onClick={() => onSelectFeature('all')}
-                  >
-                    <td className="py-3.5 px-6 font-medium text-zinc-950">All optimizations combined</td>
-                    <td className="py-3.5 px-6 text-right tabular-nums font-medium text-zinc-950">{(allRun.gzipBytes / 1024).toFixed(1)} KB</td>
-                    <td className="py-3.5 px-6 text-right tabular-nums text-emerald-700 font-normal">
-                      {allRun.gzipPercent > 0 ? `+${allRun.gzipPercent.toFixed(1)}%` : `${allRun.gzipPercent.toFixed(1)}%`}
-                    </td>
-                    <td className="py-3.5 px-6 text-right tabular-nums font-medium text-zinc-950">{(allRun.rawBytes / 1024).toFixed(1)} KB</td>
-                    <td className="py-3.5 px-6 text-right tabular-nums text-emerald-700 font-normal">
-                      {allRun.rawPercent > 0 ? `+${allRun.rawPercent.toFixed(1)}%` : `${allRun.rawPercent.toFixed(1)}%`}
-                    </td>
-                    <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-600">{allRun.buildTimeMs ? `${allRun.buildTimeMs.toFixed(0)} ms` : '—'}</td>
-                    <td className="py-3.5 px-6 text-right tabular-nums">
-                      <div className="flex flex-col items-end">
-                        <span className="text-zinc-950 font-normal">{allRun.firstRenderMs ? `${allRun.firstRenderMs.toFixed(2)} ms` : '—'}</span>
-                        {allRun.speedupPercent ? <span className="text-base font-light text-emerald-700 tabular-nums">+{allRun.speedupPercent.toFixed(1)}%</span> : null}
-                      </div>
-                    </td>
-                  </tr>
-                )}
+                {allRun &&
+                  (() => {
+                    const allGzipDelta =
+                      baselineRun?.gzipBytes && baselineRun.gzipBytes > 0 && allRun.gzipBytes ? ((allRun.gzipBytes - baselineRun.gzipBytes) / baselineRun.gzipBytes) * 100 : (allRun.gzipPercent ?? 0);
+                    const allRawDelta =
+                      baselineRun?.rawBytes && baselineRun.rawBytes > 0 && allRun.rawBytes ? ((allRun.rawBytes - baselineRun.rawBytes) / baselineRun.rawBytes) * 100 : (allRun.rawPercent ?? 0);
+                    const allSpeedup =
+                      baselineRun?.firstRenderMs && allRun.firstRenderMs && baselineRun.firstRenderMs > 0
+                        ? ((baselineRun.firstRenderMs - allRun.firstRenderMs) / baselineRun.firstRenderMs) * 100
+                        : allRun.speedupPercent;
+
+                    return (
+                      <tr
+                        className={`transition-colors cursor-pointer ${selectedFeatureId === 'all' ? 'bg-emerald-100/80 font-medium' : 'bg-emerald-50/50 hover:bg-emerald-100/40'}`}
+                        onClick={() => onSelectFeature('all')}
+                      >
+                        <td className="py-3.5 px-6 font-medium text-zinc-950">All optimizations combined</td>
+                        <td className="py-3.5 px-6 text-right tabular-nums font-medium text-zinc-950">{(allRun.gzipBytes / 1024).toFixed(1)} KB</td>
+                        <td
+                          className={`py-3.5 px-6 text-right tabular-nums ${
+                            allGzipDelta <= -0.1 ? 'text-emerald-700 font-normal' : Math.abs(allGzipDelta) <= 0.1 ? 'text-zinc-500 font-light' : 'text-rose-700 font-normal'
+                          }`}
+                        >
+                          {allGzipDelta > 0 ? `+${allGzipDelta.toFixed(1)}%` : `${allGzipDelta.toFixed(1)}%`}
+                        </td>
+                        <td className="py-3.5 px-6 text-right tabular-nums font-medium text-zinc-950">{(allRun.rawBytes / 1024).toFixed(1)} KB</td>
+                        <td
+                          className={`py-3.5 px-6 text-right tabular-nums ${
+                            allRawDelta <= -0.1 ? 'text-emerald-700 font-normal' : Math.abs(allRawDelta) <= 0.1 ? 'text-zinc-500 font-light' : 'text-rose-700 font-normal'
+                          }`}
+                        >
+                          {allRawDelta > 0 ? `+${allRawDelta.toFixed(1)}%` : `${allRawDelta.toFixed(1)}%`}
+                        </td>
+                        <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-600">{allRun.buildTimeMs ? `${allRun.buildTimeMs.toFixed(0)} ms` : '—'}</td>
+                        <td className="py-3.5 px-6 text-right tabular-nums">
+                          <div className="flex flex-col items-end">
+                            <span className="text-zinc-950 font-normal">{allRun.firstRenderMs ? `${allRun.firstRenderMs.toFixed(2)} ms` : '—'}</span>
+                            {allSpeedup !== undefined && Math.abs(allSpeedup) > 0.5 ? (
+                              <span className={`text-base font-light tabular-nums ${allSpeedup > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                                {allSpeedup > 0 ? `+${allSpeedup.toFixed(1)}%` : `${allSpeedup.toFixed(1)}%`}
+                              </span>
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })()}
 
                 {/* Section header for standalone passes */}
                 <tr>
@@ -160,8 +185,13 @@ export const LibraryView: React.FC<LibraryViewProps> = ({ manifest, selectedSuit
                 {/* 3. Individual compiler passes */}
                 {individualRuns.map((run, idx) => {
                   const isSelected = run.featureId === selectedFeatureId;
+                  const gzipDelta =
+                    baselineRun?.gzipBytes && baselineRun.gzipBytes > 0 && run.gzipBytes ? ((run.gzipBytes - baselineRun.gzipBytes) / baselineRun.gzipBytes) * 100 : (run.gzipPercent ?? 0);
+                  const rawDelta = baselineRun?.rawBytes && baselineRun.rawBytes > 0 && run.rawBytes ? ((run.rawBytes - baselineRun.rawBytes) / baselineRun.rawBytes) * 100 : (run.rawPercent ?? 0);
                   const speedup =
-                    baselineRun?.firstRenderMs && run.firstRenderMs && baselineRun.firstRenderMs > 0 ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100 : undefined;
+                    baselineRun?.firstRenderMs && run.firstRenderMs && baselineRun.firstRenderMs > 0
+                      ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100
+                      : run.speedupPercent;
 
                   return (
                     <tr
@@ -173,18 +203,18 @@ export const LibraryView: React.FC<LibraryViewProps> = ({ manifest, selectedSuit
                       <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-700">{(run.gzipBytes / 1024).toFixed(1)} KB</td>
                       <td
                         className={`py-3.5 px-6 text-right tabular-nums ${
-                          (run.gzipPercent ?? 0) <= -0.1 ? 'text-emerald-700 font-normal' : Math.abs(run.gzipPercent ?? 0) <= 0.1 ? 'text-zinc-500 font-light' : 'text-rose-700 font-normal'
+                          gzipDelta <= -0.1 ? 'text-emerald-700 font-normal' : Math.abs(gzipDelta) <= 0.1 ? 'text-zinc-500 font-light' : 'text-rose-700 font-normal'
                         }`}
                       >
-                        {run.gzipPercent > 0 ? `+${run.gzipPercent.toFixed(1)}%` : `${run.gzipPercent.toFixed(1)}%`}
+                        {gzipDelta > 0 ? `+${gzipDelta.toFixed(1)}%` : `${gzipDelta.toFixed(1)}%`}
                       </td>
                       <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-700">{(run.rawBytes / 1024).toFixed(1)} KB</td>
                       <td
                         className={`py-3.5 px-6 text-right tabular-nums ${
-                          (run.rawPercent ?? 0) <= -0.1 ? 'text-emerald-700 font-normal' : Math.abs(run.rawPercent ?? 0) <= 0.1 ? 'text-zinc-500 font-light' : 'text-rose-700 font-normal'
+                          rawDelta <= -0.1 ? 'text-emerald-700 font-normal' : Math.abs(rawDelta) <= 0.1 ? 'text-zinc-500 font-light' : 'text-rose-700 font-normal'
                         }`}
                       >
-                        {run.rawPercent > 0 ? `+${run.rawPercent.toFixed(1)}%` : `${run.rawPercent.toFixed(1)}%`}
+                        {rawDelta > 0 ? `+${rawDelta.toFixed(1)}%` : `${rawDelta.toFixed(1)}%`}
                       </td>
                       <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-600">{run.buildTimeMs ? `${run.buildTimeMs.toFixed(0)} ms` : '—'}</td>
                       <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-600">

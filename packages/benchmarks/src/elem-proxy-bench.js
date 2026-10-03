@@ -9,7 +9,6 @@ import { lit } from '@lit-core/vite-plugin';
 import { build } from 'vite';
 import { calculateDelta } from './format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
-import { closeBrowser, getBrowser } from './runtime.js';
 import { createBenchmarkResult } from './schema.js';
 import { carbonSuite } from './suites/carbon.js';
 import { materialSuite } from './suites/material.js';
@@ -57,58 +56,11 @@ async function buildSuiteBundle(entryPath, outDir, plugins = []) {
  * Measure runtime performance (CPU evaluation, heap, mount) for a bundle.
  * @param {string} bundlePath
  * @param {number} totalComponents
- * @param {string} suiteName
+ * @param {string} _suiteName
  * @param {boolean} isOptimized
  */
 async function evaluateBundlePerformance(bundlePath, totalComponents, _suiteName, isOptimized) {
   const bundleCode = fs.readFileSync(bundlePath, 'utf8');
-
-  // Try real browser measurement via Playwright
-  let _browserMountLatency = 0;
-  const browser = await getBrowser();
-  if (browser) {
-    let context;
-    try {
-      context = await browser.newContext();
-      const page = await context.newPage();
-
-      const html = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <script type="module">
-              const t0 = performance.now();
-              window.__bundleLoaded = false;
-              import('./bundle.js').then(() => {
-                const t1 = performance.now();
-                window.__evalDuration = t1 - t0;
-                window.__bundleLoaded = true;
-              });
-            </script>
-          </head>
-          <body>
-            <div id="container"></div>
-          </body>
-        </html>
-      `;
-
-      const distDir = path.dirname(bundlePath);
-      const htmlPath = path.join(distDir, 'index.html');
-      fs.writeFileSync(htmlPath, html, 'utf8');
-
-      await page.goto(`file://${htmlPath}`);
-      await page.waitForFunction(() => /** @type {any} */ (window).__bundleLoaded === true, { timeout: 10000 });
-
-      const browserEval = await page.evaluate(() => /** @type {any} */ (window).__evalDuration);
-      if (typeof browserEval === 'number') {
-        _browserMountLatency = browserEval;
-      }
-    } catch (_err) {
-      // Fall back to VM measurement
-    } finally {
-      if (context) await context.close();
-    }
-  }
 
   // In-process precision evaluation using V8 heap statistics and performance timers
   const runs = 5;
@@ -152,6 +104,9 @@ async function evaluateBundlePerformance(bundlePath, totalComponents, _suiteName
 
     const vmContext = vm.createContext(sandbox);
 
+    global.gc?.();
+    const heapBefore = v8.getHeapStatistics().used_heap_size;
+
     const t0 = performance.now();
     const wrappedCode = `(function() {
       ${bundleCode.replace(/import\s+[^;]+;/g, '').replace(/export\s+[^;]+;/g, '')}
@@ -163,9 +118,10 @@ async function evaluateBundlePerformance(bundlePath, totalComponents, _suiteName
     } catch (_e) {}
     const t1 = performance.now();
 
+    global.gc?.();
     const heapAfter = v8.getHeapStatistics().used_heap_size;
     const evalMs = t1 - t0;
-    const heapDiff = Math.max(0, heapAfter);
+    const heapDiff = Math.max(0, heapAfter - heapBefore);
 
     const tMount0 = performance.now();
     const registeredTags = Array.from(domRegistry.keys()).slice(0, 5);
@@ -269,7 +225,6 @@ export async function runElemProxyBenchmarks(options = {}) {
     await suite.cleanup();
   }
 
-  await closeBrowser();
   fs.rmSync(tempBase, { recursive: true, force: true });
 
   return createBenchmarkResult({

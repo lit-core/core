@@ -15,6 +15,7 @@ members = [
     "packages/native",
     "packages/props-lower",
     "packages/resumable",
+    "packages/tag-shake",
 ]
 
 [workspace.dependencies]

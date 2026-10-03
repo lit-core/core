@@ -24,6 +24,7 @@
 | [`@lit-core/css-minifier`](packages/css-minifier/) | CSS template literal minification |
 | [`@lit-core/html-minifier`](packages/html-minifier/) | HTML and SVG template literal minification |
 | [`@lit-core/resumable`](packages/resumable/) | Zero-JS SSR and interaction-driven runtime resumption |
+| [`@lit-core/tag-shake`](packages/tag-shake/) | Ahead-of-time Web Component dead code elimination and registration tag shaking |
 
 ---
 

@@ -57,7 +57,8 @@
     "@lit-core/memoize": "workspace:*",
     "@lit-core/native": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
-    "@lit-core/resumable": "workspace:*"
+    "@lit-core/resumable": "workspace:*",
+    "@lit-core/tag-shake": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

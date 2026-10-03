@@ -33,6 +33,7 @@ export function createIsolatedToolPlugin(toolKey, toolOptions) {
     'domPaths',
     'memoize',
     'resumable',
+    'tagShake',
   ];
 
   /** @type {Record<string, any>} */

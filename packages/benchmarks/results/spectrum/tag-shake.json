@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "spectrum-tag-shake",
+  "suite": {
+    "id": "spectrum",
+    "name": "Spectrum Web Components (@spectrum-web-components)",
+    "packageName": "@spectrum-web-components/bundle",
+    "version": "1.12.2",
+    "componentCount": 20,
+    "components": [
+      {
+        "concept": "button",
+        "tag": "sp-button",
+        "label": "Button",
+        "path": "button/sp-button.js"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "sp-checkbox",
+        "label": "Checkbox",
+        "path": "checkbox/sp-checkbox.js"
+      },
+      {
+        "concept": "radio",
+        "tag": "sp-radio",
+        "label": "Radio button",
+        "path": "radio/sp-radio.js"
+      },
+      {
+        "concept": "switch",
+        "tag": "sp-switch",
+        "label": "Switch / toggle",
+        "path": "switch/sp-switch.js"
+      },
+      {
+        "concept": "text-input",
+        "tag": "sp-textfield",
+        "label": "Text input / field",
+        "path": "textfield/sp-textfield.js"
+      },
+      {
+        "concept": "select",
+        "tag": "sp-picker",
+        "label": "Select / dropdown",
+        "path": "picker/sp-picker.js"
+      },
+      {
+        "concept": "dialog",
+        "tag": "sp-dialog",
+        "label": "Dialog / modal",
+        "path": "dialog/sp-dialog.js"
+      },
+      {
+        "concept": "badge",
+        "tag": "sp-badge",
+        "label": "Badge / tag",
+        "path": "badge/sp-badge.js"
+      },
+      {
+        "concept": "tabs",
+        "tag": "sp-tabs",
+        "label": "Tabs",
+        "path": "tabs/sp-tabs.js"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "sp-progress-bar",
+        "label": "Progress bar",
+        "path": "progress-bar/sp-progress-bar.js"
+      },
+      {
+        "concept": "spinner",
+        "tag": "sp-progress-circle",
+        "label": "Spinner / loader",
+        "path": "progress-circle/sp-progress-circle.js"
+      },
+      {
+        "concept": "slider",
+        "tag": "sp-slider",
+        "label": "Slider",
+        "path": "slider/sp-slider.js"
+      },
+      {
+        "concept": "menu",
+        "tag": "sp-menu",
+        "label": "Menu / popover",
+        "path": "menu/sp-menu.js"
+      },
+      {
+        "concept": "divider",
+        "tag": "sp-divider",
+        "label": "Divider",
+        "path": "divider/sp-divider.js"
+      },
+      {
+        "concept": "icon",
+        "tag": "sp-icon",
+        "label": "Icon",
+        "path": "icon/sp-icon.js"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "sp-action-button",
+        "label": "Icon button",
+        "path": "action-button/sp-action-button.js"
+      },
+      {
+        "concept": "card",
+        "tag": "sp-card",
+        "label": "Card / tile",
+        "path": "card/sp-card.js"
+      },
+      {
+        "concept": "elevation",
+        "tag": "sp-popover",
+        "label": "Elevation / focus",
+        "path": "popover/sp-popover.js"
+      },
+      {
+        "concept": "list",
+        "tag": "sp-sidenav",
+        "label": "List / structured",
+        "path": "sidenav/sp-sidenav.js"
+      },
+      {
+        "concept": "chips",
+        "tag": "sp-action-group",
+        "label": "Chips / segmented",
+        "path": "action-group/sp-action-group.js"
+      }
+    ]
+  },
+  "feature": {
+    "id": "tag-shake",
+    "name": "Tag shake dead code elimination (tag-shake)",
+    "description": "Ahead-of-time Web Component dead code elimination and registration tag shaking",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-03T21:05:55.085Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "b67b735",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 804248,
+    "gzipBytes": 145287,
+    "brotliBytes": 110303,
+    "buildTimeMs": 114.93795899999986
+  },
+  "baseline": {
+    "rawBytes": 819006,
+    "gzipBytes": 146760,
+    "brotliBytes": 111333,
+    "buildTimeMs": 74.79816699999992
+  },
+  "deltas": {
+    "rawBytes": -14758,
+    "rawPercent": -1.801940400925024,
+    "gzipBytes": -1473,
+    "gzipPercent": -1.0036794766966477,
+    "brotliBytes": -1030,
+    "brotliPercent": -0.9251524705163787,
+    "buildTimeMs": 40.13979199999994
+  },
+  "runtime": {
+    "firstRenderMs": 51.7,
+    "updateMs": 2,
+    "scriptEvalMs": 11.5,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 57916,
+    "speedupPercent": 1.1472275334607922,
+    "updateSpeedupPercent": 4.761904761904765,
+    "evalSpeedupPercent": -9.523809523809524,
+    "registrationSpeedupPercent": -16.666666666666664,
+    "memorySavingsPercent": -0.6534584636774418
+  }
+}

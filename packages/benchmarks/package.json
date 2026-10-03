@@ -35,6 +35,7 @@
     "benchmark:memoize": "node src/memoize-bench.js",
     "benchmark:native": "node src/native-bench.js",
     "benchmark:resumable": "node src/resumable-bench.js",
+    "benchmark:tag-shake": "node src/tag-shake-bench.js",
     "benchmark:json": "node src/index.js --format=json",
     "benchmark:compare": "node src/compare.js",
     "viewer:dev": "vite viewer",
@@ -66,6 +67,7 @@
     "@lit-core/memoize": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
+    "@lit-core/tag-shake": "workspace:*",
     "@lit-core/test-kit": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "lucide-react": "^1.50.0"

@@ -20,6 +20,10 @@ export const SUITE_LABELS = {
  * Lit runtime directive simulation class for baseline comparison.
  */
 class MockDirectiveResult {
+  /**
+   * @param {any} directiveClass
+   * @param {any} values
+   */
   constructor(directiveClass, values) {
     this._$litDirective$ = directiveClass;
     this.values = values;

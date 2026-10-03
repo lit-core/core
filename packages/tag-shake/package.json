@@ -1,0 +1,56 @@
+{
+  "name": "@lit-core/tag-shake",
+  "version": "0.1.0",
+  "description": "Ahead-of-time Web Component dead code elimination and registration tag shaking compiler pass",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "*.node"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/tag-shake"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "dead-code-elimination",
+    "tree-shaking",
+    "tag-shake",
+    "aot",
+    "oxc",
+    "performance"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "napi": {
+    "binaryName": "tag-shake",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "cargo build --release && (cp ../../target/release/libtag_shake.dylib tag-shake.darwin-arm64.node 2>/dev/null || cp target/release/libtag_shake.dylib tag-shake.darwin-arm64.node 2>/dev/null || true) && (codesign -s - -f tag-shake.darwin-arm64.node 2>/dev/null || true)",
+    "build:debug": "cargo build && (cp ../../target/debug/libtag_shake.dylib tag-shake.darwin-arm64.node 2>/dev/null || cp target/debug/libtag_shake.dylib tag-shake.darwin-arm64.node 2>/dev/null || true) && (codesign -s - -f tag-shake.darwin-arm64.node 2>/dev/null || true)",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.6",
+    "vitest": "^5.0.3"
+  }
+}

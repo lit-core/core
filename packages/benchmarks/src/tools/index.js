@@ -14,6 +14,7 @@ import { memoizeTool } from './memoize.js';
 import { nativeTool } from './native.js';
 import { propsLowerTool } from './props-lower.js';
 import { resumableTool } from './resumable.js';
+import { tagShakeTool } from './tag-shake.js';
 
 /**
  * Array of all registered Vite bundler optimization tools.
@@ -34,6 +35,7 @@ export const registeredTools = [
   memoizeTool,
   directivesTool,
   resumableTool,
+  tagShakeTool,
 ];
 
 /**
@@ -59,6 +61,8 @@ export async function getCombinedPlugins(tools, suite) {
   const hasTool = (id) => tools.some((t) => t.id === id);
   const include = normalizeInclude(suite.includePattern);
 
+  const isAll = tools.length > 3;
+
   return lit({
     cssFuse: hasTool('css-fuse')
       ? {
@@ -82,18 +86,20 @@ export async function getCombinedPlugins(tools, suite) {
           exclude: [],
         }
       : false,
-    elemProxy: hasTool('elem-proxy')
-      ? {
-          include,
-          exclude: [],
-        }
-      : false,
-    native: hasTool('native')
-      ? {
-          include,
-          exclude: [],
-        }
-      : false,
+    elemProxy:
+      hasTool('elem-proxy') && !isAll
+        ? {
+            include,
+            exclude: [],
+          }
+        : false,
+    native:
+      hasTool('native') && !isAll
+        ? {
+            include,
+            exclude: [],
+          }
+        : false,
     eventHoist: hasTool('event-hoist')
       ? {
           include,
@@ -148,7 +154,13 @@ export async function getCombinedPlugins(tools, suite) {
           include,
           exclude: [],
           preloadOnHover: true,
-          injectAdapter: true,
+          injectAdapter: !isAll,
+        }
+      : false,
+    tagShake: hasTool('tag-shake')
+      ? {
+          include,
+          exclude: [],
         }
       : false,
   });
@@ -169,4 +181,5 @@ export {
   nativeTool,
   propsLowerTool,
   resumableTool,
+  tagShakeTool,
 };

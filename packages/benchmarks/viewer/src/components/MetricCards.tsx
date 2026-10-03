@@ -1,6 +1,6 @@
 import { Archive, ArrowDownRight, ArrowUpRight, Cpu, Database, FileCode, Layers, Package, RefreshCw, Timer, Zap } from 'lucide-react';
 import type React from 'react';
-import type { RuntimeMetrics, SizeDeltas, SizeMetrics } from '../types.js';
+import type { ManifestRunEntry, RuntimeMetrics, SizeDeltas, SizeMetrics } from '../types.js';
 
 interface MetricCardsProps {
   metrics?: SizeMetrics;
@@ -8,6 +8,7 @@ interface MetricCardsProps {
   deltas?: SizeDeltas;
   runtime?: RuntimeMetrics;
   isBaseline?: boolean;
+  baselineRun?: ManifestRunEntry;
 }
 
 function formatBytes(bytes?: number): string {
@@ -24,8 +25,43 @@ function formatPercent(pct?: number): string {
   return `${prefix}${pct.toFixed(1)}%`;
 }
 
-export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, deltas, runtime, isBaseline }) => {
+export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, deltas, runtime, isBaseline, baselineRun }) => {
   if (!metrics) return null;
+
+  const rawDeltaPct = baselineRun?.rawBytes && metrics?.rawBytes && baselineRun.rawBytes > 0 ? ((metrics.rawBytes - baselineRun.rawBytes) / baselineRun.rawBytes) * 100 : deltas?.rawPercent;
+  const rawDeltaBytes = baselineRun?.rawBytes && metrics?.rawBytes ? metrics.rawBytes - baselineRun.rawBytes : deltas?.rawBytes;
+
+  const gzipDeltaPct = baselineRun?.gzipBytes && metrics?.gzipBytes && baselineRun.gzipBytes > 0 ? ((metrics.gzipBytes - baselineRun.gzipBytes) / baselineRun.gzipBytes) * 100 : deltas?.gzipPercent;
+  const gzipDeltaBytes = baselineRun?.gzipBytes && metrics?.gzipBytes ? metrics.gzipBytes - baselineRun.gzipBytes : deltas?.gzipBytes;
+
+  const brotliDeltaPct =
+    baselineRun?.brotliBytes && metrics?.brotliBytes && baselineRun.brotliBytes > 0 ? ((metrics.brotliBytes - baselineRun.brotliBytes) / baselineRun.brotliBytes) * 100 : deltas?.brotliPercent;
+  const brotliDeltaBytes = baselineRun?.brotliBytes && metrics?.brotliBytes ? metrics.brotliBytes - baselineRun.brotliBytes : deltas?.brotliBytes;
+
+  const firstRenderSpeedup =
+    baselineRun?.firstRenderMs && runtime?.firstRenderMs && baselineRun.firstRenderMs > 0 && runtime.firstRenderMs > 0
+      ? ((baselineRun.firstRenderMs - runtime.firstRenderMs) / baselineRun.firstRenderMs) * 100
+      : runtime?.speedupPercent;
+
+  const updateSpeedup =
+    baselineRun?.updateMs && runtime?.updateMs && baselineRun.updateMs > 0 && runtime.updateMs > 0
+      ? ((baselineRun.updateMs - runtime.updateMs) / baselineRun.updateMs) * 100
+      : runtime?.updateSpeedupPercent;
+
+  const evalSpeedup =
+    baselineRun?.scriptEvalMs && runtime?.scriptEvalMs && baselineRun.scriptEvalMs > 0 && runtime.scriptEvalMs > 0
+      ? ((baselineRun.scriptEvalMs - runtime.scriptEvalMs) / baselineRun.scriptEvalMs) * 100
+      : runtime?.evalSpeedupPercent;
+
+  const registrationSpeedup =
+    baselineRun?.registrationMs && runtime?.registrationMs && baselineRun.registrationMs > 0 && runtime.registrationMs > 0
+      ? ((baselineRun.registrationMs - runtime.registrationMs) / baselineRun.registrationMs) * 100
+      : runtime?.registrationSpeedupPercent;
+
+  const memorySavings =
+    baselineRun?.heapUsedBytes && runtime?.heapUsedBytes && baselineRun.heapUsedBytes > 0 && runtime.heapUsedBytes > 0
+      ? ((baselineRun.heapUsedBytes - runtime.heapUsedBytes) / baselineRun.heapUsedBytes) * 100
+      : runtime?.memorySavingsPercent;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -36,15 +72,15 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, del
           <FileCode className="w-5 h-5 text-zinc-400 stroke-[1.5]" />
         </div>
         <div className="text-2xl font-light tracking-tight text-zinc-950 tabular-nums">{formatBytes(metrics.rawBytes)}</div>
-        {!isBaseline && deltas && (
+        {!isBaseline && rawDeltaPct !== undefined && (
           <div
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-normal tabular-nums w-fit ${
-              (deltas.rawPercent ?? 0) <= -0.1 ? 'bg-emerald-50 text-emerald-700' : Math.abs(deltas.rawPercent ?? 0) <= 0.1 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
+              rawDeltaPct <= -0.1 ? 'bg-emerald-50 text-emerald-700' : Math.abs(rawDeltaPct) <= 0.1 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
             }`}
           >
-            {(deltas.rawPercent ?? 0) <= -0.1 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : (deltas.rawPercent ?? 0) > 0.1 ? <ArrowUpRight className="w-4 h-4 stroke-[1.75]" /> : null}
-            <span>{formatPercent(deltas.rawPercent)}</span>
-            <span>({formatBytes(deltas.rawBytes)})</span>
+            {rawDeltaPct <= -0.1 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : rawDeltaPct > 0.1 ? <ArrowUpRight className="w-4 h-4 stroke-[1.75]" /> : null}
+            <span>{formatPercent(rawDeltaPct)}</span>
+            {rawDeltaBytes !== undefined && <span>({formatBytes(rawDeltaBytes)})</span>}
           </div>
         )}
         {baseline && <div className="text-base font-light text-zinc-400 tabular-nums">Baseline: {formatBytes(baseline.rawBytes)}</div>}
@@ -57,15 +93,15 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, del
           <Archive className="w-5 h-5 text-zinc-400 stroke-[1.5]" />
         </div>
         <div className="text-2xl font-light tracking-tight text-zinc-950 tabular-nums">{formatBytes(metrics.gzipBytes)}</div>
-        {!isBaseline && deltas && (
+        {!isBaseline && gzipDeltaPct !== undefined && (
           <div
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-normal tabular-nums w-fit ${
-              (deltas.gzipPercent ?? 0) <= -0.1 ? 'bg-emerald-50 text-emerald-700' : Math.abs(deltas.gzipPercent ?? 0) <= 0.1 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
+              gzipDeltaPct <= -0.1 ? 'bg-emerald-50 text-emerald-700' : Math.abs(gzipDeltaPct) <= 0.1 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
             }`}
           >
-            {(deltas.gzipPercent ?? 0) <= -0.1 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : (deltas.gzipPercent ?? 0) > 0.1 ? <ArrowUpRight className="w-4 h-4 stroke-[1.75]" /> : null}
-            <span>{formatPercent(deltas.gzipPercent)}</span>
-            <span>({formatBytes(deltas.gzipBytes)})</span>
+            {gzipDeltaPct <= -0.1 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : gzipDeltaPct > 0.1 ? <ArrowUpRight className="w-4 h-4 stroke-[1.75]" /> : null}
+            <span>{formatPercent(gzipDeltaPct)}</span>
+            {gzipDeltaBytes !== undefined && <span>({formatBytes(gzipDeltaBytes)})</span>}
           </div>
         )}
         {baseline && <div className="text-base font-light text-zinc-400 tabular-nums">Baseline: {formatBytes(baseline.gzipBytes)}</div>}
@@ -78,15 +114,15 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, del
           <Package className="w-5 h-5 text-zinc-400 stroke-[1.5]" />
         </div>
         <div className="text-2xl font-light tracking-tight text-zinc-950 tabular-nums">{formatBytes(metrics.brotliBytes)}</div>
-        {!isBaseline && deltas && (
+        {!isBaseline && brotliDeltaPct !== undefined && (
           <div
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-normal tabular-nums w-fit ${
-              (deltas.brotliPercent ?? 0) <= -0.1 ? 'bg-emerald-50 text-emerald-700' : Math.abs(deltas.brotliPercent ?? 0) <= 0.1 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
+              brotliDeltaPct <= -0.1 ? 'bg-emerald-50 text-emerald-700' : Math.abs(brotliDeltaPct) <= 0.1 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
             }`}
           >
-            {(deltas.brotliPercent ?? 0) <= -0.1 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : (deltas.brotliPercent ?? 0) > 0.1 ? <ArrowUpRight className="w-4 h-4 stroke-[1.75]" /> : null}
-            <span>{formatPercent(deltas.brotliPercent)}</span>
-            <span>({formatBytes(deltas.brotliBytes)})</span>
+            {brotliDeltaPct <= -0.1 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : brotliDeltaPct > 0.1 ? <ArrowUpRight className="w-4 h-4 stroke-[1.75]" /> : null}
+            <span>{formatPercent(brotliDeltaPct)}</span>
+            {brotliDeltaBytes !== undefined && <span>({formatBytes(brotliDeltaBytes)})</span>}
           </div>
         )}
         {baseline && <div className="text-base font-light text-zinc-400 tabular-nums">Baseline: {formatBytes(baseline.brotliBytes)}</div>}
@@ -122,14 +158,14 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, del
             <Zap className="w-5 h-5 text-zinc-400 stroke-[1.5]" />
           </div>
           <div className="text-2xl font-light tracking-tight text-zinc-950 tabular-nums">{runtime.firstRenderMs.toFixed(2)} ms</div>
-          {!isBaseline && runtime.speedupPercent !== undefined && runtime.speedupPercent !== 0 && (
+          {!isBaseline && firstRenderSpeedup !== undefined && Math.abs(firstRenderSpeedup) > 0.5 && (
             <div
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-normal tabular-nums w-fit ${
-                runtime.speedupPercent > 0.5 ? 'bg-emerald-50 text-emerald-700' : Math.abs(runtime.speedupPercent) <= 0.5 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
+                firstRenderSpeedup > 0.5 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
               }`}
             >
-              {runtime.speedupPercent > 0.5 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
-              <span>{runtime.speedupPercent > 0 ? `+${runtime.speedupPercent.toFixed(1)}% faster` : `${runtime.speedupPercent.toFixed(1)}%`}</span>
+              {firstRenderSpeedup > 0.5 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
+              <span>{firstRenderSpeedup > 0 ? `+${firstRenderSpeedup.toFixed(1)}% faster` : `${firstRenderSpeedup.toFixed(1)}%`}</span>
             </div>
           )}
         </div>
@@ -143,14 +179,14 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, del
             <RefreshCw className="w-5 h-5 text-zinc-400 stroke-[1.5]" />
           </div>
           <div className="text-2xl font-light tracking-tight text-zinc-950 tabular-nums">{runtime.updateMs.toFixed(2)} ms</div>
-          {!isBaseline && runtime.updateSpeedupPercent !== undefined && runtime.updateSpeedupPercent !== 0 && (
+          {!isBaseline && updateSpeedup !== undefined && Math.abs(updateSpeedup) > 0.5 && (
             <div
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-normal tabular-nums w-fit ${
-                runtime.updateSpeedupPercent > 0.5 ? 'bg-emerald-50 text-emerald-700' : Math.abs(runtime.updateSpeedupPercent) <= 0.5 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
+                updateSpeedup > 0.5 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
               }`}
             >
-              {runtime.updateSpeedupPercent > 0.5 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
-              <span>{runtime.updateSpeedupPercent > 0 ? `+${runtime.updateSpeedupPercent.toFixed(1)}% faster` : `${runtime.updateSpeedupPercent.toFixed(1)}%`}</span>
+              {updateSpeedup > 0.5 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
+              <span>{updateSpeedup > 0 ? `+${updateSpeedup.toFixed(1)}% faster` : `${updateSpeedup.toFixed(1)}%`}</span>
             </div>
           )}
         </div>
@@ -164,14 +200,14 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, del
             <Cpu className="w-5 h-5 text-zinc-400 stroke-[1.5]" />
           </div>
           <div className="text-2xl font-light tracking-tight text-zinc-950 tabular-nums">{runtime.scriptEvalMs.toFixed(2)} ms</div>
-          {!isBaseline && runtime.evalSpeedupPercent !== undefined && runtime.evalSpeedupPercent !== 0 && (
+          {!isBaseline && evalSpeedup !== undefined && Math.abs(evalSpeedup) > 0.5 && (
             <div
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-normal tabular-nums w-fit ${
-                runtime.evalSpeedupPercent > 0.5 ? 'bg-emerald-50 text-emerald-700' : Math.abs(runtime.evalSpeedupPercent) <= 0.5 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
+                evalSpeedup > 0.5 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
               }`}
             >
-              {runtime.evalSpeedupPercent > 0.5 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
-              <span>{runtime.evalSpeedupPercent > 0 ? `+${runtime.evalSpeedupPercent.toFixed(1)}% faster` : `${runtime.evalSpeedupPercent.toFixed(1)}%`}</span>
+              {evalSpeedup > 0.5 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
+              <span>{evalSpeedup > 0 ? `+${evalSpeedup.toFixed(1)}% faster` : `${evalSpeedup.toFixed(1)}%`}</span>
             </div>
           )}
         </div>
@@ -185,18 +221,14 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, del
             <Layers className="w-5 h-5 text-zinc-400 stroke-[1.5]" />
           </div>
           <div className="text-2xl font-light tracking-tight text-zinc-950 tabular-nums">{runtime.registrationMs.toFixed(2)} ms</div>
-          {!isBaseline && runtime.registrationSpeedupPercent !== undefined && runtime.registrationSpeedupPercent !== 0 && (
+          {!isBaseline && registrationSpeedup !== undefined && Math.abs(registrationSpeedup) > 0.5 && (
             <div
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-normal tabular-nums w-fit ${
-                runtime.registrationSpeedupPercent > 0.5
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : Math.abs(runtime.registrationSpeedupPercent) <= 0.5
-                    ? 'bg-zinc-100 text-zinc-700'
-                    : 'bg-rose-50 text-rose-700'
+                registrationSpeedup > 0.5 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
               }`}
             >
-              {runtime.registrationSpeedupPercent > 0.5 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
-              <span>{runtime.registrationSpeedupPercent > 0 ? `+${runtime.registrationSpeedupPercent.toFixed(1)}% faster` : `${runtime.registrationSpeedupPercent.toFixed(1)}%`}</span>
+              {registrationSpeedup > 0.5 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
+              <span>{registrationSpeedup > 0 ? `+${registrationSpeedup.toFixed(1)}% faster` : `${registrationSpeedup.toFixed(1)}%`}</span>
             </div>
           )}
           <div className="text-base font-light text-zinc-400 tabular-nums">customElements.define CPU cost</div>
@@ -211,14 +243,14 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, del
             <Database className="w-5 h-5 text-zinc-400 stroke-[1.5]" />
           </div>
           <div className="text-2xl font-light tracking-tight text-zinc-950 tabular-nums">{formatBytes(runtime.heapUsedBytes)}</div>
-          {!isBaseline && runtime.memorySavingsPercent !== undefined && runtime.memorySavingsPercent !== 0 && (
+          {!isBaseline && memorySavings !== undefined && Math.abs(memorySavings) > 0.5 && (
             <div
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-normal tabular-nums w-fit ${
-                runtime.memorySavingsPercent > 0.5 ? 'bg-emerald-50 text-emerald-700' : Math.abs(runtime.memorySavingsPercent) <= 0.5 ? 'bg-zinc-100 text-zinc-700' : 'bg-rose-50 text-rose-700'
+                memorySavings > 0.5 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
               }`}
             >
-              {runtime.memorySavingsPercent > 0 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
-              <span>{runtime.memorySavingsPercent > 0 ? `+${runtime.memorySavingsPercent.toFixed(1)}% savings` : `${runtime.memorySavingsPercent.toFixed(1)}%`}</span>
+              {memorySavings > 0.5 ? <ArrowDownRight className="w-4 h-4 stroke-[1.75]" /> : null}
+              <span>{memorySavings > 0 ? `+${memorySavings.toFixed(1)}% savings` : `${memorySavings.toFixed(1)}%`}</span>
             </div>
           )}
         </div>

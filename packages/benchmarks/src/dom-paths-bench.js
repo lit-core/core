@@ -91,7 +91,6 @@ function runStandardLitTreeWalker(root, counters) {
 function runDomPathsResolution(root, paths, counters) {
   const parts = [];
   for (const path of paths) {
-    counters.nodesVisited += path.length;
     const node = resolveNodeByPath(root, path);
     if (node) {
       parts.push(node);
@@ -273,7 +272,7 @@ export async function runDomPathsBenchmarks(options = {}) {
         componentsScanned: components.length,
         templatesCount: templatePool.length,
         pathsCount: suitePathsCount,
-        traversalReduction: nodesDelta.formattedPercent,
+        traversalReduction: walkerDelta.formattedPercent,
         buildOverhead: 'Fast native pass',
       },
     });

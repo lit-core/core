@@ -3,13 +3,13 @@
   "benchmarkId": "elem-proxy",
   "title": "`@lit-core/elem-proxy` empirical benchmark results",
   "description": "Deferred Custom Element proxy stubs evaluated across 349 production Lit Web Components to measure script evaluation CPU time, V8 heap memory footprint, and mount latency.",
-  "timestamp": "2026-09-29T20:31:24.391Z",
+  "timestamp": "2026-10-03T20:45:54.934Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a49119e",
+    "gitCommit": "b67b735",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -31,16 +31,16 @@
       "packageName": "@carbon/web-components",
       "componentCount": 99,
       "baseline": {
-        "evalTimeMs": 50.52,
-        "heapKb": 127453.8,
+        "evalTimeMs": 11.7,
+        "heapKb": 1976.1,
         "mountLatencyMs": 0,
         "totalComponents": 99,
         "deferredComponents": 0,
         "evaluatedComponents": 99
       },
       "optimized": {
-        "evalTimeMs": 42.47,
-        "heapKb": 136493.6,
+        "evalTimeMs": 9.72,
+        "heapKb": 1530,
         "mountLatencyMs": 0,
         "totalComponents": 99,
         "deferredComponents": 94,
@@ -48,26 +48,26 @@
       },
       "deltas": {
         "cpu": {
-          "diff": -8.050000000000004,
-          "percent": -15.934283452098185,
-          "formattedDiff": "-8.1",
-          "formattedPercent": "-15.9%",
+          "diff": -1.9799999999999986,
+          "percent": -16.923076923076913,
+          "formattedDiff": "-2.0",
+          "formattedPercent": "-16.9%",
           "isReduction": true
         },
         "heap": {
-          "diff": 9039.800000000003,
-          "percent": 7.092609243506276,
-          "formattedDiff": "9,039.8",
-          "formattedPercent": "+7.1%",
-          "isReduction": false
+          "diff": -446.0999999999999,
+          "percent": -22.574768483376346,
+          "formattedDiff": "-446.1",
+          "formattedPercent": "-22.6%",
+          "isReduction": true
         }
       },
       "diagnostics": {
         "evaluatedCount": "5 / 99 (5.1%)",
         "deferredCount": "94 avoided",
         "deferredProportion": "94.9% deferred",
-        "cpuSavings": "-15.9%",
-        "heapSavings": "+7.1%",
+        "cpuSavings": "-16.9%",
+        "heapSavings": "-22.6%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -78,16 +78,16 @@
       "packageName": "@spectrum-web-components/bundle",
       "componentCount": 52,
       "baseline": {
-        "evalTimeMs": 3.91,
-        "heapKb": 173040.7,
+        "evalTimeMs": 1.79,
+        "heapKb": 995.8,
         "mountLatencyMs": 0,
         "totalComponents": 52,
         "deferredComponents": 0,
         "evaluatedComponents": 52
       },
       "optimized": {
-        "evalTimeMs": 3.82,
-        "heapKb": 106655.7,
+        "evalTimeMs": 1.37,
+        "heapKb": 1243.1,
         "mountLatencyMs": 0,
         "totalComponents": 52,
         "deferredComponents": 47,
@@ -95,26 +95,26 @@
       },
       "deltas": {
         "cpu": {
-          "diff": -0.0900000000000003,
-          "percent": -2.301790281329931,
-          "formattedDiff": "-0.1",
-          "formattedPercent": "-2.3%",
+          "diff": -0.41999999999999993,
+          "percent": -23.463687150837984,
+          "formattedDiff": "-0.4",
+          "formattedPercent": "-23.5%",
           "isReduction": true
         },
         "heap": {
-          "diff": -66385.00000000001,
-          "percent": -38.36380689629666,
-          "formattedDiff": "-66,385.0",
-          "formattedPercent": "-38.4%",
-          "isReduction": true
+          "diff": 247.29999999999995,
+          "percent": 24.834304077123917,
+          "formattedDiff": "247.3",
+          "formattedPercent": "+24.8%",
+          "isReduction": false
         }
       },
       "diagnostics": {
         "evaluatedCount": "5 / 52 (9.6%)",
         "deferredCount": "47 avoided",
         "deferredProportion": "90.4% deferred",
-        "cpuSavings": "-2.3%",
-        "heapSavings": "-38.4%",
+        "cpuSavings": "-23.5%",
+        "heapSavings": "+24.8%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -125,16 +125,16 @@
       "packageName": "@awesome.me/webawesome",
       "componentCount": 73,
       "baseline": {
-        "evalTimeMs": 3.96,
-        "heapKb": 153021.2,
+        "evalTimeMs": 1.48,
+        "heapKb": 880,
         "mountLatencyMs": 0,
         "totalComponents": 73,
         "deferredComponents": 0,
         "evaluatedComponents": 73
       },
       "optimized": {
-        "evalTimeMs": 1.51,
-        "heapKb": 164249.8,
+        "evalTimeMs": 0.49,
+        "heapKb": 771.8,
         "mountLatencyMs": 0,
         "totalComponents": 73,
         "deferredComponents": 68,
@@ -142,26 +142,26 @@
       },
       "deltas": {
         "cpu": {
-          "diff": -2.45,
-          "percent": -61.86868686868687,
-          "formattedDiff": "-2.5",
-          "formattedPercent": "-61.9%",
+          "diff": -0.99,
+          "percent": -66.8918918918919,
+          "formattedDiff": "-1.0",
+          "formattedPercent": "-66.9%",
           "isReduction": true
         },
         "heap": {
-          "diff": 11228.599999999977,
-          "percent": 7.337937488400284,
-          "formattedDiff": "11,228.6",
-          "formattedPercent": "+7.3%",
-          "isReduction": false
+          "diff": -108.20000000000005,
+          "percent": -12.29545454545455,
+          "formattedDiff": "-108.2",
+          "formattedPercent": "-12.3%",
+          "isReduction": true
         }
       },
       "diagnostics": {
         "evaluatedCount": "5 / 73 (6.8%)",
         "deferredCount": "68 avoided",
         "deferredProportion": "93.2% deferred",
-        "cpuSavings": "-61.9%",
-        "heapSavings": "+7.3%",
+        "cpuSavings": "-66.9%",
+        "heapSavings": "-12.3%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -172,16 +172,16 @@
       "packageName": "@momentum-design/components",
       "componentCount": 97,
       "baseline": {
-        "evalTimeMs": 3.29,
-        "heapKb": 116104.3,
-        "mountLatencyMs": 0,
+        "evalTimeMs": 2.92,
+        "heapKb": 385,
+        "mountLatencyMs": 0.01,
         "totalComponents": 97,
         "deferredComponents": 0,
         "evaluatedComponents": 97
       },
       "optimized": {
-        "evalTimeMs": 3.47,
-        "heapKb": 122866.4,
+        "evalTimeMs": 2.02,
+        "heapKb": 379.8,
         "mountLatencyMs": 0,
         "totalComponents": 97,
         "deferredComponents": 92,
@@ -189,26 +189,26 @@
       },
       "deltas": {
         "cpu": {
-          "diff": 0.18000000000000016,
-          "percent": 5.471124620060795,
-          "formattedDiff": "0.2",
-          "formattedPercent": "+5.5%",
-          "isReduction": false
+          "diff": -0.8999999999999999,
+          "percent": -30.821917808219172,
+          "formattedDiff": "-0.9",
+          "formattedPercent": "-30.8%",
+          "isReduction": true
         },
         "heap": {
-          "diff": 6762.099999999991,
-          "percent": 5.824159828705733,
-          "formattedDiff": "6,762.1",
-          "formattedPercent": "+5.8%",
-          "isReduction": false
+          "diff": -5.199999999999989,
+          "percent": -1.3506493506493478,
+          "formattedDiff": "-5.2",
+          "formattedPercent": "-1.4%",
+          "isReduction": true
         }
       },
       "diagnostics": {
         "evaluatedCount": "5 / 97 (5.2%)",
         "deferredCount": "92 avoided",
         "deferredProportion": "94.8% deferred",
-        "cpuSavings": "+5.5%",
-        "heapSavings": "+5.8%",
+        "cpuSavings": "-30.8%",
+        "heapSavings": "-1.4%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -219,16 +219,16 @@
       "packageName": "@material/web",
       "componentCount": 28,
       "baseline": {
-        "evalTimeMs": 6.67,
-        "heapKb": 139159.5,
+        "evalTimeMs": 3.61,
+        "heapKb": 388.4,
         "mountLatencyMs": 0,
         "totalComponents": 28,
         "deferredComponents": 0,
         "evaluatedComponents": 28
       },
       "optimized": {
-        "evalTimeMs": 5.31,
-        "heapKb": 143322.8,
+        "evalTimeMs": 2.88,
+        "heapKb": 317.4,
         "mountLatencyMs": 0,
         "totalComponents": 28,
         "deferredComponents": 23,
@@ -236,26 +236,26 @@
       },
       "deltas": {
         "cpu": {
-          "diff": -1.3600000000000003,
-          "percent": -20.38980509745128,
-          "formattedDiff": "-1.4",
-          "formattedPercent": "-20.4%",
+          "diff": -0.73,
+          "percent": -20.221606648199447,
+          "formattedDiff": "-0.7",
+          "formattedPercent": "-20.2%",
           "isReduction": true
         },
         "heap": {
-          "diff": 4163.299999999988,
-          "percent": 2.9917468803782628,
-          "formattedDiff": "4,163.3",
-          "formattedPercent": "+3.0%",
-          "isReduction": false
+          "diff": -71,
+          "percent": -18.280123583934092,
+          "formattedDiff": "-71.0",
+          "formattedPercent": "-18.3%",
+          "isReduction": true
         }
       },
       "diagnostics": {
         "evaluatedCount": "5 / 28 (17.9%)",
         "deferredCount": "23 avoided",
         "deferredProportion": "82.1% deferred",
-        "cpuSavings": "-20.4%",
-        "heapSavings": "+3.0%",
+        "cpuSavings": "-20.2%",
+        "heapSavings": "-18.3%",
         "buildOverhead": "Fast native pass"
       }
     }

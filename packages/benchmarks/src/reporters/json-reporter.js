@@ -88,6 +88,11 @@ export const FEATURE_METADATA = {
     description: 'Zero-JavaScript SSR and interaction-driven runtime resumption',
     category: 'resumption',
   },
+  'tag-shake': {
+    name: 'Tag shake dead code elimination (tag-shake)',
+    description: 'Ahead-of-time Web Component dead code elimination and registration tag shaking',
+    category: 'tree-shaking',
+  },
   all: {
     name: 'All optimizations combined',
     description: 'Combined impact of all enabled optimization tools simultaneously',
@@ -243,6 +248,54 @@ export function updateManifest(entry, outDir = defaultResultsDir) {
   // Remove existing run for this suite & feature
   manifest.runs = manifest.runs.filter((r) => !(r.suiteId === entry.suiteId && r.featureId === entry.featureId));
   manifest.runs.push(entry);
+
+  // Reconcile deltas against current baseline for each suite
+  /** @type {Record<string, ManifestRunEntry>} */
+  const baselinesBySuite = {};
+  for (const r of manifest.runs) {
+    if (r.featureId === 'baseline') {
+      baselinesBySuite[r.suiteId] = r;
+    }
+  }
+
+  for (const r of manifest.runs) {
+    const base = baselinesBySuite[r.suiteId];
+    if (r.featureId === 'baseline') {
+      r.rawPercent = 0;
+      r.gzipPercent = 0;
+      r.brotliPercent = 0;
+      r.speedupPercent = 0;
+      r.updateSpeedupPercent = 0;
+      r.evalSpeedupPercent = 0;
+      r.registrationSpeedupPercent = 0;
+      r.memorySavingsPercent = 0;
+    } else if (base) {
+      if (base.rawBytes > 0 && r.rawBytes > 0) {
+        r.rawPercent = ((r.rawBytes - base.rawBytes) / base.rawBytes) * 100;
+      }
+      if (base.gzipBytes > 0 && r.gzipBytes > 0) {
+        r.gzipPercent = ((r.gzipBytes - base.gzipBytes) / base.gzipBytes) * 100;
+      }
+      if (base.brotliBytes > 0 && r.brotliBytes > 0) {
+        r.brotliPercent = ((r.brotliBytes - base.brotliBytes) / base.brotliBytes) * 100;
+      }
+      if (base.firstRenderMs > 0 && r.firstRenderMs > 0) {
+        r.speedupPercent = ((base.firstRenderMs - r.firstRenderMs) / base.firstRenderMs) * 100;
+      }
+      if (base.updateMs > 0 && r.updateMs > 0) {
+        r.updateSpeedupPercent = ((base.updateMs - r.updateMs) / base.updateMs) * 100;
+      }
+      if (base.scriptEvalMs > 0 && r.scriptEvalMs > 0) {
+        r.evalSpeedupPercent = ((base.scriptEvalMs - r.scriptEvalMs) / base.scriptEvalMs) * 100;
+      }
+      if (base.registrationMs > 0 && r.registrationMs > 0) {
+        r.registrationSpeedupPercent = ((base.registrationMs - r.registrationMs) / base.registrationMs) * 100;
+      }
+      if (base.heapUsedBytes > 0 && r.heapUsedBytes > 0) {
+        r.memorySavingsPercent = ((base.heapUsedBytes - r.heapUsedBytes) / base.heapUsedBytes) * 100;
+      }
+    }
+  }
 
   // Sort runs consistently: by suiteId then by featureId
   manifest.runs.sort((a, b) => {

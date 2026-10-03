@@ -317,6 +317,19 @@ export interface LitPluginOptions {
    * @default false
    */
   resumable?: boolean | ResumableOptions;
+
+  /**
+   * Ahead-of-time Web Component dead code elimination via @lit-core/tag-shake.
+   * Scans templates for used tags and prunes unreferenced custom element registrations and imports.
+   * Pass `true` or a `TagShakeOptions` object to enable.
+   * @default false
+   */
+  tagShake?: boolean | TagShakeOptions;
+
+  /**
+   * Kebab-case alias for `tagShake`.
+   */
+  'tag-shake'?: boolean | TagShakeOptions;
 }
 
 export interface ResumableOptions {
@@ -550,4 +563,31 @@ export interface DirectivesOptions {
 }
 
 export type LitDirectivesOptions = DirectivesOptions;
+
+export interface TagShakeOptions {
+  /**
+   * File patterns for application files to scan for used tags.
+   * Defaults to [/\.[jt]sx?$/, /\.html$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude from application tag scanning.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Explicit list of tags to preserve.
+   */
+  keepTags?: string[];
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitTagShakeOptions = TagShakeOptions;
 export type LitCorePluginOptions = LitPluginOptions;

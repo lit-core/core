@@ -3,13 +3,13 @@
   "benchmarkId": "dom-paths",
   "title": "`@lit-core/dom-paths` empirical benchmark results",
   "description": "Ahead-of-time structural DOM child pointer path compilation evaluated across 255 production Web Components to eliminate runtime TreeWalker traversal during component mount.",
-  "timestamp": "2026-09-29T20:31:35.182Z",
+  "timestamp": "2026-10-03T20:41:35.932Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a49119e",
+    "gitCommit": "b67b735",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -34,30 +34,30 @@
         "instancesCount": 500,
         "treeWalkerCalls": 500,
         "nodesVisited": 1863,
-        "mountLatencyMs": 0.16,
-        "heapKb": 174
+        "mountLatencyMs": 0.23,
+        "heapKb": 175.3
       },
       "optimized": {
         "instancesCount": 500,
         "treeWalkerCalls": 0,
-        "nodesVisited": 4629,
-        "mountLatencyMs": 0.1,
-        "heapKb": 323.9
+        "nodesVisited": 0,
+        "mountLatencyMs": 0.2,
+        "heapKb": 256.4
       },
       "deltas": {
         "latency": {
-          "diff": -0.06,
-          "percent": -37.5,
-          "formattedDiff": "-0.1",
-          "formattedPercent": "-37.5%",
+          "diff": -0.03,
+          "percent": -13.043478260869565,
+          "formattedDiff": "-0.0",
+          "formattedPercent": "-13.0%",
           "isReduction": true
         },
         "nodes": {
-          "diff": 2766,
-          "percent": 148.47020933977456,
-          "formattedDiff": "2,766.0",
-          "formattedPercent": "+148.5%",
-          "isReduction": false
+          "diff": -1863,
+          "percent": -100,
+          "formattedDiff": "-1,863.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
         },
         "walker": {
           "diff": -500,
@@ -71,7 +71,7 @@
         "componentsScanned": 51,
         "templatesCount": 60,
         "pathsCount": 350,
-        "traversalReduction": "+148.5%",
+        "traversalReduction": "-100.0%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -85,30 +85,30 @@
         "instancesCount": 500,
         "treeWalkerCalls": 500,
         "nodesVisited": 1000,
-        "mountLatencyMs": 0.09,
-        "heapKb": 174.7
+        "mountLatencyMs": 0.11,
+        "heapKb": 224.4
       },
       "optimized": {
         "instancesCount": 500,
         "treeWalkerCalls": 0,
-        "nodesVisited": 1000,
-        "mountLatencyMs": 0.07,
-        "heapKb": 158.2
+        "nodesVisited": 0,
+        "mountLatencyMs": 0.04,
+        "heapKb": 174
       },
       "deltas": {
         "latency": {
-          "diff": -0.01999999999999999,
-          "percent": -22.222222222222214,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-22.2%",
+          "diff": -0.07,
+          "percent": -63.63636363636365,
+          "formattedDiff": "-0.1",
+          "formattedPercent": "-63.6%",
           "isReduction": true
         },
         "nodes": {
-          "diff": 0,
-          "percent": 0,
-          "formattedDiff": "0.0",
-          "formattedPercent": "0.0%",
-          "isReduction": false
+          "diff": -1000,
+          "percent": -100,
+          "formattedDiff": "-1,000.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
         },
         "walker": {
           "diff": -500,
@@ -122,7 +122,7 @@
         "componentsScanned": 51,
         "templatesCount": 1,
         "pathsCount": 0,
-        "traversalReduction": "0.0%",
+        "traversalReduction": "-100.0%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -136,30 +136,30 @@
         "instancesCount": 500,
         "treeWalkerCalls": 500,
         "nodesVisited": 2861,
-        "mountLatencyMs": 0.15,
-        "heapKb": 165.7
+        "mountLatencyMs": 0.17,
+        "heapKb": 184.5
       },
       "optimized": {
         "instancesCount": 500,
         "treeWalkerCalls": 0,
-        "nodesVisited": 7346,
-        "mountLatencyMs": 0.08,
-        "heapKb": 263.5
+        "nodesVisited": 0,
+        "mountLatencyMs": 0.07,
+        "heapKb": 244.4
       },
       "deltas": {
         "latency": {
-          "diff": -0.06999999999999999,
-          "percent": -46.666666666666664,
+          "diff": -0.1,
+          "percent": -58.82352941176471,
           "formattedDiff": "-0.1",
-          "formattedPercent": "-46.7%",
+          "formattedPercent": "-58.8%",
           "isReduction": true
         },
         "nodes": {
-          "diff": 4485,
-          "percent": 156.76336945124083,
-          "formattedDiff": "4,485.0",
-          "formattedPercent": "+156.8%",
-          "isReduction": false
+          "diff": -2861,
+          "percent": -100,
+          "formattedDiff": "-2,861.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
         },
         "walker": {
           "diff": -500,
@@ -173,7 +173,7 @@
         "componentsScanned": 51,
         "templatesCount": 44,
         "pathsCount": 331,
-        "traversalReduction": "+156.8%",
+        "traversalReduction": "-100.0%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -187,30 +187,30 @@
         "instancesCount": 500,
         "treeWalkerCalls": 500,
         "nodesVisited": 2103,
-        "mountLatencyMs": 0.09,
-        "heapKb": 162.5
+        "mountLatencyMs": 0.11,
+        "heapKb": 164.1
       },
       "optimized": {
         "instancesCount": 500,
         "treeWalkerCalls": 0,
-        "nodesVisited": 4531,
-        "mountLatencyMs": 0.03,
-        "heapKb": 122.5
+        "nodesVisited": 0,
+        "mountLatencyMs": 0.04,
+        "heapKb": 122.6
       },
       "deltas": {
         "latency": {
-          "diff": -0.06,
-          "percent": -66.66666666666666,
+          "diff": -0.07,
+          "percent": -63.63636363636365,
           "formattedDiff": "-0.1",
-          "formattedPercent": "-66.7%",
+          "formattedPercent": "-63.6%",
           "isReduction": true
         },
         "nodes": {
-          "diff": 2428,
-          "percent": 115.45411317165954,
-          "formattedDiff": "2,428.0",
-          "formattedPercent": "+115.5%",
-          "isReduction": false
+          "diff": -2103,
+          "percent": -100,
+          "formattedDiff": "-2,103.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
         },
         "walker": {
           "diff": -500,
@@ -224,7 +224,7 @@
         "componentsScanned": 51,
         "templatesCount": 63,
         "pathsCount": 337,
-        "traversalReduction": "+115.5%",
+        "traversalReduction": "-100.0%",
         "buildOverhead": "Fast native pass"
       }
     },
@@ -239,29 +239,29 @@
         "treeWalkerCalls": 500,
         "nodesVisited": 1843,
         "mountLatencyMs": 0.1,
-        "heapKb": 156.2
+        "heapKb": 146.6
       },
       "optimized": {
         "instancesCount": 500,
         "treeWalkerCalls": 0,
-        "nodesVisited": 3498,
-        "mountLatencyMs": 0.02,
+        "nodesVisited": 0,
+        "mountLatencyMs": 0.03,
         "heapKb": 109.9
       },
       "deltas": {
         "latency": {
-          "diff": -0.08,
-          "percent": -80,
+          "diff": -0.07,
+          "percent": -70,
           "formattedDiff": "-0.1",
-          "formattedPercent": "-80.0%",
+          "formattedPercent": "-70.0%",
           "isReduction": true
         },
         "nodes": {
-          "diff": 1655,
-          "percent": 89.79924036896365,
-          "formattedDiff": "1,655.0",
-          "formattedPercent": "+89.8%",
-          "isReduction": false
+          "diff": -1843,
+          "percent": -100,
+          "formattedDiff": "-1,843.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
         },
         "walker": {
           "diff": -500,
@@ -275,7 +275,7 @@
         "componentsScanned": 51,
         "templatesCount": 30,
         "pathsCount": 130,
-        "traversalReduction": "+89.8%",
+        "traversalReduction": "-100.0%",
         "buildOverhead": "Fast native pass"
       }
     }

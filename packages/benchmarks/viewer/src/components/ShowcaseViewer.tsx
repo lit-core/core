@@ -124,6 +124,7 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
     { id: 'css-fuse', name: 'CSS AST deduplication', description: 'Cross-component shared constructable sheets' },
     { id: 'props-lower', name: 'Lit decorator lowering', description: 'Compile-time property descriptor lowering' },
     { id: 'html-aot', name: 'AOT template compilation', description: 'Static compiled template descriptors' },
+    { id: 'tag-shake', name: 'Tag shake dead code elimination', description: 'Eliminates unreferenced custom element registrations and imports' },
     { id: 'all', name: 'All optimizations combined', description: 'Unified multi-pass compiler pipeline' },
   ];
 
