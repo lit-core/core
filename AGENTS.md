@@ -24,9 +24,50 @@ Welcome to the `@lit-core` monorepo. This file outlines core architectural princ
 >   - Pull request titles, commit messages, and summaries
 >   - Diagram labels and descriptions
 >   - Prose, callouts, and notes
+>   - UI components, navigation tabs, buttons, section headers, badges, and filters
 > - Preserve proper nouns, brand names, acronyms, and code identifiers exactly as they are (e.g. `Lit`, `Vite`, `AST`, `Rollup`, `HTML`, `CSSStyleSheet`, `oxc`, `lightningcss`, `Carbon Web Components`).
 
 ---
+
+## 🎨 UI typography, layout, and visual design rules (Mandatory)
+
+> **MANDATORY DESIGN RULE: SCANDINAVIAN MINIMALISM AND BALANCED TYPOGRAPHY**:
+> Every frontend application, viewer dashboard, and showcase in this monorepo must adhere to the following UI standards:
+>
+> 1. **Zero uppercasing anywhere**:
+>    - Never use CSS `uppercase` or `tracking-wider` on headings, badges, tabs, or buttons.
+>    - Never use Title Case. All UI copy must strictly use **sentence case**.
+> 2. **16px root font size and 1rem minimum floor**:
+>    - Root HTML must be 16px (`html { font-size: 16px; }`).
+>    - **Never go below 1rem (16px) anywhere in the UI.**
+>    - Strictly forbid `text-xs` (12px) and `text-sm` (14px). Use `text-base` (1rem, 16px) as the floor for badges, helper text, and secondary labels.
+> 3. **Thinner font weights**:
+>    - Use `font-light` (300) for secondary copy, neutral values, helper text, and unselected pills.
+>    - Use `font-normal` (400) for body copy, table values, and table headers.
+>    - Use `font-medium` (500) strictly for section titles and active button/pill states.
+>    - Strictly forbid heavy weights (`font-semibold`, `font-bold`).
+> 4. **Reuse standard typography variants**:
+>    - Page / view title: `text-2xl font-light text-zinc-950 tracking-tight`
+>    - Section heading: `text-lg font-medium text-zinc-950 tracking-tight`
+>    - Base body & table cell: `text-base font-normal text-zinc-900` or `text-base font-light text-zinc-700`
+>    - Filter label, column header & supporting text: `text-base font-light text-zinc-500` (never low-contrast `text-zinc-400`)
+>    - Tabular numeric value: `tabular-nums text-base font-light text-zinc-700`
+> 5. **Wide container alignment**:
+>    - Header and main content must share identical container constraints: `w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-14`.
+> 6. **Headings outside surface cards**:
+>    - Never trap section headings inside cards or nested boxes. Place headings cleanly on the canvas outside and above the surface cards.
+> 7. **Unboxed filter controls**:
+>    - Filter and selection controls live directly on the `#fafafb` canvas with fixed-width muted labels (`w-28 text-base font-light text-zinc-500 shrink-0`), not wrapped inside bulky white cards.
+> 8. **Combined soft modern shadows and super subtle border definition**:
+>    - Strictly forbid heavy 1px gray borders (`border border-zinc-200`, `border-b`, `border-t`).
+>    - Elevate cards, surfaces, panels, and tables with soft, diffuse, larger modern shadows paired with a super subtle border ring: `shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5` (transitioning to `shadow-[0_12px_36px_rgb(0,0,0,0.06)]` on hover).
+>    - Keep interactive controls flat (`shadow-none`) without heavy shadows. Dropdowns use rich emerald with white text (`bg-emerald-700 hover:bg-emerald-800 text-white`).
+>    - When an active or selected outline is needed (e.g. overview cards), use a thick green ring (`ring-[3px] ring-emerald-600`), keeping the card background identical to inactive cards.
+> 9. **Balanced grayscales and contrast**:
+>    - Clean surface distinction between `#ffffff` cards and `#fafafb` canvas provided by soft shadows.
+>    - Maintain legible contrast: use `text-zinc-500` (WCAG AA compliant ~4.6:1 against `#fafafb`) for column headers, secondary labels, and muted text.
+> 10. **Component isolation via iframes**:
+>    - Third-party Web Components must render in isolated `<iframe>` canvases to strictly prevent global reset stylesheets from leaking into the dashboard.
 
 ## 🌐 General-purpose architecture rule (Never hardcode library-specific heuristics)
 
@@ -94,6 +135,7 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 | `@lit-core/vite-plugin` | `packages/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
 | `@lit-core/webpack-plugin` | `packages/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack |
 | `@lit-core/benchmarks` | `packages/benchmarks` | Node.js, Vite | Multi-library bundle size and deduplication benchmark harness |
+| `@lit-core/showcase` | `packages/showcase` | TypeScript, Vite | Multi-framework component visualization showcase with isolated compiler passes |
 | `@lit-core/tests` | `packages/tests` | TypeScript, Vitest, Playwright | Real component multi-framework Playwright test suite |
 
 ---

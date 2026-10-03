@@ -143,4 +143,19 @@ describe('playwright browser runtime testing for lit-core and html-aot', () => {
     expect(duration).toBeGreaterThan(0);
     expect(duration).toBeLessThan(1000);
   });
+
+  it('returns zero-valued runtime metrics from emptyRuntimeMetrics and fallback', async () => {
+    const { emptyRuntimeMetrics, measureBundleRuntime } = await import('../src/runtime.js');
+    const empty = emptyRuntimeMetrics();
+    expect(empty).toEqual({
+      firstRenderMs: 0,
+      updateMs: 0,
+      scriptEvalMs: 0,
+      registrationMs: 0,
+      heapUsedBytes: 0,
+    });
+
+    const nonExistentResult = await measureBundleRuntime('/non-existent-path/bundle.js');
+    expect(nonExistentResult).toEqual(empty);
+  });
 });

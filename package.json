@@ -43,6 +43,10 @@
     "viewer:dev": "pnpm --filter @lit-core/benchmarks run viewer:dev",
     "viewer:build": "pnpm --filter @lit-core/benchmarks run viewer:build",
     "viewer:preview": "pnpm --filter @lit-core/benchmarks run viewer:preview",
+    "showcase:dev": "pnpm --filter @lit-core/showcase run dev",
+    "showcase:build": "pnpm --filter @lit-core/showcase run build",
+    "showcase:preview": "pnpm --filter @lit-core/showcase run preview",
+    "test:showcase": "pnpm --filter @lit-core/tests run test:showcase",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "biome format --write .",
     "format:check": "biome format ."

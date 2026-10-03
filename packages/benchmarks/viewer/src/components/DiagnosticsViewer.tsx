@@ -1,4 +1,5 @@
-import React from 'react';
+import type React from 'react';
+import { Terminal } from 'lucide-react';
 
 interface DiagnosticsViewerProps {
   diagnostics: Record<string, any>;
@@ -23,30 +24,34 @@ export const DiagnosticsViewer: React.FC<DiagnosticsViewerProps> = ({ diagnostic
   }
 
   return (
-    <div className="table-card">
-      <div className="table-header-bar">
-        <span className="table-title">Compiler AST diagnostics</span>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-baseline justify-between px-1">
+        <h2 className="text-lg font-medium text-zinc-950 tracking-tight flex items-center gap-2.5">
+          <Terminal className="w-4 h-4 text-zinc-400 stroke-[1.75]" />
+          <span>Compiler AST diagnostics</span>
+        </h2>
+        <span className="text-base font-light text-zinc-500">{entries.length} metrics evaluated</span>
       </div>
 
-      <div className="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Diagnostic metric</th>
-              <th className="numeric">Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map(([key, val]) => (
-              <tr key={key}>
-                <td>{formatKey(key)}</td>
-                <td className="numeric">
-                  <strong>{formatVal(val)}</strong>
-                </td>
+      <div className="bg-white rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-base">
+            <thead>
+              <tr className="bg-zinc-100/75">
+                <th className="py-3.5 px-6 text-base font-medium text-zinc-700">Diagnostic metric</th>
+                <th className="py-3.5 px-6 text-base font-medium text-zinc-700 text-right">Value</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {entries.map(([key, val], idx) => (
+                <tr key={key} className={`transition-colors hover:bg-zinc-100/60 ${idx % 2 === 1 ? 'bg-zinc-50/70' : 'bg-white'}`}>
+                  <td className="py-3.5 px-6 font-normal text-zinc-900">{formatKey(key)}</td>
+                  <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-800">{formatVal(val)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

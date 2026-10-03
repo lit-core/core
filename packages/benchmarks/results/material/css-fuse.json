@@ -136,13 +136,13 @@
     "description": "Cross-component CSS deduplication into shared constructable stylesheets",
     "isBaseline": false
   },
-  "timestamp": "2026-09-29T20:57:44.971Z",
+  "timestamp": "2026-10-03T12:10:19.696Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "3e38fce",
+    "gitCommit": "ea75514",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -160,13 +160,13 @@
     "rawBytes": 271126,
     "gzipBytes": 57539,
     "brotliBytes": 46726,
-    "buildTimeMs": 260.3043339999999
+    "buildTimeMs": 133.12945800000125
   },
   "baseline": {
     "rawBytes": 269272,
     "gzipBytes": 56943,
     "brotliBytes": 46024,
-    "buildTimeMs": 52.36883399999999
+    "buildTimeMs": 35.46716699999888
   },
   "deltas": {
     "rawBytes": 1854,
@@ -175,12 +175,19 @@
     "gzipPercent": 1.0466606957835027,
     "brotliBytes": 702,
     "brotliPercent": 1.5252911524422041,
-    "buildTimeMs": 207.93549999999993
+    "buildTimeMs": 97.66229100000237
   },
   "runtime": {
-    "firstRenderMs": 0,
-    "updateMs": 0,
-    "speedupPercent": 0
+    "firstRenderMs": 5.3,
+    "updateMs": 1.1,
+    "scriptEvalMs": 5.7,
+    "registrationMs": 1.6,
+    "heapUsedBytes": 532520,
+    "speedupPercent": 3.63636363636364,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 3.3898305084745792,
+    "registrationSpeedupPercent": -14.285714285714299,
+    "memorySavingsPercent": 0.14026718272988442
   },
   "diagnostics": {
     "rulesScanned": 1354,

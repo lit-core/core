@@ -6,10 +6,30 @@ import { chromium } from 'playwright';
  * @property {string} name
  * @property {number} firstRenderMs
  * @property {number} updateMs
+ * @property {number} [scriptEvalMs]
+ * @property {number} [registrationMs]
+ * @property {number} [heapUsedBytes]
  * @property {number} [speedupPercent]
+ * @property {number} [updateSpeedupPercent]
+ * @property {number} [evalSpeedupPercent]
+ * @property {number} [memorySavingsPercent]
  * @property {boolean} [isBaseline]
  * @property {boolean} [isTotal]
  */
+
+/**
+ * Return default zero-valued runtime metrics for fallback scenarios.
+ * @returns {{ firstRenderMs: number, updateMs: number, scriptEvalMs: number, registrationMs: number, heapUsedBytes: number }}
+ */
+export function emptyRuntimeMetrics() {
+  return {
+    firstRenderMs: 0,
+    updateMs: 0,
+    scriptEvalMs: 0,
+    registrationMs: 0,
+    heapUsedBytes: 0,
+  };
+}
 
 /** @type {import('playwright').Browser | null} */
 let browserInstance = null;
@@ -19,7 +39,7 @@ export async function getBrowser() {
     try {
       browserInstance = await chromium.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+        args: ['--single-process', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--enable-precise-memory-info', '--js-flags=--expose-gc'],
       });
     } catch (_err) {
       // Browser launch unavailable in restricted/sandboxed environment
@@ -42,29 +62,27 @@ export async function closeBrowser() {
  * Benchmark runtime performance of a built bundle using Playwright with real DOM instantiation.
  * @param {string} bundlePath - Absolute path to bundle.js
  * @param {string} [name='Bundle'] - Display name
- * @returns {Promise<{ firstRenderMs: number, updateMs: number }>}
+ * @returns {Promise<{ firstRenderMs: number, updateMs: number, scriptEvalMs: number, registrationMs: number, heapUsedBytes: number }>}
  */
 export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
   if (!fs.existsSync(bundlePath)) {
-    return { firstRenderMs: 0, updateMs: 0 };
+    return emptyRuntimeMetrics();
   }
 
   const bundleCode = fs.readFileSync(bundlePath, 'utf-8');
   let browser = null;
   try {
-    browser = await getBrowser();
-  } catch {}
-
-  if (!browser) {
-    // If browser cannot launch in the current environment, report 0 (unmeasured)
-    // rather than generating fabricated or synthetic speedup numbers.
-    return { firstRenderMs: 0, updateMs: 0 };
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--single-process', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--enable-precise-memory-info', '--js-flags=--expose-gc'],
+    });
+  } catch (_err) {
+    return emptyRuntimeMetrics();
   }
 
-  const context = await browser.newContext();
-  const page = await context.newPage();
-
   try {
+    const page = await browser.newPage();
+
     // Generate isolated HTML page that intercepts customElements.define, runs bundleCode,
     // and measures real custom element lifecycle and template renders.
     const htmlContent = `<!DOCTYPE html>
@@ -76,19 +94,27 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 <body>
   <div id="container"></div>
   <script type="module">
+    window.addEventListener('error', (e) => { e.preventDefault(); });
+    window.addEventListener('unhandledrejection', (e) => { e.preventDefault(); });
     window.__registeredTags = [];
+    window.__registrationMs = 0;
     const origDefine = customElements.define;
     customElements.define = function(tag, constructor, options) {
       if (!window.__registeredTags.includes(tag)) {
         window.__registeredTags.push(tag);
       }
-      return origDefine.call(customElements, tag, constructor, options);
+      const t0 = performance.now();
+      const result = origDefine.call(customElements, tag, constructor, options);
+      window.__registrationMs += performance.now() - t0;
+      return result;
     };
+    window.__evalStart = performance.now();
     try {
       ${bundleCode}
     } catch (e) {
       console.warn("Bundle execution warning:", e.message);
     }
+    window.__evalEnd = performance.now();
     window.__bundleReady = true;
   </script>
 </body>
@@ -99,13 +125,75 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 
     // Execute precision in-browser rendering measurement using actual defined elements
     const timing = await page.evaluate(async () => {
-      const container = document.getElementById('container');
-      if (!container) return { firstRenderMs: 0, updateMs: 0 };
-
       const win = /** @type {any} */ (window);
+      const evalMs = win.__evalStart && win.__evalEnd ? Math.max(0, win.__evalEnd - win.__evalStart) : 0;
+      const regMs = win.__registrationMs || 0;
+
+      const empty = {
+        firstRenderMs: 0,
+        updateMs: 0,
+        scriptEvalMs: Number(evalMs.toFixed(2)),
+        registrationMs: Number(regMs.toFixed(2)),
+        heapUsedBytes: 0,
+      };
+
+      const container = document.getElementById('container');
+      if (!container) return empty;
+
       const tags = (win.__registeredTags || []).filter((/** @type {any} */ t) => typeof t === 'string' && t.includes('-'));
       if (tags.length === 0) {
-        return { firstRenderMs: 0, updateMs: 0 };
+        return empty;
+      }
+
+      /** @param {any} el */
+      const safeUpdateComplete = (el) => {
+        try {
+          if (el && typeof el.updateComplete?.then === 'function') {
+            return el.updateComplete.catch(() => {});
+          }
+        } catch {}
+        return Promise.resolve();
+      };
+
+      // Heap memory footprint measurement (cold pass before render timing loop)
+      let heapUsedBytes = 0;
+      try {
+        if (typeof win.gc === 'function') {
+          win.gc();
+        }
+        const heapBefore = win.performance?.memory?.usedJSHeapSize;
+
+        container.innerHTML = '';
+        const heapElements = [];
+        const maxInstances = 30;
+        for (let i = 0; i < maxInstances; i++) {
+          const tag = tags[i % tags.length];
+          try {
+            const el = document.createElement(tag);
+            el.setAttribute('data-bench-index', String(i));
+            container.appendChild(el);
+            heapElements.push(el);
+          } catch {}
+        }
+
+        await Promise.all(heapElements.map(safeUpdateComplete));
+        void container.offsetHeight;
+
+        if (typeof win.gc === 'function') {
+          win.gc();
+        }
+        const heapAfter = win.performance?.memory?.usedJSHeapSize;
+
+        if (typeof heapBefore === 'number' && typeof heapAfter === 'number') {
+          heapUsedBytes = Math.max(0, Math.round(heapAfter - heapBefore));
+        }
+
+        container.innerHTML = '';
+        if (typeof win.gc === 'function') {
+          win.gc();
+        }
+      } catch {
+        heapUsedBytes = 0;
       }
 
       const iterations = 5;
@@ -118,7 +206,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 
         // 1. Mount phase: instantiate real registered Custom Elements from the bundle
         const t0 = performance.now();
-        const maxInstances = 50;
+        const maxInstances = 30;
         for (let i = 0; i < maxInstances; i++) {
           const tag = tags[i % tags.length];
           try {
@@ -130,14 +218,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
         }
 
         // Wait for Lit element updateComplete lifecycle if available
-        await Promise.all(
-          mountedElements.map((el) => {
-            if (el && typeof el.updateComplete?.then === 'function') {
-              return el.updateComplete;
-            }
-            return Promise.resolve();
-          }),
-        );
+        await Promise.all(mountedElements.map(safeUpdateComplete));
 
         // Force layout calculation
         void container.offsetHeight;
@@ -149,28 +230,19 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
         for (let i = 0; i < mountedElements.length; i++) {
           const child = mountedElements[i];
           if (child) {
-            child.setAttribute('data-active', i % 2 === 0 ? 'true' : 'false');
-            if ('label' in child) {
-              try {
+            try {
+              child.setAttribute('data-active', i % 2 === 0 ? 'true' : 'false');
+              if ('label' in child) {
                 child.label = 'Updated ' + i;
-              } catch {}
-            }
-            if ('value' in child) {
-              try {
+              }
+              if ('value' in child) {
                 child.value = 'Val ' + i;
-              } catch {}
-            }
+              }
+            } catch {}
           }
         }
 
-        await Promise.all(
-          mountedElements.map((el) => {
-            if (el && typeof el.updateComplete?.then === 'function') {
-              return el.updateComplete;
-            }
-            return Promise.resolve();
-          }),
-        );
+        await Promise.all(mountedElements.map(safeUpdateComplete));
 
         void container.offsetHeight;
         const t3 = performance.now();
@@ -187,6 +259,9 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
       return {
         firstRenderMs: Number(medianMount.toFixed(2)),
         updateMs: Number(medianUpdate.toFixed(2)),
+        scriptEvalMs: Number(evalMs.toFixed(2)),
+        registrationMs: Number(regMs.toFixed(2)),
+        heapUsedBytes,
       };
     });
 
@@ -194,9 +269,12 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`[Runtime Benchmark] Measurement error for ${name}:`, msg);
-    return { firstRenderMs: 0, updateMs: 0 };
+    return emptyRuntimeMetrics();
   } finally {
-    await page.close();
-    await context.close();
+    if (browser) {
+      try {
+        await browser.close();
+      } catch {}
+    }
   }
 }

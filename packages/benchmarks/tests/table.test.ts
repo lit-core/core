@@ -47,6 +47,37 @@ describe('benchmarks ASCII terminal table formatting', () => {
     expect(asciiOutput).toContain('+32.4%');
   });
 
+  it('renders extended runtime metrics including script eval, registration, and heap when present', () => {
+    const runtimeRows = [
+      {
+        name: 'Baseline (Standard Vite)',
+        firstRenderMs: 14.5,
+        updateMs: 3.2,
+        scriptEvalMs: 12.0,
+        registrationMs: 4.5,
+        heapUsedBytes: 150000,
+        isBaseline: true,
+      },
+      {
+        name: 'css-fuse',
+        firstRenderMs: 11.2,
+        updateMs: 2.8,
+        scriptEvalMs: 10.5,
+        registrationMs: 3.8,
+        heapUsedBytes: 120000,
+        speedupPercent: 22.8,
+      },
+    ];
+
+    const asciiOutput = renderAsciiRuntimeTable('Test Suite extended performance', runtimeRows);
+    expect(asciiOutput).toContain('Script eval');
+    expect(asciiOutput).toContain('Element registration');
+    expect(asciiOutput).toContain('Retained heap');
+    expect(asciiOutput).toContain('12.00 ms');
+    expect(asciiOutput).toContain('4.50 ms');
+    expect(asciiOutput).toContain('+22.8%');
+  });
+
   it('renders cross-suite summary ASCII table', () => {
     const summaryRows = [
       {

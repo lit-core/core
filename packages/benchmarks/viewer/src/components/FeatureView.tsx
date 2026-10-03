@@ -1,6 +1,8 @@
-import React from 'react';
+import { Zap } from 'lucide-react';
+import type React from 'react';
 import type { ManifestData, StandaloneBenchmarkResult } from '../types.js';
 import { DiagnosticsViewer } from './DiagnosticsViewer.js';
+import { Dropdown } from './Dropdown.js';
 import { MetricCards } from './MetricCards.js';
 
 interface FeatureViewProps {
@@ -10,134 +12,143 @@ interface FeatureViewProps {
   selectedResult: StandaloneBenchmarkResult | null;
   onSelectFeature: (featureId: string) => void;
   onSelectSuite: (suiteId: string) => void;
-  onOpenShowcase: () => void;
+  onOpenShowcase?: () => void;
 }
 
-export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuiteId, selectedFeatureId, selectedResult, onSelectFeature, onSelectSuite, onOpenShowcase }) => {
+export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuiteId, selectedFeatureId, selectedResult, onSelectFeature, onSelectSuite }) => {
   const { features, libraries, runs } = manifest;
 
   // Filter runs for this feature across all libraries
   const featureRuns = runs.filter((r) => r.featureId === selectedFeatureId);
-  const currentFeature = features.find((f) => f.id === selectedFeatureId);
+
+  const baselineFeat = features.find((f) => f.id === 'baseline');
+  const allFeat = features.find((f) => f.id === 'all');
+  const individualFeats = features.filter((f) => f.id !== 'baseline' && f.id !== 'all');
 
   return (
-    <div>
-      {/* Feature selector pills */}
-      <div className="filter-bar">
-        <div className="filter-group">
-          <span className="filter-label">Optimization:</span>
-          <div className="filter-pill-list">
-            {features.map((feat) => (
-              <button key={feat.id} type="button" className={`filter-pill ${selectedFeatureId === feat.id ? 'active' : ''}`} onClick={() => onSelectFeature(feat.id)}>
-                {feat.name}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="flex flex-col gap-10">
+      {/* Feature selector */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Dropdown
+          label="Optimization"
+          icon={Zap}
+          value={selectedFeatureId}
+          options={[
+            ...(allFeat ? [{ value: 'all', label: 'All combined', group: 'Macro options' }] : []),
+            ...(baselineFeat ? [{ value: 'baseline', label: 'Baseline', group: 'Macro options' }] : []),
+            ...individualFeats.map((feat) => ({
+              value: feat.id,
+              label: feat.name,
+              description: feat.category,
+              group: 'Compiler passes',
+            })),
+          ]}
+          onChange={onSelectFeature}
+        />
       </div>
 
-      {currentFeature && (
-        <div className="info-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h2 className="info-title">{currentFeature.name}</h2>
-            <p className="info-description">{currentFeature.description}</p>
-          </div>
-
-          {selectedResult && (
-            <button type="button" className="btn-primary" onClick={onOpenShowcase}>
-              Open showcase →
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Cross-library comparison table for this feature */}
-      <div className="table-card">
-        <div className="table-header-bar">
-          <span className="table-title">Comparison across design systems</span>
+      {/* Cross-library comparison table with heading outside the box */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between px-1">
+          <h2 className="text-lg font-medium text-zinc-950 tracking-tight">Comparison across design systems</h2>
+          <span className="text-base font-light text-zinc-500">{libraries.length} design systems evaluated</span>
         </div>
 
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Component library</th>
-                <th>Package</th>
-                <th className="numeric">Gzip size</th>
-                <th className="numeric">Gzip savings</th>
-                <th className="numeric">Raw size</th>
-                <th className="numeric">Raw savings</th>
-                <th className="numeric">Build time</th>
-                <th className="numeric">First render</th>
-                <th className="numeric">Speedup</th>
-              </tr>
-            </thead>
-            <tbody>
-              {libraries.map((lib) => {
-                const run = featureRuns.find((r) => r.suiteId === lib.id);
-                const isSelected = selectedSuiteId === lib.id;
-                const isBaseline = selectedFeatureId === 'baseline';
+        <div className="bg-white rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-base">
+              <thead className="bg-white border-b-2 border-zinc-900/10">
+                <tr>
+                  <th className="py-4 px-6 text-base font-medium text-zinc-950 tracking-tight min-w-[240px]">Component library</th>
+                  <th className="py-4 px-6 text-base font-medium text-zinc-950 tracking-tight min-w-[220px]">Package</th>
+                  <th className="py-4 px-6 text-base font-medium text-zinc-950 tracking-tight text-right min-w-[120px]">Gzip size</th>
+                  <th className="py-4 px-6 text-base font-medium text-zinc-950 tracking-tight text-right min-w-[120px]">Gzip delta</th>
+                  <th className="py-4 px-6 text-base font-medium text-zinc-950 tracking-tight text-right min-w-[120px]">Raw size</th>
+                  <th className="py-4 px-6 text-base font-medium text-zinc-950 tracking-tight text-right min-w-[120px]">Raw delta</th>
+                  <th className="py-4 px-6 text-base font-medium text-zinc-950 tracking-tight text-right min-w-[120px]">Build time</th>
+                  <th className="py-4 px-6 text-base font-medium text-zinc-950 tracking-tight text-right min-w-[130px]">First render</th>
+                </tr>
+              </thead>
+              <tbody>
+                {libraries.map((lib, idx) => {
+                  const run = featureRuns.find((r) => r.suiteId === lib.id);
+                  const isSelected = selectedSuiteId === lib.id;
+                  const isBaseline = selectedFeatureId === 'baseline';
 
-                if (!run) {
+                  if (!run) {
+                    return (
+                      <tr key={lib.id} className={`transition-colors hover:bg-zinc-100/60 ${idx % 2 === 1 ? 'bg-zinc-50/70' : 'bg-white'}`}>
+                        <td className="py-3.5 px-6 font-normal text-zinc-900">{lib.name}</td>
+                        <td className="py-3.5 px-6">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-light bg-zinc-100 text-zinc-600">{lib.packageName}</span>
+                        </td>
+                        <td colSpan={6} className="py-3.5 px-6 text-center text-base font-light text-zinc-500">
+                          Not yet evaluated
+                        </td>
+                      </tr>
+                    );
+                  }
+
                   return (
-                    <tr key={lib.id}>
-                      <td>
-                        <strong>{lib.name}</strong>
+                    <tr
+                      key={lib.id}
+                      className={`transition-colors cursor-pointer ${isSelected ? 'bg-zinc-100/90 font-medium' : idx % 2 === 1 ? 'bg-zinc-50/70 hover:bg-zinc-100/60' : 'bg-white hover:bg-zinc-100/60'}`}
+                      onClick={() => onSelectSuite(lib.id)}
+                      title={`Click to inspect ${lib.name}`}
+                    >
+                      <td className={`py-3.5 px-6 ${isSelected ? 'font-medium text-zinc-950' : 'font-normal text-zinc-900'}`}>{lib.name}</td>
+                      <td className="py-3.5 px-6">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-light bg-zinc-100 text-zinc-600">{lib.packageName}</span>
                       </td>
-                      <td>
-                        <code>{lib.packageName}</code>
+                      <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-700">{(run.gzipBytes / 1024).toFixed(1)} KB</td>
+                      <td
+                        className={`py-3.5 px-6 text-right tabular-nums ${
+                          isBaseline
+                            ? 'text-zinc-500 font-light'
+                            : (run.gzipPercent ?? 0) <= -0.1
+                              ? 'text-emerald-700 font-normal'
+                              : Math.abs(run.gzipPercent ?? 0) <= 0.1
+                                ? 'text-zinc-500 font-light'
+                                : 'text-rose-700 font-normal'
+                        }`}
+                      >
+                        {isBaseline ? 'baseline' : run.gzipPercent > 0 ? `+${run.gzipPercent.toFixed(1)}%` : `${run.gzipPercent.toFixed(1)}%`}
                       </td>
-                      <td colSpan={7} style={{ color: 'var(--text-subtle)', textAlign: 'center' }}>
-                        Not yet evaluated
+                      <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-700">{(run.rawBytes / 1024).toFixed(1)} KB</td>
+                      <td
+                        className={`py-3.5 px-6 text-right tabular-nums ${
+                          isBaseline
+                            ? 'text-zinc-500 font-light'
+                            : (run.rawPercent ?? 0) <= -0.1
+                              ? 'text-emerald-700 font-normal'
+                              : Math.abs(run.rawPercent ?? 0) <= 0.1
+                                ? 'text-zinc-500 font-light'
+                                : 'text-rose-700 font-normal'
+                        }`}
+                      >
+                        {isBaseline ? 'baseline' : run.rawPercent > 0 ? `+${run.rawPercent.toFixed(1)}%` : `${run.rawPercent.toFixed(1)}%`}
+                      </td>
+                      <td className="py-3.5 px-6 text-right tabular-nums font-light text-zinc-600">{run.buildTimeMs ? `${run.buildTimeMs.toFixed(0)} ms` : '—'}</td>
+                      <td className="py-3.5 px-6 text-right tabular-nums">
+                        {run.firstRenderMs ? (
+                          <div className="flex flex-col items-end">
+                            <span className="text-zinc-950 font-normal">{run.firstRenderMs.toFixed(2)} ms</span>
+                            {run.speedupPercent && Math.abs(run.speedupPercent) > 0.5 ? (
+                              <span className={`text-base font-light tabular-nums ${run.speedupPercent > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                                {run.speedupPercent > 0 ? `+${run.speedupPercent.toFixed(1)}%` : `${run.speedupPercent.toFixed(1)}%`}
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <span className="text-zinc-500 font-light">—</span>
+                        )}
                       </td>
                     </tr>
                   );
-                }
-
-                return (
-                  <tr key={lib.id} className={isSelected ? 'row-selected' : undefined} style={{ cursor: 'pointer' }} onClick={() => onSelectSuite(lib.id)} title={`Click to inspect ${lib.name}`}>
-                    <td>
-                      <strong>{lib.name}</strong>
-                    </td>
-                    <td>
-                      <code>{lib.packageName}</code>
-                    </td>
-                    <td className="numeric">{(run.gzipBytes / 1024).toFixed(1)} KB</td>
-                    <td
-                      className="numeric"
-                      style={{
-                        color: isBaseline ? 'var(--text-muted)' : (run.gzipPercent ?? 0) <= 0 ? 'var(--accent-green)' : 'var(--accent-red)',
-                        fontWeight: isBaseline ? 400 : 500,
-                      }}
-                    >
-                      {isBaseline ? 'baseline' : run.gzipPercent > 0 ? `+${run.gzipPercent.toFixed(1)}%` : `${run.gzipPercent.toFixed(1)}%`}
-                    </td>
-                    <td className="numeric">{(run.rawBytes / 1024).toFixed(1)} KB</td>
-                    <td
-                      className="numeric"
-                      style={{
-                        color: isBaseline ? 'var(--text-muted)' : (run.rawPercent ?? 0) <= 0 ? 'var(--accent-green)' : 'var(--accent-red)',
-                        fontWeight: isBaseline ? 400 : 500,
-                      }}
-                    >
-                      {isBaseline ? 'baseline' : run.rawPercent > 0 ? `+${run.rawPercent.toFixed(1)}%` : `${run.rawPercent.toFixed(1)}%`}
-                    </td>
-                    <td className="numeric">{run.buildTimeMs ? `${run.buildTimeMs.toFixed(1)} ms` : '-'}</td>
-                    <td className="numeric">{run.firstRenderMs ? `${run.firstRenderMs.toFixed(2)} ms` : '-'}</td>
-                    <td
-                      className="numeric"
-                      style={{
-                        color: isBaseline || !run.speedupPercent ? 'var(--text-muted)' : run.speedupPercent >= 0 ? 'var(--accent-green)' : 'var(--accent-red)',
-                        fontWeight: isBaseline ? 400 : 500,
-                      }}
-                    >
-                      {isBaseline || !run.speedupPercent ? '-' : run.speedupPercent >= 0 ? `+${run.speedupPercent.toFixed(1)}%` : `${run.speedupPercent.toFixed(1)}%`}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

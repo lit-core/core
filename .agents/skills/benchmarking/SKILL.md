@@ -76,6 +76,19 @@ Every benchmark run produces decoupled standalone outputs in `packages/benchmark
 
 ---
 
+## Measured performance metrics
+
+Runtime metrics recorded in `results/manifest.json` and `results/<suite>/<feature>.json`:
+- `firstRenderMs` and `speedupPercent`: First-render mount latency across 50 component instances.
+- `updateMs` and `updateSpeedupPercent`: Reactive property update latency across 50 component instances.
+- `scriptEvalMs` and `evalSpeedupPercent`: Execution time for the bundled code.
+- `registrationMs`: Cumulative execution time spent inside `customElements.define`.
+- `heapUsedBytes` and `memorySavingsPercent`: Retained heap memory delta before and after mounting 50 component instances.
+
+When running in headless or sandboxed environments where browser APIs or Chromium are unavailable, missing runtime metrics default to 0 (unmeasured) rather than synthetic values.
+
+---
+
 ## Interactive React benchmark viewer dashboard
 
 The React application in `packages/benchmarks/viewer` provides visual exploration with strictly zero bundled or hardcoded data:
@@ -87,9 +100,14 @@ pnpm run viewer:dev
 # Build static production dashboard for GitHub Pages deployment
 pnpm run viewer:build
 
-# Preview static production dashboard locally
-pnpm run viewer:preview
-```
+### UI typography and visual design rules for the viewer
+- **Strict sentence case**: Zero `uppercase` CSS transforms, no Title Case in headings, buttons, tabs, or badges.
+- **Root 16px and 1rem floor**: Minimum 1rem (`text-base`, 16px) everywhere; strictly forbid `text-xs` (12px) and `text-sm` (14px).
+- **Thinner font weights**: Use `font-light` (300) for secondary copy, `font-normal` (400) for body and values, and `font-medium` (500) only for titles and active pills. No heavy bold weights.
+- **Wide container alignment**: Both header and content share `w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-14`.
+- **Headings outside cards**: Section headings sit cleanly on the canvas outside and above white surface cards.
+- **Flat borderless design**: Zero 1px borders (`border-none`), subtle surface contrast on `#fafafb` canvas.
+- For complete specifications, see `ui-typography-and-design`.
 
 ---
 

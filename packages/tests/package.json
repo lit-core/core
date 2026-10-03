@@ -14,12 +14,14 @@
     "test:momentum": "vitest run momentum",
     "test:plugins": "vitest run plugins",
     "test:native": "vitest run native",
+    "test:showcase": "vitest run showcase",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.14.0",
     "@carbon/web-components": "^2.64.0",
     "@lit-core/benchmarks": "workspace:*",
+    "@lit-core/showcase": "workspace:*",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
     "@lit-core/elem-proxy": "workspace:*",

@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "webawesome-dom-paths",
+  "suite": {
+    "id": "webawesome",
+    "name": "Web Awesome (20 Canonical Components)",
+    "packageName": "@awesome.me/webawesome",
+    "version": "3.14.0",
+    "componentCount": 20,
+    "components": [
+      {
+        "concept": "button",
+        "tag": "wa-button",
+        "label": "Button",
+        "path": "dist/components/button/button.js"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "wa-checkbox",
+        "label": "Checkbox",
+        "path": "dist/components/checkbox/checkbox.js"
+      },
+      {
+        "concept": "radio",
+        "tag": "wa-radio",
+        "label": "Radio button",
+        "path": "dist/components/radio/radio.js"
+      },
+      {
+        "concept": "switch",
+        "tag": "wa-switch",
+        "label": "Switch / toggle",
+        "path": "dist/components/switch/switch.js"
+      },
+      {
+        "concept": "text-input",
+        "tag": "wa-input",
+        "label": "Text input / field",
+        "path": "dist/components/input/input.js"
+      },
+      {
+        "concept": "select",
+        "tag": "wa-select",
+        "label": "Select / dropdown",
+        "path": "dist/components/select/select.js"
+      },
+      {
+        "concept": "dialog",
+        "tag": "wa-dialog",
+        "label": "Dialog / modal",
+        "path": "dist/components/dialog/dialog.js"
+      },
+      {
+        "concept": "badge",
+        "tag": "wa-badge",
+        "label": "Badge / tag",
+        "path": "dist/components/badge/badge.js"
+      },
+      {
+        "concept": "tabs",
+        "tag": "wa-tab-group",
+        "label": "Tabs",
+        "path": "dist/components/tab-group/tab-group.js"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "wa-progress-bar",
+        "label": "Progress bar",
+        "path": "dist/components/progress-bar/progress-bar.js"
+      },
+      {
+        "concept": "spinner",
+        "tag": "wa-spinner",
+        "label": "Spinner / loader",
+        "path": "dist/components/spinner/spinner.js"
+      },
+      {
+        "concept": "slider",
+        "tag": "wa-slider",
+        "label": "Slider",
+        "path": "dist/components/slider/slider.js"
+      },
+      {
+        "concept": "menu",
+        "tag": "wa-dropdown",
+        "label": "Menu / popover",
+        "path": "dist/components/dropdown/dropdown.js"
+      },
+      {
+        "concept": "divider",
+        "tag": "wa-divider",
+        "label": "Divider",
+        "path": "dist/components/divider/divider.js"
+      },
+      {
+        "concept": "icon",
+        "tag": "wa-icon",
+        "label": "Icon",
+        "path": "dist/components/icon/icon.js"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "wa-copy-button",
+        "label": "Icon button",
+        "path": "dist/components/copy-button/copy-button.js"
+      },
+      {
+        "concept": "card",
+        "tag": "wa-card",
+        "label": "Card / tile",
+        "path": "dist/components/card/card.js"
+      },
+      {
+        "concept": "elevation",
+        "tag": "wa-popover",
+        "label": "Elevation / focus",
+        "path": "dist/components/popover/popover.js"
+      },
+      {
+        "concept": "list",
+        "tag": "wa-details",
+        "label": "List / structured",
+        "path": "dist/components/details/details.js"
+      },
+      {
+        "concept": "chips",
+        "tag": "wa-breadcrumb",
+        "label": "Chips / segmented",
+        "path": "dist/components/breadcrumb/breadcrumb.js"
+      }
+    ]
+  },
+  "feature": {
+    "id": "dom-paths",
+    "name": "Structural DOM paths (dom-paths)",
+    "description": "Structural DOM path compiler eliminating TreeWalker mounting traversal",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-03T12:10:15.642Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "ea75514",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 379904,
+    "gzipBytes": 87665,
+    "brotliBytes": 70130,
+    "buildTimeMs": 46.68987500000003
+  },
+  "baseline": {
+    "rawBytes": 370946,
+    "gzipBytes": 86902,
+    "brotliBytes": 69583,
+    "buildTimeMs": 54.010666000000015
+  },
+  "deltas": {
+    "rawBytes": 8958,
+    "rawPercent": 2.4149067519261562,
+    "gzipBytes": 763,
+    "gzipPercent": 0.878000506317461,
+    "brotliBytes": 547,
+    "brotliPercent": 0.7861115502349713,
+    "buildTimeMs": -7.320790999999986
+  },
+  "runtime": {
+    "firstRenderMs": 5,
+    "updateMs": 0.7,
+    "scriptEvalMs": 2.9,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 597349,
+    "speedupPercent": 3.8461538461538494,
+    "updateSpeedupPercent": 22.22222222222223,
+    "evalSpeedupPercent": 38.297872340425535,
+    "registrationSpeedupPercent": 65.38461538461539,
+    "memorySavingsPercent": -0.024112323239088754
+  }
+}

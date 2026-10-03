@@ -1,12 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { AlertCircle, Loader2, RotateCcw } from 'lucide-react';
 import { fetchBenchmarkResult, fetchManifest } from './api/client.js';
-import { CanonicalComponentsDrawer } from './components/CanonicalComponentsDrawer.js';
 import { FeatureView } from './components/FeatureView.js';
 import { Header } from './components/Header.js';
 import { LibraryView } from './components/LibraryView.js';
 import { MatrixOverview } from './components/MatrixOverview.js';
-import { Navigation, type TabView } from './components/Navigation.js';
-import { RawJsonViewer } from './components/RawJsonViewer.js';
+import type { TabView } from './components/Navigation.js';
+import { ShowcaseViewer } from './components/ShowcaseViewer.js';
 import type { ManifestData, StandaloneBenchmarkResult } from './types.js';
 
 export const App: React.FC = () => {
@@ -16,7 +17,7 @@ export const App: React.FC = () => {
 
   const [currentTab, setCurrentTab] = useState<TabView>('matrix');
   const [selectedSuiteId, setSelectedSuiteId] = useState<string>('carbon');
-  const [selectedFeatureId, setSelectedFeatureId] = useState<string>('css-fuse');
+  const [selectedFeatureId, setSelectedFeatureId] = useState<string>('all');
   const [selectedResult, setSelectedResult] = useState<StandaloneBenchmarkResult | null>(null);
 
   // Parse initial state from URL hash if available
@@ -28,7 +29,7 @@ export const App: React.FC = () => {
       const suiteParam = params.get('suite');
       const featureParam = params.get('feature');
 
-      if (tabParam) setCurrentTab(tabParam);
+      if (tabParam && ['matrix', 'library', 'feature', 'showcase'].includes(tabParam)) setCurrentTab(tabParam);
       if (suiteParam) setSelectedSuiteId(suiteParam);
       if (featureParam) setSelectedFeatureId(featureParam);
     }
@@ -111,29 +112,32 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="app-container">
-      <Header manifest={manifest} onRefresh={loadManifest} loading={loading} />
+    <div className="flex flex-col min-h-screen bg-white text-zinc-900 font-sans">
+      <Header currentTab={currentTab} onSelectTab={setCurrentTab} />
 
-      <Navigation currentTab={currentTab} onSelectTab={setCurrentTab} />
-
-      <main className="app-content">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-14 py-8">
         {loading && !manifest && (
-          <div className="state-box">
-            <div className="spinner" />
-            <p>Loading benchmark manifest and results...</p>
+          <div className="flex flex-col items-center justify-center p-20 gap-4 text-zinc-600">
+            <Loader2 className="w-8 h-8 text-zinc-900 animate-spin stroke-[1.5]" />
+            <p className="text-base font-normal">Loading benchmark manifest and results...</p>
           </div>
         )}
 
         {error && (
-          <div className="state-box">
-            <span className="state-icon">⚠️</span>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Failed to load benchmark data</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>{error}</p>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Make sure benchmark results exist in <code>packages/benchmarks/results/manifest.json</code>. Run <code>pnpm run benchmark:carbon</code> to generate results.
+          <div className="flex flex-col items-center justify-center p-16 gap-3 text-center bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5">
+            <AlertCircle className="w-8 h-8 text-rose-500 stroke-[1.75]" />
+            <h2 className="text-lg font-medium text-zinc-950 tracking-tight">Failed to load benchmark data</h2>
+            <p className="text-base font-normal text-zinc-600 max-w-md">{error}</p>
+            <p className="text-base font-light text-zinc-500 max-w-lg leading-relaxed">
+              Make sure benchmark results exist in results/manifest.json. Run pnpm run benchmark:carbon to generate results.
             </p>
-            <button type="button" className="refresh-button" onClick={loadManifest} style={{ marginTop: '0.75rem' }}>
-              Retry
+            <button
+              type="button"
+              className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 text-base font-medium text-zinc-800 bg-zinc-100/90 hover:bg-zinc-200/80 rounded-xl transition-all shadow-none cursor-pointer"
+              onClick={loadManifest}
+            >
+              <RotateCcw className="w-4 h-4 stroke-[1.75]" />
+              <span>Retry</span>
             </button>
           </div>
         )}
@@ -150,6 +154,7 @@ export const App: React.FC = () => {
                 selectedResult={selectedResult}
                 onSelectSuite={setSelectedSuiteId}
                 onSelectFeature={setSelectedFeatureId}
+                onOpenShowcase={() => setCurrentTab('showcase')}
               />
             )}
 
@@ -161,12 +166,13 @@ export const App: React.FC = () => {
                 selectedResult={selectedResult}
                 onSelectFeature={setSelectedFeatureId}
                 onSelectSuite={setSelectedSuiteId}
+                onOpenShowcase={() => setCurrentTab('showcase')}
               />
             )}
 
-            {currentTab === 'components' && <CanonicalComponentsDrawer manifest={manifest} />}
-
-            {currentTab === 'json' && <RawJsonViewer selectedSuiteId={selectedSuiteId} selectedFeatureId={selectedFeatureId} result={selectedResult} />}
+            {currentTab === 'showcase' && (
+              <ShowcaseViewer manifest={manifest} selectedSuiteId={selectedSuiteId} selectedFeatureId={selectedFeatureId} onSelectSuite={setSelectedSuiteId} onSelectFeature={setSelectedFeatureId} />
+            )}
           </>
         )}
       </main>

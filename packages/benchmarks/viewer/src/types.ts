@@ -26,7 +26,14 @@ export interface SizeDeltas {
 export interface RuntimeMetrics {
   firstRenderMs: number;
   updateMs?: number;
+  scriptEvalMs?: number;
+  registrationMs?: number;
+  heapUsedBytes?: number;
   speedupPercent?: number;
+  updateSpeedupPercent?: number;
+  evalSpeedupPercent?: number;
+  registrationSpeedupPercent?: number;
+  memorySavingsPercent?: number;
 }
 
 export interface CanonicalComponentItem {
@@ -71,6 +78,7 @@ export interface ManifestRunEntry {
   suiteId: string;
   featureId: string;
   path: string;
+  htmlPath?: string;
   rawBytes: number;
   gzipBytes: number;
   brotliBytes: number;
@@ -79,7 +87,15 @@ export interface ManifestRunEntry {
   gzipPercent: number;
   brotliPercent: number;
   firstRenderMs: number;
+  updateMs?: number;
+  scriptEvalMs?: number;
+  registrationMs?: number;
+  heapUsedBytes?: number;
   speedupPercent: number;
+  updateSpeedupPercent?: number;
+  evalSpeedupPercent?: number;
+  registrationSpeedupPercent?: number;
+  memorySavingsPercent?: number;
   timestamp: string;
 }
 

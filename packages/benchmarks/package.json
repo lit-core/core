@@ -37,7 +37,7 @@
     "benchmark:json": "node src/index.js --format=json",
     "benchmark:compare": "node src/compare.js",
     "viewer:dev": "vite viewer",
-    "viewer:build": "vite build viewer --base=./ && cp -r results viewer/dist/results",
+    "viewer:build": "vite build viewer --base=./ && cp -r results viewer/dist/results && cp -r ../showcase/dist viewer/dist/showcase",
     "viewer:preview": "vite preview viewer",
     "test": "tsc --noEmit && vitest run tests",
     "typecheck": "tsc --noEmit"
@@ -64,7 +64,8 @@
     "@lit-core/memoize": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
-    "@lit-core/vite-plugin": "workspace:*"
+    "@lit-core/vite-plugin": "workspace:*",
+    "lucide-react": "^1.50.0"
   },
   "devDependencies": {
     "@awesome.me/webawesome": "^3.14.0",
@@ -72,6 +73,7 @@
     "@material/web": "^2.5.0",
     "@momentum-design/components": "^0.139.9",
     "@spectrum-web-components/bundle": "^1.12.2",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -80,6 +82,7 @@
     "playwright": "^1.63.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vitest": "^5.0.2"

@@ -133,7 +133,15 @@ export function saveStandaloneResult({ suiteId, featureId, result, outDir = defa
       gzipPercent: result.deltas?.gzipPercent ?? 0,
       brotliPercent: result.deltas?.brotliPercent ?? 0,
       firstRenderMs: result.runtime?.firstRenderMs ?? 0,
+      updateMs: result.runtime?.updateMs ?? 0,
+      scriptEvalMs: result.runtime?.scriptEvalMs ?? 0,
+      registrationMs: result.runtime?.registrationMs ?? 0,
+      heapUsedBytes: result.runtime?.heapUsedBytes ?? 0,
       speedupPercent: result.runtime?.speedupPercent ?? 0,
+      updateSpeedupPercent: result.runtime?.updateSpeedupPercent ?? 0,
+      evalSpeedupPercent: result.runtime?.evalSpeedupPercent ?? 0,
+      registrationSpeedupPercent: result.runtime?.registrationSpeedupPercent ?? 0,
+      memorySavingsPercent: result.runtime?.memorySavingsPercent ?? 0,
       timestamp: result.timestamp,
     },
     outDir,
@@ -162,11 +170,11 @@ export function loadStandaloneResult(suiteId, featureId, dir = defaultResultsDir
 }
 
 /**
-/**
  * @typedef {Object} ManifestRunEntry
  * @property {string} suiteId
  * @property {string} featureId
  * @property {string} path
+ * @property {string} [htmlPath]
  * @property {number} rawBytes
  * @property {number} gzipBytes
  * @property {number} brotliBytes
@@ -175,7 +183,15 @@ export function loadStandaloneResult(suiteId, featureId, dir = defaultResultsDir
  * @property {number} gzipPercent
  * @property {number} brotliPercent
  * @property {number} firstRenderMs
+ * @property {number} [updateMs]
+ * @property {number} [scriptEvalMs]
+ * @property {number} [registrationMs]
+ * @property {number} [heapUsedBytes]
  * @property {number} speedupPercent
+ * @property {number} [updateSpeedupPercent]
+ * @property {number} [evalSpeedupPercent]
+ * @property {number} [registrationSpeedupPercent]
+ * @property {number} [memorySavingsPercent]
  * @property {string} timestamp
  */
 

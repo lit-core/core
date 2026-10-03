@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "material-event-hoist",
+  "suite": {
+    "id": "material",
+    "name": "Material Web (@material/web)",
+    "packageName": "@material/web",
+    "version": "2.5.0",
+    "componentCount": 20,
+    "components": [
+      {
+        "concept": "button",
+        "tag": "md-filled-button",
+        "label": "Button",
+        "path": "button/filled-button.js"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "md-checkbox",
+        "label": "Checkbox",
+        "path": "checkbox/checkbox.js"
+      },
+      {
+        "concept": "radio",
+        "tag": "md-radio",
+        "label": "Radio button",
+        "path": "radio/radio.js"
+      },
+      {
+        "concept": "switch",
+        "tag": "md-switch",
+        "label": "Switch / toggle",
+        "path": "switch/switch.js"
+      },
+      {
+        "concept": "text-input",
+        "tag": "md-filled-text-field",
+        "label": "Text input / field",
+        "path": "textfield/filled-text-field.js"
+      },
+      {
+        "concept": "select",
+        "tag": "md-filled-select",
+        "label": "Select / dropdown",
+        "path": "select/filled-select.js"
+      },
+      {
+        "concept": "dialog",
+        "tag": "md-dialog",
+        "label": "Dialog / modal",
+        "path": "dialog/dialog.js"
+      },
+      {
+        "concept": "badge",
+        "tag": "md-badge",
+        "label": "Badge / tag",
+        "path": "labs/badge/badge.js"
+      },
+      {
+        "concept": "tabs",
+        "tag": "md-tabs",
+        "label": "Tabs",
+        "path": "tabs/tabs.js"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "md-linear-progress",
+        "label": "Progress bar",
+        "path": "progress/linear-progress.js"
+      },
+      {
+        "concept": "spinner",
+        "tag": "md-circular-progress",
+        "label": "Spinner / loader",
+        "path": "progress/circular-progress.js"
+      },
+      {
+        "concept": "slider",
+        "tag": "md-slider",
+        "label": "Slider",
+        "path": "slider/slider.js"
+      },
+      {
+        "concept": "menu",
+        "tag": "md-menu",
+        "label": "Menu / popover",
+        "path": "menu/menu.js"
+      },
+      {
+        "concept": "divider",
+        "tag": "md-divider",
+        "label": "Divider",
+        "path": "divider/divider.js"
+      },
+      {
+        "concept": "icon",
+        "tag": "md-icon",
+        "label": "Icon",
+        "path": "icon/icon.js"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "md-icon-button",
+        "label": "Icon button",
+        "path": "iconbutton/icon-button.js"
+      },
+      {
+        "concept": "card",
+        "tag": "md-elevation",
+        "label": "Card / tile",
+        "path": "elevation/elevation.js"
+      },
+      {
+        "concept": "elevation",
+        "tag": "md-focus-ring",
+        "label": "Elevation / focus",
+        "path": "focus/md-focus-ring.js"
+      },
+      {
+        "concept": "list",
+        "tag": "md-list",
+        "label": "List / structured",
+        "path": "list/list.js"
+      },
+      {
+        "concept": "chips",
+        "tag": "md-chip-set",
+        "label": "Chips / segmented",
+        "path": "chips/chip-set.js"
+      }
+    ]
+  },
+  "feature": {
+    "id": "event-hoist",
+    "name": "ShadowRoot event delegation (event-hoist)",
+    "description": "Ahead-of-time ShadowRoot event delegation",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-03T12:10:22.551Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "ea75514",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 275925,
+    "gzipBytes": 57889,
+    "brotliBytes": 46473,
+    "buildTimeMs": 24.975875000000087
+  },
+  "baseline": {
+    "rawBytes": 269272,
+    "gzipBytes": 56943,
+    "brotliBytes": 46024,
+    "buildTimeMs": 35.46716699999888
+  },
+  "deltas": {
+    "rawBytes": 6653,
+    "rawPercent": 2.470735910157759,
+    "gzipBytes": 946,
+    "gzipPercent": 1.6613104332402577,
+    "brotliBytes": 449,
+    "brotliPercent": 0.9755779593255692,
+    "buildTimeMs": -10.491291999998793
+  },
+  "runtime": {
+    "firstRenderMs": 5.5,
+    "updateMs": 1,
+    "scriptEvalMs": 5.8,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 538810,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 9.090909090909099,
+    "evalSpeedupPercent": 1.6949152542372972,
+    "registrationSpeedupPercent": 42.85714285714285,
+    "memorySavingsPercent": -1.0392523084077798
+  }
+}

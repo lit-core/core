@@ -8,5 +8,6 @@
     "dev": "vite",
     "build": "vite build --base=./",
     "preview": "vite preview"
-  }
+  },
+  "dependencies": {}
 }

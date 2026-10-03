@@ -1,0 +1,69 @@
+{
+  "name": "@lit-core/showcase",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multi-framework component showcase with isolated compiler passes and visual inspector",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./canonical-registry": {
+      "import": "./src/canonical-registry.ts",
+      "types": "./src/canonical-registry.ts"
+    },
+    "./features": {
+      "import": "./src/features.ts",
+      "types": "./src/features.ts"
+    },
+    "./ui": {
+      "import": "./src/ShowcaseViewer.tsx",
+      "types": "./src/ShowcaseViewer.tsx"
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "node build.js",
+    "preview": "vite preview --outDir dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@awesome.me/webawesome": "^3.14.0",
+    "@carbon/styles": "^1.116.0",
+    "@carbon/web-components": "^2.64.0",
+    "@lit-core/css-fuse": "workspace:*",
+    "@lit-core/css-minifier": "workspace:*",
+    "@lit-core/dirty-mask": "workspace:*",
+    "@lit-core/dom-paths": "workspace:*",
+    "@lit-core/elem-proxy": "workspace:*",
+    "@lit-core/event-hoist": "workspace:*",
+    "@lit-core/html-aot": "workspace:*",
+    "@lit-core/html-fuse": "workspace:*",
+    "@lit-core/html-minifier": "workspace:*",
+    "@lit-core/memoize": "workspace:*",
+    "@lit-core/native": "workspace:*",
+    "@lit-core/props-lower": "workspace:*",
+    "@lit-core/resumable": "workspace:*",
+    "@lit-core/vite-plugin": "workspace:*",
+    "@material/web": "^2.5.0",
+    "@momentum-design/components": "^0.139.9",
+    "@spectrum-web-components/bundle": "^1.12.2",
+    "lit": "^3.3.3",
+    "lucide-react": "^1.50.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  }
+}

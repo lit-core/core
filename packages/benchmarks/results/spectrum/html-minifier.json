@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "spectrum-html-minifier",
+  "suite": {
+    "id": "spectrum",
+    "name": "Spectrum Web Components (@spectrum-web-components)",
+    "packageName": "@spectrum-web-components/bundle",
+    "version": "1.12.2",
+    "componentCount": 20,
+    "components": [
+      {
+        "concept": "button",
+        "tag": "sp-button",
+        "label": "Button",
+        "path": "button/sp-button.js"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "sp-checkbox",
+        "label": "Checkbox",
+        "path": "checkbox/sp-checkbox.js"
+      },
+      {
+        "concept": "radio",
+        "tag": "sp-radio",
+        "label": "Radio button",
+        "path": "radio/sp-radio.js"
+      },
+      {
+        "concept": "switch",
+        "tag": "sp-switch",
+        "label": "Switch / toggle",
+        "path": "switch/sp-switch.js"
+      },
+      {
+        "concept": "text-input",
+        "tag": "sp-textfield",
+        "label": "Text input / field",
+        "path": "textfield/sp-textfield.js"
+      },
+      {
+        "concept": "select",
+        "tag": "sp-picker",
+        "label": "Select / dropdown",
+        "path": "picker/sp-picker.js"
+      },
+      {
+        "concept": "dialog",
+        "tag": "sp-dialog",
+        "label": "Dialog / modal",
+        "path": "dialog/sp-dialog.js"
+      },
+      {
+        "concept": "badge",
+        "tag": "sp-badge",
+        "label": "Badge / tag",
+        "path": "badge/sp-badge.js"
+      },
+      {
+        "concept": "tabs",
+        "tag": "sp-tabs",
+        "label": "Tabs",
+        "path": "tabs/sp-tabs.js"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "sp-progress-bar",
+        "label": "Progress bar",
+        "path": "progress-bar/sp-progress-bar.js"
+      },
+      {
+        "concept": "spinner",
+        "tag": "sp-progress-circle",
+        "label": "Spinner / loader",
+        "path": "progress-circle/sp-progress-circle.js"
+      },
+      {
+        "concept": "slider",
+        "tag": "sp-slider",
+        "label": "Slider",
+        "path": "slider/sp-slider.js"
+      },
+      {
+        "concept": "menu",
+        "tag": "sp-menu",
+        "label": "Menu / popover",
+        "path": "menu/sp-menu.js"
+      },
+      {
+        "concept": "divider",
+        "tag": "sp-divider",
+        "label": "Divider",
+        "path": "divider/sp-divider.js"
+      },
+      {
+        "concept": "icon",
+        "tag": "sp-icon",
+        "label": "Icon",
+        "path": "icon/sp-icon.js"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "sp-action-button",
+        "label": "Icon button",
+        "path": "action-button/sp-action-button.js"
+      },
+      {
+        "concept": "card",
+        "tag": "sp-card",
+        "label": "Card / tile",
+        "path": "card/sp-card.js"
+      },
+      {
+        "concept": "elevation",
+        "tag": "sp-popover",
+        "label": "Elevation / focus",
+        "path": "popover/sp-popover.js"
+      },
+      {
+        "concept": "list",
+        "tag": "sp-sidenav",
+        "label": "List / structured",
+        "path": "sidenav/sp-sidenav.js"
+      },
+      {
+        "concept": "chips",
+        "tag": "sp-action-group",
+        "label": "Chips / segmented",
+        "path": "action-group/sp-action-group.js"
+      }
+    ]
+  },
+  "feature": {
+    "id": "html-minifier",
+    "name": "HTML template minification (html-minifier)",
+    "description": "High-speed HTML template literal minifier powered by OXC",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-03T12:11:10.476Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "ea75514",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 808542,
+    "gzipBytes": 145803,
+    "brotliBytes": 110661,
+    "buildTimeMs": 86.81979200000205
+  },
+  "baseline": {
+    "rawBytes": 819094,
+    "gzipBytes": 146775,
+    "brotliBytes": 111368,
+    "buildTimeMs": 81.78462500000023
+  },
+  "deltas": {
+    "rawBytes": -10552,
+    "rawPercent": -1.288252630345235,
+    "gzipBytes": -972,
+    "gzipPercent": -0.6622381195707716,
+    "brotliBytes": -707,
+    "brotliPercent": -0.6348322677968536,
+    "buildTimeMs": 5.03516700000182
+  },
+  "runtime": {
+    "firstRenderMs": 15.6,
+    "updateMs": 0.7,
+    "scriptEvalMs": 12.1,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 428969,
+    "speedupPercent": -1.9607843137254832,
+    "updateSpeedupPercent": 12.50000000000001,
+    "evalSpeedupPercent": 11.029411764705882,
+    "registrationSpeedupPercent": -33.33333333333335,
+    "memorySavingsPercent": 0.6399803581851704
+  }
+}

@@ -32,6 +32,7 @@ Whenever writing text or documentation, **do NOT uppercase every single word**.
 4. Callout titles and admonitions
 5. Commit messages and pull request descriptions
 6. Responses and explanations provided to the user
+7. UI components, buttons, tabs, section headers, badges, and filter options (see `ui-typography-and-design`)
 
 ### Exceptions
 Preserve proper nouns, established brand names, acronyms, and code identifiers exactly:

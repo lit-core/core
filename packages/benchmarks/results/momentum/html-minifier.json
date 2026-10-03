@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "momentum-html-minifier",
+  "suite": {
+    "id": "momentum",
+    "name": "Momentum Design (@momentum-design/components)",
+    "packageName": "@momentum-design/components",
+    "version": "0.139.9",
+    "componentCount": 20,
+    "components": [
+      {
+        "concept": "button",
+        "tag": "mdc-button",
+        "label": "Button",
+        "path": "dist/components/button/index.js"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "mdc-checkbox",
+        "label": "Checkbox",
+        "path": "dist/components/checkbox/index.js"
+      },
+      {
+        "concept": "radio",
+        "tag": "mdc-radio",
+        "label": "Radio button",
+        "path": "dist/components/radio/index.js"
+      },
+      {
+        "concept": "switch",
+        "tag": "mdc-toggle",
+        "label": "Switch / toggle",
+        "path": "dist/components/toggle/index.js"
+      },
+      {
+        "concept": "text-input",
+        "tag": "mdc-input",
+        "label": "Text input / field",
+        "path": "dist/components/input/index.js"
+      },
+      {
+        "concept": "select",
+        "tag": "mdc-select",
+        "label": "Select / dropdown",
+        "path": "dist/components/select/index.js"
+      },
+      {
+        "concept": "dialog",
+        "tag": "mdc-dialog",
+        "label": "Dialog / modal",
+        "path": "dist/components/dialog/index.js"
+      },
+      {
+        "concept": "badge",
+        "tag": "mdc-badge",
+        "label": "Badge / tag",
+        "path": "dist/components/badge/index.js"
+      },
+      {
+        "concept": "tabs",
+        "tag": "mdc-menubar",
+        "label": "Tabs",
+        "path": "dist/components/menubar/index.js"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "mdc-progressbar",
+        "label": "Progress bar",
+        "path": "dist/components/progressbar/index.js"
+      },
+      {
+        "concept": "spinner",
+        "tag": "mdc-spinner",
+        "label": "Spinner / loader",
+        "path": "dist/components/spinner/index.js"
+      },
+      {
+        "concept": "slider",
+        "tag": "mdc-slider",
+        "label": "Slider",
+        "path": "dist/components/slider/index.js"
+      },
+      {
+        "concept": "menu",
+        "tag": "mdc-popover",
+        "label": "Menu / popover",
+        "path": "dist/components/popover/index.js"
+      },
+      {
+        "concept": "divider",
+        "tag": "mdc-divider",
+        "label": "Divider",
+        "path": "dist/components/divider/index.js"
+      },
+      {
+        "concept": "icon",
+        "tag": "mdc-icon",
+        "label": "Icon",
+        "path": "dist/components/icon/index.js"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "mdc-avatarbutton",
+        "label": "Icon button",
+        "path": "dist/components/avatarbutton/index.js"
+      },
+      {
+        "concept": "card",
+        "tag": "mdc-card",
+        "label": "Card / tile",
+        "path": "dist/components/card/index.js"
+      },
+      {
+        "concept": "elevation",
+        "tag": "mdc-presence",
+        "label": "Elevation / focus",
+        "path": "dist/components/presence/index.js"
+      },
+      {
+        "concept": "list",
+        "tag": "mdc-list",
+        "label": "List / structured",
+        "path": "dist/components/list/index.js"
+      },
+      {
+        "concept": "chips",
+        "tag": "mdc-chip",
+        "label": "Chips / segmented",
+        "path": "dist/components/chip/index.js"
+      }
+    ]
+  },
+  "feature": {
+    "id": "html-minifier",
+    "name": "HTML template minification (html-minifier)",
+    "description": "High-speed HTML template literal minifier powered by OXC",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-03T12:11:27.944Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "ea75514",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 339866,
+    "gzipBytes": 73185,
+    "brotliBytes": 59156,
+    "buildTimeMs": 38.989457999996375
+  },
+  "baseline": {
+    "rawBytes": 346264,
+    "gzipBytes": 74162,
+    "brotliBytes": 59626,
+    "buildTimeMs": 79.31620800000383
+  },
+  "deltas": {
+    "rawBytes": -6398,
+    "rawPercent": -1.8477231245523646,
+    "gzipBytes": -977,
+    "gzipPercent": -1.3173862625064048,
+    "brotliBytes": -470,
+    "brotliPercent": -0.7882467380002013,
+    "buildTimeMs": -40.32675000000745
+  },
+  "runtime": {
+    "firstRenderMs": 3.9,
+    "updateMs": 0.7,
+    "scriptEvalMs": 4.2,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 595654,
+    "speedupPercent": 2.500000000000002,
+    "updateSpeedupPercent": 12.50000000000001,
+    "evalSpeedupPercent": 39.130434782608695,
+    "registrationSpeedupPercent": -14.285714285714299,
+    "memorySavingsPercent": 1.4103529606488185
+  }
+}

@@ -36,7 +36,14 @@
  * @property {string} name
  * @property {number} firstRenderMs
  * @property {number} updateMs
+ * @property {number} [scriptEvalMs]
+ * @property {number} [registrationMs]
+ * @property {number} [heapUsedBytes]
  * @property {number} [speedupPercent]
+ * @property {number} [updateSpeedupPercent]
+ * @property {number} [evalSpeedupPercent]
+ * @property {number} [registrationSpeedupPercent]
+ * @property {number} [memorySavingsPercent]
  * @property {boolean} [isBaseline]
  * @property {boolean} [isTotal]
  */

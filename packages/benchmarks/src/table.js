@@ -77,20 +77,38 @@ export function renderAsciiTable(title, rows) {
 }
 
 /**
- * Format runtime performance metrics (First Render, Update) as an ASCII table.
+ * Format runtime performance metrics (First render, Update, Script eval, Heap) as an ASCII table.
  * @param {string} title
- * @param {Array<{ name: string, firstRenderMs: number, updateMs: number, speedupPercent?: number, isBaseline?: boolean, isTotal?: boolean }>} rows
+ * @param {Array<{ name: string, firstRenderMs: number, updateMs: number, scriptEvalMs?: number, registrationMs?: number, heapUsedBytes?: number, speedupPercent?: number, updateSpeedupPercent?: number, evalSpeedupPercent?: number, memorySavingsPercent?: number, isBaseline?: boolean, isTotal?: boolean }>} rows
  * @returns {string}
  */
 export function renderAsciiRuntimeTable(title, rows) {
   if (!rows || rows.length === 0) return '';
 
-  const headers = ['Optimization tool or mode', 'First render', 'Update complete', 'Render speedup'];
+  const hasEval = rows.some((r) => (r.scriptEvalMs ?? 0) > 0);
+  const hasReg = rows.some((r) => (r.registrationMs ?? 0) > 0);
+  const hasHeap = rows.some((r) => (r.heapUsedBytes ?? 0) > 0);
+
+  const headers = ['Optimization tool or mode', 'First render', 'Update complete'];
+  if (hasEval) headers.push('Script eval');
+  if (hasReg) headers.push('Element registration');
+  if (hasHeap) headers.push('Retained heap');
+  headers.push('Render speedup');
+
   const formattedRows = rows.map((r) => {
     const firstRender = r.firstRenderMs > 0 ? `${r.firstRenderMs.toFixed(2)} ms` : 'n/a';
     const update = r.updateMs > 0 ? `${r.updateMs.toFixed(2)} ms` : 'n/a';
+    const scriptEval = typeof r.scriptEvalMs === 'number' && r.scriptEvalMs > 0 ? `${r.scriptEvalMs.toFixed(2)} ms` : 'n/a';
+    const registration = typeof r.registrationMs === 'number' && r.registrationMs > 0 ? `${r.registrationMs.toFixed(2)} ms` : 'n/a';
+    const heap = typeof r.heapUsedBytes === 'number' && r.heapUsedBytes > 0 ? formatKb(r.heapUsedBytes) : 'n/a';
     const speedup = r.isBaseline ? 'n/a' : r.speedupPercent ? `${r.speedupPercent > 0 ? '+' : ''}${r.speedupPercent.toFixed(1)}%` : '0.0%';
-    return [r.name, firstRender, update, speedup];
+
+    const row = [r.name, firstRender, update];
+    if (hasEval) row.push(scriptEval);
+    if (hasReg) row.push(registration);
+    if (hasHeap) row.push(heap);
+    row.push(speedup);
+    return row;
   });
 
   const colWidths = headers.map((header, i) => {

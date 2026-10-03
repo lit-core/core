@@ -55,6 +55,54 @@ export async function runViteBuild({ entryPath, outDir, plugins = [] }) {
 }
 
 /**
+ * Compute comparison percentages between baseline and target runtime measurements.
+ * Returns 0 for any metric where either the baseline or target was unmeasured (<= 0).
+ * @param {any} baseline
+ * @param {any} target
+ * @returns {{ speedupPercent: number, updateSpeedupPercent: number, evalSpeedupPercent: number, registrationSpeedupPercent: number, memorySavingsPercent: number }}
+ */
+export function compareRuntime(baseline, target) {
+  const speedupPercent = baseline?.firstRenderMs > 0 && target?.firstRenderMs > 0 ? ((baseline.firstRenderMs - target.firstRenderMs) / baseline.firstRenderMs) * 100 : 0;
+
+  const updateSpeedupPercent = baseline?.updateMs > 0 && target?.updateMs > 0 ? ((baseline.updateMs - target.updateMs) / baseline.updateMs) * 100 : 0;
+
+  const evalSpeedupPercent = baseline?.scriptEvalMs > 0 && target?.scriptEvalMs > 0 ? ((baseline.scriptEvalMs - target.scriptEvalMs) / baseline.scriptEvalMs) * 100 : 0;
+
+  const registrationSpeedupPercent = baseline?.registrationMs > 0 && target?.registrationMs > 0 ? ((baseline.registrationMs - target.registrationMs) / baseline.registrationMs) * 100 : 0;
+
+  const memorySavingsPercent = baseline?.heapUsedBytes > 0 && target?.heapUsedBytes > 0 ? ((baseline.heapUsedBytes - target.heapUsedBytes) / baseline.heapUsedBytes) * 100 : 0;
+
+  return {
+    speedupPercent,
+    updateSpeedupPercent,
+    evalSpeedupPercent,
+    registrationSpeedupPercent,
+    memorySavingsPercent,
+  };
+}
+
+/**
+ * Build a structured runtime record combining raw measurements and comparison deltas.
+ * @param {any} measure
+ * @param {any} [comparison]
+ * @returns {{ firstRenderMs: number, updateMs: number, scriptEvalMs: number, registrationMs: number, heapUsedBytes: number, speedupPercent: number, updateSpeedupPercent: number, evalSpeedupPercent: number, registrationSpeedupPercent: number, memorySavingsPercent: number }}
+ */
+export function buildRuntimeRecord(measure, comparison = {}) {
+  return {
+    firstRenderMs: measure?.firstRenderMs ?? 0,
+    updateMs: measure?.updateMs ?? 0,
+    scriptEvalMs: measure?.scriptEvalMs ?? 0,
+    registrationMs: measure?.registrationMs ?? 0,
+    heapUsedBytes: measure?.heapUsedBytes ?? 0,
+    speedupPercent: comparison?.speedupPercent ?? 0,
+    updateSpeedupPercent: comparison?.updateSpeedupPercent ?? 0,
+    evalSpeedupPercent: comparison?.evalSpeedupPercent ?? 0,
+    registrationSpeedupPercent: comparison?.registrationSpeedupPercent ?? 0,
+    memorySavingsPercent: comparison?.memorySavingsPercent ?? 0,
+  };
+}
+
+/**
  * Execute a standalone benchmark for a specific suite and a single tool (or baseline / all).
  * Persists the result directly to packages/benchmarks/results/<suiteId>/<featureId>.json
  * and the HTML showcase to packages/benchmarks/results/<suiteId>/<featureId>.html.
@@ -108,11 +156,7 @@ export async function runStandaloneBenchmark({ suite, tool, options = {}, allToo
         });
         const baselineBundle = path.join(baselineOutDir, 'bundle.js');
         const rt = await measureBundleRuntime(baselineBundle, 'Baseline');
-        baselineRuntime = {
-          firstRenderMs: rt.firstRenderMs,
-          updateMs: rt.updateMs,
-          speedupPercent: 0,
-        };
+        baselineRuntime = buildRuntimeRecord(rt);
 
         // Save baseline JSON for future reuse
         const baselineResult = {
@@ -168,7 +212,7 @@ export async function runStandaloneBenchmark({ suite, tool, options = {}, allToo
     const runtimeMeasure = await measureBundleRuntime(bundlePath, toolName);
 
     let deltas = null;
-    let speedup = 0;
+    let comparison = {};
     if (!isBaseline && baselineMetrics) {
       const impact = calculateImpact(baselineMetrics, metrics);
       deltas = {
@@ -181,10 +225,12 @@ export async function runStandaloneBenchmark({ suite, tool, options = {}, allToo
         buildTimeMs: (metrics.buildTimeMs || 0) - (baselineMetrics.buildTimeMs || 0),
       };
 
-      if (baselineRuntime?.firstRenderMs > 0 && runtimeMeasure.firstRenderMs > 0) {
-        speedup = ((baselineRuntime.firstRenderMs - runtimeMeasure.firstRenderMs) / baselineRuntime.firstRenderMs) * 100;
+      if (baselineRuntime) {
+        comparison = compareRuntime(baselineRuntime, runtimeMeasure);
       }
     }
+
+    const runtime = buildRuntimeRecord(runtimeMeasure, comparison);
 
     /** @type {Record<string, any>} */
     let diagnostics = {};
@@ -217,11 +263,7 @@ export async function runStandaloneBenchmark({ suite, tool, options = {}, allToo
       metrics,
       ...(isBaseline ? {} : { baseline: baselineMetrics }),
       ...(deltas ? { deltas } : {}),
-      runtime: {
-        firstRenderMs: runtimeMeasure.firstRenderMs,
-        updateMs: runtimeMeasure.updateMs,
-        speedupPercent: speedup,
-      },
+      runtime,
       ...(Object.keys(diagnostics).length > 0 ? { diagnostics } : {}),
     };
 
@@ -275,12 +317,20 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
     const runtimeRows = [];
     const baselineBundle = path.join(baselineOutDir, 'bundle.js');
-    const baselineRuntime = await measureBundleRuntime(baselineBundle, 'Baseline');
+    const baselineRuntimeMeasure = await measureBundleRuntime(baselineBundle, 'Baseline');
+    const baselineRuntime = buildRuntimeRecord(baselineRuntimeMeasure);
 
     runtimeRows.push({
       name: 'Baseline (Standard Vite)',
       firstRenderMs: baselineRuntime.firstRenderMs,
       updateMs: baselineRuntime.updateMs,
+      scriptEvalMs: baselineRuntime.scriptEvalMs,
+      registrationMs: baselineRuntime.registrationMs,
+      heapUsedBytes: baselineRuntime.heapUsedBytes,
+      speedupPercent: 0,
+      updateSpeedupPercent: 0,
+      evalSpeedupPercent: 0,
+      memorySavingsPercent: 0,
       isBaseline: true,
     });
 
@@ -315,11 +365,7 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
         timestamp: new Date().toISOString(),
         environment: getEnvironmentMetadata(),
         metrics: baselineMetrics,
-        runtime: {
-          firstRenderMs: baselineRuntime.firstRenderMs,
-          updateMs: baselineRuntime.updateMs,
-          speedupPercent: 0,
-        },
+        runtime: baselineRuntime,
       },
       outDir: options.outDir,
     });
@@ -340,14 +386,21 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
       const impact = calculateImpact(baselineMetrics, toolMetrics);
       const toolBundle = path.join(toolOutDir, 'bundle.js');
-      const toolRuntime = await measureBundleRuntime(toolBundle, tool.name);
-      const speedup = baselineRuntime.firstRenderMs > 0 && toolRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - toolRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
+      const toolRuntimeMeasure = await measureBundleRuntime(toolBundle, tool.name);
+      const toolComparison = compareRuntime(baselineRuntime, toolRuntimeMeasure);
+      const toolRuntime = buildRuntimeRecord(toolRuntimeMeasure, toolComparison);
 
       runtimeRows.push({
         name: tool.name,
         firstRenderMs: toolRuntime.firstRenderMs,
         updateMs: toolRuntime.updateMs,
-        speedupPercent: speedup,
+        scriptEvalMs: toolRuntime.scriptEvalMs,
+        registrationMs: toolRuntime.registrationMs,
+        heapUsedBytes: toolRuntime.heapUsedBytes,
+        speedupPercent: toolRuntime.speedupPercent,
+        updateSpeedupPercent: toolRuntime.updateSpeedupPercent,
+        evalSpeedupPercent: toolRuntime.evalSpeedupPercent,
+        memorySavingsPercent: toolRuntime.memorySavingsPercent,
       });
 
       rows.push({
@@ -401,11 +454,7 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
             brotliPercent: impact.brotliPercent,
             buildTimeMs: (toolMetrics.buildTimeMs || 0) - (baselineMetrics.buildTimeMs || 0),
           },
-          runtime: {
-            firstRenderMs: toolRuntime.firstRenderMs,
-            updateMs: toolRuntime.updateMs,
-            speedupPercent: speedup,
-          },
+          runtime: toolRuntime,
           ...(Object.keys(toolDiag).length > 0 ? { diagnostics: toolDiag } : {}),
         },
         outDir: options.outDir,
@@ -439,14 +488,21 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
     }
 
     const totalBundle = path.join(totalOutDir, 'bundle.js');
-    const totalRuntime = tools.length === 1 && runtimeRows[1] ? runtimeRows[1] : fs.existsSync(totalBundle) ? await measureBundleRuntime(totalBundle, 'TOTAL') : baselineRuntime;
-    const totalSpeedup = baselineRuntime.firstRenderMs > 0 && totalRuntime.firstRenderMs > 0 ? ((baselineRuntime.firstRenderMs - totalRuntime.firstRenderMs) / baselineRuntime.firstRenderMs) * 100 : 0;
+    const totalRuntimeMeasure = tools.length === 1 && runtimeRows[1] ? runtimeRows[1] : fs.existsSync(totalBundle) ? await measureBundleRuntime(totalBundle, 'TOTAL') : baselineRuntime;
+    const totalComparison = compareRuntime(baselineRuntime, totalRuntimeMeasure);
+    const totalRuntime = buildRuntimeRecord(totalRuntimeMeasure, totalComparison);
 
     runtimeRows.push({
       name: 'TOTAL (All Optimizations Combined)',
       firstRenderMs: totalRuntime.firstRenderMs,
       updateMs: totalRuntime.updateMs,
-      speedupPercent: totalSpeedup,
+      scriptEvalMs: totalRuntime.scriptEvalMs,
+      registrationMs: totalRuntime.registrationMs,
+      heapUsedBytes: totalRuntime.heapUsedBytes,
+      speedupPercent: totalRuntime.speedupPercent,
+      updateSpeedupPercent: totalRuntime.updateSpeedupPercent,
+      evalSpeedupPercent: totalRuntime.evalSpeedupPercent,
+      memorySavingsPercent: totalRuntime.memorySavingsPercent,
       isTotal: true,
     });
 
@@ -495,11 +551,7 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
                 buildTimeMs: (totalMetrics.buildTimeMs || 0) - (baselineMetrics.buildTimeMs || 0),
               }
             : {},
-          runtime: {
-            firstRenderMs: totalRuntime.firstRenderMs,
-            updateMs: totalRuntime.updateMs,
-            speedupPercent: totalSpeedup,
-          },
+          runtime: totalRuntime,
         },
         outDir: options.outDir,
       });
