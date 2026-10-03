@@ -21,7 +21,6 @@
     "@awesome.me/webawesome": "^3.14.0",
     "@carbon/web-components": "^2.64.0",
     "@lit-core/benchmarks": "workspace:*",
-    "@lit-core/showcase": "workspace:*",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
     "@lit-core/elem-proxy": "workspace:*",
@@ -32,17 +31,18 @@
     "@lit-core/native": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
+    "@lit-core/showcase": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "@lit-core/webpack-plugin": "workspace:*",
     "@material/web": "^2.5.0",
-    "@momentum-design/components": "^0.139.9",
-    "@spectrum-web-components/bundle": "^1.12.2",
+    "@momentum-design/components": "^0.140.1",
+    "@spectrum-web-components/bundle": "^1.12.4",
     "lit": "^3.3.3",
     "playwright": "^1.63.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.3",
+    "@types/node": "^26.6.4",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.3"
   }
 }

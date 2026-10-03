@@ -55,6 +55,6 @@
     "test": "node tests/minifier.test.js"
   },
   "devDependencies": {
-    "@napi-rs/cli": "^3.10.5"
+    "@napi-rs/cli": "^3.10.6"
   }
 }

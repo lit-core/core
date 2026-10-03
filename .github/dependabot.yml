@@ -21,6 +21,8 @@ updates:
       all-dependencies:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "turbo"
     commit-message:
       prefix: "chore"
       include: "scope"
