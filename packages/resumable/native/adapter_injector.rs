@@ -1,9 +1,10 @@
 use napi_derive::napi;
-use oxc_allocator::Allocator;
+use oxc_allocator::{Allocator, ArenaVec};
 use oxc_ast::ast::*;
+use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_span::SourceType;
+use oxc_span::{SourceType, SPAN};
 use serde::{Deserialize, Serialize};
 
 #[napi(object)]
@@ -152,19 +153,37 @@ pub fn transform_resumable_component(
         .as_deref()
         .unwrap_or("virtual:lit-core/resumable-adapter");
 
-    let injection_source = format!(
-        "import {{ installResumableAdapter }} from '{}';\ninstallResumableAdapter();\n",
-        virtual_module
+    let ast = AstBuilder::new(&allocator);
+
+    let imported = ModuleExportName::IdentifierName(IdentifierName::new(
+        SPAN,
+        "installResumableAdapter",
+        &ast,
+    ));
+    let local = BindingIdentifier::new(SPAN, "installResumableAdapter", &ast);
+    let spec = ImportSpecifier::boxed(SPAN, imported, local, ImportOrExportKind::Value, &ast);
+    let mut specs = ArenaVec::new_in(&ast);
+    specs.push(ImportDeclarationSpecifier::ImportSpecifier(spec));
+    let source_lit = StringLiteral::new(SPAN, virtual_module, None, &ast);
+    let import_decl = ImportDeclaration::boxed(
+        SPAN,
+        Some(specs),
+        source_lit,
+        None,
+        None,
+        ImportOrExportKind::Value,
+        &ast,
     );
+    let import_stmt = Statement::ImportDeclaration(import_decl);
 
-    let injection_parsed = Parser::new(&allocator, &injection_source, source_type).parse();
-    let mut injection_stmts: Vec<Statement> = injection_parsed.program.body.into_iter().collect();
+    let callee = Expression::new_identifier(SPAN, "installResumableAdapter", &ast);
+    let call_expr =
+        Expression::new_call_expression(SPAN, callee, None, ArenaVec::new_in(&ast), false, &ast);
+    let call_stmt = Statement::new_expression_statement(SPAN, call_expr, &ast);
 
-    // Insert injection statements at the top of the program
-    let mut new_body = oxc_allocator::Vec::new_in(&&allocator);
-    for stmt in injection_stmts.drain(..) {
-        new_body.push(stmt);
-    }
+    let mut new_body = ArenaVec::new_in(&ast);
+    new_body.push(import_stmt);
+    new_body.push(call_stmt);
     for stmt in parsed.program.body {
         new_body.push(stmt);
     }

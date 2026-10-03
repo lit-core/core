@@ -44,6 +44,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
     let import_ctx = ImportContext::scan(&program);
     let ast = AstBuilder::new(&allocator);
     let forced_mode = opts.mode.as_deref().unwrap_or("auto");
+    let define_calls = classifier::scan_define_calls(&program);
 
     let mut classifications = Vec::new();
     let mut vanilla_count = 0u32;
@@ -56,7 +57,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
         match &mut stmt {
             Statement::ClassDeclaration(class) => {
                 if let Some(target) =
-                    classifier::classify_class(class, forced_mode, &source, &import_ctx, None)
+                    classifier::classify_class(class, forced_mode, &define_calls, &import_ctx, None)
                 {
                     classifications.push(target.clone());
                     match target.mode.as_str() {
@@ -101,9 +102,13 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
             }
             Statement::ExportDeclaration(export_decl) => match &mut export_decl.declaration {
                 Declaration::ClassDeclaration(class) => {
-                    if let Some(target) =
-                        classifier::classify_class(class, forced_mode, &source, &import_ctx, None)
-                    {
+                    if let Some(target) = classifier::classify_class(
+                        class,
+                        forced_mode,
+                        &define_calls,
+                        &import_ctx,
+                        None,
+                    ) {
                         classifications.push(target.clone());
                         match target.mode.as_str() {
                             "vanilla" => {
@@ -155,7 +160,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                         if let Some(target) = classifier::classify_class(
                             class,
                             forced_mode,
-                            &source,
+                            &define_calls,
                             &import_ctx,
                             None,
                         ) {

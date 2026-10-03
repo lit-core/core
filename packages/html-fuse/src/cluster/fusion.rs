@@ -41,7 +41,7 @@ impl HtmlClusterEngine {
         }
 
         // Sort candidates by length descending so larger parent subtrees are prioritized
-        clusters.sort_by(|a, b| b.canonical_text.len().cmp(&a.canonical_text.len()));
+        clusters.sort_by_key(|b| std::cmp::Reverse(b.canonical_text.len()));
 
         let mut non_subsumed = Vec::new();
         for candidate in clusters {

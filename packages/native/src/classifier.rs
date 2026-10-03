@@ -4,6 +4,56 @@ use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
 use oxc_parser::Parser;
 use oxc_span::SourceType;
+use std::collections::HashMap;
+
+pub fn scan_define_calls<'a>(program: &Program<'a>) -> HashMap<String, String> {
+    let mut map = HashMap::new();
+    for stmt in &program.body {
+        if let Some((tag, cls)) = get_ce_define_call(stmt) {
+            map.insert(cls, tag);
+        }
+    }
+    map
+}
+
+pub fn get_ce_define_call<'a>(stmt: &Statement<'a>) -> Option<(String, String)> {
+    if let Statement::ExpressionStatement(expr_stmt) = stmt {
+        if let Expression::CallExpression(call) = &expr_stmt.expression {
+            let is_ce_define = match &call.callee {
+                Expression::StaticMemberExpression(mem) => {
+                    mem.property.name == "define"
+                        && match &mem.object {
+                            Expression::Identifier(id) => id.name == "customElements",
+                            Expression::StaticMemberExpression(inner) => {
+                                inner.property.name == "customElements"
+                            }
+                            _ => false,
+                        }
+                }
+                _ => false,
+            };
+            if is_ce_define && call.arguments.len() >= 2 {
+                let tag_str = match call.arguments[0].as_expression() {
+                    Some(Expression::StringLiteral(s)) => Some(s.value.as_str().to_string()),
+                    Some(Expression::TemplateLiteral(t))
+                        if t.expressions.is_empty() && !t.quasis.is_empty() =>
+                    {
+                        Some(t.quasis[0].value.raw.as_str().to_string())
+                    }
+                    _ => None,
+                };
+                let class_str = match call.arguments[1].as_expression() {
+                    Some(Expression::Identifier(id)) => Some(id.name.as_str().to_string()),
+                    _ => None,
+                };
+                if let (Some(tag), Some(cls)) = (tag_str, class_str) {
+                    return Some((tag, cls));
+                }
+            }
+        }
+    }
+    None
+}
 
 pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<ClassificationResult> {
     let allocator = Allocator::default();
@@ -17,6 +67,7 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
 
     let program = &parsed.program;
     let import_ctx = ImportContext::scan(program);
+    let define_calls = scan_define_calls(program);
     let mut results = Vec::new();
 
     let forced_mode = options.mode.as_deref().unwrap_or("auto");
@@ -24,13 +75,16 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
     for stmt in &program.body {
         match stmt {
             Statement::ClassDeclaration(class) => {
-                if let Some(res) = classify_class(class, forced_mode, source, &import_ctx, None) {
+                if let Some(res) =
+                    classify_class(class, forced_mode, &define_calls, &import_ctx, None)
+                {
                     results.push(res);
                 }
             }
             Statement::ExportDeclaration(export_decl) => match &export_decl.declaration {
                 Declaration::ClassDeclaration(class) => {
-                    if let Some(res) = classify_class(class, forced_mode, source, &import_ctx, None)
+                    if let Some(res) =
+                        classify_class(class, forced_mode, &define_calls, &import_ctx, None)
                     {
                         results.push(res);
                     }
@@ -43,7 +97,7 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
                                 _ => None,
                             };
                             if let Some(res) =
-                                classify_class(class, forced_mode, source, &import_ctx, name)
+                                classify_class(class, forced_mode, &define_calls, &import_ctx, name)
                             {
                                 results.push(res);
                             }
@@ -54,13 +108,15 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
             },
             Statement::ExportDefaultDeclaration(export_decl) => match &export_decl.declaration {
                 ExportDefaultDeclarationKind::ClassDeclaration(class) => {
-                    if let Some(res) = classify_class(class, forced_mode, source, &import_ctx, None)
+                    if let Some(res) =
+                        classify_class(class, forced_mode, &define_calls, &import_ctx, None)
                     {
                         results.push(res);
                     }
                 }
                 ExportDefaultDeclarationKind::ClassExpression(class) => {
-                    if let Some(res) = classify_class(class, forced_mode, source, &import_ctx, None)
+                    if let Some(res) =
+                        classify_class(class, forced_mode, &define_calls, &import_ctx, None)
                     {
                         results.push(res);
                     }
@@ -75,7 +131,7 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
                             _ => None,
                         };
                         if let Some(res) =
-                            classify_class(class, forced_mode, source, &import_ctx, name)
+                            classify_class(class, forced_mode, &define_calls, &import_ctx, name)
                         {
                             results.push(res);
                         }
@@ -92,7 +148,7 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
 pub fn classify_class<'a>(
     class: &Class<'a>,
     forced_mode: &str,
-    source: &str,
+    define_calls: &HashMap<String, String>,
     import_ctx: &ImportContext,
     fallback_name: Option<&str>,
 ) -> Option<ClassificationResult> {
@@ -103,7 +159,7 @@ pub fn classify_class<'a>(
         .or_else(|| fallback_name.map(|s| s.to_string()))
         .unwrap_or_else(|| "AnonymousComponent".to_string());
 
-    let tag_name = extract_tag_name(class, source, fallback_name);
+    let tag_name = extract_tag_name(class, define_calls, fallback_name);
     let has_render_method = class.body.body.iter().any(|elem| match elem {
         ClassElement::MethodDefinition(m) => {
             m.key.static_name().map(|n| n == "render").unwrap_or(false)
@@ -151,6 +207,9 @@ pub fn classify_class<'a>(
                     || name == "willUpdate"
                     || name == "updated"
                     || name == "firstUpdated"
+                    || name == "connectedCallback"
+                    || name == "disconnectedCallback"
+                    || name == "attributeChangedCallback"
                 {
                     has_lifecycle_override = true;
                 }
@@ -199,11 +258,29 @@ pub fn classify_class<'a>(
         }
     }
 
+    let extends_direct_lit = match &class.heritage {
+        Some(h) => match &h.expression {
+            Expression::Identifier(id) => {
+                id.name == "LitElement"
+                    || id.name == "ReactiveElement"
+                    || import_ctx.lit_bindings.contains(id.name.as_str())
+            }
+            Expression::StaticMemberExpression(mem) => {
+                mem.property.name == "LitElement" || mem.property.name == "ReactiveElement"
+            }
+            _ => false,
+        },
+        None => false,
+    };
+
     // Classification decision:
-    // 1. If has structural directives (repeat, cache, until, live) -> Mode B micro/skip
-    // 2. If has lowerable directives (classMap, styleMap, ifDefined, guard) OR complex lifecycle -> Mode B
-    // 3. If genuine leaf (no directives, <= 12 props, single template, no lifecycle overrides) -> Mode A vanilla
-    let (mode, reason) = if has_structural_directive {
+    // 1. If not directly extending LitElement (e.g. custom base element) -> Mode B micro
+    // 2. If has structural directives (repeat, cache, until, live) -> Mode B micro/skip
+    // 3. If has lowerable directives (classMap, styleMap, ifDefined, guard) OR complex lifecycle -> Mode B
+    // 4. If genuine leaf (direct LitElement, no directives, <= 12 props, single template, no lifecycle overrides) -> Mode A vanilla
+    let (mode, reason) = if !extends_direct_lit {
+        ("micro", Some("Subclasses custom base element".to_string()))
+    } else if has_structural_directive {
         (
             "micro",
             Some("Contains structural Lit directives".to_string()),
@@ -382,7 +459,7 @@ fn inspect_render_expression<'a>(
 
 fn extract_tag_name<'a>(
     class: &Class<'a>,
-    source: &str,
+    define_calls: &HashMap<String, String>,
     fallback_name: Option<&str>,
 ) -> Option<String> {
     for dec in &class.decorators {
@@ -407,21 +484,6 @@ fn extract_tag_name<'a>(
         .as_ref()
         .map(|id| id.name.as_str())
         .or(fallback_name)?;
-    let search_str = "customElements.define(";
-    let mut pos_offset = 0;
-    while let Some(pos) = source[pos_offset..].find(search_str) {
-        let abs_pos = pos_offset + pos;
-        let after = &source[abs_pos + search_str.len()..];
-        if let Some(comma_pos) = after.find(',') {
-            let tag_part = after[..comma_pos].trim();
-            let remaining = after[comma_pos + 1..].trim();
-            if remaining.starts_with(class_name) {
-                let clean_tag = tag_part.trim_matches(|c| c == '\'' || c == '"' || c == '`');
-                return Some(clean_tag.to_string());
-            }
-        }
-        pos_offset = abs_pos + search_str.len();
-    }
 
-    None
+    define_calls.get(class_name).cloned()
 }

@@ -136,13 +136,13 @@
     "description": "Cross-component CSS deduplication into shared constructable stylesheets",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T16:42:15.683Z",
+  "timestamp": "2026-10-03T19:27:32.232Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "e7dd878",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -158,36 +158,36 @@
   },
   "metrics": {
     "rawBytes": 924632,
-    "gzipBytes": 142330,
-    "brotliBytes": 102065,
-    "buildTimeMs": 588.0970000000002
+    "gzipBytes": 142329,
+    "brotliBytes": 102195,
+    "buildTimeMs": 858.6546659999985
   },
   "baseline": {
     "rawBytes": 1438781,
     "gzipBytes": 186286,
     "brotliBytes": 98045,
-    "buildTimeMs": 68.61058400000002
+    "buildTimeMs": 78.04595799999879
   },
   "deltas": {
     "rawBytes": -514149,
     "rawPercent": -35.7350423726752,
-    "gzipBytes": -43956,
-    "gzipPercent": -23.59597607979129,
-    "brotliBytes": 4020,
-    "brotliPercent": 4.10015809067265,
-    "buildTimeMs": 519.4864160000002
+    "gzipBytes": -43957,
+    "gzipPercent": -23.596512888783913,
+    "brotliBytes": 4150,
+    "brotliPercent": 4.232750267734204,
+    "buildTimeMs": 780.6087079999998
   },
   "runtime": {
-    "firstRenderMs": 43.7,
-    "updateMs": 2,
-    "scriptEvalMs": 3.7,
-    "registrationMs": 1,
-    "heapUsedBytes": 149432,
-    "speedupPercent": 21.964285714285708,
-    "updateSpeedupPercent": 13.04347826086956,
-    "evalSpeedupPercent": 11.904761904761903,
-    "registrationSpeedupPercent": 9.090909090909099,
-    "memorySavingsPercent": -0.5598923283983849
+    "firstRenderMs": 40.6,
+    "updateMs": 1.7,
+    "scriptEvalMs": 3.3,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 149128,
+    "speedupPercent": 26.978417266187048,
+    "updateSpeedupPercent": 29.166666666666668,
+    "evalSpeedupPercent": 28.26086956521739,
+    "registrationSpeedupPercent": -50.000000000000014,
+    "memorySavingsPercent": -0.10202985715819998
   },
   "diagnostics": {
     "rulesScanned": 23881,

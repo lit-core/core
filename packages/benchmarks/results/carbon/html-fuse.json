@@ -136,13 +136,13 @@
     "description": "Cross-component static HTML and SVG fragment clustering",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T16:42:17.670Z",
+  "timestamp": "2026-10-03T19:27:34.478Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "e7dd878",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -160,13 +160,13 @@
     "rawBytes": 1436544,
     "gzipBytes": 186340,
     "brotliBytes": 98111,
-    "buildTimeMs": 322.31066699999974
+    "buildTimeMs": 434.3336249999993
   },
   "baseline": {
     "rawBytes": 1438781,
     "gzipBytes": 186286,
     "brotliBytes": 98045,
-    "buildTimeMs": 68.61058400000002
+    "buildTimeMs": 78.04595799999879
   },
   "deltas": {
     "rawBytes": -2237,
@@ -175,19 +175,19 @@
     "gzipPercent": 0.028987685601709202,
     "brotliBytes": 66,
     "brotliPercent": 0.0673160283543271,
-    "buildTimeMs": 253.70008299999972
+    "buildTimeMs": 356.2876670000005
   },
   "runtime": {
-    "firstRenderMs": 43.2,
-    "updateMs": 2,
-    "scriptEvalMs": 3.2,
-    "registrationMs": 0.8,
-    "heapUsedBytes": 150480,
-    "speedupPercent": 22.85714285714285,
-    "updateSpeedupPercent": 13.04347826086956,
-    "evalSpeedupPercent": 23.809523809523807,
-    "registrationSpeedupPercent": 27.272727272727277,
-    "memorySavingsPercent": -1.2651413189771197
+    "firstRenderMs": 66.7,
+    "updateMs": 2.6,
+    "scriptEvalMs": 3.7,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 151232,
+    "speedupPercent": -19.964028776978417,
+    "updateSpeedupPercent": -8.333333333333341,
+    "evalSpeedupPercent": 19.565217391304337,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -1.514337879926968
   },
   "diagnostics": {
     "fragmentsScanned": 596,

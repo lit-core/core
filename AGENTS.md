@@ -185,6 +185,30 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
    - Never start local HTTP servers on loopback (`127.0.0.1`), as standard sandbox mode restricts local socket binding and triggers permission prompts.
    - Always launch Playwright Chromium through `@lit-core/test-kit` which configures verified `--single-process` flags.
    - Never run recursive searches across `node_modules`. Use `pnpm run vendor:where <suite> [component]` to resolve canonical component source files directly.
+---
 
+## Autonomous goal orchestration and specialized subagent roster
 
+The repository uses Antigravity lifecycle hooks (`.agents/hooks.json`) and specialized subagents to run autonomous tasks without unnecessary human intervention.
 
+### Autonomous goal execution protocol
+
+Whenever the user triggers `/goal` or asks for hands-off execution:
+1. **Initialize goal tracking**:
+   - Run `node .agents/scripts/goal.js start "<goal description>" "<verification command>"` (default verification: `pnpm run check`).
+   - This registers an active goal file (`.agents/.goal_active.json`).
+2. **Hard-gated termination guard**:
+   - The Antigravity `Stop` hook (`.agents/scripts/goal-stop-hook.js`) automatically intercepts model termination.
+   - If the verification command fails, the hook forces the agent to continue iterating autonomously until all checks pass or the cycle limit is reached.
+3. **Autonomous handoff and completion**:
+   - Never prompt the user for intermediate approval or trivial confirmations.
+   - Only report completion once the verification command passes and the hook permits completion.
+
+### Subagent team roster
+
+Subagents are defined in `.agents/agents/*.md` and can be launched via `invoke_subagent` or selected as primary agents:
+
+- [**`software-architect`**](file:///Users/rawlings/core-1/.agents/agents/software-architect.md) (`Model: 'pro'`): High-reasoning architectural decomposition, invariant auditing, and execution planning.
+- [**`rust-compiler-engineer`**](file:///Users/rawlings/core-1/.agents/agents/rust-compiler-engineer.md) (`Model: 'flash'` or `'pro'`): Native Rust AST parsing, lowering, and minification using `oxc` and `lightningcss`. Strictly enforces AST builder neutrality and minification resilience.
+- [**`web-components-engineer`**](file:///Users/rawlings/core-1/.agents/agents/web-components-engineer.md) (`Model: 'flash'`): Lit 3.x, Web Components, ReactiveElement, SSR resumability, and bundler plugin integration.
+- [**`test-automation-engineer`**](file:///Users/rawlings/core-1/.agents/agents/test-automation-engineer.md) (`Model: 'flash'`): Playwright Chromium, Vitest, and design system benchmark verification. Ensures sandboxed execution and iframe component isolation.

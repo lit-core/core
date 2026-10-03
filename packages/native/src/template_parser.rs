@@ -122,8 +122,7 @@ fn extract_attribute_binding(trimmed: &str) -> (BindingKind, String) {
 
     let token = without_eq
         .split(|c: char| c.is_whitespace() || c == '<' || c == '>')
-        .filter(|s| !s.is_empty())
-        .next_back()
+        .rfind(|s| !s.is_empty())
         .unwrap_or("");
 
     if let Some(ev) = token.strip_prefix('@') {
@@ -137,18 +136,20 @@ fn extract_attribute_binding(trimmed: &str) -> (BindingKind, String) {
     }
 }
 
+type StackFrame = (
+    String,
+    String,
+    Vec<DomNode>,
+    Vec<(BindingKind, String, usize, String)>,
+);
+
 fn parse_html_to_tree(
     html: &str,
     expressions: &[&str],
     expr_meta: &[(bool, BindingKind, String)],
 ) -> Vec<DomNode> {
     let mut chars = html.char_indices().peekable();
-    let mut stack: Vec<(
-        String,
-        String,
-        Vec<DomNode>,
-        Vec<(BindingKind, String, usize, String)>,
-    )> = Vec::new();
+    let mut stack: Vec<StackFrame> = Vec::new();
     let mut top_nodes: Vec<DomNode> = Vec::new();
 
     let void_elements: [&str; 14] = [
@@ -158,14 +159,7 @@ fn parse_html_to_tree(
 
     let mut text_buf = String::new();
 
-    let flush_text = |buf: &mut String,
-                      stack: &mut Vec<(
-        String,
-        String,
-        Vec<DomNode>,
-        Vec<(BindingKind, String, usize, String)>,
-    )>,
-                      top: &mut Vec<DomNode>| {
+    let flush_text = |buf: &mut String, stack: &mut Vec<StackFrame>, top: &mut Vec<DomNode>| {
         if !buf.is_empty() {
             let node = DomNode::Text(std::mem::take(buf));
             if let Some((_, _, children, _)) = stack.last_mut() {

@@ -1,9 +1,10 @@
 use napi_derive::napi;
 use oxc_allocator::{Allocator, Vec as ArenaVec};
 use oxc_ast::ast::*;
+use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_span::{GetSpan, SourceType, Span};
+use oxc_span::{GetSpan, SourceType, Span, SPAN};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -28,7 +29,6 @@ pub struct HtmlAotResult {
 struct CompiledTemplateData {
     var_name: String,
     prepared: PreparedTemplate,
-    expr_spans: Vec<Span>,
 }
 
 fn contains_octal_escape(quasis: &[TemplateElement]) -> bool {
@@ -713,17 +713,8 @@ fn walk_expr_for_templates<'a>(
                 if let Some(prepared) = parse_lit_template(&quasis) {
                     *counter += 1;
                     let var_name = format!("lit_template_{}", counter);
-                    let expr_spans: Vec<Span> =
-                        tagged.quasi.expressions.iter().map(|e| e.span()).collect();
 
-                    out.push((
-                        tagged.span,
-                        CompiledTemplateData {
-                            var_name,
-                            prepared,
-                            expr_spans,
-                        },
-                    ));
+                    out.push((tagged.span, CompiledTemplateData { var_name, prepared }));
                 }
             }
 
@@ -940,29 +931,45 @@ fn replace_in_expr<'a>(
     let span = expr.span();
     for (tmpl_span, tmpl_data) in template_matches {
         if span.start == tmpl_span.start && span.end == tmpl_span.end {
-            // Found target tagged template! Construct replacement
-            let values_code: Vec<&str> = tmpl_data
-                .expr_spans
-                .iter()
-                .map(|sp| &source[sp.start as usize..sp.end as usize])
-                .collect();
+            // Found target tagged template! Construct replacement using AstBuilder
+            let ast = AstBuilder::new(allocator);
+            let mut properties = ArenaVec::new_in(&ast);
 
-            let replacement_code = format!(
-                "({{ ['_$litType$']: {}, values: [{}] }})",
-                tmpl_data.var_name,
-                values_code.join(", ")
-            );
+            let key1 = PropertyKey::new_string_literal(SPAN, "_$litType$", None, &ast);
+            let val1 =
+                Expression::new_identifier(SPAN, allocator.alloc_str(&tmpl_data.var_name), &ast);
+            properties.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                key1,
+                val1,
+                false,
+                true,
+                false,
+                &ast,
+            ));
 
-            let dummy = format!("let __x = {};", replacement_code);
-            let p = Parser::new(allocator, allocator.alloc_str(&dummy), source_type).parse();
-            if let Some(Statement::VariableDeclaration(mut v)) = p.program.body.into_iter().next() {
-                if !v.declarations.is_empty() {
-                    if let Some(init) = v.declarations.remove(0).init {
-                        *expr = init;
-                        return;
-                    }
+            let mut elements = ArenaVec::new_in(&ast);
+            if let Expression::TaggedTemplateExpression(ref mut tagged) = expr {
+                for e in tagged.quasi.expressions.drain(..) {
+                    elements.push(ArrayExpressionElement::from(e));
                 }
             }
+            let key2 = PropertyKey::new_static_identifier(SPAN, "values", &ast);
+            let val2 = Expression::new_array_expression(SPAN, elements, &ast);
+            properties.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                key2,
+                val2,
+                false,
+                false,
+                false,
+                &ast,
+            ));
+
+            *expr = Expression::new_object_expression(SPAN, properties, &ast);
+            return;
         }
     }
 

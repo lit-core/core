@@ -1,10 +1,11 @@
 use napi_derive::napi;
-use oxc_allocator::{Allocator, Vec as ArenaVec};
+use oxc_allocator::{Allocator, CloneIn, GetAllocator, Vec as ArenaVec};
 use oxc_ast::ast::*;
+use oxc_ast::builder::AstBuilder;
 use oxc_ast_visit::Visit;
 use oxc_codegen::Codegen;
 use oxc_parser::Parser;
-use oxc_span::{GetSpan, SourceType};
+use oxc_span::{GetSpan, SourceType, SPAN};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -312,35 +313,35 @@ pub fn analyze_candidate<'a>(expr: &'a Expression<'a>) -> Option<CandidateInfo> 
     })
 }
 
-#[derive(Clone, Debug)]
-pub struct CandidateItem {
+#[derive(Debug)]
+pub struct CandidateItem<'a> {
     pub expr_start: usize,
     pub expr_end: usize,
-    pub expr_code: String,
+    pub expr: Expression<'a>,
     pub root_prop: String,
     pub var_name: String,
     pub val_slot: String,
     pub dependencies: Vec<String>,
 }
 
-#[derive(Clone, Debug)]
-pub struct StmtCandidateGroup {
+#[derive(Debug)]
+pub struct StmtCandidateGroup<'a> {
     pub stmt_start: usize,
     pub stmt_end: usize,
     pub is_var_decl: bool,
     pub var_name: Option<String>,
-    pub candidates: Vec<CandidateItem>,
+    pub candidates: Vec<CandidateItem<'a>>,
 }
 
 /// Visitor that walks tagged templates inside statements to find candidate expressions
-struct TemplateCandidateFinder<'s> {
-    source: &'s str,
-    candidates: Vec<CandidateItem>,
+struct TemplateCandidateFinder<'a> {
+    allocator: &'a Allocator,
+    candidates: Vec<CandidateItem<'a>>,
     used_slots: HashSet<String>,
     counter: usize,
 }
 
-impl<'a, 's> Visit<'a> for TemplateCandidateFinder<'s> {
+impl<'a> Visit<'a> for TemplateCandidateFinder<'a> {
     fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
         if is_lit_html_tag(&tagged.tag) {
             for expr in &tagged.quasi.expressions {
@@ -361,12 +362,12 @@ impl<'a, 's> Visit<'a> for TemplateCandidateFinder<'s> {
                     self.used_slots.insert(format!("_memo_{}", base_prop));
                     self.counter += 1;
 
-                    let expr_code = self.source[cand.expr_start..cand.expr_end].to_string();
+                    let expr_cloned = expr.clone_in(self.allocator);
 
                     self.candidates.push(CandidateItem {
                         expr_start: cand.expr_start,
                         expr_end: cand.expr_end,
-                        expr_code,
+                        expr: expr_cloned,
                         root_prop: cand.root_prop,
                         var_name,
                         val_slot,
@@ -386,9 +387,9 @@ impl<'a, 's> Visit<'a> for TemplateCandidateFinder<'s> {
 }
 
 fn collect_stmt_candidates<'a>(
-    stmt: &'a Statement<'a>,
-    source: &str,
-    out: &mut Vec<StmtCandidateGroup>,
+    stmt: &Statement<'a>,
+    allocator: &'a Allocator,
+    out: &mut Vec<StmtCandidateGroup<'a>>,
     used_slots: &mut HashSet<String>,
     counter: &mut usize,
 ) {
@@ -413,7 +414,7 @@ fn collect_stmt_candidates<'a>(
                         used_slots.insert(val_slot.clone());
                         *counter += 1;
 
-                        let expr_code = source[cand.expr_start..cand.expr_end].to_string();
+                        let expr_cloned = init_expr.clone_in(allocator);
 
                         out.push(StmtCandidateGroup {
                             stmt_start: stmt.span().start as usize,
@@ -423,7 +424,7 @@ fn collect_stmt_candidates<'a>(
                             candidates: vec![CandidateItem {
                                 expr_start: cand.expr_start,
                                 expr_end: cand.expr_end,
-                                expr_code,
+                                expr: expr_cloned,
                                 root_prop: cand.root_prop,
                                 var_name,
                                 val_slot,
@@ -435,7 +436,7 @@ fn collect_stmt_candidates<'a>(
 
                     // Otherwise, scan init for inline template candidates
                     let mut finder = TemplateCandidateFinder {
-                        source,
+                        allocator,
                         candidates: Vec::new(),
                         used_slots: used_slots.clone(),
                         counter: *counter,
@@ -472,7 +473,7 @@ fn collect_stmt_candidates<'a>(
                     let var_name = format!("_memoized_{}", val_slot);
                     *counter += 1;
 
-                    let expr_code = source[cand.expr_start..cand.expr_end].to_string();
+                    let expr_cloned = arg.clone_in(allocator);
 
                     out.push(StmtCandidateGroup {
                         stmt_start: stmt.span().start as usize,
@@ -482,7 +483,7 @@ fn collect_stmt_candidates<'a>(
                         candidates: vec![CandidateItem {
                             expr_start: cand.expr_start,
                             expr_end: cand.expr_end,
-                            expr_code,
+                            expr: expr_cloned,
                             root_prop: cand.root_prop,
                             var_name,
                             val_slot,
@@ -494,7 +495,7 @@ fn collect_stmt_candidates<'a>(
 
                 // Scan return argument for inline template candidates
                 let mut finder = TemplateCandidateFinder {
-                    source,
+                    allocator,
                     candidates: Vec::new(),
                     used_slots: used_slots.clone(),
                     counter: *counter,
@@ -518,7 +519,7 @@ fn collect_stmt_candidates<'a>(
         }
         Statement::ExpressionStatement(expr_stmt) => {
             let mut finder = TemplateCandidateFinder {
-                source,
+                allocator,
                 candidates: Vec::new(),
                 used_slots: used_slots.clone(),
                 counter: *counter,
@@ -540,35 +541,35 @@ fn collect_stmt_candidates<'a>(
             }
         }
         Statement::IfStatement(if_stmt) => {
-            collect_stmt_candidates(&if_stmt.consequent, source, out, used_slots, counter);
+            collect_stmt_candidates(&if_stmt.consequent, allocator, out, used_slots, counter);
             if let Some(alt) = &if_stmt.alternate {
-                collect_stmt_candidates(alt, source, out, used_slots, counter);
+                collect_stmt_candidates(alt, allocator, out, used_slots, counter);
             }
         }
         Statement::BlockStatement(block) => {
             for s in &block.body {
-                collect_stmt_candidates(s, source, out, used_slots, counter);
+                collect_stmt_candidates(s, allocator, out, used_slots, counter);
             }
         }
         Statement::TryStatement(try_stmt) => {
             for s in &try_stmt.block.body {
-                collect_stmt_candidates(s, source, out, used_slots, counter);
+                collect_stmt_candidates(s, allocator, out, used_slots, counter);
             }
             if let Some(h) = &try_stmt.handler {
                 for s in &h.body.body {
-                    collect_stmt_candidates(s, source, out, used_slots, counter);
+                    collect_stmt_candidates(s, allocator, out, used_slots, counter);
                 }
             }
             if let Some(f) = &try_stmt.finalizer {
                 for s in &f.body {
-                    collect_stmt_candidates(s, source, out, used_slots, counter);
+                    collect_stmt_candidates(s, allocator, out, used_slots, counter);
                 }
             }
         }
         Statement::SwitchStatement(sw) => {
             for case in &sw.cases {
                 for s in &case.consequent {
-                    collect_stmt_candidates(s, source, out, used_slots, counter);
+                    collect_stmt_candidates(s, allocator, out, used_slots, counter);
                 }
             }
         }
@@ -576,143 +577,239 @@ fn collect_stmt_candidates<'a>(
     }
 }
 
-fn generate_memo_block(cand: &CandidateItem) -> String {
-    let guards: Vec<String> = cand
-        .dependencies
-        .iter()
-        .map(|dep| format!("this.__memo_{}_ref === this.{}", dep, dep))
-        .collect();
-    let guard_str = guards.join(" && ");
+fn build_memo_block<'a>(
+    var_name: &str,
+    val_slot: &str,
+    dependencies: &[String],
+    expr: Expression<'a>,
+    ast: &AstBuilder<'a>,
+) -> ArenaVec<'a, Statement<'a>> {
+    let mut stmts = ArenaVec::new_in(ast);
 
-    let saves: Vec<String> = cand
-        .dependencies
-        .iter()
-        .map(|dep| format!("this.__memo_{}_ref = this.{};", dep, dep))
-        .collect();
-    let saves_str = saves.join("\n");
+    // let {var_name};
+    let var_ident = ast.allocator().alloc_str(var_name);
+    let binding = BindingPattern::new_binding_identifier(SPAN, var_ident, ast);
+    let declarator = VariableDeclarator::new(SPAN, binding, None, None, false, ast);
+    let mut decls = ArenaVec::new_in(ast);
+    decls.push(declarator);
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Let,
+        decls,
+        false,
+        ast,
+    ));
 
-    format!(
-        "let {var_name};\n\
-         if ({guard_str}) {{\n\
-           {var_name} = this.__memo_{val_slot}_val;\n\
-         }} else {{\n\
-           {saves_str}\n\
-           {var_name} = this.__memo_{val_slot}_val = {expr};\n\
-         }}",
-        var_name = cand.var_name,
-        val_slot = cand.val_slot,
-        guard_str = guard_str,
-        saves_str = saves_str,
-        expr = cand.expr_code,
-    )
-}
+    // Guard expression: this.__memo_{dep}_ref === this.{dep}
+    let mut guard_opt: Option<Expression<'a>> = None;
+    for dep in dependencies {
+        let this_l = Expression::new_this_expression(SPAN, ast);
+        let prop_l = ast.allocator().alloc_str(&format!("__memo_{}_ref", dep));
+        let left = Expression::new_static_member_expression(
+            SPAN,
+            this_l,
+            IdentifierName::new(SPAN, prop_l, ast),
+            false,
+            ast,
+        );
 
-fn generate_var_decl_memo_block(cand: &CandidateItem, var_name: &str) -> String {
-    let guards: Vec<String> = cand
-        .dependencies
-        .iter()
-        .map(|dep| format!("this.__memo_{}_ref === this.{}", dep, dep))
-        .collect();
-    let guard_str = guards.join(" && ");
+        let this_r = Expression::new_this_expression(SPAN, ast);
+        let prop_r = ast.allocator().alloc_str(dep);
+        let right = Expression::new_static_member_expression(
+            SPAN,
+            this_r,
+            IdentifierName::new(SPAN, prop_r, ast),
+            false,
+            ast,
+        );
 
-    let saves: Vec<String> = cand
-        .dependencies
-        .iter()
-        .map(|dep| format!("this.__memo_{}_ref = this.{};", dep, dep))
-        .collect();
-    let saves_str = saves.join("\n");
+        let eq = Expression::new_binary_expression(
+            SPAN,
+            left,
+            BinaryOperator::StrictEquality,
+            right,
+            ast,
+        );
 
-    format!(
-        "let {var_name};\n\
-         if ({guard_str}) {{\n\
-           {var_name} = this.__memo_{val_slot}_val;\n\
-         }} else {{\n\
-           {saves_str}\n\
-           {var_name} = this.__memo_{val_slot}_val = {expr};\n\
-         }}",
-        var_name = var_name,
-        val_slot = cand.val_slot,
-        guard_str = guard_str,
-        saves_str = saves_str,
-        expr = cand.expr_code,
-    )
+        guard_opt = match guard_opt {
+            None => Some(eq),
+            Some(prev) => Some(Expression::new_logical_expression(
+                SPAN,
+                prev,
+                LogicalOperator::And,
+                eq,
+                ast,
+            )),
+        };
+    }
+    let guard = guard_opt.unwrap_or_else(|| Expression::new_boolean_literal(SPAN, false, ast));
+
+    // Consequent block: {var_name} = this.__memo_{val_slot}_val;
+    let target = AssignmentTarget::new_assignment_target_identifier(SPAN, var_ident, ast);
+    let this_val = Expression::new_this_expression(SPAN, ast);
+    let slot_prop = ast
+        .allocator()
+        .alloc_str(&format!("__memo_{}_val", val_slot));
+    let val_member = Expression::new_static_member_expression(
+        SPAN,
+        this_val,
+        IdentifierName::new(SPAN, slot_prop, ast),
+        false,
+        ast,
+    );
+    let assign_then = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        target,
+        val_member,
+        ast,
+    );
+    let mut then_stmts = ArenaVec::new_in(ast);
+    then_stmts.push(Statement::new_expression_statement(SPAN, assign_then, ast));
+    let then_block = Statement::new_block_statement(SPAN, then_stmts, ast);
+
+    // Alternate block:
+    // saves: this.__memo_{dep}_ref = this.{dep};
+    let mut else_stmts = ArenaVec::new_in(ast);
+    for dep in dependencies {
+        let this_l = Expression::new_this_expression(SPAN, ast);
+        let prop_l = ast.allocator().alloc_str(&format!("__memo_{}_ref", dep));
+        let target = AssignmentTarget::new_static_member_expression(
+            SPAN,
+            this_l,
+            IdentifierName::new(SPAN, prop_l, ast),
+            false,
+            ast,
+        );
+
+        let this_r = Expression::new_this_expression(SPAN, ast);
+        let prop_r = ast.allocator().alloc_str(dep);
+        let val = Expression::new_static_member_expression(
+            SPAN,
+            this_r,
+            IdentifierName::new(SPAN, prop_r, ast),
+            false,
+            ast,
+        );
+
+        let save_assign = Expression::new_assignment_expression(
+            SPAN,
+            AssignmentOperator::Assign,
+            target,
+            val,
+            ast,
+        );
+        else_stmts.push(Statement::new_expression_statement(SPAN, save_assign, ast));
+    }
+
+    // {var_name} = this.__memo_{val_slot}_val = {expr};
+    let this_slot = Expression::new_this_expression(SPAN, ast);
+    let slot_target = AssignmentTarget::new_static_member_expression(
+        SPAN,
+        this_slot,
+        IdentifierName::new(SPAN, slot_prop, ast),
+        false,
+        ast,
+    );
+    let inner_assign = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        slot_target,
+        expr,
+        ast,
+    );
+    let outer_target = AssignmentTarget::new_assignment_target_identifier(SPAN, var_ident, ast);
+    let outer_assign = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        outer_target,
+        inner_assign,
+        ast,
+    );
+    else_stmts.push(Statement::new_expression_statement(SPAN, outer_assign, ast));
+
+    let else_block = Statement::new_block_statement(SPAN, else_stmts, ast);
+
+    // if statement
+    stmts.push(Statement::new_if_statement(
+        SPAN,
+        guard,
+        then_block,
+        Some(else_block),
+        ast,
+    ));
+
+    stmts
 }
 
 fn replace_candidate_exprs<'a>(
     expr: &mut Expression<'a>,
-    candidates: &[CandidateItem],
+    candidates: &[CandidateItem<'a>],
     allocator: &'a Allocator,
-    source_type: SourceType,
 ) {
     let start = expr.span().start as usize;
     let end = expr.span().end as usize;
     for cand in candidates {
         if start == cand.expr_start && end == cand.expr_end {
-            let dummy = format!("let __x = {};", cand.var_name);
-            let p = Parser::new(allocator, allocator.alloc_str(&dummy), source_type).parse();
-            if let Some(Statement::VariableDeclaration(mut v)) = p.program.body.into_iter().next() {
-                if !v.declarations.is_empty() {
-                    if let Some(init) = v.declarations.remove(0).init {
-                        *expr = init;
-                        return;
-                    }
-                }
-            }
+            let ast = AstBuilder::new(allocator);
+            let ident = ast.allocator().alloc_str(&cand.var_name);
+            *expr = Expression::new_identifier(SPAN, ident, &ast);
+            return;
         }
     }
 
     match expr {
         Expression::TaggedTemplateExpression(tagged) => {
             for quasi_expr in &mut tagged.quasi.expressions {
-                replace_candidate_exprs(quasi_expr, candidates, allocator, source_type);
+                replace_candidate_exprs(quasi_expr, candidates, allocator);
             }
         }
         Expression::ParenthesizedExpression(p) => {
-            replace_candidate_exprs(&mut p.expression, candidates, allocator, source_type);
+            replace_candidate_exprs(&mut p.expression, candidates, allocator);
         }
         Expression::ConditionalExpression(c) => {
-            replace_candidate_exprs(&mut c.test, candidates, allocator, source_type);
-            replace_candidate_exprs(&mut c.consequent, candidates, allocator, source_type);
-            replace_candidate_exprs(&mut c.alternate, candidates, allocator, source_type);
+            replace_candidate_exprs(&mut c.test, candidates, allocator);
+            replace_candidate_exprs(&mut c.consequent, candidates, allocator);
+            replace_candidate_exprs(&mut c.alternate, candidates, allocator);
         }
         Expression::CallExpression(c) => {
-            replace_candidate_exprs(&mut c.callee, candidates, allocator, source_type);
+            replace_candidate_exprs(&mut c.callee, candidates, allocator);
             for arg in &mut c.arguments {
                 if let Some(e) = arg.as_expression_mut() {
-                    replace_candidate_exprs(e, candidates, allocator, source_type);
+                    replace_candidate_exprs(e, candidates, allocator);
                 }
             }
         }
         Expression::ArrowFunctionExpression(arrow) => match &mut arrow.body {
             ArrowFunctionBody::FunctionBody(body) => {
                 for s in &mut body.statements {
-                    replace_candidates_in_stmt(s, candidates, allocator, source_type);
+                    replace_candidates_in_stmt(s, candidates, allocator);
                 }
             }
             _ => {
                 if let Some(e) = arrow.body.as_expression_mut() {
-                    replace_candidate_exprs(e, candidates, allocator, source_type);
+                    replace_candidate_exprs(e, candidates, allocator);
                 }
             }
         },
         Expression::FunctionExpression(func) => {
             if let Some(ref mut body) = func.body {
                 for s in &mut body.statements {
-                    replace_candidates_in_stmt(s, candidates, allocator, source_type);
+                    replace_candidates_in_stmt(s, candidates, allocator);
                 }
             }
         }
         Expression::ArrayExpression(arr) => {
             for el in &mut arr.elements {
                 if let Some(e) = el.as_expression_mut() {
-                    replace_candidate_exprs(e, candidates, allocator, source_type);
+                    replace_candidate_exprs(e, candidates, allocator);
                 }
             }
         }
         Expression::ObjectExpression(obj) => {
             for prop in &mut obj.properties {
                 if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                    replace_candidate_exprs(&mut p.value, candidates, allocator, source_type);
+                    replace_candidate_exprs(&mut p.value, candidates, allocator);
                 }
             }
         }
@@ -722,41 +819,35 @@ fn replace_candidate_exprs<'a>(
 
 fn replace_candidates_in_stmt<'a>(
     stmt: &mut Statement<'a>,
-    candidates: &[CandidateItem],
+    candidates: &[CandidateItem<'a>],
     allocator: &'a Allocator,
-    source_type: SourceType,
 ) {
     match stmt {
         Statement::ReturnStatement(ret) => {
             if let Some(ref mut arg) = ret.argument {
-                replace_candidate_exprs(arg, candidates, allocator, source_type);
+                replace_candidate_exprs(arg, candidates, allocator);
             }
         }
         Statement::ExpressionStatement(expr_stmt) => {
-            replace_candidate_exprs(
-                &mut expr_stmt.expression,
-                candidates,
-                allocator,
-                source_type,
-            );
+            replace_candidate_exprs(&mut expr_stmt.expression, candidates, allocator);
         }
         Statement::VariableDeclaration(var_decl) => {
             for decl in &mut var_decl.declarations {
                 if let Some(ref mut init) = decl.init {
-                    replace_candidate_exprs(init, candidates, allocator, source_type);
+                    replace_candidate_exprs(init, candidates, allocator);
                 }
             }
         }
         Statement::BlockStatement(block) => {
             for s in &mut block.body {
-                replace_candidates_in_stmt(s, candidates, allocator, source_type);
+                replace_candidates_in_stmt(s, candidates, allocator);
             }
         }
         Statement::IfStatement(if_stmt) => {
-            replace_candidate_exprs(&mut if_stmt.test, candidates, allocator, source_type);
-            replace_candidates_in_stmt(&mut if_stmt.consequent, candidates, allocator, source_type);
+            replace_candidate_exprs(&mut if_stmt.test, candidates, allocator);
+            replace_candidates_in_stmt(&mut if_stmt.consequent, candidates, allocator);
             if let Some(ref mut alt) = if_stmt.alternate {
-                replace_candidates_in_stmt(alt, candidates, allocator, source_type);
+                replace_candidates_in_stmt(alt, candidates, allocator);
             }
         }
         _ => {}
@@ -866,14 +957,20 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
         let mut used_slots: HashSet<String> = HashSet::new();
         let mut counter: usize = 0;
 
-        let old_statements =
-            std::mem::replace(&mut render_body.statements, ArenaVec::new_in(&&allocator));
-        let mut new_statements = ArenaVec::new_in(&&allocator);
+        let ast = AstBuilder::new(&allocator);
+        let old_statements = std::mem::replace(&mut render_body.statements, ArenaVec::new_in(&ast));
+        let mut new_statements = ArenaVec::new_in(&ast);
         let mut class_modified = false;
 
         for mut stmt in old_statements {
             let mut groups: Vec<StmtCandidateGroup> = Vec::new();
-            collect_stmt_candidates(&stmt, source, &mut groups, &mut used_slots, &mut counter);
+            collect_stmt_candidates(
+                &stmt,
+                &allocator,
+                &mut groups,
+                &mut used_slots,
+                &mut counter,
+            );
 
             if groups.is_empty() {
                 new_statements.push(stmt);
@@ -888,34 +985,34 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
             if is_single_var_decl {
                 let cand = &groups[0].candidates[0];
                 let var_name = groups[0].var_name.as_deref().unwrap_or(&cand.var_name);
-                let memo_block = generate_var_decl_memo_block(cand, var_name);
                 total_memoized_count += 1;
 
-                let p =
-                    Parser::new(&allocator, allocator.alloc_str(&memo_block), source_type).parse();
-                for s in p.program.body {
+                for s in build_memo_block(
+                    var_name,
+                    &cand.val_slot,
+                    &cand.dependencies,
+                    cand.expr.clone_in(&allocator),
+                    &ast,
+                ) {
                     new_statements.push(s);
                 }
             } else {
                 for group in &groups {
                     for cand in &group.candidates {
-                        let memo_block = generate_memo_block(cand);
                         total_memoized_count += 1;
 
-                        let p =
-                            Parser::new(&allocator, allocator.alloc_str(&memo_block), source_type)
-                                .parse();
-                        for s in p.program.body {
+                        for s in build_memo_block(
+                            &cand.var_name,
+                            &cand.val_slot,
+                            &cand.dependencies,
+                            cand.expr.clone_in(&allocator),
+                            &ast,
+                        ) {
                             new_statements.push(s);
                         }
                     }
 
-                    replace_candidates_in_stmt(
-                        &mut stmt,
-                        &group.candidates,
-                        &allocator,
-                        source_type,
-                    );
+                    replace_candidates_in_stmt(&mut stmt, &group.candidates, &allocator);
                 }
                 new_statements.push(stmt);
             }

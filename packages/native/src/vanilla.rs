@@ -48,7 +48,7 @@ pub fn transform_vanilla_class<'a>(
                 if let Some(prop_name) = name {
                     if prop.r#static && prop_name == "styles" {
                         if let Some(init) = &prop.value {
-                            styles_css = extract_css_from_expr(init, source);
+                            styles_css = extract_css_from_expr(init);
                         }
                         continue;
                     }
@@ -63,71 +63,66 @@ pub fn transform_vanilla_class<'a>(
                                 }
                                 _ => None,
                             };
-                            if callee == Some("property") {
-                                if seen_props.insert(prop_name.clone()) {
-                                    let mut p_type = "string".to_string();
-                                    let mut reflect = false;
-                                    let mut attr_name = prop_name.to_lowercase();
+                            if callee == Some("property") && seen_props.insert(prop_name.clone()) {
+                                let mut p_type = "string".to_string();
+                                let mut reflect = false;
+                                let mut attr_name = prop_name.to_lowercase();
 
-                                    if let Some(arg) = call.arguments.first() {
-                                        if let Some(Expression::ObjectExpression(obj)) =
-                                            arg.as_expression()
-                                        {
-                                            for p in &obj.properties {
-                                                if let ObjectPropertyKind::ObjectProperty(prop_kv) =
-                                                    p
-                                                {
-                                                    let k = match &prop_kv.key {
-                                                        PropertyKey::StaticIdentifier(id) => {
-                                                            Some(id.name.as_str())
-                                                        }
-                                                        _ => None,
-                                                    };
-                                                    if k == Some("type") {
-                                                        if let Expression::Identifier(t_id) =
-                                                            &prop_kv.value
-                                                        {
-                                                            let tn = t_id.name.as_str();
-                                                            if tn == "Number" {
-                                                                p_type = "number".to_string();
-                                                            } else if tn == "Boolean" {
-                                                                p_type = "boolean".to_string();
-                                                            }
+                                if let Some(arg) = call.arguments.first() {
+                                    if let Some(Expression::ObjectExpression(obj)) =
+                                        arg.as_expression()
+                                    {
+                                        for p in &obj.properties {
+                                            if let ObjectPropertyKind::ObjectProperty(prop_kv) = p {
+                                                let k = match &prop_kv.key {
+                                                    PropertyKey::StaticIdentifier(id) => {
+                                                        Some(id.name.as_str())
+                                                    }
+                                                    _ => None,
+                                                };
+                                                if k == Some("type") {
+                                                    if let Expression::Identifier(t_id) =
+                                                        &prop_kv.value
+                                                    {
+                                                        let tn = t_id.name.as_str();
+                                                        if tn == "Number" {
+                                                            p_type = "number".to_string();
+                                                        } else if tn == "Boolean" {
+                                                            p_type = "boolean".to_string();
                                                         }
                                                     }
-                                                    if k == Some("reflect") {
-                                                        if let Expression::BooleanLiteral(b) =
-                                                            &prop_kv.value
-                                                        {
-                                                            reflect = b.value;
-                                                        }
+                                                }
+                                                if k == Some("reflect") {
+                                                    if let Expression::BooleanLiteral(b) =
+                                                        &prop_kv.value
+                                                    {
+                                                        reflect = b.value;
                                                     }
-                                                    if k == Some("attribute") {
-                                                        if let Expression::StringLiteral(s) =
-                                                            &prop_kv.value
-                                                        {
-                                                            attr_name =
-                                                                s.value.as_str().to_string();
-                                                        }
+                                                }
+                                                if k == Some("attribute") {
+                                                    if let Expression::StringLiteral(s) =
+                                                        &prop_kv.value
+                                                    {
+                                                        attr_name = s.value.as_str().to_string();
                                                     }
                                                 }
                                             }
                                         }
                                     }
-
-                                    let default_val = prop.value.as_ref().map(|v| {
-                                        let s = v.span();
-                                        source[s.start as usize..s.end as usize].to_string()
-                                    });
-
-                                    properties.push(PropertyInfo {
-                                        name: prop_name.clone(),
-                                        prop_type: p_type,
-                                        reflect,
-                                        attribute_name: attr_name,
-                                        default_value: default_val,
-                                    });
                                 }
+
+                                let default_val = prop.value.as_ref().map(|v| {
+                                    let s = v.span();
+                                    source[s.start as usize..s.end as usize].to_string()
+                                });
+
+                                properties.push(PropertyInfo {
+                                    name: prop_name.clone(),
+                                    prop_type: p_type,
+                                    reflect,
+                                    attribute_name: attr_name,
+                                    default_value: default_val,
+                                });
                             }
                         }
                     }
@@ -137,10 +132,13 @@ pub fn transform_vanilla_class<'a>(
                 let name = m.key.static_name().unwrap_or_default();
                 if m.r#static && name == "styles" {
                     if let Some(body) = &m.value.body {
-                        let span = body.span;
-                        styles_css = Some(extract_css_from_str(
-                            &source[span.start as usize..span.end as usize],
-                        ));
+                        for stmt in &body.statements {
+                            if let Statement::ReturnStatement(ret) = stmt {
+                                if let Some(arg) = &ret.argument {
+                                    styles_css = extract_css_from_expr(arg);
+                                }
+                            }
+                        }
                     }
                 } else if name == "render" {
                     if let Some(body) = &m.value.body {
@@ -174,13 +172,6 @@ pub fn transform_vanilla_class<'a>(
     let tmpl_var = format!("__lit_tmpl_{}", comp_id);
 
     let mut hoisted_code = String::new();
-    hoisted_code.push_str("if (typeof HTMLElement !== 'undefined') {\n");
-    hoisted_code.push_str("  if (!HTMLElement.prototype.connectedCallback) HTMLElement.prototype.connectedCallback = function() { if (this.__controllers) { for (const c of this.__controllers) c.hostConnected?.(); } };\n");
-    hoisted_code.push_str("  if (!HTMLElement.prototype.disconnectedCallback) HTMLElement.prototype.disconnectedCallback = function() { if (this.__controllers) { for (const c of this.__controllers) c.hostDisconnected?.(); } };\n");
-    hoisted_code.push_str("  if (!HTMLElement.prototype.addController) HTMLElement.prototype.addController = function(c) { (this.__controllers ??= []).push(c); if (this.isConnected) c.hostConnected?.(); };\n");
-    hoisted_code.push_str("  if (!HTMLElement.prototype.removeController) HTMLElement.prototype.removeController = function(c) { if (this.__controllers) { const i = this.__controllers.indexOf(c); if (i >= 0) this.__controllers.splice(i, 1); } };\n");
-    hoisted_code.push_str("  if (!HTMLElement.prototype.requestUpdate) HTMLElement.prototype.requestUpdate = function() { return Promise.resolve(false); };\n");
-    hoisted_code.push_str("}\n");
     if let Some(css) = &styles_css {
         hoisted_code.push_str(&format!(
             "const {} = new CSSStyleSheet();\n{}.replaceSync(`{}`);\n",
@@ -451,22 +442,23 @@ pub fn transform_vanilla_class<'a>(
     }
 }
 
-fn extract_css_from_expr<'a>(expr: &Expression<'a>, source: &str) -> Option<String> {
+fn extract_css_from_expr<'a>(expr: &Expression<'a>) -> Option<String> {
     match expr {
         Expression::TaggedTemplateExpression(tag) => {
-            let start = tag.quasi.span.start as usize + 1;
-            let end = tag.quasi.span.end as usize - 1;
-            if start <= end && end <= source.len() {
-                Some(source[start..end].to_string())
-            } else {
-                None
-            }
+            let css = tag
+                .quasi
+                .quasis
+                .iter()
+                .map(|q| q.value.raw.as_str())
+                .collect::<Vec<_>>()
+                .join("");
+            Some(css)
         }
         Expression::ArrayExpression(arr) => {
             let mut parts = Vec::new();
             for el in &arr.elements {
                 if let Some(e) = el.as_expression() {
-                    if let Some(s) = extract_css_from_expr(e, source) {
+                    if let Some(s) = extract_css_from_expr(e) {
                         parts.push(s);
                     }
                 }
@@ -475,16 +467,6 @@ fn extract_css_from_expr<'a>(expr: &Expression<'a>, source: &str) -> Option<Stri
         }
         _ => None,
     }
-}
-
-fn extract_css_from_str(s: &str) -> String {
-    if let Some(start) = s.find("css`") {
-        let after = &s[start + 4..];
-        if let Some(end) = after.find('`') {
-            return after[..end].to_string();
-        }
-    }
-    String::new()
 }
 
 fn extract_render_quasis_and_exprs<'a>(

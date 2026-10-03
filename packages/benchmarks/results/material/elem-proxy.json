@@ -136,13 +136,13 @@
     "description": "AOT Custom Element proxy stubs for deferred registration and lazy loading",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T16:30:12.736Z",
+  "timestamp": "2026-10-03T19:27:21.057Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "e7dd878",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -160,13 +160,13 @@
     "rawBytes": 269272,
     "gzipBytes": 56943,
     "brotliBytes": 46024,
-    "buildTimeMs": 31.087041999999656
+    "buildTimeMs": 24.83166600000186
   },
   "baseline": {
     "rawBytes": 269272,
     "gzipBytes": 56943,
     "brotliBytes": 46024,
-    "buildTimeMs": 71.26437499999997
+    "buildTimeMs": 37.73137499999939
   },
   "deltas": {
     "rawBytes": 0,
@@ -175,18 +175,18 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -40.17733300000032
+    "buildTimeMs": -12.899708999997529
   },
   "runtime": {
-    "firstRenderMs": 21,
-    "updateMs": 2.2,
-    "scriptEvalMs": 5.6,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 70236,
-    "speedupPercent": 29.53020134228188,
-    "updateSpeedupPercent": 4.347826086956506,
-    "evalSpeedupPercent": 24.324324324324333,
-    "registrationSpeedupPercent": 26.66666666666666,
-    "memorySavingsPercent": -0.34287673581347505
+    "firstRenderMs": 23.8,
+    "updateMs": 1.9,
+    "scriptEvalMs": 5.8,
+    "registrationMs": 1.4,
+    "heapUsedBytes": 69900,
+    "speedupPercent": 19.594594594594597,
+    "updateSpeedupPercent": 20.833333333333336,
+    "evalSpeedupPercent": 15.942028985507253,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0.2055850608189138
   }
 }

@@ -136,13 +136,13 @@
     "description": "AOT Custom Element proxy stubs for deferred registration and lazy loading",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T16:43:10.397Z",
+  "timestamp": "2026-10-03T19:28:07.154Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "e7dd878",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +157,36 @@
     }
   },
   "metrics": {
-    "rawBytes": 822123,
-    "gzipBytes": 147624,
-    "brotliBytes": 111985,
-    "buildTimeMs": 59.84220800000003
+    "rawBytes": 822196,
+    "gzipBytes": 147665,
+    "brotliBytes": 112039,
+    "buildTimeMs": 67.2267920000013
   },
   "baseline": {
     "rawBytes": 819006,
     "gzipBytes": 146760,
     "brotliBytes": 111333,
-    "buildTimeMs": 83.90575000000001
+    "buildTimeMs": 169.27816699999676
   },
   "deltas": {
-    "rawBytes": 3117,
-    "rawPercent": 0.3805832924300921,
-    "gzipBytes": 864,
-    "gzipPercent": 0.588716271463614,
-    "brotliBytes": 652,
-    "brotliPercent": 0.5856304958996883,
-    "buildTimeMs": -24.063541999999984
+    "rawBytes": 3190,
+    "rawPercent": 0.389496536044913,
+    "gzipBytes": 905,
+    "gzipPercent": 0.6166530389751976,
+    "brotliBytes": 706,
+    "brotliPercent": 0.6341336351306441,
+    "buildTimeMs": -102.05137499999546
   },
   "runtime": {
-    "firstRenderMs": 25.9,
+    "firstRenderMs": 22.3,
     "updateMs": 2.1,
-    "scriptEvalMs": 10.1,
-    "registrationMs": 0.8,
+    "scriptEvalMs": 10.4,
+    "registrationMs": 0.5,
     "heapUsedBytes": 57540,
-    "speedupPercent": 6.498194945848377,
-    "updateSpeedupPercent": 4.545454545454549,
-    "evalSpeedupPercent": 17.213114754098356,
-    "registrationSpeedupPercent": -60.00000000000001,
-    "memorySavingsPercent": 0
+    "speedupPercent": 20.92198581560283,
+    "updateSpeedupPercent": 12.499999999999993,
+    "evalSpeedupPercent": 15.447154471544716,
+    "registrationSpeedupPercent": 28.571428571428566,
+    "memorySavingsPercent": -0.07652706275219145
   }
 }

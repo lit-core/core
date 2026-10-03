@@ -24,7 +24,7 @@ pub fn rewrite_file(
     for cluster in &applicable_clusters {
         // Map canonical hash from cluster id
         // cluster.id is "_fused_html_<hash>" or "_fused_svg_<hash>"
-        if let Some(hash) = cluster.id.split('_').last() {
+        if let Some(hash) = cluster.id.split('_').next_back() {
             cluster_map.insert(hash.to_string(), *cluster);
         }
     }

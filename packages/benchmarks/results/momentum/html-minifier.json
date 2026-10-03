@@ -5,7 +5,7 @@
     "id": "momentum",
     "name": "Momentum Design (@momentum-design/components)",
     "packageName": "@momentum-design/components",
-    "version": "0.139.9",
+    "version": "0.140.1",
     "componentCount": 20,
     "components": [
       {
@@ -136,13 +136,13 @@
     "description": "High-speed HTML template literal minifier powered by OXC",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T12:11:27.944Z",
+  "timestamp": "2026-10-03T19:28:33.476Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +157,36 @@
     }
   },
   "metrics": {
-    "rawBytes": 339866,
-    "gzipBytes": 73185,
-    "brotliBytes": 59156,
-    "buildTimeMs": 38.989457999996375
+    "rawBytes": 340175,
+    "gzipBytes": 73288,
+    "brotliBytes": 59244,
+    "buildTimeMs": 92.00612499999988
   },
   "baseline": {
-    "rawBytes": 346264,
-    "gzipBytes": 74162,
-    "brotliBytes": 59626,
-    "buildTimeMs": 79.31620800000383
+    "rawBytes": 346579,
+    "gzipBytes": 74275,
+    "brotliBytes": 59822,
+    "buildTimeMs": 63.82370800001081
   },
   "deltas": {
-    "rawBytes": -6398,
-    "rawPercent": -1.8477231245523646,
-    "gzipBytes": -977,
-    "gzipPercent": -1.3173862625064048,
-    "brotliBytes": -470,
-    "brotliPercent": -0.7882467380002013,
-    "buildTimeMs": -40.32675000000745
+    "rawBytes": -6404,
+    "rawPercent": -1.8477749661693292,
+    "gzipBytes": -987,
+    "gzipPercent": -1.3288455065634466,
+    "brotliBytes": -578,
+    "brotliPercent": -0.966199725853365,
+    "buildTimeMs": 28.182416999989073
   },
   "runtime": {
-    "firstRenderMs": 3.9,
-    "updateMs": 0.7,
+    "firstRenderMs": 21.3,
+    "updateMs": 0.9,
     "scriptEvalMs": 4.2,
-    "registrationMs": 0.8,
-    "heapUsedBytes": 595654,
-    "speedupPercent": 2.500000000000002,
-    "updateSpeedupPercent": 12.50000000000001,
-    "evalSpeedupPercent": 39.130434782608695,
-    "registrationSpeedupPercent": -14.285714285714299,
-    "memorySavingsPercent": 1.4103529606488185
+    "registrationMs": 0.3,
+    "heapUsedBytes": 66552,
+    "speedupPercent": -1.9138755980861348,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 6.6666666666666625,
+    "registrationSpeedupPercent": 25.000000000000007,
+    "memorySavingsPercent": -2.0798822013620466
   }
 }

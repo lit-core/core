@@ -5,7 +5,7 @@
     "id": "momentum",
     "name": "Momentum Design (@momentum-design/components)",
     "packageName": "@momentum-design/components",
-    "version": "0.139.9",
+    "version": "0.140.1",
     "componentCount": 20,
     "components": [
       {
@@ -136,13 +136,13 @@
     "description": "Zero-JavaScript SSR and interaction-driven runtime resumption",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T12:11:30.864Z",
+  "timestamp": "2026-10-03T19:28:36.730Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,16 +157,16 @@
     }
   },
   "metrics": {
-    "rawBytes": 346264,
-    "gzipBytes": 74162,
-    "brotliBytes": 59626,
-    "buildTimeMs": 43.586999999999534
+    "rawBytes": 346579,
+    "gzipBytes": 74275,
+    "brotliBytes": 59822,
+    "buildTimeMs": 44.678083000006154
   },
   "baseline": {
-    "rawBytes": 346264,
-    "gzipBytes": 74162,
-    "brotliBytes": 59626,
-    "buildTimeMs": 79.31620800000383
+    "rawBytes": 346579,
+    "gzipBytes": 74275,
+    "brotliBytes": 59822,
+    "buildTimeMs": 63.82370800001081
   },
   "deltas": {
     "rawBytes": 0,
@@ -175,18 +175,18 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -35.72920800000429
+    "buildTimeMs": -19.145625000004657
   },
   "runtime": {
-    "firstRenderMs": 4.5,
-    "updateMs": 0.8,
-    "scriptEvalMs": 4.3,
+    "firstRenderMs": 18.8,
+    "updateMs": 0.7,
+    "scriptEvalMs": 4.1,
     "registrationMs": 0.6,
-    "heapUsedBytes": 604175,
-    "speedupPercent": -12.5,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 37.68115942028986,
-    "registrationSpeedupPercent": 14.285714285714283,
-    "memorySavingsPercent": 0
+    "heapUsedBytes": 67040,
+    "speedupPercent": 10.047846889952144,
+    "updateSpeedupPercent": 22.22222222222223,
+    "evalSpeedupPercent": 8.888888888888896,
+    "registrationSpeedupPercent": -49.999999999999986,
+    "memorySavingsPercent": -2.8283943800233144
   }
 }

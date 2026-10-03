@@ -136,13 +136,13 @@
     "description": "Combined impact of all enabled optimization tools simultaneously",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T16:42:40.900Z",
+  "timestamp": "2026-10-03T19:27:55.449Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "e7dd878",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -158,35 +158,35 @@
   },
   "metrics": {
     "rawBytes": 1007814,
-    "gzipBytes": 157778,
-    "brotliBytes": 109046,
-    "buildTimeMs": 2296.806166999999
+    "gzipBytes": 157788,
+    "brotliBytes": 109112,
+    "buildTimeMs": 1338.4387920000008
   },
   "baseline": {
     "rawBytes": 1438781,
     "gzipBytes": 186286,
     "brotliBytes": 98045,
-    "buildTimeMs": 68.61058400000002
+    "buildTimeMs": 78.04595799999879
   },
   "deltas": {
     "rawBytes": -430967,
     "rawPercent": -29.953620460653845,
-    "gzipBytes": -28508,
-    "gzipPercent": -15.30335076173196,
-    "brotliBytes": 11001,
-    "brotliPercent": 11.220357998878066,
-    "buildTimeMs": 2228.195582999999
+    "gzipBytes": -28498,
+    "gzipPercent": -15.297982671805718,
+    "brotliBytes": 11067,
+    "brotliPercent": 11.287674027232393,
+    "buildTimeMs": 1260.392834000002
   },
   "runtime": {
-    "firstRenderMs": 44.6,
-    "updateMs": 2.9,
-    "scriptEvalMs": 4.2,
-    "registrationMs": 0.8,
+    "firstRenderMs": 40.4,
+    "updateMs": 2,
+    "scriptEvalMs": 4.1,
+    "registrationMs": 1.1,
     "heapUsedBytes": 155656,
-    "speedupPercent": 20.357142857142854,
-    "updateSpeedupPercent": -26.086956521739136,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 27.272727272727277,
-    "memorySavingsPercent": -4.748317631224765
+    "speedupPercent": 27.33812949640288,
+    "updateSpeedupPercent": 16.666666666666664,
+    "evalSpeedupPercent": 10.869565217391305,
+    "registrationSpeedupPercent": -83.33333333333336,
+    "memorySavingsPercent": -4.483943722478789
   }
 }

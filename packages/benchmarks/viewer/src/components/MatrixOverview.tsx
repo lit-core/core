@@ -53,6 +53,32 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
   const avgRegMs = calcAverage(allRuns.map((r) => r.registrationMs));
   const avgHeapSavings = calcAverage(allRuns.map((r) => r.memorySavingsPercent));
 
+  function getSpeedupColorClass(speedupVal?: number): string {
+    if (speedupVal === undefined || speedupVal === 0) {
+      return 'text-zinc-500 font-light';
+    }
+    if (speedupVal > 0.5) {
+      return 'text-emerald-700 font-normal';
+    }
+    if (speedupVal < -0.5) {
+      return 'text-rose-700 font-normal';
+    }
+    return 'text-zinc-500 font-light';
+  }
+
+  function getReductionColorClass(deltaPercent?: number, threshold = 0.5): string {
+    if (deltaPercent === undefined || deltaPercent === 0) {
+      return 'text-zinc-500 font-light';
+    }
+    if (deltaPercent < -threshold) {
+      return 'text-emerald-700 font-normal';
+    }
+    if (deltaPercent > threshold) {
+      return 'text-rose-700 font-normal';
+    }
+    return 'text-zinc-500 font-light';
+  }
+
   function renderCellValue(run?: ManifestRunEntry, isBaseline?: boolean, libId?: string) {
     if (!run) {
       return <span className="text-base font-light text-zinc-400">—</span>;
@@ -66,14 +92,9 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         const val = payloadFormat === 'gzip' ? run.gzipPercent : payloadFormat === 'brotli' ? run.brotliPercent : run.rawPercent;
 
         const numVal = val ?? 0;
-        const isGood = numVal < -0.1;
-        const isNeutral = Math.abs(numVal) <= 0.1;
+        const colorClass = getReductionColorClass(numVal, 0.1);
 
-        return (
-          <span className={`tabular-nums text-base ${isNeutral ? 'text-zinc-500 font-light' : isGood ? 'text-emerald-700 font-normal' : 'text-rose-700 font-normal'}`}>
-            {numVal > 0 ? `+${numVal.toFixed(1)}%` : `${numVal.toFixed(1)}%`}
-          </span>
-        );
+        return <span className={`tabular-nums text-base ${colorClass}`}>{numVal > 0 ? `+${numVal.toFixed(1)}%` : `${numVal.toFixed(1)}%`}</span>;
       }
 
       // payloadUnit === 'kb'
@@ -84,20 +105,34 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="tabular-nums text-base font-light text-zinc-600">{kbFormatted}</span>;
       }
 
-      return <span className="tabular-nums text-base font-light text-zinc-700">{kbFormatted}</span>;
+      const val = payloadFormat === 'gzip' ? run.gzipPercent : payloadFormat === 'brotli' ? run.brotliPercent : run.rawPercent;
+      const numVal = val ?? 0;
+      const colorClass = getReductionColorClass(numVal, 0.1);
+
+      return <span className={`tabular-nums text-base ${colorClass}`}>{kbFormatted}</span>;
     }
+
+    const baselineRun = libId ? runMap[libId]?.baseline : undefined;
 
     // category === 'performance'
     if (perfMetric === 'firstRender') {
+      if (!run.firstRenderMs || run.firstRenderMs === 0) {
+        return <span className="text-base font-light text-zinc-400">—</span>;
+      }
+
+      const speedup =
+        run.speedupPercent !== undefined && run.speedupPercent !== 0
+          ? run.speedupPercent
+          : baselineRun?.firstRenderMs && baselineRun.firstRenderMs > 0
+            ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100
+            : 0;
+
       if (perfUnit === 'ms') {
-        if (!run.firstRenderMs || run.firstRenderMs === 0) {
-          return <span className="text-base font-light text-zinc-400">—</span>;
-        }
         const msFormatted = `${run.firstRenderMs.toFixed(1)} ms`;
         if (isBaseline) {
           return <span className="tabular-nums text-base font-light text-zinc-600">{msFormatted}</span>;
         }
-        return <span className="tabular-nums text-base font-light text-zinc-700">{msFormatted}</span>;
+        return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{msFormatted}</span>;
       }
 
       // perfUnit === 'percent'
@@ -105,29 +140,30 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      const val = run.speedupPercent ?? 0;
-      if (val === 0) {
+      if (speedup === 0) {
         return <span className="text-base font-light text-zinc-400">—</span>;
       }
-      const isGood = val > 0.5;
-      const isNeutral = Math.abs(val) <= 0.5;
-      return (
-        <span className={`tabular-nums text-base ${isNeutral ? 'text-zinc-500 font-light' : isGood ? 'text-emerald-700 font-normal' : 'text-rose-700 font-normal'}`}>
-          {val > 0 ? `+${val.toFixed(1)}%` : `${val.toFixed(1)}%`}
-        </span>
-      );
+      return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{speedup > 0 ? `+${speedup.toFixed(1)}%` : `${speedup.toFixed(1)}%`}</span>;
     }
 
     if (perfMetric === 'update') {
+      if (!run.updateMs || run.updateMs === 0) {
+        return <span className="text-base font-light text-zinc-400">—</span>;
+      }
+
+      const speedup =
+        run.updateSpeedupPercent !== undefined && run.updateSpeedupPercent !== 0
+          ? run.updateSpeedupPercent
+          : baselineRun?.updateMs && baselineRun.updateMs > 0
+            ? ((baselineRun.updateMs - run.updateMs) / baselineRun.updateMs) * 100
+            : 0;
+
       if (perfUnit === 'ms') {
-        if (!run.updateMs || run.updateMs === 0) {
-          return <span className="text-base font-light text-zinc-400">—</span>;
-        }
         const msFormatted = `${run.updateMs.toFixed(2)} ms`;
         if (isBaseline) {
           return <span className="tabular-nums text-base font-light text-zinc-600">{msFormatted}</span>;
         }
-        return <span className="tabular-nums text-base font-light text-zinc-700">{msFormatted}</span>;
+        return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{msFormatted}</span>;
       }
 
       // perfUnit === 'percent'
@@ -135,29 +171,30 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      const val = run.updateSpeedupPercent ?? 0;
-      if (val === 0) {
+      if (speedup === 0) {
         return <span className="text-base font-light text-zinc-400">—</span>;
       }
-      const isGood = val > 0.5;
-      const isNeutral = Math.abs(val) <= 0.5;
-      return (
-        <span className={`tabular-nums text-base ${isNeutral ? 'text-zinc-500 font-light' : isGood ? 'text-emerald-700 font-normal' : 'text-rose-700 font-normal'}`}>
-          {val > 0 ? `+${val.toFixed(1)}%` : `${val.toFixed(1)}%`}
-        </span>
-      );
+      return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{speedup > 0 ? `+${speedup.toFixed(1)}%` : `${speedup.toFixed(1)}%`}</span>;
     }
 
     if (perfMetric === 'scriptEval') {
+      if (!run.scriptEvalMs || run.scriptEvalMs === 0) {
+        return <span className="text-base font-light text-zinc-400">—</span>;
+      }
+
+      const speedup =
+        run.evalSpeedupPercent !== undefined && run.evalSpeedupPercent !== 0
+          ? run.evalSpeedupPercent
+          : baselineRun?.scriptEvalMs && baselineRun.scriptEvalMs > 0
+            ? ((baselineRun.scriptEvalMs - run.scriptEvalMs) / baselineRun.scriptEvalMs) * 100
+            : 0;
+
       if (perfUnit === 'ms') {
-        if (!run.scriptEvalMs || run.scriptEvalMs === 0) {
-          return <span className="text-base font-light text-zinc-400">—</span>;
-        }
         const msFormatted = `${run.scriptEvalMs.toFixed(2)} ms`;
         if (isBaseline) {
           return <span className="tabular-nums text-base font-light text-zinc-600">{msFormatted}</span>;
         }
-        return <span className="tabular-nums text-base font-light text-zinc-700">{msFormatted}</span>;
+        return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{msFormatted}</span>;
       }
 
       // perfUnit === 'percent'
@@ -165,29 +202,30 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      const val = run.evalSpeedupPercent ?? 0;
-      if (val === 0) {
+      if (speedup === 0) {
         return <span className="text-base font-light text-zinc-400">—</span>;
       }
-      const isGood = val > 0.5;
-      const isNeutral = Math.abs(val) <= 0.5;
-      return (
-        <span className={`tabular-nums text-base ${isNeutral ? 'text-zinc-500 font-light' : isGood ? 'text-emerald-700 font-normal' : 'text-rose-700 font-normal'}`}>
-          {val > 0 ? `+${val.toFixed(1)}%` : `${val.toFixed(1)}%`}
-        </span>
-      );
+      return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{speedup > 0 ? `+${speedup.toFixed(1)}%` : `${speedup.toFixed(1)}%`}</span>;
     }
 
     if (perfMetric === 'registration') {
+      if (!run.registrationMs || run.registrationMs === 0) {
+        return <span className="text-base font-light text-zinc-400">—</span>;
+      }
+
+      const speedup =
+        run.registrationSpeedupPercent !== undefined && run.registrationSpeedupPercent !== 0
+          ? run.registrationSpeedupPercent
+          : baselineRun?.registrationMs && baselineRun.registrationMs > 0
+            ? ((baselineRun.registrationMs - run.registrationMs) / baselineRun.registrationMs) * 100
+            : 0;
+
       if (perfUnit === 'ms') {
-        if (!run.registrationMs || run.registrationMs === 0) {
-          return <span className="text-base font-light text-zinc-400">—</span>;
-        }
         const msFormatted = `${run.registrationMs.toFixed(2)} ms`;
         if (isBaseline) {
           return <span className="tabular-nums text-base font-light text-zinc-600">{msFormatted}</span>;
         }
-        return <span className="tabular-nums text-base font-light text-zinc-700">{msFormatted}</span>;
+        return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{msFormatted}</span>;
       }
 
       // perfUnit === 'percent'
@@ -195,29 +233,30 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      const val = run.registrationSpeedupPercent ?? 0;
-      if (val === 0) {
+      if (speedup === 0) {
         return <span className="text-base font-light text-zinc-400">—</span>;
       }
-      const isGood = val > 0.5;
-      const isNeutral = Math.abs(val) <= 0.5;
-      return (
-        <span className={`tabular-nums text-base ${isNeutral ? 'text-zinc-500 font-light' : isGood ? 'text-emerald-700 font-normal' : 'text-rose-700 font-normal'}`}>
-          {val > 0 ? `+${val.toFixed(1)}%` : `${val.toFixed(1)}%`}
-        </span>
-      );
+      return <span className={`tabular-nums text-base ${getSpeedupColorClass(speedup)}`}>{speedup > 0 ? `+${speedup.toFixed(1)}%` : `${speedup.toFixed(1)}%`}</span>;
     }
 
     if (perfMetric === 'heap') {
+      if (!run.heapUsedBytes || run.heapUsedBytes === 0) {
+        return <span className="text-base font-light text-zinc-400">—</span>;
+      }
+
+      const savings =
+        run.memorySavingsPercent !== undefined && run.memorySavingsPercent !== 0
+          ? run.memorySavingsPercent
+          : baselineRun?.heapUsedBytes && baselineRun.heapUsedBytes > 0
+            ? ((baselineRun.heapUsedBytes - run.heapUsedBytes) / baselineRun.heapUsedBytes) * 100
+            : 0;
+
       if (perfUnit === 'ms') {
-        if (!run.heapUsedBytes || run.heapUsedBytes === 0) {
-          return <span className="text-base font-light text-zinc-400">—</span>;
-        }
         const kbFormatted = `${(run.heapUsedBytes / 1024).toFixed(1)} KB`;
         if (isBaseline) {
           return <span className="tabular-nums text-base font-light text-zinc-600">{kbFormatted}</span>;
         }
-        return <span className="tabular-nums text-base font-light text-zinc-700">{kbFormatted}</span>;
+        return <span className={`tabular-nums text-base ${getSpeedupColorClass(savings)}`}>{kbFormatted}</span>;
       }
 
       // perfUnit === 'percent'
@@ -225,28 +264,28 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-500">baseline</span>;
       }
 
-      const val = run.memorySavingsPercent ?? 0;
-      if (val === 0) {
+      if (savings === 0) {
         return <span className="text-base font-light text-zinc-400">—</span>;
       }
-      const isGood = val > 0.5;
-      const isNeutral = Math.abs(val) <= 0.5;
-      return (
-        <span className={`tabular-nums text-base ${isNeutral ? 'text-zinc-500 font-light' : isGood ? 'text-emerald-700 font-normal' : 'text-rose-700 font-normal'}`}>
-          {val > 0 ? `+${val.toFixed(1)}%` : `${val.toFixed(1)}%`}
-        </span>
-      );
+      return <span className={`tabular-nums text-base ${getSpeedupColorClass(savings)}`}>{savings > 0 ? `+${savings.toFixed(1)}%` : `${savings.toFixed(1)}%`}</span>;
     }
 
     // perfMetric === 'buildTime'
+    if (!run.buildTimeMs || run.buildTimeMs === 0) {
+      return <span className="text-base font-light text-zinc-400">—</span>;
+    }
+
+    const buildDelta = baselineRun?.buildTimeMs && baselineRun.buildTimeMs > 0 ? ((run.buildTimeMs - baselineRun.buildTimeMs) / baselineRun.buildTimeMs) * 100 : undefined;
+
     if (perfUnit === 'ms') {
-      if (!run.buildTimeMs || run.buildTimeMs === 0) {
-        return <span className="text-base font-light text-zinc-400">—</span>;
-      }
+      const msFormatted = `${run.buildTimeMs.toFixed(0)} ms`;
       if (isBaseline) {
-        return <span className="tabular-nums text-base font-light text-zinc-600">{run.buildTimeMs.toFixed(0)} ms</span>;
+        return <span className="tabular-nums text-base font-light text-zinc-600">{msFormatted}</span>;
       }
-      return <span className="tabular-nums text-base font-light text-zinc-700">{run.buildTimeMs.toFixed(0)} ms</span>;
+      if (buildDelta === undefined) {
+        return <span className="tabular-nums text-base font-light text-zinc-700">{msFormatted}</span>;
+      }
+      return <span className={`tabular-nums text-base ${getReductionColorClass(buildDelta, 0.5)}`}>{msFormatted}</span>;
     }
 
     // perfUnit === 'percent'
@@ -254,20 +293,11 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       return <span className="text-base font-light text-zinc-500">baseline</span>;
     }
 
-    const baselineRun = libId ? runMap[libId]?.baseline : undefined;
-    if (!baselineRun?.buildTimeMs || baselineRun.buildTimeMs === 0 || !run.buildTimeMs) {
+    if (buildDelta === undefined) {
       return <span className="text-base font-light text-zinc-400">—</span>;
     }
 
-    const val = ((run.buildTimeMs - baselineRun.buildTimeMs) / baselineRun.buildTimeMs) * 100;
-    const isGood = val < -0.5;
-    const isNeutral = Math.abs(val) <= 0.5;
-
-    return (
-      <span className={`tabular-nums text-base ${isNeutral ? 'text-zinc-500 font-light' : isGood ? 'text-emerald-700 font-normal' : 'text-rose-700 font-normal'}`}>
-        {val > 0 ? `+${val.toFixed(1)}%` : `${val.toFixed(1)}%`}
-      </span>
-    );
+    return <span className={`tabular-nums text-base ${getReductionColorClass(buildDelta, 0.5)}`}>{buildDelta > 0 ? `+${buildDelta.toFixed(1)}%` : `${buildDelta.toFixed(1)}%`}</span>;
   }
 
   // Split features into Macro comparison (Baseline and All combined) and Micro individual passes
@@ -317,7 +347,11 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
             </div>
             <div className="flex items-center justify-between">
               <span className="text-base font-light text-zinc-500">Gzip savings</span>
-              {avgGzipPercent !== undefined && avgGzipPercent < -0.1 ? <span className="text-base font-normal text-emerald-700">Reduced</span> : null}
+              {avgGzipPercent !== undefined && avgGzipPercent < -0.1 ? (
+                <span className="text-base font-normal text-emerald-700">Reduced</span>
+              ) : avgGzipPercent !== undefined && avgGzipPercent > 0.1 ? (
+                <span className="text-base font-normal text-rose-700">Increased</span>
+              ) : null}
             </div>
           </button>
 
@@ -341,6 +375,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
               <span className="text-base font-light text-zinc-500">Mount speedup</span>
               {avgRenderSpeedup !== undefined && avgRenderSpeedup > 0.5 ? (
                 <span className="text-base font-normal text-emerald-700">Faster</span>
+              ) : avgRenderSpeedup !== undefined && avgRenderSpeedup < -0.5 ? (
+                <span className="text-base font-normal text-rose-700">Slower</span>
               ) : (
                 <span className="text-base font-light text-zinc-400">Unmeasured</span>
               )}
@@ -367,6 +403,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
               <span className="text-base font-light text-zinc-500">Update speedup</span>
               {avgUpdateSpeedup !== undefined && avgUpdateSpeedup > 0.5 ? (
                 <span className="text-base font-normal text-emerald-700">Faster</span>
+              ) : avgUpdateSpeedup !== undefined && avgUpdateSpeedup < -0.5 ? (
+                <span className="text-base font-normal text-rose-700">Slower</span>
               ) : (
                 <span className="text-base font-light text-zinc-400">Unmeasured</span>
               )}
@@ -393,6 +431,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
               <span className="text-base font-light text-zinc-500">Eval speedup</span>
               {avgEvalSpeedup !== undefined && avgEvalSpeedup > 0.5 ? (
                 <span className="text-base font-normal text-emerald-700">Faster</span>
+              ) : avgEvalSpeedup !== undefined && avgEvalSpeedup < -0.5 ? (
+                <span className="text-base font-normal text-rose-700">Slower</span>
               ) : (
                 <span className="text-base font-light text-zinc-400">Unmeasured</span>
               )}
@@ -421,6 +461,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
               <span className="text-base font-light text-zinc-500">Registration cost</span>
               {avgRegSpeedup !== undefined && avgRegSpeedup > 0.5 ? (
                 <span className="text-base font-normal text-emerald-700">Faster</span>
+              ) : avgRegSpeedup !== undefined && avgRegSpeedup < -0.5 ? (
+                <span className="text-base font-normal text-rose-700">Slower</span>
               ) : avgRegMs !== undefined ? (
                 <span className="text-base font-normal text-zinc-700">Measured</span>
               ) : (
@@ -449,6 +491,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
               <span className="text-base font-light text-zinc-500">Memory savings</span>
               {avgHeapSavings !== undefined && avgHeapSavings > 0.5 ? (
                 <span className="text-base font-normal text-emerald-700">Savings</span>
+              ) : avgHeapSavings !== undefined && avgHeapSavings < -0.5 ? (
+                <span className="text-base font-normal text-rose-700">Increase</span>
               ) : (
                 <span className="text-base font-light text-zinc-400">Unmeasured</span>
               )}

@@ -1,9 +1,10 @@
 use napi_derive::napi;
-use oxc_allocator::Allocator;
+use oxc_allocator::{Allocator, ArenaVec, GetAllocator};
 use oxc_ast::ast::*;
+use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_span::{GetSpan, SourceType};
+use oxc_span::{GetSpan, SourceType, SPAN};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -352,92 +353,86 @@ fn collect_reactive_properties(class: &Class) -> (HashMap<String, usize>, Vec<(S
 
 fn mask_expressions_in_expr<'a>(
     expr: &mut Expression<'a>,
-    source: &str,
     reactive_props: &HashMap<String, usize>,
     allocator: &'a Allocator,
-    source_type: SourceType,
     masked_count: &mut u32,
 ) {
     match expr {
         Expression::TaggedTemplateExpression(tagged) => {
             if is_lit_html_tag(&tagged.tag) {
                 for quasi_expr in &mut tagged.quasi.expressions {
-                    let start = quasi_expr.span().start as usize;
-                    let end = quasi_expr.span().end as usize;
-                    if start < end && end <= source.len() {
-                        let expr_slice = &source[start..end];
-                        if expr_slice.contains("__litDirtyMask") {
-                            continue;
-                        }
-                        let mask = compute_part_mask(quasi_expr, reactive_props);
-                        let repl = format!(
-                            "(this.__litDirtyMask & {}) ? ({}) : noChange",
-                            mask, expr_slice
-                        );
-                        let dummy_prog = format!("let __d = {};", repl);
-                        let parsed_e =
-                            Parser::new(allocator, allocator.alloc_str(&dummy_prog), source_type)
-                                .parse();
-                        if let Some(Statement::VariableDeclaration(mut var_decl)) =
-                            parsed_e.program.body.into_iter().next()
-                        {
-                            if !var_decl.declarations.is_empty() {
-                                if let Some(init) = var_decl.declarations.remove(0).init {
-                                    *quasi_expr = init;
-                                    *masked_count += 1;
+                    if let Expression::ConditionalExpression(cond) = quasi_expr {
+                        if let Expression::BinaryExpression(bin) = &cond.test {
+                            if let Expression::StaticMemberExpression(mem) = &bin.left {
+                                if mem.property.name == "__litDirtyMask" {
+                                    continue;
                                 }
                             }
                         }
                     }
+
+                    let mask = compute_part_mask(quasi_expr, reactive_props);
+                    let ast = AstBuilder::new(allocator);
+
+                    let this_expr = Expression::new_this_expression(SPAN, &ast);
+                    let member_prop = IdentifierName::new(SPAN, "__litDirtyMask", &ast);
+                    let member = Expression::new_static_member_expression(
+                        SPAN,
+                        this_expr,
+                        member_prop,
+                        false,
+                        &ast,
+                    );
+                    let mask_num = Expression::new_numeric_literal(
+                        SPAN,
+                        mask as f64,
+                        None,
+                        NumberBase::Decimal,
+                        &ast,
+                    );
+                    let test = Expression::new_binary_expression(
+                        SPAN,
+                        member,
+                        BinaryOperator::BitwiseAnd,
+                        mask_num,
+                        &ast,
+                    );
+
+                    let placeholder = Expression::new_identifier(SPAN, "noChange", &ast);
+                    let original = std::mem::replace(quasi_expr, placeholder);
+                    let conditional = Expression::new_conditional_expression(
+                        SPAN,
+                        test,
+                        original,
+                        Expression::new_identifier(SPAN, "noChange", &ast),
+                        &ast,
+                    );
+                    *quasi_expr = conditional;
+                    *masked_count += 1;
                 }
             } else {
                 for quasi_expr in &mut tagged.quasi.expressions {
-                    mask_expressions_in_expr(
-                        quasi_expr,
-                        source,
-                        reactive_props,
-                        allocator,
-                        source_type,
-                        masked_count,
-                    );
+                    mask_expressions_in_expr(quasi_expr, reactive_props, allocator, masked_count);
                 }
             }
         }
         Expression::ParenthesizedExpression(paren) => {
             mask_expressions_in_expr(
                 &mut paren.expression,
-                source,
                 reactive_props,
                 allocator,
-                source_type,
                 masked_count,
             );
         }
         Expression::ConditionalExpression(cond) => {
-            mask_expressions_in_expr(
-                &mut cond.test,
-                source,
-                reactive_props,
-                allocator,
-                source_type,
-                masked_count,
-            );
+            mask_expressions_in_expr(&mut cond.test, reactive_props, allocator, masked_count);
             mask_expressions_in_expr(
                 &mut cond.consequent,
-                source,
                 reactive_props,
                 allocator,
-                source_type,
                 masked_count,
             );
-            mask_expressions_in_expr(
-                &mut cond.alternate,
-                source,
-                reactive_props,
-                allocator,
-                source_type,
-                masked_count,
-            );
+            mask_expressions_in_expr(&mut cond.alternate, reactive_props, allocator, masked_count);
         }
         _ => {}
     }
@@ -445,87 +440,46 @@ fn mask_expressions_in_expr<'a>(
 
 fn mask_expressions_in_stmt<'a>(
     stmt: &mut Statement<'a>,
-    source: &str,
     reactive_props: &HashMap<String, usize>,
     allocator: &'a Allocator,
-    source_type: SourceType,
     masked_count: &mut u32,
 ) {
     match stmt {
         Statement::ReturnStatement(ret) => {
             if let Some(ref mut arg) = ret.argument {
-                mask_expressions_in_expr(
-                    arg,
-                    source,
-                    reactive_props,
-                    allocator,
-                    source_type,
-                    masked_count,
-                );
+                mask_expressions_in_expr(arg, reactive_props, allocator, masked_count);
             }
         }
         Statement::ExpressionStatement(expr_stmt) => {
             mask_expressions_in_expr(
                 &mut expr_stmt.expression,
-                source,
                 reactive_props,
                 allocator,
-                source_type,
                 masked_count,
             );
         }
         Statement::VariableDeclaration(var_decl) => {
             for decl in &mut var_decl.declarations {
                 if let Some(ref mut init) = decl.init {
-                    mask_expressions_in_expr(
-                        init,
-                        source,
-                        reactive_props,
-                        allocator,
-                        source_type,
-                        masked_count,
-                    );
+                    mask_expressions_in_expr(init, reactive_props, allocator, masked_count);
                 }
             }
         }
         Statement::BlockStatement(block) => {
             for s in &mut block.body {
-                mask_expressions_in_stmt(
-                    s,
-                    source,
-                    reactive_props,
-                    allocator,
-                    source_type,
-                    masked_count,
-                );
+                mask_expressions_in_stmt(s, reactive_props, allocator, masked_count);
             }
         }
         Statement::IfStatement(if_stmt) => {
-            mask_expressions_in_expr(
-                &mut if_stmt.test,
-                source,
-                reactive_props,
-                allocator,
-                source_type,
-                masked_count,
-            );
+            mask_expressions_in_expr(&mut if_stmt.test, reactive_props, allocator, masked_count);
             mask_expressions_in_stmt(
                 &mut if_stmt.consequent,
-                source,
                 reactive_props,
                 allocator,
-                source_type,
                 masked_count,
             );
             if let Some(ref mut alt) = if_stmt.alternate {
-                mask_expressions_in_stmt(
-                    alt,
-                    source,
-                    reactive_props,
-                    allocator,
-                    source_type,
-                    masked_count,
-                );
+                mask_expressions_in_stmt(alt, reactive_props, allocator, masked_count);
             }
         }
         _ => {}
@@ -534,22 +488,215 @@ fn mask_expressions_in_stmt<'a>(
 
 fn mask_expressions_in_body<'a>(
     body: &mut FunctionBody<'a>,
-    source: &str,
     reactive_props: &HashMap<String, usize>,
     allocator: &'a Allocator,
-    source_type: SourceType,
     masked_count: &mut u32,
 ) {
     for stmt in &mut body.statements {
-        mask_expressions_in_stmt(
-            stmt,
-            source,
-            reactive_props,
-            allocator,
-            source_type,
-            masked_count,
-        );
+        mask_expressions_in_stmt(stmt, reactive_props, allocator, masked_count);
     }
+}
+
+fn build_alias_statement<'a>(param: Option<&str>, ast: &AstBuilder<'a>) -> Option<Statement<'a>> {
+    let param = param?;
+    if param == "changedProperties" {
+        return None;
+    }
+    let cp_binding = BindingPattern::new_binding_identifier(SPAN, "changedProperties", ast);
+    let param_expr = if param.is_empty() {
+        let args_ident = Expression::new_identifier(SPAN, "arguments", ast);
+        let zero = Expression::new_numeric_literal(SPAN, 0.0, None, NumberBase::Decimal, ast);
+        Expression::new_computed_member_expression(SPAN, args_ident, zero, false, ast)
+    } else {
+        Expression::new_identifier(SPAN, ast.allocator().alloc_str(param), ast)
+    };
+    let new_map = Expression::new_new_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "Map", ast),
+        None,
+        ArenaVec::new_in(ast),
+        ast,
+    );
+    let logical_or =
+        Expression::new_logical_expression(SPAN, param_expr, LogicalOperator::Or, new_map, ast);
+    let declarator = VariableDeclarator::new(SPAN, cp_binding, None, Some(logical_or), false, ast);
+    let mut decls = ArenaVec::new_in(ast);
+    decls.push(declarator);
+    Some(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        decls,
+        false,
+        ast,
+    ))
+}
+
+fn build_mask_calc_statements<'a>(
+    sorted_props: &[(String, usize)],
+    ast: &AstBuilder<'a>,
+) -> ArenaVec<'a, Statement<'a>> {
+    let mut stmts = ArenaVec::new_in(ast);
+
+    let mask_binding = BindingPattern::new_binding_identifier(SPAN, "mask", ast);
+    let zero = Expression::new_numeric_literal(SPAN, 0.0, None, NumberBase::Decimal, ast);
+    let declarator = VariableDeclarator::new(SPAN, mask_binding, None, Some(zero), false, ast);
+    let mut decls = ArenaVec::new_in(ast);
+    decls.push(declarator);
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Let,
+        decls,
+        false,
+        ast,
+    ));
+
+    let mut if_stmts = ArenaVec::new_in(ast);
+    for (prop_name, idx) in sorted_props {
+        let bit = 1u32 << idx;
+
+        let cp_ident = Expression::new_identifier(SPAN, "changedProperties", ast);
+        let has_prop = IdentifierName::new(SPAN, "has", ast);
+        let has_member =
+            Expression::new_static_member_expression(SPAN, cp_ident, has_prop, false, ast);
+        let mut has_args = ArenaVec::new_in(ast);
+        has_args.push(Argument::from(Expression::new_string_literal(
+            SPAN,
+            ast.allocator().alloc_str(prop_name.as_str()),
+            None,
+            ast,
+        )));
+        let has_call =
+            Expression::new_call_expression(SPAN, has_member, None, has_args, false, ast);
+
+        let mask_target = AssignmentTarget::new_assignment_target_identifier(SPAN, "mask", ast);
+        let bit_num =
+            Expression::new_numeric_literal(SPAN, bit as f64, None, NumberBase::Decimal, ast);
+        let assign = Expression::new_assignment_expression(
+            SPAN,
+            AssignmentOperator::BitwiseOR,
+            mask_target,
+            bit_num,
+            ast,
+        );
+        let assign_stmt = Statement::new_expression_statement(SPAN, assign, ast);
+
+        if_stmts.push(Statement::new_if_statement(
+            SPAN,
+            has_call,
+            assign_stmt,
+            None,
+            ast,
+        ));
+    }
+
+    let if_block = Statement::new_block_statement(SPAN, if_stmts, ast);
+
+    let mask_target = AssignmentTarget::new_assignment_target_identifier(SPAN, "mask", ast);
+    let neg_one = Expression::new_numeric_literal(SPAN, -1.0, None, NumberBase::Decimal, ast);
+    let neg_one_assign = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        mask_target,
+        neg_one,
+        ast,
+    );
+    let neg_one_stmt = Statement::new_expression_statement(SPAN, neg_one_assign, ast);
+    let mut else_stmts = ArenaVec::new_in(ast);
+    else_stmts.push(neg_one_stmt);
+    let else_block = Statement::new_block_statement(SPAN, else_stmts, ast);
+
+    let this_expr = Expression::new_this_expression(SPAN, ast);
+    let has_updated_prop = IdentifierName::new(SPAN, "hasUpdated", ast);
+    let has_updated =
+        Expression::new_static_member_expression(SPAN, this_expr, has_updated_prop, false, ast);
+    stmts.push(Statement::new_if_statement(
+        SPAN,
+        has_updated,
+        if_block,
+        Some(else_block),
+        ast,
+    ));
+
+    let this_expr2 = Expression::new_this_expression(SPAN, ast);
+    let member_prop = IdentifierName::new(SPAN, "__litDirtyMask", ast);
+    let target_member =
+        AssignmentTarget::new_static_member_expression(SPAN, this_expr2, member_prop, false, ast);
+    let assign_mask = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        target_member,
+        Expression::new_identifier(SPAN, "mask", ast),
+        ast,
+    );
+    stmts.push(Statement::new_expression_statement(SPAN, assign_mask, ast));
+
+    stmts
+}
+
+fn build_super_update_statement<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
+    let super_expr = Expression::new_super(SPAN, ast);
+    let update_prop = IdentifierName::new(SPAN, "update", ast);
+    let super_member =
+        Expression::new_static_member_expression(SPAN, super_expr, update_prop, false, ast);
+    let mut args = ArenaVec::new_in(ast);
+    args.push(Argument::from(Expression::new_identifier(
+        SPAN,
+        "changedProperties",
+        ast,
+    )));
+    let super_call = Expression::new_call_expression(SPAN, super_member, None, args, false, ast);
+    Statement::new_expression_statement(SPAN, super_call, ast)
+}
+
+fn build_update_method<'a>(
+    sorted_props: &[(String, usize)],
+    ast: &AstBuilder<'a>,
+) -> ClassElement<'a> {
+    let mut statements = build_mask_calc_statements(sorted_props, ast);
+    statements.push(build_super_update_statement(ast));
+
+    let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), statements, ast);
+    let param_pat = BindingPattern::new_binding_identifier(SPAN, "changedProperties", ast);
+    let mut params_vec = ArenaVec::new_in(ast);
+    params_vec.push(FormalParameter::new_plain(SPAN, param_pat, ast));
+    let params = FormalParameters::boxed(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        params_vec,
+        None,
+        ast,
+    );
+
+    let func = Function::boxed(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        None,
+        None,
+        params,
+        None,
+        Some(body),
+        ast,
+    );
+
+    let method_key = PropertyKey::new_static_identifier(SPAN, "update", ast);
+    ClassElement::new_method_definition(
+        SPAN,
+        MethodDefinitionType::MethodDefinition,
+        ArenaVec::new_in(ast),
+        method_key,
+        func,
+        MethodDefinitionKind::Method,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    )
 }
 
 pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResult {
@@ -618,7 +765,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                                         Some(Expression::ArrayExpression(arr)) => {
                                             arr.elements.iter().any(|elem| {
                                                 elem.as_expression()
-                                                    .map_or(false, is_reactive_decorator)
+                                                    .is_some_and(is_reactive_decorator)
                                             })
                                         }
                                         _ => false,
@@ -710,10 +857,8 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                         if let Some(ref mut body) = method.value.body {
                             mask_expressions_in_body(
                                 body,
-                                source,
                                 &reactive_props,
                                 &allocator,
-                                source_type,
                                 &mut class_masked_count,
                             );
                         }
@@ -732,14 +877,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         total_masked_parts_count += class_masked_count;
         total_properties_count += reactive_props.len() as u32;
 
-        let mut mask_calcs = String::new();
-        for (prop_name, idx) in &sorted_props {
-            let bit = 1 << idx;
-            mask_calcs.push_str(&format!(
-                "      if (changedProperties.has('{}')) mask |= {};\n",
-                prop_name, bit
-            ));
-        }
+        let ast = AstBuilder::new(&allocator);
 
         if let Some(idx) = existing_update_idx {
             if let ClassElement::MethodDefinition(ref mut method) = &mut class.body.body[idx] {
@@ -755,15 +893,6 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                             }
                             _ => None,
                         });
-                let alias_line = match existing_param.as_deref() {
-                    Some("changedProperties") => String::new(),
-                    Some(other) => {
-                        format!("    const changedProperties = {} || new Map();\n", other)
-                    }
-                    None => {
-                        "    const changedProperties = arguments[0] || new Map();\n".to_string()
-                    }
-                };
                 if let Some(ref mut body) = method.value.body {
                     let already_has = body.statements.iter().any(|s| {
                         let start = s.span().start as usize;
@@ -775,45 +904,24 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                         }
                     });
                     if !already_has {
-                        let block_code = format!(
-                            "function __d() {{\n{}    let mask = 0;\n    if (this.hasUpdated) {{\n{}    }} else {{\n      mask = -1;\n    }}\n    this.__litDirtyMask = mask;\n}}",
-                            alias_line,
-                            mask_calcs
-                        );
-                        let parsed_b =
-                            Parser::new(&allocator, allocator.alloc_str(&block_code), source_type)
-                                .parse();
-                        if let Some(Statement::FunctionDeclaration(mut fn_decl)) =
-                            parsed_b.program.body.into_iter().next()
+                        let mut insert_stmts = Vec::new();
+                        if let Some(alias_stmt) =
+                            build_alias_statement(existing_param.as_deref().or(Some("")), &ast)
                         {
-                            if let Some(ref mut fn_body) = fn_decl.body {
-                                let stmts = std::mem::replace(
-                                    &mut fn_body.statements,
-                                    oxc_allocator::ArenaVec::new_in(&&allocator),
-                                );
-                                for (i, stmt) in stmts.into_iter().enumerate() {
-                                    body.statements.insert(i, stmt);
-                                }
-                            }
+                            insert_stmts.push(alias_stmt);
+                        }
+                        for stmt in build_mask_calc_statements(&sorted_props, &ast) {
+                            insert_stmts.push(stmt);
+                        }
+                        for (i, stmt) in insert_stmts.into_iter().enumerate() {
+                            body.statements.insert(i, stmt);
                         }
                     }
                 }
             }
         } else {
-            let method_code = format!(
-                "class __D {{\n  update(changedProperties) {{\n    let mask = 0;\n    if (this.hasUpdated) {{\n{}    }} else {{\n      mask = -1;\n    }}\n    this.__litDirtyMask = mask;\n    super.update(changedProperties);\n  }}\n}}",
-                mask_calcs
-            );
-            let parsed_m =
-                Parser::new(&allocator, allocator.alloc_str(&method_code), source_type).parse();
-            if let Some(Statement::ClassDeclaration(mut d_class)) =
-                parsed_m.program.body.into_iter().next()
-            {
-                if !d_class.body.body.is_empty() {
-                    let method = d_class.body.body.remove(0);
-                    class.body.body.push(method);
-                }
-            }
+            let update_elem = build_update_method(&sorted_props, &ast);
+            class.body.body.push(update_elem);
         }
     }
 
@@ -851,29 +959,40 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
     }
 
     if !has_no_change {
+        let ast = AstBuilder::new(&allocator);
+        let imported =
+            ModuleExportName::IdentifierName(IdentifierName::new(SPAN, "noChange", &ast));
+        let local = BindingIdentifier::new(SPAN, "noChange", &ast);
+        let spec = ImportSpecifier::boxed(SPAN, imported, local, ImportOrExportKind::Value, &ast);
+
         if let Some(idx) = lit_import_idx {
             if let Statement::ImportDeclaration(ref mut import_decl) = &mut parsed.program.body[idx]
             {
-                let dummy_imp = "import { noChange } from 'lit';";
-                let p_imp = Parser::new(&allocator, dummy_imp, source_type).parse();
-                if let Some(Statement::ImportDeclaration(mut d)) =
-                    p_imp.program.body.into_iter().next()
-                {
-                    if let Some(mut specs) = d.specifiers.take() {
-                        if let Some(spec) = specs.pop() {
-                            if let Some(ref mut current_specs) = import_decl.specifiers {
-                                current_specs.push(spec);
-                            }
-                        }
-                    }
+                if let Some(ref mut current_specs) = import_decl.specifiers {
+                    current_specs.push(ImportDeclarationSpecifier::ImportSpecifier(spec));
+                } else {
+                    let mut specs = ArenaVec::new_in(&ast);
+                    specs.push(ImportDeclarationSpecifier::ImportSpecifier(spec));
+                    import_decl.specifiers = Some(specs);
                 }
             }
         } else {
-            let dummy_imp = "import { noChange } from 'lit';\n";
-            let p_imp = Parser::new(&allocator, dummy_imp, source_type).parse();
-            if let Some(import_stmt) = p_imp.program.body.into_iter().next() {
-                parsed.program.body.insert(0, import_stmt);
-            }
+            let mut specs = ArenaVec::new_in(&ast);
+            specs.push(ImportDeclarationSpecifier::ImportSpecifier(spec));
+            let source_lit = StringLiteral::new(SPAN, "lit", None, &ast);
+            let import_decl = ImportDeclaration::boxed(
+                SPAN,
+                Some(specs),
+                source_lit,
+                None,
+                None,
+                ImportOrExportKind::Value,
+                &ast,
+            );
+            parsed
+                .program
+                .body
+                .insert(0, Statement::ImportDeclaration(import_decl));
         }
     }
 

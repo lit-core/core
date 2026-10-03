@@ -5,7 +5,7 @@
     "id": "momentum",
     "name": "Momentum Design (@momentum-design/components)",
     "packageName": "@momentum-design/components",
-    "version": "0.139.9",
+    "version": "0.140.1",
     "componentCount": 20,
     "components": [
       {
@@ -136,13 +136,13 @@
     "description": "Ahead-of-time ShadowRoot event delegation",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T12:11:25.561Z",
+  "timestamp": "2026-10-03T19:28:31.004Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +157,36 @@
     }
   },
   "metrics": {
-    "rawBytes": 354288,
-    "gzipBytes": 76014,
-    "brotliBytes": 60186,
-    "buildTimeMs": 57.62437499999942
+    "rawBytes": 354603,
+    "gzipBytes": 76124,
+    "brotliBytes": 60266,
+    "buildTimeMs": 39.91599999999744
   },
   "baseline": {
-    "rawBytes": 346264,
-    "gzipBytes": 74162,
-    "brotliBytes": 59626,
-    "buildTimeMs": 79.31620800000383
+    "rawBytes": 346579,
+    "gzipBytes": 74275,
+    "brotliBytes": 59822,
+    "buildTimeMs": 63.82370800001081
   },
   "deltas": {
     "rawBytes": 8024,
-    "rawPercent": 2.3173070258531063,
-    "gzipBytes": 1852,
-    "gzipPercent": 2.4972357811278014,
-    "brotliBytes": 560,
-    "brotliPercent": 0.9391876027236441,
-    "buildTimeMs": -21.691833000004408
+    "rawPercent": 2.3152008632952374,
+    "gzipBytes": 1849,
+    "gzipPercent": 2.4893975092561424,
+    "brotliBytes": 444,
+    "brotliPercent": 0.7422018655344188,
+    "buildTimeMs": -23.907708000013372
   },
   "runtime": {
-    "firstRenderMs": 3.5,
-    "updateMs": 0.6,
-    "scriptEvalMs": 4.4,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 611891,
-    "speedupPercent": 12.5,
-    "updateSpeedupPercent": 25.000000000000007,
-    "evalSpeedupPercent": 36.231884057971016,
-    "registrationSpeedupPercent": 28.571428571428566,
-    "memorySavingsPercent": -1.2771134191252536
+    "firstRenderMs": 20.9,
+    "updateMs": 0.9,
+    "scriptEvalMs": 4.8,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 68262,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -6.6666666666666625,
+    "registrationSpeedupPercent": -74.99999999999997,
+    "memorySavingsPercent": -4.702742499539849
   }
 }

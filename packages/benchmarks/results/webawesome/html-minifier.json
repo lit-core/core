@@ -136,13 +136,13 @@
     "description": "High-speed HTML template literal minifier powered by OXC",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T16:17:35.517Z",
+  "timestamp": "2026-10-03T19:27:11.220Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "84d0fed",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +157,36 @@
     }
   },
   "metrics": {
-    "rawBytes": 360993,
-    "gzipBytes": 85596,
-    "brotliBytes": 68641,
-    "buildTimeMs": 38.68037499999991
+    "rawBytes": 360978,
+    "gzipBytes": 85595,
+    "brotliBytes": 68639,
+    "buildTimeMs": 51.816249999999854
   },
   "baseline": {
     "rawBytes": 370946,
     "gzipBytes": 86902,
     "brotliBytes": 69583,
-    "buildTimeMs": 52.67933299999993
+    "buildTimeMs": 53.78800000000001
   },
   "deltas": {
-    "rawBytes": -9953,
-    "rawPercent": -2.683139864023335,
-    "gzipBytes": -1306,
-    "gzipPercent": -1.5028422821108836,
-    "brotliBytes": -942,
-    "brotliPercent": -1.3537789402583964,
-    "buildTimeMs": -13.998958000000016
+    "rawBytes": -9968,
+    "rawPercent": -2.6871835792810814,
+    "gzipBytes": -1307,
+    "gzipPercent": -1.5039930036132656,
+    "brotliBytes": -944,
+    "brotliPercent": -1.3566532055243379,
+    "buildTimeMs": -1.9717500000001564
   },
   "runtime": {
-    "firstRenderMs": 26.8,
-    "updateMs": 0.9,
+    "firstRenderMs": 29.1,
+    "updateMs": 1,
     "scriptEvalMs": 2.7,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 85495,
-    "speedupPercent": 34.474327628361856,
-    "updateSpeedupPercent": 40,
-    "evalSpeedupPercent": 47.05882352941176,
-    "registrationSpeedupPercent": 35.29411764705881,
-    "memorySavingsPercent": 0.4923298959472986
+    "registrationMs": 0.9,
+    "heapUsedBytes": 88236,
+    "speedupPercent": 26.329113924050628,
+    "updateSpeedupPercent": 28.571428571428566,
+    "evalSpeedupPercent": 18.181818181818173,
+    "registrationSpeedupPercent": 24.999999999999993,
+    "memorySavingsPercent": -11.936265492788003
   }
 }

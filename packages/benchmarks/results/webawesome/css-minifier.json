@@ -136,13 +136,13 @@
     "description": "High-speed CSS template literal minifier powered by Lightning CSS",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T16:17:34.778Z",
+  "timestamp": "2026-10-03T19:27:10.450Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "84d0fed",
+    "gitCommit": "edc74ca",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -160,13 +160,13 @@
     "rawBytes": 337367,
     "gzipBytes": 81016,
     "brotliBytes": 65581,
-    "buildTimeMs": 47.87537499999962
+    "buildTimeMs": 67.40750000000025
   },
   "baseline": {
     "rawBytes": 370946,
     "gzipBytes": 86902,
     "brotliBytes": 69583,
-    "buildTimeMs": 52.67933299999993
+    "buildTimeMs": 53.78800000000001
   },
   "deltas": {
     "rawBytes": -33579,
@@ -175,18 +175,18 @@
     "gzipPercent": -6.7731467630204145,
     "brotliBytes": -4002,
     "brotliPercent": -5.751404797148728,
-    "buildTimeMs": -4.803958000000307
+    "buildTimeMs": 13.619500000000244
   },
   "runtime": {
-    "firstRenderMs": 31.7,
-    "updateMs": 1.4,
-    "scriptEvalMs": 3.2,
+    "firstRenderMs": 27.9,
+    "updateMs": 0.9,
+    "scriptEvalMs": 2.6,
     "registrationMs": 1,
-    "heapUsedBytes": 86174,
-    "speedupPercent": 22.493887530562347,
-    "updateSpeedupPercent": 6.666666666666672,
-    "evalSpeedupPercent": 37.2549019607843,
-    "registrationSpeedupPercent": 41.17647058823529,
-    "memorySavingsPercent": -0.2979585185874904
+    "heapUsedBytes": 79099,
+    "speedupPercent": 29.367088607594937,
+    "updateSpeedupPercent": 35.71428571428571,
+    "evalSpeedupPercent": 21.212121212121204,
+    "registrationSpeedupPercent": 16.666666666666664,
+    "memorySavingsPercent": -0.3450594339502962
   }
 }

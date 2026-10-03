@@ -14,7 +14,7 @@ describe('resumable AOT compiler and inline microloader', () => {
     });
     expect(inlineScript).toBeTypeOf('string');
     expect(inlineScript.length).toBeGreaterThan(100);
-    expect(inlineScript.length).toBeLessThan(1500); // Verify <=1.5 KB constraint
+    expect(inlineScript.length).toBeLessThan(1536); // Verify <=1.5 KB constraint
     expect(inlineScript).toContain('__lit_resumed__');
     expect(inlineScript).toContain('user-profile');
     expect(inlineScript).toContain('/assets/user-profile.js');

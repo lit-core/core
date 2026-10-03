@@ -1,0 +1,25 @@
+{
+  "continuous-auto-formatter": {
+    "PostToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./scripts/auto-format.js",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
+  "continuous-ci-goal-guard": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node ./scripts/goal-stop-hook.js",
+        "timeout": 60
+      }
+    ]
+  }
+}

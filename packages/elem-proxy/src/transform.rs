@@ -70,91 +70,86 @@ fn extract_class_properties<'a>(
     let mut attr_set = HashSet::new();
 
     for elem in &class.body.body {
-        match elem {
-            ClassElement::PropertyDefinition(prop) => {
-                let prop_name = match &prop.key {
-                    PropertyKey::StaticIdentifier(ident) => Some(ident.name.as_str().to_string()),
-                    PropertyKey::StringLiteral(lit) => Some(lit.value.as_str().to_string()),
-                    _ => None,
-                };
+        if let ClassElement::PropertyDefinition(prop) = elem {
+            let prop_name = match &prop.key {
+                PropertyKey::StaticIdentifier(ident) => Some(ident.name.as_str().to_string()),
+                PropertyKey::StringLiteral(lit) => Some(lit.value.as_str().to_string()),
+                _ => None,
+            };
 
-                if let Some(name) = prop_name {
-                    let mut is_lit_prop = false;
-                    let mut observes_attr = true;
-                    let mut custom_attr_name: Option<String> = None;
+            if let Some(name) = prop_name {
+                let mut is_lit_prop = false;
+                let mut observes_attr = true;
+                let mut custom_attr_name: Option<String> = None;
 
-                    for dec in &prop.decorators {
-                        if let Expression::CallExpression(call) = &dec.expression {
-                            let callee_name = match &call.callee {
-                                Expression::Identifier(id) => Some(id.name.as_str()),
-                                Expression::StaticMemberExpression(mem) => {
-                                    Some(mem.property.name.as_str())
-                                }
-                                _ => None,
-                            };
+                for dec in &prop.decorators {
+                    if let Expression::CallExpression(call) = &dec.expression {
+                        let callee_name = match &call.callee {
+                            Expression::Identifier(id) => Some(id.name.as_str()),
+                            Expression::StaticMemberExpression(mem) => {
+                                Some(mem.property.name.as_str())
+                            }
+                            _ => None,
+                        };
 
-                            if callee_name == Some("property") {
-                                is_lit_prop = true;
-                                if let Some(arg) = call.arguments.first() {
-                                    if let Some(Expression::ObjectExpression(obj)) =
-                                        arg.as_expression()
-                                    {
-                                        for p in &obj.properties {
-                                            if let ObjectPropertyKind::ObjectProperty(prop_kv) = p {
-                                                let k_name = match &prop_kv.key {
-                                                    PropertyKey::StaticIdentifier(id) => {
-                                                        Some(id.name.as_str())
-                                                    }
-                                                    PropertyKey::StringLiteral(lit) => {
-                                                        Some(lit.value.as_str())
-                                                    }
-                                                    _ => None,
-                                                };
+                        if callee_name == Some("property") {
+                            is_lit_prop = true;
+                            if let Some(arg) = call.arguments.first() {
+                                if let Some(Expression::ObjectExpression(obj)) = arg.as_expression()
+                                {
+                                    for p in &obj.properties {
+                                        if let ObjectPropertyKind::ObjectProperty(prop_kv) = p {
+                                            let k_name = match &prop_kv.key {
+                                                PropertyKey::StaticIdentifier(id) => {
+                                                    Some(id.name.as_str())
+                                                }
+                                                PropertyKey::StringLiteral(lit) => {
+                                                    Some(lit.value.as_str())
+                                                }
+                                                _ => None,
+                                            };
 
-                                                if k_name == Some("attribute") {
-                                                    match &prop_kv.value {
-                                                        Expression::BooleanLiteral(b) => {
-                                                            if !b.value {
-                                                                observes_attr = false;
-                                                            }
-                                                        }
-                                                        Expression::StringLiteral(s) => {
-                                                            custom_attr_name =
-                                                                Some(s.value.as_str().to_string());
-                                                        }
-                                                        _ => {}
-                                                    }
-                                                } else if k_name == Some("state") {
-                                                    if let Expression::BooleanLiteral(b) =
-                                                        &prop_kv.value
-                                                    {
-                                                        if b.value {
+                                            if k_name == Some("attribute") {
+                                                match &prop_kv.value {
+                                                    Expression::BooleanLiteral(b) => {
+                                                        if !b.value {
                                                             observes_attr = false;
                                                         }
+                                                    }
+                                                    Expression::StringLiteral(s) => {
+                                                        custom_attr_name =
+                                                            Some(s.value.as_str().to_string());
+                                                    }
+                                                    _ => {}
+                                                }
+                                            } else if k_name == Some("state") {
+                                                if let Expression::BooleanLiteral(b) =
+                                                    &prop_kv.value
+                                                {
+                                                    if b.value {
+                                                        observes_attr = false;
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            } else if callee_name == Some("state") {
-                                is_lit_prop = true;
-                                observes_attr = false;
                             }
-                        }
-                    }
-
-                    if is_lit_prop {
-                        prop_set.insert(name.clone());
-                        if observes_attr {
-                            let attr =
-                                custom_attr_name.unwrap_or_else(|| name.to_ascii_lowercase());
-                            attr_set.insert(attr);
+                        } else if callee_name == Some("state") {
+                            is_lit_prop = true;
+                            observes_attr = false;
                         }
                     }
                 }
+
+                if is_lit_prop {
+                    prop_set.insert(name.clone());
+                    if observes_attr {
+                        let attr = custom_attr_name.unwrap_or_else(|| name.to_ascii_lowercase());
+                        attr_set.insert(attr);
+                    }
+                }
             }
-            _ => {}
         }
 
         // Also check static properties definition: static properties = { ... }
