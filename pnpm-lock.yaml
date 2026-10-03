@@ -16,8 +16,8 @@ importers:
         specifier: ^2.5.14
         version: 2.5.14
       '@momentum-design/components':
-        specifier: ^0.139.9
-        version: 0.139.9(@types/react@19.3.0)
+        specifier: ^0.140.0
+        version: 0.140.0(@types/react@19.3.0)
       '@types/webpack':
         specifier: ^5.28.5
         version: 5.28.5
@@ -92,8 +92,8 @@ importers:
         specifier: ^2.5.0
         version: 2.5.0
       '@momentum-design/components':
-        specifier: ^0.139.9
-        version: 0.139.9(@types/react@19.3.0)
+        specifier: ^0.140.0
+        version: 0.140.0(@types/react@19.3.0)
       '@spectrum-web-components/bundle':
         specifier: ^1.12.2
         version: 1.12.2
@@ -324,8 +324,8 @@ importers:
         specifier: ^2.5.0
         version: 2.5.0
       '@momentum-design/components':
-        specifier: ^0.139.9
-        version: 0.139.9(@types/react@19.3.0)
+        specifier: ^0.140.0
+        version: 0.140.0(@types/react@19.3.0)
       '@spectrum-web-components/bundle':
         specifier: ^1.12.2
         version: 1.12.2
@@ -418,8 +418,8 @@ importers:
         specifier: ^2.5.0
         version: 2.5.0
       '@momentum-design/components':
-        specifier: ^0.139.9
-        version: 0.139.9(@types/react@19.3.0)
+        specifier: ^0.140.0
+        version: 0.140.0(@types/react@19.3.0)
       '@spectrum-web-components/bundle':
         specifier: ^1.12.2
         version: 1.12.2
@@ -929,8 +929,8 @@ packages:
   '@momentum-design/brand-visuals@0.40.0':
     resolution: {integrity: sha512-ZqRqWilrNNlJAPLNbDvcNOt/N1SAIxOLVeFLTSpYqejrlBflLaDXbeSGtEeAYOM6kXpnhYaICquBAaD37q2quQ==}
 
-  '@momentum-design/components@0.139.9':
-    resolution: {integrity: sha512-6QdrVOyUUc/H82kdy8jhXck+9ffDtm/ZuIMAmap3S9sBBIjbuGo5aXs0/uSLxHs90mWl1PiDm+eTp9i58aVGcQ==}
+  '@momentum-design/components@0.140.0':
+    resolution: {integrity: sha512-ImWDznSAF0IwoEfRglVufnq7jYOQ4nBxY8dTEer7Wyu0lc/rn7jgPx1bq/gsz2ZuQIFv1+uCNrbNG4HSLxXyOA==}
     engines: {node: '>=24.0.0', npm: '>=8.0.0'}
 
   '@momentum-design/fonts@0.2.6':
@@ -3291,7 +3291,7 @@ snapshots:
 
   '@momentum-design/brand-visuals@0.40.0': {}
 
-  '@momentum-design/components@0.139.9(@types/react@19.3.0)':
+  '@momentum-design/components@0.140.0(@types/react@19.3.0)':
     dependencies:
       '@floating-ui/dom': 1.8.0
       '@lit/context': 1.1.6

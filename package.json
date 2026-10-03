@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
-    "@momentum-design/components": "^0.139.9",
+    "@momentum-design/components": "^0.140.0",
     "@types/webpack": "^5.28.5",
     "playwright": "^1.63.0",
     "turbo": "^2.11.4",
