@@ -1,11 +1,26 @@
 version: 2
+
+multi-ecosystem-groups:
+  all-dependencies:
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+
 updates:
   # Monthly dependency updates for pnpm workspace packages
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 1
+    patterns:
+      - "*"
+    multi-ecosystem-group: "all-dependencies"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -15,46 +30,18 @@ updates:
 
   # Monthly dependency updates for Rust packages
   - package-ecosystem: "cargo"
-    directory: "/packages/css-fuse"
+    directories:
+      - "/packages/*"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 10
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "rust"
-
-  - package-ecosystem: "cargo"
-    directory: "/packages/props-lower"
-    schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 10
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "rust"
-
-  - package-ecosystem: "cargo"
-    directory: "/packages/css-minifier"
-    schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 10
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "rust"
-
-  - package-ecosystem: "cargo"
-    directory: "/packages/html-minifier"
-    schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 1
+    patterns:
+      - "*"
+    multi-ecosystem-group: "all-dependencies"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -67,7 +54,14 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 1
+    patterns:
+      - "*"
+    multi-ecosystem-group: "all-dependencies"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
     commit-message:
       prefix: "chore"
       include: "scope"
