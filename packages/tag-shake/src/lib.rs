@@ -8,8 +8,8 @@ use napi_derive::napi;
 use options::{TagShakeOptions, TagShakeResult};
 
 #[napi]
-pub fn scan_tags(source: String, _filename: Option<String>) -> Vec<String> {
-    scanner::scan_custom_element_tags(&source)
+pub fn scan_tags(source: String, filename: Option<String>) -> Vec<String> {
+    scanner::scan_custom_element_tags(&source, filename.as_deref())
 }
 
 #[napi]

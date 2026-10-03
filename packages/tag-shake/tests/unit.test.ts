@@ -22,6 +22,58 @@ describe('scanTags', () => {
     const tags = scanTags(code);
     expect(tags).toEqual([]);
   });
+
+  it('scans JSX and TSX element names', () => {
+    const code = `
+      export function MyComponent() {
+        return (
+          <div>
+            <cds-button size="md">Click</cds-button>
+            <sp-action-button active />
+          </div>
+        );
+      }
+    `;
+    const tags = scanTags(code, 'component.tsx');
+    expect(tags).toEqual(['cds-button', 'sp-action-button']);
+  });
+
+  it('does not match tags inside comments or attributes', () => {
+    const code = `
+      import { html } from 'lit';
+      const t = html\`
+        <!-- <cds-ignored></cds-ignored> -->
+        <div title="<cds-ignored-too>">
+          <cds-button></cds-button>
+        </div>
+      \`;
+    `;
+    const tags = scanTags(code);
+    expect(tags).toEqual(['cds-button']);
+  });
+
+  it('does not match JS binary comparisons or math expressions', () => {
+    const code = `
+      const a = 10;
+      const b = 5;
+      const c = 2;
+      if (a < b - c) {
+        console.log('math');
+      }
+    `;
+    const tags = scanTags(code, 'math.js');
+    expect(tags).toEqual([]);
+  });
+
+  it('detects DOM APIs document.createElement and querySelector', () => {
+    const code = `
+      const btn = document.createElement('cds-button');
+      const dialog = document.querySelector('cds-modal.active');
+      customElements.whenDefined('sp-picker');
+    `;
+    const tags = scanTags(code, 'dom.js');
+    expect(tags).toEqual(['cds-button', 'cds-modal', 'sp-picker']);
+  });
 });
 
 describe('transformTagShake unit tests', () => {

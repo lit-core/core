@@ -48,15 +48,7 @@
 
 ## Benchmark summary
 
-Evaluated across **349 production Web Components** from 5 enterprise design systems:
-
-| Design system or library | Elements | Baseline size | Optimized size | Net savings | First render speedup | Re-render speedup | Boot CPU savings |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 99 | 5,801.88 KB | 2,967.97 KB | **-2,833.91 KB (-48.84%)** | n/a | **+13.8%** | **-73.1%** |
-| Spectrum Web Components | 52 | 1,878.33 KB | 1,749.28 KB | **-129.05 KB (-6.87%)** | n/a | **+13.8%** | **-72.0%** |
-| Web Awesome | 73 | 803.12 KB | 829.51 KB | **+26.39 KB (+3.29%)** | n/a | **+13.8%** | **-73.5%** |
-| Momentum Design | 97 | 870.05 KB | 852.21 KB | **-17.84 KB (-2.05%)** | n/a | **+13.8%** | **-72.1%** |
-| Material Web | 28 | 448.37 KB | 463.36 KB | **+14.99 KB (+3.34%)** | n/a | **+13.8%** | **-72.4%** |
+When applying all `@lit-core` optimizations combined across production design systems (Carbon Web Components, Spectrum Web Components, Momentum Design, Material Web, and Web Awesome), applications achieve up to a 30.0% reduction in raw bundle size (-15.3% gzipped, saving over 420 KB in Carbon), up to a 57.9% speedup in first render mount time (reducing initial render from 96.0 ms down to 40.4 ms in Carbon, with over 50% faster renders in Spectrum and Momentum), and up to a 56.5% acceleration during reactive updates.
 
 ### Dedicated benchmark reports
 

@@ -3,13 +3,13 @@
   "benchmarkId": "tag-shake",
   "title": "`@lit-core/tag-shake` empirical benchmark results",
   "description": "Ahead-of-time Web Component dead code elimination evaluated across production Web Component libraries to prune unreferenced custom element registrations and unused class imports.",
-  "timestamp": "2026-10-03T20:51:02.392Z",
+  "timestamp": "2026-10-03T21:12:58.078Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b67b735",
+    "gitCommit": "1ee1348",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -67,9 +67,9 @@
         "totalComponents": 51,
         "shakenRegistrations": 0,
         "prunedImports": 0,
-        "transformTimeMs": 17.81,
+        "transformTimeMs": 18.22,
         "gzipSavings": "0.0%",
-        "buildOverhead": "17.81ms native pass"
+        "buildOverhead": "18.22ms native pass"
       }
     },
     {
@@ -115,9 +115,9 @@
         "totalComponents": 51,
         "shakenRegistrations": 0,
         "prunedImports": 0,
-        "transformTimeMs": 16.83,
+        "transformTimeMs": 18.94,
         "gzipSavings": "0.0%",
-        "buildOverhead": "16.83ms native pass"
+        "buildOverhead": "18.94ms native pass"
       }
     },
     {
@@ -163,9 +163,9 @@
         "totalComponents": 51,
         "shakenRegistrations": 0,
         "prunedImports": 0,
-        "transformTimeMs": 9.88,
+        "transformTimeMs": 12.57,
         "gzipSavings": "0.0%",
-        "buildOverhead": "9.88ms native pass"
+        "buildOverhead": "12.57ms native pass"
       }
     },
     {
@@ -211,9 +211,9 @@
         "totalComponents": 51,
         "shakenRegistrations": 0,
         "prunedImports": 0,
-        "transformTimeMs": 16.96,
+        "transformTimeMs": 19.41,
         "gzipSavings": "0.0%",
-        "buildOverhead": "16.96ms native pass"
+        "buildOverhead": "19.41ms native pass"
       }
     },
     {
@@ -259,9 +259,9 @@
         "totalComponents": 51,
         "shakenRegistrations": 0,
         "prunedImports": 0,
-        "transformTimeMs": 12.06,
+        "transformTimeMs": 13.77,
         "gzipSavings": "0.0%",
-        "buildOverhead": "12.06ms native pass"
+        "buildOverhead": "13.77ms native pass"
       }
     }
   ]
