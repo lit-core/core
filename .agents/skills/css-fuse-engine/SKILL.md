@@ -29,10 +29,19 @@ This skill outlines the technical invariants, AST visitor mechanics, and verific
      `static styles = [shared_cluster_0, local_component_styles]`
    - Emits virtual module identifiers conforming to `virtual:css-fuse/<hash>.js`.
 
+## Architectural principles and transform standards
+
+This package must strictly adhere to the overarching transform principles in:
+`.agents/skills/transform-principles/SKILL.md`
+
+All AST extraction and rewriting must be performed structurally using `oxc_allocator` and `AstBuilder`. Never use regex, string interpolation (`format!`, `push_str`), or re-parsing.
+
 ## Non-negotiable invariants
 
+- **Minification awareness**:
+  Do not assume the tagged template is named `css`. Always trace tag identifiers via `oxc_semantic` to imports from `"lit"`, `"@lit/reactive-element"`, or `"lit-element"`.
 - **Cascade precedence**:
-  Shared constructable stylesheets must ALWAYS be prepended before local overrides. Prepending preserves the cascade order so component-level styles override shared theme defaults without increasing specificity.
+  Shared constructable stylesheets must always be prepended before local overrides. Prepending preserves the cascade order so component-level styles override shared theme defaults without increasing specificity.
 - **Selector specificity**:
   Never mutate selectors or strip pseudo-classes in ways that alter specificity or break Shadow DOM boundary encapsulation.
 - **Property accessor safety**:

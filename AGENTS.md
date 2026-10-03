@@ -69,23 +69,19 @@ Welcome to the `@lit-core` monorepo. This file outlines core architectural princ
 > 10. **Component isolation via iframes**:
 >    - Third-party Web Components must render in isolated `<iframe>` canvases to strictly prevent global reset stylesheets from leaking into the dashboard.
 
-## 🌐 General-purpose architecture rule (Never hardcode library-specific heuristics)
+## 🌐 General-purpose architecture and transform principles
 
-> **MANDATORY DESIGN RULE: STRICTLY GENERAL PURPOSE**:
-> Every compiler pass, AST visitor, parser, clustering algorithm, transform, lowering logic, and bundler plugin in this monorepo must be **100% general-purpose**.
+> **MANDATORY DESIGN RULE: STRICTLY GENERAL PURPOSE AND MINIFICATION-SAFE**:
+> Every compiler pass, AST visitor, parser, clustering algorithm, transform, lowering logic, and bundler plugin in this monorepo must be **100% general-purpose and resilient to minified input**.
 >
-> - **NEVER EVER hardcode library-specific, component-suite-specific, or vendor-specific hacks into core tools.**
->   - ❌ **Strictly forbidden**:
->     - Hardcoding component suite class names, IDs, or substrings (e.g. `iconContainer`, `indicator`, `badge`, `chevron`, `focus-ring`) to trigger, bias, or filter AST extraction.
->     - Restricting element, tag, attribute, or style extraction to whitelists designed to make specific benchmarks or libraries pass or look favorable.
->     - Hardcoding non-standard external library decorator wrappers (e.g. `carbonElement`) into core decorator lowering or regex detection rather than parsing standard Lit decorators (`@customElement`, `@property`, `@state`, etc.).
->     - Hardcoding arbitrary package-specific paths, component namespaces, or vendor conventions into general-purpose transforms.
-    - Synthesizing client scripts or loader code via string interpolation templates (e.g. `format!`) or naive path fallbacks (e.g. `'/components/' + tag + '.js'`) rather than AST-driven injection and bundler manifests.
-    - Requiring downstream consumers to install, import, or initialize manual runtime packages or client loader modules.
->   - ✅ **Required general-purpose design**:
->     - Rely exclusively on official Web Component, DOM, HTML, CSS, JavaScript, and Lit language specifications.
->     - Static fragment deduplication must inspect any valid HTML, SVG, or custom element subtree structurally and hierarchically based on syntax and configurable length/frequency thresholds, never class name or tag whitelists.
->     - Benchmarking harnesses measure real-world performance against third-party design systems objectively without the core compiler containing any special-cased logic for those libraries.
+> For full architectural rationale, refer to the authoritative skill: `.agents/skills/transform-principles/SKILL.md`.
+>
+> - **Core tenets**:
+>   - **Assume input may be minified**: Never rely on local variable names, decorator helper names (`__decorate`), comments, or formatting. Rely exclusively on semantic symbol bindings (`oxc_semantic`) traced to canonical import specifiers.
+>   - **Identify by meaning, not spelling**: Resolve imports and bindings semantically. Never match on raw identifier names (`callee == "property"`) or search substrings in source text (`contains("Element")`).
+>   - **Structure in, structure out**: Always build AST directly using `AstBuilder`. Strictly forbid string interpolation (`format!`, `push_str`) and re-parsing generated strings (`Parser::new`).
+>   - **Prove it or leave it alone**: Only transform when AST-level evidence proves all preconditions are met. If anything is ambiguous or unsupported, bail out cleanly and leave the file untouched. Never invent fake stubs, global prototype monkey-patches, or fallback markup.
+>   - **Fix classes of bugs, not instances**: Never introduce library-specific or component-specific class names, IDs, tags, or heuristics (e.g. `iconContainer`, `carbonElement`, `indicator`, `focus-ring`). Benchmarks measure compiler performance objectively without special casing.
 
 ---
 
@@ -165,17 +161,19 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
    - Shared stylesheets must respect Rollup chunk boundaries to prevent lazy-loaded component styles from leaking into entry chunks.
 3. **Net savings threshold**:
    - Clustering in `css-fuse` must enforce a net-savings threshold so virtual module import overhead never exceeds CSS bytes saved.
-4. **General-purpose neutrality**:
+4. **General-purpose neutrality and minification safety**:
    - All compiler logic, AST visitors, and extraction passes must remain strictly general-purpose with zero library-specific hardcoding, class checks, or aliases.
+   - Transforms must assume input code may be minified or mangled. See `.agents/skills/transform-principles/SKILL.md` for the authoritative guide.
 5. **Runtime verification with Playwright and Vitest**:
    - Always verify template compilation, DOM hydration, and real render performance using Vitest and Playwright.
 6. **Documentation brevity**:
    - Keep markdown concise, high-signal, and easy to read.
    - Avoid repetitive tables and redundant prose.
    - Follow the sentence case instruction strictly.
-7. **AST codegen invariant (strictly no string splicing)**:
-   - Never use string manipulation (`replace_range`, `insert_str`, manual brace counting, regex search/replace, `.find('{')`, raw slice span math) to synthesize or rewrite JavaScript, TypeScript, or CSS AST structures.
-   - Always parse code with `oxc_parser`, perform structural transforms on the AST using `oxc_allocator` / `AstBuilder` / `oxc_traverse`, and emit valid output using `oxc_codegen`.
+7. **AST codegen invariant (strictly no string splicing or string re-parsing)**:
+   - Never use string manipulation (`replace_range`, `insert_str`, manual brace counting, regex search/replace, `.find('{')`, raw slice span math, `format!`, or `push_str`) to synthesize or rewrite code.
+   - Strictly prohibit string-building followed by re-parsing (`Parser::new`). Re-parsing synthesized string snippets is string splicing with extra steps.
+   - Always construct AST nodes directly using `oxc_allocator` and `AstBuilder`, and emit valid output using `oxc_codegen`.
    - String splicing breaks on multiline imports, inline comments, string literals with brackets or braces, and multi-component files. AST transformation is deterministic and preserves syntax validity.
 8. **Zero consumer runtime overhead and automated bundler injection**:
    - Downstream consumers must never be required to manually import, wire up, or configure runtime microloaders, client adapters, or orchestration scripts.

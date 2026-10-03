@@ -7,7 +7,7 @@ use oxc_parser::Parser;
 use oxc_span::{SourceType, SPAN};
 
 use crate::ast_helpers::AstHelper;
-use crate::constructor::{hoist_constructor_defaults, inject_constructor_statements};
+use crate::constructor::inject_constructor_statements;
 use crate::decorators::custom_element::transform_custom_element;
 use crate::decorators::event_options::try_transform_event_options;
 use crate::decorators::localized::transform_localized;
@@ -18,9 +18,7 @@ use crate::decorators::query_assigned::try_transform_query_assigned;
 use crate::decorators::query_async::try_transform_query_async;
 use crate::decorators::state::try_transform_state;
 use crate::lit_import_scanner::{is_lit_import, ImportContext, LitDecoratorKind};
-use crate::static_properties::{
-    deduplicate_descriptors_in_program, inject_or_merge_static_properties,
-};
+use crate::static_properties::inject_or_merge_static_properties;
 
 #[napi(object)]
 #[derive(Default, Clone, Debug)]
@@ -54,11 +52,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
 
     // 1. Scan for Lit decorator imports
     let import_ctx = ImportContext::scan(&program);
-    let has_decorators_in_source = source.contains("@property")
-        || source.contains("@state")
-        || source.contains("@customElement")
-        || source.contains("__decorate");
-    if !import_ctx.has_lit_decorators() && !has_decorators_in_source {
+    if !import_ctx.has_lit_decorators() {
         return TransformResult {
             code: source.to_string(),
             map: None,
@@ -144,9 +138,6 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     strip_dead_decorator_helpers(&mut new_statements);
 
     program.body = new_statements;
-
-    // 4. Deduplicate repeating property descriptor presets into frozen module constants
-    deduplicate_descriptors_in_program(&mut program, &ast);
 
     let mut codegen_options = CodegenOptions::default();
     if options.sourcemap.unwrap_or(false) {
@@ -261,13 +252,7 @@ pub fn transform_class<'a>(
         inject_or_merge_static_properties(class, reactive_props, ast);
     }
 
-    // 4. Hoist scalar property defaults onto class prototype
-    let proto_stmts = hoist_constructor_defaults(class, ast);
-    for s in proto_stmts {
-        post_class_statements.push(s);
-    }
-
-    // 5. Inject constructor statements
+    // 4. Inject constructor statements
     if !constructor_statements.is_empty() {
         inject_constructor_statements(class, constructor_statements, ast);
     }
@@ -391,23 +376,7 @@ pub fn try_transform_decorate_call<'a>(
 
     let is_decorate = match &call.callee {
         Expression::Identifier(id) => {
-            id.name == "__decorate"
-                || id.name == "__decorateClass"
-                || id.name == "_ts_decorate"
-                || id.name.starts_with("__decorate")
-                || arr.elements.iter().any(|elem| {
-                    if let Some(Expression::CallExpression(c)) = elem.as_expression() {
-                        let name = match &c.callee {
-                            Expression::Identifier(id) => id.name.as_str(),
-                            Expression::StaticMemberExpression(m) => m.property.name.as_str(),
-                            _ => "",
-                        };
-                        import_ctx.get_decorator_kind(name).is_some()
-                            || LitDecoratorKind::from_canonical_name(name).is_some()
-                    } else {
-                        false
-                    }
-                })
+            id.name == "__decorate" || id.name == "__decorateClass" || id.name == "_ts_decorate"
         }
         Expression::StaticMemberExpression(mem) => {
             mem.property.name == "__decorate" || mem.property.name == "decorate"
@@ -422,350 +391,257 @@ pub fn try_transform_decorate_call<'a>(
     let target_expr = second_arg.as_expression()?;
     let helper = AstHelper::new(ast);
 
-    let mut lowered_stmts = Vec::new();
-    let mut unlowered_elems = ArenaVec::new_in(ast);
-
-    for elem in &arr.elements {
-        let Some(Expression::CallExpression(dec_call)) = elem.as_expression() else {
-            unlowered_elems.push(elem.clone_in(ast.allocator()));
-            continue;
+    // Case 1: Member decorator (__decorate([dec], Target.prototype, "key", void 0))
+    if call.arguments.len() >= 3 {
+        let class_expr = match target_expr {
+            Expression::StaticMemberExpression(target_mem) => {
+                if target_mem.property.name != "prototype" {
+                    return None; // static member decorator -> bail (N7)
+                }
+                target_mem.object.clone_in(ast.allocator())
+            }
+            _ => return None, // non-prototype target -> bail (N7)
         };
 
-        let dec_name = match &dec_call.callee {
-            Expression::Identifier(id) => id.name.as_str(),
-            Expression::StaticMemberExpression(mem) => mem.property.name.as_str(),
-            _ => {
-                unlowered_elems.push(elem.clone_in(ast.allocator()));
+        let third_arg = call.arguments.get(2)?;
+        let prop_name = match third_arg.as_expression()? {
+            Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
+            _ => return None, // identifier or computed key -> bail (N6)
+        };
+
+        let mut lowered_stmts = Vec::new();
+
+        for elem in &arr.elements {
+            let Some(Expression::CallExpression(dec_call)) = elem.as_expression() else {
+                return None; // Non-call decorator or unlowered -> bail all-or-nothing
+            };
+
+            let dec_name = match &dec_call.callee {
+                Expression::Identifier(id) => id.name.as_str(),
+                Expression::StaticMemberExpression(mem) => mem.property.name.as_str(),
+                _ => return None,
+            };
+
+            if dec_name == "__metadata" || dec_name == "metadata" {
                 continue;
             }
-        };
 
-        if dec_name == "__metadata" || dec_name == "metadata" {
-            continue;
-        }
+            let Some(kind) = import_ctx.get_decorator_kind(dec_name) else {
+                return None; // Unknown or unimported decorator -> bail all-or-nothing
+            };
 
-        let Some(kind) = import_ctx
-            .get_decorator_kind(dec_name)
-            .or_else(|| LitDecoratorKind::from_canonical_name(dec_name))
-        else {
-            unlowered_elems.push(elem.clone_in(ast.allocator()));
-            continue;
-        };
+            match kind {
+                LitDecoratorKind::Property => {
+                    let opt_arg = dec_call
+                        .arguments
+                        .first()
+                        .and_then(|a| a.as_expression())
+                        .map(|e| e.clone_in(ast.allocator()));
 
-        match kind {
-            LitDecoratorKind::Property => {
-                let class_expr = match target_expr {
-                    Expression::StaticMemberExpression(target_mem) => {
-                        if target_mem.property.name != "prototype" {
-                            unlowered_elems.push(elem.clone_in(ast.allocator()));
-                            continue;
-                        }
-                        target_mem.object.clone_in(ast.allocator())
-                    }
-                    Expression::Identifier(id) => {
-                        Expression::Identifier(id.clone_in(ast.allocator()))
-                    }
-                    _ => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-
-                let third_arg = match call.arguments.get(2) {
-                    Some(a) => a,
-                    None => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-                let prop_name = match third_arg.as_expression() {
-                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
-                    Some(Expression::Identifier(id)) => id.name.as_str(),
-                    _ => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-
-                let opt_arg = dec_call
-                    .arguments
-                    .first()
-                    .and_then(|a| a.as_expression())
-                    .map(|e| e.clone_in(ast.allocator()));
-
-                let stmt = helper.create_property_call(
-                    class_expr,
-                    ast.allocator().alloc_str(prop_name),
-                    opt_arg,
-                );
-                lowered_stmts.push(stmt);
-            }
-            LitDecoratorKind::State => {
-                let class_expr = match target_expr {
-                    Expression::StaticMemberExpression(target_mem) => {
-                        if target_mem.property.name != "prototype" {
-                            unlowered_elems.push(elem.clone_in(ast.allocator()));
-                            continue;
-                        }
-                        target_mem.object.clone_in(ast.allocator())
-                    }
-                    Expression::Identifier(id) => {
-                        Expression::Identifier(id.clone_in(ast.allocator()))
-                    }
-                    _ => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-
-                let third_arg = match call.arguments.get(2) {
-                    Some(a) => a,
-                    None => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-                let prop_name = match third_arg.as_expression() {
-                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
-                    Some(Expression::Identifier(id)) => id.name.as_str(),
-                    _ => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-
-                let state_key = PropertyKey::new_static_identifier(SPAN, "state", ast);
-                let true_val = Expression::new_boolean_literal(SPAN, true, ast);
-                let obj_prop = ObjectPropertyKind::new_object_property(
-                    SPAN,
-                    PropertyKind::Init,
-                    state_key,
-                    true_val,
-                    false,
-                    false,
-                    false,
-                    ast,
-                );
-                let mut props = ArenaVec::new_in(ast);
-                props.push(obj_prop);
-                let state_obj = Expression::new_object_expression(SPAN, props, ast);
-
-                let stmt = helper.create_property_call(
-                    class_expr,
-                    ast.allocator().alloc_str(prop_name),
-                    Some(state_obj),
-                );
-                lowered_stmts.push(stmt);
-            }
-            LitDecoratorKind::CustomElement => {
-                let class_expr = target_expr.clone_in(ast.allocator());
-
-                let Some(tag_arg) = dec_call.arguments.first() else {
-                    unlowered_elems.push(elem.clone_in(ast.allocator()));
-                    continue;
-                };
-                let tag_str = match tag_arg.as_expression() {
-                    Some(Expression::StringLiteral(str_lit)) => Some(str_lit.value.as_str()),
-                    Some(Expression::TemplateLiteral(tmpl))
-                        if tmpl.expressions.is_empty() && !tmpl.quasis.is_empty() =>
-                    {
-                        Some(tmpl.quasis[0].value.raw.as_str())
-                    }
-                    _ => None,
-                };
-                let Some(tag_str) = tag_str else {
-                    unlowered_elems.push(elem.clone_in(ast.allocator()));
-                    continue;
-                };
-
-                let stmt =
-                    helper.custom_elements_define(ast.allocator().alloc_str(tag_str), class_expr);
-                lowered_stmts.push(stmt);
-            }
-            LitDecoratorKind::Query => {
-                let third_arg = match call.arguments.get(2) {
-                    Some(a) => a,
-                    None => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-                let prop_name = match third_arg.as_expression() {
-                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
-                    Some(Expression::Identifier(id)) => id.name.as_str(),
-                    _ => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-
-                let Some(selector_arg) = dec_call.arguments.first() else {
-                    unlowered_elems.push(elem.clone_in(ast.allocator()));
-                    continue;
-                };
-                let selector_str = match selector_arg.as_expression() {
-                    Some(Expression::StringLiteral(str_lit)) => Some(str_lit.value.as_str()),
-                    Some(Expression::TemplateLiteral(tmpl))
-                        if tmpl.expressions.is_empty() && !tmpl.quasis.is_empty() =>
-                    {
-                        Some(tmpl.quasis[0].value.raw.as_str())
-                    }
-                    _ => None,
-                };
-                let Some(selector_str) = selector_str else {
-                    unlowered_elems.push(elem.clone_in(ast.allocator()));
-                    continue;
-                };
-
-                let this = helper.this_expr();
-                let render_root = helper.static_member(this, "renderRoot", false);
-                let query_selector_member =
-                    helper.static_member(render_root, "querySelector", true);
-                let mut q_args = ArenaVec::new_in(ast);
-                q_args.push(Argument::from(
-                    helper.string_lit(ast.allocator().alloc_str(selector_str)),
-                ));
-                let query_call = helper.call_expr(query_selector_member, q_args, false);
-                let null_expr = helper.null_lit();
-                let return_expr = helper.nullish_coalescing(query_call, null_expr);
-
-                let stmt = helper.define_getter(
-                    target_expr.clone_in(ast.allocator()),
-                    ast.allocator().alloc_str(prop_name),
-                    return_expr,
-                );
-                lowered_stmts.push(stmt);
-            }
-            LitDecoratorKind::QueryAll => {
-                let third_arg = match call.arguments.get(2) {
-                    Some(a) => a,
-                    None => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-                let prop_name = match third_arg.as_expression() {
-                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
-                    Some(Expression::Identifier(id)) => id.name.as_str(),
-                    _ => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-
-                let Some(selector_arg) = dec_call.arguments.first() else {
-                    unlowered_elems.push(elem.clone_in(ast.allocator()));
-                    continue;
-                };
-                let selector_str = match selector_arg.as_expression() {
-                    Some(Expression::StringLiteral(str_lit)) => Some(str_lit.value.as_str()),
-                    Some(Expression::TemplateLiteral(tmpl))
-                        if tmpl.expressions.is_empty() && !tmpl.quasis.is_empty() =>
-                    {
-                        Some(tmpl.quasis[0].value.raw.as_str())
-                    }
-                    _ => None,
-                };
-                let Some(selector_str) = selector_str else {
-                    unlowered_elems.push(elem.clone_in(ast.allocator()));
-                    continue;
-                };
-
-                let this = helper.this_expr();
-                let render_root = helper.static_member(this, "renderRoot", false);
-                let query_selector_all_member =
-                    helper.static_member(render_root, "querySelectorAll", true);
-                let mut q_args = ArenaVec::new_in(ast);
-                q_args.push(Argument::from(
-                    helper.string_lit(ast.allocator().alloc_str(selector_str)),
-                ));
-                let query_call = helper.call_expr(query_selector_all_member, q_args, false);
-                let empty_arr = helper.empty_array();
-                let return_expr = helper.nullish_coalescing(query_call, empty_arr);
-
-                let stmt = helper.define_getter(
-                    target_expr.clone_in(ast.allocator()),
-                    ast.allocator().alloc_str(prop_name),
-                    return_expr,
-                );
-                lowered_stmts.push(stmt);
-            }
-            LitDecoratorKind::QueryAssignedElements | LitDecoratorKind::QueryAssignedNodes => {
-                let third_arg = match call.arguments.get(2) {
-                    Some(a) => a,
-                    None => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-                let prop_name = match third_arg.as_expression() {
-                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
-                    Some(Expression::Identifier(id)) => id.name.as_str(),
-                    _ => {
-                        unlowered_elems.push(elem.clone_in(ast.allocator()));
-                        continue;
-                    }
-                };
-
-                let this = helper.this_expr();
-                let render_root = helper.static_member(this, "renderRoot", false);
-                let query_selector_member =
-                    helper.static_member(render_root, "querySelector", true);
-                let mut q_args = ArenaVec::new_in(ast);
-                q_args.push(Argument::from(helper.string_lit("slot")));
-                let slot_call = helper.call_expr(query_selector_member, q_args, false);
-
-                let method_name = if kind == LitDecoratorKind::QueryAssignedElements {
-                    "assignedElements"
-                } else {
-                    "assignedNodes"
-                };
-                let assigned_member = helper.static_member(slot_call, method_name, true);
-                let mut a_args = ArenaVec::new_in(ast);
-                if let Some(opt) = dec_call.arguments.first() {
-                    if let Some(opt_expr) = opt.as_expression() {
-                        a_args.push(Argument::from(opt_expr.clone_in(ast.allocator())));
-                    }
+                    let stmt = helper.create_property_call(
+                        class_expr.clone_in(ast.allocator()),
+                        ast.allocator().alloc_str(prop_name),
+                        opt_arg,
+                    );
+                    lowered_stmts.push(stmt);
                 }
-                let assigned_call = helper.call_expr(assigned_member, a_args, false);
-                let empty_arr = helper.empty_array();
-                let return_expr = helper.nullish_coalescing(assigned_call, empty_arr);
+                LitDecoratorKind::State => {
+                    let state_key = PropertyKey::new_static_identifier(SPAN, "state", ast);
+                    let true_val = Expression::new_boolean_literal(SPAN, true, ast);
+                    let obj_prop = ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        state_key,
+                        true_val,
+                        false,
+                        false,
+                        false,
+                        ast,
+                    );
+                    let mut props = ArenaVec::new_in(ast);
+                    props.push(obj_prop);
+                    let state_obj = Expression::new_object_expression(SPAN, props, ast);
 
-                let stmt = helper.define_getter(
-                    target_expr.clone_in(ast.allocator()),
-                    ast.allocator().alloc_str(prop_name),
-                    return_expr,
-                );
-                lowered_stmts.push(stmt);
-            }
-            _ => {
-                unlowered_elems.push(elem.clone_in(ast.allocator()));
+                    let stmt = helper.create_property_call(
+                        class_expr.clone_in(ast.allocator()),
+                        ast.allocator().alloc_str(prop_name),
+                        Some(state_obj),
+                    );
+                    lowered_stmts.push(stmt);
+                }
+                LitDecoratorKind::Query => {
+                    let selector_arg = dec_call.arguments.first()?;
+                    let selector_str = match selector_arg.as_expression()? {
+                        Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
+                        Expression::TemplateLiteral(tmpl)
+                            if tmpl.expressions.is_empty() && !tmpl.quasis.is_empty() =>
+                        {
+                            tmpl.quasis[0]
+                                .value
+                                .cooked
+                                .as_ref()
+                                .map(|s| s.as_str())
+                                .unwrap_or(tmpl.quasis[0].value.raw.as_str())
+                        }
+                        _ => return None,
+                    };
+
+                    let this = helper.this_expr();
+                    let render_root = helper.static_member(this, "renderRoot", false);
+                    let query_selector_member =
+                        helper.static_member(render_root, "querySelector", true);
+                    let mut q_args = ArenaVec::new_in(ast);
+                    q_args.push(Argument::from(
+                        helper.string_lit(ast.allocator().alloc_str(selector_str)),
+                    ));
+                    let query_call = helper.call_expr(query_selector_member, q_args, false);
+                    let null_expr = helper.null_lit();
+                    let return_expr = helper.nullish_coalescing(query_call, null_expr);
+
+                    let stmt = helper.define_getter(
+                        target_expr.clone_in(ast.allocator()),
+                        ast.allocator().alloc_str(prop_name),
+                        return_expr,
+                    );
+                    lowered_stmts.push(stmt);
+                }
+                LitDecoratorKind::QueryAll => {
+                    let selector_arg = dec_call.arguments.first()?;
+                    let selector_str = match selector_arg.as_expression()? {
+                        Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
+                        Expression::TemplateLiteral(tmpl)
+                            if tmpl.expressions.is_empty() && !tmpl.quasis.is_empty() =>
+                        {
+                            tmpl.quasis[0]
+                                .value
+                                .cooked
+                                .as_ref()
+                                .map(|s| s.as_str())
+                                .unwrap_or(tmpl.quasis[0].value.raw.as_str())
+                        }
+                        _ => return None,
+                    };
+
+                    let this = helper.this_expr();
+                    let render_root = helper.static_member(this, "renderRoot", false);
+                    let query_selector_all_member =
+                        helper.static_member(render_root, "querySelectorAll", true);
+                    let mut q_args = ArenaVec::new_in(ast);
+                    q_args.push(Argument::from(
+                        helper.string_lit(ast.allocator().alloc_str(selector_str)),
+                    ));
+                    let query_call = helper.call_expr(query_selector_all_member, q_args, false);
+                    let empty_arr = helper.empty_array();
+                    let return_expr = helper.nullish_coalescing(query_call, empty_arr);
+
+                    let stmt = helper.define_getter(
+                        target_expr.clone_in(ast.allocator()),
+                        ast.allocator().alloc_str(prop_name),
+                        return_expr,
+                    );
+                    lowered_stmts.push(stmt);
+                }
+                LitDecoratorKind::QueryAssignedElements | LitDecoratorKind::QueryAssignedNodes => {
+                    let (slot_name, flatten, selector) =
+                        crate::decorators::query_assigned::extract_query_assigned_options(
+                            &Expression::CallExpression(dec_call.clone_in(ast.allocator())),
+                        );
+                    let method = if kind == LitDecoratorKind::QueryAssignedElements {
+                        "assignedElements"
+                    } else {
+                        "assignedNodes"
+                    };
+                    let return_expr =
+                        crate::decorators::query_assigned::build_query_assigned_return_expr(
+                            method,
+                            slot_name.as_deref(),
+                            flatten,
+                            selector.as_deref(),
+                            ast,
+                        );
+
+                    let stmt = helper.define_getter(
+                        target_expr.clone_in(ast.allocator()),
+                        ast.allocator().alloc_str(prop_name),
+                        return_expr,
+                    );
+                    lowered_stmts.push(stmt);
+                }
+                _ => return None,
             }
         }
-    }
 
-    if lowered_stmts.is_empty() {
-        return None;
-    }
-
-    if !unlowered_elems.is_empty() {
-        let mut new_call = call.clone_in(ast.allocator());
-        let new_arr = Expression::new_array_expression(SPAN, unlowered_elems, ast);
-        if let Some(first) = new_call.arguments.first_mut() {
-            *first = Argument::from(new_arr);
+        if lowered_stmts.is_empty() {
+            None
+        } else {
+            Some(lowered_stmts)
         }
-        let call_expr = helper.call_expr(new_call.callee, new_call.arguments, new_call.optional);
-        lowered_stmts.push(Statement::new_expression_statement(SPAN, call_expr, ast));
-    }
+    } else {
+        // Case 2: Class decorator (__decorate([customElement("tag")], Target))
+        let mut lowered_stmts = Vec::new();
 
-    Some(lowered_stmts)
+        for elem in &arr.elements {
+            let Some(Expression::CallExpression(dec_call)) = elem.as_expression() else {
+                return None; // Non-call or unknown -> bail all-or-nothing
+            };
+
+            let dec_name = match &dec_call.callee {
+                Expression::Identifier(id) => id.name.as_str(),
+                Expression::StaticMemberExpression(mem) => mem.property.name.as_str(),
+                _ => return None,
+            };
+
+            if dec_name == "__metadata" || dec_name == "metadata" {
+                continue;
+            }
+
+            let Some(kind) = import_ctx.get_decorator_kind(dec_name) else {
+                return None; // Unknown or unimported decorator -> bail all-or-nothing (N8)
+            };
+
+            match kind {
+                LitDecoratorKind::CustomElement => {
+                    let tag_arg = dec_call.arguments.first()?;
+                    let tag_str = match tag_arg.as_expression()? {
+                        Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
+                        Expression::TemplateLiteral(tmpl)
+                            if tmpl.expressions.is_empty() && !tmpl.quasis.is_empty() =>
+                        {
+                            tmpl.quasis[0]
+                                .value
+                                .cooked
+                                .as_ref()
+                                .map(|s| s.as_str())
+                                .unwrap_or(tmpl.quasis[0].value.raw.as_str())
+                        }
+                        _ => return None,
+                    };
+
+                    let stmt = helper.custom_elements_define(
+                        ast.allocator().alloc_str(tag_str),
+                        target_expr.clone_in(ast.allocator()),
+                    );
+                    lowered_stmts.push(stmt);
+                }
+                _ => return None, // Non-class decorator on class target -> bail
+            }
+        }
+
+        if lowered_stmts.is_empty() {
+            None
+        } else {
+            Some(lowered_stmts)
+        }
+    }
 }
 
 fn strip_dead_decorator_helpers<'a>(statements: &mut ArenaVec<'a, Statement<'a>>) {
-    if is_identifier_used_in_statements(statements, "__decorate")
+    let decorate_used = is_identifier_used_in_statements(statements, "__decorate")
         || is_identifier_used_in_statements(statements, "__decorateClass")
-        || is_identifier_used_in_statements(statements, "_ts_decorate")
-    {
+        || is_identifier_used_in_statements(statements, "_ts_decorate");
+    let metadata_used = is_identifier_used_in_statements(statements, "__metadata");
+
+    if decorate_used && metadata_used {
         return;
     }
 
@@ -773,10 +649,18 @@ fn strip_dead_decorator_helpers<'a>(statements: &mut ArenaVec<'a, Statement<'a>>
         Statement::VariableDeclaration(var_decl) => {
             var_decl.declarations.retain(|decl| {
                 if let BindingPattern::BindingIdentifier(id) = &decl.id {
-                    id.name != "__decorate"
-                        && id.name != "__decorateClass"
-                        && id.name != "_ts_decorate"
-                        && id.name != "__metadata"
+                    let name = id.name.as_str();
+                    if !decorate_used
+                        && (name == "__decorate"
+                            || name == "__decorateClass"
+                            || name == "_ts_decorate")
+                    {
+                        false
+                    } else if !metadata_used && name == "__metadata" {
+                        false
+                    } else {
+                        true
+                    }
                 } else {
                     true
                 }
@@ -787,15 +671,30 @@ fn strip_dead_decorator_helpers<'a>(statements: &mut ArenaVec<'a, Statement<'a>>
             if let Some(specifiers) = &mut import_decl.specifiers {
                 specifiers.retain(|spec| match spec {
                     ImportDeclarationSpecifier::ImportSpecifier(s) => {
-                        s.local.name != "__decorate"
-                            && s.local.name != "__decorateClass"
-                            && s.local.name != "_ts_decorate"
-                            && s.local.name != "__metadata"
+                        let name = s.local.name.as_str();
+                        if !decorate_used
+                            && (name == "__decorate"
+                                || name == "__decorateClass"
+                                || name == "_ts_decorate")
+                        {
+                            false
+                        } else if !metadata_used && name == "__metadata" {
+                            false
+                        } else {
+                            true
+                        }
                     }
                     ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
-                        s.local.name != "__decorate"
-                            && s.local.name != "__decorateClass"
-                            && s.local.name != "_ts_decorate"
+                        let name = s.local.name.as_str();
+                        if !decorate_used
+                            && (name == "__decorate"
+                                || name == "__decorateClass"
+                                || name == "_ts_decorate")
+                        {
+                            false
+                        } else {
+                            true
+                        }
                     }
                     _ => true,
                 });

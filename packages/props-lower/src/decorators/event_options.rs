@@ -31,15 +31,16 @@ pub fn try_transform_event_options<'a>(
     }
 
     let idx = decorator_idx?;
-    method_def.decorators.remove(idx);
 
-    // If method has accessibility private, do not emit Object.assign (handled via template rewrite or skipped)
-    if method_def.accessibility == Some(TSAccessibility::Private) {
+    // If anonymous class or private method, we cannot emit Object.assign(ClassName.prototype...)!
+    if class_name.is_empty() || method_def.accessibility == Some(TSAccessibility::Private) {
         return None;
     }
 
     let method_name = method_def.key.static_name()?.to_string();
     let opts = options?;
+
+    method_def.decorators.remove(idx);
 
     let helper = AstHelper::new(ast);
 

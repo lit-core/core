@@ -17,6 +17,12 @@ pub fn try_transform_state<'a>(
 ) -> Option<PropertyTransformResult<'a>> {
     match element {
         ClassElement::PropertyDefinition(prop_def) => {
+            if prop_def.r#static {
+                return None;
+            }
+
+            let prop_name = prop_def.key.static_name()?.to_string();
+
             let mut decorator_idx = None;
             let mut options = None;
 
@@ -33,16 +39,21 @@ pub fn try_transform_state<'a>(
             let idx = decorator_idx?;
             prop_def.decorators.remove(idx);
 
-            let prop_name = prop_def.key.static_name()?.to_string();
-
             // Ensure { state: true } is in options
             let state_options = inject_state_true(options, ast);
 
+            // If other decorators remain on this property, preserve the property definition!
+            let remove_member = prop_def.decorators.is_empty();
+
             let helper = AstHelper::new(ast);
-            let constructor_init = prop_def.value.take().map(|val| {
-                let name_str = ast.allocator().alloc_str(&prop_name);
-                helper.this_prop_assign(name_str, val)
-            });
+            let constructor_init = if remove_member {
+                prop_def.value.take().map(|val| {
+                    let name_str = ast.allocator().alloc_str(&prop_name);
+                    helper.this_prop_assign(name_str, val)
+                })
+            } else {
+                None
+            };
 
             Some(PropertyTransformResult {
                 reactive_prop: ReactiveProp {
@@ -50,7 +61,7 @@ pub fn try_transform_state<'a>(
                     options: Some(state_options),
                 },
                 constructor_init,
-                remove_member: true,
+                remove_member,
             })
         }
         _ => None,

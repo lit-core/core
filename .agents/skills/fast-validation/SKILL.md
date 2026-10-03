@@ -59,11 +59,13 @@ Always test in small increments, progressing from cheapest to most expensive:
   Deep pnpm hardlink trees trigger heavy background tasks.
   Use `pnpm run vendor:where <suite> [component]` to resolve exact component source files and tags instantly.
 
-## Workflow from browser failure to millisecond reproduction
+## Workflow from browser failure to general-purpose resolution
 
 When a component fails during browser verification or benchmarks:
-1. Check the captured error report at `artifacts/verify/<suite>/<component>/error.log`.
-2. Extract the minimal failing snippet and save it as a fixture in `packages/<crate>/tests/fixtures/<name>.js`.
-3. Run `cargo test --manifest-path packages/<crate>/Cargo.toml`. The fixture test reproduces the issue with exact AST diagnostics in under 1 second.
-4. Fix the AST transform in Rust.
-5. Re-run `pnpm run check:rust` followed by `pnpm run verify --suite=<suite> --component=<component>`.
+1. **Inspect error**: Check the captured error report at `artifacts/verify/<suite>/<component>/error.log`.
+2. **Isolate fixture**: Extract the minimal failing AST pattern and save it as a fixture in `packages/<crate>/tests/fixtures/<name>.js`.
+3. **Formulate the general rule**: What standard JavaScript, HTML, CSS, or Lit specification behavior was unhandled? Never ask "how do I make this specific component pass?" Ask "what general AST construct did the parser or transform encounter?"
+4. **Create adversarial and minified variants**: Add a second fixture variant with mangled identifier names, aliased imports (`import { property as p }`), or minified syntax (`!0` for booleans) to ensure the solution is robust against minification.
+5. **Fix the AST transform**: Implement the fix structurally in Rust using `oxc_allocator` and `AstBuilder`. Strictly forbid any check for component names, tags, suite namespaces, or ad hoc string matching. Refer to `.agents/skills/transform-principles/SKILL.md`.
+6. **Verify both variants**: Run `cargo test --manifest-path packages/<crate>/Cargo.toml`. Both the original and adversarial fixtures must pass.
+7. **Verify suite**: Re-run `pnpm run check:rust` followed by `pnpm run verify --suite=<suite> --component=<component>`.

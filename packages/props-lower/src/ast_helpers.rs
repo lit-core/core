@@ -72,15 +72,26 @@ impl<'a, 'b> AstHelper<'a, 'b> {
         Statement::new_expression_statement(SPAN, expr, self.ast)
     }
 
-    /// Builds `this.prop = value;`
+    /// Builds `this.prop = value;` or `this['prop'] = value;` depending on identifier validity
     pub fn this_prop_assign(&self, prop_name: &'a str, value: Expression<'a>) -> Statement<'a> {
-        let target = AssignmentTarget::new_static_member_expression(
-            SPAN,
-            self.this_expr(),
-            self.ident_name(prop_name),
-            false,
-            self.ast,
-        );
+        let target = if oxc_syntax::identifier::is_identifier_name(prop_name) {
+            AssignmentTarget::new_static_member_expression(
+                SPAN,
+                self.this_expr(),
+                self.ident_name(prop_name),
+                false,
+                self.ast,
+            )
+        } else {
+            let key = Expression::new_string_literal(SPAN, prop_name, None, self.ast);
+            AssignmentTarget::new_computed_member_expression(
+                SPAN,
+                self.this_expr(),
+                key,
+                false,
+                self.ast,
+            )
+        };
         let assign = Expression::new_assignment_expression(
             SPAN,
             AssignmentOperator::Assign,

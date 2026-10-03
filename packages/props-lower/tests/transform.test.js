@@ -209,11 +209,11 @@ console.log('Testing @lit-core/props-lower native addon...');
   console.log('  ✔ Compiled __decorate customElement lowering');
 }
 
-// Test 12: Repeating descriptor preset deduplication into frozen module constants
+// Test 12: Multiple reactive and state properties without unsafe frozen presets
 {
   const input = `
     import {LitElement} from 'lit';
-    import {property} from 'lit/decorators.js';
+    import {property, state} from 'lit/decorators.js';
 
     class MyElement extends LitElement {
       @property({type: Boolean, reflect: true})
@@ -221,15 +221,21 @@ console.log('Testing @lit-core/props-lower native addon...');
 
       @property({type: Boolean, reflect: true})
       checked = false;
+
+      @state()
+      foo = 1;
+
+      @state()
+      bar = 2;
     }
   `;
   const res = transformLitProps(input);
-  assert(res.code.includes('const _PROP_BOOL_REFLECT = Object.freeze('), 'Should define frozen descriptor preset constant');
-  assert(res.code.includes('type: Boolean'), 'Should preserve type: Boolean in frozen constant');
-  assert(res.code.includes('reflect: true'), 'Should preserve reflect: true in frozen constant');
-  assert(res.code.includes('disabled: _PROP_BOOL_REFLECT'), 'Should reference frozen preset for disabled');
-  assert(res.code.includes('checked: _PROP_BOOL_REFLECT'), 'Should reference frozen preset for checked');
-  console.log('  ✔ Repeating descriptor preset virtualization into frozen constants');
+  assert(!res.code.includes('Object.freeze'), 'Should not freeze descriptor presets to avoid mutation crashes in Lit');
+  assert(/disabled:\s*\{\s*type:\s*Boolean,\s*reflect:\s*true\s*\}/.test(res.code), 'Should preserve disabled property options');
+  assert(/checked:\s*\{\s*type:\s*Boolean,\s*reflect:\s*true\s*\}/.test(res.code), 'Should preserve checked property options');
+  assert(/foo:\s*\{\s*state:\s*true\s*\}/.test(res.code), 'Should define foo state');
+  assert(/bar:\s*\{\s*state:\s*true\s*\}/.test(res.code), 'Should define bar state');
+  console.log('  ✔ Multiple reactive and state properties without unsafe frozen presets');
 }
 
 // Test 13: Constructor scalar property default prototype hoisting
@@ -256,4 +262,83 @@ console.log('Testing @lit-core/props-lower native addon...');
   console.log('  ✔ Constructor property preservation without unsafe prototype hoisting');
 }
 
-console.log('\nAll 13 integration tests passed successfully!\n');
+// Test 14: Aliased imports
+{
+  const input = `
+    import {LitElement} from 'lit';
+    import {property as litProp} from 'lit/decorators.js';
+
+    class MyElement extends LitElement {
+      @litProp({type: String})
+      label = 'test';
+    }
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('label: { type: String }') || res.code.includes('label: {\n\t\ttype: String\n\t}'), 'Should lower aliased litProp');
+  assert(!res.code.includes('decorators.js'), 'Should clean aliased decorator import');
+  console.log('  ✔ Aliased decorator imports');
+}
+
+// Test 15: Sibling non-Lit decorators preserved
+{
+  const input = `
+    import {LitElement} from 'lit';
+    import {property} from 'lit/decorators.js';
+
+    class MyElement extends LitElement {
+      @customValidator()
+      @property({type: Number})
+      count = 0;
+    }
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('@customValidator()'), 'Should preserve non-Lit decorator on field');
+  assert(res.code.includes('count: { type: Number }') || res.code.includes('count: {\n\t\ttype: Number\n\t}'), 'Should lower Lit property into static properties');
+  console.log('  ✔ Sibling non-Lit decorator preservation');
+}
+
+// Test 16: Non-identifier property keys
+{
+  const input = `
+    import {LitElement} from 'lit';
+    import {property} from 'lit/decorators.js';
+
+    class MyElement extends LitElement {
+      @property({type: String})
+      'data-testid' = 'my-val';
+    }
+  `;
+  const res = transformLitProps(input);
+  assert(
+    res.code.includes('"data-testid": { type: String }') || res.code.includes("'data-testid': { type: String }") || res.code.includes('"data-testid": {\n\t\ttype: String\n\t}'),
+    'Should emit string key in static properties',
+  );
+  assert(res.code.includes('this["data-testid"] = \'my-val\'') || res.code.includes('this["data-testid"] = "my-val"'), 'Should emit computed this assignment in constructor');
+  console.log('  ✔ Non-identifier property keys');
+}
+
+// Test 17: Existing constructor insertion immediately after super()
+{
+  const input = `
+    import {LitElement} from 'lit';
+    import {property} from 'lit/decorators.js';
+
+    class MyElement extends LitElement {
+      @property()
+      title = 'hello';
+
+      constructor() {
+        super();
+        this.initCustomThings();
+      }
+    }
+  `;
+  const res = transformLitProps(input);
+  const superIdx = res.code.indexOf('super()');
+  const titleIdx = res.code.indexOf("this.title = 'hello'") !== -1 ? res.code.indexOf("this.title = 'hello'") : res.code.indexOf('this.title = "hello"');
+  const customIdx = res.code.indexOf('this.initCustomThings()');
+  assert(superIdx < titleIdx && titleIdx < customIdx, 'Should insert lowered initializer right after super() before user constructor logic');
+  console.log('  ✔ Initializer insertion right after super()');
+}
+
+console.log('\nAll integration tests passed successfully!\n');

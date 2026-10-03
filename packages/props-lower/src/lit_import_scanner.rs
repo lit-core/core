@@ -35,44 +35,57 @@ impl LitDecoratorKind {
 
 pub fn is_lit_import(specifier: &str) -> bool {
     specifier == "lit"
+        || specifier == "lit/decorators.js"
+        || specifier == "lit/decorators"
         || specifier.starts_with("lit/")
         || specifier == "lit-element"
+        || specifier == "lit-element/decorators.js"
+        || specifier == "lit-element/decorators"
         || specifier.starts_with("lit-element/")
-        || specifier.starts_with("@lit/")
-        || specifier.ends_with("/decorators.js")
-        || specifier.ends_with("/decorators")
-        || specifier.contains("decorators")
+        || specifier == "@lit/reactive-element"
+        || specifier.starts_with("@lit/reactive-element/decorators")
+        || specifier == "@lit/localize"
 }
 
 #[derive(Debug, Default)]
 pub struct ImportContext {
     /// Maps local identifier name (as imported in the file) to its LitDecoratorKind
     pub decorator_bindings: HashMap<String, LitDecoratorKind>,
+    /// Maps namespace import local name (e.g. `import * as lit from 'lit'`) to its import specifier
+    pub namespace_bindings: HashMap<String, String>,
 }
 
 impl ImportContext {
     /// Scans program import statements to populate recognized Lit decorator bindings.
-    /// Recognizes standard Lit imports as well as any import re-exporting canonical decorator names.
+    /// Only recognizes imports from verified Lit package specifiers.
     pub fn scan<'a>(program: &Program<'a>) -> Self {
         let mut ctx = Self::default();
 
         for stmt in &program.body {
             if let Statement::ImportDeclaration(import_decl) = stmt {
                 let specifier = import_decl.source.value.as_str();
-                let is_known_lit = is_lit_import(specifier);
+                if !is_lit_import(specifier) {
+                    continue;
+                }
 
                 if let Some(specifiers) = &import_decl.specifiers {
                     for spec in specifiers {
-                        if let ImportDeclarationSpecifier::ImportSpecifier(named_spec) = spec {
-                            let canonical_name = named_spec.imported.name();
-                            if let Some(kind) =
-                                LitDecoratorKind::from_canonical_name(canonical_name.as_str())
-                            {
-                                let local_name = named_spec.local.name.as_str().to_string();
-                                ctx.decorator_bindings.insert(local_name, kind);
-                            } else if is_known_lit {
-                                // Keep known lit specifiers mapped if matching
+                        match spec {
+                            ImportDeclarationSpecifier::ImportSpecifier(named_spec) => {
+                                let canonical_name = named_spec.imported.name();
+                                if let Some(kind) =
+                                    LitDecoratorKind::from_canonical_name(canonical_name.as_str())
+                                {
+                                    let local_name = named_spec.local.name.as_str().to_string();
+                                    ctx.decorator_bindings.insert(local_name, kind);
+                                }
                             }
+                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns_spec) => {
+                                let local_name = ns_spec.local.name.as_str().to_string();
+                                ctx.namespace_bindings
+                                    .insert(local_name, specifier.to_string());
+                            }
+                            _ => {}
                         }
                     }
                 }
@@ -83,13 +96,23 @@ impl ImportContext {
     }
 
     pub fn has_lit_decorators(&self) -> bool {
-        !self.decorator_bindings.is_empty()
+        !self.decorator_bindings.is_empty() || !self.namespace_bindings.is_empty()
     }
 
     pub fn get_decorator_kind(&self, name: &str) -> Option<LitDecoratorKind> {
-        self.decorator_bindings
-            .get(name)
-            .copied()
-            .or_else(|| LitDecoratorKind::from_canonical_name(name))
+        self.decorator_bindings.get(name).copied()
+    }
+
+    pub fn get_member_decorator_kind(
+        &self,
+        object_name: &str,
+        member_name: &str,
+    ) -> Option<LitDecoratorKind> {
+        if let Some(spec) = self.namespace_bindings.get(object_name) {
+            if is_lit_import(spec) {
+                return LitDecoratorKind::from_canonical_name(member_name);
+            }
+        }
+        None
     }
 }

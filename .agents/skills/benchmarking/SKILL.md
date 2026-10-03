@@ -37,6 +37,8 @@ Every benchmark in `@lit-core/benchmarks`—whether whole-bundle Vite builds, pe
 - Synthetic math loops or theoretical multipliers (e.g. `Math.sqrt(i)` to simulate CPU load).
 - Fabricated fallback arithmetic or hardcoded speedup constants.
 - Generic HTML elements (`<div><span>Item</span></div>`) substituted in place of the bundle's actual custom elements.
+- Special-casing compiler transforms to make benchmarks look favorable. Benchmarks objectively measure compiler performance across real-world code.
+- Hiding bailouts: if a component bails out because an unsupported feature is encountered, report the bailout transparently. Never inject fake runtime stubs to artificially inflate benchmark metrics.
 
 ---
 
@@ -64,7 +66,52 @@ node packages/benchmarks/src/index.js --tool=all
 
 # Run all suites in sequence
 pnpm run benchmark:all
+
+# Real-world scenario-based benchmarks
+pnpm run benchmark:scenario:grid    # Data grid (1,000 cells: dom-paths, dirty-mask, native)
+pnpm run benchmark:scenario:form    # Interactive form (500 controls: event-hoist, elem-proxy)
+pnpm run benchmark:scenario:ssr     # Server-rendered dashboard (resumable, html-aot)
+pnpm run benchmark:scenario:bundle  # Design system bundle (css-fuse, css-minifier, props-lower)
+pnpm run benchmark:scenarios        # Run all 4 scenarios across design systems
+
+# Run a specific scenario and variant
+node packages/benchmarks/src/index.js --scenario=data-grid --suite=carbon --variant=dom-paths
+node packages/benchmarks/src/index.js --scenario=interactive-form --suite=carbon --variant=event-hoist
 ```
+
+---
+
+## Real-world production scenarios
+
+Each compiler optimization is evaluated in its genuine production use case:
+
+1. **Data grid or table (1,000 cells)**:
+   - Evaluates `dom-paths`, `dirty-mask`, `native`, `memoize` (secondary: `html-aot`).
+   - Renders 1,000 canonical component cells (`badge`, `button`, `checkbox`, `icon-button`) using keyed `repeat`.
+   - Directly measures TreeWalker overhead during batch mounting, single-cell reactive updates, column updates, and keyed row reordering.
+2. **Interactive form or dense list (500 controls)**:
+   - Evaluates `event-hoist`, `elem-proxy` (secondary: `dirty-mask`).
+   - Renders 500 controls with event listeners (50 above fold, 450 below fold).
+   - Directly measures DOM event listener allocations via CDP, interaction latency via real Playwright mouse and keyboard events, and deferred element upgrade latency.
+3. **Server-rendered landing page or dashboard**:
+   - Evaluates `resumable`, `html-aot`.
+   - Pre-rendered Declarative Shadow DOM HTML with inline resumption micro-loader.
+   - Directly measures First Contentful Paint (FCP), Total Blocking Time (TBT), initial JS payload (< 2 KB), and resumption latency upon first user click.
+4. **Multi-component bundle (entire design system suite)**:
+   - Evaluates `css-fuse`, `css-minifier`, `html-minifier`, `props-lower`.
+   - Enterprise application importing all 20 canonical components with 3 code-split routes.
+   - Directly measures cross-component style deduplication into shared constructable `CSSStyleSheet` objects, chunk scoping, and decorator lowering.
+
+---
+
+## Scenario JSON artifacts (schema 3.0.0)
+
+Scenario results are persisted to `packages/benchmarks/results/scenarios/<scenario>/<suite>/<variant>.json`:
+- `schemaVersion`: `3.0.0`
+- `scenario`: identifier and metadata
+- `metrics`: raw build sizes, timings, DOM counters, and observer metrics
+- `deltas`: difference vs baseline, 95% bootstrap confidence interval, and noise detection
+- `equivalence`: verified DOM structure and shadow tree equivalence check
 
 ---
 

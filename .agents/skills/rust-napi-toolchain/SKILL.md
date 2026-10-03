@@ -24,13 +24,12 @@ This skill guides you through developing and building native Rust packages with 
 - `packages/props-lower`
 - `packages/resumable`
 
-## AST codegen invariant (strictly no string splicing)
+## Architectural principles for transforms
 
-Every Rust transform in this monorepo must adhere strictly to AST-level manipulation:
-- **Never splice code**: Strictly prohibit `replace_range`, `insert_str`, manual brace counting, regex search/replace, `.find('{')`, raw slice span math, and `format!` string interpolation. String splicing breaks on multiline imports, inline comments, string literals with brackets or braces, and multi-component files.
-- **Always use `oxc` AST**: Parse with `oxc_parser`, perform structural transforms on the AST using `oxc_allocator` / `AstBuilder` / `oxc_traverse`, and serialize output using `oxc_codegen`.
-- **Zero consumer runtime overhead**: Synthesize minimal, self-contained artifacts ahead of time. Never generate code relying on naive path assumptions (such as `/components/*`) or requiring consumer-facing runtime libraries.
-- **Preserve syntax validity**: AST transforms are guaranteed syntactically valid and deterministic.
+For the mandatory AST transform invariants, input contracts (including minification awareness), and design guidelines, refer to the authoritative skill:
+`.agents/skills/transform-principles/SKILL.md`
+
+All Rust transforms must manipulate AST nodes structurally using `oxc_allocator` and `AstBuilder`. Strictly avoid `format!`, `push_str`, or `Parser::new` string synthesis.
 
 ## Building native artifacts
 

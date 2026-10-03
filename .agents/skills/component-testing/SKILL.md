@@ -20,6 +20,8 @@ All tests in `packages/tests` evaluate real production component source and styl
 
 **Mandatory requirements**:
 - Always resolve and test real component definitions directly from the 5 enterprise libraries via `packages/tests/src/components.ts` and `packages/tests/src/fixtures.ts`.
+- Verify behavior against minified and mangled code: real bundles often undergo minification. Transforms must successfully parse and process minified component sources without relying on unminified names.
+- Validate safe bailouts: when a component uses advanced or unsupported constructs, assert that the transform leaves the component safely untransformed and produces a diagnostic, rather than injecting fake stubs to force a pass.
 - Every test:
 1. Reads actual component source or styles from `node_modules` via `fixtures.ts`
 2. Runs the `@lit-core` transform function under test

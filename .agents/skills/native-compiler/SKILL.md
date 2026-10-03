@@ -9,43 +9,41 @@ description: >-
 
 This skill outlines the technical architecture, invariants, and verification workflows for `@lit-core/native`.
 
-## Architecture overview
+## Architectural principles and transform standards
 
-1. **AST classification (`oxc` 0.151.0)**:
-   - Scans JavaScript/TypeScript modules for component classes extending `LitElement`, `ReactiveElement`, or any custom element base class.
-   - Inspects AST nodes for complexity indicators:
-     - Detects dynamic list directives (`repeat()`, `map()`) and complex conditional logic.
-     - Routes leaf components to Mode A (pure vanilla Custom Element).
-     - Routes dynamic list components to Mode B (micro-runtime `NativeElement`).
-   - Supports override modes via `{ mode: 'vanilla-only' | 'micro-only' | 'auto' }`.
+This package must strictly adhere to the overarching transform principles in:
+`.agents/skills/transform-principles/SKILL.md`
 
-2. **Mode A vanilla compiler (`src/vanilla.rs`, `src/template_parser.rs`)**:
-   - Parses template HTML into exact DOM `childNodes` paths.
-   - Strips all imports from `lit`, `lit-html`, `lit-element`, and `reactive-element`.
-   - Rewrites component class to `class ComponentName extends HTMLElement`.
-   - Instantiates constructable stylesheets via `new CSSStyleSheet()` and `replaceSync()`.
-   - Injects template cloning (`document.createElement('template')`, `cloneNode(true)`) and `attachShadow({ mode: 'open' })`.
-   - Generates getters, setters, and `attributeChangedCallback` for observed attributes.
-   - Compiles static bindings to direct text node property mutations (`node.data = val`).
-   - Uses `oxc_codegen` for 100% valid AST code generation.
+All AST construction must use `oxc_allocator` and `AstBuilder`. Never use string interpolation (`format!`, `push_str`), string re-parsing (`Parser::new`), or text substring matching (`contains()`, `find()`).
 
-3. **Mode B directive lowering (`src/directive_lower.rs`)**:
-   - Replaces high-level Lit directives (`classMap`, `styleMap`, `ifDefined`, `guard`) with inline native JS expressions.
-   - Automatically eliminates dead imports from `lit/directives/*` to enable bundler tree-shaking.
-   - Preserves full compatibility with LitElement lifecycle for complex components.
+## Classification and decision rules
 
-4. **Bundler plugin integration**:
-   - Integrated into `@lit-core/vite-plugin` (position #5 in pipeline) and `@lit-core/webpack-plugin`.
-   - Exposes configuration flag `native: boolean | NativePluginOptions`.
+Classification determines whether a component can safely be transformed into a pure vanilla Custom Element (Mode A), lowered to the micro-runtime (Mode B), or left untouched.
 
-## Non-negotiable invariants
+### 1. Proving a component is Lit
+- **Semantic identification**: Inspect the class heritage expression. Resolve its symbol binding via `oxc_semantic` to verify that it imports from a known Lit module (`"lit"`, `"@lit/reactive-element"`, `"lit-element"`).
+- **Minified resilience**: In minified bundles, `import { LitElement as e } from 'lit'` means the class extends `e`. Never rely on identifier name strings like `"LitElement"` or substring checks like `heritage.contains("Element")`.
+- **Bailout**: If the heritage cannot be proven to extend Lit, leave the class untouched.
 
-- **Strictly general-purpose**: Never hardcode library-specific heuristics, tag whitelists, or vendor class names. All classification must rely on AST analysis.
-- **AST codegen invariant (strictly no string splicing)**: Never use string manipulation (`replace_range`, `insert_str`, manual brace counting, regex, `.find('{')`, raw slice span math) to synthesize or rewrite code. Always manipulate AST nodes with `oxc_allocator` / `AstBuilder` and emit code with `oxc_codegen`.
-- **Zero runtime dependencies for Mode A**: Mode A output must have zero runtime dependencies on Lit packages.
-- **Zero consumer runtime overhead**: Downstream consumers write standard components and only configure the bundler plugin. Never require manual consumer runtime setup or client loader modules.
-- **Micro-runtime budget**: Mode B micro-runtime must remain ≤1.5 KB gzipped.
-- **Sentence case documentation**: All documentation, comments, and summaries must use sentence case headings and descriptions.
+### 2. Mode A eligibility criteria (pure vanilla Custom Element)
+A component may only be transformed to Mode A if **all** of the following conditions are proven:
+- All reactive properties use supported standard options (`type`, `reflect`, `attribute`).
+- No unsupported Lit lifecycle hooks are defined (`firstUpdated`, `updated`, `willUpdate`, `update`, `shouldUpdate`).
+- No host controllers are added (`addController`).
+- All template bindings are static or direct property bindings supported by the template compiler.
+- No dynamic list directives (`repeat()`, `map()`) or complex conditional branching directives.
+
+### 3. Strict Mode A prohibitions
+When compiling to Mode A, the transform must **never**:
+- **Patch global prototypes**: Never attach properties or methods to `HTMLElement.prototype`.
+- **Inject fake compatibility stubs**: Never generate dummy Lit methods (e.g. `requestUpdate() { return Promise.resolve(false); }` or `static createProperty() {}`) to bypass unhandled features.
+- **Invent fallback markup**: Never invent `<slot></slot>` when no template is declared.
+- **Guess event names**: Never default unparseable event bindings to `"click"` or strip strings with `trim_start_matches("this.")`. Move original AST handler expressions directly into `addEventListener`.
+- **Reconstruct expressions via strings**: Carry over author initializers and expressions as AST nodes (`clone_in`).
+
+### 4. Mode B and safe bailout
+- If a component uses dynamic directives or features supported by the micro-runtime, route to Mode B (`NativeElement`).
+- If any component feature is unrecognized, dynamic, or unsupported by both Mode A and Mode B, leave the component completely unchanged and emit a diagnostic. An untouched file is a safe, valid outcome.
 
 ## Verification procedure
 

@@ -3,16 +3,6 @@ use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
-/// Analyzes constructor property assignments (`this.disabled = false; this.size = 'lg';`),
-/// hoists scalar property defaults onto the class prototype (`Component.prototype.disabled = false;`),
-/// and eliminates redundant assignment statements from the constructor body.
-pub fn hoist_constructor_defaults<'a>(
-    _class: &mut Class<'a>,
-    _ast: &AstBuilder<'a>,
-) -> Vec<Statement<'a>> {
-    Vec::new()
-}
-
 pub fn inject_constructor_statements<'a>(
     class: &mut Class<'a>,
     extra_statements: Vec<Statement<'a>>,
@@ -27,8 +17,19 @@ pub fn inject_constructor_statements<'a>(
         if let ClassElement::MethodDefinition(method_def) = element {
             if method_def.kind == MethodDefinitionKind::Constructor {
                 if let Some(ref mut body) = method_def.value.body {
-                    for stmt in extra_statements {
-                        body.statements.push(stmt);
+                    let mut insert_pos = 0;
+                    for (i, stmt) in body.statements.iter().enumerate() {
+                        if let Statement::ExpressionStatement(expr_stmt) = stmt {
+                            if let Expression::CallExpression(call) = &expr_stmt.expression {
+                                if matches!(call.callee, Expression::Super(_)) {
+                                    insert_pos = i + 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    for (offset, stmt) in extra_statements.into_iter().enumerate() {
+                        body.statements.insert(insert_pos + offset, stmt);
                     }
                 }
                 return;
