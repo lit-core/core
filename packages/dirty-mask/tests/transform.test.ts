@@ -231,6 +231,22 @@ export class BareEl {
     expect(resWithoutLit.code).toMatch(/import\s*\{\s*noChange\s*\}\s*from\s*['"]lit['"]/);
   });
 
+  it('detects compiled __decorate and createProperty property definitions', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+import { property } from 'lit/decorators.js';
+
+export class CompiledEl extends LitElement {
+  render() { return html\`<div>\${this.title}</div>\`; }
+}
+CompiledEl.createProperty("title", { type: String });
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.maskedPartsCount).toBe(1);
+    expect(res.code).toContain('this.__litDirtyMask & 1');
+  });
+
   it('is idempotent and does not re-wrap already masked expressions', () => {
     const input = `
 import { LitElement, html, noChange } from 'lit';

@@ -10,7 +10,7 @@ import { getCombinedPlugins } from './tools/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../..');
-const defaultResultsDir = path.resolve(__dirname, '../results');
+const _defaultResultsDir = path.resolve(__dirname, '../results');
 
 /**
  * Run a Vite build for benchmark purposes.

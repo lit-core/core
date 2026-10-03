@@ -123,10 +123,17 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     }
 
     // 3. Clean unused decorator imports
+    let mut referenced_names = std::collections::HashSet::new();
+    for name in import_ctx.decorator_bindings.keys() {
+        if is_identifier_used_in_statements(&intermediate_statements, name) {
+            referenced_names.insert(name.clone());
+        }
+    }
+
     let mut new_statements = ArenaVec::new_in(&ast);
     for mut stmt in intermediate_statements {
         if let Statement::ImportDeclaration(import_decl) = &mut stmt {
-            if clean_lit_import(import_decl, &import_ctx, &ast) {
+            if clean_lit_import(import_decl, &import_ctx, &referenced_names, &ast) {
                 new_statements.push(stmt);
             }
         } else {
@@ -272,6 +279,7 @@ pub fn transform_class<'a>(
 fn clean_lit_import<'a>(
     import_decl: &mut ImportDeclaration<'a>,
     import_ctx: &ImportContext,
+    referenced_names: &std::collections::HashSet<String>,
     ast: &AstBuilder<'a>,
 ) -> bool {
     let specifier = import_decl.source.value.as_str();
@@ -290,21 +298,22 @@ fn clean_lit_import<'a>(
         match &mut spec {
             ImportDeclarationSpecifier::ImportSpecifier(named) => {
                 let imported_name = named.imported.name();
+                let local_name = named.local.name.as_str();
                 if imported_name.as_str() == "localized" {
                     named.imported = ModuleExportName::IdentifierName(IdentifierName::new(
                         SPAN,
                         "updateWhenLocaleChanges",
                         ast,
                     ));
-                    if named.local.name.as_str() == "localized" {
+                    if local_name == "localized" {
                         named.local = BindingIdentifier::new(SPAN, "updateWhenLocaleChanges", ast);
                     }
                     new_specs.push(spec);
-                } else if import_ctx
-                    .get_decorator_kind(named.local.name.as_str())
-                    .is_some()
-                {
-                    // Stripped decorator import
+                } else if import_ctx.get_decorator_kind(local_name).is_some() {
+                    // Only strip if NO references remain in the program!
+                    if referenced_names.contains(local_name) {
+                        new_specs.push(spec);
+                    }
                 } else {
                     new_specs.push(spec);
                 }
@@ -369,14 +378,6 @@ pub fn try_transform_decorate_call<'a>(
     import_ctx: &ImportContext,
     ast: &AstBuilder<'a>,
 ) -> Option<Vec<Statement<'a>>> {
-    let is_decorate = match &call.callee {
-        Expression::Identifier(id) => id.name == "__decorate",
-        _ => false,
-    };
-    if !is_decorate {
-        return None;
-    }
-
     if call.arguments.len() < 2 {
         return None;
     }
@@ -389,21 +390,56 @@ pub fn try_transform_decorate_call<'a>(
         return None;
     }
 
+    let is_decorate = match &call.callee {
+        Expression::Identifier(id) => {
+            id.name == "__decorate"
+                || id.name == "__decorateClass"
+                || id.name == "_ts_decorate"
+                || id.name.starts_with("__decorate")
+                || arr.elements.iter().any(|elem| {
+                    if let Some(Expression::CallExpression(c)) = elem.as_expression() {
+                        let name = match &c.callee {
+                            Expression::Identifier(id) => id.name.as_str(),
+                            Expression::StaticMemberExpression(m) => m.property.name.as_str(),
+                            _ => "",
+                        };
+                        import_ctx.get_decorator_kind(name).is_some()
+                            || LitDecoratorKind::from_canonical_name(name).is_some()
+                    } else {
+                        false
+                    }
+                })
+        }
+        Expression::StaticMemberExpression(mem) => {
+            mem.property.name == "__decorate"
+                || mem.property.name == "decorate"
+        }
+        _ => false,
+    };
+    if !is_decorate {
+        return None;
+    }
+
     let second_arg = call.arguments.get(1)?;
     let target_expr = second_arg.as_expression()?;
     let helper = AstHelper::new(ast);
 
     let mut lowered_stmts = Vec::new();
+    let mut unlowered_elems = ArenaVec::new_in(ast);
 
     for elem in &arr.elements {
         let Some(Expression::CallExpression(dec_call)) = elem.as_expression() else {
-            return None;
+            unlowered_elems.push(elem.clone_in(ast.allocator()));
+            continue;
         };
 
         let dec_name = match &dec_call.callee {
             Expression::Identifier(id) => id.name.as_str(),
             Expression::StaticMemberExpression(mem) => mem.property.name.as_str(),
-            _ => continue,
+            _ => {
+                unlowered_elems.push(elem.clone_in(ast.allocator()));
+                continue;
+            }
         };
 
         if dec_name == "__metadata" || dec_name == "metadata" {
@@ -414,24 +450,43 @@ pub fn try_transform_decorate_call<'a>(
             .get_decorator_kind(dec_name)
             .or_else(|| LitDecoratorKind::from_canonical_name(dec_name))
         else {
+            unlowered_elems.push(elem.clone_in(ast.allocator()));
             continue;
         };
 
         match kind {
             LitDecoratorKind::Property => {
-                let Expression::StaticMemberExpression(target_mem) = target_expr else {
-                    return None;
+                let class_expr = match target_expr {
+                    Expression::StaticMemberExpression(target_mem) => {
+                        if target_mem.property.name != "prototype" {
+                            unlowered_elems.push(elem.clone_in(ast.allocator()));
+                            continue;
+                        }
+                        target_mem.object.clone_in(ast.allocator())
+                    }
+                    Expression::Identifier(id) => {
+                        Expression::Identifier(id.clone_in(ast.allocator()))
+                    }
+                    _ => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
                 };
-                if target_mem.property.name != "prototype" {
-                    return None;
-                }
-                let class_expr = target_mem.object.clone_in(ast.allocator());
 
-                let third_arg = call.arguments.get(2)?;
-                let prop_name = match third_arg.as_expression()? {
-                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
-                    Expression::Identifier(id) => id.name.as_str(),
-                    _ => return None,
+                let third_arg = match call.arguments.get(2) {
+                    Some(a) => a,
+                    None => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
+                };
+                let prop_name = match third_arg.as_expression() {
+                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
+                    Some(Expression::Identifier(id)) => id.name.as_str(),
+                    _ => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
                 };
 
                 let opt_arg = dec_call
@@ -448,19 +503,37 @@ pub fn try_transform_decorate_call<'a>(
                 lowered_stmts.push(stmt);
             }
             LitDecoratorKind::State => {
-                let Expression::StaticMemberExpression(target_mem) = target_expr else {
-                    return None;
+                let class_expr = match target_expr {
+                    Expression::StaticMemberExpression(target_mem) => {
+                        if target_mem.property.name != "prototype" {
+                            unlowered_elems.push(elem.clone_in(ast.allocator()));
+                            continue;
+                        }
+                        target_mem.object.clone_in(ast.allocator())
+                    }
+                    Expression::Identifier(id) => {
+                        Expression::Identifier(id.clone_in(ast.allocator()))
+                    }
+                    _ => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
                 };
-                if target_mem.property.name != "prototype" {
-                    return None;
-                }
-                let class_expr = target_mem.object.clone_in(ast.allocator());
 
-                let third_arg = call.arguments.get(2)?;
-                let prop_name = match third_arg.as_expression()? {
-                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
-                    Expression::Identifier(id) => id.name.as_str(),
-                    _ => return None,
+                let third_arg = match call.arguments.get(2) {
+                    Some(a) => a,
+                    None => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
+                };
+                let prop_name = match third_arg.as_expression() {
+                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
+                    Some(Expression::Identifier(id)) => id.name.as_str(),
+                    _ => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
                 };
 
                 let state_key = PropertyKey::new_static_identifier(SPAN, "state", ast);
@@ -489,10 +562,22 @@ pub fn try_transform_decorate_call<'a>(
             LitDecoratorKind::CustomElement => {
                 let class_expr = target_expr.clone_in(ast.allocator());
 
-                let tag_arg = dec_call.arguments.first()?;
-                let tag_str = match tag_arg.as_expression()? {
-                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
-                    _ => return None,
+                let Some(tag_arg) = dec_call.arguments.first() else {
+                    unlowered_elems.push(elem.clone_in(ast.allocator()));
+                    continue;
+                };
+                let tag_str = match tag_arg.as_expression() {
+                    Some(Expression::StringLiteral(str_lit)) => Some(str_lit.value.as_str()),
+                    Some(Expression::TemplateLiteral(tmpl))
+                        if tmpl.expressions.is_empty() && !tmpl.quasis.is_empty() =>
+                    {
+                        Some(tmpl.quasis[0].value.raw.as_str())
+                    }
+                    _ => None,
+                };
+                let Some(tag_str) = tag_str else {
+                    unlowered_elems.push(elem.clone_in(ast.allocator()));
+                    continue;
                 };
 
                 let stmt =
@@ -500,17 +585,38 @@ pub fn try_transform_decorate_call<'a>(
                 lowered_stmts.push(stmt);
             }
             LitDecoratorKind::Query => {
-                let third_arg = call.arguments.get(2)?;
-                let prop_name = match third_arg.as_expression()? {
-                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
-                    Expression::Identifier(id) => id.name.as_str(),
-                    _ => return None,
+                let third_arg = match call.arguments.get(2) {
+                    Some(a) => a,
+                    None => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
+                };
+                let prop_name = match third_arg.as_expression() {
+                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
+                    Some(Expression::Identifier(id)) => id.name.as_str(),
+                    _ => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
                 };
 
-                let selector_arg = dec_call.arguments.first()?;
-                let selector_str = match selector_arg.as_expression()? {
-                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
-                    _ => return None,
+                let Some(selector_arg) = dec_call.arguments.first() else {
+                    unlowered_elems.push(elem.clone_in(ast.allocator()));
+                    continue;
+                };
+                let selector_str = match selector_arg.as_expression() {
+                    Some(Expression::StringLiteral(str_lit)) => Some(str_lit.value.as_str()),
+                    Some(Expression::TemplateLiteral(tmpl))
+                        if tmpl.expressions.is_empty() && !tmpl.quasis.is_empty() =>
+                    {
+                        Some(tmpl.quasis[0].value.raw.as_str())
+                    }
+                    _ => None,
+                };
+                let Some(selector_str) = selector_str else {
+                    unlowered_elems.push(elem.clone_in(ast.allocator()));
+                    continue;
                 };
 
                 let this = helper.this_expr();
@@ -533,17 +639,38 @@ pub fn try_transform_decorate_call<'a>(
                 lowered_stmts.push(stmt);
             }
             LitDecoratorKind::QueryAll => {
-                let third_arg = call.arguments.get(2)?;
-                let prop_name = match third_arg.as_expression()? {
-                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
-                    Expression::Identifier(id) => id.name.as_str(),
-                    _ => return None,
+                let third_arg = match call.arguments.get(2) {
+                    Some(a) => a,
+                    None => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
+                };
+                let prop_name = match third_arg.as_expression() {
+                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
+                    Some(Expression::Identifier(id)) => id.name.as_str(),
+                    _ => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
                 };
 
-                let selector_arg = dec_call.arguments.first()?;
-                let selector_str = match selector_arg.as_expression()? {
-                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
-                    _ => return None,
+                let Some(selector_arg) = dec_call.arguments.first() else {
+                    unlowered_elems.push(elem.clone_in(ast.allocator()));
+                    continue;
+                };
+                let selector_str = match selector_arg.as_expression() {
+                    Some(Expression::StringLiteral(str_lit)) => Some(str_lit.value.as_str()),
+                    Some(Expression::TemplateLiteral(tmpl))
+                        if tmpl.expressions.is_empty() && !tmpl.quasis.is_empty() =>
+                    {
+                        Some(tmpl.quasis[0].value.raw.as_str())
+                    }
+                    _ => None,
+                };
+                let Some(selector_str) = selector_str else {
+                    unlowered_elems.push(elem.clone_in(ast.allocator()));
+                    continue;
                 };
 
                 let this = helper.this_expr();
@@ -566,11 +693,20 @@ pub fn try_transform_decorate_call<'a>(
                 lowered_stmts.push(stmt);
             }
             LitDecoratorKind::QueryAssignedElements | LitDecoratorKind::QueryAssignedNodes => {
-                let third_arg = call.arguments.get(2)?;
-                let prop_name = match third_arg.as_expression()? {
-                    Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
-                    Expression::Identifier(id) => id.name.as_str(),
-                    _ => return None,
+                let third_arg = match call.arguments.get(2) {
+                    Some(a) => a,
+                    None => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
+                };
+                let prop_name = match third_arg.as_expression() {
+                    Some(Expression::StringLiteral(str_lit)) => str_lit.value.as_str(),
+                    Some(Expression::Identifier(id)) => id.name.as_str(),
+                    _ => {
+                        unlowered_elems.push(elem.clone_in(ast.allocator()));
+                        continue;
+                    }
                 };
 
                 let this = helper.this_expr();
@@ -604,20 +740,38 @@ pub fn try_transform_decorate_call<'a>(
                 );
                 lowered_stmts.push(stmt);
             }
-            _ => continue,
+            _ => {
+                unlowered_elems.push(elem.clone_in(ast.allocator()));
+            }
         }
     }
 
     if lowered_stmts.is_empty() {
-        None
-    } else {
-        Some(lowered_stmts)
+        return None;
     }
+
+    if !unlowered_elems.is_empty() {
+        let mut new_call = call.clone_in(ast.allocator());
+        let new_arr = Expression::new_array_expression(SPAN, unlowered_elems, ast);
+        if let Some(first) = new_call.arguments.first_mut() {
+            *first = Argument::from(new_arr);
+        }
+        let call_expr = helper.call_expr(new_call.callee, new_call.arguments, new_call.optional);
+        lowered_stmts.push(Statement::new_expression_statement(
+            SPAN,
+            call_expr,
+            ast,
+        ));
+    }
+
+    Some(lowered_stmts)
 }
 
 fn strip_dead_decorator_helpers<'a>(statements: &mut ArenaVec<'a, Statement<'a>>) {
-    let has_decorate = statements.iter().any(stmt_has_decorate_call);
-    if has_decorate {
+    if is_identifier_used_in_statements(statements, "__decorate")
+        || is_identifier_used_in_statements(statements, "__decorateClass")
+        || is_identifier_used_in_statements(statements, "_ts_decorate")
+    {
         return;
     }
 
@@ -626,7 +780,10 @@ fn strip_dead_decorator_helpers<'a>(statements: &mut ArenaVec<'a, Statement<'a>>
             Statement::VariableDeclaration(var_decl) => {
                 var_decl.declarations.retain(|decl| {
                     if let BindingPattern::BindingIdentifier(id) = &decl.id {
-                        id.name != "__decorate" && id.name != "__metadata"
+                        id.name != "__decorate"
+                            && id.name != "__decorateClass"
+                            && id.name != "_ts_decorate"
+                            && id.name != "__metadata"
                     } else {
                         true
                     }
@@ -638,10 +795,15 @@ fn strip_dead_decorator_helpers<'a>(statements: &mut ArenaVec<'a, Statement<'a>>
                     specifiers.retain(|spec| {
                         match spec {
                             ImportDeclarationSpecifier::ImportSpecifier(s) => {
-                                s.local.name != "__decorate" && s.local.name != "__metadata"
+                                s.local.name != "__decorate"
+                                    && s.local.name != "__decorateClass"
+                                    && s.local.name != "_ts_decorate"
+                                    && s.local.name != "__metadata"
                             }
                             ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
                                 s.local.name != "__decorate"
+                                    && s.local.name != "__decorateClass"
+                                    && s.local.name != "_ts_decorate"
                             }
                             _ => true,
                         }
@@ -656,38 +818,248 @@ fn strip_dead_decorator_helpers<'a>(statements: &mut ArenaVec<'a, Statement<'a>>
     });
 }
 
-fn stmt_has_decorate_call(stmt: &Statement) -> bool {
+pub fn is_identifier_used_in_statements<'a>(statements: &[Statement<'a>], name: &str) -> bool {
+    statements.iter().any(|s| stmt_has_identifier_reference(s, name))
+}
+
+fn stmt_has_identifier_reference(stmt: &Statement, name: &str) -> bool {
     match stmt {
-        Statement::ExpressionStatement(expr_stmt) => expr_has_decorate_call(&expr_stmt.expression),
-        Statement::VariableDeclaration(var_decl) => var_decl.declarations.iter().any(|d| {
-            d.init.as_ref().map_or(false, expr_has_decorate_call)
-        }),
+        Statement::ExpressionStatement(e) => expr_has_identifier_reference(&e.expression, name),
+        Statement::VariableDeclaration(var_decl) => {
+            var_decl.declarations.iter().any(|d| {
+                d.init.as_ref().map_or(false, |init| expr_has_identifier_reference(init, name))
+            })
+        }
+        Statement::ClassDeclaration(class) => class_has_identifier_reference(class, name),
+        Statement::FunctionDeclaration(func) => {
+            func.body.as_ref().map_or(false, |b| {
+                b.statements.iter().any(|s| stmt_has_identifier_reference(s, name))
+            })
+        }
+        Statement::ReturnStatement(ret) => {
+            ret.argument.as_ref().map_or(false, |arg| expr_has_identifier_reference(arg, name))
+        }
+        Statement::IfStatement(if_stmt) => {
+            expr_has_identifier_reference(&if_stmt.test, name)
+                || stmt_has_identifier_reference(&if_stmt.consequent, name)
+                || if_stmt.alternate.as_ref().map_or(false, |alt| stmt_has_identifier_reference(alt, name))
+        }
+        Statement::BlockStatement(block) => {
+            block.body.iter().any(|s| stmt_has_identifier_reference(s, name))
+        }
+        Statement::ForStatement(for_stmt) => {
+            for_stmt.init.as_ref().map_or(false, |init| match init {
+                ForStatementInit::VariableDeclaration(v) => v.declarations.iter().any(|d| d.init.as_ref().map_or(false, |i| expr_has_identifier_reference(i, name))),
+                _ => init.as_expression().map_or(false, |e| expr_has_identifier_reference(e, name)),
+            })
+            || for_stmt.test.as_ref().map_or(false, |test| expr_has_identifier_reference(test, name))
+            || for_stmt.update.as_ref().map_or(false, |up| expr_has_identifier_reference(up, name))
+            || stmt_has_identifier_reference(&for_stmt.body, name)
+        }
+        Statement::ForInStatement(for_in) => {
+            expr_has_identifier_reference(&for_in.right, name)
+                || stmt_has_identifier_reference(&for_in.body, name)
+        }
+        Statement::ForOfStatement(for_of) => {
+            expr_has_identifier_reference(&for_of.right, name)
+                || stmt_has_identifier_reference(&for_of.body, name)
+        }
+        Statement::WhileStatement(while_stmt) => {
+            expr_has_identifier_reference(&while_stmt.test, name)
+                || stmt_has_identifier_reference(&while_stmt.body, name)
+        }
+        Statement::DoWhileStatement(do_while) => {
+            expr_has_identifier_reference(&do_while.test, name)
+                || stmt_has_identifier_reference(&do_while.body, name)
+        }
+        Statement::SwitchStatement(switch_stmt) => {
+            expr_has_identifier_reference(&switch_stmt.discriminant, name)
+                || switch_stmt.cases.iter().any(|c| {
+                    c.test.as_ref().map_or(false, |t| expr_has_identifier_reference(t, name))
+                        || c.consequent.iter().any(|s| stmt_has_identifier_reference(s, name))
+                })
+        }
+        Statement::ThrowStatement(throw_stmt) => {
+            expr_has_identifier_reference(&throw_stmt.argument, name)
+        }
+        Statement::TryStatement(try_stmt) => {
+            try_stmt.block.body.iter().any(|s| stmt_has_identifier_reference(s, name))
+                || try_stmt.handler.as_ref().map_or(false, |h| {
+                    h.body.body.iter().any(|s| stmt_has_identifier_reference(s, name))
+                })
+                || try_stmt.finalizer.as_ref().map_or(false, |f| {
+                    f.body.iter().any(|s| stmt_has_identifier_reference(s, name))
+                })
+        }
         Statement::ExportDefaultDeclaration(exp) => {
-            exp.declaration.as_expression().map_or(false, expr_has_decorate_call)
+            match &exp.declaration {
+                ExportDefaultDeclarationKind::ClassDeclaration(c) => class_has_identifier_reference(c, name),
+                ExportDefaultDeclarationKind::FunctionDeclaration(f) => {
+                    f.body.as_ref().map_or(false, |b| {
+                        b.statements.iter().any(|s| stmt_has_identifier_reference(s, name))
+                    })
+                }
+                _ => {
+                    if let Some(expr) = exp.declaration.as_expression() {
+                        expr_has_identifier_reference(expr, name)
+                    } else {
+                        false
+                    }
+                }
+            }
+        }
+        Statement::ExportDeclaration(exp) => {
+            decl_has_identifier_reference(&exp.declaration, name)
+        }
+        Statement::ExportNamedDeclaration(exp) => {
+            exp.specifiers.iter().any(|s| s.local.name().as_str() == name)
         }
         _ => false,
     }
 }
 
-fn expr_has_decorate_call(expr: &Expression) -> bool {
-    match expr {
-        Expression::CallExpression(call) => {
-            if let Expression::Identifier(id) = &call.callee {
-                if id.name == "__decorate" {
-                    return true;
-                }
+fn decl_has_identifier_reference(decl: &Declaration, name: &str) -> bool {
+    match decl {
+        Declaration::VariableDeclaration(v) => {
+            v.declarations.iter().any(|d| {
+                d.init.as_ref().map_or(false, |init| expr_has_identifier_reference(init, name))
+            })
+        }
+        Declaration::ClassDeclaration(c) => class_has_identifier_reference(c, name),
+        Declaration::FunctionDeclaration(f) => {
+            f.body.as_ref().map_or(false, |b| {
+                b.statements.iter().any(|s| stmt_has_identifier_reference(s, name))
+            })
+        }
+        _ => false,
+    }
+}
+
+fn class_has_identifier_reference(class: &Class, name: &str) -> bool {
+    if class
+        .heritage
+        .as_ref()
+        .map_or(false, |h| expr_has_identifier_reference(&h.expression, name))
+    {
+        return true;
+    }
+    class.decorators.iter().any(|d| expr_has_identifier_reference(&d.expression, name))
+        || class.body.body.iter().any(|elem| match elem {
+            ClassElement::MethodDefinition(m) => {
+                m.decorators.iter().any(|d| expr_has_identifier_reference(&d.expression, name))
+                    || m.value.body.as_ref().map_or(false, |b| {
+                        b.statements.iter().any(|s| stmt_has_identifier_reference(s, name))
+                    })
             }
-            call.arguments.iter().any(|arg| {
-                if let Some(e) = arg.as_expression() {
-                    expr_has_decorate_call(e)
-                } else {
-                    false
+            ClassElement::PropertyDefinition(p) => {
+                p.decorators.iter().any(|d| expr_has_identifier_reference(&d.expression, name))
+                    || p.value.as_ref().map_or(false, |v| expr_has_identifier_reference(v, name))
+            }
+            ClassElement::StaticBlock(b) => {
+                b.body.iter().any(|s| stmt_has_identifier_reference(s, name))
+            }
+            ClassElement::AccessorProperty(a) => {
+                a.decorators.iter().any(|d| expr_has_identifier_reference(&d.expression, name))
+                    || a.value.as_ref().map_or(false, |v| expr_has_identifier_reference(v, name))
+            }
+            _ => false,
+        })
+}
+
+fn expr_has_identifier_reference(expr: &Expression, name: &str) -> bool {
+    match expr {
+        Expression::Identifier(id) => id.name == name,
+        Expression::CallExpression(call) => {
+            expr_has_identifier_reference(&call.callee, name)
+                || call.arguments.iter().any(|arg| {
+                    arg.as_expression().map_or(false, |e| expr_has_identifier_reference(e, name))
+                })
+        }
+        Expression::StaticMemberExpression(mem) => {
+            expr_has_identifier_reference(&mem.object, name)
+        }
+        Expression::ComputedMemberExpression(mem) => {
+            expr_has_identifier_reference(&mem.object, name)
+                || expr_has_identifier_reference(&mem.expression, name)
+        }
+        Expression::AssignmentExpression(assign) => {
+            expr_has_identifier_reference(&assign.right, name)
+        }
+        Expression::BinaryExpression(bin) => {
+            expr_has_identifier_reference(&bin.left, name)
+                || expr_has_identifier_reference(&bin.right, name)
+        }
+        Expression::UnaryExpression(unary) => {
+            expr_has_identifier_reference(&unary.argument, name)
+        }
+        Expression::LogicalExpression(log) => {
+            expr_has_identifier_reference(&log.left, name)
+                || expr_has_identifier_reference(&log.right, name)
+        }
+        Expression::ConditionalExpression(cond) => {
+            expr_has_identifier_reference(&cond.test, name)
+                || expr_has_identifier_reference(&cond.consequent, name)
+                || expr_has_identifier_reference(&cond.alternate, name)
+        }
+        Expression::SequenceExpression(seq) => {
+            seq.expressions.iter().any(|e| expr_has_identifier_reference(e, name))
+        }
+        Expression::ParenthesizedExpression(p) => {
+            expr_has_identifier_reference(&p.expression, name)
+        }
+        Expression::ArrayExpression(arr) => {
+            arr.elements.iter().any(|elem| {
+                elem.as_expression().map_or(false, |e| expr_has_identifier_reference(e, name))
+            })
+        }
+        Expression::ObjectExpression(obj) => {
+            obj.properties.iter().any(|prop| {
+                match prop {
+                    ObjectPropertyKind::ObjectProperty(p) => {
+                        expr_has_identifier_reference(&p.value, name)
+                    }
+                    ObjectPropertyKind::SpreadProperty(p) => {
+                        expr_has_identifier_reference(&p.argument, name)
+                    }
                 }
             })
         }
-        Expression::AssignmentExpression(assign) => expr_has_decorate_call(&assign.right),
-        Expression::SequenceExpression(seq) => seq.expressions.iter().any(expr_has_decorate_call),
-        Expression::ParenthesizedExpression(p) => expr_has_decorate_call(&p.expression),
+        Expression::FunctionExpression(func) => {
+            func.body.as_ref().map_or(false, |b| {
+                b.statements.iter().any(|s| stmt_has_identifier_reference(s, name))
+            })
+        }
+        Expression::ArrowFunctionExpression(arrow) => match &arrow.body {
+            ArrowFunctionBody::FunctionBody(b) => {
+                b.statements.iter().any(|s| stmt_has_identifier_reference(s, name))
+            }
+            _ => {
+                if let Some(expr) = arrow.body.as_expression() {
+                    expr_has_identifier_reference(expr, name)
+                } else {
+                    false
+                }
+            }
+        },
+        Expression::ClassExpression(class) => {
+            class_has_identifier_reference(class, name)
+        }
+        Expression::TemplateLiteral(tmpl) => {
+            tmpl.expressions.iter().any(|e| expr_has_identifier_reference(e, name))
+        }
+        Expression::TaggedTemplateExpression(tagged) => {
+            expr_has_identifier_reference(&tagged.tag, name)
+                || tagged.quasi.expressions.iter().any(|e| expr_has_identifier_reference(e, name))
+        }
+        Expression::NewExpression(new_expr) => {
+            expr_has_identifier_reference(&new_expr.callee, name)
+                || new_expr.arguments.iter().any(|arg| {
+                    arg.as_expression().map_or(false, |e| expr_has_identifier_reference(e, name))
+                })
+        }
+        Expression::AwaitExpression(aw) => {
+            expr_has_identifier_reference(&aw.argument, name)
+        }
         _ => false,
     }
 }

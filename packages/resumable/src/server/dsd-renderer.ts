@@ -63,7 +63,7 @@ export function renderToDsd(options: DsdRenderOptions): string {
     }
   }
 
-  return `<${tag}${attrStr}>` + `<template shadowrootmode="open">` + `${styleTag}${shadowHtml}` + `</template>` + `${lightDom}${stateScript}` + `</${tag}>`;
+  return `<${tag}${attrStr}><template shadowrootmode="open">${styleTag}${shadowHtml}</template>${lightDom}${stateScript}</${tag}>`;
 }
 
 /**
@@ -116,7 +116,7 @@ export function renderComponentToDsd(component: any, options: ComponentDsdOption
   const lightDom = options.lightDom || '';
   const styleTag = stylesList.length > 0 ? `<style>${stylesList.join('\n')}</style>` : '';
 
-  return `<${tagName}${attrStr}>` + `<template shadowrootmode="open">` + `${styleTag}${shadowHtml}` + `</template>` + `${lightDom}${stateScript}` + `</${tagName}>`;
+  return `<${tagName}${attrStr}><template shadowrootmode="open">${styleTag}${shadowHtml}</template>${lightDom}${stateScript}</${tagName}>`;
 }
 
 /**
@@ -159,7 +159,7 @@ export function renderTemplateResult(result: any): string {
           if (quote) {
             stripLeadingQuote = quote;
           }
-          str = str.slice(0, match.index) + `resumes-on-${eventName} `;
+          str = `${str.slice(0, match.index)}resumes-on-${eventName} `;
         }
         html += str;
         continue;

@@ -44,7 +44,7 @@ export function extractCssFromModule(source) {
   const templateMatches = source.matchAll(/(?:css|[a-zA-Z0-9_$]+)\s*`([\s\S]*?)`/g);
   for (const match of templateMatches) {
     if (match[1] && match[1].length > 5) {
-      accumulated += '\n' + match[1];
+      accumulated += `\n${match[1]}`;
     }
   }
   if (accumulated.trim().length > 0) {
@@ -201,9 +201,9 @@ export function readComponentFullSource(pkg, subpath) {
   const imports = [...full.matchAll(/from\s*['"](\.[^'"]+)['"]/g)].map((m) => m[1]);
   for (const imp of imports) {
     let resolved = path.resolve(dir, imp);
-    if (!fs.existsSync(resolved) && fs.existsSync(resolved + '.js')) resolved += '.js';
+    if (!fs.existsSync(resolved) && fs.existsSync(`${resolved}.js`)) resolved += '.js';
     if (fs.existsSync(resolved) && fs.statSync(resolved).isFile()) {
-      full += '\n' + fs.readFileSync(resolved, 'utf-8');
+      full += `\n${fs.readFileSync(resolved, 'utf-8')}`;
     }
   }
   return full;

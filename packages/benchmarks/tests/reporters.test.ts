@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { loadBenchmarkResult, loadStandaloneResult, saveBenchmarkResult, saveStandaloneResult, updateManifest } from '../src/reporters/index.js';
+import { loadBenchmarkResult, loadStandaloneResult, saveBenchmarkResult, saveStandaloneResult } from '../src/reporters/index.js';
 import { createBenchmarkResult } from '../src/schema.js';
 
 describe('reporters for decoupled benchmark output', () => {

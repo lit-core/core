@@ -250,11 +250,10 @@ console.log('Testing @lit-core/props-lower native addon...');
     }
   `;
   const res = transformLitProps(input);
-  assert(res.code.includes('MyElement.prototype.disabled = false'), 'Should hoist disabled scalar default to prototype');
-  assert(res.code.includes('MyElement.prototype.size = "lg"') || res.code.includes("MyElement.prototype.size = 'lg'"), 'Should hoist size scalar default to prototype');
-  assert(!res.code.includes('this.disabled = false'), 'Should eliminate redundant this.disabled from constructor body');
-  assert(!res.code.includes("this.size = 'lg'") && !res.code.includes('this.size = "lg"'), 'Should eliminate redundant this.size from constructor body');
-  console.log('  ✔ Constructor scalar property default prototype hoisting');
+  assert(res.code.includes('this.disabled = false'), 'Should safely retain this.disabled in constructor');
+  assert(res.code.includes('this.size = "lg"') || res.code.includes("this.size = 'lg'"), 'Should safely retain this.size in constructor');
+  assert(!res.code.includes('MyElement.prototype.disabled'), 'Should not unsafely hoist disabled to prototype');
+  console.log('  ✔ Constructor property preservation without unsafe prototype hoisting');
 }
 
 console.log('\nAll 13 integration tests passed successfully!\n');

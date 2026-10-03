@@ -3,7 +3,7 @@ import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { transformDirtyMask } from '@lit-core/dirty-mask';
 import { ENTERPRISE_COMPONENTS, readComponentFullSource } from './fixtures.js';
-import { calculateDelta, formatDuration, formatKb, formatNumber, formatPercent } from './format.js';
+import { calculateDelta } from './format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 

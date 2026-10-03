@@ -234,17 +234,17 @@ const mockCompiler = {
   hooks: {
     beforeCompile: { tapAsync: () => {} },
     compilation: {
-      tap: (name, cb) => {
+      tap: (_name, cb) => {
         const mockCompilation = {};
         cb(mockCompilation);
       },
     },
     normalModuleFactory: {
-      tap: (name, cb) => {
+      tap: (_name, cb) => {
         const mockNmf = {
           hooks: {
             resolve: {
-              tap: (n, fn) => {
+              tap: (_n, fn) => {
                 resolveHook = fn;
               },
             },
@@ -259,8 +259,8 @@ const mockCompiler = {
     NormalModule: {
       getCompilationHooks: () => ({
         readResourceForScheme: {
-          for: (scheme) => ({
-            tapPromise: (name, fn) => {
+          for: (_scheme) => ({
+            tapPromise: (_name, fn) => {
               virtualResourceHook = fn;
             },
           }),

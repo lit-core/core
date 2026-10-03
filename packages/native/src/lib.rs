@@ -7,7 +7,7 @@ pub mod models;
 pub mod template_parser;
 pub mod vanilla;
 
-use crate::import_scanner::{is_lit_directive_source, is_lit_import_source, ImportContext};
+use crate::import_scanner::ImportContext;
 use crate::models::{ClassificationResult, ClassifyOptions, TransformOptions, TransformResult};
 use napi_derive::napi;
 use oxc_allocator::{Allocator, ArenaVec};
@@ -214,12 +214,8 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
     program.body = new_statements;
 
     // Dead import elimination:
-    // If all components were converted to vanilla, strip unused Lit base imports
-    if vanilla_count > 0 && micro_count == 0 {
-        strip_lit_imports_from_program(&mut program, &ast);
-    } else if micro_count > 0 {
-        // Strip unused directive imports that were lowered
-        strip_lowered_directive_imports(&mut program, &ast);
+    if vanilla_count > 0 || micro_count > 0 {
+        import_scanner::clean_dead_imports(&mut program, &ast);
     }
 
     let mut codegen_options = CodegenOptions::default();
@@ -239,55 +235,4 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
         micro_count,
         classifications,
     }
-}
-
-fn strip_lit_imports_from_program<'a>(program: &mut Program<'a>, ast: &AstBuilder<'a>) {
-    let mut retained = ArenaVec::new_in(ast);
-    for mut stmt in program.body.drain(..) {
-        if let Statement::ImportDeclaration(ref mut import_decl) = stmt {
-            let src = import_decl.source.value.as_str();
-            if is_lit_import_source(src) || is_lit_directive_source(src) {
-                if let Some(ref mut specifiers) = import_decl.specifiers {
-                    specifiers.retain(|spec| {
-                        let name = match spec {
-                            ImportDeclarationSpecifier::ImportSpecifier(n) => {
-                                n.imported.name().as_str()
-                            }
-                            _ => "",
-                        };
-                        name != "LitElement"
-                            && name != "ReactiveElement"
-                            && name != "html"
-                            && name != "css"
-                            && name != "customElement"
-                            && name != "property"
-                            && name != "state"
-                    });
-                    if specifiers.is_empty() {
-                        continue;
-                    }
-                }
-            }
-        }
-        retained.push(stmt);
-    }
-    program.body = retained;
-}
-
-fn strip_lowered_directive_imports<'a>(program: &mut Program<'a>, ast: &AstBuilder<'a>) {
-    let mut retained = ArenaVec::new_in(ast);
-    for mut stmt in program.body.drain(..) {
-        if let Statement::ImportDeclaration(ref mut import_decl) = stmt {
-            let src = import_decl.source.value.as_str();
-            if is_lit_directive_source(src)
-                && (src.contains("class-map")
-                    || src.contains("if-defined")
-                    || src.contains("guard"))
-            {
-                continue;
-            }
-        }
-        retained.push(stmt);
-    }
-    program.body = retained;
 }

@@ -163,6 +163,6 @@ Options:
   }
 }
 
-if (process.argv[1] && process.argv[1].endsWith('compare.js')) {
+if (process.argv[1]?.endsWith('compare.js')) {
   main();
 }

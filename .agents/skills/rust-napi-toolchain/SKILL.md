@@ -57,16 +57,18 @@ Whenever you modify `.rs` files or Cargo dependencies, you must compile the nati
 
 ## Testing native modules
 
-1. **Rust unit tests**:
+1. **Fast automated test suite across affected crates**:
+   ```bash
+   pnpm run check:rust
+   ```
+
+2. **Crate-specific Rust unit tests (~0.3s)**:
    ```bash
    cargo test --manifest-path packages/<package-name>/Cargo.toml
    ```
 
-2. **Node.js integration tests**:
-   Ensure the native `.node` binary has been built first, then run:
-   ```bash
-   node packages/<package-name>/test.js
-   ```
+3. **Automatic binary freshness**:
+   You do not need to manually run release builds during development. Running `pnpm run check` or `node scripts/check/native-fresh.mjs` automatically detects newer `.rs` sources and recompiles native addons in fast debug mode before running JS tests.
 
 ## Common troubleshooting
 

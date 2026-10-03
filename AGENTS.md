@@ -182,6 +182,11 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
    - All runtime execution hooks (such as resumable event delegation, custom element chunk loaders, or hydration adapters) must be synthesized ahead of time via `oxc` AST compilation and automatically injected by bundler plugins (`@lit-core/webpack-plugin`, `@lit-core/vite-plugin`).
    - Consumers write standard Lit components and only add the bundler plugin. Zero additional runtime dependencies, zero manual imports, and zero configuration boilerplate.
    - Strictly prohibit opinionated path conventions (such as naive `/components/*` fallback assumptions). Manifests and chunk URLs must be resolved dynamically by the bundler plugin across any codebase.
+9. **Autonomous sandboxed validation loop**:
+   - Always validate changes using `pnpm run check` (runs affected tiers), `pnpm run check:rust`, `pnpm run check:js`, or `pnpm run verify`.
+   - Never start local HTTP servers on loopback (`127.0.0.1`), as standard sandbox mode restricts local socket binding and triggers permission prompts.
+   - Always launch Playwright Chromium through `@lit-core/test-kit` which configures verified `--single-process` flags.
+   - Never run recursive searches across `node_modules`. Use `pnpm run vendor:where <suite> [component]` to resolve canonical component source files directly.
 
 
 

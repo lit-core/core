@@ -136,13 +136,13 @@
     "description": "Ahead-of-time decorator lowering and prototype descriptor preset hoisting",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T12:10:08.496Z",
+  "timestamp": "2026-10-03T16:17:30.124Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "84d0fed",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +157,36 @@
     }
   },
   "metrics": {
-    "rawBytes": 371840,
-    "gzipBytes": 86573,
-    "brotliBytes": 69241,
-    "buildTimeMs": 35.30845799999997
+    "rawBytes": 373703,
+    "gzipBytes": 86568,
+    "brotliBytes": 69211,
+    "buildTimeMs": 101.720417
   },
   "baseline": {
     "rawBytes": 370946,
     "gzipBytes": 86902,
     "brotliBytes": 69583,
-    "buildTimeMs": 54.010666000000015
+    "buildTimeMs": 52.67933299999993
   },
   "deltas": {
-    "rawBytes": 894,
-    "rawPercent": 0.2410054293616861,
-    "gzipBytes": -329,
-    "gzipPercent": -0.37858737428367584,
-    "brotliBytes": -342,
-    "brotliPercent": -0.4914993604759783,
-    "buildTimeMs": -18.70220800000004
+    "rawBytes": 2757,
+    "rawPercent": 0.7432348643737903,
+    "gzipBytes": -334,
+    "gzipPercent": -0.38434098179558585,
+    "brotliBytes": -372,
+    "brotliPercent": -0.5346133394650993,
+    "buildTimeMs": 49.04108400000007
   },
   "runtime": {
-    "firstRenderMs": 0,
-    "updateMs": 0,
-    "scriptEvalMs": 3.8,
-    "registrationMs": 0,
-    "heapUsedBytes": 0,
-    "speedupPercent": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 19.148936170212774,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0
+    "firstRenderMs": 28.2,
+    "updateMs": 1.2,
+    "scriptEvalMs": 3,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 85792,
+    "speedupPercent": 31.05134474327628,
+    "updateSpeedupPercent": 20.000000000000004,
+    "evalSpeedupPercent": 41.17647058823529,
+    "registrationSpeedupPercent": 29.411764705882355,
+    "memorySavingsPercent": 0.1466514583672804
   }
 }

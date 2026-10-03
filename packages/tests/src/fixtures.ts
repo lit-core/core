@@ -79,12 +79,12 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
       if (fs.existsSync(resolvedChunk) && fs.statSync(resolvedChunk).isDirectory()) {
         const potential = [
           path.join(resolvedChunk, 'index.js'),
-          path.join(resolvedChunk, path.basename(resolvedChunk) + '.styles.js'),
-          path.join(resolvedChunk, path.basename(resolvedChunk) + '.component.js'),
+          path.join(resolvedChunk, `${path.basename(resolvedChunk)}.styles.js`),
+          path.join(resolvedChunk, `${path.basename(resolvedChunk)}.component.js`),
         ];
         resolvedChunk = potential.find((p) => fs.existsSync(p)) || resolvedChunk;
-      } else if (!fs.existsSync(resolvedChunk) && fs.existsSync(resolvedChunk + '.js')) {
-        resolvedChunk = resolvedChunk + '.js';
+      } else if (!fs.existsSync(resolvedChunk) && fs.existsSync(`${resolvedChunk}.js`)) {
+        resolvedChunk = `${resolvedChunk}.js`;
       }
 
       if (fs.existsSync(resolvedChunk) && fs.statSync(resolvedChunk).isFile()) {
@@ -153,7 +153,7 @@ export function extractCssFromModule(source: string): string {
   const templateMatches = source.matchAll(/(?:css|[a-zA-Z0-9_$]+)\s*`([\s\S]*?)`/g);
   for (const match of templateMatches) {
     if (match[1] && match[1].length > 5) {
-      accumulated += '\n' + match[1];
+      accumulated += `\n${match[1]}`;
     }
   }
   if (accumulated.trim().length > 0) {

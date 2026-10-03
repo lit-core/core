@@ -1,0 +1,48 @@
+{
+  "name": "@lit-core/test-kit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sandbox-safe Playwright browser runner and DOM test utilities for lit-core",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js",
+      "default": "./dist/browser.js"
+    },
+    "./page": {
+      "types": "./dist/page.d.ts",
+      "import": "./dist/page.js",
+      "default": "./dist/page.js"
+    },
+    "./stack": {
+      "types": "./dist/stack.d.ts",
+      "import": "./dist/stack.js",
+      "default": "./dist/stack.js"
+    },
+    "./mount": {
+      "types": "./dist/mount.d.ts",
+      "import": "./dist/mount.js",
+      "default": "./dist/mount.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "playwright": "^1.63.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0",
+    "typescript": "^7.0.2"
+  },
+  "license": "MIT"
+}

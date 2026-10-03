@@ -1,4 +1,4 @@
-import { Activity, ArrowDownRight, Boxes, Building2, Check, CheckCircle2, CircleDashed, ClipboardCheck, Clock, Cpu, Layers, LayoutGrid, Shield, ShieldAlert, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowDownRight, Boxes, Building2, Check, CheckCircle2, CircleDashed, ClipboardCheck, Clock, Cpu, Layers, LayoutGrid, Shield, ShieldAlert, ShieldCheck, Zap } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useId, useState } from 'react';
 import './canonical-components.js';
@@ -104,7 +104,7 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
     // Run audit after render cycles
     const timer = setTimeout(runDomAudit, 100);
     return () => clearTimeout(timer);
-  }, [runDomAudit, currentSuite, viewMode, selectedConcept]);
+  }, [runDomAudit]);
 
   const handleSelectSuite = (suiteId: string) => {
     setCurrentSuite(suiteId);
@@ -123,7 +123,7 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
     }
   };
 
-  const activeLib = LIBRARIES.find((l) => l.id === currentSuite);
+  const _activeLib = LIBRARIES.find((l) => l.id === currentSuite);
   const activeFeat = FEATURES.find((f) => f.id === currentFeature) || {
     id: currentFeature,
     name: currentFeature,
@@ -241,7 +241,7 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
           <span className="text-base font-light text-zinc-400">Encapsulated shadow trees</span>
         </div>
 
-        {benchmarkRun && benchmarkRun.deltas && (
+        {benchmarkRun?.deltas && (
           <div className="bg-white rounded-2xl p-6 flex flex-col gap-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.06)] ring-1 ring-zinc-900/5 hover:bg-zinc-50/50 transition-all">
             <div className="flex items-center justify-between">
               <span className="text-base font-light text-zinc-500">Gzip savings</span>
@@ -411,10 +411,8 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
                               <span className="text-base font-light text-zinc-600 bg-zinc-100/90 px-2.5 py-1 rounded-lg font-mono">{comp.tag}</span>
                             </div>
 
-                            <div
-                              className="p-6 min-h-[140px] flex items-center justify-center bg-zinc-50/80 rounded-xl"
-                              dangerouslySetInnerHTML={{ __html: comp.renderHtml(instanceId) }}
-                            />
+                            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: required for web component showcase preview rendering */}
+                            <div className="p-6 min-h-[140px] flex items-center justify-center bg-zinc-50/80 rounded-xl" dangerouslySetInnerHTML={{ __html: comp.renderHtml(instanceId) }} />
 
                             <div className="flex justify-between items-center text-base font-light text-zinc-500 pt-1">
                               <span className={`inline-flex items-center gap-1.5 ${audit?.isDefined ? 'text-emerald-700 font-normal' : 'text-zinc-500'}`}>
@@ -463,6 +461,7 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
                         <span className="text-base font-light text-zinc-600 bg-zinc-100/90 px-2.5 py-1 rounded-lg font-mono">{comp.tag}</span>
                       </div>
 
+                      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: required for web component showcase preview rendering */}
                       <div className="p-6 min-h-[140px] flex items-center justify-center bg-zinc-50/80 rounded-xl" dangerouslySetInnerHTML={{ __html: comp.renderHtml(instanceId) }} />
 
                       <div className="flex justify-between items-center text-base font-light text-zinc-500 pt-1">

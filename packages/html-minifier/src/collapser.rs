@@ -24,6 +24,29 @@ pub fn is_preserve_tag(tag: &str) -> bool {
     matches!(tag, "pre" | "code" | "textarea" | "style" | "script")
 }
 
+/// Checks if '<' at position i in the quasi leads into a dynamic tag expression hole (${tag}),
+/// such as `<${tag}` or `</${tag}`.
+fn check_dynamic_tag(chars: &[char], i: usize, is_last_quasi: bool) -> Option<(bool, usize)> {
+    if is_last_quasi || chars[i] != '<' {
+        return None;
+    }
+    let len = chars.len();
+    let mut j = i + 1;
+    let mut is_closing = false;
+    if j < len && chars[j] == '/' {
+        is_closing = true;
+        j += 1;
+    }
+    while j < len && chars[j].is_whitespace() {
+        j += 1;
+    }
+    if j == len {
+        Some((is_closing, len - i))
+    } else {
+        None
+    }
+}
+
 /// Collapses whitespace across the quasis of a single tagged template expression.
 /// Preserves expression holes completely untouched.
 pub fn collapse_template_quasis(quasis: &[&str]) -> Vec<String> {
@@ -128,6 +151,29 @@ pub fn collapse_template_quasis(quasis: &[&str]) -> Vec<String> {
                 {
                     state.in_comment = true;
                     i += 4;
+                    continue;
+                }
+
+                // Check for dynamic tag start: <${tag} or </${tag}
+                if let Some((is_closing, consumed)) = check_dynamic_tag(&chars, i, is_last_quasi) {
+                    if state.after_tag_close || (is_first_quasi && out.is_empty()) || is_closing {
+                        pending_ws.clear();
+                    } else if !pending_ws.is_empty() {
+                        out.push(' ');
+                        pending_ws.clear();
+                    }
+
+                    state.after_tag_close = false;
+                    state.in_tag = true;
+                    state.quote = None;
+                    state.tag_name.clear();
+                    state.tag_name_done = true;
+                    state.is_closing_tag = is_closing;
+                    out.push('<');
+                    if is_closing {
+                        out.push('/');
+                    }
+                    i += consumed;
                     continue;
                 }
 
@@ -359,5 +405,32 @@ mod tests {
         let output = collapse_template_quasis(&input);
         assert_eq!(output[0], "<pre>  ");
         assert_eq!(output[1], "  </pre>");
+    }
+
+    #[test]
+    fn test_dynamic_tag_with_attributes() {
+        // html`<${tag}\n  part="btn"\n  class=${cls}\n></${tag}>`
+        let input = vec![
+            "\n  <",
+            "\n    part=\"btn\"\n    class=",
+            "\n  ></",
+            ">\n",
+        ];
+        let output = collapse_template_quasis(&input);
+        assert_eq!(output[0], "<");
+        assert_eq!(output[1], " part=\"btn\" class=");
+        assert_eq!(output[2], "></");
+        assert_eq!(output[3], ">");
+    }
+
+    #[test]
+    fn test_dynamic_tag_self_contained() {
+        // html`<${tag}>${content}</${tag}>`
+        let input = vec!["<", ">", "</", ">"];
+        let output = collapse_template_quasis(&input);
+        assert_eq!(output[0], "<");
+        assert_eq!(output[1], ">");
+        assert_eq!(output[2], "</");
+        assert_eq!(output[3], ">");
     }
 }

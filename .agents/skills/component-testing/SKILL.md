@@ -38,6 +38,10 @@ The test suite evaluates all real production components from each of the 5 suppo
 ## Execution commands
 
 ```bash
+# Fast sandbox-safe single-component or suite verification (recommended first step, ~100ms)
+pnpm run verify --suite=carbon --component=button
+pnpm run verify --suite=spectrum
+
 # Run all real component tests
 pnpm --filter @lit-core/tests test
 

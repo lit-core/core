@@ -32,6 +32,7 @@
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
     "@lit-core/showcase": "workspace:*",
+    "@lit-core/test-kit": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "@lit-core/webpack-plugin": "workspace:*",
     "@material/web": "^2.5.0",

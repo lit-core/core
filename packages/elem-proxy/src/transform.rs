@@ -316,7 +316,19 @@ class {proxy_name} extends HTMLElement {{
   static getImplementation() {{
     return {getter_name}();
   }}
+  static get formAssociated() {{
+    const Impl = {getter_name}();
+    return Boolean(Impl && Impl.formAssociated);
+  }}
   constructor() {{
+    const RealClass = {getter_name}();
+    if (RealClass) {{
+      if (Object.getPrototypeOf({proxy_name}.prototype) !== RealClass.prototype) {{
+        Object.setPrototypeOf({proxy_name}.prototype, RealClass.prototype);
+        Object.setPrototypeOf({proxy_name}, RealClass);
+      }}
+      return Reflect.construct(RealClass, [], new.target);
+    }}
     super();
     this.__upgraded = false;
     this.__attrBuffer = null;
@@ -354,10 +366,16 @@ class {proxy_name} extends HTMLElement {{
     if (!this.renderOptions) {{
       this.renderOptions = {{ host: this }};
     }}
+    this.isUpdatePending = false;
+    this.hasUpdated = false;
+    this._$Em = null;
     if (typeof this._$Ev === 'function') {{
       this._$Ev();
     }} else if (typeof RealClass.prototype._$Ev === 'function') {{
       RealClass.prototype._$Ev.call(this);
+    }}
+    if (this._$AL === undefined) {{
+      this._$AL = new Map();
     }}
     if (this.__attrBuffer) {{
       for (const [k, v] of this.__attrBuffer) {{
@@ -366,6 +384,69 @@ class {proxy_name} extends HTMLElement {{
         }}
       }}
       this.__attrBuffer = null;
+    }}
+    if (!this.internals && typeof this.attachInternals === 'function') {{
+      try {{
+        this.internals = this.attachInternals();
+      }} catch {{}}
+    }}
+    if (!this.customStates && this.internals?.states) {{
+      this.customStates = {{
+        set: (customState, active) => {{
+          if (!this.internals?.states) return;
+          try {{
+            if (active) this.internals.states.add(customState);
+            else this.internals.states.delete(customState);
+          }} catch {{}}
+        }},
+        has: (customState) => {{
+          if (!this.internals?.states) return false;
+          try {{ return this.internals.states.has(customState); }} catch {{ return false; }}
+        }}
+      }};
+    }}
+    try {{
+      const instance = Reflect.construct(RealClass, [], this.constructor);
+      for (const k of Object.getOwnPropertyNames(instance)) {{
+        if (!(k in this)) {{
+          try {{
+            const desc = Object.getOwnPropertyDescriptor(instance, k);
+            if (desc) Object.defineProperty(this, k, desc);
+          }} catch {{}}
+        }}
+      }}
+      for (const s of Object.getOwnPropertySymbols(instance)) {{
+        if (!(s in this)) {{
+          try {{
+            const desc = Object.getOwnPropertyDescriptor(instance, s);
+            if (desc) Object.defineProperty(this, s, desc);
+          }} catch {{}}
+        }}
+      }}
+    }} catch {{
+      try {{
+        const dummy = new RealClass();
+        for (const k of Object.getOwnPropertyNames(dummy)) {{
+          if (!(k in this)) {{
+            try {{
+              const desc = Object.getOwnPropertyDescriptor(dummy, k);
+              if (desc) Object.defineProperty(this, k, desc);
+            }} catch {{}}
+          }}
+        }}
+      }} catch {{}}
+    }}
+    if (this.initialReflectedProperties === undefined) {{
+      this.initialReflectedProperties = new Map();
+    }}
+    if (this.assumeInteractionOn === undefined) {{
+      this.assumeInteractionOn = [];
+    }}
+    if (this.validators === undefined) {{
+      this.validators = [];
+    }}
+    if (this.emittedEvents === undefined) {{
+      this.emittedEvents = [];
     }}
     if (typeof RealClass.prototype.connectedCallback === 'function') {{
       RealClass.prototype.connectedCallback.call(this);
@@ -402,7 +483,170 @@ customElements.define('{tag_name}', {proxy_name});
     )
 }
 
-fn is_ce_define_for<'a>(stmt: &Statement<'a>, targets: &HashMap<String, CustomElementTarget>) -> bool {
+fn generate_external_proxy_wrapper(tag_name: &str, class_name: &str) -> String {
+    let proxy_name = format!("{}Proxy", class_name);
+    format!(
+        r#"class {proxy_name} extends HTMLElement {{
+  static get observedAttributes() {{
+    return (typeof {class_name} !== 'undefined' && {class_name}.observedAttributes) || [];
+  }}
+  static [Symbol.hasInstance](instance) {{
+    return (typeof {class_name} !== 'undefined' && {class_name} && instance instanceof {class_name}) || super[Symbol.hasInstance](instance);
+  }}
+  static getImplementation() {{
+    return {class_name};
+  }}
+  static get formAssociated() {{
+    return Boolean(typeof {class_name} !== 'undefined' && {class_name} && {class_name}.formAssociated);
+  }}
+  constructor() {{
+    const RealClass = typeof {class_name} !== 'undefined' ? {class_name} : null;
+    if (RealClass) {{
+      if (Object.getPrototypeOf({proxy_name}.prototype) !== RealClass.prototype) {{
+        Object.setPrototypeOf({proxy_name}.prototype, RealClass.prototype);
+        Object.setPrototypeOf({proxy_name}, RealClass);
+      }}
+      return Reflect.construct(RealClass, [], new.target);
+    }}
+    super();
+    this.__upgraded = false;
+    this.__attrBuffer = null;
+  }}
+  attributeChangedCallback(name, oldValue, newValue) {{
+    if (this.__upgraded) {{
+      if (typeof super.attributeChangedCallback === 'function') {{
+        super.attributeChangedCallback(name, oldValue, newValue);
+      }}
+    }} else {{
+      if (!this.__attrBuffer) this.__attrBuffer = new Map();
+      this.__attrBuffer.set(name, newValue);
+    }}
+  }}
+  connectedCallback() {{
+    this.__upgrade();
+  }}
+  __upgrade() {{
+    if (this.__upgraded) return this;
+    this.__upgraded = true;
+    const RealClass = {class_name};
+    if (!RealClass) return this;
+    if (typeof RealClass.finalize === 'function') {{
+      RealClass.finalize();
+    }}
+    Object.setPrototypeOf(this, RealClass.prototype);
+    if (RealClass.elementStyles && !this.shadowRoot && typeof this.attachShadow === 'function') {{
+      const root = this.attachShadow(RealClass.shadowRootOptions || {{ mode: 'open' }});
+      if (Array.isArray(RealClass.elementStyles)) {{
+        root.adoptedStyleSheets = RealClass.elementStyles.map((s) => s?.styleSheet || s).filter(Boolean);
+      }} else if (RealClass.elementStyles?.styleSheet) {{
+        root.adoptedStyleSheets = [RealClass.elementStyles.styleSheet];
+      }}
+    }}
+    if (!this.renderOptions) {{
+      this.renderOptions = {{ host: this }};
+    }}
+    this.isUpdatePending = false;
+    this.hasUpdated = false;
+    this._$Em = null;
+    if (typeof this._$Ev === 'function') {{
+      this._$Ev();
+    }} else if (typeof RealClass.prototype._$Ev === 'function') {{
+      RealClass.prototype._$Ev.call(this);
+    }}
+    if (this._$AL === undefined) {{
+      this._$AL = new Map();
+    }}
+    if (this.__attrBuffer) {{
+      for (const [k, v] of this.__attrBuffer) {{
+        if (typeof this.attributeChangedCallback === 'function') {{
+          this.attributeChangedCallback(k, null, v);
+        }}
+      }}
+      this.__attrBuffer = null;
+    }}
+    if (!this.internals && typeof this.attachInternals === 'function') {{
+      try {{
+        this.internals = this.attachInternals();
+      }} catch {{}}
+    }}
+    if (!this.customStates && this.internals?.states) {{
+      this.customStates = {{
+        set: (customState, active) => {{
+          if (!this.internals?.states) return;
+          try {{
+            if (active) this.internals.states.add(customState);
+            else this.internals.states.delete(customState);
+          }} catch {{}}
+        }},
+        has: (customState) => {{
+          if (!this.internals?.states) return false;
+          try {{ return this.internals.states.has(customState); }} catch {{ return false; }}
+        }}
+      }};
+    }}
+    try {{
+      const instance = Reflect.construct(RealClass, [], this.constructor);
+      for (const k of Object.getOwnPropertyNames(instance)) {{
+        if (!(k in this)) {{
+          try {{
+            const desc = Object.getOwnPropertyDescriptor(instance, k);
+            if (desc) Object.defineProperty(this, k, desc);
+          }} catch {{}}
+        }}
+      }}
+      for (const s of Object.getOwnPropertySymbols(instance)) {{
+        if (!(s in this)) {{
+          try {{
+            const desc = Object.getOwnPropertyDescriptor(instance, s);
+            if (desc) Object.defineProperty(this, s, desc);
+          }} catch {{}}
+        }}
+      }}
+    }} catch {{
+      try {{
+        const dummy = new RealClass();
+        for (const k of Object.getOwnPropertyNames(dummy)) {{
+          if (!(k in this)) {{
+            try {{
+              const desc = Object.getOwnPropertyDescriptor(dummy, k);
+              if (desc) Object.defineProperty(this, k, desc);
+            }} catch {{}}
+          }}
+        }}
+      }} catch {{}}
+    }}
+    if (this.initialReflectedProperties === undefined) {{
+      this.initialReflectedProperties = new Map();
+    }}
+    if (this.assumeInteractionOn === undefined) {{
+      this.assumeInteractionOn = [];
+    }}
+    if (this.validators === undefined) {{
+      this.validators = [];
+    }}
+    if (this.emittedEvents === undefined) {{
+      this.emittedEvents = [];
+    }}
+    if (typeof RealClass.prototype.connectedCallback === 'function') {{
+      RealClass.prototype.connectedCallback.call(this);
+    }} else if (typeof this.connectedCallback === 'function' && this.connectedCallback !== RealClass.prototype.connectedCallback) {{
+      RealClass.prototype.connectedCallback?.call(this);
+    }}
+    if (typeof this.requestUpdate === 'function') {{
+      this.requestUpdate();
+    }}
+    return this;
+  }}
+}}
+customElements.define('{tag_name}', {proxy_name});
+"#,
+        class_name = class_name,
+        proxy_name = proxy_name,
+        tag_name = tag_name,
+    )
+}
+
+fn get_ce_define_call<'a>(stmt: &Statement<'a>) -> Option<(String, String)> {
     if let Statement::ExpressionStatement(expr_stmt) = stmt {
         if let Expression::CallExpression(call) = &expr_stmt.expression {
             let is_ce_define = match &call.callee {
@@ -419,13 +663,24 @@ fn is_ce_define_for<'a>(stmt: &Statement<'a>, targets: &HashMap<String, CustomEl
                 _ => false,
             };
             if is_ce_define && call.arguments.len() >= 2 {
-                if let Some(Expression::Identifier(id)) = call.arguments[1].as_expression() {
-                    return targets.contains_key(id.name.as_str());
+                let tag_str = match call.arguments[0].as_expression() {
+                    Some(Expression::StringLiteral(s)) => Some(s.value.as_str().to_string()),
+                    Some(Expression::TemplateLiteral(t)) if t.expressions.is_empty() && !t.quasis.is_empty() => {
+                        Some(t.quasis[0].value.raw.as_str().to_string())
+                    }
+                    _ => None,
+                };
+                let class_str = match call.arguments[1].as_expression() {
+                    Some(Expression::Identifier(id)) => Some(id.name.as_str().to_string()),
+                    _ => None,
+                };
+                if let (Some(tag), Some(cls)) = (tag_str, class_str) {
+                    return Some((tag, cls));
                 }
             }
         }
     }
-    false
+    None
 }
 
 pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResult {
@@ -506,7 +761,8 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
         }
     }
 
-    if targets.is_empty() {
+    let has_any_targets = !targets.is_empty() || !define_calls.is_empty();
+    if !has_any_targets {
         return ElemProxyResult {
             code: source.to_string(),
             map: None,
@@ -517,10 +773,27 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
 
     let old_body = std::mem::replace(&mut parsed.program.body, ArenaVec::new_in(&&allocator));
     let mut new_body = ArenaVec::new_in(&&allocator);
+    let mut external_elements_info = Vec::new();
 
     for stmt in old_body {
-        if is_ce_define_for(&stmt, &targets) {
-            continue;
+        if let Some((tag, cls)) = get_ce_define_call(&stmt) {
+            if targets.contains_key(&cls) {
+                continue;
+            } else {
+                let wrapper_src = generate_external_proxy_wrapper(&tag, &cls);
+                let wrapper =
+                    Parser::new(&allocator, allocator.alloc_str(&wrapper_src), source_type).parse();
+                for s in wrapper.program.body {
+                    new_body.push(s);
+                }
+                external_elements_info.push(ProxiedElementInfo {
+                    tag_name: tag,
+                    class_name: cls,
+                    properties: Vec::new(),
+                    observed_attributes: Vec::new(),
+                });
+                continue;
+            }
         }
 
         let mut matched_target = None;
@@ -636,7 +909,7 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
     let codegen = Codegen::new();
     let rewritten = codegen.build(&parsed.program).code;
 
-    let elements_info: Vec<ProxiedElementInfo> = targets
+    let mut elements_info: Vec<ProxiedElementInfo> = targets
         .into_values()
         .map(|t| ProxiedElementInfo {
             tag_name: t.tag_name,
@@ -645,6 +918,7 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
             observed_attributes: t.observed_attributes,
         })
         .collect();
+    elements_info.extend(external_elements_info);
 
     let count = elements_info.len() as u32;
 

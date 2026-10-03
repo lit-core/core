@@ -136,13 +136,13 @@
     "description": "Standard Vite build without any lit-core optimization plugins",
     "isBaseline": true
   },
-  "timestamp": "2026-10-03T12:10:05.928Z",
+  "timestamp": "2026-10-03T16:17:27.091Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "84d0fed",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -160,14 +160,14 @@
     "rawBytes": 370946,
     "gzipBytes": 86902,
     "brotliBytes": 69583,
-    "buildTimeMs": 54.010666000000015
+    "buildTimeMs": 52.67933299999993
   },
   "runtime": {
-    "firstRenderMs": 5.2,
-    "updateMs": 0.9,
-    "scriptEvalMs": 4.7,
-    "registrationMs": 2.6,
-    "heapUsedBytes": 597205,
+    "firstRenderMs": 40.9,
+    "updateMs": 1.5,
+    "scriptEvalMs": 5.1,
+    "registrationMs": 1.7,
+    "heapUsedBytes": 85918,
     "speedupPercent": 0,
     "updateSpeedupPercent": 0,
     "evalSpeedupPercent": 0,

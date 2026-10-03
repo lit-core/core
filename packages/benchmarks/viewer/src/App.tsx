@@ -1,6 +1,6 @@
+import { AlertCircle, Loader2, RotateCcw } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, Loader2, RotateCcw } from 'lucide-react';
 import { fetchBenchmarkResult, fetchManifest } from './api/client.js';
 import { FeatureView } from './components/FeatureView.js';
 import { Header } from './components/Header.js';

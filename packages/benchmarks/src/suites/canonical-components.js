@@ -218,7 +218,7 @@ export function getCanonicalSuiteConfig(suiteId) {
   }
 
   return {
-    entryContent: importLines.join('\n') + '\n',
+    entryContent: `${importLines.join('\n')}\n`,
     componentCount: components.length,
     components,
   };

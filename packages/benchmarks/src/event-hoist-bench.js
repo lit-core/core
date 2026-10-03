@@ -3,7 +3,7 @@ import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { transformEventHoist } from '@lit-core/event-hoist';
 import { ENTERPRISE_COMPONENTS, extractComponentTemplates, readComponentFullSource } from './fixtures.js';
-import { calculateDelta, formatDuration, formatNumber, formatPercent } from './format.js';
+import { calculateDelta } from './format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 

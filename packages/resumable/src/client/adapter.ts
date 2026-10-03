@@ -2,7 +2,7 @@
  * Parse state from serialized script text content.
  */
 export function parseComponentState(scriptContent: string): Record<string, unknown> {
-  if (!scriptContent || !scriptContent.trim()) {
+  if (!scriptContent?.trim()) {
     return {};
   }
   return JSON.parse(scriptContent.trim());
@@ -38,7 +38,7 @@ export function restoreComponentState(host: HTMLElement): Record<string, unknown
     }
   }
 
-  if (!stateScript || !stateScript.textContent) {
+  if (!stateScript?.textContent) {
     return null;
   }
 

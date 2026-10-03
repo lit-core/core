@@ -7,7 +7,7 @@ import v8 from 'node:v8';
 import vm from 'node:vm';
 import { lit } from '@lit-core/vite-plugin';
 import { build } from 'vite';
-import { calculateDelta, formatDuration, formatKb, formatNumber, formatPercent } from './format.js';
+import { calculateDelta } from './format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { closeBrowser, getBrowser } from './runtime.js';
 import { createBenchmarkResult } from './schema.js';
@@ -60,11 +60,11 @@ async function buildSuiteBundle(entryPath, outDir, plugins = []) {
  * @param {string} suiteName
  * @param {boolean} isOptimized
  */
-async function evaluateBundlePerformance(bundlePath, totalComponents, suiteName, isOptimized) {
+async function evaluateBundlePerformance(bundlePath, totalComponents, _suiteName, isOptimized) {
   const bundleCode = fs.readFileSync(bundlePath, 'utf8');
 
   // Try real browser measurement via Playwright
-  let browserMountLatency = 0;
+  let _browserMountLatency = 0;
   const browser = await getBrowser();
   if (browser) {
     let context;
@@ -101,7 +101,7 @@ async function evaluateBundlePerformance(bundlePath, totalComponents, suiteName,
 
       const browserEval = await page.evaluate(() => /** @type {any} */ (window).__evalDuration);
       if (typeof browserEval === 'number') {
-        browserMountLatency = browserEval;
+        _browserMountLatency = browserEval;
       }
     } catch (_err) {
       // Fall back to VM measurement

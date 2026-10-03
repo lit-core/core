@@ -2,7 +2,7 @@ import './setup.js';
 import { html, LitElement } from 'lit';
 import { describe, expect, it } from 'vitest';
 import { restoreComponentState, withResumable } from '../src/client/adapter.js';
-import { renderToDsd, renderTemplateResult } from '../src/server/dsd-renderer.js';
+import { renderTemplateResult, renderToDsd } from '../src/server/dsd-renderer.js';
 import { extractComponentState, serializeComponentState } from '../src/server/state-serializer.js';
 
 describe('hydration-free client adapter and state hydration', () => {

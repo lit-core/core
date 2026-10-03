@@ -136,13 +136,13 @@
     "description": "Combined impact of all enabled optimization tools simultaneously",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T12:10:18.215Z",
+  "timestamp": "2026-10-03T16:17:40.268Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "84d0fed",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +157,36 @@
     }
   },
   "metrics": {
-    "rawBytes": 373792,
-    "gzipBytes": 85198,
-    "brotliBytes": 67994,
-    "buildTimeMs": 402.69916700000067
+    "rawBytes": 461722,
+    "gzipBytes": 92307,
+    "brotliBytes": 69515,
+    "buildTimeMs": 548.1960830000007
   },
   "baseline": {
     "rawBytes": 370946,
     "gzipBytes": 86902,
     "brotliBytes": 69583,
-    "buildTimeMs": 54.010666000000015
+    "buildTimeMs": 52.67933299999993
   },
   "deltas": {
-    "rawBytes": 2846,
-    "rawPercent": 0.7672275749030857,
-    "gzipBytes": -1704,
-    "gzipPercent": -1.9608294400589168,
-    "brotliBytes": -1589,
-    "brotliPercent": -2.2836037537904375,
-    "buildTimeMs": 348.68850100000066
+    "rawBytes": 90776,
+    "rawPercent": 24.471486415812542,
+    "gzipBytes": 5405,
+    "gzipPercent": 6.219649720374675,
+    "brotliBytes": -68,
+    "brotliPercent": -0.09772501904200738,
+    "buildTimeMs": 495.5167500000008
   },
   "runtime": {
-    "firstRenderMs": 0,
-    "updateMs": 0,
+    "firstRenderMs": 39.5,
+    "updateMs": 1.6,
     "scriptEvalMs": 4.3,
-    "registrationMs": 0,
-    "heapUsedBytes": 0,
-    "speedupPercent": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 8.510638297872347,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0
+    "registrationMs": 1.5,
+    "heapUsedBytes": 90581,
+    "speedupPercent": 3.422982885085571,
+    "updateSpeedupPercent": -6.666666666666672,
+    "evalSpeedupPercent": 15.68627450980392,
+    "registrationSpeedupPercent": 11.764705882352938,
+    "memorySavingsPercent": -5.427267860052608
   }
 }

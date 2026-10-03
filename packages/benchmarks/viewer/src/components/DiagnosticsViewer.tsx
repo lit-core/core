@@ -1,5 +1,5 @@
-import type React from 'react';
 import { Terminal } from 'lucide-react';
+import type React from 'react';
 
 interface DiagnosticsViewerProps {
   diagnostics: Record<string, any>;

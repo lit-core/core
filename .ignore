@@ -1,0 +1,11 @@
+# Search ignore file for ripgrep and agents
+node_modules/
+target/
+dist/
+lib/
+artifacts/
+.turbo/
+*.node
+*.dylib
+*.map
+.git/

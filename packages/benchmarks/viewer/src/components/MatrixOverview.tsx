@@ -254,8 +254,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       return <span className="text-base font-light text-zinc-500">baseline</span>;
     }
 
-    const baselineRun = libId ? runMap[libId]?.['baseline'] : undefined;
-    if (!baselineRun || !baselineRun.buildTimeMs || baselineRun.buildTimeMs === 0 || !run.buildTimeMs) {
+    const baselineRun = libId ? runMap[libId]?.baseline : undefined;
+    if (!baselineRun?.buildTimeMs || baselineRun.buildTimeMs === 0 || !run.buildTimeMs) {
       return <span className="text-base font-light text-zinc-400">—</span>;
     }
 
@@ -552,9 +552,7 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
                   <tr key={baselineFeat.id} className="bg-zinc-50/90 hover:bg-zinc-100/80 transition-colors">
                     <td className="py-3.5 px-6 font-normal text-zinc-800">{baselineFeat.name}</td>
                     <td className="py-3.5 px-6">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-light bg-zinc-200/60 text-zinc-600">
-                        Baseline
-                      </span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-light bg-zinc-200/60 text-zinc-600">Baseline</span>
                     </td>
                     {libraries.map((lib) => {
                       const run = runMap[lib.id]?.[baselineFeat.id];
@@ -563,6 +561,12 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
                           key={lib.id}
                           className="py-3.5 px-6 text-right tabular-nums cursor-pointer hover:bg-zinc-200/40 transition-colors"
                           onClick={() => onSelectRun(lib.id, baselineFeat.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              onSelectRun(lib.id, baselineFeat.id);
+                            }
+                          }}
                           title={`Click to view ${lib.name} baseline`}
                         >
                           {renderCellValue(run, true, lib.id)}
@@ -577,9 +581,7 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
                   <tr key={allFeat.id} className="bg-emerald-50/50 hover:bg-emerald-100/40 transition-colors">
                     <td className="py-3.5 px-6 font-medium text-zinc-950">{allFeat.name}</td>
                     <td className="py-3.5 px-6">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-medium bg-emerald-100/80 text-emerald-800">
-                        Combined
-                      </span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-medium bg-emerald-100/80 text-emerald-800">Combined</span>
                     </td>
                     {libraries.map((lib) => {
                       const run = runMap[lib.id]?.[allFeat.id];
@@ -588,6 +590,12 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
                           key={lib.id}
                           className="py-3.5 px-6 text-right tabular-nums cursor-pointer hover:bg-emerald-200/40 transition-colors font-medium"
                           onClick={() => onSelectRun(lib.id, allFeat.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              onSelectRun(lib.id, allFeat.id);
+                            }
+                          }}
                           title={`Click to view ${lib.name} - ${allFeat.name}`}
                         >
                           {renderCellValue(run, false, lib.id)}
@@ -606,15 +614,10 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
 
                 {/* 3. Individual compiler passes */}
                 {individualFeats.map((feat, idx) => (
-                  <tr
-                    key={feat.id}
-                    className={`transition-colors hover:bg-zinc-100/60 ${idx % 2 === 1 ? 'bg-zinc-50/70' : 'bg-white'}`}
-                  >
+                  <tr key={feat.id} className={`transition-colors hover:bg-zinc-100/60 ${idx % 2 === 1 ? 'bg-zinc-50/70' : 'bg-white'}`}>
                     <td className="py-3.5 px-6 font-normal text-zinc-900">{feat.name}</td>
                     <td className="py-3.5 px-6">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-light bg-zinc-100 text-zinc-600">
-                        {feat.category}
-                      </span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-light bg-zinc-100 text-zinc-600">{feat.category}</span>
                     </td>
                     {libraries.map((lib) => {
                       const run = runMap[lib.id]?.[feat.id];
@@ -623,6 +626,12 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
                           key={lib.id}
                           className="py-3.5 px-6 text-right tabular-nums cursor-pointer hover:bg-zinc-200/50 transition-colors"
                           onClick={() => onSelectRun(lib.id, feat.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              onSelectRun(lib.id, feat.id);
+                            }
+                          }}
                           title={`Click to view ${lib.name} - ${feat.name}`}
                         >
                           {renderCellValue(run, false, lib.id)}

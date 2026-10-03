@@ -63,7 +63,7 @@ export function extractComponentState(instanceOrProps: any, options: StateSerial
   }
 
   // 2. Inspect static properties object
-  if (ctor && ctor.properties && typeof ctor.properties === 'object') {
+  if (ctor?.properties && typeof ctor.properties === 'object') {
     for (const key of Object.keys(ctor.properties)) {
       candidateKeys.add(key);
     }
@@ -133,7 +133,7 @@ export function renderStateScript(stateJsonOrObj: string | Record<string, unknow
  * Parse state from serialized script text content.
  */
 export function parseComponentState(scriptContent: string): Record<string, unknown> {
-  if (!scriptContent || !scriptContent.trim()) {
+  if (!scriptContent?.trim()) {
     return {};
   }
   return JSON.parse(scriptContent.trim());

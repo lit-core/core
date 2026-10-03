@@ -1,5 +1,5 @@
 import './setup.js';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { compileResumableLoader } from '../src/client/compiler.js';
 import { createReplayedEvent, RESUMED_EVENT_FLAG, replayEvent, replayQueue } from '../src/client/replay.js';
 

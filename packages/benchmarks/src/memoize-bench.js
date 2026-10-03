@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
-import { calculateDelta, formatDuration, formatKb, formatNumber, formatPercent } from './format.js';
+import { calculateDelta } from './format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 

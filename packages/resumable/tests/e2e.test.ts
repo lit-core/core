@@ -1,4 +1,5 @@
-import { type Browser, chromium } from 'playwright';
+import type { Browser } from 'playwright';
+import { launchBrowser } from '@lit-core/test-kit';
 import { afterAll, describe, expect, it } from 'vitest';
 import { compileResumableLoader } from '../src/client/compiler.js';
 import { renderToDsd } from '../src/server/dsd-renderer.js';
@@ -13,15 +14,8 @@ describe('playwright browser end-to-end resumption tests', () => {
   });
 
   it('resumes nested Declarative Shadow DOM components on first interaction', async () => {
-    try {
-      browser = await chromium.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
-    } catch (_err) {
-      console.warn('Chromium launch skipped due to sandboxed environment');
-      return;
-    }
+    browser = await launchBrowser();
+
 
     const page = await browser.newPage();
 
@@ -98,7 +92,7 @@ describe('playwright browser end-to-end resumption tests', () => {
 
     // Trigger upgrade definition
     await page.evaluate(() => (window as any).__defineComponents());
-    const isDefinedAfter = await page.evaluate(() => Boolean(customElements.get('resumable-button')));
+    const _isDefinedAfter = await page.evaluate(() => Boolean(customElements.get('resumable-button')));
     // Click button inside shadow root
     await page.evaluate(() => {
       const profile = document.querySelector('resumable-profile');

@@ -484,6 +484,83 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         };
     }
 
+    let mut external_props: HashMap<String, Vec<String>> = HashMap::new();
+    for stmt in &parsed.program.body {
+        if let Statement::ExpressionStatement(expr_stmt) = stmt {
+            match &expr_stmt.expression {
+                Expression::CallExpression(call) => {
+                    if let Expression::StaticMemberExpression(mem) = &call.callee {
+                        if mem.property.name == "createProperty" {
+                            if let Expression::Identifier(obj_id) = &mem.object {
+                                if let Some(first_arg) = call.arguments.first() {
+                                    if let Some(Expression::StringLiteral(s)) = first_arg.as_expression() {
+                                        external_props.entry(obj_id.name.as_str().to_string())
+                                            .or_default()
+                                            .push(s.value.as_str().to_string());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    let callee_name = match &call.callee {
+                        Expression::Identifier(id) => Some(id.name.as_str()),
+                        _ => None,
+                    };
+                    if (callee_name == Some("__decorate")
+                        || callee_name == Some("__decorateClass")
+                        || callee_name == Some("_ts_decorate"))
+                        && call.arguments.len() >= 3
+                    {
+                        if let Some(Expression::StaticMemberExpression(mem)) = call.arguments[1].as_expression() {
+                            if mem.property.name == "prototype" {
+                                if let Expression::Identifier(id) = &mem.object {
+                                    let class_name = id.name.as_str().to_string();
+                                    let has_reactive = match call.arguments[0].as_expression() {
+                                        Some(Expression::ArrayExpression(arr)) => {
+                                            arr.elements.iter().any(|elem| {
+                                                elem.as_expression().map_or(false, is_reactive_decorator)
+                                            })
+                                        }
+                                        _ => false,
+                                    };
+                                    if has_reactive {
+                                        if let Some(Expression::StringLiteral(s)) = call.arguments[2].as_expression() {
+                                            external_props.entry(class_name)
+                                                .or_default()
+                                                .push(s.value.as_str().to_string());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Expression::AssignmentExpression(assign) => {
+                    if let Some(SimpleAssignmentTarget::StaticMemberExpression(mem)) =
+                        assign.left.as_simple_assignment_target()
+                    {
+                        if mem.property.name == "properties" {
+                            if let Expression::Identifier(obj_id) = &mem.object {
+                                if let Expression::ObjectExpression(obj) = &assign.right {
+                                    for prop in &obj.properties {
+                                        if let ObjectPropertyKind::ObjectProperty(p) = prop {
+                                            if let Some(name) = p.key.static_name() {
+                                                external_props.entry(obj_id.name.as_str().to_string())
+                                                    .or_default()
+                                                    .push(name.to_string());
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
     let mut classes = Vec::new();
     collect_classes_mut(&mut parsed.program.body, &mut classes);
 
@@ -502,7 +579,18 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
     let mut total_properties_count: u32 = 0;
 
     for class in classes {
-        let (reactive_props, sorted_props) = collect_reactive_properties(class);
+        let (mut reactive_props, mut sorted_props) = collect_reactive_properties(class);
+        if let Some(id) = &class.id {
+            if let Some(extra) = external_props.get(id.name.as_str()) {
+                for prop_name in extra {
+                    if !reactive_props.contains_key(prop_name) {
+                        let idx = sorted_props.len();
+                        reactive_props.insert(prop_name.clone(), idx);
+                        sorted_props.push((prop_name.clone(), idx));
+                    }
+                }
+            }
+        }
         if reactive_props.is_empty() {
             continue;
         }

@@ -288,7 +288,7 @@ class MockElement extends MockNode {
     if (!this.listeners.has(type)) {
       this.listeners.set(type, []);
     }
-    this.listeners.get(type)!.push({ fn, capture });
+    this.listeners.get(type)?.push({ fn, capture });
   }
 
   removeEventListener(type: string, fn: Function, opts: any = false) {
@@ -327,7 +327,7 @@ class MockElement extends MockNode {
     const clean = selector.replace(':scope > ', '').replace(':scope', '').trim();
 
     function matchSelector(child: any): boolean {
-      if (!child || child.nodeType !== 1) return false;
+      if (child?.nodeType !== 1) return false;
       if (clean === '*') return true;
       if (clean.startsWith('.')) {
         return Boolean(child.getAttribute('class')?.includes(clean.slice(1)));
@@ -437,7 +437,7 @@ class CustomElementRegistry {
       upgrade(document.body);
     }
     if (this.promises.has(lower)) {
-      this.promises.get(lower)!.resolve();
+      this.promises.get(lower)?.resolve();
       this.promises.delete(lower);
     }
   }
@@ -458,7 +458,7 @@ class CustomElementRegistry {
       });
       this.promises.set(lower, { resolve, promise });
     }
-    return this.promises.get(lower)!.promise;
+    return this.promises.get(lower)?.promise;
   }
 }
 

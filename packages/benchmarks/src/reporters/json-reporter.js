@@ -206,7 +206,7 @@ export function updateManifest(entry, outDir = defaultResultsDir) {
   const manifestPath = path.join(outDir, 'manifest.json');
 
   /** @type {{ schemaVersion: string, generatedAt: string, canonicalComponentCount: number, canonicalComponents: string[], libraries: Array<{ id: string, name: string, packageName: string, componentCount: number }>, features: Array<{ id: string, name: string, description: string, category: string }>, runs: ManifestRunEntry[] }} */
-  let manifest = {
+  const manifest = {
     schemaVersion: SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
     canonicalComponentCount: CANONICAL_COMPONENT_IDS.length,

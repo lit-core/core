@@ -64,6 +64,7 @@
     "@lit-core/memoize": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
+    "@lit-core/test-kit": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "lucide-react": "^1.50.0"
   },

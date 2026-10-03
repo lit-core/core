@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { chromium } from 'playwright';
+import { closeSharedBrowser, getSharedBrowser } from '@lit-core/test-kit';
 
 /**
  * @typedef {Object} RuntimeMetric
@@ -31,31 +31,12 @@ export function emptyRuntimeMetrics() {
   };
 }
 
-/** @type {import('playwright').Browser | null} */
-let browserInstance = null;
-
 export async function getBrowser() {
-  if (!browserInstance) {
-    try {
-      browserInstance = await chromium.launch({
-        headless: true,
-        args: ['--single-process', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--enable-precise-memory-info', '--js-flags=--expose-gc'],
-      });
-    } catch (_err) {
-      // Browser launch unavailable in restricted/sandboxed environment
-      return null;
-    }
-  }
-  return browserInstance;
+  return getSharedBrowser();
 }
 
 export async function closeBrowser() {
-  if (browserInstance) {
-    try {
-      await browserInstance.close();
-    } catch {}
-    browserInstance = null;
-  }
+  return closeSharedBrowser();
 }
 
 /**
@@ -72,16 +53,38 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
   const bundleCode = fs.readFileSync(bundlePath, 'utf-8');
   let browser = null;
   try {
-    browser = await chromium.launch({
-      headless: true,
-      args: ['--single-process', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--enable-precise-memory-info', '--js-flags=--expose-gc'],
-    });
-  } catch (_err) {
-    return emptyRuntimeMetrics();
+    browser = await getBrowser();
+  } catch (err) {
+    if (process.env.ALLOW_NO_BROWSER === '1' || process.argv.includes('--allow-no-browser')) {
+      return emptyRuntimeMetrics();
+    }
+    throw new Error(
+      `Chromium browser could not be launched during benchmark run for "${name}". ` +
+        `Pass --allow-no-browser if running in a browser-less environment.\n` +
+        `Cause: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
+    );
   }
+  if (!browser) {
+    if (process.env.ALLOW_NO_BROWSER === '1' || process.argv.includes('--allow-no-browser')) {
+      return emptyRuntimeMetrics();
+    }
+    throw new Error(`Chromium browser unavailable for "${name}". Pass --allow-no-browser to bypass.`);
+  }
+
+  const runtimeErrors = [];
 
   try {
     const page = await browser.newPage();
+
+    page.on('pageerror', (err) => {
+      runtimeErrors.push(`[Page Error] ${err.stack || err.message}`);
+    });
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        runtimeErrors.push(`[Console Error] ${msg.text()}`);
+      }
+    });
 
     // Generate isolated HTML page that intercepts customElements.define, runs bundleCode,
     // and measures real custom element lifecycle and template renders.
@@ -94,10 +97,10 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 <body>
   <div id="container"></div>
   <script type="module">
-    window.addEventListener('error', (e) => { e.preventDefault(); });
-    window.addEventListener('unhandledrejection', (e) => { e.preventDefault(); });
     window.__registeredTags = [];
     window.__registrationMs = 0;
+    window.__bundleError = null;
+
     const origDefine = customElements.define;
     customElements.define = function(tag, constructor, options) {
       if (!window.__registeredTags.includes(tag)) {
@@ -108,94 +111,68 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
       window.__registrationMs += performance.now() - t0;
       return result;
     };
+
     window.__evalStart = performance.now();
     try {
       ${bundleCode}
     } catch (e) {
-      console.warn("Bundle execution warning:", e.message);
+      window.__bundleError = e.stack || e.message;
+      throw e;
     }
     window.__evalEnd = performance.now();
     window.__bundleReady = true;
+    //# sourceURL=${name.replace(/[^a-zA-Z0-9_-]/g, '_')}.bundle.js
   </script>
 </body>
 </html>`;
 
     await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => /** @type {any} */ (window).__bundleReady === true, { timeout: 10000 }).catch(() => {});
+    await page.waitForFunction(() => /** @type {any} */ (window).__bundleReady === true, { timeout: 15000 }).catch(() => {});
+
+    if (runtimeErrors.length > 0) {
+      throw new Error(`Runtime failure during bundle evaluation in ${name}:\n${runtimeErrors.join('\n')}`);
+    }
 
     // Execute precision in-browser rendering measurement using actual defined elements
     const timing = await page.evaluate(async () => {
       const win = /** @type {any} */ (window);
+      if (win.__bundleError) {
+        throw new Error(`Bundle execution crashed: ${win.__bundleError}`);
+      }
+
       const evalMs = win.__evalStart && win.__evalEnd ? Math.max(0, win.__evalEnd - win.__evalStart) : 0;
       const regMs = win.__registrationMs || 0;
 
-      const empty = {
-        firstRenderMs: 0,
-        updateMs: 0,
-        scriptEvalMs: Number(evalMs.toFixed(2)),
-        registrationMs: Number(regMs.toFixed(2)),
-        heapUsedBytes: 0,
-      };
-
       const container = document.getElementById('container');
-      if (!container) return empty;
+      if (!container) throw new Error('Benchmark container not found');
 
       const tags = (win.__registeredTags || []).filter((/** @type {any} */ t) => typeof t === 'string' && t.includes('-'));
       if (tags.length === 0) {
-        return empty;
+        throw new Error('No custom elements registered by bundle');
       }
 
       /** @param {any} el */
       const safeUpdateComplete = (el) => {
-        try {
-          if (el && typeof el.updateComplete?.then === 'function') {
-            return el.updateComplete.catch(() => {});
-          }
-        } catch {}
+        if (el && typeof el.updateComplete?.then === 'function') {
+          return el.updateComplete;
+        }
         return Promise.resolve();
       };
 
-      // Heap memory footprint measurement (cold pass before render timing loop)
-      let heapUsedBytes = 0;
-      try {
-        if (typeof win.gc === 'function') {
-          win.gc();
-        }
-        const heapBefore = win.performance?.memory?.usedJSHeapSize;
-
-        container.innerHTML = '';
-        const heapElements = [];
-        const maxInstances = 30;
-        for (let i = 0; i < maxInstances; i++) {
-          const tag = tags[i % tags.length];
-          try {
-            const el = document.createElement(tag);
-            el.setAttribute('data-bench-index', String(i));
-            container.appendChild(el);
-            heapElements.push(el);
-          } catch {}
-        }
-
-        await Promise.all(heapElements.map(safeUpdateComplete));
-        void container.offsetHeight;
-
-        if (typeof win.gc === 'function') {
-          win.gc();
-        }
-        const heapAfter = win.performance?.memory?.usedJSHeapSize;
-
-        if (typeof heapBefore === 'number' && typeof heapAfter === 'number') {
-          heapUsedBytes = Math.max(0, Math.round(heapAfter - heapBefore));
-        }
-
-        container.innerHTML = '';
-        if (typeof win.gc === 'function') {
-          win.gc();
-        }
-      } catch {
-        heapUsedBytes = 0;
+      // 1. Cold First Render: Measure on fresh page BEFORE any prior template instantiation
+      container.innerHTML = '';
+      const coldElements = [];
+      const coldStart = performance.now();
+      for (const tag of tags) {
+        const el = document.createElement(tag);
+        container.appendChild(el);
+        coldElements.push(el);
       }
+      await Promise.all(coldElements.map(safeUpdateComplete));
+      void container.offsetHeight;
+      const coldFirstRenderMs = performance.now() - coldStart;
 
+      // 2. Warm Mount & Update iterations (interleaved)
       const iterations = 5;
       const mountSamples = [];
       const updateSamples = [];
@@ -204,46 +181,29 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
         container.innerHTML = '';
         const mountedElements = [];
 
-        // 1. Mount phase: instantiate real registered Custom Elements from the bundle
         const t0 = performance.now();
-        const maxInstances = 30;
-        for (let i = 0; i < maxInstances; i++) {
-          const tag = tags[i % tags.length];
-          try {
-            const el = document.createElement(tag);
-            el.setAttribute('data-bench-index', String(i));
-            container.appendChild(el);
-            mountedElements.push(el);
-          } catch {}
+        for (const tag of tags) {
+          const el = document.createElement(tag);
+          container.appendChild(el);
+          mountedElements.push(el);
         }
-
-        // Wait for Lit element updateComplete lifecycle if available
         await Promise.all(mountedElements.map(safeUpdateComplete));
-
-        // Force layout calculation
         void container.offsetHeight;
         const t1 = performance.now();
         mountSamples.push(t1 - t0);
 
-        // 2. Re-render / update phase
+        // Update phase: exercise properties and attributes
         const t2 = performance.now();
         for (let i = 0; i < mountedElements.length; i++) {
           const child = mountedElements[i];
           if (child) {
-            try {
-              child.setAttribute('data-active', i % 2 === 0 ? 'true' : 'false');
-              if ('label' in child) {
-                child.label = 'Updated ' + i;
-              }
-              if ('value' in child) {
-                child.value = 'Val ' + i;
-              }
-            } catch {}
+            child.setAttribute('data-active', i % 2 === 0 ? 'true' : 'false');
+            if ('disabled' in child) child.disabled = i % 2 === 0;
+            if ('label' in child) child.label = `Updated ${i}`;
+            if ('value' in child) child.value = `Val ${i}`;
           }
         }
-
         await Promise.all(mountedElements.map(safeUpdateComplete));
-
         void container.offsetHeight;
         const t3 = performance.now();
         updateSamples.push(t3 - t2);
@@ -251,13 +211,34 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 
       container.innerHTML = '';
 
+      // 3. Memory footprint measurement
+      if (typeof win.gc === 'function') win.gc();
+      const heapBefore = win.performance?.memory?.usedJSHeapSize || 0;
+
+      const memElements = [];
+      for (const tag of tags) {
+        const el = document.createElement(tag);
+        container.appendChild(el);
+        memElements.push(el);
+      }
+      await Promise.all(memElements.map(safeUpdateComplete));
+      void container.offsetHeight;
+
+      if (typeof win.gc === 'function') win.gc();
+      const heapAfter = win.performance?.memory?.usedJSHeapSize || 0;
+      const heapUsedBytes = Math.max(0, Math.round(heapAfter - heapBefore));
+
+      container.innerHTML = '';
+      if (typeof win.gc === 'function') win.gc();
+
       mountSamples.sort((a, b) => a - b);
       updateSamples.sort((a, b) => a - b);
-      const medianMount = mountSamples[Math.floor(mountSamples.length / 2)] || 0;
+      const medianWarmMount = mountSamples[Math.floor(mountSamples.length / 2)] || 0;
       const medianUpdate = updateSamples[Math.floor(updateSamples.length / 2)] || 0;
 
       return {
-        firstRenderMs: Number(medianMount.toFixed(2)),
+        firstRenderMs: Number(coldFirstRenderMs.toFixed(2)),
+        warmMountMs: Number(medianWarmMount.toFixed(2)),
         updateMs: Number(medianUpdate.toFixed(2)),
         scriptEvalMs: Number(evalMs.toFixed(2)),
         registrationMs: Number(regMs.toFixed(2)),
@@ -265,11 +246,15 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
       };
     });
 
+    if (runtimeErrors.length > 0) {
+      throw new Error(`Runtime failure during element lifecycle in ${name}:\n${runtimeErrors.join('\n')}`);
+    }
+
     return timing;
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.warn(`[Runtime Benchmark] Measurement error for ${name}:`, msg);
-    return emptyRuntimeMetrics();
+    const msg = err instanceof Error ? err.stack || err.message : String(err);
+    console.error(`[Runtime Benchmark Error] Fatal failure for ${name}:`, msg);
+    throw new Error(`[Runtime Benchmark Error] Fatal failure for ${name}:\n${msg}`);
   } finally {
     if (browser) {
       try {

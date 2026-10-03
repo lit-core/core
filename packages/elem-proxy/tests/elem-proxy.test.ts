@@ -73,6 +73,20 @@ customElements.define('fancy-card', FancyCard);
     expect(res.code).toMatch(/customElements\.define\(['"]fancy-card['"],\s*FancyCardProxy\)/);
   });
 
+  it('transforms external customElements.define registration without local class declaration', () => {
+    const input = `
+import { ExternalButton } from './button.js';
+
+customElements.define('ext-button', ExternalButton);
+`;
+    const res = transformElemProxy(input);
+    expect(res.proxiedElementsCount).toBe(1);
+    expect(res.elements[0].tagName).toBe('ext-button');
+    expect(res.elements[0].className).toBe('ExternalButton');
+    expect(res.code).toContain('class ExternalButtonProxy extends HTMLElement');
+    expect(res.code).toMatch(/customElements\.define\(['"]ext-button['"],\s*ExternalButtonProxy\)/);
+  });
+
   it('preserves non-custom-element code without modifications', () => {
     const input = `
 export const add = (a: number, b: number) => a + b;

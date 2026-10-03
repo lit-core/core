@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import { compileResumableLoader } from '@lit-core/resumable/client';
 import { renderToDsd } from '@lit-core/resumable/server';
 import { ENTERPRISE_COMPONENTS, extractComponentTemplates, extractCssFromModule, findComponentCssSource } from './fixtures.js';
-import { calculateDelta, formatDuration, formatNumber } from './format.js';
+import { calculateDelta, formatDuration } from './format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from './reporters/index.js';
 import { createBenchmarkResult } from './schema.js';
 

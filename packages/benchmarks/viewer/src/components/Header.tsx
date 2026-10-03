@@ -33,9 +33,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab }) => {
                 key={tab.id}
                 type="button"
                 className={`py-6 text-base transition-colors cursor-pointer border-b-2 ${
-                  isActive
-                    ? 'border-emerald-600 text-zinc-950 font-medium'
-                    : 'border-transparent text-zinc-500 font-light hover:text-zinc-950 hover:border-zinc-300'
+                  isActive ? 'border-emerald-600 text-zinc-950 font-medium' : 'border-transparent text-zinc-500 font-light hover:text-zinc-950 hover:border-zinc-300'
                 }`}
                 onClick={() => onSelectTab(tab.id)}
               >

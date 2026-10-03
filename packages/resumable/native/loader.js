@@ -15,7 +15,7 @@
     if (!p.some(iT)) return;
     const u = [...new Set(p.map((l) => l.localName).filter((n) => n?.includes('-') && !C.get(n)))];
     if (!u.length) return;
-    if (e.type === 'pointerover' || (/^p.*d|f.*n$/.test(e.type) && !p.some((l) => l.hasAttribute?.('resumes-on-' + e.type)))) return u.forEach(uG);
+    if (e.type === 'pointerover' || (/^p.*d|f.*n$/.test(e.type) && !p.some((l) => l.hasAttribute?.(`resumes-on-${e.type}`)))) return u.forEach(uG);
     e.cancelable && e.preventDefault();
     e.stopImmediatePropagation();
     B.push({ e, t: e.target, h: p.find((l) => l.localName?.includes('-')) });
@@ -31,7 +31,9 @@
       (t?.isConnected ? t : h)?.dispatchEvent(v);
     }
   };
-  __EVENTS__.forEach((t) => W.addEventListener(t, hI, true));
+  __EVENTS__.forEach((t) => {
+    W.addEventListener(t, hI, true);
+  });
   if (__IDLE_HYDRATION__) {
     const q = W.requestIdleCallback || ((c) => setTimeout(c, 50));
     const s = (r) => [...r.querySelectorAll('*')].flatMap((e) => (e.shadowRoot ? [e, ...s(e.shadowRoot)] : e));

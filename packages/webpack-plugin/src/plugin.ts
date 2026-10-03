@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildManifest, compileResumableLoader, extractCustomElementTags } from '@lit-core/resumable';
 import type { Compiler } from 'webpack';
 import { registerPluginState, unregisterPluginState } from './loader.js';
 import type {
@@ -18,7 +19,6 @@ import type {
   PropsLowerOptions,
   ResumableOptions,
 } from './options.js';
-import { buildManifest, compileResumableLoader, extractCustomElementTags } from '@lit-core/resumable';
 import { runFuseOptimization, runHtmlFuseOptimization, runScopingAudit } from './transforms.js';
 import {
   BARE_FUSED_ID_REGEX,
