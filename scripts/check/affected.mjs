@@ -14,6 +14,7 @@ export const ALL_CRATES = [
   'elem-proxy',
   'dom-paths',
   'dirty-mask',
+  'directives',
   'html-aot',
   'resumable',
 ];

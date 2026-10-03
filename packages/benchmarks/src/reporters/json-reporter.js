@@ -53,6 +53,11 @@ export const FEATURE_METADATA = {
     description: 'Ahead-of-time property-to-part dependency bitmasking',
     category: 'reactivity',
   },
+  directives: {
+    name: 'Lit directive lowering (directives)',
+    description: 'Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations',
+    category: 'templates',
+  },
   memoize: {
     name: 'Expression memoization (memoize)',
     description: 'Ahead-of-time reactive expression auto-memoization',

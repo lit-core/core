@@ -47,6 +47,7 @@
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
     "@lit-core/dirty-mask": "workspace:*",
+    "@lit-core/directives": "workspace:*",
     "@lit-core/dom-paths": "workspace:*",
     "@lit-core/elem-proxy": "workspace:*",
     "@lit-core/event-hoist": "workspace:*",

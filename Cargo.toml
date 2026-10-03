@@ -4,6 +4,7 @@ members = [
     "packages/css-fuse",
     "packages/css-minifier",
     "packages/dirty-mask",
+    "packages/directives",
     "packages/dom-paths",
     "packages/elem-proxy",
     "packages/event-hoist",

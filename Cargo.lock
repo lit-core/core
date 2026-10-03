@@ -497,6 +497,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "directives"
+version = "0.1.0"
+dependencies = [
+ "napi",
+ "napi-build",
+ "napi-derive",
+ "oxc_allocator",
+ "oxc_ast",
+ "oxc_ast_visit",
+ "oxc_codegen",
+ "oxc_parser",
+ "oxc_span",
+ "oxc_syntax",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dirty_mask"
 version = "0.1.0"
 dependencies = [

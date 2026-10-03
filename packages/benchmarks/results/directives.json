@@ -1,0 +1,283 @@
+{
+  "schemaVersion": "1.0.0",
+  "benchmarkId": "directives",
+  "title": "`@lit-core/directives` empirical benchmark results",
+  "description": "Ahead-of-time Lit built-in directive compiler evaluated across 255 production Web Components to eliminate runtime directive object allocations and prune dead imports.",
+  "timestamp": "2026-10-03T20:06:43.661Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "9795425",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "suites": [
+    {
+      "id": "carbon",
+      "name": "Carbon Web Components",
+      "shortName": "Carbon",
+      "packageName": "@carbon/web-components",
+      "componentCount": 51,
+      "baseline": {
+        "directiveObjectsAllocated": 8000,
+        "renderLatencyMs": 0.47,
+        "estimatedGcPauseMs": 0.09,
+        "runtimeDirectiveImports": 118
+      },
+      "optimized": {
+        "directiveObjectsAllocated": 0,
+        "renderLatencyMs": 0.14,
+        "estimatedGcPauseMs": 0,
+        "runtimeDirectiveImports": 0
+      },
+      "deltas": {
+        "allocations": {
+          "diff": -8000,
+          "percent": -100,
+          "formattedDiff": "-8,000.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -0.32999999999999996,
+          "percent": -70.2127659574468,
+          "formattedDiff": "-0.3",
+          "formattedPercent": "-70.2%",
+          "isReduction": true
+        },
+        "imports": {
+          "diff": -118,
+          "percent": -100,
+          "formattedDiff": "-118.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "componentsWithDirectives": 30,
+        "totalDirectivesLowered": 118,
+        "directivesUsed": "classMap, ifDefined",
+        "transformTimeMs": 23.23,
+        "allocationReduction": "-100.0%",
+        "buildOverhead": "23.23ms native pass"
+      }
+    },
+    {
+      "id": "spectrum",
+      "name": "Adobe Spectrum Web Components",
+      "shortName": "Adobe Spectrum",
+      "packageName": "@spectrum-web-components",
+      "componentCount": 51,
+      "baseline": {
+        "directiveObjectsAllocated": 6000,
+        "renderLatencyMs": 0.05,
+        "estimatedGcPauseMs": 0.07,
+        "runtimeDirectiveImports": 56
+      },
+      "optimized": {
+        "directiveObjectsAllocated": 0,
+        "renderLatencyMs": 0.02,
+        "estimatedGcPauseMs": 0,
+        "runtimeDirectiveImports": 0
+      },
+      "deltas": {
+        "allocations": {
+          "diff": -6000,
+          "percent": -100,
+          "formattedDiff": "-6,000.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -0.030000000000000002,
+          "percent": -60,
+          "formattedDiff": "-0.0",
+          "formattedPercent": "-60.0%",
+          "isReduction": true
+        },
+        "imports": {
+          "diff": -56,
+          "percent": -100,
+          "formattedDiff": "-56.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "componentsWithDirectives": 19,
+        "totalDirectivesLowered": 56,
+        "directivesUsed": "when, ifDefined, join, classMap, repeat",
+        "transformTimeMs": 12.94,
+        "allocationReduction": "-100.0%",
+        "buildOverhead": "12.94ms native pass"
+      }
+    },
+    {
+      "id": "webawesome",
+      "name": "Web Awesome",
+      "shortName": "Web Awesome",
+      "packageName": "@awesome.me/webawesome",
+      "componentCount": 51,
+      "baseline": {
+        "directiveObjectsAllocated": 10000,
+        "renderLatencyMs": 0.21,
+        "estimatedGcPauseMs": 0.11,
+        "runtimeDirectiveImports": 142
+      },
+      "optimized": {
+        "directiveObjectsAllocated": 0,
+        "renderLatencyMs": 0.03,
+        "estimatedGcPauseMs": 0,
+        "runtimeDirectiveImports": 0
+      },
+      "deltas": {
+        "allocations": {
+          "diff": -10000,
+          "percent": -100,
+          "formattedDiff": "-10,000.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -0.18,
+          "percent": -85.71428571428571,
+          "formattedDiff": "-0.2",
+          "formattedPercent": "-85.7%",
+          "isReduction": true
+        },
+        "imports": {
+          "diff": -142,
+          "percent": -100,
+          "formattedDiff": "-142.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "componentsWithDirectives": 28,
+        "totalDirectivesLowered": 142,
+        "directivesUsed": "classMap, styleMap, ifDefined, map, live, unsafeHTML, when",
+        "transformTimeMs": 14.71,
+        "allocationReduction": "-100.0%",
+        "buildOverhead": "14.71ms native pass"
+      }
+    },
+    {
+      "id": "momentum",
+      "name": "Cisco Momentum Design",
+      "shortName": "Cisco Momentum",
+      "packageName": "@momentum-design/components",
+      "componentCount": 51,
+      "baseline": {
+        "directiveObjectsAllocated": 8000,
+        "renderLatencyMs": 0.05,
+        "estimatedGcPauseMs": 0.09,
+        "runtimeDirectiveImports": 56
+      },
+      "optimized": {
+        "directiveObjectsAllocated": 0,
+        "renderLatencyMs": 0,
+        "estimatedGcPauseMs": 0,
+        "runtimeDirectiveImports": 0
+      },
+      "deltas": {
+        "allocations": {
+          "diff": -8000,
+          "percent": -100,
+          "formattedDiff": "-8,000.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -0.05,
+          "percent": -100,
+          "formattedDiff": "-0.1",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "imports": {
+          "diff": -56,
+          "percent": -100,
+          "formattedDiff": "-56.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "componentsWithDirectives": 15,
+        "totalDirectivesLowered": 56,
+        "directivesUsed": "ifDefined, ref, classMap, live, repeat",
+        "transformTimeMs": 20.01,
+        "allocationReduction": "-100.0%",
+        "buildOverhead": "20.01ms native pass"
+      }
+    },
+    {
+      "id": "material",
+      "name": "Google Material Web",
+      "shortName": "Google Material Web",
+      "packageName": "@material/web",
+      "componentCount": 51,
+      "baseline": {
+        "directiveObjectsAllocated": 2000,
+        "renderLatencyMs": 0.01,
+        "estimatedGcPauseMs": 0.02,
+        "runtimeDirectiveImports": 11
+      },
+      "optimized": {
+        "directiveObjectsAllocated": 0,
+        "renderLatencyMs": 0,
+        "estimatedGcPauseMs": 0,
+        "runtimeDirectiveImports": 0
+      },
+      "deltas": {
+        "allocations": {
+          "diff": -2000,
+          "percent": -100,
+          "formattedDiff": "-2,000.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "latency": {
+          "diff": -0.01,
+          "percent": -100,
+          "formattedDiff": "-0.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        },
+        "imports": {
+          "diff": -11,
+          "percent": -100,
+          "formattedDiff": "-11.0",
+          "formattedPercent": "-100.0%",
+          "isReduction": true
+        }
+      },
+      "diagnostics": {
+        "totalComponents": 51,
+        "componentsWithDirectives": 10,
+        "totalDirectivesLowered": 11,
+        "directivesUsed": "classMap",
+        "transformTimeMs": 15.78,
+        "allocationReduction": "-100.0%",
+        "buildOverhead": "15.78ms native pass"
+      }
+    }
+  ]
+}

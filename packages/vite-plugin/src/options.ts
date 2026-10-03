@@ -304,6 +304,14 @@ export interface LitPluginOptions {
   memoize?: boolean | MemoizeOptions;
 
   /**
+   * Ahead-of-time Lit directive lowering compiler pass via @lit-core/directives.
+   * Compiles built-in Lit directives ahead of time into primitive JS expressions and prunes runtime directive imports.
+   * Pass `true` or a `DirectivesOptions` object to enable.
+   * @default false
+   */
+  directives?: boolean | DirectivesOptions;
+
+  /**
    * Ahead-of-time SSR and runtime resumption architecture for zero component JS on initial boot.
    * Pass `true` or a `ResumableOptions` object to enable.
    * @default false
@@ -520,4 +528,26 @@ export interface NativeOptions {
 }
 
 export type LitNativeOptions = NativeOptions;
+
+export interface DirectivesOptions {
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitDirectivesOptions = DirectivesOptions;
 export type LitCorePluginOptions = LitPluginOptions;

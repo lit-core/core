@@ -16,6 +16,7 @@
 | [`@lit-core/event-hoist`](packages/event-hoist/) | Ahead-of-time ShadowRoot event delegation |
 | [`@lit-core/dom-paths`](packages/dom-paths/) | Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal |
 | [`@lit-core/dirty-mask`](packages/dirty-mask/) | Ahead-of-time property-to-part dependency bitmasking |
+| [`@lit-core/directives`](packages/directives/) | Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations |
 | [`@lit-core/memoize`](packages/memoize/) | Ahead-of-time reactive expression auto-memoization |
 | [`@lit-core/elem-proxy`](packages/elem-proxy/) | Deferred custom element stubs and JIT class upgrade |
 | [`@lit-core/html-aot`](packages/html-aot/) | Ahead-of-time Lit template compilation |
@@ -66,6 +67,7 @@ Detailed AST diagnostics, build durations, and runtime measurements are document
 - [`event-hoist` benchmark report](packages/benchmarks/docs/event-hoist.md)
 - [`dom-paths` benchmark report](packages/benchmarks/docs/dom-paths.md)
 - [`dirty-mask` benchmark report](packages/benchmarks/docs/dirty-mask.md)
+- [`directives` benchmark report](packages/benchmarks/docs/directives.md)
 - [`memoize` benchmark report](packages/benchmarks/docs/memoize.md)
 - [`elem-proxy` benchmark report](packages/benchmarks/docs/elem-proxy.md)
 - [`html-aot` benchmark report](packages/benchmarks/docs/html-aot.md)

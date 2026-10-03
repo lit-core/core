@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
+import { transformDirectives } from '@lit-core/directives';
 import { transformDirtyMask } from '@lit-core/dirty-mask';
 import { transformDomPaths } from '@lit-core/dom-paths';
 import { transformElemProxy as runTransformElemProxy } from '@lit-core/elem-proxy';
@@ -16,6 +17,7 @@ import { transformResumableComponent } from '@lit-core/resumable';
 import type {
   CssFuseOptions,
   CssMinifierOptions,
+  DirectivesOptions,
   DirtyMaskOptions,
   DomPathsOptions,
   ElemProxyOptions,
@@ -36,6 +38,7 @@ export const LIT_NATIVE_FAST_CHECK = /\bLitElement\b|@customElement\b|extends\s+
 export const LIT_EVENT_HOIST_FAST_CHECK = /html\s*`[\s\S]*?@[a-zA-Z]/;
 export const LIT_DIRTY_MASK_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
 export const LIT_MEMOIZE_FAST_CHECK = /\brender\s*\([^)]*\)\s*\{/;
+export const LIT_DIRECTIVES_FAST_CHECK = /(?:lit|lit-html)\/directives\//;
 export const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
 export const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
 
@@ -516,6 +519,37 @@ export function transformMemoizePlugin(code: string, id: string, options: Memoiz
     });
 
     if (result.memoizedCount === 0) {
+      return null;
+    }
+
+    return {
+      code: result.code,
+      map: result.map ? JSON.parse(result.map) : null,
+    };
+  } catch (_err) {
+    return null;
+  }
+}
+
+export function transformDirectivesPlugin(code: string, id: string, options: DirectivesOptions = {}): TransformResult | null {
+  const { sourcemap = true } = options;
+  const cleanId = id.split('?')[0] ?? id;
+
+  if (!shouldProcessFile(cleanId, options)) {
+    return null;
+  }
+
+  if (!LIT_DIRECTIVES_FAST_CHECK.test(code)) {
+    return null;
+  }
+
+  try {
+    const result = transformDirectives(code, {
+      sourcemap,
+      filename: cleanId,
+    });
+
+    if (result.loweredCount === 0) {
       return null;
     }
 

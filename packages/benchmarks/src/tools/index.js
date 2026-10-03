@@ -2,6 +2,7 @@ import { lit } from '@lit-core/vite-plugin';
 import { normalizeInclude } from './base.js';
 import { cssFuseTool } from './css-fuse.js';
 import { cssMinifierTool } from './css-minifier.js';
+import { directivesTool } from './directives.js';
 import { dirtyMaskTool } from './dirty-mask.js';
 import { domPathsTool } from './dom-paths.js';
 import { elemProxyTool } from './elem-proxy.js';
@@ -31,6 +32,7 @@ export const registeredTools = [
   dirtyMaskTool,
   domPathsTool,
   memoizeTool,
+  directivesTool,
   resumableTool,
 ];
 
@@ -135,6 +137,12 @@ export async function getCombinedPlugins(tools, suite) {
           exclude: [],
         }
       : false,
+    directives: hasTool('directives')
+      ? {
+          include,
+          exclude: [],
+        }
+      : false,
     resumable: hasTool('resumable')
       ? {
           include,
@@ -149,6 +157,7 @@ export async function getCombinedPlugins(tools, suite) {
 export {
   cssFuseTool,
   cssMinifierTool,
+  directivesTool,
   dirtyMaskTool,
   domPathsTool,
   elemProxyTool,

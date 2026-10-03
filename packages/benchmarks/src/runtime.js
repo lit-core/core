@@ -159,6 +159,9 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
         return Promise.resolve();
       };
 
+      // Allow browser event loop, initial script eval, and microtasks to settle
+      await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 200)));
+
       // 1. Cold First Render: Measure on fresh page BEFORE any prior template instantiation
       container.innerHTML = '';
       const coldElements = [];

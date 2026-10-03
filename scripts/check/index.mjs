@@ -124,6 +124,11 @@ async function main() {
     }
   }
 
+  if (!allPassed) {
+    log(`\n✖ Validation check failed.\n`);
+    process.exit(1);
+  }
+
   log(`\n✔ Validation check completed successfully.\n`);
 }
 

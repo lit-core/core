@@ -7,6 +7,7 @@ import { registerPluginState, unregisterPluginState } from './loader.js';
 import type {
   CssFuseOptions,
   CssMinifierOptions,
+  DirectivesOptions,
   DirtyMaskOptions,
   DomPathsOptions,
   ElemProxyOptions,
@@ -432,6 +433,19 @@ export function memoize(options: MemoizeOptions = {}): MemoizeWebpackPlugin {
   return new MemoizeWebpackPlugin(options);
 }
 
+export class DirectivesWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: DirectivesOptions = {}) {
+    super(
+      { cssFuse: false, htmlFuse: false, propsLower: false, elemProxy: false, eventHoist: false, dirtyMask: false, directives: options, htmlAot: false, cssMinifier: false, htmlMinifier: false },
+      'DirectivesWebpackPlugin',
+    );
+  }
+}
+
+export function directives(options: DirectivesOptions = {}): DirectivesWebpackPlugin {
+  return new DirectivesWebpackPlugin(options);
+}
+
 export function cssMinifier(options: CssMinifierOptions = {}): CssMinifierWebpackPlugin {
   return new CssMinifierWebpackPlugin(options);
 }
@@ -466,6 +480,7 @@ export const litEventHoist = eventHoist;
 export const litDirtyMask = dirtyMask;
 export const litDomPaths = domPaths;
 export const litMemoize = memoize;
+export const litDirectives = directives;
 export const litCssMinifier = cssMinifier;
 export const litHtmlMinifier = htmlMinifier;
 export const litHtmlAot = htmlAot;

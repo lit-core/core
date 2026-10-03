@@ -43,6 +43,7 @@
     "benchmark:event-hoist": "pnpm --filter @lit-core/benchmarks run benchmark:event-hoist",
     "benchmark:dirty-mask": "pnpm --filter @lit-core/benchmarks run benchmark:dirty-mask",
     "benchmark:dom-paths": "pnpm --filter @lit-core/benchmarks run benchmark:dom-paths",
+    "benchmark:directives": "pnpm --filter @lit-core/benchmarks run benchmark:directives",
     "benchmark:memoize": "pnpm --filter @lit-core/benchmarks run benchmark:memoize",
     "benchmark:native": "pnpm --filter @lit-core/benchmarks run benchmark:native",
     "benchmark:resumable": "pnpm --filter @lit-core/benchmarks run benchmark:resumable",

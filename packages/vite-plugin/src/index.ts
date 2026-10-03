@@ -1,6 +1,7 @@
 export type {
   CssFuseOptions,
   CssMinifierOptions,
+  DirectivesOptions,
   DirtyMaskOptions,
   DomPathsOptions,
   ElemProxyOptions,
@@ -11,6 +12,7 @@ export type {
   LitCorePluginOptions,
   LitCssFuseOptions,
   LitCssMinifierOptions,
+  LitDirectivesOptions,
   LitDirtyMaskOptions,
   LitDomPathsOptions,
   LitElemProxyOptions,
@@ -31,6 +33,7 @@ export type {
 export {
   cssFuse,
   cssMinifier,
+  directives,
   dirtyMask,
   domPaths,
   elemProxy,
@@ -43,6 +46,7 @@ export {
   litCore,
   litCssFuse,
   litCssMinifier,
+  litDirectives,
   litDirtyMask,
   litDomPaths,
   litElemProxy,

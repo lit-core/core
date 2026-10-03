@@ -3,6 +3,7 @@ import path from 'node:path';
 import type { LoaderContext } from 'webpack';
 import type {
   CssMinifierOptions,
+  DirectivesOptions,
   DirtyMaskOptions,
   DomPathsOptions,
   ElemProxyOptions,
@@ -17,6 +18,7 @@ import type {
 } from './options.js';
 import {
   transformCssMinifier,
+  transformDirectivesPlugin,
   transformDirtyMaskPlugin,
   transformDomPathsPlugin,
   transformElemProxy,
@@ -169,6 +171,19 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
   if (memoizeOpt) {
     const memoizeOpts: MemoizeOptions = typeof memoizeOpt === 'object' ? memoizeOpt : {};
     const result = transformMemoizePlugin(currentSource, resourcePath, memoizeOpts);
+    if (result) {
+      currentSource = result.code;
+      if (result.map) {
+        currentMap = result.map;
+      }
+    }
+  }
+
+  // 8. Apply directives AOT lowering if enabled
+  const directivesOpt = options.directives;
+  if (directivesOpt) {
+    const directivesOpts: DirectivesOptions = typeof directivesOpt === 'object' ? directivesOpt : {};
+    const result = transformDirectivesPlugin(currentSource, resourcePath, directivesOpts);
     if (result) {
       currentSource = result.code;
       if (result.map) {

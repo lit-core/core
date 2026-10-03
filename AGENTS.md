@@ -123,6 +123,7 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 | `@lit-core/dirty-mask` | `packages/dirty-mask` | Rust (`oxc`), NAPI-RS | Ahead-of-time property-to-part dependency bitmasking |
 | `@lit-core/memoize` | `packages/memoize` | Rust (`oxc`), NAPI-RS | Ahead-of-time reactive expression auto-memoization |
 | `@lit-core/elem-proxy` | `packages/elem-proxy` | Rust (`oxc`), NAPI-RS | AOT Custom Element proxy stubs for deferred registration |
+| `@lit-core/directives` | `packages/directives` | Rust (`oxc`), NAPI-RS | Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations and pruning dead imports |
 | `@lit-core/css-minifier` | `packages/css-minifier` | Rust (`lightningcss`), NAPI-RS | High-speed CSS template literal minifier |
 | `@lit-core/html-minifier` | `packages/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML template literal minifier |
 | `@lit-core/html-aot` | `packages/html-aot` | TypeScript, `parse5`, `lit-html` | Ahead-of-time Lit template compilation eliminating runtime prepare phase |
@@ -142,7 +143,7 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 - **Monorepo build orchestration**: `turbo run build`.
 - **Rust NAPI modules**:
   - Rust packages contain native `.node` bindings.
-  - Whenever you modify Rust code in packages with native crates (such as `css-fuse`, `props-lower`, `native`, `elem-proxy`, `dirty-mask`, `dom-paths`, `event-hoist`, `memoize`, `css-minifier`, or `html-minifier`), run `cargo build --release` (or the package's build script) to update the `.node` binary before executing JS tests or benchmarks.
+  - Whenever you modify Rust code in packages with native crates (such as `css-fuse`, `props-lower`, `native`, `elem-proxy`, `dirty-mask`, `dom-paths`, `event-hoist`, `memoize`, `directives`, `css-minifier`, or `html-minifier`), run `cargo build --release` (or the package's build script) to update the `.node` binary before executing JS tests or benchmarks.
 - **Code formatting and linting**:
   - JavaScript / TypeScript: `pnpm run format` (powered by Biome).
   - Rust: `cargo fmt` and `cargo clippy`.
