@@ -26,7 +26,12 @@ enum Commands {
         #[arg(short, long, default_value = ".fused-html", help = "Output directory")]
         output_dir: String,
 
-        #[arg(short, long, default_value_t = true, help = "Write output files to disk")]
+        #[arg(
+            short,
+            long,
+            default_value_t = true,
+            help = "Write output files to disk"
+        )]
         write: bool,
 
         #[arg(short, long, default_value_t = 15, help = "Minimum fragment length")]
@@ -75,12 +80,30 @@ fn main() {
 
             let result = fuse(Some(config));
             println!("⚡ [html-fuse] Optimization completed!");
-            println!("  Templates scanned:        {}", result.stats.templates_scanned);
-            println!("  Fragments extracted:      {}", result.stats.fragments_extracted);
-            println!("  Unique fragments:         {}", result.stats.unique_fragments);
-            println!("  Duplicate fragments fused:{}", result.stats.fragments_deduped);
-            println!("  Shared templates created: {}", result.stats.fused_templates_created);
-            println!("  Components rewritten:     {}", result.stats.components_rewritten);
+            println!(
+                "  Templates scanned:        {}",
+                result.stats.templates_scanned
+            );
+            println!(
+                "  Fragments extracted:      {}",
+                result.stats.fragments_extracted
+            );
+            println!(
+                "  Unique fragments:         {}",
+                result.stats.unique_fragments
+            );
+            println!(
+                "  Duplicate fragments fused:{}",
+                result.stats.fragments_deduped
+            );
+            println!(
+                "  Shared templates created: {}",
+                result.stats.fused_templates_created
+            );
+            println!(
+                "  Components rewritten:     {}",
+                result.stats.components_rewritten
+            );
             println!("  Est. bytes saved:         {} B", result.stats.bytes_saved);
         }
         Commands::Analyze {
@@ -99,10 +122,22 @@ fn main() {
             let result = analyze(Some(config));
             println!("📊 [html-fuse] Analysis summary:");
             println!("  Files scanned:            {}", result.stats.files_scanned);
-            println!("  Templates scanned:        {}", result.stats.templates_scanned);
-            println!("  Fragments extracted:      {}", result.stats.fragments_extracted);
-            println!("  Duplicate fragments fused:{}", result.stats.fragments_deduped);
-            println!("  Shared templates created: {}", result.stats.fused_templates_created);
+            println!(
+                "  Templates scanned:        {}",
+                result.stats.templates_scanned
+            );
+            println!(
+                "  Fragments extracted:      {}",
+                result.stats.fragments_extracted
+            );
+            println!(
+                "  Duplicate fragments fused:{}",
+                result.stats.fragments_deduped
+            );
+            println!(
+                "  Shared templates created: {}",
+                result.stats.fused_templates_created
+            );
         }
         Commands::Audit { include, exclude } => {
             let config = HtmlFuseConfig {

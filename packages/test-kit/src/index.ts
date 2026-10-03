@@ -1,26 +1,23 @@
 export {
-  SANDBOX_SAFE_CHROMIUM_ARGS,
-  launchBrowser,
-  getSharedBrowser,
   closeSharedBrowser,
+  getSharedBrowser,
+  launchBrowser,
+  SANDBOX_SAFE_CHROMIUM_ARGS,
   type SafeBrowserOptions,
 } from './browser.js';
-
+export {
+  type MountResult,
+  mountElement,
+} from './mount.js';
 export {
   createTestPage,
-  getShadowText,
   getShadowComputedStyle,
-  type SetupPageOptions,
+  getShadowText,
   type ManagedTestPage,
+  type SetupPageOptions,
 } from './page.js';
-
 export {
+  type MappedFrame,
   mapStackTrace,
   type SourceMapPayload,
-  type MappedFrame,
 } from './stack.js';
-
-export {
-  mountElement,
-  type MountResult,
-} from './mount.js';

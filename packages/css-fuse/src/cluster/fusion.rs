@@ -145,8 +145,7 @@ impl ClusterEngine {
                         continue;
                     }
 
-                    let rule_hashes: Vec<RuleHash> =
-                        rules.iter().map(|r| r.hash.clone()).collect();
+                    let rule_hashes: Vec<RuleHash> = rules.iter().map(|r| r.hash.clone()).collect();
                     let cluster_id =
                         format!("_fused_subsystem_{}", compute_cluster_hash(&rule_hashes));
 
@@ -213,8 +212,7 @@ impl ClusterEngine {
                         continue;
                     }
 
-                    let rule_hashes: Vec<RuleHash> =
-                        rules.iter().map(|r| r.hash.clone()).collect();
+                    let rule_hashes: Vec<RuleHash> = rules.iter().map(|r| r.hash.clone()).collect();
                     let cluster_id =
                         format!("_fused_subsystem_{}", compute_cluster_hash(&rule_hashes));
 

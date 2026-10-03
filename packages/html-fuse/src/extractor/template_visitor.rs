@@ -2,7 +2,7 @@ use crate::extractor::import_resolver::ImportResolver;
 use crate::models::{ExtractedFragment, SourceSpan};
 use crate::normalizer::normalize_fragment;
 use oxc_ast::ast::{Expression, Program, Statement, TaggedTemplateExpression};
-use oxc_ast::Visit;
+use oxc_ast_visit::Visit;
 use oxc_span::Span;
 
 pub struct TemplateVisitor<'a> {
@@ -156,10 +156,7 @@ impl<'a> Visit<'a> for TemplateVisitor<'a> {
 
 /// Finds balanced static DOM element subtrees in a quasi text slice.
 /// Returns (start_offset, end_offset, text, is_svg)
-pub fn find_static_subtrees(
-    raw: &str,
-    min_length: usize,
-) -> Vec<(usize, usize, String, bool)> {
+pub fn find_static_subtrees(raw: &str, min_length: usize) -> Vec<(usize, usize, String, bool)> {
     let mut results = Vec::new();
     let bytes = raw.as_bytes();
     let len = bytes.len();
@@ -256,7 +253,20 @@ pub fn find_static_subtrees(
 
             let is_void_tag = matches!(
                 tag_name.to_ascii_lowercase().as_str(),
-                "area" | "base" | "br" | "col" | "embed" | "hr" | "img" | "input" | "link" | "meta" | "param" | "source" | "track" | "wbr"
+                "area"
+                    | "base"
+                    | "br"
+                    | "col"
+                    | "embed"
+                    | "hr"
+                    | "img"
+                    | "input"
+                    | "link"
+                    | "meta"
+                    | "param"
+                    | "source"
+                    | "track"
+                    | "wbr"
             );
 
             if is_self_closing || is_void_tag {
@@ -336,7 +346,10 @@ pub fn find_static_subtrees(
                                     }
                                 } else if b == b'"' || b == b'\'' {
                                     n_in_quote = Some(b);
-                                } else if b == b'/' && check_pos + 1 < len && bytes[check_pos + 1] == b'>' {
+                                } else if b == b'/'
+                                    && check_pos + 1 < len
+                                    && bytes[check_pos + 1] == b'>'
+                                {
                                     n_self_closing = true;
                                     break;
                                 } else if b == b'>' {
@@ -386,7 +399,10 @@ mod tests {
         assert!(subtrees[0].2.starts_with("<div class=\"test\">"));
         let svg_tuple = &subtrees[1];
         assert!(svg_tuple.3); // is_svg
-        assert_eq!(svg_tuple.2, "<svg viewBox=\"0 0 16 16\"><path d=\"M4 6\" /></svg>");
+        assert_eq!(
+            svg_tuple.2,
+            "<svg viewBox=\"0 0 16 16\"><path d=\"M4 6\" /></svg>"
+        );
     }
 
     #[test]
@@ -394,15 +410,24 @@ mod tests {
         let quasi = r#"<slot name="decorator" slot="decorator"></slot>"#;
         let subtrees = find_static_subtrees(quasi, 15);
         assert_eq!(subtrees.len(), 1);
-        assert_eq!(subtrees[0].2, "<slot name=\"decorator\" slot=\"decorator\"></slot>");
+        assert_eq!(
+            subtrees[0].2,
+            "<slot name=\"decorator\" slot=\"decorator\"></slot>"
+        );
     }
 
     #[test]
     fn test_find_static_subtrees_generic_html() {
         let quasi = r#"<div class="card"><span class="label">User</span><button type="button">Click</button></div>"#;
         let subtrees = find_static_subtrees(quasi, 15);
-        assert!(subtrees.iter().any(|s| s.2.starts_with("<div class=\"card\">")));
-        assert!(subtrees.iter().any(|s| s.2 == "<span class=\"label\">User</span>"));
-        assert!(subtrees.iter().any(|s| s.2 == "<button type=\"button\">Click</button>"));
+        assert!(subtrees
+            .iter()
+            .any(|s| s.2.starts_with("<div class=\"card\">")));
+        assert!(subtrees
+            .iter()
+            .any(|s| s.2 == "<span class=\"label\">User</span>"));
+        assert!(subtrees
+            .iter()
+            .any(|s| s.2 == "<button type=\"button\">Click</button>"));
     }
 }

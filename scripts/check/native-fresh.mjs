@@ -61,6 +61,21 @@ export function ensureNativeFresh(crates = ALL_CRATES, root = process.cwd()) {
           stdio: 'inherit',
           env: { ...process.env, TURBO_TELEMETRY_DISABLED: '1' },
         });
+        const crateUnderscore = crate.replace(/-/g, '_');
+        const dylibCandidates = [
+          path.join(root, 'target', 'debug', `lib${crateUnderscore}.dylib`),
+          path.join(root, 'target', 'release', `lib${crateUnderscore}.dylib`),
+          path.join(pkgDir, 'target', 'debug', `lib${crateUnderscore}.dylib`),
+          path.join(pkgDir, 'target', 'release', `lib${crateUnderscore}.dylib`),
+        ];
+        const targetDylib = dylibCandidates.find((p) => fs.existsSync(p));
+        if (targetDylib && nodeBinary) {
+          const destNode = path.join(pkgDir, nodeBinary);
+          fs.copyFileSync(targetDylib, destNode);
+          try {
+            execSync(`codesign -s - -f "${destNode}" 2>/dev/null || true`);
+          } catch {}
+        }
         const duration = ((Date.now() - t0) / 1000).toFixed(2);
         console.log(`[native-fresh] Successfully rebuilt ${crate} in ${duration}s`);
         rebuilt.push(crate);

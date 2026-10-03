@@ -1,7 +1,7 @@
 /**
  * Standard Lit component with property and state decorators
  */
-import { LitElement, html, css } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('my-counter')
@@ -15,7 +15,7 @@ export class MyCounter extends LitElement {
   count = 0;
 
   @state()
-  private _internalState = false;
+  _internalState = false;
 
   render() {
     return html`

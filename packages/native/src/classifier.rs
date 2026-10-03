@@ -3,7 +3,7 @@ use crate::models::{ClassificationResult, ClassifyOptions};
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
 use oxc_parser::Parser;
-use oxc_span::{GetSpan, SourceType};
+use oxc_span::SourceType;
 
 pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<ClassificationResult> {
     let allocator = Allocator::default();
@@ -103,23 +103,7 @@ pub fn classify_class<'a>(
         .or_else(|| fallback_name.map(|s| s.to_string()))
         .unwrap_or_else(|| "AnonymousComponent".to_string());
 
-    // Check heritage: class must extend LitElement, ReactiveElement, or mixin wrapping it
-    let mut extends_lit = false;
-    if let Some(heritage) = &class.heritage {
-        let span = heritage.expression.span();
-        let start = (span.start as usize).min(source.len());
-        let end = (span.end as usize).min(source.len());
-        let heritage_str = &source[start..end];
-        if heritage_str.contains("LitElement")
-            || heritage_str.contains("ReactiveElement")
-            || heritage_str.contains("Element")
-        {
-            extends_lit = true;
-        }
-    }
-
     let tag_name = extract_tag_name(class, source, fallback_name);
-    let has_custom_element_decorator = tag_name.is_some();
     let has_render_method = class.body.body.iter().any(|elem| match elem {
         ClassElement::MethodDefinition(m) => {
             m.key.static_name().map(|n| n == "render").unwrap_or(false)
@@ -127,7 +111,10 @@ pub fn classify_class<'a>(
         _ => false,
     });
 
-    if !extends_lit && !has_custom_element_decorator && !has_render_method {
+    // Only components that define a render() method are candidates for AOT compilation.
+    // Classes without a render() method (e.g. abstract base classes, controller hosts, or mixins)
+    // are skipped so their capability inheritance remains intact.
+    if !has_render_method {
         return None;
     }
 

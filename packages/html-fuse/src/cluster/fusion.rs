@@ -48,7 +48,10 @@ impl HtmlClusterEngine {
             let is_subsumed = non_subsumed.iter().any(|parent: &HtmlClusterGroup| {
                 parent.canonical_text.contains(&candidate.canonical_text)
                     && candidate.occurrences_count <= parent.occurrences_count
-                    && candidate.shared_by_files.iter().all(|f| parent.shared_by_files.contains(f))
+                    && candidate
+                        .shared_by_files
+                        .iter()
+                        .all(|f| parent.shared_by_files.contains(f))
             });
 
             if !is_subsumed {

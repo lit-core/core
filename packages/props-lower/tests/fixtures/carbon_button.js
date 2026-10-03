@@ -1,11 +1,11 @@
 /**
  * Verbatim excerpt from @carbon/web-components/es/components/button/button.js
  */
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import __decorate from './decorate.js';
 
-let CDSButton = class CDSButton extends LitElement {
+const CDSButton = class CDSButton extends LitElement {
   constructor(..._args) {
     super(..._args);
     this.disabled = false;

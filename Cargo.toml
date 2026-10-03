@@ -1,0 +1,50 @@
+[workspace]
+resolver = "2"
+members = [
+    "packages/css-fuse",
+    "packages/css-minifier",
+    "packages/dirty-mask",
+    "packages/dom-paths",
+    "packages/elem-proxy",
+    "packages/event-hoist",
+    "packages/html-aot",
+    "packages/html-fuse",
+    "packages/html-minifier",
+    "packages/memoize",
+    "packages/native",
+    "packages/props-lower",
+    "packages/resumable",
+]
+
+[workspace.dependencies]
+# NAPI-RS native bindings
+napi = { version = "3.10.5", features = ["serde-json"] }
+napi-derive = "3.5.10"
+napi-build = "2.3.2"
+
+# Core serialization & error handling
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0"
+
+# File matching & hashing
+glob = "0.3"
+blake3 = "1.5"
+
+# CLI & diagnostics
+clap = { version = "4.5", features = ["derive"] }
+miette = { version = "7.6", features = ["fancy"] }
+insta = { version = "1.41", features = ["json", "redactions"] }
+
+# CSS processing
+lightningcss = "1.0.0-alpha.72"
+
+# OXC compiler stack
+oxc_allocator = "0.151.0"
+oxc_ast = "0.151.0"
+oxc_ast_visit = "0.151.0"
+oxc_codegen = "0.151.0"
+oxc_parser = "0.151.0"
+oxc_semantic = "0.151.0"
+oxc_span = "0.151.0"
+oxc_traverse = "0.151.0"

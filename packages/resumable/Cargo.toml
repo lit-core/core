@@ -8,19 +8,19 @@ path = "native/lib.rs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-napi = { version = "3.10.5", features = ["serde-json"] }
-napi-derive = "3.5.10"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+napi = { workspace = true }
+napi-derive = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 
-# OXC stack — latest stable matching monorepo
-oxc_allocator = "0.151.0"
-oxc_parser = "0.151.0"
-oxc_ast = "0.151.0"
-oxc_span = "0.151.0"
-oxc_codegen = "0.151.0"
-oxc_traverse = "0.151.0"
-oxc_semantic = "0.151.0"
+# OXC stack
+oxc_allocator = { workspace = true }
+oxc_parser = { workspace = true }
+oxc_ast = { workspace = true }
+oxc_span = { workspace = true }
+oxc_codegen = { workspace = true }
+oxc_traverse = { workspace = true }
+oxc_semantic = { workspace = true }
 
 [build-dependencies]
-napi-build = "2.3.2"
+napi-build = { workspace = true }

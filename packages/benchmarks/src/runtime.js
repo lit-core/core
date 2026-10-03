@@ -154,7 +154,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
       /** @param {any} el */
       const safeUpdateComplete = (el) => {
         if (el && typeof el.updateComplete?.then === 'function') {
-          return el.updateComplete;
+          return el.updateComplete.catch(() => {});
         }
         return Promise.resolve();
       };

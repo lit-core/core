@@ -218,11 +218,7 @@ fn compute_part_mask(expr: &Expression, reactive_props: &HashMap<String, usize>)
     }
 }
 
-
-fn collect_classes_mut<'a, 'b>(
-    stmts: &'b mut [Statement<'a>],
-    out: &mut Vec<&'b mut Class<'a>>,
-) {
+fn collect_classes_mut<'a, 'b>(stmts: &'b mut [Statement<'a>], out: &mut Vec<&'b mut Class<'a>>) {
     for stmt in stmts {
         match stmt {
             Statement::ClassDeclaration(class) => {
@@ -374,10 +370,17 @@ fn mask_expressions_in_expr<'a>(
                             continue;
                         }
                         let mask = compute_part_mask(quasi_expr, reactive_props);
-                        let repl = format!("(this.__litDirtyMask & {}) ? ({}) : noChange", mask, expr_slice);
+                        let repl = format!(
+                            "(this.__litDirtyMask & {}) ? ({}) : noChange",
+                            mask, expr_slice
+                        );
                         let dummy_prog = format!("let __d = {};", repl);
-                        let parsed_e = Parser::new(allocator, allocator.alloc_str(&dummy_prog), source_type).parse();
-                        if let Some(Statement::VariableDeclaration(mut var_decl)) = parsed_e.program.body.into_iter().next() {
+                        let parsed_e =
+                            Parser::new(allocator, allocator.alloc_str(&dummy_prog), source_type)
+                                .parse();
+                        if let Some(Statement::VariableDeclaration(mut var_decl)) =
+                            parsed_e.program.body.into_iter().next()
+                        {
                             if !var_decl.declarations.is_empty() {
                                 if let Some(init) = var_decl.declarations.remove(0).init {
                                     *quasi_expr = init;
@@ -389,17 +392,52 @@ fn mask_expressions_in_expr<'a>(
                 }
             } else {
                 for quasi_expr in &mut tagged.quasi.expressions {
-                    mask_expressions_in_expr(quasi_expr, source, reactive_props, allocator, source_type, masked_count);
+                    mask_expressions_in_expr(
+                        quasi_expr,
+                        source,
+                        reactive_props,
+                        allocator,
+                        source_type,
+                        masked_count,
+                    );
                 }
             }
         }
         Expression::ParenthesizedExpression(paren) => {
-            mask_expressions_in_expr(&mut paren.expression, source, reactive_props, allocator, source_type, masked_count);
+            mask_expressions_in_expr(
+                &mut paren.expression,
+                source,
+                reactive_props,
+                allocator,
+                source_type,
+                masked_count,
+            );
         }
         Expression::ConditionalExpression(cond) => {
-            mask_expressions_in_expr(&mut cond.test, source, reactive_props, allocator, source_type, masked_count);
-            mask_expressions_in_expr(&mut cond.consequent, source, reactive_props, allocator, source_type, masked_count);
-            mask_expressions_in_expr(&mut cond.alternate, source, reactive_props, allocator, source_type, masked_count);
+            mask_expressions_in_expr(
+                &mut cond.test,
+                source,
+                reactive_props,
+                allocator,
+                source_type,
+                masked_count,
+            );
+            mask_expressions_in_expr(
+                &mut cond.consequent,
+                source,
+                reactive_props,
+                allocator,
+                source_type,
+                masked_count,
+            );
+            mask_expressions_in_expr(
+                &mut cond.alternate,
+                source,
+                reactive_props,
+                allocator,
+                source_type,
+                masked_count,
+            );
         }
         _ => {}
     }
@@ -416,29 +454,78 @@ fn mask_expressions_in_stmt<'a>(
     match stmt {
         Statement::ReturnStatement(ret) => {
             if let Some(ref mut arg) = ret.argument {
-                mask_expressions_in_expr(arg, source, reactive_props, allocator, source_type, masked_count);
+                mask_expressions_in_expr(
+                    arg,
+                    source,
+                    reactive_props,
+                    allocator,
+                    source_type,
+                    masked_count,
+                );
             }
         }
         Statement::ExpressionStatement(expr_stmt) => {
-            mask_expressions_in_expr(&mut expr_stmt.expression, source, reactive_props, allocator, source_type, masked_count);
+            mask_expressions_in_expr(
+                &mut expr_stmt.expression,
+                source,
+                reactive_props,
+                allocator,
+                source_type,
+                masked_count,
+            );
         }
         Statement::VariableDeclaration(var_decl) => {
             for decl in &mut var_decl.declarations {
                 if let Some(ref mut init) = decl.init {
-                    mask_expressions_in_expr(init, source, reactive_props, allocator, source_type, masked_count);
+                    mask_expressions_in_expr(
+                        init,
+                        source,
+                        reactive_props,
+                        allocator,
+                        source_type,
+                        masked_count,
+                    );
                 }
             }
         }
         Statement::BlockStatement(block) => {
             for s in &mut block.body {
-                mask_expressions_in_stmt(s, source, reactive_props, allocator, source_type, masked_count);
+                mask_expressions_in_stmt(
+                    s,
+                    source,
+                    reactive_props,
+                    allocator,
+                    source_type,
+                    masked_count,
+                );
             }
         }
         Statement::IfStatement(if_stmt) => {
-            mask_expressions_in_expr(&mut if_stmt.test, source, reactive_props, allocator, source_type, masked_count);
-            mask_expressions_in_stmt(&mut if_stmt.consequent, source, reactive_props, allocator, source_type, masked_count);
+            mask_expressions_in_expr(
+                &mut if_stmt.test,
+                source,
+                reactive_props,
+                allocator,
+                source_type,
+                masked_count,
+            );
+            mask_expressions_in_stmt(
+                &mut if_stmt.consequent,
+                source,
+                reactive_props,
+                allocator,
+                source_type,
+                masked_count,
+            );
             if let Some(ref mut alt) = if_stmt.alternate {
-                mask_expressions_in_stmt(alt, source, reactive_props, allocator, source_type, masked_count);
+                mask_expressions_in_stmt(
+                    alt,
+                    source,
+                    reactive_props,
+                    allocator,
+                    source_type,
+                    masked_count,
+                );
             }
         }
         _ => {}
@@ -454,7 +541,14 @@ fn mask_expressions_in_body<'a>(
     masked_count: &mut u32,
 ) {
     for stmt in &mut body.statements {
-        mask_expressions_in_stmt(stmt, source, reactive_props, allocator, source_type, masked_count);
+        mask_expressions_in_stmt(
+            stmt,
+            source,
+            reactive_props,
+            allocator,
+            source_type,
+            masked_count,
+        );
     }
 }
 
@@ -493,8 +587,11 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                         if mem.property.name == "createProperty" {
                             if let Expression::Identifier(obj_id) = &mem.object {
                                 if let Some(first_arg) = call.arguments.first() {
-                                    if let Some(Expression::StringLiteral(s)) = first_arg.as_expression() {
-                                        external_props.entry(obj_id.name.as_str().to_string())
+                                    if let Some(Expression::StringLiteral(s)) =
+                                        first_arg.as_expression()
+                                    {
+                                        external_props
+                                            .entry(obj_id.name.as_str().to_string())
                                             .or_default()
                                             .push(s.value.as_str().to_string());
                                     }
@@ -511,21 +608,27 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                         || callee_name == Some("_ts_decorate"))
                         && call.arguments.len() >= 3
                     {
-                        if let Some(Expression::StaticMemberExpression(mem)) = call.arguments[1].as_expression() {
+                        if let Some(Expression::StaticMemberExpression(mem)) =
+                            call.arguments[1].as_expression()
+                        {
                             if mem.property.name == "prototype" {
                                 if let Expression::Identifier(id) = &mem.object {
                                     let class_name = id.name.as_str().to_string();
                                     let has_reactive = match call.arguments[0].as_expression() {
                                         Some(Expression::ArrayExpression(arr)) => {
                                             arr.elements.iter().any(|elem| {
-                                                elem.as_expression().map_or(false, is_reactive_decorator)
+                                                elem.as_expression()
+                                                    .map_or(false, is_reactive_decorator)
                                             })
                                         }
                                         _ => false,
                                     };
                                     if has_reactive {
-                                        if let Some(Expression::StringLiteral(s)) = call.arguments[2].as_expression() {
-                                            external_props.entry(class_name)
+                                        if let Some(Expression::StringLiteral(s)) =
+                                            call.arguments[2].as_expression()
+                                        {
+                                            external_props
+                                                .entry(class_name)
                                                 .or_default()
                                                 .push(s.value.as_str().to_string());
                                         }
@@ -545,7 +648,8 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                                     for prop in &obj.properties {
                                         if let ObjectPropertyKind::ObjectProperty(p) = prop {
                                             if let Some(name) = p.key.static_name() {
-                                                external_props.entry(obj_id.name.as_str().to_string())
+                                                external_props
+                                                    .entry(obj_id.name.as_str().to_string())
                                                     .or_default()
                                                     .push(name.to_string());
                                             }
@@ -604,7 +708,14 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                 if !method.r#static {
                     if name.as_deref() == Some("render") {
                         if let Some(ref mut body) = method.value.body {
-                            mask_expressions_in_body(body, source, &reactive_props, &allocator, source_type, &mut class_masked_count);
+                            mask_expressions_in_body(
+                                body,
+                                source,
+                                &reactive_props,
+                                &allocator,
+                                source_type,
+                                &mut class_masked_count,
+                            );
                         }
                     } else if name.as_deref() == Some("update") {
                         existing_update_idx = Some(idx);
@@ -632,6 +743,27 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
 
         if let Some(idx) = existing_update_idx {
             if let ClassElement::MethodDefinition(ref mut method) = &mut class.body.body[idx] {
+                let existing_param =
+                    method
+                        .value
+                        .params
+                        .items
+                        .first()
+                        .and_then(|p| match &p.pattern {
+                            BindingPattern::BindingIdentifier(id) => {
+                                Some(id.name.as_str().to_string())
+                            }
+                            _ => None,
+                        });
+                let alias_line = match existing_param.as_deref() {
+                    Some("changedProperties") => String::new(),
+                    Some(other) => {
+                        format!("    const changedProperties = {} || new Map();\n", other)
+                    }
+                    None => {
+                        "    const changedProperties = arguments[0] || new Map();\n".to_string()
+                    }
+                };
                 if let Some(ref mut body) = method.value.body {
                     let already_has = body.statements.iter().any(|s| {
                         let start = s.span().start as usize;
@@ -644,13 +776,21 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                     });
                     if !already_has {
                         let block_code = format!(
-                            "function __d() {{\n    let mask = 0;\n    if (this.hasUpdated) {{\n{}    }} else {{\n      mask = -1;\n    }}\n    this.__litDirtyMask = mask;\n}}",
+                            "function __d() {{\n{}    let mask = 0;\n    if (this.hasUpdated) {{\n{}    }} else {{\n      mask = -1;\n    }}\n    this.__litDirtyMask = mask;\n}}",
+                            alias_line,
                             mask_calcs
                         );
-                        let parsed_b = Parser::new(&allocator, allocator.alloc_str(&block_code), source_type).parse();
-                        if let Some(Statement::FunctionDeclaration(mut fn_decl)) = parsed_b.program.body.into_iter().next() {
+                        let parsed_b =
+                            Parser::new(&allocator, allocator.alloc_str(&block_code), source_type)
+                                .parse();
+                        if let Some(Statement::FunctionDeclaration(mut fn_decl)) =
+                            parsed_b.program.body.into_iter().next()
+                        {
                             if let Some(ref mut fn_body) = fn_decl.body {
-                                let stmts = std::mem::replace(&mut fn_body.statements, oxc_allocator::ArenaVec::new_in(&&allocator));
+                                let stmts = std::mem::replace(
+                                    &mut fn_body.statements,
+                                    oxc_allocator::ArenaVec::new_in(&&allocator),
+                                );
                                 for (i, stmt) in stmts.into_iter().enumerate() {
                                     body.statements.insert(i, stmt);
                                 }
@@ -664,8 +804,11 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                 "class __D {{\n  update(changedProperties) {{\n    let mask = 0;\n    if (this.hasUpdated) {{\n{}    }} else {{\n      mask = -1;\n    }}\n    this.__litDirtyMask = mask;\n    super.update(changedProperties);\n  }}\n}}",
                 mask_calcs
             );
-            let parsed_m = Parser::new(&allocator, allocator.alloc_str(&method_code), source_type).parse();
-            if let Some(Statement::ClassDeclaration(mut d_class)) = parsed_m.program.body.into_iter().next() {
+            let parsed_m =
+                Parser::new(&allocator, allocator.alloc_str(&method_code), source_type).parse();
+            if let Some(Statement::ClassDeclaration(mut d_class)) =
+                parsed_m.program.body.into_iter().next()
+            {
                 if !d_class.body.body.is_empty() {
                     let method = d_class.body.body.remove(0);
                     class.body.body.push(method);
@@ -709,10 +852,13 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
 
     if !has_no_change {
         if let Some(idx) = lit_import_idx {
-            if let Statement::ImportDeclaration(ref mut import_decl) = &mut parsed.program.body[idx] {
+            if let Statement::ImportDeclaration(ref mut import_decl) = &mut parsed.program.body[idx]
+            {
                 let dummy_imp = "import { noChange } from 'lit';";
                 let p_imp = Parser::new(&allocator, dummy_imp, source_type).parse();
-                if let Some(Statement::ImportDeclaration(mut d)) = p_imp.program.body.into_iter().next() {
+                if let Some(Statement::ImportDeclaration(mut d)) =
+                    p_imp.program.body.into_iter().next()
+                {
                     if let Some(mut specs) = d.specifiers.take() {
                         if let Some(spec) = specs.pop() {
                             if let Some(ref mut current_specs) = import_decl.specifiers {
@@ -738,7 +884,9 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         }
     }
 
-    let codegen_result = Codegen::new().with_options(codegen_options).build(&parsed.program);
+    let codegen_result = Codegen::new()
+        .with_options(codegen_options)
+        .build(&parsed.program);
     let map_json = codegen_result.map.map(|m| m.to_json_string());
 
     DirtyMaskResult {

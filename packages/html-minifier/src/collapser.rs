@@ -410,12 +410,7 @@ mod tests {
     #[test]
     fn test_dynamic_tag_with_attributes() {
         // html`<${tag}\n  part="btn"\n  class=${cls}\n></${tag}>`
-        let input = vec![
-            "\n  <",
-            "\n    part=\"btn\"\n    class=",
-            "\n  ></",
-            ">\n",
-        ];
+        let input = vec!["\n  <", "\n    part=\"btn\"\n    class=", "\n  ></", ">\n"];
         let output = collapse_template_quasis(&input);
         assert_eq!(output[0], "<");
         assert_eq!(output[1], " part=\"btn\" class=");

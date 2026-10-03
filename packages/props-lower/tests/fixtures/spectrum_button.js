@@ -1,7 +1,7 @@
 /**
  * Verbatim excerpt from @spectrum-web-components action-button pattern
  */
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
 export class ActionButton extends LitElement {

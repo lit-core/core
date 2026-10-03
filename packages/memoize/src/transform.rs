@@ -733,7 +733,12 @@ fn replace_candidates_in_stmt<'a>(
             }
         }
         Statement::ExpressionStatement(expr_stmt) => {
-            replace_candidate_exprs(&mut expr_stmt.expression, candidates, allocator, source_type);
+            replace_candidate_exprs(
+                &mut expr_stmt.expression,
+                candidates,
+                allocator,
+                source_type,
+            );
         }
         Statement::VariableDeclaration(var_decl) => {
             for decl in &mut var_decl.declarations {
@@ -861,7 +866,8 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
         let mut used_slots: HashSet<String> = HashSet::new();
         let mut counter: usize = 0;
 
-        let old_statements = std::mem::replace(&mut render_body.statements, ArenaVec::new_in(&&allocator));
+        let old_statements =
+            std::mem::replace(&mut render_body.statements, ArenaVec::new_in(&&allocator));
         let mut new_statements = ArenaVec::new_in(&&allocator);
         let mut class_modified = false;
 
@@ -876,7 +882,8 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
 
             class_modified = true;
 
-            let is_single_var_decl = groups.len() == 1 && groups[0].is_var_decl && groups[0].candidates.len() == 1;
+            let is_single_var_decl =
+                groups.len() == 1 && groups[0].is_var_decl && groups[0].candidates.len() == 1;
 
             if is_single_var_decl {
                 let cand = &groups[0].candidates[0];
@@ -884,7 +891,8 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
                 let memo_block = generate_var_decl_memo_block(cand, var_name);
                 total_memoized_count += 1;
 
-                let p = Parser::new(&allocator, allocator.alloc_str(&memo_block), source_type).parse();
+                let p =
+                    Parser::new(&allocator, allocator.alloc_str(&memo_block), source_type).parse();
                 for s in p.program.body {
                     new_statements.push(s);
                 }
@@ -894,13 +902,20 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
                         let memo_block = generate_memo_block(cand);
                         total_memoized_count += 1;
 
-                        let p = Parser::new(&allocator, allocator.alloc_str(&memo_block), source_type).parse();
+                        let p =
+                            Parser::new(&allocator, allocator.alloc_str(&memo_block), source_type)
+                                .parse();
                         for s in p.program.body {
                             new_statements.push(s);
                         }
                     }
 
-                    replace_candidates_in_stmt(&mut stmt, &group.candidates, &allocator, source_type);
+                    replace_candidates_in_stmt(
+                        &mut stmt,
+                        &group.candidates,
+                        &allocator,
+                        source_type,
+                    );
                 }
                 new_statements.push(stmt);
             }

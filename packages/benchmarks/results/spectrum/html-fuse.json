@@ -136,13 +136,13 @@
     "description": "Cross-component static HTML and SVG fragment clustering",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T12:10:59.633Z",
+  "timestamp": "2026-10-03T16:43:07.248Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "e7dd878",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,37 +157,37 @@
     }
   },
   "metrics": {
-    "rawBytes": 818387,
-    "gzipBytes": 147383,
-    "brotliBytes": 111827,
-    "buildTimeMs": 380.3301250000004
+    "rawBytes": 818299,
+    "gzipBytes": 147341,
+    "brotliBytes": 111804,
+    "buildTimeMs": 862.3141669999995
   },
   "baseline": {
-    "rawBytes": 819094,
-    "gzipBytes": 146775,
-    "brotliBytes": 111368,
-    "buildTimeMs": 81.78462500000023
+    "rawBytes": 819006,
+    "gzipBytes": 146760,
+    "brotliBytes": 111333,
+    "buildTimeMs": 83.90575000000001
   },
   "deltas": {
     "rawBytes": -707,
-    "rawPercent": -0.08631487961088716,
-    "gzipBytes": 608,
-    "gzipPercent": 0.4142394822006472,
-    "brotliBytes": 459,
-    "brotliPercent": 0.41214711586811287,
-    "buildTimeMs": 298.5455000000002
+    "rawPercent": -0.08632415391340234,
+    "gzipBytes": 581,
+    "gzipPercent": 0.39588443717634236,
+    "brotliBytes": 471,
+    "brotliPercent": 0.423055158847781,
+    "buildTimeMs": 778.4084169999995
   },
   "runtime": {
-    "firstRenderMs": 15.7,
-    "updateMs": 0.8,
-    "scriptEvalMs": 11.1,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 431737,
-    "speedupPercent": -2.614379084967311,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 18.38235294117647,
-    "registrationSpeedupPercent": -16.666666666666664,
-    "memorySavingsPercent": -0.0011581258743850352
+    "firstRenderMs": 28.1,
+    "updateMs": 2.9,
+    "scriptEvalMs": 10.1,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 58844,
+    "speedupPercent": -1.4440433212996466,
+    "updateSpeedupPercent": -31.818181818181802,
+    "evalSpeedupPercent": 17.213114754098356,
+    "registrationSpeedupPercent": -60.00000000000001,
+    "memorySavingsPercent": -2.2662495655196384
   },
   "diagnostics": {
     "fragmentsScanned": 874,

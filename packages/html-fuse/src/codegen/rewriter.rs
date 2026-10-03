@@ -48,7 +48,12 @@ pub fn rewrite_file(
                 format!("${{{}}}", cluster.id)
             };
 
-            replacements.push((frag.span.start, frag.span.end, replacement, cluster.id.clone()));
+            replacements.push((
+                frag.span.start,
+                frag.span.end,
+                replacement,
+                cluster.id.clone(),
+            ));
         }
     }
 

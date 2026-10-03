@@ -61,7 +61,9 @@ impl<'a> HtmlMinifierTraverser<'a> {
     fn is_target_tag(&self, expr: &Expression<'a>) -> bool {
         match expr {
             Expression::Identifier(ident) => {
-                ident.name == "html" || ident.name == "svg" || self.html_svg_tags.contains(ident.name.as_str())
+                ident.name == "html"
+                    || ident.name == "svg"
+                    || self.html_svg_tags.contains(ident.name.as_str())
             }
             Expression::StaticMemberExpression(member) => {
                 member.property.name == "html"
@@ -176,7 +178,9 @@ pub fn collapse_code(source: &str, options: CollapseOptions) -> CollapseResult {
         }
     }
 
-    let codegen_result = Codegen::new().with_options(codegen_options).build(&parsed.program);
+    let codegen_result = Codegen::new()
+        .with_options(codegen_options)
+        .build(&parsed.program);
 
     CollapseResult {
         code: codegen_result.code,

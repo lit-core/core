@@ -1,5 +1,5 @@
-import type { Browser } from 'playwright';
 import { launchBrowser } from '@lit-core/test-kit';
+import type { Browser } from 'playwright';
 import { afterAll, describe, expect, it } from 'vitest';
 import { compileResumableLoader } from '../src/client/compiler.js';
 import { renderToDsd } from '../src/server/dsd-renderer.js';
@@ -15,7 +15,6 @@ describe('playwright browser end-to-end resumption tests', () => {
 
   it('resumes nested Declarative Shadow DOM components on first interaction', async () => {
     browser = await launchBrowser();
-
 
     const page = await browser.newPage();
 

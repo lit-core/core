@@ -85,11 +85,16 @@ async function main() {
 
   // Tier 1: Rust unit tests on affected crates
   if (!ONLY_JS && affected.affectedCrates.length > 0) {
-    for (const crate of affected.affectedCrates) {
-      const manifestPath = path.join(ROOT, 'packages', crate, 'Cargo.toml');
-      if (fs.existsSync(manifestPath)) {
-        const passed = runStep(`tier 1: cargo test for ${crate}`, `cargo test --manifest-path packages/${crate}/Cargo.toml`);
-        if (!passed) allPassed = false;
+    if (affected.affectedCrates.length === ALL_CRATES.length) {
+      const passed = runStep('tier 1: cargo test workspace', 'cargo test --workspace');
+      if (!passed) allPassed = false;
+    } else {
+      for (const crate of affected.affectedCrates) {
+        const manifestPath = path.join(ROOT, 'packages', crate, 'Cargo.toml');
+        if (fs.existsSync(manifestPath)) {
+          const passed = runStep(`tier 1: cargo test for ${crate}`, `cargo test -p ${crate.replace(/-/g, '_')}`);
+          if (!passed) allPassed = false;
+        }
       }
     }
   }

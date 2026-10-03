@@ -5,7 +5,7 @@
     "id": "momentum",
     "name": "Momentum Design (@momentum-design/components)",
     "packageName": "@momentum-design/components",
-    "version": "0.139.9",
+    "version": "0.140.1",
     "componentCount": 20,
     "components": [
       {
@@ -136,13 +136,13 @@
     "description": "AOT Custom Element proxy stubs for deferred registration and lazy loading",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T12:11:24.055Z",
+  "timestamp": "2026-10-03T16:43:48.605Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "e7dd878",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,16 +157,16 @@
     }
   },
   "metrics": {
-    "rawBytes": 346264,
-    "gzipBytes": 74162,
-    "brotliBytes": 59626,
-    "buildTimeMs": 47.14008300000569
+    "rawBytes": 346579,
+    "gzipBytes": 74275,
+    "brotliBytes": 59822,
+    "buildTimeMs": 44.014458000000104
   },
   "baseline": {
-    "rawBytes": 346264,
-    "gzipBytes": 74162,
-    "brotliBytes": 59626,
-    "buildTimeMs": 79.31620800000383
+    "rawBytes": 346579,
+    "gzipBytes": 74275,
+    "brotliBytes": 59822,
+    "buildTimeMs": 71.49916700000006
   },
   "deltas": {
     "rawBytes": 0,
@@ -175,18 +175,18 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -32.17612499999814
+    "buildTimeMs": -27.484708999999953
   },
   "runtime": {
-    "firstRenderMs": 4.2,
-    "updateMs": 1,
-    "scriptEvalMs": 4.3,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 604175,
-    "speedupPercent": -5.000000000000004,
-    "updateSpeedupPercent": -24.999999999999993,
-    "evalSpeedupPercent": 37.68115942028986,
-    "registrationSpeedupPercent": 57.14285714285714,
-    "memorySavingsPercent": 0
+    "firstRenderMs": 21,
+    "updateMs": 0.9,
+    "scriptEvalMs": 4.8,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 67024,
+    "speedupPercent": 4.545454545454546,
+    "updateSpeedupPercent": 40,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -19.999999999999996,
+    "memorySavingsPercent": 0.059644518668734346
   }
 }

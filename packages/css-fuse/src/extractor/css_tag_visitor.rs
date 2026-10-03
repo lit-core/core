@@ -3,7 +3,7 @@ use oxc_ast::ast::{
     CallExpression, Class, ClassElement, Expression, MethodDefinitionKind, PropertyKey, Statement,
     TaggedTemplateExpression, VariableDeclaration,
 };
-use oxc_ast::Visit;
+use oxc_ast_visit::Visit;
 use oxc_span::Span;
 use std::collections::{HashMap, HashSet};
 
@@ -279,12 +279,7 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
                 match spec {
                     oxc_ast::ast::ImportDeclarationSpecifier::ImportSpecifier(s) => {
                         let local_name = s.local.name.to_string();
-                        let imported_name = match &s.imported {
-                            oxc_ast::ast::ModuleExportName::Identifier(id) => id.name.to_string(),
-                            oxc_ast::ast::ModuleExportName::StringLiteral(lit) => {
-                                lit.value.to_string()
-                            }
-                        };
+                        let imported_name = s.imported.name().to_string();
                         if imported_name == "styles"
                             || imported_name.ends_with("Styles")
                             || imported_name == "default"
@@ -380,7 +375,7 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
 
     fn visit_variable_declaration(&mut self, decl: &VariableDeclaration<'a>) {
         for declarator in &decl.declarations {
-            if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(id) = &declarator.id.kind {
+            if let oxc_ast::ast::BindingPattern::BindingIdentifier(id) = &declarator.id {
                 let name = id.name.to_string();
                 if let Some(init) = &declarator.init {
                     let parent_span = Some(self.compute_span(declarator.span));

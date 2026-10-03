@@ -174,6 +174,13 @@ pub fn transform_vanilla_class<'a>(
     let tmpl_var = format!("__lit_tmpl_{}", comp_id);
 
     let mut hoisted_code = String::new();
+    hoisted_code.push_str("if (typeof HTMLElement !== 'undefined') {\n");
+    hoisted_code.push_str("  if (!HTMLElement.prototype.connectedCallback) HTMLElement.prototype.connectedCallback = function() { if (this.__controllers) { for (const c of this.__controllers) c.hostConnected?.(); } };\n");
+    hoisted_code.push_str("  if (!HTMLElement.prototype.disconnectedCallback) HTMLElement.prototype.disconnectedCallback = function() { if (this.__controllers) { for (const c of this.__controllers) c.hostDisconnected?.(); } };\n");
+    hoisted_code.push_str("  if (!HTMLElement.prototype.addController) HTMLElement.prototype.addController = function(c) { (this.__controllers ??= []).push(c); if (this.isConnected) c.hostConnected?.(); };\n");
+    hoisted_code.push_str("  if (!HTMLElement.prototype.removeController) HTMLElement.prototype.removeController = function(c) { if (this.__controllers) { const i = this.__controllers.indexOf(c); if (i >= 0) this.__controllers.splice(i, 1); } };\n");
+    hoisted_code.push_str("  if (!HTMLElement.prototype.requestUpdate) HTMLElement.prototype.requestUpdate = function() { return Promise.resolve(false); };\n");
+    hoisted_code.push_str("}\n");
     if let Some(css) = &styles_css {
         hoisted_code.push_str(&format!(
             "const {} = new CSSStyleSheet();\n{}.replaceSync(`{}`);\n",
@@ -214,6 +221,12 @@ pub fn transform_vanilla_class<'a>(
             observed_attrs.join(", ")
         ));
     }
+
+    // Static Lit compatibility stubs for lowered classes
+    members_code.push_str("  static createProperty() {}\n");
+    members_code.push_str("  static getPropertyOptions() { return {}; }\n");
+    members_code.push_str("  static get elementProperties() { return new Map(); }\n");
+    members_code.push_str("  static addInitializer() {}\n");
 
     // constructor
     members_code.push_str("  constructor() {\n");
@@ -327,13 +340,13 @@ pub fn transform_vanilla_class<'a>(
         if p.reflect {
             if p.prop_type == "boolean" {
                 members_code.push_str(&format!(
-                    "    this.toggleAttribute('{}', Boolean(v));\n",
-                    p.attribute_name
+                    "    if (this.isConnected) {{\n      if (this.hasAttribute('{}') !== Boolean(v)) this.toggleAttribute('{}', Boolean(v));\n    }} else {{\n      queueMicrotask(() => {{\n        if (this.toggleAttribute && this.hasAttribute('{}') !== Boolean(this._{})) this.toggleAttribute('{}', Boolean(this._{}));\n      }});\n    }}\n",
+                    p.attribute_name, p.attribute_name, p.attribute_name, p_name, p.attribute_name, p_name
                 ));
             } else {
                 members_code.push_str(&format!(
-                    "    if (v != null) this.setAttribute('{}', String(v)); else this.removeAttribute('{}');\n",
-                    p.attribute_name, p.attribute_name
+                    "    if (this.isConnected) {{\n      if (v != null) {{\n        if (this.getAttribute('{}') !== String(v)) this.setAttribute('{}', String(v));\n      }} else {{\n        this.removeAttribute('{}');\n      }}\n    }} else {{\n      queueMicrotask(() => {{\n        if (this.setAttribute) {{\n          if (this._{} != null) {{\n            if (this.getAttribute('{}') !== String(this._{})) this.setAttribute('{}', String(this._{}));\n          }} else {{\n            this.removeAttribute('{}');\n          }}\n        }}\n      }});\n    }}\n",
+                    p.attribute_name, p.attribute_name, p.attribute_name, p_name, p.attribute_name, p_name, p.attribute_name, p_name, p.attribute_name
                 ));
             }
         }
@@ -359,6 +372,11 @@ pub fn transform_vanilla_class<'a>(
         members_code.push_str("    }\n");
         members_code.push_str("  }\n");
     }
+
+    // Lit instance lifecycle compatibility stubs
+    members_code.push_str("  get renderRoot() { return this.shadowRoot; }\n");
+    members_code.push_str("  requestUpdate() { return Promise.resolve(false); }\n");
+    members_code.push_str("  get updateComplete() { return Promise.resolve(true); }\n");
 
     // Parse synthesized class members into AST ClassElements
     let dummy_source = format!("class __Dummy {{\n{}\n}}", members_code);

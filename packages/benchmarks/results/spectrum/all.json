@@ -136,13 +136,13 @@
     "description": "Combined impact of all enabled optimization tools simultaneously",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T12:11:19.759Z",
+  "timestamp": "2026-10-03T16:43:27.196Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "e7dd878",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +157,36 @@
     }
   },
   "metrics": {
-    "rawBytes": 808724,
-    "gzipBytes": 148137,
-    "brotliBytes": 113077,
-    "buildTimeMs": 2359.782124999998
+    "rawBytes": 806918,
+    "gzipBytes": 147430,
+    "brotliBytes": 112720,
+    "buildTimeMs": 2418.225624999999
   },
   "baseline": {
-    "rawBytes": 819094,
-    "gzipBytes": 146775,
-    "brotliBytes": 111368,
-    "buildTimeMs": 81.78462500000023
+    "rawBytes": 819006,
+    "gzipBytes": 146760,
+    "brotliBytes": 111333,
+    "buildTimeMs": 83.90575000000001
   },
   "deltas": {
-    "rawBytes": -10370,
-    "rawPercent": -1.266032958366195,
-    "gzipBytes": 1362,
-    "gzipPercent": 0.9279509453244763,
-    "brotliBytes": 1709,
-    "brotliPercent": 1.5345521155089434,
-    "buildTimeMs": 2277.9974999999977
+    "rawBytes": -12088,
+    "rawPercent": -1.4759354632322597,
+    "gzipBytes": 670,
+    "gzipPercent": 0.4565276642136822,
+    "brotliBytes": 1387,
+    "brotliPercent": 1.2458121132099198,
+    "buildTimeMs": 2334.3198749999992
   },
   "runtime": {
-    "firstRenderMs": 0,
-    "updateMs": 0,
-    "scriptEvalMs": 11.2,
-    "registrationMs": 0,
-    "heapUsedBytes": 0,
-    "speedupPercent": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 17.647058823529417,
-    "registrationSpeedupPercent": 0,
+    "firstRenderMs": 22.1,
+    "updateMs": 1.9,
+    "scriptEvalMs": 10.2,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 57540,
+    "speedupPercent": 20.21660649819494,
+    "updateSpeedupPercent": 13.636363636363647,
+    "evalSpeedupPercent": 16.393442622950822,
+    "registrationSpeedupPercent": -80,
     "memorySavingsPercent": 0
   }
 }

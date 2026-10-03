@@ -5,7 +5,7 @@
     "id": "momentum",
     "name": "Momentum Design (@momentum-design/components)",
     "packageName": "@momentum-design/components",
-    "version": "0.139.9",
+    "version": "0.140.1",
     "componentCount": 20,
     "components": [
       {
@@ -136,13 +136,13 @@
     "description": "Standard Vite build without any lit-core optimization plugins",
     "isBaseline": true
   },
-  "timestamp": "2026-10-03T12:11:20.605Z",
+  "timestamp": "2026-10-03T16:43:45.151Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "e7dd878",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,17 +157,17 @@
     }
   },
   "metrics": {
-    "rawBytes": 346264,
-    "gzipBytes": 74162,
-    "brotliBytes": 59626,
-    "buildTimeMs": 79.31620800000383
+    "rawBytes": 346579,
+    "gzipBytes": 74275,
+    "brotliBytes": 59822,
+    "buildTimeMs": 71.49916700000006
   },
   "runtime": {
-    "firstRenderMs": 4,
-    "updateMs": 0.8,
-    "scriptEvalMs": 6.9,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 604175,
+    "firstRenderMs": 22,
+    "updateMs": 1.5,
+    "scriptEvalMs": 4.8,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 67064,
     "speedupPercent": 0,
     "updateSpeedupPercent": 0,
     "evalSpeedupPercent": 0,

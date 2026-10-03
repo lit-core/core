@@ -34,7 +34,7 @@
     "verify": "node scripts/check/verify.mjs",
     "vendor:where": "node scripts/check/vendor-where.mjs",
     "test": "turbo run test",
-    "test:rust": "for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask html-aot resumable; do cargo test --manifest-path packages/$pkg/Cargo.toml; done",
+    "test:rust": "cargo test --workspace",
     "typecheck": "turbo run typecheck",
     "benchmark": "pnpm --filter @lit-core/benchmarks run benchmark",
     "benchmark:webawesome": "pnpm --filter @lit-core/benchmarks run benchmark:webawesome",

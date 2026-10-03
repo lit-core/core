@@ -109,7 +109,10 @@ mod tests {
 
         assert_eq!(canon1, canon2);
         assert_eq!(hash1, hash2);
-        assert_eq!(canon1, "<svg viewBox=\"0 0 16 16\"><path d=\"M4 6\"/></svg>");
+        assert_eq!(
+            canon1,
+            "<svg viewBox=\"0 0 16 16\"><path d=\"M4 6\"/></svg>"
+        );
     }
 
     #[test]

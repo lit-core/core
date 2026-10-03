@@ -136,13 +136,13 @@
     "description": "Cross-component CSS deduplication into shared constructable stylesheets",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T12:10:31.753Z",
+  "timestamp": "2026-10-03T16:42:15.683Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "ea75514",
+    "gitCommit": "e7dd878",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -158,36 +158,36 @@
   },
   "metrics": {
     "rawBytes": 924632,
-    "gzipBytes": 142331,
-    "brotliBytes": 102246,
-    "buildTimeMs": 640.2804579999975
+    "gzipBytes": 142330,
+    "brotliBytes": 102065,
+    "buildTimeMs": 588.0970000000002
   },
   "baseline": {
     "rawBytes": 1438781,
     "gzipBytes": 186286,
     "brotliBytes": 98045,
-    "buildTimeMs": 66.64341599999898
+    "buildTimeMs": 68.61058400000002
   },
   "deltas": {
     "rawBytes": -514149,
     "rawPercent": -35.7350423726752,
-    "gzipBytes": -43955,
-    "gzipPercent": -23.595439270798664,
-    "brotliBytes": 4201,
-    "brotliPercent": 4.284767198735275,
-    "buildTimeMs": 573.6370419999985
+    "gzipBytes": -43956,
+    "gzipPercent": -23.59597607979129,
+    "brotliBytes": 4020,
+    "brotliPercent": 4.10015809067265,
+    "buildTimeMs": 519.4864160000002
   },
   "runtime": {
-    "firstRenderMs": 2.7,
-    "updateMs": 0.4,
-    "scriptEvalMs": 3.6,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 1040416,
-    "speedupPercent": 22.85714285714285,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 7.692307692307689,
-    "registrationSpeedupPercent": 40,
-    "memorySavingsPercent": -127.40041003134249
+    "firstRenderMs": 43.7,
+    "updateMs": 2,
+    "scriptEvalMs": 3.7,
+    "registrationMs": 1,
+    "heapUsedBytes": 149432,
+    "speedupPercent": 21.964285714285708,
+    "updateSpeedupPercent": 13.04347826086956,
+    "evalSpeedupPercent": 11.904761904761903,
+    "registrationSpeedupPercent": 9.090909090909099,
+    "memorySavingsPercent": -0.5598923283983849
   },
   "diagnostics": {
     "rulesScanned": 23881,

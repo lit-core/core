@@ -78,10 +78,12 @@ pub fn rewrite_file(
                 } else if cluster_ids.len() == 1 {
                     replacements.push((style.span.start, style.span.end, cluster_ids[0].clone()));
                 } else {
+                    let interpolations: Vec<String> =
+                        cluster_ids.iter().map(|c| format!("${{{}}}", c)).collect();
                     replacements.push((
                         style.span.start,
                         style.span.end,
-                        format!("[{}]", cluster_ref_list),
+                        format!("{}`\n{}\n  `", tag, interpolations.join("\n")),
                     ));
                 }
             }
@@ -104,10 +106,12 @@ pub fn rewrite_file(
                 } else if cluster_ids.len() == 1 {
                     replacements.push((style.span.start, style.span.end, cluster_ids[0].clone()));
                 } else {
+                    let interpolations: Vec<String> =
+                        cluster_ids.iter().map(|c| format!("${{{}}}", c)).collect();
                     replacements.push((
                         style.span.start,
                         style.span.end,
-                        format!("[{}]", cluster_ref_list),
+                        format!("{}`\n{}\n  `", tag, interpolations.join("\n")),
                     ));
                 }
             }
@@ -120,7 +124,9 @@ pub fn rewrite_file(
                 } else if cluster_ids.len() == 1 {
                     cluster_ids[0].clone()
                 } else {
-                    format!("[{}]", cluster_ref_list)
+                    let interpolations: Vec<String> =
+                        cluster_ids.iter().map(|c| format!("${{{}}}", c)).collect();
+                    format!("{}`\n{}\n  `", tag, interpolations.join("\n"))
                 };
                 replacements.push((style.span.start, style.span.end, replacement));
             }

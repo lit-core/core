@@ -7,37 +7,38 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-napi = { version = "3.10.5", features = ["serde-json"] }
-napi-derive = "3.5.10"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-glob = "0.3"
+napi = { workspace = true }
+napi-derive = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+glob = { workspace = true }
 
-# JS/TS parsing (matching existing monorepo versions)
-oxc_parser = "0.15.0"
-oxc_ast = "0.15.0"
-oxc_allocator = "0.15.0"
-oxc_span = "0.15.0"
+# JS/TS parsing
+oxc_parser = { workspace = true }
+oxc_ast = { workspace = true }
+oxc_allocator = { workspace = true }
+oxc_span = { workspace = true }
+oxc_ast_visit = { workspace = true }
 
 # CSS parsing & transformation
-lightningcss = "1.0.0-alpha.72"
+lightningcss = { workspace = true }
 
 # Fast hashing
-blake3 = "1.5"
+blake3 = { workspace = true }
 
 # CLI
-clap = { version = "4.5", features = ["derive"] }
+clap = { workspace = true }
 
 # Diagnostics
-thiserror = "2.0"
-miette = { version = "7.6", features = ["fancy"] }
+thiserror = { workspace = true }
+miette = { workspace = true }
 
 [dev-dependencies]
-insta = { version = "1.41", features = ["json", "redactions"] }
+insta = { workspace = true }
 
 [[bin]]
 name = "css-fuse-bin"
 path = "src/bin.rs"
 
 [build-dependencies]
-napi-build = "2.3.2"
+napi-build = { workspace = true }

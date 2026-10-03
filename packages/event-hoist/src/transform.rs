@@ -151,8 +151,12 @@ fn hoist_events_in_expr<'a>(
                             let expr_node = &mut tagged.quasi.expressions[i];
                             let wrapped_src = format!("this.__lhAction({})", expr_src);
                             let dummy = format!("let __x = {};", wrapped_src);
-                            let p = Parser::new(allocator, allocator.alloc_str(&dummy), source_type).parse();
-                            if let Some(Statement::VariableDeclaration(mut v)) = p.program.body.into_iter().next() {
+                            let p =
+                                Parser::new(allocator, allocator.alloc_str(&dummy), source_type)
+                                    .parse();
+                            if let Some(Statement::VariableDeclaration(mut v)) =
+                                p.program.body.into_iter().next()
+                            {
                                 if !v.declarations.is_empty() {
                                     if let Some(init) = v.declarations.remove(0).init {
                                         *expr_node = init;
@@ -177,25 +181,65 @@ fn hoist_events_in_expr<'a>(
                         hoisted_events.insert(event_name);
                         *hoisted_count += 1;
                     } else {
-                        hoist_events_in_expr(&mut tagged.quasi.expressions[i], source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                        hoist_events_in_expr(
+                            &mut tagged.quasi.expressions[i],
+                            source,
+                            safe_events,
+                            allocator,
+                            source_type,
+                            hoisted_events,
+                            hoisted_count,
+                        );
                     }
                 }
             } else {
                 for quasi_expr in &mut tagged.quasi.expressions {
-                    hoist_events_in_expr(quasi_expr, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                    hoist_events_in_expr(
+                        quasi_expr,
+                        source,
+                        safe_events,
+                        allocator,
+                        source_type,
+                        hoisted_events,
+                        hoisted_count,
+                    );
                 }
             }
         }
         Expression::CallExpression(c) => {
-            hoist_events_in_expr(&mut c.callee, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            hoist_events_in_expr(
+                &mut c.callee,
+                source,
+                safe_events,
+                allocator,
+                source_type,
+                hoisted_events,
+                hoisted_count,
+            );
             for arg in &mut c.arguments {
                 match arg {
                     Argument::SpreadElement(s) => {
-                        hoist_events_in_expr(&mut s.argument, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                        hoist_events_in_expr(
+                            &mut s.argument,
+                            source,
+                            safe_events,
+                            allocator,
+                            source_type,
+                            hoisted_events,
+                            hoisted_count,
+                        );
                     }
                     _ => {
                         if let Some(e) = arg.as_expression_mut() {
-                            hoist_events_in_expr(e, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                            hoist_events_in_expr(
+                                e,
+                                source,
+                                safe_events,
+                                allocator,
+                                source_type,
+                                hoisted_events,
+                                hoisted_count,
+                            );
                         }
                     }
                 }
@@ -204,19 +248,43 @@ fn hoist_events_in_expr<'a>(
         Expression::ArrowFunctionExpression(arrow) => match &mut arrow.body {
             ArrowFunctionBody::FunctionBody(body) => {
                 for s in &mut body.statements {
-                    hoist_events_in_stmt(s, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                    hoist_events_in_stmt(
+                        s,
+                        source,
+                        safe_events,
+                        allocator,
+                        source_type,
+                        hoisted_events,
+                        hoisted_count,
+                    );
                 }
             }
             _ => {
                 if let Some(expr) = arrow.body.as_expression_mut() {
-                    hoist_events_in_expr(expr, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                    hoist_events_in_expr(
+                        expr,
+                        source,
+                        safe_events,
+                        allocator,
+                        source_type,
+                        hoisted_events,
+                        hoisted_count,
+                    );
                 }
             }
         },
         Expression::FunctionExpression(func) => {
             if let Some(ref mut body) = func.body {
                 for s in &mut body.statements {
-                    hoist_events_in_stmt(s, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                    hoist_events_in_stmt(
+                        s,
+                        source,
+                        safe_events,
+                        allocator,
+                        source_type,
+                        hoisted_events,
+                        hoisted_count,
+                    );
                 }
             }
         }
@@ -224,12 +292,28 @@ fn hoist_events_in_expr<'a>(
             for el in &mut arr.elements {
                 match el {
                     ArrayExpressionElement::SpreadElement(s) => {
-                        hoist_events_in_expr(&mut s.argument, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                        hoist_events_in_expr(
+                            &mut s.argument,
+                            source,
+                            safe_events,
+                            allocator,
+                            source_type,
+                            hoisted_events,
+                            hoisted_count,
+                        );
                     }
                     ArrayExpressionElement::Elision(_) => {}
                     _ => {
                         if let Some(e) = el.as_expression_mut() {
-                            hoist_events_in_expr(e, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                            hoist_events_in_expr(
+                                e,
+                                source,
+                                safe_events,
+                                allocator,
+                                source_type,
+                                hoisted_events,
+                                hoisted_count,
+                            );
                         }
                     }
                 }
@@ -238,17 +322,57 @@ fn hoist_events_in_expr<'a>(
         Expression::ObjectExpression(obj) => {
             for prop in &mut obj.properties {
                 if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                    hoist_events_in_expr(&mut p.value, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                    hoist_events_in_expr(
+                        &mut p.value,
+                        source,
+                        safe_events,
+                        allocator,
+                        source_type,
+                        hoisted_events,
+                        hoisted_count,
+                    );
                 }
             }
         }
         Expression::ParenthesizedExpression(p) => {
-            hoist_events_in_expr(&mut p.expression, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            hoist_events_in_expr(
+                &mut p.expression,
+                source,
+                safe_events,
+                allocator,
+                source_type,
+                hoisted_events,
+                hoisted_count,
+            );
         }
         Expression::ConditionalExpression(c) => {
-            hoist_events_in_expr(&mut c.test, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
-            hoist_events_in_expr(&mut c.consequent, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
-            hoist_events_in_expr(&mut c.alternate, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            hoist_events_in_expr(
+                &mut c.test,
+                source,
+                safe_events,
+                allocator,
+                source_type,
+                hoisted_events,
+                hoisted_count,
+            );
+            hoist_events_in_expr(
+                &mut c.consequent,
+                source,
+                safe_events,
+                allocator,
+                source_type,
+                hoisted_events,
+                hoisted_count,
+            );
+            hoist_events_in_expr(
+                &mut c.alternate,
+                source,
+                safe_events,
+                allocator,
+                source_type,
+                hoisted_events,
+                hoisted_count,
+            );
         }
         _ => {}
     }
@@ -266,39 +390,92 @@ fn hoist_events_in_stmt<'a>(
     match stmt {
         Statement::ReturnStatement(ret) => {
             if let Some(ref mut arg) = ret.argument {
-                hoist_events_in_expr(arg, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                hoist_events_in_expr(
+                    arg,
+                    source,
+                    safe_events,
+                    allocator,
+                    source_type,
+                    hoisted_events,
+                    hoisted_count,
+                );
             }
         }
         Statement::ExpressionStatement(expr_stmt) => {
-            hoist_events_in_expr(&mut expr_stmt.expression, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            hoist_events_in_expr(
+                &mut expr_stmt.expression,
+                source,
+                safe_events,
+                allocator,
+                source_type,
+                hoisted_events,
+                hoisted_count,
+            );
         }
         Statement::VariableDeclaration(var_decl) => {
             for decl in &mut var_decl.declarations {
                 if let Some(ref mut init) = decl.init {
-                    hoist_events_in_expr(init, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                    hoist_events_in_expr(
+                        init,
+                        source,
+                        safe_events,
+                        allocator,
+                        source_type,
+                        hoisted_events,
+                        hoisted_count,
+                    );
                 }
             }
         }
         Statement::BlockStatement(block) => {
             for s in &mut block.body {
-                hoist_events_in_stmt(s, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                hoist_events_in_stmt(
+                    s,
+                    source,
+                    safe_events,
+                    allocator,
+                    source_type,
+                    hoisted_events,
+                    hoisted_count,
+                );
             }
         }
         Statement::IfStatement(if_stmt) => {
-            hoist_events_in_expr(&mut if_stmt.test, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
-            hoist_events_in_stmt(&mut if_stmt.consequent, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+            hoist_events_in_expr(
+                &mut if_stmt.test,
+                source,
+                safe_events,
+                allocator,
+                source_type,
+                hoisted_events,
+                hoisted_count,
+            );
+            hoist_events_in_stmt(
+                &mut if_stmt.consequent,
+                source,
+                safe_events,
+                allocator,
+                source_type,
+                hoisted_events,
+                hoisted_count,
+            );
             if let Some(ref mut alt) = if_stmt.alternate {
-                hoist_events_in_stmt(alt, source, safe_events, allocator, source_type, hoisted_events, hoisted_count);
+                hoist_events_in_stmt(
+                    alt,
+                    source,
+                    safe_events,
+                    allocator,
+                    source_type,
+                    hoisted_events,
+                    hoisted_count,
+                );
             }
         }
         _ => {}
     }
 }
 
-fn collect_classes_mut<'a, 'b>(
-    stmts: &'b mut [Statement<'a>],
-    out: &mut Vec<&'b mut Class<'a>>,
-) {
+fn collect_classes_mut<'a, 'b>(stmts: &'b mut [Statement<'a>], out: &mut Vec<&'b mut Class<'a>>) {
     for stmt in stmts {
         match stmt {
             Statement::ClassDeclaration(class) => {
@@ -396,7 +573,15 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
                 if let Some(ref mut body) = method.value.body {
                     if method_name == Some("render") {
                         for stmt in &mut body.statements {
-                            hoist_events_in_stmt(stmt, source, &safe_event_set, &allocator, source_type, &mut class_hoisted_events, &mut class_hoisted_count);
+                            hoist_events_in_stmt(
+                                stmt,
+                                source,
+                                &safe_event_set,
+                                &allocator,
+                                source_type,
+                                &mut class_hoisted_events,
+                                &mut class_hoisted_count,
+                            );
                         }
                     } else if method_name == Some("connectedCallback") {
                         has_connected = true;
@@ -429,22 +614,26 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
 
                 if let Some(ref mut body) = method.value.body {
                     if method_name == Some("render") {
-                        let p = Parser::new(&allocator, "this.__lhActions = [];", source_type).parse();
+                        let p =
+                            Parser::new(&allocator, "this.__lhActions = [];", source_type).parse();
                         if let Some(stmt) = p.program.body.into_iter().next() {
                             body.statements.insert(0, stmt);
                         }
                     } else if method_name == Some("connectedCallback") {
-                        let p = Parser::new(&allocator, "this.__initLitEventHoist();", source_type).parse();
+                        let p = Parser::new(&allocator, "this.__initLitEventHoist();", source_type)
+                            .parse();
                         if let Some(stmt) = p.program.body.into_iter().next() {
                             body.statements.insert(0, stmt);
                         }
                     } else if method_name == Some("firstUpdated") {
-                        let p = Parser::new(&allocator, "this.__initLitEventHoist();", source_type).parse();
+                        let p = Parser::new(&allocator, "this.__initLitEventHoist();", source_type)
+                            .parse();
                         if let Some(stmt) = p.program.body.into_iter().next() {
                             body.statements.insert(0, stmt);
                         }
                     } else if method_name == Some("willUpdate") {
-                        let p = Parser::new(&allocator, "this.__lhActions = [];", source_type).parse();
+                        let p =
+                            Parser::new(&allocator, "this.__lhActions = [];", source_type).parse();
                         if let Some(stmt) = p.program.body.into_iter().next() {
                             body.statements.insert(0, stmt);
                         }
@@ -561,9 +750,15 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
             listeners_str
         );
 
-        let p_helpers = Parser::new(&allocator, allocator.alloc_str(&helpers_str), source_type).parse();
-        if let Some(Statement::ClassDeclaration(mut d_helpers)) = p_helpers.program.body.into_iter().next() {
-            let elems = std::mem::replace(&mut d_helpers.body.body, oxc_allocator::ArenaVec::new_in(&&allocator));
+        let p_helpers =
+            Parser::new(&allocator, allocator.alloc_str(&helpers_str), source_type).parse();
+        if let Some(Statement::ClassDeclaration(mut d_helpers)) =
+            p_helpers.program.body.into_iter().next()
+        {
+            let elems = std::mem::replace(
+                &mut d_helpers.body.body,
+                oxc_allocator::ArenaVec::new_in(&&allocator),
+            );
             for elem in elems {
                 class.body.body.push(elem);
             }
@@ -587,7 +782,9 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
         }
     }
 
-    let codegen_result = Codegen::new().with_options(codegen_options).build(&parsed.program);
+    let codegen_result = Codegen::new()
+        .with_options(codegen_options)
+        .build(&parsed.program);
     let map_json = codegen_result.map.map(|m| m.to_json_string());
 
     let mut sorted_events: Vec<String> = all_unique_events.into_iter().collect();

@@ -5,7 +5,7 @@ use crate::models::ExtractedStyle;
 use css_tag_visitor::CssTagVisitor;
 use import_resolver::{normalize_path, resolve_relative_import};
 use oxc_allocator::Allocator;
-use oxc_ast::Visit;
+use oxc_ast_visit::Visit;
 use oxc_parser::Parser;
 use oxc_span::SourceType;
 use std::collections::HashSet;

@@ -1,19 +1,7 @@
+import { closeSharedBrowser, createTestPage, getShadowComputedStyle, getShadowText, getSharedBrowser, type SetupPageOptions } from '@lit-core/test-kit';
 import type { Browser, Page } from 'playwright';
-import {
-  closeSharedBrowser,
-  createTestPage,
-  getShadowComputedStyle,
-  getShadowText,
-  getSharedBrowser,
-  type SetupPageOptions,
-} from '@lit-core/test-kit';
 
-export {
-  closeSharedBrowser as closeTestBrowser,
-  getShadowText,
-  getShadowComputedStyle,
-  type SetupPageOptions,
-};
+export { closeSharedBrowser as closeTestBrowser, getShadowComputedStyle, getShadowText, type SetupPageOptions };
 
 /**
  * Get or launch shared real headless Chromium instance via Playwright.

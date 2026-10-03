@@ -4,7 +4,7 @@ pub mod template_visitor;
 use crate::extractor::template_visitor::TemplateVisitor;
 use crate::models::ExtractedFragment;
 use oxc_allocator::Allocator;
-use oxc_ast::Visit;
+use oxc_ast_visit::Visit;
 use oxc_parser::Parser;
 use oxc_span::SourceType;
 use std::fs;
@@ -13,7 +13,10 @@ use std::path::Path;
 pub struct TemplateExtractor;
 
 impl TemplateExtractor {
-    pub fn extract_from_files(files: &[String], min_fragment_length: usize) -> (Vec<ExtractedFragment>, u32) {
+    pub fn extract_from_files(
+        files: &[String],
+        min_fragment_length: usize,
+    ) -> (Vec<ExtractedFragment>, u32) {
         let mut all_fragments = Vec::new();
         let mut total_templates_scanned = 0;
 

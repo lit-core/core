@@ -665,7 +665,9 @@ fn get_ce_define_call<'a>(stmt: &Statement<'a>) -> Option<(String, String)> {
             if is_ce_define && call.arguments.len() >= 2 {
                 let tag_str = match call.arguments[0].as_expression() {
                     Some(Expression::StringLiteral(s)) => Some(s.value.as_str().to_string()),
-                    Some(Expression::TemplateLiteral(t)) if t.expressions.is_empty() && !t.quasis.is_empty() => {
+                    Some(Expression::TemplateLiteral(t))
+                        if t.expressions.is_empty() && !t.quasis.is_empty() =>
+                    {
                         Some(t.quasis[0].value.raw.as_str().to_string())
                     }
                     _ => None,
@@ -717,10 +719,12 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                     _ => false,
                 };
                 if is_ce_define && call.arguments.len() >= 2 {
-                    if let (Some(Expression::StringLiteral(s)), Some(Expression::Identifier(id))) =
-                        (call.arguments[0].as_expression(), call.arguments[1].as_expression())
-                    {
-                        define_calls.insert(id.name.as_str().to_string(), s.value.as_str().to_string());
+                    if let (Some(Expression::StringLiteral(s)), Some(Expression::Identifier(id))) = (
+                        call.arguments[0].as_expression(),
+                        call.arguments[1].as_expression(),
+                    ) {
+                        define_calls
+                            .insert(id.name.as_str().to_string(), s.value.as_str().to_string());
                     }
                 }
             }
@@ -750,8 +754,7 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                     &export_decl.declaration
                 {
-                    if let Some(target) =
-                        check_and_extract_target(class, true, true, &define_calls)
+                    if let Some(target) = check_and_extract_target(class, true, true, &define_calls)
                     {
                         targets.insert(target.class_name.clone(), target);
                     }
@@ -812,7 +815,9 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                         .unwrap()
                         .clone();
                     matched_target = Some(target);
-                    class.decorators.retain(|d| extract_decorator_tag(d).is_none());
+                    class
+                        .decorators
+                        .retain(|d| extract_decorator_tag(d).is_none());
                     class_to_wrap = Some(Statement::ClassDeclaration(class));
                 } else {
                     new_body.push(Statement::ClassDeclaration(class));
@@ -835,11 +840,16 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                             .unwrap()
                             .clone();
                         matched_target = Some(target);
-                        class.decorators.retain(|d| extract_decorator_tag(d).is_none());
+                        class
+                            .decorators
+                            .retain(|d| extract_decorator_tag(d).is_none());
                         class_to_wrap = Some(Statement::ClassDeclaration(class));
                     }
                 } else {
-                    new_body.push(Statement::ExportDeclaration(ArenaBox::new_in(export_decl, &&allocator)));
+                    new_body.push(Statement::ExportDeclaration(ArenaBox::new_in(
+                        export_decl,
+                        &&allocator,
+                    )));
                 }
             }
             Statement::ExportDefaultDeclaration(export_decl) => {
@@ -861,11 +871,16 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                             .unwrap()
                             .clone();
                         matched_target = Some(target);
-                        class.decorators.retain(|d| extract_decorator_tag(d).is_none());
+                        class
+                            .decorators
+                            .retain(|d| extract_decorator_tag(d).is_none());
                         class_to_wrap = Some(Statement::ClassDeclaration(class));
                     }
                 } else {
-                    new_body.push(Statement::ExportDefaultDeclaration(ArenaBox::new_in(export_decl, &&allocator)));
+                    new_body.push(Statement::ExportDefaultDeclaration(ArenaBox::new_in(
+                        export_decl,
+                        &&allocator,
+                    )));
                 }
             }
             other => {
@@ -886,8 +901,7 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                             if let Some(Statement::IfStatement(if_stmt)) =
                                 body.statements.first_mut()
                             {
-                                if let Statement::BlockStatement(ref mut block) =
-                                    if_stmt.consequent
+                                if let Statement::BlockStatement(ref mut block) = if_stmt.consequent
                                 {
                                     block.body.insert(0, class_decl);
                                     break;

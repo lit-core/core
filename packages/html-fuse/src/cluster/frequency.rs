@@ -26,14 +26,14 @@ impl FragmentFrequencyIndex {
 
     pub fn index_fragments(&mut self, fragments: &[ExtractedFragment]) {
         for frag in fragments {
-            let entry = self
-                .fragments
-                .entry(frag.hash.clone())
-                .or_insert_with(|| FragmentOccurrences {
-                    sample_fragment: frag.clone(),
-                    files: HashSet::new(),
-                    total_occurrences: 0,
-                });
+            let entry =
+                self.fragments
+                    .entry(frag.hash.clone())
+                    .or_insert_with(|| FragmentOccurrences {
+                        sample_fragment: frag.clone(),
+                        files: HashSet::new(),
+                        total_occurrences: 0,
+                    });
 
             entry.files.insert(frag.file_path.clone());
             entry.total_occurrences += 1;

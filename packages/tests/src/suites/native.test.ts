@@ -50,8 +50,13 @@ describe('@lit-core/native Playwright Chromium and real component verification',
               const chunkMatch = /from\s*['"](\.\.?\/[^'"]+)['"]/.exec(raw);
               if (chunkMatch) {
                 const srcPath = path.resolve(process.cwd(), 'node_modules', comp.pkg, comp.source);
-                const chunkPath = path.resolve(path.dirname(srcPath), chunkMatch[1]);
-                if (fs.existsSync(chunkPath)) {
+                let chunkPath = path.resolve(path.dirname(srcPath), chunkMatch[1]);
+                if (!fs.existsSync(chunkPath)) {
+                  if (fs.existsSync(`${chunkPath}.js`)) chunkPath = `${chunkPath}.js`;
+                  else if (fs.existsSync(`${chunkPath}.ts`)) chunkPath = `${chunkPath}.ts`;
+                  else if (fs.existsSync(`${chunkPath}/index.js`)) chunkPath = `${chunkPath}/index.js`;
+                }
+                if (fs.existsSync(chunkPath) && fs.statSync(chunkPath).isFile()) {
                   raw = fs.readFileSync(chunkPath, 'utf-8');
                 }
               }
