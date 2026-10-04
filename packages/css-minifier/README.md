@@ -129,15 +129,17 @@ console.log(minified);
 
 ## Empirical performance
 
-Evaluated across production design system component suites:
+Evaluated across canonical component suites (standalone `css-minifier` vs baseline in `packages/benchmarks/results/manifest.json`):
 
-| Design system | Raw CSS template bytes | Minified CSS bytes | Byte reduction |
-| :--- | ---: | ---: | ---: |
-| Carbon Web Components | 794.2 KB | 728.5 KB | -8.3% |
-| Spectrum Web Components | 412.8 KB | 379.0 KB | -8.2% |
-| Web Awesome | 288.6 KB | 267.4 KB | -7.3% |
-| Momentum Design | 520.1 KB | 476.3 KB | -8.4% |
-| Material Web | 196.4 KB | 182.1 KB | -7.3% |
+| Design system | Baseline bundle size | With `css-minifier` | Raw bundle reduction | Gzip reduction | First render speedup |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 1,438,781 B | 1,434,476 B | -0.3% (-4,305 B) | -0.04% (-66 B) | +49.1% (48.9 ms vs 96.0 ms) |
+| Spectrum Web Components | 819,006 B | 818,661 B | -0.04% (-345 B) | -0.05% (-72 B) | +51.1% (25.6 ms vs 52.3 ms) |
+| Web Awesome | 370,946 B | 337,367 B | -9.1% (-33,579 B) | -6.8% (-5,886 B) | +32.0% (27.9 ms vs 41.0 ms) |
+| Momentum Design | 346,579 B | 328,340 B | -5.3% (-18,239 B) | -2.3% (-1,692 B) | +49.5% (20.0 ms vs 39.6 ms) |
+| Material Web | 269,272 B | 269,272 B | 0.0% (0 B) | 0.0% (0 B) | +58.8% (18.6 ms vs 45.1 ms) |
+
+> Embedded CSS template minification via `lightningcss` parses and optimizes inline CSS in `css\`...\`` tagged template strings, eliminating whitespace, redundant semicolons, and comments without disturbing JavaScript syntax.
 
 ---
 

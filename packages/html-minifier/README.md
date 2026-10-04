@@ -135,15 +135,17 @@ console.log(minified);
 
 ## Empirical performance
 
-Evaluated across production design system component suites:
+Evaluated across canonical component suites (standalone `html-minifier` vs baseline in `packages/benchmarks/results/manifest.json`):
 
-| Design system | Raw template bytes | Minified template bytes | Reduction |
-| :--- | ---: | ---: | ---: |
-| Carbon Web Components | 342.5 KB | 323.0 KB | -5.7% |
-| Spectrum Web Components | 215.0 KB | 204.2 KB | -5.0% |
-| Web Awesome | 184.2 KB | 175.4 KB | -4.8% |
-| Momentum Design | 260.4 KB | 246.0 KB | -5.5% |
-| Material Web | 128.0 KB | 122.5 KB | -4.3% |
+| Design system | Baseline bundle size | With `html-minifier` | Raw bundle reduction | Gzip reduction | First render speedup |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 1,438,781 B | 1,424,282 B | -1.0% (-14,499 B) | -0.9% (-1,728 B) | +53.9% (44.3 ms vs 96.0 ms) |
+| Spectrum Web Components | 819,006 B | 808,454 B | -1.3% (-10,552 B) | -0.7% (-994 B) | +50.3% (26.0 ms vs 52.3 ms) |
+| Web Awesome | 370,946 B | 360,978 B | -2.7% (-9,968 B) | -1.5% (-1,307 B) | +29.0% (29.1 ms vs 41.0 ms) |
+| Momentum Design | 346,579 B | 340,175 B | -1.8% (-6,404 B) | -1.3% (-987 B) | +46.2% (21.3 ms vs 39.6 ms) |
+| Material Web | 269,272 B | 264,534 B | -1.8% (-4,738 B) | -1.1% (-641 B) | +59.4% (18.3 ms vs 45.1 ms) |
+
+> High-speed embedded HTML minification via `oxc` strips redundant whitespace and comments from Lit `html` template literals ahead of time, reducing bundle transfer size while accelerating browser parsing.
 
 ---
 

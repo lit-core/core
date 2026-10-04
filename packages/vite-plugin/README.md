@@ -163,15 +163,15 @@ export default defineConfig({
 
 ## Empirical performance
 
-When enabled across canonical components from production design systems:
+When enabled across canonical components from production design systems (all optimizations combined vs baseline in `packages/benchmarks/results/manifest.json`):
 
-| Design system | Bundle size reduction | First render mount acceleration | Reactive update acceleration |
-| :--- | ---: | ---: | ---: |
-| Carbon Web Components | -30.0% (-420 KB) | +57.9% | +56.5% |
-| Spectrum Web Components | -21.5% (-148 KB) | +51.2% | +48.0% |
-| Web Awesome | -18.2% (-86 KB) | +48.5% | +42.0% |
-| Momentum Design | -24.8% (-182 KB) | +53.4% | +49.1% |
-| Material Web | -15.4% (-45 KB) | +41.0% | +38.5% |
+| Design system | Baseline raw bundle | With `@lit-core` suite | Raw reduction | Gzip reduction | First render mount acceleration | Reactive update speedup |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 1,438,781 B | 1,007,814 B | -30.0% (-430,967 B) | -15.3% (-28,498 B) | +57.9% (40.4 ms vs 96.0 ms) | +56.5% (2.0 ms vs 4.6 ms) |
+| Spectrum Web Components | 819,006 B | 812,929 B | -0.7% (-6,077 B) | +1.3% (+1,865 B) | +52.8% (24.7 ms vs 52.3 ms) | -14.3% (2.4 ms vs 2.1 ms) |
+| Web Awesome | 370,946 B | 461,707 B | +24.5% (+90,761 B) | +6.2% (+5,402 B) | -0.7% (41.3 ms vs 41.0 ms) | +12.5% (1.4 ms vs 1.6 ms) |
+| Momentum Design | 346,579 B | 346,661 B | +0.02% (+82 B) | +5.5% (+4,088 B) | +54.3% (18.1 ms vs 39.6 ms) | +54.5% (0.5 ms vs 1.1 ms) |
+| Material Web | 269,272 B | 368,826 B | +37.0% (+99,554 B) | +16.7% (+9,487 B) | +27.7% (32.6 ms vs 45.1 ms) | +38.1% (1.3 ms vs 2.1 ms) |
 
 ---
 

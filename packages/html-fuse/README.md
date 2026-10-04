@@ -148,15 +148,17 @@ module.exports = {
 
 ## Empirical performance
 
-Evaluated across production design system component suites:
+Evaluated across canonical components from production suites (standalone `html-fuse` vs baseline in `packages/benchmarks/results/`):
 
-| Design system | Static fragments clustered | First render latency delta | Bundle byte reduction |
-| :--- | ---: | ---: | ---: |
-| Carbon Web Components | 48 | -14.2% | -18.6 KB |
-| Spectrum Web Components | 35 | -11.0% | -12.4 KB |
-| Web Awesome | 29 | -9.8% | -9.2 KB |
-| Momentum Design | 39 | -12.5% | -14.8 KB |
-| Material Web | 21 | -8.1% | -7.1 KB |
+| Design system | Static fragments clustered | Fused templates created | Baseline first render | With `html-fuse` | Mount speedup |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 35 fragments | 19 templates | 96.0 ms | 66.7 ms | +30.5% |
+| Spectrum Web Components | 160 fragments | 120 templates | 52.3 ms | 24.4 ms | +53.3% |
+| Web Awesome | 31 fragments | 14 templates | 41.0 ms | 28.6 ms | +30.2% |
+| Momentum Design | 16 fragments | 8 templates | 39.6 ms | 20.6 ms | +48.0% |
+| Material Web | 29 fragments | 11 templates | 45.1 ms | 26.3 ms | +41.7% |
+
+> By extracting repeated static HTML and SVG subtrees into module-level template constants, `@lit-core/html-fuse` eliminates redundant template parsing and DOM subtree allocations during element initialization.
 
 ---
 

@@ -91,11 +91,15 @@ Evaluated across 20 canonical components from 5 enterprise design systems (Carbo
 
 | Metric | Baseline production build | With `@lit-core` full suite | Measured improvement |
 | :--- | ---: | ---: | ---: |
-| Raw bundle size (Carbon) | 1,402 KB | 981 KB | -30.0% (-421 KB) |
-| Gzipped bundle size (Carbon) | 268 KB | 227 KB | -15.3% (-41 KB) |
+| Raw bundle size (Carbon) | 1,405.1 KB (1,438,781 B) | 984.2 KB (1,007,814 B) | -30.0% (-420.9 KB) |
+| Gzipped bundle size (Carbon) | 181.9 KB (186,286 B) | 154.1 KB (157,788 B) | -15.3% (-27.8 KB) |
 | First render mount latency (Carbon) | 96.0 ms | 40.4 ms | +57.9% faster mount |
-| First render mount latency (Spectrum) | 74.2 ms | 36.2 ms | +51.2% faster mount |
-| Reactive update latency | 48.2 ms | 20.9 ms | +56.5% faster updates |
+| First render mount latency (Spectrum) | 52.3 ms | 24.7 ms | +52.8% faster mount |
+| First render mount latency (Momentum) | 39.6 ms | 18.1 ms | +54.3% faster mount |
+| Reactive update latency (Carbon) | 4.6 ms | 2.0 ms | +56.5% faster updates |
+| Reactive update latency (Momentum) | 1.1 ms | 0.5 ms | +54.5% faster updates |
+| Script eval latency (Carbon) | 4.4 ms | 4.1 ms | +6.8% faster eval |
+| Script eval latency (Web Awesome) | 6.2 ms | 3.3 ms | +46.8% faster eval |
 | Collection reconciliation (memoize) | 48.2 ms | 0.2 ms | -99.5% latency reduction |
 | Initial JS payload on boot (SSR) | 420.5 KB | 1.2 KB | -99.6% initial download |
 

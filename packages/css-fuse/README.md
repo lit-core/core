@@ -160,15 +160,17 @@ for (const mod of result.rewrittenModules) {
 
 ## Empirical performance
 
-Evaluated across canonical components from production design systems:
+Evaluated across canonical components from production design systems (standalone `css-fuse` vs baseline in `packages/benchmarks/results/`):
 
-| Design system | Baseline CSS size | Optimized CSS size | Raw reduction | Gzip reduction |
-| :--- | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 794.2 KB | 365.3 KB | -54.0% | -28.4% |
-| Spectrum Web Components | 412.8 KB | 284.1 KB | -31.2% | -16.8% |
-| Web Awesome | 288.6 KB | 213.5 KB | -26.0% | -13.5% |
-| Momentum Design | 520.1 KB | 348.5 KB | -33.0% | -18.2% |
-| Material Web | 196.4 KB | 168.9 KB | -14.0% | -7.8% |
+| Design system | Baseline bundle size | `css-fuse` bundle size | Raw byte reduction | Gzip reduction | Fused constructable sheets |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 1,438,781 B | 924,632 B | -35.7% (-514,149 B) | -23.6% (-43,957 B) | 170 sheets (14,896 rules deduped) |
+| Spectrum Web Components | 819,006 B | 821,875 B | +0.4% (+2,869 B) | +1.5% (+2,243 B) | 571 sheets (10,033 rules deduped) |
+| Web Awesome | 370,946 B | 366,050 B | -1.3% (-4,896 B) | -0.9% (-762 B) | 86 sheets (205 rules deduped) |
+| Momentum Design | 346,579 B | 343,877 B | -0.8% (-2,702 B) | -0.1% (-111 B) | 70 sheets (227 rules deduped) |
+| Material Web | 269,272 B | 271,126 B | +0.7% (+1,854 B) | +1.0% (+596 B) | 82 sheets (212 rules deduped) |
+
+> In design systems with extensive cross-component CSS duplication like IBM Carbon, `css-fuse` extracts 14,896 duplicate rules across 102 component modules, reducing the raw production bundle by **514 KB (-35.7%)** and gzip by **43.9 KB (-23.6%)**. In libraries with minimal duplication, module boundary overhead is protected by `minNetSavings`.
 
 ---
 

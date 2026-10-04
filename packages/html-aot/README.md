@@ -143,15 +143,17 @@ console.log(descriptor.parts);
 
 ## Empirical performance
 
-Evaluated across production design system component suites:
+Evaluated across canonical component suites (standalone `html-aot` vs baseline in `packages/benchmarks/results/manifest.json`):
 
-| Design system | First render mount latency (baseline) | With `html-aot` | Mount acceleration |
-| :--- | ---: | ---: | ---: |
-| Carbon Web Components | 96.0 ms | 61.4 ms | +36.0% |
-| Spectrum Web Components | 74.2 ms | 46.8 ms | +37.0% |
-| Web Awesome | 52.6 ms | 33.1 ms | +37.1% |
-| Momentum Design | 82.5 ms | 51.2 ms | +38.0% |
-| Material Web | 44.8 ms | 29.1 ms | +35.0% |
+| Design system | First render mount latency (baseline) | With `html-aot` | Mount acceleration | Reactive update speedup |
+| :--- | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 96.0 ms | 53.5 ms | +44.3% | +28.3% (3.3 ms vs 4.6 ms) |
+| Spectrum Web Components | 52.3 ms | 24.6 ms | +53.0% | 0.0% (2.1 ms vs 2.1 ms) |
+| Web Awesome | 41.0 ms | 28.4 ms | +30.7% | +43.8% (0.9 ms vs 1.6 ms) |
+| Momentum Design | 39.6 ms | 19.2 ms | +51.5% | +9.1% (1.0 ms vs 1.1 ms) |
+| Material Web | 45.1 ms | 19.1 ms | +57.6% | +19.0% (1.7 ms vs 2.1 ms) |
+
+> Pre-compiling Lit `html` templates into static descriptors ahead of time eliminates the browser template preparation phase (`<template>` creation and `TreeWalker` traversal), cutting initial mount latency by **30.7% to 57.6%**.
 
 ---
 

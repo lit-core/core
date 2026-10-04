@@ -131,14 +131,17 @@ console.log(`Generated proxy for: ${result.registeredTags.join(', ')}`);
 
 ## Empirical performance
 
-Evaluated across production design system suites when loading 20 canonical components:
+Evaluated across canonical component suites (standalone `elem-proxy` vs baseline in `packages/benchmarks/results/manifest.json`):
 
-| Metric | Baseline | With `@lit-core/elem-proxy` | Delta |
-| :--- | ---: | ---: | ---: |
-| Script evaluation CPU time | 148.2 ms | 41.5 ms | -72.0% |
-| Initial V8 heap memory footprint | 18.6 MB | 5.4 MB | -71.0% |
-| First mount latency (JIT upgrade cost) | 0.00 ms | +0.90 ms | One-time overhead |
-| Net boot time acceleration | - | - | +68.5% |
+| Design system | Baseline mount latency | With `elem-proxy` | First render speedup | Baseline script eval | With `elem-proxy` | Eval speedup |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 96.0 ms | 44.0 ms | +54.2% | 4.4 ms | 3.1 ms | +29.5% |
+| Spectrum Web Components | 52.3 ms | 22.3 ms | +57.4% | 10.5 ms | 10.4 ms | +1.0% |
+| Web Awesome | 41.0 ms | 27.7 ms | +32.4% | 6.2 ms | 2.6 ms | +58.1% |
+| Momentum Design | 39.6 ms | 19.0 ms | +52.0% | 4.3 ms | 4.3 ms | 0.0% |
+| Material Web | 45.1 ms | 23.8 ms | +47.2% | 6.8 ms | 5.8 ms | +14.7% |
+
+> By replacing immediate component class definition with lightweight proxy stubs that upgrade on-demand upon first connection, `@lit-core/elem-proxy` eliminates upfront class initialization overhead, delivering up to **58.1% faster script evaluation** and **32% to 57% faster initial rendering**.
 
 ---
 

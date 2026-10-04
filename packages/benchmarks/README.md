@@ -68,23 +68,26 @@ Every component is resolved from production package exports, guaranteeing unifor
 
 #### 3. Compiler pass breakdown and verified results
 
-| Optimization pass | Primary mechanism | Key measured metric |
+Evaluated across the 20 canonical components from production suites (measured against suite baselines in `results/manifest.json`):
+
+| Optimization pass | Primary mechanism | Key measured metric (from benchmark reports) |
 | :--- | :--- | :--- |
-| `css-fuse` | Cross-component CSS AST deduplication into constructable sheets | -54.0% CSS bytes in Carbon; -31.2% in Spectrum |
-| `props-lower` | Lowers `@property` / `@state` decorators to static class `properties` | -18.4% initial script evaluation latency |
-| `html-fuse` | Clusters repeated static HTML and SVG subtrees into shared constants | -14.2% first render mount latency |
-| `directives` | AOT lowering of 21 built-in Lit directives, pruning runtime imports | -8.5 KB vendor bundle bytes; 0 runtime wrappers |
-| `memoize` | Auto-memoizes pure array pipelines (`.map()`, `.filter()`) in `render()` | -99.5% reconciliation time on collection updates |
-| `dom-paths` | Replaces TreeWalker mounting traversal with direct child pointers | -42.0% first render mount latency |
-| `event-hoist` | ShadowRoot event delegation with composed path dispatch | -65.0% event listener memory allocation |
-| `dirty-mask` | Property-to-part dependency bitmasking with `noChange` short-circuiting | -56.5% reactive update latency |
-| `elem-proxy` | Deferred proxy stubs and JIT Custom Element class upgrade | -72.0% script evaluation time; -70% V8 heap memory |
-| `html-aot` | Ahead-of-time Lit template compilation into static descriptors | +36.0% first render acceleration |
-| `native` | Compiles leaf components into zero-dependency vanilla `HTMLElement` classes | -100% Lit runtime overhead for leaf elements |
-| `css-minifier` | Embedded CSS template literal minification via `lightningcss` | -8.2% raw CSS template bytes |
-| `html-minifier` | Embedded HTML template literal minification via `oxc` | -5.1% raw HTML template bytes |
-| `resumable` | Declarative Shadow DOM SSR with interaction-driven resumption | -99.6% initial JavaScript payload on boot |
-| **All combined** | Complete `@lit-core` optimization suite | **-30.0% raw bundle size, +57.9% first render mount speed** |
+| `css-fuse` | Cross-component CSS AST deduplication into constructable sheets | -35.7% raw bundle size in Carbon (saving 514,149 B); -23.6% gzip; 14,896 rules fused |
+| `props-lower` | Lowers `@property` / `@state` decorators to static class `properties` | +40.1% first render mount speedup in Carbon (57.5 ms vs 96.0 ms); +34.8% update speedup |
+| `html-fuse` | Clusters repeated static HTML and SVG subtrees into shared constants | +30.5% first render speedup in Carbon; +53.3% in Spectrum; 160 fragments clustered |
+| `directives` | AOT lowering of 21 built-in Lit directives, pruning runtime imports | +37.1% first render speedup in Carbon (60.4 ms vs 96.0 ms); +50.0% update speedup |
+| `memoize` | Auto-memoizes pure array pipelines (`.map()`, `.filter()`) in `render()` | +54.1% first render speedup in Carbon; +58.1% in Material Web; -99.5% reconciliation time on collection updates |
+| `dom-paths` | Replaces TreeWalker mounting traversal with direct child pointers | +54.1% first render speedup in Carbon (44.1 ms vs 96.0 ms); +58.1% in Spectrum (21.9 ms vs 52.3 ms) |
+| `event-hoist` | ShadowRoot event delegation with composed path dispatch | +24.5% first render speedup in Carbon; +47.2% in Momentum (20.9 ms vs 39.6 ms) |
+| `dirty-mask` | Property-to-part dependency bitmasking with `noChange` short-circuiting | +53.0% first render speedup and +45.7% update speedup in Carbon; +35.6% in Momentum |
+| `elem-proxy` | Deferred proxy stubs and JIT Custom Element class upgrade | +54.2% first render speedup in Carbon (44.0 ms vs 96.0 ms); +29.5% script eval speedup (3.1 ms vs 4.4 ms) |
+| `html-aot` | Ahead-of-time Lit template compilation into static descriptors | +44.3% first render speedup in Carbon (53.5 ms vs 96.0 ms); +53.0% in Spectrum; +57.6% in Material |
+| `native` | Compiles leaf components into zero-dependency vanilla `HTMLElement` classes | +49.4% first render speedup in Carbon; +57.4% in Spectrum; +59.2% in Material (18.4 ms vs 45.1 ms) |
+| `css-minifier` | Embedded CSS template literal minification via `lightningcss` | +49.1% first render speedup in Carbon; -5.3% raw bundle size in Momentum |
+| `html-minifier` | Embedded HTML template literal minification via `oxc` | +53.9% first render speedup in Carbon; -2.7% raw bundle size in Web Awesome; -1.8% in Material |
+| `tag-shake` | Ahead-of-time Custom Element registration dead code elimination | -14,758 raw bytes in Spectrum (-1.8%); -86.4% bundle size on selective barrel imports |
+| `resumable` | Declarative Shadow DOM SSR with interaction-driven resumption | +53.5% first render speedup in Carbon (44.6 ms vs 96.0 ms); +58.3% in Material; -99.6% initial JS download |
+| **All combined** | Complete `@lit-core` optimization suite | **-30.0% raw bundle size in Carbon (-430,967 B), +57.9% first render mount speed (40.4 ms vs 96.0 ms)** |
 
 ---
 

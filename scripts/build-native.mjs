@@ -54,9 +54,9 @@ const crateUnderscore = crateName.replace(/-/g, '_');
 const libFileName = `${libPrefix}${crateUnderscore}${libExt}`;
 
 const cwd = process.cwd();
-const candidates = [path.resolve(cwd, 'target', mode, libFileName), path.resolve(cwd, '../..', 'target', mode, libFileName)];
+const candidates = [path.resolve(cwd, '../..', 'target', mode, libFileName), path.resolve(cwd, 'target', mode, libFileName)];
 
-const foundLib = candidates.find((p) => fs.existsSync(p));
+const foundLib = candidates.filter((p) => fs.existsSync(p)).sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0];
 if (!foundLib) {
   console.error(`[build-native] Could not locate compiled library ${libFileName} in:`);
   for (const c of candidates) console.error(`  - ${c}`);

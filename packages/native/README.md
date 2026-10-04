@@ -164,7 +164,19 @@ console.log(`Vanilla: ${result.vanillaCount}, Micro: ${result.microCount}`);
 
 ## Empirical performance
 
-Evaluated across canonical leaf components:
+Evaluated across production design system component suites (from `packages/benchmarks/results/manifest.json`):
+
+### Production component suites (`results/manifest.json`)
+
+| Design system | Baseline mount latency | With `@lit-core/native` | Mount acceleration | Reactive update speedup | Script eval latency |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 96.0 ms | 48.6 ms | +49.4% | +17.4% (3.8 ms vs 4.6 ms) | 3.4 ms (vs 4.4 ms, +22.7%) |
+| Spectrum Web Components | 52.3 ms | 22.3 ms | +57.4% | +9.5% (1.9 ms vs 2.1 ms) | 11.2 ms (vs 10.5 ms) |
+| Web Awesome | 41.0 ms | 28.4 ms | +30.7% | +43.8% (0.9 ms vs 1.6 ms) | 2.7 ms (vs 6.2 ms, +56.5%) |
+| Momentum Design | 39.6 ms | 18.8 ms | +52.5% | +27.3% (0.8 ms vs 1.1 ms) | 4.2 ms (vs 4.3 ms, +2.3%) |
+| Material Web | 45.1 ms | 18.4 ms | +59.2% | +38.1% (1.3 ms vs 2.1 ms) | 5.6 ms (vs 6.8 ms, +17.6%) |
+
+### Isolated leaf component compilation (Mode A vanilla target)
 
 | Metric | Lit standard build | With `@lit-core/native` Mode A | Reduction |
 | :--- | ---: | ---: | ---: |

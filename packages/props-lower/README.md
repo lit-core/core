@@ -166,15 +166,17 @@ console.log(`Lowered ${result.propertiesCount} properties across ${result.classe
 
 ## Empirical performance
 
-Evaluated across production design system component suites:
+Evaluated across canonical components from production suites (standalone `props-lower` vs baseline in `packages/benchmarks/results/manifest.json`):
 
-| Design system | Decorated properties lowered | Initial script evaluation delta | Bundle byte reduction |
-| :--- | ---: | ---: | ---: |
-| Carbon Web Components | 382 | -18.4% | -14.2 KB |
-| Spectrum Web Components | 240 | -15.1% | -9.8 KB |
-| Web Awesome | 196 | -14.0% | -7.5 KB |
-| Momentum Design | 290 | -16.5% | -11.0 KB |
-| Material Web | 178 | -12.8% | -6.9 KB |
+| Design system | Baseline mount latency | With `props-lower` | First render speedup | Reactive update speedup | Script eval latency |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 96.0 ms | 57.5 ms | +40.1% | +34.8% (3.0 ms vs 4.6 ms) | 4.3 ms (vs 4.4 ms) |
+| Spectrum Web Components | 52.3 ms | 25.0 ms | +52.2% | -4.8% (2.2 ms vs 2.1 ms) | 11.1 ms (vs 10.5 ms) |
+| Web Awesome | 41.0 ms | 28.9 ms | +29.5% | +37.5% (1.0 ms vs 1.6 ms) | 2.6 ms (vs 6.2 ms, +58.1%) |
+| Momentum Design | 39.6 ms | 18.1 ms | +54.3% | +27.3% (0.8 ms vs 1.1 ms) | 3.8 ms (vs 4.3 ms, +11.6%) |
+| Material Web | 45.1 ms | 21.3 ms | +52.8% | 0.0% (2.1 ms vs 2.1 ms) | 6.1 ms (vs 6.8 ms, +10.3%) |
+
+> By lowering TypeScript `@property` and `@state` decorators to static class `properties` descriptors ahead of time, `@lit-core/props-lower` accelerates initial component mounting by **29.5% to 54.3%** across all evaluated design systems, while eliminating runtime decorator metadata helpers.
 
 ---
 

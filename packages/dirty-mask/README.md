@@ -122,15 +122,17 @@ console.log(result.code);
 
 ## Empirical performance
 
-Evaluated across production design system component suites during single-property mutations:
+Evaluated across canonical component suites (standalone `dirty-mask` vs baseline in `packages/benchmarks/results/manifest.json`):
 
-| Design system | Part expressions evaluated (baseline) | With `dirty-mask` | Reactive update speedup |
-| :--- | ---: | ---: | ---: |
-| Carbon Web Components | 100% of expressions | 12.5% of expressions | +56.5% |
-| Spectrum Web Components | 100% of expressions | 15.0% of expressions | +52.0% |
-| Web Awesome | 100% of expressions | 14.2% of expressions | +48.0% |
-| Momentum Design | 100% of expressions | 16.0% of expressions | +51.0% |
-| Material Web | 100% of expressions | 18.0% of expressions | +45.0% |
+| Design system | Baseline update latency | With `dirty-mask` | Update speedup | Baseline first render | With `dirty-mask` | Mount speedup |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 4.6 ms | 2.5 ms | +45.7% | 96.0 ms | 45.1 ms | +53.0% |
+| Spectrum Web Components | 2.1 ms | 2.1 ms | 0.0% | 52.3 ms | 28.5 ms | +45.5% |
+| Web Awesome | 1.6 ms | 1.5 ms | +6.3% | 41.0 ms | 44.1 ms | -7.6% |
+| Momentum Design | 1.1 ms | 1.2 ms | -9.1% | 39.6 ms | 25.5 ms | +35.6% |
+| Material Web | 2.1 ms | 1.6 ms | +23.8% | 45.1 ms | 18.7 ms | +58.5% |
+
+> Property-to-part dependency bitmasking traces which properties affect which dynamic bindings in template literals, short-circuiting unchanged DOM parts during reactive updates.
 
 ---
 

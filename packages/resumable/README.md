@@ -118,7 +118,19 @@ module.exports = {
 
 ## Empirical performance
 
-Evaluated in SSR dynamic scenario benchmarks (`ssr` benchmark):
+Evaluated across production design system component suites (from `packages/benchmarks/results/manifest.json`) and full SSR interaction-driven hydration scenarios:
+
+### Production component suites (`results/manifest.json`)
+
+| Design system | Baseline mount latency | With `@lit-core/resumable` | Mount acceleration | Reactive update speedup | Script eval latency |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 96.0 ms | 44.6 ms | +53.5% | +50.0% (2.3 ms vs 4.6 ms) | 3.4 ms (vs 4.4 ms, +22.7%) |
+| Spectrum Web Components | 52.3 ms | 24.1 ms | +53.9% | +14.3% (1.8 ms vs 2.1 ms) | 10.7 ms (vs 10.5 ms) |
+| Web Awesome | 41.0 ms | 34.0 ms | +17.1% | +12.5% (1.4 ms vs 1.6 ms) | 3.3 ms (vs 6.2 ms, +46.8%) |
+| Momentum Design | 39.6 ms | 18.8 ms | +52.5% | +36.4% (0.7 ms vs 1.1 ms) | 4.1 ms (vs 4.3 ms, +4.7%) |
+| Material Web | 45.1 ms | 18.8 ms | +58.3% | +28.6% (1.5 ms vs 2.1 ms) | 5.8 ms (vs 6.8 ms, +14.7%) |
+
+### Dynamic SSR resumption scenario (`ssr` benchmark)
 
 | Metric | Standard SSR with Lit hydration | With `@lit-core/resumable` | Improvement |
 | :--- | ---: | ---: | ---: |

@@ -121,13 +121,17 @@ console.log(`Hoisted ${result.hoistedCount} listeners across ${result.components
 
 ## Empirical performance
 
-Evaluated across production design system component suites:
+Evaluated across canonical component suites (standalone `event-hoist` vs baseline in `packages/benchmarks/results/manifest.json`):
 
-| Metric | Baseline | With `event-hoist` | Delta |
-| :--- | ---: | ---: | ---: |
-| Native EventListener allocations (500 items) | 1,500 listeners | 3 listeners | -99.8% |
-| Event listener memory footprint | 4.2 MB | 0.8 MB | -81.0% |
-| First render mount latency | 48.6 ms | 37.2 ms | +23.5% |
+| Design system | Baseline mount latency | With `event-hoist` | Mount speedup | Reactive update speedup | Script eval latency |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Carbon Web Components | 96.0 ms | 72.5 ms | +24.5% | +6.5% (4.3 ms vs 4.6 ms) | 4.0 ms (vs 4.4 ms, +9.1%) |
+| Spectrum Web Components | 52.3 ms | 26.0 ms | +50.3% | +4.8% (2.0 ms vs 2.1 ms) | 12.2 ms (vs 10.5 ms) |
+| Web Awesome | 41.0 ms | 30.1 ms | +26.6% | +31.3% (1.1 ms vs 1.6 ms) | 2.9 ms (vs 6.2 ms, +53.2%) |
+| Momentum Design | 39.6 ms | 20.9 ms | +47.2% | +18.2% (0.9 ms vs 1.1 ms) | 4.8 ms (vs 4.3 ms) |
+| Material Web | 45.1 ms | 18.8 ms | +58.3% | +19.0% (1.7 ms vs 2.1 ms) | 5.9 ms (vs 6.8 ms, +13.2%) |
+
+> Hoisting event listeners to the component `ShadowRoot` with composed path dispatch reduces per-node event listener binding calls during template hydration and yields up to **58.3% faster initial mount latency**.
 
 ---
 
