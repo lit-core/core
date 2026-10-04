@@ -56,8 +56,8 @@
   "dependencies": {
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
-    "@lit-core/dirty-mask": "workspace:*",
     "@lit-core/directives": "workspace:*",
+    "@lit-core/dirty-mask": "workspace:*",
     "@lit-core/dom-paths": "workspace:*",
     "@lit-core/elem-proxy": "workspace:*",
     "@lit-core/event-hoist": "workspace:*",
@@ -70,7 +70,7 @@
     "@lit-core/tag-shake": "workspace:*",
     "@lit-core/test-kit": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
-    "lucide-react": "^1.50.0"
+    "lucide-react": "^1.51.0"
   },
   "devDependencies": {
     "@awesome.me/webawesome": "^3.14.0",
