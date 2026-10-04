@@ -13,13 +13,9 @@ const currentArch = arch();
 // Try loading platform-specific native addon
 try {
   if (currentPlatform === 'darwin') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../tag-shake.darwin-arm64.node')
-      : require('../tag-shake.darwin-x64.node');
+    nativeBinding = currentArch === 'arm64' ? require('../tag-shake.darwin-arm64.node') : require('../tag-shake.darwin-x64.node');
   } else if (currentPlatform === 'linux') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../tag-shake.linux-arm64-gnu.node')
-      : require('../tag-shake.linux-x64-gnu.node');
+    nativeBinding = currentArch === 'arm64' ? require('../tag-shake.linux-arm64-gnu.node') : require('../tag-shake.linux-x64-gnu.node');
   }
 } catch (_err) {
   try {

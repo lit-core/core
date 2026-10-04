@@ -45,9 +45,13 @@ export function ensureNativeFresh(crates = ALL_CRATES, root = process.cwd()) {
     // Expected .node binary name for current platform
     const platformId =
       process.platform === 'darwin'
-        ? (process.arch === 'arm64' ? 'darwin-arm64' : 'darwin-x64')
+        ? process.arch === 'arm64'
+          ? 'darwin-arm64'
+          : 'darwin-x64'
         : process.platform === 'linux'
-          ? (process.arch === 'arm64' ? 'linux-arm64-gnu' : 'linux-x64-gnu')
+          ? process.arch === 'arm64'
+            ? 'linux-arm64-gnu'
+            : 'linux-x64-gnu'
           : `win32-${process.arch}-msvc`;
     const expectedBinary = `${crate}.${platformId}.node`;
     const binaryPath = path.join(pkgDir, expectedBinary);

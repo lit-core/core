@@ -11,13 +11,9 @@ const currentArch = arch();
 
 try {
   if (currentPlatform === 'darwin') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../props-lower.darwin-arm64.node')
-      : require('../props-lower.darwin-x64.node');
+    nativeBinding = currentArch === 'arm64' ? require('../props-lower.darwin-arm64.node') : require('../props-lower.darwin-x64.node');
   } else if (currentPlatform === 'linux') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../props-lower.linux-arm64-gnu.node')
-      : require('../props-lower.linux-x64-gnu.node');
+    nativeBinding = currentArch === 'arm64' ? require('../props-lower.linux-arm64-gnu.node') : require('../props-lower.linux-x64-gnu.node');
   }
 } catch (_err) {
   try {

@@ -13,13 +13,9 @@ const currentArch = arch();
 // Try loading platform-specific native addon
 try {
   if (currentPlatform === 'darwin') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../memoize.darwin-arm64.node')
-      : require('../memoize.darwin-x64.node');
+    nativeBinding = currentArch === 'arm64' ? require('../memoize.darwin-arm64.node') : require('../memoize.darwin-x64.node');
   } else if (currentPlatform === 'linux') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../memoize.linux-arm64-gnu.node')
-      : require('../memoize.linux-x64-gnu.node');
+    nativeBinding = currentArch === 'arm64' ? require('../memoize.linux-arm64-gnu.node') : require('../memoize.linux-x64-gnu.node');
   }
 } catch (_err) {
   try {

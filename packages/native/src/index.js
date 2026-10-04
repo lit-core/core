@@ -11,13 +11,9 @@ const currentArch = arch();
 
 try {
   if (currentPlatform === 'darwin') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../native.darwin-arm64.node')
-      : require('../native.darwin-x64.node');
+    nativeBinding = currentArch === 'arm64' ? require('../native.darwin-arm64.node') : require('../native.darwin-x64.node');
   } else if (currentPlatform === 'linux') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../native.linux-arm64-gnu.node')
-      : require('../native.linux-x64-gnu.node');
+    nativeBinding = currentArch === 'arm64' ? require('../native.linux-arm64-gnu.node') : require('../native.linux-x64-gnu.node');
   }
 } catch (_err) {
   try {

@@ -11,13 +11,9 @@ const currentArch = arch();
 
 try {
   if (currentPlatform === 'darwin') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../../resumable.darwin-arm64.node')
-      : require('../../resumable.darwin-x64.node');
+    nativeBinding = currentArch === 'arm64' ? require('../../resumable.darwin-arm64.node') : require('../../resumable.darwin-x64.node');
   } else if (currentPlatform === 'linux') {
-    nativeBinding = currentArch === 'arm64'
-      ? require('../../resumable.linux-arm64-gnu.node')
-      : require('../../resumable.linux-x64-gnu.node');
+    nativeBinding = currentArch === 'arm64' ? require('../../resumable.linux-arm64-gnu.node') : require('../../resumable.linux-x64-gnu.node');
   }
 } catch (_err) {
   try {
