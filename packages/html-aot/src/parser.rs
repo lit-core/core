@@ -29,8 +29,17 @@ enum TagState {
     InTag,
     InAttrValueDouble,
     InAttrValueSingle,
-    InAttrValueUnquoted,
     InComment,
+}
+
+#[derive(Debug, Clone)]
+struct ActiveAttr {
+    name: String,
+    ctor_type: u8,
+    quote: Option<char>,
+    strings: Vec<String>,
+    current_string: String,
+    element_index: u32,
 }
 
 pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
@@ -52,6 +61,7 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
     let mut state = TagState::Outside;
     let mut open_tags: Vec<String> = Vec::new();
     let mut current_tag = String::new();
+    let mut active_attr: Option<ActiveAttr> = None;
 
     // Track if inside raw text elements: script, style, textarea, title
     let is_raw_text = |tag: &str| -> bool {
@@ -61,12 +71,67 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
 
     // Buffer for building the current tag's output without bound attributes
     let mut tag_output = String::new();
-    let mut attr_start_in_tag = 0;
 
     for (k, quasi) in quasis.iter().enumerate() {
         let chars: Vec<char> = quasi.chars().collect();
         let len = chars.len();
         let mut i = 0;
+
+        // If resuming inside an attribute value from previous expression
+        if let Some(ref mut attr) = active_attr {
+            if let Some(q) = attr.quote {
+                let mut found_quote = false;
+                while i < len {
+                    if chars[i] == q {
+                        found_quote = true;
+                        i += 1;
+                        break;
+                    }
+                    attr.current_string.push(chars[i]);
+                    i += 1;
+                }
+                if found_quote {
+                    let mut finished = active_attr.take().unwrap();
+                    finished
+                        .strings
+                        .push(std::mem::take(&mut finished.current_string));
+                    parts.push(TemplatePartInfo {
+                        kind: PartKind::Attribute {
+                            name: finished.name,
+                            strings: finished.strings,
+                            ctor_type: finished.ctor_type,
+                        },
+                        index: finished.element_index,
+                    });
+                    state = TagState::InTag;
+                }
+            } else {
+                let mut found_delimiter = false;
+                while i < len {
+                    if chars[i].is_whitespace() || chars[i] == '>' {
+                        found_delimiter = true;
+                        break;
+                    }
+                    attr.current_string.push(chars[i]);
+                    i += 1;
+                }
+                if found_delimiter {
+                    let mut finished = active_attr.take().unwrap();
+                    finished
+                        .strings
+                        .push(std::mem::take(&mut finished.current_string));
+                    parts.push(TemplatePartInfo {
+                        kind: PartKind::Attribute {
+                            name: finished.name,
+                            strings: finished.strings,
+                            ctor_type: finished.ctor_type,
+                        },
+                        index: finished.element_index,
+                    });
+                    state = TagState::InTag;
+                }
+            }
+        }
 
         while i < len {
             match state {
@@ -101,14 +166,6 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                         i += 1;
                     }
                 }
-                TagState::InAttrValueUnquoted => {
-                    if chars[i].is_whitespace() || chars[i] == '>' {
-                        state = TagState::InTag;
-                    } else {
-                        tag_output.push(chars[i]);
-                        i += 1;
-                    }
-                }
                 TagState::InTagName => {
                     if chars[i].is_whitespace() || chars[i] == '>' || chars[i] == '/' {
                         state = TagState::InTag;
@@ -121,6 +178,9 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                 TagState::InTag => {
                     let ch = chars[i];
                     if ch == '>' {
+                        while tag_output.ends_with(char::is_whitespace) {
+                            tag_output.pop();
+                        }
                         tag_output.push('>');
                         prepared_html.push_str(&tag_output);
                         tag_output.clear();
@@ -141,26 +201,7 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                         tag_output.push('\'');
                         state = TagState::InAttrValueSingle;
                         i += 1;
-                    } else if ch == '=' {
-                        tag_output.push('=');
-                        i += 1;
-                        if i < len {
-                            if chars[i] == '"' {
-                                tag_output.push('"');
-                                state = TagState::InAttrValueDouble;
-                                i += 1;
-                            } else if chars[i] == '\'' {
-                                tag_output.push('\'');
-                                state = TagState::InAttrValueSingle;
-                                i += 1;
-                            } else if !chars[i].is_whitespace() && chars[i] != '>' {
-                                state = TagState::InAttrValueUnquoted;
-                            }
-                        }
                     } else {
-                        if ch.is_whitespace() {
-                            attr_start_in_tag = tag_output.len() + 1;
-                        }
                         tag_output.push(ch);
                         i += 1;
                     }
@@ -212,7 +253,6 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                         tag_output.clear();
                         tag_output.push('<');
                         state = TagState::InTagName;
-                        attr_start_in_tag = 0;
                         i += 1;
                         continue;
                     }
@@ -232,96 +272,112 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                 }
             }
 
-            match state {
-                TagState::InTag
-                | TagState::InAttrValueDouble
-                | TagState::InAttrValueSingle
-                | TagState::InAttrValueUnquoted => {
-                    // Check if it's an attribute binding or element binding
-                    let trimmed_tag = tag_output.trim_end();
-                    if trimmed_tag.ends_with('=')
-                        || trimmed_tag.ends_with("=\"")
-                        || trimmed_tag.ends_with("='")
-                    {
-                        // Attribute binding!
-                        let without_eq = trimmed_tag
-                            .strip_suffix('=')
-                            .or_else(|| trimmed_tag.strip_suffix("=\""))
-                            .or_else(|| trimmed_tag.strip_suffix("='"))
-                            .unwrap_or(trimmed_tag);
+            if let Some(ref mut attr) = active_attr {
+                let cur = std::mem::take(&mut attr.current_string);
+                attr.strings.push(cur);
+            } else {
+                match state {
+                    TagState::InTag
+                    | TagState::InAttrValueDouble
+                    | TagState::InAttrValueSingle
+                    | TagState::InTagName => {
+                        if let Some(eq_pos) = tag_output.rfind('=') {
+                            let before_eq = &tag_output[..eq_pos];
+                            let after_eq = &tag_output[eq_pos + 1..];
 
-                        let raw_attr_name = without_eq
-                            .split(|c: char| c.is_whitespace() || c == '<')
-                            .rfind(|s| !s.is_empty())
-                            .unwrap_or("");
-
-                        let (ctor_type, attr_name) =
-                            if let Some(prop) = raw_attr_name.strip_prefix('.') {
-                                (3u8, prop.to_string())
-                            } else if let Some(b) = raw_attr_name.strip_prefix('?') {
-                                (4u8, b.to_string())
-                            } else if let Some(ev) = raw_attr_name.strip_prefix('@') {
-                                (5u8, ev.to_string())
+                            let (quote, prefix) = if let Some(stripped) = after_eq.strip_prefix('"')
+                            {
+                                (Some('"'), stripped.to_string())
+                            } else if let Some(stripped) = after_eq.strip_prefix('\'') {
+                                (Some('\''), stripped.to_string())
                             } else {
-                                (1u8, raw_attr_name.to_string())
+                                (None, after_eq.trim_start().to_string())
                             };
 
-                        let static_strings = vec!["".to_string(), "".to_string()];
+                            let trimmed_before = before_eq.trim_end();
+                            let attr_name_start = trimmed_before
+                                .rfind(|c: char| c.is_whitespace() || c == '<')
+                                .map(|pos| pos + 1)
+                                .unwrap_or(0);
+                            let raw_attr_name = &trimmed_before[attr_name_start..];
 
-                        // Remove this attribute from tag_output so prepared_html doesn't contain bound attributes
-                        let remove_start =
-                            tag_output.rfind(raw_attr_name).unwrap_or(attr_start_in_tag);
-                        tag_output.truncate(remove_start);
+                            let (ctor_type, attr_name) =
+                                if let Some(prop) = raw_attr_name.strip_prefix('.') {
+                                    (3u8, prop.to_string())
+                                } else if let Some(b) = raw_attr_name.strip_prefix('?') {
+                                    (4u8, b.to_string())
+                                } else if let Some(ev) = raw_attr_name.strip_prefix('@') {
+                                    (5u8, ev.to_string())
+                                } else {
+                                    (1u8, raw_attr_name.to_string())
+                                };
 
-                        parts.push(TemplatePartInfo {
-                            kind: PartKind::Attribute {
+                            let mut remove_pos = attr_name_start;
+                            while remove_pos > 0
+                                && tag_output.as_bytes()[remove_pos - 1].is_ascii_whitespace()
+                            {
+                                remove_pos -= 1;
+                            }
+                            tag_output.truncate(remove_pos);
+
+                            active_attr = Some(ActiveAttr {
                                 name: attr_name,
-                                strings: static_strings,
                                 ctor_type,
-                            },
-                            index: current_element_index.max(0) as u32,
-                        });
-
-                        state = TagState::InTag;
-                    } else {
-                        // Element binding on current element
+                                quote,
+                                strings: vec![prefix],
+                                current_string: String::new(),
+                                element_index: current_element_index.max(0) as u32,
+                            });
+                            state = TagState::InTag;
+                        } else {
+                            parts.push(TemplatePartInfo {
+                                kind: PartKind::Element,
+                                index: current_element_index.max(0) as u32,
+                            });
+                            while tag_output.ends_with(char::is_whitespace) {
+                                tag_output.pop();
+                            }
+                            state = TagState::InTag;
+                        }
+                    }
+                    TagState::InComment => {
                         parts.push(TemplatePartInfo {
-                            kind: PartKind::Element,
-                            index: current_element_index.max(0) as u32,
+                            kind: PartKind::Comment,
+                            index: current_node_index.max(0) as u32,
                         });
-                        state = TagState::InTag;
+                    }
+                    TagState::Outside => {
+                        current_node_index += 1;
+                        parts.push(TemplatePartInfo {
+                            kind: PartKind::Child,
+                            index: current_node_index.max(0) as u32,
+                        });
+
+                        prepared_html.push_str("<?>");
+
+                        if k == num_exprs - 1
+                            && k == 0
+                            && quasi.is_empty()
+                            && quasis.get(k + 1).map(|q| q.is_empty()).unwrap_or(false)
+                        {
+                            prepared_html.push_str("<!--?-->");
+                        }
                     }
                 }
-                TagState::InComment => {
-                    // Comment part
-                    parts.push(TemplatePartInfo {
-                        kind: PartKind::Comment,
-                        index: current_node_index.max(0) as u32,
-                    });
-                }
-                TagState::Outside => {
-                    // Child part
-                    current_node_index += 1;
-                    parts.push(TemplatePartInfo {
-                        kind: PartKind::Child,
-                        index: current_node_index.max(0) as u32,
-                    });
-
-                    // Add <?> marker to prepared_html
-                    prepared_html.push_str("<?>");
-
-                    // If at the end and no text, or single child part at root
-                    if k == num_exprs - 1
-                        && k == 0
-                        && quasi.is_empty()
-                        && quasis.get(k + 1).map(|q| q.is_empty()).unwrap_or(false)
-                    {
-                        prepared_html.push_str("<!--?-->");
-                    }
-                }
-                _ => {}
             }
         }
+    }
+
+    if let Some(mut attr) = active_attr {
+        attr.strings.push(attr.current_string);
+        parts.push(TemplatePartInfo {
+            kind: PartKind::Attribute {
+                name: attr.name,
+                strings: attr.strings,
+                ctor_type: attr.ctor_type,
+            },
+            index: attr.element_index,
+        });
     }
 
     if !tag_output.is_empty() {

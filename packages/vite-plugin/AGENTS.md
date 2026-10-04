@@ -28,5 +28,5 @@ Use sentence case for all headings, options descriptions, comments, and document
 ---
 
 ## Configuration guidelines
-- Support both unified plugin invocation (`lit({ cssFuse: true, propsLower: true })`) and direct modular imports (`cssFuse()`, `propsLower()`).
+- Support both unified plugin invocation (`LitCoreVitePlugin({ cssFuse: true, propsLower: true })`) and direct modular imports (`cssFuse()`, `propsLower()`).
 - Always preserve TypeScript types and documentation comments in `options.ts`.

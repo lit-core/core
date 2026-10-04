@@ -591,3 +591,5 @@ export interface TagShakeOptions {
 
 export type LitTagShakeOptions = TagShakeOptions;
 export type LitCorePluginOptions = LitPluginOptions;
+export type LitCoreVitePluginOptions = LitPluginOptions;
+export type LitVitePluginOptions = LitPluginOptions;

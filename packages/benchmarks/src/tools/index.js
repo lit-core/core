@@ -1,4 +1,4 @@
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 import { normalizeInclude } from './base.js';
 import { cssFuseTool } from './css-fuse.js';
 import { cssMinifierTool } from './css-minifier.js';
@@ -63,7 +63,7 @@ export async function getCombinedPlugins(tools, suite) {
 
   const isAll = tools.length > 3;
 
-  return lit({
+  return LitCoreVitePlugin({
     cssFuse: hasTool('css-fuse')
       ? {
           include,

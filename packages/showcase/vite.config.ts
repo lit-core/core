@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
@@ -66,7 +66,7 @@ function getPluginOptions(feat: string) {
 }
 
 const pluginOpts = getPluginOptions(feature);
-const plugins = [tailwindcss(), ...(pluginOpts ? [lit(pluginOpts)] : [])];
+const plugins = [tailwindcss(), ...(pluginOpts ? [LitCoreVitePlugin(pluginOpts)] : [])];
 
 export default defineConfig({
   root: __dirname,

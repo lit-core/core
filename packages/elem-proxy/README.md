@@ -84,17 +84,18 @@ pnpm add -D @lit-core/elem-proxy
 
 ```typescript
 import { defineConfig } from 'vite';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    lit({
+    LitCoreVitePlugin({
       elemProxy: {
         include: 'node_modules/@carbon/web-components/**/*.js',
       },
     }),
   ],
 });
+
 ```
 
 ### Via `@lit-core/webpack-plugin`

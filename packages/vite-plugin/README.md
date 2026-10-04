@@ -76,11 +76,11 @@ pnpm add -D @lit-core/vite-plugin
 ```typescript
 // vite.config.ts
 import { defineConfig } from 'vite';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    lit({
+    LitCoreVitePlugin({
       cssFuse: true,
       propsLower: true,
       cssMinifier: true,
@@ -95,12 +95,13 @@ export default defineConfig({
 ```typescript
 // vite.config.ts
 import { defineConfig } from 'vite';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    lit({
+    LitCoreVitePlugin({
       // Cross-component CSS deduplication
+
       cssFuse: {
         threshold: 2,
         applyInDev: false,

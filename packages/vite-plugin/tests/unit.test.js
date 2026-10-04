@@ -5,8 +5,10 @@ import litDefault, {
   domPaths,
   elemProxy,
   htmlMinifier,
+  LitCoreVitePlugin,
   lit,
   litCore,
+  litCoreVitePlugin,
   litCssFuse,
   litDirtyMask,
   litDomPaths,
@@ -18,9 +20,13 @@ import litDefault, {
 
 console.log('Testing @lit-core/vite-plugin hooks and exports...');
 
+assert.strictEqual(typeof litCoreVitePlugin, 'function', 'litCoreVitePlugin must be a function');
+assert.strictEqual(LitCoreVitePlugin, litCoreVitePlugin, 'LitCoreVitePlugin must be identical to litCoreVitePlugin');
 assert.strictEqual(typeof lit, 'function', 'lit must be a function');
 assert.strictEqual(lit, litDefault, 'default export must be lit');
 assert.strictEqual(lit, litCore, 'litCore must be an alias for lit');
+assert.strictEqual(lit, litCoreVitePlugin, 'lit must be an alias for litCoreVitePlugin');
+
 assert.strictEqual(typeof cssFuse, 'function', 'cssFuse must be a function');
 assert.strictEqual(typeof litCssFuse, 'function', 'litCssFuse must be an alias');
 assert.strictEqual(typeof propsLower, 'function', 'propsLower must be a function');

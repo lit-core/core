@@ -103,11 +103,11 @@ pnpm add -D @lit-core/html-fuse
 
 ```typescript
 import { defineConfig } from 'vite';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    lit({
+    LitCoreVitePlugin({
       htmlFuse: {
         threshold: 2,
         minFragmentLength: 15,
@@ -115,6 +115,7 @@ export default defineConfig({
     }),
   ],
 });
+
 ```
 
 ### Via `@lit-core/webpack-plugin`

@@ -148,7 +148,7 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let need_ssr_import = need_attr_part || need_prop_part || need_bool_part || need_event_part;
 
     // 4. Construct top-level statements to insert after imports
-    let mut prepended_stmts = Vec::new();
+    let mut header_stmts = Vec::new();
 
     if need_ssr_import {
         let mut bindings = Vec::new();
@@ -176,7 +176,7 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
         )
         .parse();
         for stmt in parsed_import.program.body {
-            prepended_stmts.push(stmt);
+            header_stmts.push(stmt);
         }
     }
 
@@ -185,11 +185,12 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let parsed_brand =
         Parser::new(&allocator, allocator.alloc_str(brand_snippet), source_type).parse();
     for stmt in parsed_brand.program.body {
-        prepended_stmts.push(stmt);
+        header_stmts.push(stmt);
     }
 
-    // Top-level template definitions
-    for (_, tmpl) in &template_matches {
+    // Top-level template definitions associated with their source span
+    let mut tmpl_stmts: Vec<(Span, Vec<Statement<'_>>)> = Vec::new();
+    for (tmpl_span, tmpl) in &template_matches {
         let mut parts_items = Vec::new();
         for p in &tmpl.prepared.parts {
             match &p.kind {
@@ -245,9 +246,7 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
             source_type,
         )
         .parse();
-        for stmt in parsed_tmpl.program.body {
-            prepended_stmts.push(stmt);
-        }
+        tmpl_stmts.push((*tmpl_span, parsed_tmpl.program.body.into_iter().collect()));
     }
 
     // 5. Replace tagged template expressions with CompiledTemplateResult descriptors
@@ -264,7 +263,7 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
         strip_ts_in_stmts(&mut parsed.program.body);
     }
 
-    // 7. Insert synthesized statements right after the last import statement
+    // 7. Insert synthesized statements
     let last_import_idx = parsed
         .program
         .body
@@ -276,15 +275,33 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let mut new_body = ArenaVec::new_in(&&allocator);
     for (i, s) in parsed.program.body.into_iter().enumerate() {
         if i == last_import_idx {
-            for p in prepended_stmts.drain(..) {
+            for p in header_stmts.drain(..) {
                 new_body.push(p);
+            }
+        }
+        let stmt_span = s.span();
+        let mut idx = 0;
+        while idx < tmpl_stmts.len() {
+            if tmpl_stmts[idx].0.start >= stmt_span.start && tmpl_stmts[idx].0.end <= stmt_span.end
+            {
+                let (_, stmts) = tmpl_stmts.remove(idx);
+                for ts in stmts {
+                    new_body.push(ts);
+                }
+            } else {
+                idx += 1;
             }
         }
         new_body.push(s);
     }
-    if !prepended_stmts.is_empty() {
-        for p in prepended_stmts {
+    if !header_stmts.is_empty() {
+        for p in header_stmts {
             new_body.push(p);
+        }
+    }
+    for (_, stmts) in tmpl_stmts {
+        for ts in stmts {
+            new_body.push(ts);
         }
     }
     parsed.program.body = new_body;
@@ -309,54 +326,57 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     }
 }
 
+#[allow(clippy::while_let_on_iterator)]
 fn compact_parts_in_code(code: &str) -> String {
     let mut res = String::with_capacity(code.len());
-    let mut i = 0;
-    let bytes = code.as_bytes();
-    let len = bytes.len();
+    let mut chars = code.chars().peekable();
 
-    while i < len {
-        if code[i..].starts_with("parts: [") {
+    while let Some(ch) = chars.next() {
+        if ch == 'p' && chars.clone().take(7).collect::<String>() == "arts: [" {
             res.push_str("parts: [");
-            i += 8;
+            for _ in 0..7 {
+                chars.next();
+            }
 
             let mut bracket_depth = 1;
-            while i < len && bracket_depth > 0 {
-                if bytes[i] == b'[' {
+            while let Some(c) = chars.next() {
+                if c == '[' {
                     bracket_depth += 1;
-                    res.push('[');
-                    i += 1;
-                } else if bytes[i] == b']' {
+                    res.push(c);
+                } else if c == ']' {
                     bracket_depth -= 1;
-                    res.push(']');
-                    i += 1;
-                } else if bytes[i] == b'{' {
-                    let mut obj_depth = 1;
-                    let obj_start = i;
-                    i += 1;
-                    while i < len && obj_depth > 0 {
-                        if bytes[i] == b'{' {
-                            obj_depth += 1;
-                        } else if bytes[i] == b'}' {
-                            obj_depth -= 1;
-                        }
-                        i += 1;
+                    res.push(c);
+                    if bracket_depth == 0 {
+                        break;
                     }
-                    let obj_slice = &code[obj_start..i];
+                } else if c == '{' {
+                    let mut obj_depth = 1;
+                    let mut obj_str = String::from("{");
+                    while let Some(oc) = chars.next() {
+                        obj_str.push(oc);
+                        if oc == '{' {
+                            obj_depth += 1;
+                        } else if oc == '}' {
+                            obj_depth -= 1;
+                            if obj_depth == 0 {
+                                break;
+                            }
+                        }
+                    }
                     let mut compacted = String::new();
                     let mut prev_is_space = false;
-                    for c in obj_slice.chars() {
-                        if c.is_whitespace() {
+                    for sc in obj_str.chars() {
+                        if sc.is_whitespace() {
                             if !prev_is_space {
                                 compacted.push(' ');
                                 prev_is_space = true;
                             }
                         } else {
-                            if (c == ':' || c == ',') && prev_is_space {
+                            if (sc == ':' || sc == ',') && prev_is_space {
                                 compacted.pop();
                             }
-                            compacted.push(c);
-                            if c == ':' || c == ',' {
+                            compacted.push(sc);
+                            if sc == ':' || sc == ',' {
                                 compacted.push(' ');
                                 prev_is_space = true;
                             } else {
@@ -366,13 +386,11 @@ fn compact_parts_in_code(code: &str) -> String {
                     }
                     res.push_str(compacted.trim());
                 } else {
-                    res.push(bytes[i] as char);
-                    i += 1;
+                    res.push(c);
                 }
             }
         } else {
-            res.push(bytes[i] as char);
-            i += 1;
+            res.push(ch);
         }
     }
     res
@@ -944,8 +962,8 @@ fn replace_in_expr<'a>(
                 key1,
                 val1,
                 false,
-                true,
                 false,
+                true,
                 &ast,
             ));
 

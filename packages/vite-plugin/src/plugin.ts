@@ -1148,7 +1148,7 @@ export const litTagShake = tagShake;
 
 const TAG_SHAKE_FAST_CHECK = /\.define\(|customElement\(/;
 
-export function lit(options: LitPluginOptions = {}): Plugin[] {
+export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [];
 
   if (options.virtual) {
@@ -1248,10 +1248,12 @@ export function lit(options: LitPluginOptions = {}): Plugin[] {
   return plugins;
 }
 
+export const LitCoreVitePlugin = litCoreVitePlugin;
+export const lit = litCoreVitePlugin;
+export const litCore = litCoreVitePlugin;
 export const resumable = litResumablePlugin;
 export const litResumable = litResumablePlugin;
-export const litCore = lit;
 export const litVirtualPlugin = litVirtual;
 export const litCssFuse = cssFuse;
 export const litPropsLower = propsLower;
-export default lit;
+export default litCoreVitePlugin;

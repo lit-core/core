@@ -84,17 +84,18 @@ pnpm add -D @lit-core/resumable
 
 ```typescript
 import { defineConfig } from 'vite';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    lit({
+    LitCoreVitePlugin({
       resumable: {
         preloadOnHover: true,
       },
     }),
   ],
 });
+
 ```
 
 ### Via `@lit-core/webpack-plugin`

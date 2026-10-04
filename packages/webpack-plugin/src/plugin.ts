@@ -485,6 +485,8 @@ export function tagShake(options: TagShakeOptions = {}): TagShakeWebpackPlugin {
   return new TagShakeWebpackPlugin(options);
 }
 
+export const LitCoreWebpackPlugin = LitWebpackPlugin;
+export const litCoreWebpackPlugin = lit;
 export const litCore = lit;
 export const litCssFuse = cssFuse;
 export const litHtmlFuse = htmlFuse;

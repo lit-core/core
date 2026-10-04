@@ -83,15 +83,16 @@ pnpm add -D @lit-core/css-minifier
 
 ```typescript
 import { defineConfig } from 'vite';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    lit({
+    LitCoreVitePlugin({
       cssMinifier: true,
     }),
   ],
 });
+
 ```
 
 ### Via `@lit-core/webpack-plugin`

@@ -74,15 +74,16 @@ pnpm add -D @lit-core/tag-shake
 
 ```typescript
 import { defineConfig } from 'vite';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    lit({
+    LitCoreVitePlugin({
       tagShake: true,
     }),
   ],
 });
+
 ```
 
 ### Programmatic API

@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fuse } from '@lit-core/css-fuse';
 import { build } from 'vite';
-import lit from '../dist/index.js';
+import { LitCoreVitePlugin } from '../dist/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixtureDir = path.join(__dirname, 'fixtures');
@@ -169,7 +169,7 @@ async function runTests() {
         },
       },
       plugins: [
-        lit({
+        LitCoreVitePlugin({
           cssFuse: {
             include: [`${fixtureDir}/**/*.ts`],
             exclude: [`${fixtureDir}/entry-*.ts`],

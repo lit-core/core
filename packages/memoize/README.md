@@ -115,15 +115,16 @@ pnpm add -D @lit-core/memoize
 
 ```typescript
 import { defineConfig } from 'vite';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    lit({
+    LitCoreVitePlugin({
       memoize: true,
     }),
   ],
 });
+
 ```
 
 ### Via `@lit-core/webpack-plugin`

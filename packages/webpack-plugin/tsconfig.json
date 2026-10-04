@@ -12,7 +12,7 @@
       "@lit-core/dom-paths": ["../dom-paths/src/index.d.ts"],
       "@lit-core/elem-proxy": ["../elem-proxy/src/index.d.ts"],
       "@lit-core/event-hoist": ["../event-hoist/src/index.d.ts"],
-      "@lit-core/html-aot": ["../html-aot/lib/index.d.ts"],
+      "@lit-core/html-aot": ["../html-aot/src/index.d.ts"],
       "@lit-core/html-fuse": ["../html-fuse/src/index.d.ts"],
       "@lit-core/html-minifier": ["../html-minifier/src/index.d.ts"],
       "@lit-core/memoize": ["../memoize/src/index.d.ts"],

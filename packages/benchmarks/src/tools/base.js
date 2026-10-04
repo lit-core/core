@@ -1,4 +1,4 @@
-import lit from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 /**
  * Normalize an includePattern from SuiteContext into an array or undefined.
@@ -42,5 +42,5 @@ export function createIsolatedToolPlugin(toolKey, toolOptions) {
     config[feature] = feature === toolKey ? toolOptions : false;
   }
 
-  return lit(config);
+  return LitCoreVitePlugin(config);
 }

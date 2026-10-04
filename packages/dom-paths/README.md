@@ -88,15 +88,16 @@ pnpm add -D @lit-core/dom-paths
 
 ```typescript
 import { defineConfig } from 'vite';
-import { lit } from '@lit-core/vite-plugin';
+import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    lit({
+    LitCoreVitePlugin({
       domPaths: true,
     }),
   ],
 });
+
 ```
 
 ### Via `@lit-core/webpack-plugin`
