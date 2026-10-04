@@ -77,6 +77,17 @@ pnpm run benchmark:scenarios        # Run all 4 scenarios across design systems
 # Run a specific scenario and variant
 node packages/benchmarks/src/index.js --scenario=data-grid --suite=carbon --variant=dom-paths
 node packages/benchmarks/src/index.js --scenario=interactive-form --suite=carbon --variant=event-hoist
+
+# Run standalone feature microbenchmarks
+node packages/benchmarks/src/features/directives.js
+node packages/benchmarks/src/features/dirty-mask.js
+node packages/benchmarks/src/features/dom-paths.js
+node packages/benchmarks/src/features/elem-proxy.js
+node packages/benchmarks/src/features/event-hoist.js
+node packages/benchmarks/src/features/memoize.js
+node packages/benchmarks/src/features/native.js
+node packages/benchmarks/src/features/resumable.js
+node packages/benchmarks/src/features/tag-shake.js
 ```
 
 ---

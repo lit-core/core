@@ -13,37 +13,38 @@ const currentArch = arch();
 // Try loading platform-specific native addon
 try {
   if (currentPlatform === 'darwin') {
-    if (currentArch === 'arm64') {
-      nativeBinding = require('../html-aot.darwin-arm64.node');
-    } else {
-      nativeBinding = require('../html-aot.darwin-x64.node');
-    }
+    nativeBinding = currentArch === 'arm64'
+      ? require('../html-aot.darwin-arm64.node')
+      : require('../html-aot.darwin-x64.node');
   } else if (currentPlatform === 'linux') {
-    if (currentArch === 'x64') {
-      nativeBinding = require('../html-aot.linux-x64-gnu.node');
-    }
+    nativeBinding = currentArch === 'arm64'
+      ? require('../html-aot.linux-arm64-gnu.node')
+      : require('../html-aot.linux-x64-gnu.node');
   }
 } catch (_err) {
   try {
-    const localNode = path.resolve(import.meta.dirname, `../html-aot.${currentPlatform}-${currentArch}.node`);
-    if (fs.existsSync(localNode)) {
-      nativeBinding = require(localNode);
-    } else {
-      const dylib = path.resolve(import.meta.dirname, '../target/release/libhtml_aot.dylib');
-      if (fs.existsSync(dylib)) {
-        nativeBinding = require(dylib);
-      } else {
-        const so = path.resolve(import.meta.dirname, '../target/release/libhtml_aot.so');
-        if (fs.existsSync(so)) {
-          nativeBinding = require(so);
-        }
+    const ext = currentPlatform === 'darwin' ? '.dylib' : currentPlatform === 'linux' ? '.so' : '.dll';
+    const libPrefix = currentPlatform === 'win32' ? '' : 'lib';
+    const libFileName = `${libPrefix}html_aot${ext}`;
+    const candidates = [
+      path.resolve(import.meta.dirname, `../html-aot.${currentPlatform}-${currentArch}.node`),
+      path.resolve(import.meta.dirname, '../html-aot.linux-x64-gnu.node'),
+      path.resolve(import.meta.dirname, `../target/release/${libFileName}`),
+      path.resolve(import.meta.dirname, `../../target/release/${libFileName}`),
+      path.resolve(import.meta.dirname, `../target/debug/${libFileName}`),
+      path.resolve(import.meta.dirname, `../../target/debug/${libFileName}`),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        nativeBinding = require(c);
+        break;
       }
     }
   } catch {}
 }
 
 if (!nativeBinding) {
-  throw new Error('Failed to load native binding for @lit-core/html-aot. Native addon not found.');
+  throw new Error(`Failed to load native binding for @lit-core/html-aot (${currentPlatform}-${currentArch})`);
 }
 
 export const { transformHtmlAot } = nativeBinding;

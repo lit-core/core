@@ -1,5 +1,5 @@
 use napi_derive::napi;
-use oxc_allocator::{Allocator, ArenaVec, Box as ArenaBox, CloneIn, GetAllocator};
+use oxc_allocator::{Allocator, ArenaVec, CloneIn, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_ast_visit::walk_mut::walk_expression;
@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 use crate::ast_helpers::AstHelper;
-use crate::import_scanner::{extract_directive_slug, DirectiveKind, ImportContext};
+use crate::import_scanner::{DirectiveKind, ImportContext};
 
 #[napi(object)]
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
@@ -31,40 +31,8 @@ pub struct DirectivesResult {
     pub directives_used: Vec<String>,
 }
 
-fn camel_to_kebab(s: &str) -> String {
-    if s.starts_with("--") {
-        return s.to_string();
-    }
-    let mut out = String::new();
-    for c in s.chars() {
-        if c.is_ascii_uppercase() {
-            out.push('-');
-            out.push(c.to_ascii_lowercase());
-        } else {
-            out.push(c);
-        }
-    }
-    out
-}
-
-fn extract_arrow_expr<'a>(arrow: &'a ArrowFunctionExpression<'a>) -> Option<&'a Expression<'a>> {
-    if !arrow.params.items.is_empty() {
-        return None;
-    }
-    if let Some(expr) = arrow.body.as_expression() {
-        return Some(expr);
-    }
-    if let ArrowFunctionBody::FunctionBody(b) = &arrow.body {
-        if let Some(first_stmt) = b.statements.first() {
-            match first_stmt {
-                Statement::ExpressionStatement(e) => return Some(&e.expression),
-                Statement::ReturnStatement(r) => return r.argument.as_ref(),
-                _ => {}
-            }
-        }
-    }
-    None
-}
+use crate::prune::prune_and_update_imports;
+use crate::utils::{camel_to_kebab, extract_arrow_expr};
 
 pub fn transform_code(source: &str, options: DirectivesOptions) -> DirectivesResult {
     let allocator = Allocator::default();
@@ -1015,85 +983,4 @@ impl<'a, 'b> VisitMut<'a> for DirectiveLowerer<'a, 'b> {
             }
         }
     }
-}
-
-fn prune_and_update_imports<'a>(
-    program: &mut Program<'a>,
-    lowerer: &DirectiveLowerer<'a, '_>,
-    ast: &AstBuilder<'a>,
-) {
-    let mut new_body = ArenaVec::new_in(ast);
-    let mut injected_nothing = false;
-
-    for mut stmt in std::mem::replace(&mut program.body, ArenaVec::new_in(ast)) {
-        if let Statement::ImportDeclaration(import_decl) = &mut stmt {
-            let specifier = import_decl.source.value.as_str();
-
-            // If it's a directive module: lit/directives/* or lit-html/directives/*
-            if extract_directive_slug(specifier).is_some() {
-                if let Some(specifiers) = &mut import_decl.specifiers {
-                    // Filter out lowered specifiers
-                    specifiers.retain(|spec| match spec {
-                        ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                            let local = named.local.name.as_str();
-                            !lowerer.import_ctx.directive_bindings.contains_key(local)
-                        }
-                        ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                            let local = ns.local.name.as_str();
-                            !lowerer.import_ctx.namespace_bindings.contains_key(local)
-                        }
-                        _ => true,
-                    });
-
-                    if specifiers.is_empty() {
-                        // Entire import declaration is now empty, prune it!
-                        continue;
-                    }
-                }
-            } else if lowerer.used_nothing
-                && !lowerer.import_ctx.has_nothing_imported
-                && !injected_nothing
-                && (specifier == "lit" || specifier == "lit-html")
-            {
-                // Inject `nothing` into existing lit import
-                if let Some(specifiers) = &mut import_decl.specifiers {
-                    let imported = ModuleExportName::new_identifier_name(SPAN, "nothing", ast);
-                    let local = BindingIdentifier::new(SPAN, "nothing", ast);
-                    let new_spec = ImportDeclarationSpecifier::ImportSpecifier(ArenaBox::new_in(
-                        ImportSpecifier::new(SPAN, imported, local, ImportOrExportKind::Value, ast),
-                        ast,
-                    ));
-                    specifiers.push(new_spec);
-                    injected_nothing = true;
-                }
-            }
-        }
-        new_body.push(stmt);
-    }
-
-    // If `nothing` was used, not originally imported, and no existing `lit` import was found,
-    // prepend `import { nothing } from 'lit';`
-    if lowerer.used_nothing && !lowerer.import_ctx.has_nothing_imported && !injected_nothing {
-        let imported = ModuleExportName::new_identifier_name(SPAN, "nothing", ast);
-        let local = BindingIdentifier::new(SPAN, "nothing", ast);
-        let specifier = ImportDeclarationSpecifier::ImportSpecifier(ArenaBox::new_in(
-            ImportSpecifier::new(SPAN, imported, local, ImportOrExportKind::Value, ast),
-            ast,
-        ));
-        let mut specifiers = ArenaVec::new_in(ast);
-        specifiers.push(specifier);
-        let source_lit = StringLiteral::new(SPAN, "lit", None, ast);
-        let import_decl = Statement::new_import_declaration(
-            SPAN,
-            Some(specifiers),
-            source_lit,
-            None,
-            None,
-            ImportOrExportKind::Value,
-            ast,
-        );
-        new_body.insert(0, import_decl);
-    }
-
-    program.body = new_body;
 }

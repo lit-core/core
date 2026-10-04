@@ -1,3 +1,6 @@
+pub mod analyzer;
+pub mod builder;
+pub mod hoister;
 pub mod transform;
 
 use crate::transform::{transform_code, EventHoistOptions, EventHoistResult};

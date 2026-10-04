@@ -44,8 +44,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && cp target/release/libdirty_mask.dylib dirty-mask.darwin-arm64.node 2>/dev/null && (codesign -s - -f dirty-mask.darwin-arm64.node 2>/dev/null || true) || true",
-    "build:debug": "cargo build && cp target/debug/libdirty_mask.dylib dirty-mask.darwin-arm64.node 2>/dev/null && (codesign -s - -f dirty-mask.darwin-arm64.node 2>/dev/null || true) || true",
+    "build": "node ../../scripts/build-native.mjs dirty-mask --release",
+    "build:debug": "node ../../scripts/build-native.mjs dirty-mask",
     "test": "vitest run"
   },
   "devDependencies": {

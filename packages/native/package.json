@@ -35,11 +35,8 @@
     ]
   },
   "scripts": {
-    "build:rs": "cargo build --release && (cp ../../target/release/libnative.dylib native.darwin-arm64.node 2>/dev/null || cp target/release/libnative.dylib native.darwin-arm64.node 2>/dev/null || true)",
-    "build:rs:debug": "cargo build && (cp ../../target/debug/libnative.dylib native.darwin-arm64.node 2>/dev/null || cp target/debug/libnative.dylib native.darwin-arm64.node 2>/dev/null || true)",
-    "build:debug": "npm run build:rs:debug && npm run build:ts",
-    "build:ts": "tsc -p tsconfig.json",
-    "build": "npm run build:rs && npm run build:ts",
+    "build": "node ../../scripts/build-native.mjs native --release --tsc",
+    "build:debug": "node ../../scripts/build-native.mjs native --tsc",
     "test": "vitest run tests"
   },
   "devDependencies": {

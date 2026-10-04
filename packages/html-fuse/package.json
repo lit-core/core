@@ -57,8 +57,8 @@
   },
   "scripts": {
     "artifacts": "napi artifacts",
-    "build": "cargo build --release && cp target/release/libhtml_fuse.dylib html-fuse.darwin-arm64.node 2>/dev/null || true; cp target/release/html-fuse-bin bin/html-fuse-bin 2>/dev/null || true",
-    "build:debug": "cargo build && cp target/debug/libhtml_fuse.dylib html-fuse.darwin-arm64.node 2>/dev/null || true; cp target/debug/html-fuse-bin bin/html-fuse-bin 2>/dev/null || true",
+    "build": "node ../../scripts/build-native.mjs html-fuse --release",
+    "build:debug": "node ../../scripts/build-native.mjs html-fuse",
     "prepublishOnly": "napi prepublish -t npm",
     "version": "napi version",
     "test": "node tests/fuse.test.js"

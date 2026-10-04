@@ -1,3 +1,6 @@
+pub mod analyzer;
+pub mod builder;
+pub mod finder;
 pub mod transform;
 
 use crate::transform::{transform_code, MemoizeOptions, MemoizeResult};

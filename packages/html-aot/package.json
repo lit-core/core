@@ -46,8 +46,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release --offline && cp target/release/libhtml_aot.dylib html-aot.darwin-arm64.node 2>/dev/null && (codesign -s - -f html-aot.darwin-arm64.node 2>/dev/null || true) || true",
-    "build:debug": "cargo build --offline && cp target/debug/libhtml_aot.dylib html-aot.darwin-arm64.node 2>/dev/null && (codesign -s - -f html-aot.darwin-arm64.node 2>/dev/null || true) || true",
+    "build": "node ../../scripts/build-native.mjs html-aot --release",
+    "build:debug": "node ../../scripts/build-native.mjs html-aot",
     "test": "vitest run"
   },
   "devDependencies": {

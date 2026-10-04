@@ -42,17 +42,23 @@ export function ensureNativeFresh(crates = ALL_CRATES, root = process.cwd()) {
     const cargoToml = path.join(pkgDir, 'Cargo.toml');
     if (!fs.existsSync(cargoToml)) continue;
 
-    // Find .node binary in package root
-    const entries = fs.readdirSync(pkgDir);
-    const nodeBinary = entries.find((e) => e.endsWith('.node'));
+    // Expected .node binary name for current platform
+    const platformId =
+      process.platform === 'darwin'
+        ? (process.arch === 'arm64' ? 'darwin-arm64' : 'darwin-x64')
+        : process.platform === 'linux'
+          ? (process.arch === 'arm64' ? 'linux-arm64-gnu' : 'linux-x64-gnu')
+          : `win32-${process.arch}-msvc`;
+    const expectedBinary = `${crate}.${platformId}.node`;
+    const binaryPath = path.join(pkgDir, expectedBinary);
     let binaryMtime = 0;
-    if (nodeBinary) {
-      binaryMtime = fs.statSync(path.join(pkgDir, nodeBinary)).mtimeMs;
+    if (fs.existsSync(binaryPath)) {
+      binaryMtime = fs.statSync(binaryPath).mtimeMs;
     }
 
     const latestSourceMtime = getLatestMtime(pkgDir);
 
-    if (!nodeBinary || latestSourceMtime > binaryMtime) {
+    if (binaryMtime === 0 || latestSourceMtime > binaryMtime) {
       console.log(`[native-fresh] Stale binary detected in ${crate}, rebuilding in debug mode...`);
       const t0 = Date.now();
       try {
@@ -62,18 +68,20 @@ export function ensureNativeFresh(crates = ALL_CRATES, root = process.cwd()) {
           env: { ...process.env, TURBO_TELEMETRY_DISABLED: '1' },
         });
         const crateUnderscore = crate.replace(/-/g, '_');
-        const dylibCandidates = [
-          path.join(root, 'target', 'debug', `lib${crateUnderscore}.dylib`),
-          path.join(root, 'target', 'release', `lib${crateUnderscore}.dylib`),
-          path.join(pkgDir, 'target', 'debug', `lib${crateUnderscore}.dylib`),
-          path.join(pkgDir, 'target', 'release', `lib${crateUnderscore}.dylib`),
+        const libExt = process.platform === 'darwin' ? '.dylib' : process.platform === 'linux' ? '.so' : '.dll';
+        const libPrefix = process.platform === 'win32' ? '' : 'lib';
+        const libFileName = `${libPrefix}${crateUnderscore}${libExt}`;
+        const libCandidates = [
+          path.join(root, 'target', 'debug', libFileName),
+          path.join(root, 'target', 'release', libFileName),
+          path.join(pkgDir, 'target', 'debug', libFileName),
+          path.join(pkgDir, 'target', 'release', libFileName),
         ];
-        const targetDylib = dylibCandidates.find((p) => fs.existsSync(p));
-        if (targetDylib && nodeBinary) {
-          const destNode = path.join(pkgDir, nodeBinary);
-          fs.copyFileSync(targetDylib, destNode);
+        const targetLib = libCandidates.find((p) => fs.existsSync(p));
+        if (targetLib && !fs.existsSync(binaryPath)) {
+          fs.copyFileSync(targetLib, binaryPath);
           try {
-            execSync(`codesign -s - -f "${destNode}" 2>/dev/null || true`);
+            execSync(`codesign -s - -f "${binaryPath}" 2>/dev/null || true`);
           } catch {}
         }
         const duration = ((Date.now() - t0) / 1000).toFixed(2);

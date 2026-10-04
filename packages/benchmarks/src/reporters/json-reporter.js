@@ -282,16 +282,16 @@ export function updateManifest(entry, outDir = defaultResultsDir) {
       if (base.firstRenderMs > 0 && r.firstRenderMs > 0) {
         r.speedupPercent = ((base.firstRenderMs - r.firstRenderMs) / base.firstRenderMs) * 100;
       }
-      if (base.updateMs > 0 && r.updateMs > 0) {
+      if (base.updateMs !== undefined && r.updateMs !== undefined && base.updateMs > 0 && r.updateMs > 0) {
         r.updateSpeedupPercent = ((base.updateMs - r.updateMs) / base.updateMs) * 100;
       }
-      if (base.scriptEvalMs > 0 && r.scriptEvalMs > 0) {
+      if (base.scriptEvalMs !== undefined && r.scriptEvalMs !== undefined && base.scriptEvalMs > 0 && r.scriptEvalMs > 0) {
         r.evalSpeedupPercent = ((base.scriptEvalMs - r.scriptEvalMs) / base.scriptEvalMs) * 100;
       }
-      if (base.registrationMs > 0 && r.registrationMs > 0) {
+      if (base.registrationMs !== undefined && r.registrationMs !== undefined && base.registrationMs > 0 && r.registrationMs > 0) {
         r.registrationSpeedupPercent = ((base.registrationMs - r.registrationMs) / base.registrationMs) * 100;
       }
-      if (base.heapUsedBytes > 0 && r.heapUsedBytes > 0) {
+      if (base.heapUsedBytes !== undefined && r.heapUsedBytes !== undefined && base.heapUsedBytes > 0 && r.heapUsedBytes > 0) {
         r.memorySavingsPercent = ((base.heapUsedBytes - r.heapUsedBytes) / base.heapUsedBytes) * 100;
       }
     }

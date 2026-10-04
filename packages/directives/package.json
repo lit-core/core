@@ -43,8 +43,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && (cp ../../target/release/libdirectives.dylib directives.darwin-arm64.node 2>/dev/null || cp target/release/libdirectives.dylib directives.darwin-arm64.node 2>/dev/null || true) && (codesign -s - -f directives.darwin-arm64.node 2>/dev/null || true)",
-    "build:debug": "cargo build && (cp ../../target/debug/libdirectives.dylib directives.darwin-arm64.node 2>/dev/null || cp target/debug/libdirectives.dylib directives.darwin-arm64.node 2>/dev/null || true) && (codesign -s - -f directives.darwin-arm64.node 2>/dev/null || true)",
+    "build": "node ../../scripts/build-native.mjs directives --release",
+    "build:debug": "node ../../scripts/build-native.mjs directives",
     "test": "vitest run"
   },
   "devDependencies": {

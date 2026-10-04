@@ -50,8 +50,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && cp target/release/libhtml_minifier.dylib html-minifier.darwin-arm64.node 2>/dev/null && (codesign -s - -f html-minifier.darwin-arm64.node 2>/dev/null || true) || true",
-    "build:debug": "cargo build && cp target/debug/libhtml_minifier.dylib html-minifier.darwin-arm64.node 2>/dev/null && (codesign -s - -f html-minifier.darwin-arm64.node 2>/dev/null || true) || true",
+    "build": "node ../../scripts/build-native.mjs html-minifier --release",
+    "build:debug": "node ../../scripts/build-native.mjs html-minifier",
     "test": "node tests/minifier.test.js"
   },
   "devDependencies": {

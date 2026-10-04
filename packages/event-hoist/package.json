@@ -45,8 +45,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && cp target/release/libevent_hoist.dylib event-hoist.darwin-arm64.node 2>/dev/null && (codesign -s - -f event-hoist.darwin-arm64.node 2>/dev/null || true) || true",
-    "build:debug": "cargo build && cp target/debug/libevent_hoist.dylib event-hoist.darwin-arm64.node 2>/dev/null && (codesign -s - -f event-hoist.darwin-arm64.node 2>/dev/null || true) || true",
+    "build": "node ../../scripts/build-native.mjs event-hoist --release",
+    "build:debug": "node ../../scripts/build-native.mjs event-hoist",
     "test": "vitest run"
   },
   "devDependencies": {

@@ -45,8 +45,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && (cp ../../target/release/libtag_shake.dylib tag-shake.darwin-arm64.node 2>/dev/null || cp target/release/libtag_shake.dylib tag-shake.darwin-arm64.node 2>/dev/null || true) && (codesign -s - -f tag-shake.darwin-arm64.node 2>/dev/null || true)",
-    "build:debug": "cargo build && (cp ../../target/debug/libtag_shake.dylib tag-shake.darwin-arm64.node 2>/dev/null || cp target/debug/libtag_shake.dylib tag-shake.darwin-arm64.node 2>/dev/null || true) && (codesign -s - -f tag-shake.darwin-arm64.node 2>/dev/null || true)",
+    "build": "node ../../scripts/build-native.mjs tag-shake --release",
+    "build:debug": "node ../../scripts/build-native.mjs tag-shake",
     "test": "vitest run"
   },
   "devDependencies": {

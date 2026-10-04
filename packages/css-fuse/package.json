@@ -56,8 +56,8 @@
   },
   "scripts": {
     "artifacts": "napi artifacts",
-    "build": "cargo build --release && cp target/release/libcss_fuse.dylib css-fuse.darwin-arm64.node 2>/dev/null || true; cp target/release/css-fuse-bin bin/css-fuse-bin 2>/dev/null || true",
-    "build:debug": "cargo build && cp target/debug/libcss_fuse.dylib css-fuse.darwin-arm64.node 2>/dev/null || true; cp target/debug/css-fuse-bin bin/css-fuse-bin 2>/dev/null || true",
+    "build": "node ../../scripts/build-native.mjs css-fuse --release",
+    "build:debug": "node ../../scripts/build-native.mjs css-fuse",
     "prepublishOnly": "napi prepublish -t npm",
     "version": "napi version",
     "test": "node tests/fuse.test.js"

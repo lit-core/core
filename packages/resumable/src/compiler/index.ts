@@ -11,25 +11,31 @@ const currentArch = arch();
 
 try {
   if (currentPlatform === 'darwin') {
-    if (currentArch === 'arm64') {
-      nativeBinding = require('../../resumable.darwin-arm64.node');
-    } else {
-      nativeBinding = require('../../resumable.darwin-x64.node');
-    }
+    nativeBinding = currentArch === 'arm64'
+      ? require('../../resumable.darwin-arm64.node')
+      : require('../../resumable.darwin-x64.node');
   } else if (currentPlatform === 'linux') {
-    if (currentArch === 'x64') {
-      nativeBinding = require('../../resumable.linux-x64-gnu.node');
-    }
+    nativeBinding = currentArch === 'arm64'
+      ? require('../../resumable.linux-arm64-gnu.node')
+      : require('../../resumable.linux-x64-gnu.node');
   }
-} catch {
+} catch (_err) {
   try {
-    const localNode = path.resolve(import.meta.dirname, '../../resumable.darwin-arm64.node');
-    if (fs.existsSync(localNode)) {
-      nativeBinding = require(localNode);
-    } else {
-      const dylib = path.resolve(import.meta.dirname, '../../target/release/libresumable.dylib');
-      if (fs.existsSync(dylib)) {
-        nativeBinding = require(dylib);
+    const ext = currentPlatform === 'darwin' ? '.dylib' : currentPlatform === 'linux' ? '.so' : '.dll';
+    const libPrefix = currentPlatform === 'win32' ? '' : 'lib';
+    const libFileName = `${libPrefix}resumable${ext}`;
+    const candidates = [
+      path.resolve(import.meta.dirname, `../../resumable.${currentPlatform}-${currentArch}.node`),
+      path.resolve(import.meta.dirname, '../../resumable.linux-x64-gnu.node'),
+      path.resolve(import.meta.dirname, `../../target/release/${libFileName}`),
+      path.resolve(import.meta.dirname, `../../../target/release/${libFileName}`),
+      path.resolve(import.meta.dirname, `../../target/debug/${libFileName}`),
+      path.resolve(import.meta.dirname, `../../../target/debug/${libFileName}`),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        nativeBinding = require(c);
+        break;
       }
     }
   } catch {}

@@ -35,10 +35,12 @@
   },
   "files": [
     "lib",
-    "src"
+    "src",
+    "*.node"
   ],
   "scripts": {
-    "build": "tsc --build",
+    "build": "node ../../scripts/build-native.mjs resumable --release --tsc",
+    "build:debug": "node ../../scripts/build-native.mjs resumable --tsc",
     "test": "vitest run"
   },
   "dependencies": {

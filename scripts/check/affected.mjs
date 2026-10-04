@@ -16,6 +16,7 @@ export const ALL_CRATES = [
   'dirty-mask',
   'directives',
   'html-aot',
+  'tag-shake',
   'resumable',
 ];
 

@@ -65,5 +65,5 @@ When compiling to Mode A, the transform must **never**:
    ```
 5. Run benchmarks across enterprise design systems:
    ```bash
-   node packages/benchmarks/src/native-bench.js
+   node packages/benchmarks/src/features/native.js
    ```

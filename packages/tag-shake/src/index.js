@@ -13,32 +13,38 @@ const currentArch = arch();
 // Try loading platform-specific native addon
 try {
   if (currentPlatform === 'darwin') {
-    if (currentArch === 'arm64') {
-      nativeBinding = require('../tag-shake.darwin-arm64.node');
-    } else {
-      nativeBinding = require('../tag-shake.darwin-x64.node');
-    }
+    nativeBinding = currentArch === 'arm64'
+      ? require('../tag-shake.darwin-arm64.node')
+      : require('../tag-shake.darwin-x64.node');
   } else if (currentPlatform === 'linux') {
-    if (currentArch === 'x64') {
-      nativeBinding = require('../tag-shake.linux-x64-gnu.node');
-    }
+    nativeBinding = currentArch === 'arm64'
+      ? require('../tag-shake.linux-arm64-gnu.node')
+      : require('../tag-shake.linux-x64-gnu.node');
   }
 } catch (_err) {
   try {
-    const localNode = path.resolve(import.meta.dirname, '../tag-shake.darwin-arm64.node');
-    if (fs.existsSync(localNode)) {
-      nativeBinding = require(localNode);
-    } else {
-      const dylib = path.resolve(import.meta.dirname, '../target/release/libtag_shake.dylib');
-      if (fs.existsSync(dylib)) {
-        nativeBinding = require(dylib);
+    const ext = currentPlatform === 'darwin' ? '.dylib' : currentPlatform === 'linux' ? '.so' : '.dll';
+    const libPrefix = currentPlatform === 'win32' ? '' : 'lib';
+    const libFileName = `${libPrefix}tag_shake${ext}`;
+    const candidates = [
+      path.resolve(import.meta.dirname, `../tag-shake.${currentPlatform}-${currentArch}.node`),
+      path.resolve(import.meta.dirname, '../tag-shake.linux-x64-gnu.node'),
+      path.resolve(import.meta.dirname, `../target/release/${libFileName}`),
+      path.resolve(import.meta.dirname, `../../target/release/${libFileName}`),
+      path.resolve(import.meta.dirname, `../target/debug/${libFileName}`),
+      path.resolve(import.meta.dirname, `../../target/debug/${libFileName}`),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        nativeBinding = require(c);
+        break;
       }
     }
   } catch {}
 }
 
 if (!nativeBinding) {
-  throw new Error('Failed to load native binding for @lit-core/tag-shake. Native addon not found.');
+  throw new Error(`Failed to load native binding for @lit-core/tag-shake (${currentPlatform}-${currentArch})`);
 }
 
 export function scanTags(source, filename) {

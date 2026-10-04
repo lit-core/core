@@ -50,8 +50,8 @@
     ]
   },
   "scripts": {
-    "build": "cargo build --release && (cp target/release/libprops_lower.dylib props-lower.darwin-arm64.node 2>/dev/null || cp ../../target/release/libprops_lower.dylib props-lower.darwin-arm64.node 2>/dev/null || true) && (codesign -s - -f props-lower.darwin-arm64.node 2>/dev/null || true)",
-    "build:debug": "cargo build && (cp target/debug/libprops_lower.dylib props-lower.darwin-arm64.node 2>/dev/null || cp ../../target/debug/libprops_lower.dylib props-lower.darwin-arm64.node 2>/dev/null || true) && (codesign -s - -f props-lower.darwin-arm64.node 2>/dev/null || true)",
+    "build": "node ../../scripts/build-native.mjs props-lower --release",
+    "build:debug": "node ../../scripts/build-native.mjs props-lower",
     "test": "node tests/transform.test.js"
   },
   "devDependencies": {

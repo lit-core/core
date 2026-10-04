@@ -1,6 +1,8 @@
 pub mod ast_helpers;
 pub mod import_scanner;
+pub mod prune;
 pub mod transform;
+pub mod utils;
 
 use crate::transform::{transform_code, DirectivesOptions, DirectivesResult};
 use napi_derive::napi;

@@ -1,3 +1,5 @@
+pub mod extractor;
+pub mod generator;
 pub mod transform;
 
 use crate::transform::{transform_code, ElemProxyOptions, ElemProxyResult};

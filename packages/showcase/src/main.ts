@@ -1,45 +1,12 @@
 import './styles.css';
-import { ALL_CANONICAL_COMPONENTS, CONCEPTS, type ComponentItem, LIBRARIES } from './canonical-components.js';
+import { runInteractiveTests, testStates, updateAuditMetrics } from './audit/test-state.js';
+import { ALL_CANONICAL_COMPONENTS, CONCEPTS, LIBRARIES } from './canonical-components.js';
+import { renderFilters } from './views/filters.js';
+import { renderAuditReportTable } from './views/report.js';
 
 declare const __FEATURE__: string | undefined;
 
 type ViewMode = 'matrix' | 'library' | 'concept' | 'report';
-
-interface ComponentTestState {
-  item: ComponentItem;
-  testId: string;
-  isDefined: boolean;
-  isMounted: boolean;
-  hasShadowRoot: boolean;
-  isInteractive: boolean;
-  error?: string;
-}
-
-// Global test results interface for Playwright automation
-declare global {
-  interface Window {
-    __TEST_RESULTS__?: {
-      feature: string;
-      timestamp: string;
-      totalComponents: number;
-      definedComponents: number;
-      mountedComponents: number;
-      shadowRootsAttached: number;
-      interactivePassed: number;
-      components: Array<{
-        concept: string;
-        library: string;
-        tag: string;
-        isDefined: boolean;
-        isMounted: boolean;
-        hasShadowRoot: boolean;
-        isInteractive: boolean;
-        error?: string;
-      }>;
-      runInteractiveTests: () => Promise<void>;
-    };
-  }
-}
 
 const urlParams = new URLSearchParams(window.location.search);
 const activeFeature = (typeof __FEATURE__ !== 'undefined' ? __FEATURE__ : '') || urlParams.get('feature') || 'all';
@@ -54,128 +21,8 @@ let currentView: ViewMode = (urlParams.get('view') as ViewMode) || (selectedLibr
 let selectedConcept: string = urlParams.get('concept') || 'all';
 let searchQuery: string = urlParams.get('q') || '';
 
-const testStates: Map<string, ComponentTestState> = new Map();
-
-// Initialize test state map
-for (let i = 0; i < ALL_CANONICAL_COMPONENTS.length; i++) {
-  const item = ALL_CANONICAL_COMPONENTS[i];
-  const testId = `comp-${item.library}-${item.concept}`;
-  testStates.set(testId, {
-    item,
-    testId,
-    isDefined: Boolean(customElements.get(item.tag)),
-    isMounted: false,
-    hasShadowRoot: false,
-    isInteractive: false,
-  });
-}
-
-function updateAuditMetrics(): void {
-  for (const state of testStates.values()) {
-    state.isDefined = Boolean(customElements.get(state.item.tag));
-    const el = document.getElementById(state.testId);
-    if (el) {
-      state.isMounted = true;
-      state.hasShadowRoot = Boolean(el.shadowRoot);
-    }
-  }
-
-  const states = Array.from(testStates.values());
-  const definedCount = states.filter((s) => s.isDefined).length;
-  const mountedCount = states.filter((s) => s.isMounted).length;
-  const shadowCount = states.filter((s) => s.hasShadowRoot).length;
-  const interactiveCount = states.filter((s) => s.isInteractive).length;
-
-  window.__TEST_RESULTS__ = {
-    feature: activeFeature,
-    timestamp: new Date().toISOString(),
-    totalComponents: states.length,
-    definedComponents: definedCount,
-    mountedComponents: mountedCount,
-    shadowRootsAttached: shadowCount,
-    interactivePassed: interactiveCount,
-    components: states.map((s) => ({
-      concept: s.item.concept,
-      library: s.item.library,
-      tag: s.item.tag,
-      isDefined: s.isDefined,
-      isMounted: s.isMounted,
-      hasShadowRoot: s.hasShadowRoot,
-      isInteractive: s.isInteractive,
-      error: s.error,
-    })),
-    runInteractiveTests,
-  };
-
-  // Update DOM metric cards if rendered
-  const elDefined = document.getElementById('metric-defined');
-  if (elDefined) elDefined.textContent = `${definedCount} / ${states.length}`;
-
-  const elMounted = document.getElementById('metric-mounted');
-  if (elMounted) elMounted.textContent = `${mountedCount} / ${states.length}`;
-
-  const elShadow = document.getElementById('metric-shadow');
-  if (elShadow) elShadow.textContent = `${shadowCount} / ${states.length}`;
-
-  const elInteractive = document.getElementById('metric-interactive');
-  if (elInteractive) elInteractive.textContent = `${interactiveCount} passed`;
-}
-
-async function runInteractiveTests(): Promise<void> {
-  const btnTest = document.getElementById('btn-run-tests') as HTMLButtonElement | null;
-  if (btnTest) {
-    btnTest.innerHTML = `
-      <svg class="w-4 h-4 animate-spin stroke-[1.75]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-      </svg>
-      <span>Testing...</span>
-    `;
-    btnTest.disabled = true;
-  }
-
-  for (const state of testStates.values()) {
-    const el = document.getElementById(state.testId);
-    if (!el) continue;
-
-    try {
-      // Test click / activation
-      let clicked = false;
-      const clickHandler = () => {
-        clicked = true;
-      };
-      el.addEventListener('click', clickHandler, { once: true });
-      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-
-      // Also test change for input-like elements
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-
-      state.isInteractive = clicked;
-    } catch (err: any) {
-      state.isInteractive = false;
-      state.error = err?.message || 'Interaction test failed';
-    }
-  }
-
-  updateAuditMetrics();
-  renderApp();
-
-  if (btnTest) {
-    btnTest.innerHTML = `
-      <svg class="w-4 h-4 stroke-[1.75]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
-      <span>Interactions verified</span>
-    `;
-    btnTest.disabled = false;
-    setTimeout(() => {
-      btnTest.innerHTML = `
-        <svg class="w-4 h-4 stroke-[1.75]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="6 3 20 12 6 21 6 3"></polygon>
-        </svg>
-        <span>Test interactions</span>
-      `;
-    }, 2500);
-  }
+function handleRunInteractiveTests(): Promise<void> {
+  return runInteractiveTests(activeFeature, () => renderApp());
 }
 
 function renderApp(): void {
@@ -305,68 +152,14 @@ function renderApp(): void {
           </div>
         </div>
 
-        ${renderFilters()}
+        ${renderFilters(currentView, selectedLibrary, selectedConcept, searchQuery)}
         ${renderViewContent()}
       </main>
     </div>
   `;
 
   attachEventHandlers();
-  updateAuditMetrics();
-}
-
-function renderFilters(): string {
-  if (currentView === 'report') return '';
-
-  return `
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-      ${
-        currentView === 'library'
-          ? `
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
-          <span class="w-28 text-base font-light text-zinc-500 shrink-0">Library</span>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" class="px-4 py-2 text-base rounded-xl transition-all cursor-pointer border-none ${selectedLibrary === 'all' ? 'bg-zinc-900 text-white font-medium shadow-[0_2px_8px_rgba(0,0,0,0.12)]' : 'bg-white text-zinc-600 hover:text-zinc-950 font-light shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)]'}" data-lib="all">All libraries</button>
-            ${LIBRARIES.map(
-              (l) => `
-              <button type="button" class="px-4 py-2 text-base rounded-xl transition-all cursor-pointer border-none ${selectedLibrary === l.id ? 'bg-zinc-900 text-white font-medium shadow-[0_2px_8px_rgba(0,0,0,0.12)]' : 'bg-white text-zinc-600 hover:text-zinc-950 font-light shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)]'}" data-lib="${l.id}">${l.name}</button>
-            `,
-            ).join('')}
-          </div>
-        </div>
-      `
-          : ''
-      }
-
-      ${
-        currentView === 'concept'
-          ? `
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
-          <span class="w-28 text-base font-light text-zinc-500 shrink-0">Concept</span>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" class="px-4 py-2 text-base rounded-xl transition-all cursor-pointer border-none ${selectedConcept === 'all' ? 'bg-zinc-900 text-white font-medium shadow-[0_2px_8px_rgba(0,0,0,0.12)]' : 'bg-white text-zinc-600 hover:text-zinc-950 font-light shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)]'}" data-concept="all">All concepts</button>
-            ${CONCEPTS.map(
-              (c) => `
-              <button type="button" class="px-4 py-2 text-base rounded-xl transition-all cursor-pointer border-none ${selectedConcept === c.id ? 'bg-zinc-900 text-white font-medium shadow-[0_2px_8px_rgba(0,0,0,0.12)]' : 'bg-white text-zinc-600 hover:text-zinc-950 font-light shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)]'}" data-concept="${c.id}">${c.label}</button>
-            `,
-            ).join('')}
-          </div>
-        </div>
-      `
-          : ''
-      }
-
-      <div class="flex items-center gap-3">
-        <div class="relative flex items-center">
-          <svg class="w-4 h-4 text-zinc-400 absolute left-3.5 pointer-events-none stroke-[1.5]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.3-4.3"></path>
-          </svg>
-          <input type="search" class="pl-10 pr-4 py-2 text-base bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-xl text-zinc-950 placeholder:text-zinc-400 outline-none w-64 font-light border-none transition-all focus:ring-2 focus:ring-zinc-900/10" id="search-input" placeholder="Search components or tags..." value="${searchQuery}" />
-        </div>
-      </div>
-    </div>
-  `;
+  updateAuditMetrics(activeFeature, handleRunInteractiveTests);
 }
 
 function renderViewContent(): string {
@@ -383,65 +176,7 @@ function renderViewContent(): string {
   });
 
   if (currentView === 'report') {
-    return `
-      <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden mb-8 border-none">
-        <div class="px-8 py-6">
-          <h3 class="text-lg font-medium text-zinc-950 tracking-tight">Component audit status (100 canonical instances)</h3>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-base">
-            <thead>
-              <tr class="bg-zinc-50/60 border-none">
-                <th class="py-4 px-6 text-base font-normal text-zinc-500">#</th>
-                <th class="py-4 px-6 text-base font-normal text-zinc-500">Concept</th>
-                <th class="py-4 px-6 text-base font-normal text-zinc-500">Library</th>
-                <th class="py-4 px-6 text-base font-normal text-zinc-500">Custom element tag</th>
-                <th class="py-4 px-6 text-base font-normal text-zinc-500">Custom element registry</th>
-                <th class="py-4 px-6 text-base font-normal text-zinc-500">Mounted</th>
-                <th class="py-4 px-6 text-base font-normal text-zinc-500">Shadow root</th>
-                <th class="py-4 px-6 text-base font-normal text-zinc-500">Interactivity</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${allStates
-                .map(
-                  (s, idx) => `
-                <tr class="transition-colors hover:bg-zinc-50/60 border-none ${idx % 2 === 1 ? 'bg-zinc-50/30' : 'bg-white'}">
-                  <td class="py-4 px-6 text-base font-light text-zinc-400">${idx + 1}</td>
-                  <td class="py-4 px-6 text-base font-normal text-zinc-950">${s.item.conceptLabel}</td>
-                  <td class="py-4 px-6 text-base font-light text-zinc-600">${s.item.libraryLabel}</td>
-                  <td class="py-4 px-6">
-                    <span class="text-base font-light text-zinc-700 bg-zinc-100 px-3 py-1 rounded-lg font-mono border-none">${s.item.tag}</span>
-                  </td>
-                  <td class="py-4 px-6">
-                    <span class="inline-flex items-center px-3 py-1 rounded-xl text-base font-light border-none ${s.isDefined ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
-                      ${s.isDefined ? 'defined' : 'pending'}
-                    </span>
-                  </td>
-                  <td class="py-4 px-6">
-                    <span class="inline-flex items-center px-3 py-1 rounded-xl text-base font-light border-none ${s.isMounted ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
-                      ${s.isMounted ? 'mounted' : 'unmounted'}
-                    </span>
-                  </td>
-                  <td class="py-4 px-6">
-                    <span class="inline-flex items-center px-3 py-1 rounded-xl text-base font-light border-none ${s.hasShadowRoot ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'}">
-                      ${s.hasShadowRoot ? 'open shadow' : 'light dom'}
-                    </span>
-                  </td>
-                  <td class="py-4 px-6">
-                    <span class="inline-flex items-center px-3 py-1 rounded-xl text-base font-light border-none ${s.isInteractive ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'}">
-                      ${s.isInteractive ? 'verified' : 'ready'}
-                    </span>
-                  </td>
-                </tr>
-              `,
-                )
-                .join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
+    return renderAuditReportTable(allStates);
   }
 
   // Matrix view or filtered cards grouped by concept
@@ -528,7 +263,7 @@ function attachEventHandlers(): void {
   // Interactive tests button
   const testBtn = document.getElementById('btn-run-tests');
   if (testBtn) {
-    testBtn.addEventListener('click', runInteractiveTests);
+    testBtn.addEventListener('click', handleRunInteractiveTests);
   }
 }
 
@@ -544,7 +279,7 @@ window.addEventListener('message', (event) => {
     currentView = selectedConcept !== 'all' ? 'concept' : 'matrix';
     renderApp();
   } else if (event.data.type === 'RUN_TESTS') {
-    runInteractiveTests();
+    handleRunInteractiveTests();
   } else if (event.data.type === 'RUN_CANVAS_TEST') {
     if (isCanvas) {
       const el = document.getElementById(canvasId);

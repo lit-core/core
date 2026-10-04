@@ -1,5 +1,8 @@
 pub mod ast_helpers;
+pub mod clean_imports;
 pub mod constructor;
+pub mod dead_helpers;
+pub mod decorate_call;
 pub mod decorators;
 pub mod lit_import_scanner;
 pub mod static_properties;
