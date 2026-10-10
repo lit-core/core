@@ -6,13 +6,19 @@
  * then generates a clean Scandinavian portal hub in dist/index.html for GitHub Pages.
  */
 
-import { exec, execSync } from 'node:child_process';
+import { exec } from 'node:child_process';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import zlib from 'node:zlib';
+
+const req = createRequire(import.meta.url);
+const vitePkgPath = req.resolve('vite/package.json');
+const vitePkg = JSON.parse(fs.readFileSync(vitePkgPath, 'utf-8'));
+const viteBin = path.resolve(path.dirname(vitePkgPath), typeof vitePkg.bin === 'string' ? vitePkg.bin : vitePkg.bin.vite);
 
 const pExec = promisify(exec);
 
@@ -376,7 +382,7 @@ export async function buildAllShowcases(filterFeature = null) {
       const startTime = Date.now();
 
       try {
-        await pExec(`./node_modules/.bin/vite build packages/showcase --config packages/showcase/vite.config.ts`, {
+        await pExec(`"${process.execPath}" "${viteBin}" build packages/showcase --config packages/showcase/vite.config.ts`, {
           cwd: rootDir,
           env: {
             ...process.env,
@@ -401,6 +407,7 @@ export async function buildAllShowcases(filterFeature = null) {
         console.log(`[done] [${feat.id}] Complete in ${buildTimeMs}ms (${formatBytes(rawBytes)} raw, ${formatBytes(gzipBytes)} gzip)`);
       } catch (err) {
         console.error(`[error] [${feat.id}] Build failed:`, err?.stderr || err?.message || err);
+        throw err;
       }
     }
   }

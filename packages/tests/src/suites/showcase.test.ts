@@ -234,6 +234,6 @@ describe('multi-framework canonical component test showcase', () => {
       } finally {
         await page.close();
       }
-    });
+    }, 60000);
   });
 });

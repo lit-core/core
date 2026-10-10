@@ -1,29 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolvePackageDir } from './components.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../..');
 
-import { createRequire } from 'node:module';
-
-const req = createRequire(import.meta.url);
-
-export function resolvePackageDir(pkg: string): string {
-  const possiblePaths = [path.join(rootDir, 'node_modules', pkg), path.resolve(process.cwd(), 'node_modules', pkg), path.resolve(__dirname, '../node_modules', pkg)];
-  const found = possiblePaths.find((p) => fs.existsSync(p));
-  if (!found) {
-    if (pkg === '@spectrum-web-components') {
-      try {
-        const bundlePkg = req.resolve('@spectrum-web-components/bundle/package.json');
-        const parentDir = path.dirname(path.dirname(bundlePkg));
-        if (fs.existsSync(parentDir)) return fs.realpathSync(parentDir);
-      } catch {}
-    }
-    throw new Error(`Package not found in node_modules: ${pkg}`);
-  }
-  return fs.realpathSync(found);
-}
+export { resolvePackageDir };
 
 /**
  * Resolve path relative to root directory.
@@ -113,7 +96,8 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
 
   // Fallback: search directory and parent directory for any styles file
   if (sourceSubpath) {
-    const srcFile = path.resolve(process.cwd(), 'node_modules', pkg, sourceSubpath);
+    const pkgDir = resolvePackageDir(pkg);
+    const srcFile = path.join(pkgDir, sourceSubpath);
     const dir = path.dirname(srcFile);
     const parentDir = path.dirname(dir);
     for (const searchDir of [dir, parentDir]) {
@@ -133,11 +117,12 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
 
   // Fallback for Web Awesome shared styles
   if (pkg === '@awesome.me/webawesome') {
-    const hostStylesPath = path.resolve(process.cwd(), 'node_modules/@awesome.me/webawesome/dist/styles/component/host.styles.js');
+    const pkgDir = resolvePackageDir(pkg);
+    const hostStylesPath = path.join(pkgDir, 'dist/styles/component/host.styles.js');
     if (fs.existsSync(hostStylesPath)) {
       return fs.readFileSync(hostStylesPath, 'utf-8');
     }
-    const hostStylesTs = path.resolve(process.cwd(), 'node_modules/@awesome.me/webawesome/dist/styles/component/host.styles.ts');
+    const hostStylesTs = path.join(pkgDir, 'dist/styles/component/host.styles.ts');
     if (fs.existsSync(hostStylesTs)) {
       return fs.readFileSync(hostStylesTs, 'utf-8');
     }
@@ -145,7 +130,8 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
 
   // Fallback for Momentum Design shared styles
   if (pkg === '@momentum-design/components') {
-    const componentStylesPath = path.resolve(process.cwd(), 'node_modules/@momentum-design/components/dist/models/component/component.styles.js');
+    const pkgDir = resolvePackageDir(pkg);
+    const componentStylesPath = path.join(pkgDir, 'dist/models/component/component.styles.js');
     if (fs.existsSync(componentStylesPath)) {
       return fs.readFileSync(componentStylesPath, 'utf-8');
     }

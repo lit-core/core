@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { fuse as fuseCss } from '@lit-core/css-fuse';
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
 import { transformElemProxy } from '@lit-core/elem-proxy';
@@ -9,7 +10,7 @@ import { transformLitProps } from '@lit-core/props-lower';
 import { renderToDsd } from '@lit-core/resumable/server';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { ComponentDescriptor } from './components.js';
-import { extractCssFromModule, findComponentCssSource, readComponentSource, resolveWorkspacePath } from './fixtures.js';
+import { extractCssFromModule, findComponentCssSource, readComponentSource, resolvePackageDir } from './fixtures.js';
 import { getTestBrowser } from './harness.js';
 
 export interface FrameworkSuiteOptions {
@@ -89,7 +90,7 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
       });
 
       it('deduplicates shared rules across real component files via css-fuse', () => {
-        const sampleFiles = components.slice(0, 10).map((c) => resolveWorkspacePath('node_modules', c.pkg, c.source));
+        const sampleFiles = components.slice(0, 10).map((c) => path.join(resolvePackageDir(c.pkg), c.source));
         const res = fuseCss({ files: sampleFiles, threshold: 1, minSavings: 0 });
         expect(res.stats.filesScanned).toBeGreaterThan(0);
         expect(res.rewrittenFiles).toBeDefined();
@@ -289,7 +290,7 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
       });
 
       it('clusters shared HTML fragments across real components via html-fuse', () => {
-        const sampleFiles = components.slice(0, 10).map((c) => resolveWorkspacePath('node_modules', c.pkg, c.source));
+        const sampleFiles = components.slice(0, 10).map((c) => path.join(resolvePackageDir(c.pkg), c.source));
         const res = fuseHtml({
           files: sampleFiles,
           threshold: 1,

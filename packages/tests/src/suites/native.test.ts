@@ -3,7 +3,7 @@ import path from 'node:path';
 import { classify, transformNative } from '@lit-core/native';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { CARBON_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS } from '../components.js';
-import { readComponentSource } from '../fixtures.js';
+import { readComponentSource, resolvePackageDir } from '../fixtures.js';
 import { getTestBrowser } from '../harness.js';
 
 describe('@lit-core/native Playwright Chromium and real component verification', () => {
@@ -49,7 +49,7 @@ describe('@lit-core/native Playwright Chromium and real component verification',
             if (!raw.includes('render()') && !raw.includes('render(')) {
               const chunkMatch = /from\s*['"](\.\.?\/[^'"]+)['"]/.exec(raw);
               if (chunkMatch) {
-                const srcPath = path.resolve(process.cwd(), 'node_modules', comp.pkg, comp.source);
+                const srcPath = path.join(resolvePackageDir(comp.pkg), comp.source);
                 let chunkPath = path.resolve(path.dirname(srcPath), chunkMatch[1]);
                 if (!fs.existsSync(chunkPath)) {
                   if (fs.existsSync(`${chunkPath}.js`)) chunkPath = `${chunkPath}.js`;

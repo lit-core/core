@@ -10,41 +10,49 @@ export interface ComponentDescriptor {
   className?: string;
 }
 
-/**
- * Locate the monorepo root node_modules directory by walking up from the current file.
- */
-function findNodeModulesDir(): string {
-  let curr = path.dirname(new URL(import.meta.url).pathname);
-  while (curr !== path.dirname(curr)) {
-    const rootPkg = path.join(curr, 'package.json');
-    if (fs.existsSync(rootPkg)) {
-      try {
-        const pkgData = JSON.parse(fs.readFileSync(rootPkg, 'utf-8'));
-        if (pkgData.name === '@lit-core/core') {
-          return path.join(curr, 'node_modules');
-        }
-      } catch {}
-    }
-    curr = path.dirname(curr);
-  }
-  return path.resolve(process.cwd(), 'node_modules');
-}
-
-const nodeModulesDir = findNodeModulesDir();
-
 import { createRequire } from 'node:module';
 
 const req = createRequire(import.meta.url);
 
-function getSpectrumDir(): string {
-  const direct = path.join(nodeModulesDir, '@spectrum-web-components');
-  if (fs.existsSync(direct)) return direct;
+/**
+ * Locate the root directory for a given package, resolving through Node.js module resolution
+ * from the tests package context or falling back across monorepo workspace candidate paths.
+ */
+export function resolvePackageDir(pkg: string): string {
+  if (pkg === '@spectrum-web-components') {
+    try {
+      const bundlePkg = req.resolve('@spectrum-web-components/bundle/package.json');
+      const parentDir = path.dirname(path.dirname(bundlePkg));
+      if (fs.existsSync(parentDir)) return fs.realpathSync(parentDir);
+    } catch {}
+  }
+
+  // 1. Try direct package.json resolution
   try {
-    const bundlePkg = req.resolve('@spectrum-web-components/bundle/package.json');
-    const parentDir = path.dirname(path.dirname(bundlePkg));
-    if (fs.existsSync(parentDir)) return parentDir;
+    const pkgJsonPath = req.resolve(`${pkg}/package.json`);
+    return fs.realpathSync(path.dirname(pkgJsonPath));
   } catch {}
-  return direct;
+
+  // 2. Try entry point resolution and walk up to package.json (handles packages without package.json in exports)
+  try {
+    const entryPath = req.resolve(pkg);
+    let curr = path.dirname(entryPath);
+    while (curr !== path.dirname(curr)) {
+      if (fs.existsSync(path.join(curr, 'package.json'))) {
+        return fs.realpathSync(curr);
+      }
+      curr = path.dirname(curr);
+    }
+  } catch {}
+
+  // 3. Fallback candidates in monorepo
+  const thisDir = path.dirname(new URL(import.meta.url).pathname);
+  const candidates = [path.resolve(thisDir, '../node_modules', pkg), path.resolve(process.cwd(), 'node_modules', pkg), path.resolve(thisDir, '../../../node_modules', pkg)];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return fs.realpathSync(c);
+  }
+
+  throw new Error(`Package directory could not be resolved: ${pkg}`);
 }
 
 /**
@@ -54,7 +62,7 @@ export function validateComponentDescriptor(comp: ComponentDescriptor): void {
   if (!comp.name || !comp.tag || !comp.pkg || !comp.source) {
     throw new Error(`Incomplete component descriptor for tag: ${comp.tag}`);
   }
-  const pkgDir = comp.pkg === '@spectrum-web-components' ? getSpectrumDir() : path.join(nodeModulesDir, comp.pkg);
+  const pkgDir = resolvePackageDir(comp.pkg);
   const srcFile = path.join(pkgDir, comp.source);
   if (!fs.existsSync(srcFile)) {
     throw new Error(`Component source file does not exist: ${srcFile}`);
@@ -72,7 +80,7 @@ export function validateComponentDescriptor(comp: ComponentDescriptor): void {
  */
 function loadCarbonComponents(): ComponentDescriptor[] {
   const pkg = '@carbon/web-components';
-  const pkgDir = path.join(nodeModulesDir, pkg);
+  const pkgDir = resolvePackageDir(pkg);
   const cemPath = path.join(pkgDir, 'custom-elements.json');
   if (!fs.existsSync(cemPath)) {
     throw new Error(`Carbon Web Components manifest not found at ${cemPath}`);
@@ -130,7 +138,7 @@ function loadCarbonComponents(): ComponentDescriptor[] {
  */
 function loadSpectrumComponents(): ComponentDescriptor[] {
   const pkg = '@spectrum-web-components';
-  const specDir = getSpectrumDir();
+  const specDir = resolvePackageDir(pkg);
   if (!fs.existsSync(specDir)) {
     throw new Error(`Spectrum Web Components directory not found at ${specDir}`);
   }
@@ -200,7 +208,7 @@ function loadSpectrumComponents(): ComponentDescriptor[] {
  */
 function loadWebAwesomeComponents(): ComponentDescriptor[] {
   const pkg = '@awesome.me/webawesome';
-  const pkgDir = path.join(nodeModulesDir, pkg);
+  const pkgDir = resolvePackageDir(pkg);
   const cemPath = path.join(pkgDir, 'dist/custom-elements.json');
   if (!fs.existsSync(cemPath)) {
     throw new Error(`Web Awesome manifest not found at ${cemPath}`);
@@ -249,7 +257,7 @@ function loadWebAwesomeComponents(): ComponentDescriptor[] {
  */
 function loadMaterialComponents(): ComponentDescriptor[] {
   const pkg = '@material/web';
-  const pkgDir = path.join(nodeModulesDir, pkg);
+  const pkgDir = resolvePackageDir(pkg);
   const cemPath = path.join(pkgDir, 'custom-elements.json');
   if (!fs.existsSync(cemPath)) {
     throw new Error(`Material Web manifest not found at ${cemPath}`);
@@ -306,7 +314,7 @@ function loadMaterialComponents(): ComponentDescriptor[] {
  */
 function loadMomentumComponents(): ComponentDescriptor[] {
   const pkg = '@momentum-design/components';
-  const pkgDir = path.join(nodeModulesDir, pkg);
+  const pkgDir = resolvePackageDir(pkg);
   const cemPath = path.join(pkgDir, 'dist/custom-elements.json');
   if (!fs.existsSync(cemPath)) {
     throw new Error(`Momentum Design manifest not found at ${cemPath}`);
