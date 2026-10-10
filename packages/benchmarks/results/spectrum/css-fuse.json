@@ -5,7 +5,7 @@
     "id": "spectrum",
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
-    "version": "1.12.2",
+    "version": "1.12.4",
     "componentCount": 20,
     "components": [
       {
@@ -136,13 +136,18 @@
     "description": "Cross-component CSS deduplication into shared constructable stylesheets",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:28:01.135Z",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering"
+  },
+  "timestamp": "2026-10-10T10:12:52.364Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,43 +162,74 @@
     }
   },
   "metrics": {
-    "rawBytes": 821875,
-    "gzipBytes": 149003,
-    "brotliBytes": 113755,
-    "buildTimeMs": 1769.1319999999978
+    "rawBytes": 826591,
+    "gzipBytes": 150381,
+    "brotliBytes": 114720,
+    "buildTimeMs": 24044.10450000001
   },
   "baseline": {
-    "rawBytes": 819006,
-    "gzipBytes": 146760,
-    "brotliBytes": 111333,
-    "buildTimeMs": 169.27816699999676
+    "rawBytes": 823644,
+    "gzipBytes": 148106,
+    "brotliBytes": 112517,
+    "buildTimeMs": 65.20704200000182,
+    "firstRenderMs": 35.9,
+    "updateMs": 5.9,
+    "scriptEvalMs": 10.2,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 5427853,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "sp-button",
+        "sp-checkbox",
+        "sp-radio",
+        "sp-switch",
+        "sp-textfield",
+        "sp-picker",
+        "sp-dialog",
+        "sp-badge",
+        "sp-tabs",
+        "sp-progress-bar",
+        "sp-progress-circle",
+        "sp-slider",
+        "sp-menu",
+        "sp-divider",
+        "sp-icon",
+        "sp-action-button",
+        "sp-card",
+        "sp-popover",
+        "sp-sidenav",
+        "sp-action-group"
+      ],
+      "renderedCells": 20
+    }
   },
   "deltas": {
-    "rawBytes": 2869,
-    "rawPercent": 0.3503026839852211,
-    "gzipBytes": 2243,
-    "gzipPercent": 1.5283455982556555,
-    "brotliBytes": 2422,
-    "brotliPercent": 2.1754556151365723,
-    "buildTimeMs": 1599.853833000001
+    "rawBytes": 2947,
+    "rawPercent": 0.36,
+    "gzipBytes": 2275,
+    "gzipPercent": 1.54,
+    "brotliBytes": 2203,
+    "brotliPercent": 1.96,
+    "buildTimeMs": 23978.9,
+    "firstRenderMs": 30.2,
+    "speedupPercent": -84.12,
+    "updateMs": 1,
+    "updateSpeedupPercent": -16.95,
+    "evalSpeedupPercent": -110.78,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": -1.69
   },
   "runtime": {
-    "firstRenderMs": 22.9,
-    "updateMs": 2.2,
-    "scriptEvalMs": 11.4,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 57540,
-    "speedupPercent": 18.794326241134755,
-    "updateSpeedupPercent": 8.333333333333323,
-    "evalSpeedupPercent": 7.317073170731709,
-    "registrationSpeedupPercent": 14.285714285714283,
-    "memorySavingsPercent": -0.07652706275219145
-  },
-  "diagnostics": {
-    "rulesScanned": 10794,
-    "rulesDeduped": 10033,
-    "fusedSheetsCreated": 571,
-    "componentsRewritten": 536,
-    "bytesSavedEstimate": 351155
+    "firstRenderMs": 66.1,
+    "updateMs": 6.9,
+    "scriptEvalMs": 21.5,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 5519749,
+    "speedupPercent": -84.12,
+    "updateSpeedupPercent": -16.95,
+    "evalSpeedupPercent": -110.78,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": -1.69
   }
 }

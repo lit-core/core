@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "selective-app-material-baseline",
+  "scenario": {
+    "id": "selective-app",
+    "name": "Selective application",
+    "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination",
+    "relevantFeatures": ["tag-shake"],
+    "componentConcepts": ["button", "badge", "card"]
+  },
+  "suite": {
+    "id": "material",
+    "name": "Material Web (@material/web)",
+    "packageName": "@material/web",
+    "version": "2.5.0"
+  },
+  "variant": {
+    "id": "baseline",
+    "name": "Baseline (Standard Vite)",
+    "isBaseline": true
+  },
+  "timestamp": "2026-10-10T10:12:02.202Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 270724,
+    "gzipBytes": 57448,
+    "brotliBytes": 46477,
+    "buildTimeMs": 28.697167000002082,
+    "firstRenderMs": 11.5,
+    "updateMs": 1.8,
+    "scriptEvalMs": 6.3,
+    "registrationMs": 1,
+    "heapUsedBytes": 2936906,
+    "scenarioSpecific": {
+      "importedCustomElementsCount": 20,
+      "referencedCustomElementsCount": 3,
+      "referencedTags": ["md-filled-button", "md-badge", "md-elevation"],
+      "actionDispatches": 1
+    }
+  },
+  "runtime": {
+    "firstRenderMs": 11.5,
+    "updateMs": 1.8,
+    "scriptEvalMs": 6.3,
+    "registrationMs": 1,
+    "heapUsedBytes": 2936906
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 9,
+    "verified": true
+  }
+}

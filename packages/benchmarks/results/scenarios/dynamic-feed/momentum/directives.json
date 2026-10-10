@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "dynamic-feed-momentum-directives",
+  "scenario": {
+    "id": "dynamic-feed",
+    "name": "Dynamic feed",
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering",
+    "relevantFeatures": ["directives", "memoize", "html-fuse"],
+    "componentConcepts": ["card", "badge", "icon", "button", "chips", "divider"]
+  },
+  "suite": {
+    "id": "momentum",
+    "name": "Momentum Design (@momentum-design/components)",
+    "packageName": "@momentum-design/components",
+    "version": "0.140.1"
+  },
+  "variant": {
+    "id": "directives",
+    "name": "Lit directive lowering (directives)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:14:16.856Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 129427,
+    "gzipBytes": 28559,
+    "brotliBytes": 24254,
+    "buildTimeMs": 19.840125000016997,
+    "firstRenderMs": 30.3,
+    "updateMs": 4.7,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 2626295,
+    "scenarioSpecific": {
+      "totalItems": 50,
+      "directivesUsed": ["repeat", "classMap", "styleMap", "ifDefined"],
+      "renderedCards": 50
+    }
+  },
+  "baseline": {
+    "rawBytes": 129428,
+    "gzipBytes": 28560,
+    "brotliBytes": 24229,
+    "buildTimeMs": 47.09412500000326,
+    "firstRenderMs": 32.7,
+    "updateMs": 4.9,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 2626196,
+    "scenarioSpecific": {
+      "totalItems": 50,
+      "directivesUsed": ["repeat", "classMap", "styleMap", "ifDefined"],
+      "renderedCards": 50
+    }
+  },
+  "deltas": {
+    "rawBytes": -1,
+    "rawPercent": 0,
+    "gzipBytes": -1,
+    "gzipPercent": 0,
+    "brotliBytes": 25,
+    "brotliPercent": 0.1,
+    "buildTimeMs": -27.3,
+    "firstRenderMs": -2.4,
+    "speedupPercent": 7.34,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 4.08,
+    "evalSpeedupPercent": -5.56,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
+  },
+  "runtime": {
+    "firstRenderMs": 30.3,
+    "updateMs": 4.7,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 2626295,
+    "speedupPercent": 7.34,
+    "updateSpeedupPercent": 4.08,
+    "evalSpeedupPercent": -5.56,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 555,
+    "verified": true
+  }
+}

@@ -136,13 +136,18 @@
     "description": "Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T20:19:59.934Z",
+  "scenario": {
+    "id": "dynamic-feed",
+    "name": "Dynamic feed",
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering"
+  },
+  "timestamp": "2026-10-10T10:12:01.082Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b67b735",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +162,53 @@
     }
   },
   "metrics": {
-    "rawBytes": 268980,
-    "gzipBytes": 56652,
-    "brotliBytes": 45684,
-    "buildTimeMs": 55.08649999999989
+    "rawBytes": 59454,
+    "gzipBytes": 17419,
+    "brotliBytes": 15608,
+    "buildTimeMs": 24.04162499999802
   },
   "baseline": {
-    "rawBytes": 269272,
-    "gzipBytes": 56943,
-    "brotliBytes": 46024,
-    "buildTimeMs": 35.21379200000001
+    "rawBytes": 59287,
+    "gzipBytes": 17397,
+    "brotliBytes": 15562,
+    "buildTimeMs": 23.391749999998865,
+    "firstRenderMs": 31,
+    "updateMs": 3.3,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 2341860,
+    "scenarioSpecific": {
+      "totalItems": 50,
+      "directivesUsed": ["repeat", "classMap", "styleMap", "ifDefined"],
+      "renderedCards": 50
+    }
   },
   "deltas": {
-    "rawBytes": -292,
-    "rawPercent": -0.10844053596363529,
-    "gzipBytes": -291,
-    "gzipPercent": -0.5110373531426163,
-    "brotliBytes": -340,
-    "brotliPercent": -0.7387450026073353,
-    "buildTimeMs": 19.872707999999875
+    "rawBytes": 167,
+    "rawPercent": 0.28,
+    "gzipBytes": 22,
+    "gzipPercent": 0.13,
+    "brotliBytes": 46,
+    "brotliPercent": 0.3,
+    "buildTimeMs": 0.6,
+    "firstRenderMs": 0.2,
+    "speedupPercent": -0.65,
+    "updateMs": 0.2,
+    "updateSpeedupPercent": -6.06,
+    "evalSpeedupPercent": -10.53,
+    "registrationSpeedupPercent": -66.67,
+    "memorySavingsPercent": 1.43
   },
   "runtime": {
-    "firstRenderMs": 39.4,
-    "updateMs": 1.5,
-    "scriptEvalMs": 5.4,
-    "registrationMs": 1.8,
-    "heapUsedBytes": 49419,
-    "speedupPercent": 3.6674816625916873,
-    "updateSpeedupPercent": 50,
-    "evalSpeedupPercent": 5.263157894736839,
-    "registrationSpeedupPercent": -38.46153846153846,
-    "memorySavingsPercent": 29.381251786224638
+    "firstRenderMs": 31.2,
+    "updateMs": 3.5,
+    "scriptEvalMs": 2.1,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 2308359,
+    "speedupPercent": -0.65,
+    "updateSpeedupPercent": -6.06,
+    "evalSpeedupPercent": -10.53,
+    "registrationSpeedupPercent": -66.67,
+    "memorySavingsPercent": 1.43
   }
 }

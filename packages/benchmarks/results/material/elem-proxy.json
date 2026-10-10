@@ -136,13 +136,18 @@
     "description": "AOT Custom Element proxy stubs for deferred registration and lazy loading",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:27:21.057Z",
+  "scenario": {
+    "id": "interactive-form",
+    "name": "Interactive form",
+    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration"
+  },
+  "timestamp": "2026-10-10T10:11:55.486Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,16 +162,16 @@
     }
   },
   "metrics": {
-    "rawBytes": 269272,
-    "gzipBytes": 56943,
-    "brotliBytes": 46024,
-    "buildTimeMs": 24.83166600000186
+    "rawBytes": 196352,
+    "gzipBytes": 41777,
+    "brotliBytes": 34460,
+    "buildTimeMs": 21.381666999999652
   },
   "baseline": {
-    "rawBytes": 269272,
-    "gzipBytes": 56943,
-    "brotliBytes": 46024,
-    "buildTimeMs": 37.73137499999939
+    "rawBytes": 196352,
+    "gzipBytes": 41777,
+    "brotliBytes": 34460,
+    "buildTimeMs": 24.302708999999595
   },
   "deltas": {
     "rawBytes": 0,
@@ -175,18 +180,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -12.899708999997529
+    "buildTimeMs": -2.9,
+    "firstRenderMs": -11.5,
+    "speedupPercent": 30.42,
+    "updateMs": -0.5,
+    "updateSpeedupPercent": 21.74,
+    "evalSpeedupPercent": -2.63,
+    "registrationSpeedupPercent": 57.14,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 23.8,
-    "updateMs": 1.9,
-    "scriptEvalMs": 5.8,
-    "registrationMs": 1.4,
-    "heapUsedBytes": 69900,
-    "speedupPercent": 19.594594594594597,
-    "updateSpeedupPercent": 20.833333333333336,
-    "evalSpeedupPercent": 15.942028985507253,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0.2055850608189138
+    "firstRenderMs": 26.3,
+    "updateMs": 1.8,
+    "scriptEvalMs": 3.9,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 3013755,
+    "speedupPercent": 30.42,
+    "updateSpeedupPercent": 21.74,
+    "evalSpeedupPercent": -2.63,
+    "registrationSpeedupPercent": 57.14,
+    "memorySavingsPercent": 0
   }
 }

@@ -15,6 +15,7 @@ import { materialSuite } from '../suites/material.js';
 import { momentumSuite } from '../suites/momentum.js';
 import { spectrumSuite } from '../suites/spectrum.js';
 import { webAwesomeSuite } from '../suites/webawesome.js';
+import { createBenchmarkVendorResolverPlugin } from '../vendor-resolver.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../..');
@@ -34,7 +35,7 @@ async function buildSuiteBundle(entryPath, outDir, plugins = []) {
     root: rootDir,
     publicDir: false,
     logLevel: 'silent',
-    plugins,
+    plugins: [createBenchmarkVendorResolverPlugin(), ...plugins],
     build: {
       outDir,
       emptyOutDir: true,

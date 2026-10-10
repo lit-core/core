@@ -136,13 +136,18 @@
     "description": "Cross-component static HTML and SVG fragment clustering",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:28:28.226Z",
+  "scenario": {
+    "id": "dynamic-feed",
+    "name": "Dynamic feed",
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering"
+  },
+  "timestamp": "2026-10-10T10:14:07.109Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,43 +162,43 @@
     }
   },
   "metrics": {
-    "rawBytes": 346639,
-    "gzipBytes": 74312,
-    "brotliBytes": 59814,
-    "buildTimeMs": 267.89100000000326
+    "rawBytes": 129464,
+    "gzipBytes": 28594,
+    "brotliBytes": 24304,
+    "buildTimeMs": 85.84658300000592
   },
   "baseline": {
-    "rawBytes": 346579,
-    "gzipBytes": 74275,
-    "brotliBytes": 59822,
-    "buildTimeMs": 63.82370800001081
+    "rawBytes": 129428,
+    "gzipBytes": 28560,
+    "brotliBytes": 24229,
+    "buildTimeMs": 47.09412500000326
   },
   "deltas": {
-    "rawBytes": 60,
-    "rawPercent": 0.01731207026392251,
-    "gzipBytes": 37,
-    "gzipPercent": 0.049814877145742176,
-    "brotliBytes": -8,
-    "brotliPercent": -0.013373006586205743,
-    "buildTimeMs": 204.06729199999245
+    "rawBytes": 36,
+    "rawPercent": 0.03,
+    "gzipBytes": 34,
+    "gzipPercent": 0.12,
+    "brotliBytes": 75,
+    "brotliPercent": 0.31,
+    "buildTimeMs": 38.8,
+    "firstRenderMs": -5.1,
+    "speedupPercent": 15.6,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 4.08,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 50,
+    "memorySavingsPercent": -0.85
   },
   "runtime": {
-    "firstRenderMs": 20.6,
-    "updateMs": 0.9,
-    "scriptEvalMs": 4.3,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 63094,
-    "speedupPercent": 1.4354066985645797,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 4.444444444444448,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 3.224124179397509
-  },
-  "diagnostics": {
-    "fragmentsScanned": 79,
-    "fragmentsDeduped": 16,
-    "fusedTemplatesCreated": 8,
-    "componentsRewritten": 12,
-    "bytesSavedEstimate": 526
+    "firstRenderMs": 27.6,
+    "updateMs": 4.7,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 2648544,
+    "speedupPercent": 15.6,
+    "updateSpeedupPercent": 4.08,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 50,
+    "memorySavingsPercent": -0.85
   }
 }

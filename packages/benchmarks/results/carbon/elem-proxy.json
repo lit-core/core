@@ -141,13 +141,13 @@
     "name": "Interactive form",
     "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration"
   },
-  "timestamp": "2026-10-04T20:32:02.432Z",
+  "timestamp": "2026-10-10T10:12:09.564Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "70789ef",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -165,7 +165,7 @@
     "rawBytes": 310671,
     "gzipBytes": 49400,
     "brotliBytes": 34829,
-    "buildTimeMs": 25.783915999999863
+    "buildTimeMs": 27.987417000000278
   },
   "baseline": {
     "rawBytes": 310671,
@@ -191,25 +191,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -7.6,
-    "firstRenderMs": -15.9,
-    "speedupPercent": 47.89,
-    "updateMs": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 22.22,
-    "registrationSpeedupPercent": 0,
+    "buildTimeMs": -5.4,
+    "firstRenderMs": -13.4,
+    "speedupPercent": 40.36,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 5.56,
+    "registrationSpeedupPercent": -500,
     "memorySavingsPercent": -0.01
   },
   "runtime": {
-    "firstRenderMs": 17.3,
-    "updateMs": 0.4,
-    "scriptEvalMs": 1.4,
-    "registrationMs": 0,
-    "heapUsedBytes": 3001702,
-    "speedupPercent": 47.89,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 22.22,
-    "registrationSpeedupPercent": 0,
+    "firstRenderMs": 19.8,
+    "updateMs": 0.2,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 3001690,
+    "speedupPercent": 40.36,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 5.56,
+    "registrationSpeedupPercent": -500,
     "memorySavingsPercent": -0.01
   }
 }

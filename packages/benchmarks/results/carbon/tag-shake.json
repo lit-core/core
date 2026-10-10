@@ -141,13 +141,13 @@
     "name": "Selective application",
     "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination"
   },
-  "timestamp": "2026-10-04T20:30:11.992Z",
+  "timestamp": "2026-10-10T10:12:22.871Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "70789ef",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -165,7 +165,7 @@
     "rawBytes": 1440234,
     "gzipBytes": 186856,
     "brotliBytes": 98616,
-    "buildTimeMs": 74.760875
+    "buildTimeMs": 65.2241670000003
   },
   "baseline": {
     "rawBytes": 1440234,
@@ -191,25 +191,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": 5.3,
-    "firstRenderMs": -2.4,
-    "speedupPercent": 12.37,
-    "updateMs": -0.2,
-    "updateSpeedupPercent": 66.67,
-    "evalSpeedupPercent": 23.91,
-    "registrationSpeedupPercent": 53.33,
+    "buildTimeMs": -4.2,
+    "firstRenderMs": 0.3,
+    "speedupPercent": -1.55,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 33.33,
+    "evalSpeedupPercent": 13.04,
+    "registrationSpeedupPercent": 26.67,
     "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 17,
-    "updateMs": 0.1,
-    "scriptEvalMs": 3.5,
-    "registrationMs": 0.7,
+    "firstRenderMs": 19.7,
+    "updateMs": 0.2,
+    "scriptEvalMs": 4,
+    "registrationMs": 1.1,
     "heapUsedBytes": 7458076,
-    "speedupPercent": 12.37,
-    "updateSpeedupPercent": 66.67,
-    "evalSpeedupPercent": 23.91,
-    "registrationSpeedupPercent": 53.33,
+    "speedupPercent": -1.55,
+    "updateSpeedupPercent": 33.33,
+    "evalSpeedupPercent": 13.04,
+    "registrationSpeedupPercent": 26.67,
     "memorySavingsPercent": 0
   }
 }

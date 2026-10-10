@@ -1,0 +1,170 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "bundle-momentum-all",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "componentConcepts": [
+      "button",
+      "checkbox",
+      "radio",
+      "switch",
+      "text-input",
+      "select",
+      "dialog",
+      "badge",
+      "tabs",
+      "progress-bar",
+      "spinner",
+      "slider",
+      "menu",
+      "divider",
+      "icon",
+      "icon-button",
+      "card",
+      "elevation",
+      "list",
+      "chips"
+    ]
+  },
+  "suite": {
+    "id": "momentum",
+    "name": "Momentum Design (@momentum-design/components)",
+    "packageName": "@momentum-design/components",
+    "version": "0.140.1"
+  },
+  "variant": {
+    "id": "all",
+    "name": "All optimizations combined",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:14:20.042Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 338849,
+    "gzipBytes": 77228,
+    "brotliBytes": 61411,
+    "buildTimeMs": 273.63670899998397,
+    "firstRenderMs": 17.2,
+    "updateMs": 5.2,
+    "scriptEvalMs": 3.6,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 3517128,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "mdc-button",
+        "mdc-checkbox",
+        "mdc-radio",
+        "mdc-toggle",
+        "mdc-input",
+        "mdc-select",
+        "mdc-dialog",
+        "mdc-badge",
+        "mdc-menubar",
+        "mdc-progressbar",
+        "mdc-spinner",
+        "mdc-slider",
+        "mdc-popover",
+        "mdc-divider",
+        "mdc-icon",
+        "mdc-avatarbutton",
+        "mdc-card",
+        "mdc-presence",
+        "mdc-list",
+        "mdc-chip"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "baseline": {
+    "rawBytes": 348521,
+    "gzipBytes": 75053,
+    "brotliBytes": 60402,
+    "buildTimeMs": 45.31079200000386,
+    "firstRenderMs": 31.8,
+    "updateMs": 6,
+    "scriptEvalMs": 5.2,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 3581441,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "mdc-button",
+        "mdc-checkbox",
+        "mdc-radio",
+        "mdc-toggle",
+        "mdc-input",
+        "mdc-select",
+        "mdc-dialog",
+        "mdc-badge",
+        "mdc-menubar",
+        "mdc-progressbar",
+        "mdc-spinner",
+        "mdc-slider",
+        "mdc-popover",
+        "mdc-divider",
+        "mdc-icon",
+        "mdc-avatarbutton",
+        "mdc-card",
+        "mdc-presence",
+        "mdc-list",
+        "mdc-chip"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "deltas": {
+    "rawBytes": -9672,
+    "rawPercent": -2.78,
+    "gzipBytes": 2175,
+    "gzipPercent": 2.9,
+    "brotliBytes": 1009,
+    "brotliPercent": 1.67,
+    "buildTimeMs": 228.3,
+    "firstRenderMs": -14.6,
+    "speedupPercent": 45.91,
+    "updateMs": -0.8,
+    "updateSpeedupPercent": 13.33,
+    "evalSpeedupPercent": 30.77,
+    "registrationSpeedupPercent": 33.33,
+    "memorySavingsPercent": 1.8
+  },
+  "runtime": {
+    "firstRenderMs": 17.2,
+    "updateMs": 5.2,
+    "scriptEvalMs": 3.6,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 3517128,
+    "speedupPercent": 45.91,
+    "updateSpeedupPercent": 13.33,
+    "evalSpeedupPercent": 30.77,
+    "registrationSpeedupPercent": 33.33,
+    "memorySavingsPercent": 1.8
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 49,
+    "verified": true
+  }
+}

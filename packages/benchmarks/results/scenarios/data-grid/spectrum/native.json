@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "data-grid-spectrum-native",
+  "scenario": {
+    "id": "data-grid",
+    "name": "Data grid",
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
+    "relevantFeatures": ["dom-paths", "dirty-mask", "native"],
+    "componentConcepts": ["checkbox", "badge", "button", "icon-button"]
+  },
+  "suite": {
+    "id": "spectrum",
+    "name": "Spectrum Web Components (@spectrum-web-components)",
+    "packageName": "@spectrum-web-components/bundle",
+    "version": "1.12.4"
+  },
+  "variant": {
+    "id": "native",
+    "name": "Vanilla Web Component compiler (native)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:13:13.453Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 175417,
+    "gzipBytes": 30783,
+    "brotliBytes": 24803,
+    "buildTimeMs": 26.58712500000547,
+    "firstRenderMs": 30.2,
+    "updateMs": 3.2,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 3035225,
+    "scenarioSpecific": {
+      "rowCount": 100,
+      "customElementsPerCell": 4,
+      "totalCustomElements": 400,
+      "renderedNodes": 801
+    }
+  },
+  "baseline": {
+    "rawBytes": 175417,
+    "gzipBytes": 30783,
+    "brotliBytes": 24803,
+    "buildTimeMs": 22.290208000005805,
+    "firstRenderMs": 30.6,
+    "updateMs": 3.1,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 3034820
+  },
+  "deltas": {
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": 4.3,
+    "firstRenderMs": -0.4,
+    "speedupPercent": 1.31,
+    "updateMs": 0.1,
+    "updateSpeedupPercent": -3.23,
+    "evalSpeedupPercent": -11.76,
+    "registrationSpeedupPercent": 33.33,
+    "memorySavingsPercent": -0.01
+  },
+  "runtime": {
+    "firstRenderMs": 30.2,
+    "updateMs": 3.2,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 3035225,
+    "speedupPercent": 1.31,
+    "updateSpeedupPercent": -3.23,
+    "evalSpeedupPercent": -11.76,
+    "registrationSpeedupPercent": 33.33,
+    "memorySavingsPercent": -0.01
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 801,
+    "verified": true
+  }
+}

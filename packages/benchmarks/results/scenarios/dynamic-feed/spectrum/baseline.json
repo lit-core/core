@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "dynamic-feed-spectrum-baseline",
+  "scenario": {
+    "id": "dynamic-feed",
+    "name": "Dynamic feed",
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering",
+    "relevantFeatures": ["directives", "memoize", "html-fuse"],
+    "componentConcepts": ["card", "badge", "icon", "button", "chips", "divider"]
+  },
+  "suite": {
+    "id": "spectrum",
+    "name": "Spectrum Web Components (@spectrum-web-components)",
+    "packageName": "@spectrum-web-components/bundle",
+    "version": "1.12.4"
+  },
+  "variant": {
+    "id": "baseline",
+    "name": "Baseline (Standard Vite)",
+    "isBaseline": true
+  },
+  "timestamp": "2026-10-10T10:12:53.009Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 250859,
+    "gzipBytes": 44241,
+    "brotliBytes": 35823,
+    "buildTimeMs": 26.752250000005006,
+    "firstRenderMs": 28,
+    "updateMs": 3.3,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 3221093,
+    "scenarioSpecific": {
+      "totalItems": 50,
+      "directivesUsed": ["repeat", "classMap", "styleMap", "ifDefined"],
+      "renderedCards": 50
+    }
+  },
+  "runtime": {
+    "firstRenderMs": 28,
+    "updateMs": 3.3,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 3221093
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 555,
+    "verified": true
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "interactive-form-material-elem-proxy",
+  "scenario": {
+    "id": "interactive-form",
+    "name": "Interactive form",
+    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration",
+    "relevantFeatures": ["event-hoist", "elem-proxy"],
+    "componentConcepts": ["text-input", "checkbox", "switch", "radio", "select", "button"]
+  },
+  "suite": {
+    "id": "material",
+    "name": "Material Web (@material/web)",
+    "packageName": "@material/web",
+    "version": "2.5.0"
+  },
+  "variant": {
+    "id": "elem-proxy",
+    "name": "Element proxy stubs (elem-proxy)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:11:55.456Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 196352,
+    "gzipBytes": 41777,
+    "brotliBytes": 34460,
+    "buildTimeMs": 21.381666999999652,
+    "firstRenderMs": 26.3,
+    "updateMs": 1.8,
+    "scriptEvalMs": 3.9,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 3013755,
+    "scenarioSpecific": {
+      "sectionsCount": 5,
+      "controlsPerSection": 6,
+      "totalControls": 30,
+      "eventsDispatched": 11
+    }
+  },
+  "baseline": {
+    "rawBytes": 196352,
+    "gzipBytes": 41777,
+    "brotliBytes": 34460,
+    "buildTimeMs": 24.302708999999595,
+    "firstRenderMs": 37.8,
+    "updateMs": 2.3,
+    "scriptEvalMs": 3.8,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 3013699
+  },
+  "deltas": {
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": -2.9,
+    "firstRenderMs": -11.5,
+    "speedupPercent": 30.42,
+    "updateMs": -0.5,
+    "updateSpeedupPercent": 21.74,
+    "evalSpeedupPercent": -2.63,
+    "registrationSpeedupPercent": 57.14,
+    "memorySavingsPercent": 0
+  },
+  "runtime": {
+    "firstRenderMs": 26.3,
+    "updateMs": 1.8,
+    "scriptEvalMs": 3.9,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 3013755,
+    "speedupPercent": 30.42,
+    "updateSpeedupPercent": 21.74,
+    "evalSpeedupPercent": -2.63,
+    "registrationSpeedupPercent": 57.14,
+    "memorySavingsPercent": 0
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 46,
+    "verified": true
+  }
+}

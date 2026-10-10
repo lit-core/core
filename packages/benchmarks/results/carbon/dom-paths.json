@@ -141,13 +141,13 @@
     "name": "Data grid",
     "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation"
   },
-  "timestamp": "2026-10-04T20:31:52.186Z",
+  "timestamp": "2026-10-10T10:12:17.987Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "70789ef",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -165,7 +165,7 @@
     "rawBytes": 474672,
     "gzipBytes": 65600,
     "brotliBytes": 42765,
-    "buildTimeMs": 46.949208999999996
+    "buildTimeMs": 25.741541000003053
   },
   "baseline": {
     "rawBytes": 472149,
@@ -191,25 +191,25 @@
     "gzipPercent": 0.55,
     "brotliBytes": 187,
     "brotliPercent": 0.44,
-    "buildTimeMs": -24.8,
-    "firstRenderMs": -15.5,
-    "speedupPercent": 5.54,
-    "updateMs": -1.7,
-    "updateSpeedupPercent": 31.48,
-    "evalSpeedupPercent": 67.74,
-    "registrationSpeedupPercent": 50,
+    "buildTimeMs": -46,
+    "firstRenderMs": 54.4,
+    "speedupPercent": -19.43,
+    "updateMs": -1.5,
+    "updateSpeedupPercent": 27.78,
+    "evalSpeedupPercent": 72.58,
+    "registrationSpeedupPercent": 66.67,
     "memorySavingsPercent": -0.31
   },
   "runtime": {
-    "firstRenderMs": 264.5,
-    "updateMs": 3.7,
-    "scriptEvalMs": 2,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 4919949,
-    "speedupPercent": 5.54,
-    "updateSpeedupPercent": 31.48,
-    "evalSpeedupPercent": 67.74,
-    "registrationSpeedupPercent": 50,
+    "firstRenderMs": 334.4,
+    "updateMs": 3.9,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 4919917,
+    "speedupPercent": -19.43,
+    "updateSpeedupPercent": 27.78,
+    "evalSpeedupPercent": 72.58,
+    "registrationSpeedupPercent": 66.67,
     "memorySavingsPercent": -0.31
   }
 }

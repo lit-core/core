@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "ssr-dashboard-momentum-baseline",
+  "scenario": {
+    "id": "ssr-dashboard",
+    "name": "SSR dashboard",
+    "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
+    "relevantFeatures": ["resumable", "html-aot"],
+    "componentConcepts": ["card", "badge", "progress-bar", "button", "tabs"]
+  },
+  "suite": {
+    "id": "momentum",
+    "name": "Momentum Design (@momentum-design/components)",
+    "packageName": "@momentum-design/components",
+    "version": "0.140.1"
+  },
+  "variant": {
+    "id": "baseline",
+    "name": "Baseline (Standard Vite)",
+    "isBaseline": true
+  },
+  "timestamp": "2026-10-10T10:14:12.425Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 189140,
+    "gzipBytes": 46436,
+    "brotliBytes": 39064,
+    "buildTimeMs": 32.84949999998207,
+    "firstRenderMs": 10.1,
+    "updateMs": 0.5,
+    "scriptEvalMs": 2.4,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 2428737,
+    "scenarioSpecific": {
+      "cardsCount": 4,
+      "progressBarsCount": 4,
+      "resumedInteractions": 4,
+      "renderedNodes": 41
+    }
+  },
+  "runtime": {
+    "firstRenderMs": 10.1,
+    "updateMs": 0.5,
+    "scriptEvalMs": 2.4,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 2428737
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 41,
+    "verified": true
+  }
+}

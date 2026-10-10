@@ -32,6 +32,21 @@ function findNodeModulesDir(): string {
 
 const nodeModulesDir = findNodeModulesDir();
 
+import { createRequire } from 'node:module';
+
+const req = createRequire(import.meta.url);
+
+function getSpectrumDir(): string {
+  const direct = path.join(nodeModulesDir, '@spectrum-web-components');
+  if (fs.existsSync(direct)) return direct;
+  try {
+    const bundlePkg = req.resolve('@spectrum-web-components/bundle/package.json');
+    const parentDir = path.dirname(path.dirname(bundlePkg));
+    if (fs.existsSync(parentDir)) return parentDir;
+  } catch {}
+  return direct;
+}
+
 /**
  * Validate that all required paths and properties in a component descriptor exist.
  */
@@ -39,7 +54,7 @@ export function validateComponentDescriptor(comp: ComponentDescriptor): void {
   if (!comp.name || !comp.tag || !comp.pkg || !comp.source) {
     throw new Error(`Incomplete component descriptor for tag: ${comp.tag}`);
   }
-  const pkgDir = path.join(nodeModulesDir, comp.pkg);
+  const pkgDir = comp.pkg === '@spectrum-web-components' ? getSpectrumDir() : path.join(nodeModulesDir, comp.pkg);
   const srcFile = path.join(pkgDir, comp.source);
   if (!fs.existsSync(srcFile)) {
     throw new Error(`Component source file does not exist: ${srcFile}`);
@@ -115,7 +130,7 @@ function loadCarbonComponents(): ComponentDescriptor[] {
  */
 function loadSpectrumComponents(): ComponentDescriptor[] {
   const pkg = '@spectrum-web-components';
-  const specDir = path.join(nodeModulesDir, pkg);
+  const specDir = getSpectrumDir();
   if (!fs.existsSync(specDir)) {
     throw new Error(`Spectrum Web Components directory not found at ${specDir}`);
   }

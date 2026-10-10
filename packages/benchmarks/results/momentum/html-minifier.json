@@ -136,13 +136,18 @@
     "description": "High-speed HTML template literal minifier powered by OXC",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:28:33.476Z",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering"
+  },
+  "timestamp": "2026-10-10T10:14:14.606Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +162,74 @@
     }
   },
   "metrics": {
-    "rawBytes": 340175,
-    "gzipBytes": 73288,
-    "brotliBytes": 59244,
-    "buildTimeMs": 92.00612499999988
+    "rawBytes": 342117,
+    "gzipBytes": 74049,
+    "brotliBytes": 59814,
+    "buildTimeMs": 42.755375000007916
   },
   "baseline": {
-    "rawBytes": 346579,
-    "gzipBytes": 74275,
-    "brotliBytes": 59822,
-    "buildTimeMs": 63.82370800001081
+    "rawBytes": 348521,
+    "gzipBytes": 75053,
+    "brotliBytes": 60402,
+    "buildTimeMs": 45.31079200000386,
+    "firstRenderMs": 31.8,
+    "updateMs": 6,
+    "scriptEvalMs": 5.2,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 3581441,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "mdc-button",
+        "mdc-checkbox",
+        "mdc-radio",
+        "mdc-toggle",
+        "mdc-input",
+        "mdc-select",
+        "mdc-dialog",
+        "mdc-badge",
+        "mdc-menubar",
+        "mdc-progressbar",
+        "mdc-spinner",
+        "mdc-slider",
+        "mdc-popover",
+        "mdc-divider",
+        "mdc-icon",
+        "mdc-avatarbutton",
+        "mdc-card",
+        "mdc-presence",
+        "mdc-list",
+        "mdc-chip"
+      ],
+      "renderedCells": 20
+    }
   },
   "deltas": {
     "rawBytes": -6404,
-    "rawPercent": -1.8477749661693292,
-    "gzipBytes": -987,
-    "gzipPercent": -1.3288455065634466,
-    "brotliBytes": -578,
-    "brotliPercent": -0.966199725853365,
-    "buildTimeMs": 28.182416999989073
+    "rawPercent": -1.84,
+    "gzipBytes": -1004,
+    "gzipPercent": -1.34,
+    "brotliBytes": -588,
+    "brotliPercent": -0.97,
+    "buildTimeMs": -2.6,
+    "firstRenderMs": -0.7,
+    "speedupPercent": 2.2,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 17.31,
+    "registrationSpeedupPercent": -16.67,
+    "memorySavingsPercent": 0.81
   },
   "runtime": {
-    "firstRenderMs": 21.3,
-    "updateMs": 0.9,
-    "scriptEvalMs": 4.2,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 66552,
-    "speedupPercent": -1.9138755980861348,
+    "firstRenderMs": 31.1,
+    "updateMs": 6,
+    "scriptEvalMs": 4.3,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 3552578,
+    "speedupPercent": 2.2,
     "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 6.6666666666666625,
-    "registrationSpeedupPercent": 25.000000000000007,
-    "memorySavingsPercent": -2.0798822013620466
+    "evalSpeedupPercent": 17.31,
+    "registrationSpeedupPercent": -16.67,
+    "memorySavingsPercent": 0.81
   }
 }

@@ -1,0 +1,170 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "bundle-material-css-minifier",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "componentConcepts": [
+      "button",
+      "checkbox",
+      "radio",
+      "switch",
+      "text-input",
+      "select",
+      "dialog",
+      "badge",
+      "tabs",
+      "progress-bar",
+      "spinner",
+      "slider",
+      "menu",
+      "divider",
+      "icon",
+      "icon-button",
+      "card",
+      "elevation",
+      "list",
+      "chips"
+    ]
+  },
+  "suite": {
+    "id": "material",
+    "name": "Material Web (@material/web)",
+    "packageName": "@material/web",
+    "version": "2.5.0"
+  },
+  "variant": {
+    "id": "css-minifier",
+    "name": "CSS template minification (css-minifier)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:11:58.527Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 268054,
+    "gzipBytes": 57295,
+    "brotliBytes": 46349,
+    "buildTimeMs": 26.953958000001876,
+    "firstRenderMs": 20.4,
+    "updateMs": 5.4,
+    "scriptEvalMs": 5.7,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 3315450,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "md-filled-button",
+        "md-checkbox",
+        "md-radio",
+        "md-switch",
+        "md-filled-text-field",
+        "md-filled-select",
+        "md-dialog",
+        "md-badge",
+        "md-tabs",
+        "md-linear-progress",
+        "md-circular-progress",
+        "md-slider",
+        "md-menu",
+        "md-divider",
+        "md-icon",
+        "md-icon-button",
+        "md-elevation",
+        "md-focus-ring",
+        "md-list",
+        "md-chip-set"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "baseline": {
+    "rawBytes": 271249,
+    "gzipBytes": 57655,
+    "brotliBytes": 46630,
+    "buildTimeMs": 27.877166999998735,
+    "firstRenderMs": 31.7,
+    "updateMs": 7.9,
+    "scriptEvalMs": 5.9,
+    "registrationMs": 1.9,
+    "heapUsedBytes": 3327627,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "md-filled-button",
+        "md-checkbox",
+        "md-radio",
+        "md-switch",
+        "md-filled-text-field",
+        "md-filled-select",
+        "md-dialog",
+        "md-badge",
+        "md-tabs",
+        "md-linear-progress",
+        "md-circular-progress",
+        "md-slider",
+        "md-menu",
+        "md-divider",
+        "md-icon",
+        "md-icon-button",
+        "md-elevation",
+        "md-focus-ring",
+        "md-list",
+        "md-chip-set"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "deltas": {
+    "rawBytes": -3195,
+    "rawPercent": -1.18,
+    "gzipBytes": -360,
+    "gzipPercent": -0.62,
+    "brotliBytes": -281,
+    "brotliPercent": -0.6,
+    "buildTimeMs": -0.9,
+    "firstRenderMs": -11.3,
+    "speedupPercent": 35.65,
+    "updateMs": -2.5,
+    "updateSpeedupPercent": 31.65,
+    "evalSpeedupPercent": 3.39,
+    "registrationSpeedupPercent": 42.11,
+    "memorySavingsPercent": 0.37
+  },
+  "runtime": {
+    "firstRenderMs": 20.4,
+    "updateMs": 5.4,
+    "scriptEvalMs": 5.7,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 3315450,
+    "speedupPercent": 35.65,
+    "updateSpeedupPercent": 31.65,
+    "evalSpeedupPercent": 3.39,
+    "registrationSpeedupPercent": 42.11,
+    "memorySavingsPercent": 0.37
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 49,
+    "verified": true
+  }
+}

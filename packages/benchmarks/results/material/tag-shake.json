@@ -136,13 +136,18 @@
     "description": "Ahead-of-time Web Component dead code elimination and registration tag shaking",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T21:13:06.177Z",
+  "scenario": {
+    "id": "selective-app",
+    "name": "Selective application",
+    "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination"
+  },
+  "timestamp": "2026-10-10T10:12:02.884Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1ee1348",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,16 +162,16 @@
     }
   },
   "metrics": {
-    "rawBytes": 269272,
-    "gzipBytes": 56943,
-    "brotliBytes": 46024,
-    "buildTimeMs": 33.02420899999993
+    "rawBytes": 270724,
+    "gzipBytes": 57448,
+    "brotliBytes": 46477,
+    "buildTimeMs": 27.13679200000115
   },
   "baseline": {
-    "rawBytes": 269272,
-    "gzipBytes": 56943,
-    "brotliBytes": 46024,
-    "buildTimeMs": 53.91891700000002
+    "rawBytes": 270724,
+    "gzipBytes": 57448,
+    "brotliBytes": 46477,
+    "buildTimeMs": 28.697167000002082
   },
   "deltas": {
     "rawBytes": 0,
@@ -175,18 +180,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -20.894708000000094
+    "buildTimeMs": -1.6,
+    "firstRenderMs": -4,
+    "speedupPercent": 34.78,
+    "updateMs": -0.5,
+    "updateSpeedupPercent": 27.78,
+    "evalSpeedupPercent": -3.17,
+    "registrationSpeedupPercent": -20,
+    "memorySavingsPercent": -0.01
   },
   "runtime": {
-    "firstRenderMs": 38.8,
-    "updateMs": 1.8,
-    "scriptEvalMs": 6,
-    "registrationMs": 1.6,
-    "heapUsedBytes": 69908,
-    "speedupPercent": 13.968957871396906,
-    "updateSpeedupPercent": 14.285714285714288,
-    "evalSpeedupPercent": 11.764705882352938,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0.1713600274176044
+    "firstRenderMs": 7.5,
+    "updateMs": 1.3,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 2937239,
+    "speedupPercent": 34.78,
+    "updateSpeedupPercent": 27.78,
+    "evalSpeedupPercent": -3.17,
+    "registrationSpeedupPercent": -20,
+    "memorySavingsPercent": -0.01
   }
 }

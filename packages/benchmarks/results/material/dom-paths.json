@@ -136,13 +136,18 @@
     "description": "Structural DOM path compiler eliminating TreeWalker mounting traversal",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:27:25.514Z",
+  "scenario": {
+    "id": "data-grid",
+    "name": "Data grid",
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation"
+  },
+  "timestamp": "2026-10-10T10:12:00.208Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +162,54 @@
     }
   },
   "metrics": {
-    "rawBytes": 273694,
-    "gzipBytes": 57461,
-    "brotliBytes": 46453,
-    "buildTimeMs": 59.83729200000016
+    "rawBytes": 72607,
+    "gzipBytes": 18730,
+    "brotliBytes": 16617,
+    "buildTimeMs": 14.290041000000201
   },
   "baseline": {
-    "rawBytes": 269272,
-    "gzipBytes": 56943,
-    "brotliBytes": 46024,
-    "buildTimeMs": 37.73137499999939
+    "rawBytes": 71634,
+    "gzipBytes": 18623,
+    "brotliBytes": 16513,
+    "buildTimeMs": 14.497707999998966,
+    "firstRenderMs": 62.2,
+    "updateMs": 5.5,
+    "scriptEvalMs": 2.4,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 3448682,
+    "scenarioSpecific": {
+      "rowCount": 100,
+      "customElementsPerCell": 4,
+      "totalCustomElements": 400,
+      "renderedNodes": 801
+    }
   },
   "deltas": {
-    "rawBytes": 4422,
-    "rawPercent": 1.6422056507917646,
-    "gzipBytes": 518,
-    "gzipPercent": 0.9096816114359974,
-    "brotliBytes": 429,
-    "brotliPercent": 0.9321223709369025,
-    "buildTimeMs": 22.105917000000773
+    "rawBytes": 973,
+    "rawPercent": 1.36,
+    "gzipBytes": 107,
+    "gzipPercent": 0.57,
+    "brotliBytes": 104,
+    "brotliPercent": 0.63,
+    "buildTimeMs": -0.2,
+    "firstRenderMs": -0.5,
+    "speedupPercent": 0.8,
+    "updateMs": -0.7,
+    "updateSpeedupPercent": 12.73,
+    "evalSpeedupPercent": 4.17,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -0.2
   },
   "runtime": {
-    "firstRenderMs": 19.5,
-    "updateMs": 1.6,
-    "scriptEvalMs": 6.2,
-    "registrationMs": 1,
-    "heapUsedBytes": 70044,
-    "speedupPercent": 34.12162162162162,
-    "updateSpeedupPercent": 33.33333333333333,
-    "evalSpeedupPercent": 10.144927536231886,
-    "registrationSpeedupPercent": 28.571428571428566,
-    "memorySavingsPercent": 0
+    "firstRenderMs": 61.7,
+    "updateMs": 4.8,
+    "scriptEvalMs": 2.3,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 3455508,
+    "speedupPercent": 0.8,
+    "updateSpeedupPercent": 12.73,
+    "evalSpeedupPercent": 4.17,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -0.2
   }
 }

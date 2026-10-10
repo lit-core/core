@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "ssr-dashboard-material-html-aot",
+  "scenario": {
+    "id": "ssr-dashboard",
+    "name": "SSR dashboard",
+    "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
+    "relevantFeatures": ["resumable", "html-aot"],
+    "componentConcepts": ["card", "badge", "progress-bar", "button", "tabs"]
+  },
+  "suite": {
+    "id": "material",
+    "name": "Material Web (@material/web)",
+    "packageName": "@material/web",
+    "version": "2.5.0"
+  },
+  "variant": {
+    "id": "html-aot",
+    "name": "AOT template compilation (html-aot)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:11:57.858Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 70338,
+    "gzipBytes": 20018,
+    "brotliBytes": 17693,
+    "buildTimeMs": 14.942999999999302,
+    "firstRenderMs": 10.1,
+    "updateMs": 1.4,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 1966455,
+    "scenarioSpecific": {
+      "cardsCount": 4,
+      "progressBarsCount": 4,
+      "resumedInteractions": 1,
+      "renderedNodes": 41
+    }
+  },
+  "baseline": {
+    "rawBytes": 67032,
+    "gzipBytes": 19123,
+    "brotliBytes": 16992,
+    "buildTimeMs": 16.981958000000304,
+    "firstRenderMs": 8.3,
+    "updateMs": 1.3,
+    "scriptEvalMs": 2.2,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 1944717
+  },
+  "deltas": {
+    "rawBytes": 3306,
+    "rawPercent": 4.93,
+    "gzipBytes": 895,
+    "gzipPercent": 4.68,
+    "brotliBytes": 701,
+    "brotliPercent": 4.13,
+    "buildTimeMs": -2,
+    "firstRenderMs": 1.8,
+    "speedupPercent": -21.69,
+    "updateMs": 0.1,
+    "updateSpeedupPercent": -7.69,
+    "evalSpeedupPercent": 9.09,
+    "registrationSpeedupPercent": 40,
+    "memorySavingsPercent": -1.12
+  },
+  "runtime": {
+    "firstRenderMs": 10.1,
+    "updateMs": 1.4,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 1966455,
+    "speedupPercent": -21.69,
+    "updateSpeedupPercent": -7.69,
+    "evalSpeedupPercent": 9.09,
+    "registrationSpeedupPercent": 40,
+    "memorySavingsPercent": -1.12
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 41,
+    "verified": true
+  }
+}

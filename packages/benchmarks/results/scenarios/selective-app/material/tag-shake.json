@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "selective-app-material-tag-shake",
+  "scenario": {
+    "id": "selective-app",
+    "name": "Selective application",
+    "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination",
+    "relevantFeatures": ["tag-shake"],
+    "componentConcepts": ["button", "badge", "card"]
+  },
+  "suite": {
+    "id": "material",
+    "name": "Material Web (@material/web)",
+    "packageName": "@material/web",
+    "version": "2.5.0"
+  },
+  "variant": {
+    "id": "tag-shake",
+    "name": "Tag shake dead code elimination (tag-shake)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:12:02.853Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 270724,
+    "gzipBytes": 57448,
+    "brotliBytes": 46477,
+    "buildTimeMs": 27.13679200000115,
+    "firstRenderMs": 7.5,
+    "updateMs": 1.3,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 2937239,
+    "scenarioSpecific": {
+      "importedCustomElementsCount": 20,
+      "referencedCustomElementsCount": 3,
+      "referencedTags": ["md-filled-button", "md-badge", "md-elevation"],
+      "actionDispatches": 1
+    }
+  },
+  "baseline": {
+    "rawBytes": 270724,
+    "gzipBytes": 57448,
+    "brotliBytes": 46477,
+    "buildTimeMs": 28.697167000002082,
+    "firstRenderMs": 11.5,
+    "updateMs": 1.8,
+    "scriptEvalMs": 6.3,
+    "registrationMs": 1,
+    "heapUsedBytes": 2936906
+  },
+  "deltas": {
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": -1.6,
+    "firstRenderMs": -4,
+    "speedupPercent": 34.78,
+    "updateMs": -0.5,
+    "updateSpeedupPercent": 27.78,
+    "evalSpeedupPercent": -3.17,
+    "registrationSpeedupPercent": -20,
+    "memorySavingsPercent": -0.01
+  },
+  "runtime": {
+    "firstRenderMs": 7.5,
+    "updateMs": 1.3,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 2937239,
+    "speedupPercent": 34.78,
+    "updateSpeedupPercent": 27.78,
+    "evalSpeedupPercent": -3.17,
+    "registrationSpeedupPercent": -20,
+    "memorySavingsPercent": -0.01
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 9,
+    "verified": true
+  }
+}

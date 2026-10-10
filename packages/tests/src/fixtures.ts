@@ -5,10 +5,21 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../..');
 
+import { createRequire } from 'node:module';
+
+const req = createRequire(import.meta.url);
+
 export function resolvePackageDir(pkg: string): string {
   const possiblePaths = [path.join(rootDir, 'node_modules', pkg), path.resolve(process.cwd(), 'node_modules', pkg), path.resolve(__dirname, '../node_modules', pkg)];
   const found = possiblePaths.find((p) => fs.existsSync(p));
   if (!found) {
+    if (pkg === '@spectrum-web-components') {
+      try {
+        const bundlePkg = req.resolve('@spectrum-web-components/bundle/package.json');
+        const parentDir = path.dirname(path.dirname(bundlePkg));
+        if (fs.existsSync(parentDir)) return fs.realpathSync(parentDir);
+      } catch {}
+    }
     throw new Error(`Package not found in node_modules: ${pkg}`);
   }
   return fs.realpathSync(found);

@@ -5,7 +5,7 @@
     "id": "spectrum",
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
-    "version": "1.12.2",
+    "version": "1.12.4",
     "componentCount": 20,
     "components": [
       {
@@ -136,13 +136,18 @@
     "description": "High-speed CSS template literal minifier powered by Lightning CSS",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:28:13.470Z",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering"
+  },
+  "timestamp": "2026-10-10T10:13:17.279Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +162,74 @@
     }
   },
   "metrics": {
-    "rawBytes": 818661,
-    "gzipBytes": 146688,
-    "brotliBytes": 111429,
-    "buildTimeMs": 207.69958400000178
+    "rawBytes": 823299,
+    "gzipBytes": 148035,
+    "brotliBytes": 112365,
+    "buildTimeMs": 89.49579200000153
   },
   "baseline": {
-    "rawBytes": 819006,
-    "gzipBytes": 146760,
-    "brotliBytes": 111333,
-    "buildTimeMs": 169.27816699999676
+    "rawBytes": 823644,
+    "gzipBytes": 148106,
+    "brotliBytes": 112517,
+    "buildTimeMs": 65.20704200000182,
+    "firstRenderMs": 35.9,
+    "updateMs": 5.9,
+    "scriptEvalMs": 10.2,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 5427853,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "sp-button",
+        "sp-checkbox",
+        "sp-radio",
+        "sp-switch",
+        "sp-textfield",
+        "sp-picker",
+        "sp-dialog",
+        "sp-badge",
+        "sp-tabs",
+        "sp-progress-bar",
+        "sp-progress-circle",
+        "sp-slider",
+        "sp-menu",
+        "sp-divider",
+        "sp-icon",
+        "sp-action-button",
+        "sp-card",
+        "sp-popover",
+        "sp-sidenav",
+        "sp-action-group"
+      ],
+      "renderedCells": 20
+    }
   },
   "deltas": {
     "rawBytes": -345,
-    "rawPercent": -0.042124233522098736,
-    "gzipBytes": -72,
-    "gzipPercent": -0.04905968928863451,
-    "brotliBytes": 96,
-    "brotliPercent": 0.08622780307725472,
-    "buildTimeMs": 38.42141700000502
+    "rawPercent": -0.04,
+    "gzipBytes": -71,
+    "gzipPercent": -0.05,
+    "brotliBytes": -152,
+    "brotliPercent": -0.14,
+    "buildTimeMs": 24.3,
+    "firstRenderMs": 1.4,
+    "speedupPercent": -3.9,
+    "updateMs": 1.3,
+    "updateSpeedupPercent": -22.03,
+    "evalSpeedupPercent": -8.82,
+    "registrationSpeedupPercent": 11.11,
+    "memorySavingsPercent": 0.02
   },
   "runtime": {
-    "firstRenderMs": 25.6,
-    "updateMs": 2.2,
-    "scriptEvalMs": 11.3,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 57540,
-    "speedupPercent": 9.219858156028362,
-    "updateSpeedupPercent": 8.333333333333323,
-    "evalSpeedupPercent": 8.130081300813007,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -0.07652706275219145
+    "firstRenderMs": 37.3,
+    "updateMs": 7.2,
+    "scriptEvalMs": 11.1,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 5426577,
+    "speedupPercent": -3.9,
+    "updateSpeedupPercent": -22.03,
+    "evalSpeedupPercent": -8.82,
+    "registrationSpeedupPercent": 11.11,
+    "memorySavingsPercent": 0.02
   }
 }

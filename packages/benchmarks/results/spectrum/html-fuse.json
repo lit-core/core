@@ -5,7 +5,7 @@
     "id": "spectrum",
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
-    "version": "1.12.2",
+    "version": "1.12.4",
     "componentCount": 20,
     "components": [
       {
@@ -136,13 +136,18 @@
     "description": "Cross-component static HTML and SVG fragment clustering",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:28:04.129Z",
+  "scenario": {
+    "id": "dynamic-feed",
+    "name": "Dynamic feed",
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering"
+  },
+  "timestamp": "2026-10-10T10:13:08.893Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,43 +162,43 @@
     }
   },
   "metrics": {
-    "rawBytes": 818299,
-    "gzipBytes": 147341,
-    "brotliBytes": 111804,
-    "buildTimeMs": 913.8312500000029
+    "rawBytes": 250429,
+    "gzipBytes": 44370,
+    "brotliBytes": 35909,
+    "buildTimeMs": 15196.404584000004
   },
   "baseline": {
-    "rawBytes": 819006,
-    "gzipBytes": 146760,
-    "brotliBytes": 111333,
-    "buildTimeMs": 169.27816699999676
+    "rawBytes": 250859,
+    "gzipBytes": 44241,
+    "brotliBytes": 35823,
+    "buildTimeMs": 26.752250000005006
   },
   "deltas": {
-    "rawBytes": -707,
-    "rawPercent": -0.08632415391340234,
-    "gzipBytes": 581,
-    "gzipPercent": 0.39588443717634236,
-    "brotliBytes": 471,
-    "brotliPercent": 0.423055158847781,
-    "buildTimeMs": 744.5530830000062
+    "rawBytes": -430,
+    "rawPercent": -0.17,
+    "gzipBytes": 129,
+    "gzipPercent": 0.29,
+    "brotliBytes": 86,
+    "brotliPercent": 0.24,
+    "buildTimeMs": 15169.7,
+    "firstRenderMs": -1.6,
+    "speedupPercent": 5.71,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 3.03,
+    "evalSpeedupPercent": -25,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -0.86
   },
   "runtime": {
-    "firstRenderMs": 24.4,
-    "updateMs": 1.9,
-    "scriptEvalMs": 10.8,
-    "registrationMs": 0.8,
-    "heapUsedBytes": 58888,
-    "speedupPercent": 13.475177304964541,
-    "updateSpeedupPercent": 20.833333333333336,
-    "evalSpeedupPercent": 12.195121951219512,
-    "registrationSpeedupPercent": -14.285714285714299,
-    "memorySavingsPercent": -2.421037985251148
-  },
-  "diagnostics": {
-    "fragmentsScanned": 874,
-    "fragmentsDeduped": 160,
-    "fusedTemplatesCreated": 120,
-    "componentsRewritten": 108,
-    "bytesSavedEstimate": 38106
+    "firstRenderMs": 26.4,
+    "updateMs": 3.2,
+    "scriptEvalMs": 2.5,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 3248939,
+    "speedupPercent": 5.71,
+    "updateSpeedupPercent": 3.03,
+    "evalSpeedupPercent": -25,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -0.86
   }
 }

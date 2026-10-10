@@ -1,0 +1,170 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "bundle-carbon-props-lower",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "componentConcepts": [
+      "button",
+      "checkbox",
+      "radio",
+      "switch",
+      "text-input",
+      "select",
+      "dialog",
+      "badge",
+      "tabs",
+      "progress-bar",
+      "spinner",
+      "slider",
+      "menu",
+      "divider",
+      "icon",
+      "icon-button",
+      "card",
+      "elevation",
+      "list",
+      "chips"
+    ]
+  },
+  "suite": {
+    "id": "carbon",
+    "name": "Carbon Web Components (@carbon/web-components)",
+    "packageName": "@carbon/web-components",
+    "version": "2.64.0"
+  },
+  "variant": {
+    "id": "props-lower",
+    "name": "Lit decorator lowering (props-lower)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:12:08.509Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 1439422,
+    "gzipBytes": 187005,
+    "brotliBytes": 98176,
+    "buildTimeMs": 67.9833749999998,
+    "firstRenderMs": 73,
+    "updateMs": 11.7,
+    "scriptEvalMs": 3.6,
+    "registrationMs": 1,
+    "heapUsedBytes": 7852160,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "cds-button",
+        "cds-checkbox",
+        "cds-radio-button",
+        "cds-toggle",
+        "cds-text-input",
+        "cds-select",
+        "cds-modal",
+        "cds-tag",
+        "cds-tabs",
+        "cds-progress-bar",
+        "cds-loading",
+        "cds-slider",
+        "cds-overflow-menu",
+        "cds-skeleton-text",
+        "cds-icon",
+        "cds-icon-button",
+        "cds-tile",
+        "cds-popover",
+        "cds-structured-list",
+        "cds-content-switcher"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "baseline": {
+    "rawBytes": 1440814,
+    "gzipBytes": 187054,
+    "brotliBytes": 98661,
+    "buildTimeMs": 70.33916699999997,
+    "firstRenderMs": 49.1,
+    "updateMs": 5.4,
+    "scriptEvalMs": 4.1,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 7892588,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "cds-button",
+        "cds-checkbox",
+        "cds-radio-button",
+        "cds-toggle",
+        "cds-text-input",
+        "cds-select",
+        "cds-modal",
+        "cds-tag",
+        "cds-tabs",
+        "cds-progress-bar",
+        "cds-loading",
+        "cds-slider",
+        "cds-overflow-menu",
+        "cds-skeleton-text",
+        "cds-icon",
+        "cds-icon-button",
+        "cds-tile",
+        "cds-popover",
+        "cds-structured-list",
+        "cds-content-switcher"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "deltas": {
+    "rawBytes": -1392,
+    "rawPercent": -0.1,
+    "gzipBytes": -49,
+    "gzipPercent": -0.03,
+    "brotliBytes": -485,
+    "brotliPercent": -0.49,
+    "buildTimeMs": -2.4,
+    "firstRenderMs": 23.9,
+    "speedupPercent": -48.68,
+    "updateMs": 6.3,
+    "updateSpeedupPercent": -116.67,
+    "evalSpeedupPercent": 12.2,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": 0.51
+  },
+  "runtime": {
+    "firstRenderMs": 73,
+    "updateMs": 11.7,
+    "scriptEvalMs": 3.6,
+    "registrationMs": 1,
+    "heapUsedBytes": 7852160,
+    "speedupPercent": -48.68,
+    "updateSpeedupPercent": -116.67,
+    "evalSpeedupPercent": 12.2,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": 0.51
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 50,
+    "verified": true
+  }
+}

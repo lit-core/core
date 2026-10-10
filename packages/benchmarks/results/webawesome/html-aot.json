@@ -141,13 +141,13 @@
     "name": "SSR dashboard",
     "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation"
   },
-  "timestamp": "2026-10-10T10:04:29.679Z",
+  "timestamp": "2026-10-10T10:11:44.546Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "f947067",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -165,7 +165,7 @@
     "rawBytes": 164688,
     "gzipBytes": 40361,
     "brotliBytes": 33882,
-    "buildTimeMs": 20.940042000000176
+    "buildTimeMs": 16.893875000000662
   },
   "baseline": {
     "rawBytes": 164688,
@@ -191,25 +191,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": 0.5,
-    "firstRenderMs": 1.1,
-    "speedupPercent": -7.05,
-    "updateMs": 0.5,
-    "updateSpeedupPercent": -71.43,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 25,
+    "buildTimeMs": -3.6,
+    "firstRenderMs": 2.2,
+    "speedupPercent": -14.1,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 6.67,
+    "registrationSpeedupPercent": 0,
     "memorySavingsPercent": -0.01
   },
   "runtime": {
-    "firstRenderMs": 16.7,
-    "updateMs": 1.2,
-    "scriptEvalMs": 1.5,
-    "registrationMs": 0.3,
+    "firstRenderMs": 17.8,
+    "updateMs": 0.7,
+    "scriptEvalMs": 1.4,
+    "registrationMs": 0,
     "heapUsedBytes": 2408262,
-    "speedupPercent": -7.05,
-    "updateSpeedupPercent": -71.43,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 25,
+    "speedupPercent": -14.1,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 6.67,
+    "registrationSpeedupPercent": 0,
     "memorySavingsPercent": -0.01
   }
 }

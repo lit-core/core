@@ -6,6 +6,7 @@ import { build } from 'vite';
 import { getFileSizes } from '../../metrics.js';
 import { closeBrowser, emptyRuntimeMetrics, getBrowser } from '../../runtime.js';
 import { CANONICAL_SUITE_DEFINITIONS } from '../../suites/canonical-components.js';
+import { createBenchmarkVendorResolverPlugin } from '../../vendor-resolver.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../../../..');
@@ -64,7 +65,7 @@ export async function runScenarioViteBuild({ entryPath, outDir, plugins = [] }) 
     root: rootDir,
     publicDir: false,
     logLevel: 'silent',
-    plugins,
+    plugins: [createBenchmarkVendorResolverPlugin(), ...plugins],
     build: {
       outDir,
       emptyOutDir: true,

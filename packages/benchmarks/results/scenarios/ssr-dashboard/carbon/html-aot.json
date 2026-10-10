@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "ssr-dashboard-carbon-html-aot",
+  "scenario": {
+    "id": "ssr-dashboard",
+    "name": "SSR dashboard",
+    "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
+    "relevantFeatures": ["resumable", "html-aot"],
+    "componentConcepts": ["card", "badge", "progress-bar", "button", "tabs"]
+  },
+  "suite": {
+    "id": "carbon",
+    "name": "Carbon Web Components (@carbon/web-components)",
+    "packageName": "@carbon/web-components",
+    "version": "2.64.0"
+  },
+  "variant": {
+    "id": "html-aot",
+    "name": "AOT template compilation (html-aot)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:12:12.459Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "fdd6e3c",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 796532,
+    "gzipBytes": 101012,
+    "brotliBytes": 59103,
+    "buildTimeMs": 38.94487500000105,
+    "firstRenderMs": 22.5,
+    "updateMs": 0.4,
+    "scriptEvalMs": 2.3,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 4903517,
+    "scenarioSpecific": {
+      "cardsCount": 4,
+      "progressBarsCount": 4,
+      "resumedInteractions": 4,
+      "renderedNodes": 41
+    }
+  },
+  "baseline": {
+    "rawBytes": 796532,
+    "gzipBytes": 101012,
+    "brotliBytes": 59103,
+    "buildTimeMs": 52.032375,
+    "firstRenderMs": 27.9,
+    "updateMs": 0.9,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 4903340,
+    "scenarioSpecific": {
+      "cardsCount": 4,
+      "progressBarsCount": 4,
+      "resumedInteractions": 4,
+      "renderedNodes": 41
+    }
+  },
+  "deltas": {
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": -13.1,
+    "firstRenderMs": -5.4,
+    "speedupPercent": 19.35,
+    "updateMs": -0.5,
+    "updateSpeedupPercent": 55.56,
+    "evalSpeedupPercent": -15,
+    "registrationSpeedupPercent": 20,
+    "memorySavingsPercent": 0
+  },
+  "runtime": {
+    "firstRenderMs": 22.5,
+    "updateMs": 0.4,
+    "scriptEvalMs": 2.3,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 4903517,
+    "speedupPercent": 19.35,
+    "updateSpeedupPercent": 55.56,
+    "evalSpeedupPercent": -15,
+    "registrationSpeedupPercent": 20,
+    "memorySavingsPercent": 0
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 41,
+    "verified": true
+  }
+}

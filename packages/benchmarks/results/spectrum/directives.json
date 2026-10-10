@@ -5,7 +5,7 @@
     "id": "spectrum",
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
-    "version": "1.12.2",
+    "version": "1.12.4",
     "componentCount": 20,
     "components": [
       {
@@ -136,13 +136,18 @@
     "description": "Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T20:20:03.595Z",
+  "scenario": {
+    "id": "dynamic-feed",
+    "name": "Dynamic feed",
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering"
+  },
+  "timestamp": "2026-10-10T10:13:21.213Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b67b735",
+    "gitCommit": "fdd6e3c",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,16 +162,26 @@
     }
   },
   "metrics": {
-    "rawBytes": 819006,
-    "gzipBytes": 146760,
-    "brotliBytes": 111333,
-    "buildTimeMs": 72.20874999999978
+    "rawBytes": 250859,
+    "gzipBytes": 44241,
+    "brotliBytes": 35823,
+    "buildTimeMs": 27.531875000000582
   },
   "baseline": {
-    "rawBytes": 819006,
-    "gzipBytes": 146760,
-    "brotliBytes": 111333,
-    "buildTimeMs": 74.79816699999992
+    "rawBytes": 250859,
+    "gzipBytes": 44241,
+    "brotliBytes": 35823,
+    "buildTimeMs": 26.752250000005006,
+    "firstRenderMs": 28,
+    "updateMs": 3.3,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 3221093,
+    "scenarioSpecific": {
+      "totalItems": 50,
+      "directivesUsed": ["repeat", "classMap", "styleMap", "ifDefined"],
+      "renderedCards": 50
+    }
   },
   "deltas": {
     "rawBytes": 0,
@@ -175,18 +190,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -2.5894170000001395
+    "buildTimeMs": 0.8,
+    "firstRenderMs": 0.4,
+    "speedupPercent": -1.43,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 15,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0.02
   },
   "runtime": {
-    "firstRenderMs": 28.1,
-    "updateMs": 1.9,
-    "scriptEvalMs": 12.6,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 57528,
-    "speedupPercent": 46.271510516252384,
-    "updateSpeedupPercent": 9.52380952380953,
-    "evalSpeedupPercent": -19.999999999999996,
-    "registrationSpeedupPercent": 16.666666666666664,
-    "memorySavingsPercent": 0.020855057351407715
+    "firstRenderMs": 28.4,
+    "updateMs": 3.3,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 3220434,
+    "speedupPercent": -1.43,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 15,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0.02
   }
 }
