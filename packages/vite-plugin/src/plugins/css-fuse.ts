@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
@@ -10,6 +11,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
   let config: ResolvedConfig;
   let fuseResult: FuseResult | null = null;
   const virtualSheets = new Map<string, string>(); // sheetId / filename -> code
+  const sheetOrigins = new Map<string, string>(); // sheetId -> origin file path
   const transformedFiles = new Map<string, string>(); // filePath -> transformedCode
 
   const {
@@ -35,12 +37,21 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
       });
 
       virtualSheets.clear();
+      sheetOrigins.clear();
       const sheets = res.fusedSheets || [];
       for (const sheet of sheets) {
         virtualSheets.set(sheet.id, sheet.code);
         virtualSheets.set(`${sheet.id}.js`, sheet.code);
         virtualSheets.set(`${sheet.id}.ts`, sheet.code);
         virtualSheets.set(sheet.fileName, sheet.code);
+
+        const sharedList = (sheet as any).sharedBy || (sheet as any).shared_by;
+        const origin = Array.isArray(sharedList) && sharedList.length > 0 ? sharedList[0] : null;
+        if (origin) {
+          sheetOrigins.set(sheet.id, origin);
+          sheetOrigins.set(`${sheet.id}.js`, origin);
+          sheetOrigins.set(sheet.fileName, origin);
+        }
       }
 
       transformedFiles.clear();
@@ -118,12 +129,32 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
       }
     },
 
-    resolveId(id) {
+    resolveId(id, importer) {
       if (isVirtualLitCoreId(id)) {
         return formatVirtualLitCoreId(id);
       }
       if (isVirtualFusedId(id)) {
         return formatVirtualId(id);
+      }
+      if (importer && isVirtualFusedId(importer)) {
+        const sheetId = extractSheetId(importer);
+        const originFile = sheetOrigins.get(sheetId) || Array.from(transformedFiles.keys())[0];
+        const candidateRoots = [
+          originFile ? path.dirname(path.isAbsolute(originFile) ? originFile : path.resolve(config?.root || process.cwd(), originFile)) : null,
+          config?.root,
+          path.resolve(config?.root || process.cwd(), 'packages/benchmarks'),
+          path.resolve(config?.root || process.cwd(), 'packages/showcase'),
+          path.resolve(config?.root || process.cwd(), 'packages/tests'),
+          process.cwd(),
+        ].filter(Boolean) as string[];
+
+        for (const cRoot of candidateRoots) {
+          try {
+            const req = createRequire(path.join(cRoot, 'package.json'));
+            const resolved = req.resolve(id);
+            if (resolved) return resolved;
+          } catch {}
+        }
       }
       return undefined;
     },

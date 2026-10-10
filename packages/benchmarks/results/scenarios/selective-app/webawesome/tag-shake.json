@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "selective-app-webawesome-tag-shake",
+  "scenario": {
+    "id": "selective-app",
+    "name": "Selective application",
+    "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination",
+    "relevantFeatures": ["tag-shake"],
+    "componentConcepts": ["button", "badge", "card"]
+  },
+  "suite": {
+    "id": "webawesome",
+    "name": "Web Awesome (20 Canonical Components)",
+    "packageName": "@awesome.me/webawesome",
+    "version": "3.14.0"
+  },
+  "variant": {
+    "id": "tag-shake",
+    "name": "Tag shake dead code elimination (tag-shake)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:04:35.371Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "f947067",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 372339,
+    "gzipBytes": 87399,
+    "brotliBytes": 69953,
+    "buildTimeMs": 41.628209000000425,
+    "firstRenderMs": 13.2,
+    "updateMs": 0.6,
+    "scriptEvalMs": 2.8,
+    "registrationMs": 1,
+    "heapUsedBytes": 3172261,
+    "scenarioSpecific": {
+      "importedCustomElementsCount": 20,
+      "referencedCustomElementsCount": 3,
+      "referencedTags": ["wa-button", "wa-badge", "wa-card"],
+      "actionDispatches": 1
+    }
+  },
+  "baseline": {
+    "rawBytes": 372339,
+    "gzipBytes": 87399,
+    "brotliBytes": 69953,
+    "buildTimeMs": 32.82854100000077,
+    "firstRenderMs": 14.9,
+    "updateMs": 0.5,
+    "scriptEvalMs": 4.2,
+    "registrationMs": 1.5,
+    "heapUsedBytes": 3172036,
+    "scenarioSpecific": {
+      "importedCustomElementsCount": 20,
+      "referencedCustomElementsCount": 3,
+      "referencedTags": ["wa-button", "wa-badge", "wa-card"],
+      "actionDispatches": 1
+    }
+  },
+  "deltas": {
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": 8.8,
+    "firstRenderMs": -1.7,
+    "speedupPercent": 11.41,
+    "updateMs": 0.1,
+    "updateSpeedupPercent": -20,
+    "evalSpeedupPercent": 33.33,
+    "registrationSpeedupPercent": 33.33,
+    "memorySavingsPercent": -0.01
+  },
+  "runtime": {
+    "firstRenderMs": 13.2,
+    "updateMs": 0.6,
+    "scriptEvalMs": 2.8,
+    "registrationMs": 1,
+    "heapUsedBytes": 3172261,
+    "speedupPercent": 11.41,
+    "updateSpeedupPercent": -20,
+    "evalSpeedupPercent": 33.33,
+    "registrationSpeedupPercent": 33.33,
+    "memorySavingsPercent": -0.01
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 9,
+    "verified": true
+  }
+}

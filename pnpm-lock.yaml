@@ -196,6 +196,9 @@ importers:
       '@napi-rs/cli':
         specifier: ^3.10.6
         version: 3.10.6(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.4)
+      lit:
+        specifier: ^3.3.3
+        version: 3.3.3
       vitest:
         specifier: ^5.0.3
         version: 5.0.3(@types/node@26.6.4)(vite@8.3.2(@types/node@26.6.4)(jiti@2.7.0)(terser@5.51.2))

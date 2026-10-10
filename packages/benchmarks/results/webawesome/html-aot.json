@@ -136,13 +136,18 @@
     "description": "Ahead-of-time Lit template compilation eliminating runtime prepare phase",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:27:09.721Z",
+  "scenario": {
+    "id": "ssr-dashboard",
+    "name": "SSR dashboard",
+    "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation"
+  },
+  "timestamp": "2026-10-10T10:04:29.679Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "f947067",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +162,54 @@
     }
   },
   "metrics": {
-    "rawBytes": 380999,
-    "gzipBytes": 88738,
-    "brotliBytes": 71096,
-    "buildTimeMs": 292.0464579999998
+    "rawBytes": 164688,
+    "gzipBytes": 40361,
+    "brotliBytes": 33882,
+    "buildTimeMs": 20.940042000000176
   },
   "baseline": {
-    "rawBytes": 370946,
-    "gzipBytes": 86902,
-    "brotliBytes": 69583,
-    "buildTimeMs": 53.78800000000001
+    "rawBytes": 164688,
+    "gzipBytes": 40361,
+    "brotliBytes": 33882,
+    "buildTimeMs": 20.454125000000204,
+    "firstRenderMs": 15.6,
+    "updateMs": 0.7,
+    "scriptEvalMs": 1.5,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 2408101,
+    "scenarioSpecific": {
+      "cardsCount": 4,
+      "progressBarsCount": 4,
+      "resumedInteractions": 4,
+      "renderedNodes": 41
+    }
   },
   "deltas": {
-    "rawBytes": 10053,
-    "rawPercent": 2.7100979657416446,
-    "gzipBytes": 1836,
-    "gzipPercent": 2.1127246783733398,
-    "brotliBytes": 1513,
-    "brotliPercent": 2.1743816736846644,
-    "buildTimeMs": 238.2584579999998
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": 0.5,
+    "firstRenderMs": 1.1,
+    "speedupPercent": -7.05,
+    "updateMs": 0.5,
+    "updateSpeedupPercent": -71.43,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 25,
+    "memorySavingsPercent": -0.01
   },
   "runtime": {
-    "firstRenderMs": 28.4,
-    "updateMs": 0.9,
-    "scriptEvalMs": 2.9,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 76549,
-    "speedupPercent": 28.101265822784814,
-    "updateSpeedupPercent": 35.71428571428571,
-    "evalSpeedupPercent": 12.12121212121212,
-    "registrationSpeedupPercent": 41.66666666666667,
-    "memorySavingsPercent": 2.889872759333731
+    "firstRenderMs": 16.7,
+    "updateMs": 1.2,
+    "scriptEvalMs": 1.5,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 2408262,
+    "speedupPercent": -7.05,
+    "updateSpeedupPercent": -71.43,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 25,
+    "memorySavingsPercent": -0.01
   }
 }

@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
 import type { Plugin, ResolvedConfig } from 'vite';
@@ -9,6 +10,7 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
   let config: ResolvedConfig;
   let fuseResult: HtmlFuseResult | null = null;
   const virtualTemplates = new Map<string, string>();
+  const templateOrigins = new Map<string, string>();
   const transformedFiles = new Map<string, string>();
 
   const {
@@ -33,12 +35,21 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
       });
 
       virtualTemplates.clear();
+      templateOrigins.clear();
       const templates = res.fusedTemplates || [];
       for (const tpl of templates) {
         virtualTemplates.set(tpl.id, tpl.code);
         virtualTemplates.set(`${tpl.id}.js`, tpl.code);
         virtualTemplates.set(`${tpl.id}.ts`, tpl.code);
         virtualTemplates.set(tpl.fileName, tpl.code);
+
+        const sharedList = (tpl as any).sharedBy || (tpl as any).shared_by;
+        const origin = Array.isArray(sharedList) && sharedList.length > 0 ? sharedList[0] : null;
+        if (origin) {
+          templateOrigins.set(tpl.id, origin);
+          templateOrigins.set(`${tpl.id}.js`, origin);
+          templateOrigins.set(tpl.fileName, origin);
+        }
       }
 
       transformedFiles.clear();
@@ -90,9 +101,29 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
       }
     },
 
-    resolveId(id) {
+    resolveId(id, importer) {
       if (isVirtualHtmlFusedId(id)) {
         return formatVirtualHtmlId(id);
+      }
+      if (importer && isVirtualHtmlFusedId(importer)) {
+        const tplId = extractHtmlTemplateId(importer);
+        const originFile = templateOrigins.get(tplId) || Array.from(transformedFiles.keys())[0];
+        const candidateRoots = [
+          originFile ? path.dirname(path.isAbsolute(originFile) ? originFile : path.resolve(config?.root || process.cwd(), originFile)) : null,
+          config?.root,
+          path.resolve(config?.root || process.cwd(), 'packages/benchmarks'),
+          path.resolve(config?.root || process.cwd(), 'packages/showcase'),
+          path.resolve(config?.root || process.cwd(), 'packages/tests'),
+          process.cwd(),
+        ].filter(Boolean) as string[];
+
+        for (const cRoot of candidateRoots) {
+          try {
+            const req = createRequire(path.join(cRoot, 'package.json'));
+            const resolved = req.resolve(id);
+            if (resolved) return resolved;
+          } catch {}
+        }
       }
       return undefined;
     },

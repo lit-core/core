@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "data-grid-webawesome-baseline",
+  "scenario": {
+    "id": "data-grid",
+    "name": "Data grid",
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
+    "relevantFeatures": ["dom-paths", "dirty-mask", "native"],
+    "componentConcepts": ["checkbox", "badge", "button", "icon-button"]
+  },
+  "suite": {
+    "id": "webawesome",
+    "name": "Web Awesome (20 Canonical Components)",
+    "packageName": "@awesome.me/webawesome",
+    "version": "3.14.0"
+  },
+  "variant": {
+    "id": "baseline",
+    "name": "Baseline (Standard Vite)",
+    "isBaseline": true
+  },
+  "timestamp": "2026-10-10T10:01:02.652Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "f947067",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 198164,
+    "gzipBytes": 52039,
+    "brotliBytes": 43865,
+    "buildTimeMs": 26.994583999999122,
+    "firstRenderMs": 73.2,
+    "updateMs": 4.4,
+    "scriptEvalMs": 3.7,
+    "registrationMs": 1.3,
+    "heapUsedBytes": 4445712,
+    "scenarioSpecific": {
+      "rowCount": 100,
+      "customElementsPerCell": 4,
+      "totalCustomElements": 400,
+      "renderedNodes": 801
+    }
+  },
+  "runtime": {
+    "firstRenderMs": 73.2,
+    "updateMs": 4.4,
+    "scriptEvalMs": 3.7,
+    "registrationMs": 1.3,
+    "heapUsedBytes": 4445712
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 801,
+    "verified": true
+  }
+}

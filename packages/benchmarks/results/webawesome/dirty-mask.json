@@ -136,13 +136,18 @@
     "description": "Ahead-of-time property-to-part dependency bitmasking",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:27:12.160Z",
+  "scenario": {
+    "id": "data-grid",
+    "name": "Data grid",
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation"
+  },
+  "timestamp": "2026-10-10T10:04:32.098Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "f947067",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,16 +162,27 @@
     }
   },
   "metrics": {
-    "rawBytes": 370946,
-    "gzipBytes": 86902,
-    "brotliBytes": 69583,
-    "buildTimeMs": 32.880042000000685
+    "rawBytes": 198164,
+    "gzipBytes": 52039,
+    "brotliBytes": 43865,
+    "buildTimeMs": 26.53070800000023
   },
   "baseline": {
-    "rawBytes": 370946,
-    "gzipBytes": 86902,
-    "brotliBytes": 69583,
-    "buildTimeMs": 53.78800000000001
+    "rawBytes": 198164,
+    "gzipBytes": 52039,
+    "brotliBytes": 43865,
+    "buildTimeMs": 26.994583999999122,
+    "firstRenderMs": 73.2,
+    "updateMs": 4.4,
+    "scriptEvalMs": 3.7,
+    "registrationMs": 1.3,
+    "heapUsedBytes": 4445712,
+    "scenarioSpecific": {
+      "rowCount": 100,
+      "customElementsPerCell": 4,
+      "totalCustomElements": 400,
+      "renderedNodes": 801
+    }
   },
   "deltas": {
     "rawBytes": 0,
@@ -175,18 +191,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -20.907957999999326
+    "buildTimeMs": -0.5,
+    "firstRenderMs": 5.7,
+    "speedupPercent": -7.79,
+    "updateMs": -0.7,
+    "updateSpeedupPercent": 15.91,
+    "evalSpeedupPercent": 48.65,
+    "registrationSpeedupPercent": 61.54,
+    "memorySavingsPercent": 0.02
   },
   "runtime": {
-    "firstRenderMs": 44.1,
-    "updateMs": 1.5,
-    "scriptEvalMs": 7.2,
-    "registrationMs": 2.5,
-    "heapUsedBytes": 78827,
-    "speedupPercent": -11.645569620253168,
-    "updateSpeedupPercent": -7.1428571428571495,
-    "evalSpeedupPercent": -118.18181818181819,
-    "registrationSpeedupPercent": -108.33333333333334,
-    "memorySavingsPercent": 0
+    "firstRenderMs": 78.9,
+    "updateMs": 3.7,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 4444950,
+    "speedupPercent": -7.79,
+    "updateSpeedupPercent": 15.91,
+    "evalSpeedupPercent": 48.65,
+    "registrationSpeedupPercent": 61.54,
+    "memorySavingsPercent": 0.02
   }
 }

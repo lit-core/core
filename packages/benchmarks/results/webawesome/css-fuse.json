@@ -136,13 +136,18 @@
     "description": "Cross-component CSS deduplication into shared constructable stylesheets",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:27:04.528Z",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering"
+  },
+  "timestamp": "2026-10-10T10:04:25.502Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "f947067",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,43 +162,74 @@
     }
   },
   "metrics": {
-    "rawBytes": 366050,
-    "gzipBytes": 86140,
-    "brotliBytes": 69282,
-    "buildTimeMs": 143.699167
+    "rawBytes": 367975,
+    "gzipBytes": 86812,
+    "brotliBytes": 69719,
+    "buildTimeMs": 212.48391699999996
   },
   "baseline": {
-    "rawBytes": 370946,
-    "gzipBytes": 86902,
-    "brotliBytes": 69583,
-    "buildTimeMs": 53.78800000000001
+    "rawBytes": 372874,
+    "gzipBytes": 87593,
+    "brotliBytes": 70118,
+    "buildTimeMs": 52.691709,
+    "firstRenderMs": 35,
+    "updateMs": 6.9,
+    "scriptEvalMs": 3.3,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 3664726,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "wa-button",
+        "wa-checkbox",
+        "wa-radio",
+        "wa-switch",
+        "wa-input",
+        "wa-select",
+        "wa-dialog",
+        "wa-badge",
+        "wa-tab-group",
+        "wa-progress-bar",
+        "wa-spinner",
+        "wa-slider",
+        "wa-dropdown",
+        "wa-divider",
+        "wa-icon",
+        "wa-copy-button",
+        "wa-card",
+        "wa-popover",
+        "wa-details",
+        "wa-breadcrumb"
+      ],
+      "renderedCells": 20
+    }
   },
   "deltas": {
-    "rawBytes": -4896,
-    "rawPercent": -1.3198686601284284,
-    "gzipBytes": -762,
-    "gzipPercent": -0.8768497848150791,
-    "brotliBytes": -301,
-    "brotliPercent": -0.4325769225241798,
-    "buildTimeMs": 89.91116699999998
+    "rawBytes": -4899,
+    "rawPercent": -1.31,
+    "gzipBytes": -781,
+    "gzipPercent": -0.89,
+    "brotliBytes": -399,
+    "brotliPercent": -0.57,
+    "buildTimeMs": 159.8,
+    "firstRenderMs": 41.2,
+    "speedupPercent": -117.71,
+    "updateMs": 0.2,
+    "updateSpeedupPercent": -2.9,
+    "evalSpeedupPercent": -196.97,
+    "registrationSpeedupPercent": -166.67,
+    "memorySavingsPercent": 0.58
   },
   "runtime": {
-    "firstRenderMs": 34.9,
-    "updateMs": 1.5,
-    "scriptEvalMs": 3.2,
-    "registrationMs": 1.4,
-    "heapUsedBytes": 82559,
-    "speedupPercent": 11.645569620253168,
-    "updateSpeedupPercent": -7.1428571428571495,
-    "evalSpeedupPercent": 3.0303030303030196,
-    "registrationSpeedupPercent": -16.666666666666664,
-    "memorySavingsPercent": -4.734418409935682
-  },
-  "diagnostics": {
-    "rulesScanned": 1001,
-    "rulesDeduped": 205,
-    "fusedSheetsCreated": 86,
-    "componentsRewritten": 68,
-    "bytesSavedEstimate": 7175
+    "firstRenderMs": 76.2,
+    "updateMs": 7.1,
+    "scriptEvalMs": 9.8,
+    "registrationMs": 3.2,
+    "heapUsedBytes": 3643507,
+    "speedupPercent": -117.71,
+    "updateSpeedupPercent": -2.9,
+    "evalSpeedupPercent": -196.97,
+    "registrationSpeedupPercent": -166.67,
+    "memorySavingsPercent": 0.58
   }
 }

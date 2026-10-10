@@ -136,13 +136,18 @@
     "description": "Ahead-of-time Web Component dead code elimination and registration tag shaking",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T21:13:05.332Z",
+  "scenario": {
+    "id": "selective-app",
+    "name": "Selective application",
+    "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination"
+  },
+  "timestamp": "2026-10-10T10:04:35.408Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1ee1348",
+    "gitCommit": "f947067",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,16 +162,27 @@
     }
   },
   "metrics": {
-    "rawBytes": 370946,
-    "gzipBytes": 86902,
-    "brotliBytes": 69583,
-    "buildTimeMs": 72.31987500000002
+    "rawBytes": 372339,
+    "gzipBytes": 87399,
+    "brotliBytes": 69953,
+    "buildTimeMs": 41.628209000000425
   },
   "baseline": {
-    "rawBytes": 370946,
-    "gzipBytes": 86902,
-    "brotliBytes": 69583,
-    "buildTimeMs": 70.97725000000003
+    "rawBytes": 372339,
+    "gzipBytes": 87399,
+    "brotliBytes": 69953,
+    "buildTimeMs": 32.82854100000077,
+    "firstRenderMs": 14.9,
+    "updateMs": 0.5,
+    "scriptEvalMs": 4.2,
+    "registrationMs": 1.5,
+    "heapUsedBytes": 3172036,
+    "scenarioSpecific": {
+      "importedCustomElementsCount": 20,
+      "referencedCustomElementsCount": 3,
+      "referencedTags": ["wa-button", "wa-badge", "wa-card"],
+      "actionDispatches": 1
+    }
   },
   "deltas": {
     "rawBytes": 0,
@@ -175,18 +191,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": 1.3426249999999982
+    "buildTimeMs": 8.8,
+    "firstRenderMs": -1.7,
+    "speedupPercent": 11.41,
+    "updateMs": 0.1,
+    "updateSpeedupPercent": -20,
+    "evalSpeedupPercent": 33.33,
+    "registrationSpeedupPercent": 33.33,
+    "memorySavingsPercent": -0.01
   },
   "runtime": {
-    "firstRenderMs": 60.1,
-    "updateMs": 1.6,
-    "scriptEvalMs": 4.2,
-    "registrationMs": 1.4,
-    "heapUsedBytes": 78811,
-    "speedupPercent": -46.58536585365854,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 32.25806451612903,
-    "registrationSpeedupPercent": 41.66666666666667,
-    "memorySavingsPercent": 0
+    "firstRenderMs": 13.2,
+    "updateMs": 0.6,
+    "scriptEvalMs": 2.8,
+    "registrationMs": 1,
+    "heapUsedBytes": 3172261,
+    "speedupPercent": 11.41,
+    "updateSpeedupPercent": -20,
+    "evalSpeedupPercent": 33.33,
+    "registrationSpeedupPercent": 33.33,
+    "memorySavingsPercent": -0.01
   }
 }

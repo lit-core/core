@@ -136,13 +136,18 @@
     "description": "Ahead-of-time reactive expression auto-memoization",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:27:14.280Z",
+  "scenario": {
+    "id": "dynamic-feed",
+    "name": "Dynamic feed",
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering"
+  },
+  "timestamp": "2026-10-10T10:04:33.370Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "f947067",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,16 +162,26 @@
     }
   },
   "metrics": {
-    "rawBytes": 370946,
-    "gzipBytes": 86902,
-    "brotliBytes": 69583,
-    "buildTimeMs": 60.13208399999894
+    "rawBytes": 152679,
+    "gzipBytes": 38781,
+    "brotliBytes": 32333,
+    "buildTimeMs": 19.26116700000057
   },
   "baseline": {
-    "rawBytes": 370946,
-    "gzipBytes": 86902,
-    "brotliBytes": 69583,
-    "buildTimeMs": 53.78800000000001
+    "rawBytes": 152679,
+    "gzipBytes": 38781,
+    "brotliBytes": 32333,
+    "buildTimeMs": 19.63916700000027,
+    "firstRenderMs": 30.5,
+    "updateMs": 4.7,
+    "scriptEvalMs": 1.6,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 2928856,
+    "scenarioSpecific": {
+      "totalItems": 50,
+      "directivesUsed": ["repeat", "classMap", "styleMap", "ifDefined"],
+      "renderedCards": 50
+    }
   },
   "deltas": {
     "rawBytes": 0,
@@ -175,18 +190,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": 6.344083999998929
+    "buildTimeMs": -0.4,
+    "firstRenderMs": 6.3,
+    "speedupPercent": -20.66,
+    "updateMs": 0.2,
+    "updateSpeedupPercent": -4.26,
+    "evalSpeedupPercent": -6.25,
+    "registrationSpeedupPercent": -200,
+    "memorySavingsPercent": -0.01
   },
   "runtime": {
-    "firstRenderMs": 31.3,
-    "updateMs": 1.3,
-    "scriptEvalMs": 2.7,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 78827,
-    "speedupPercent": 20.759493670886073,
-    "updateSpeedupPercent": 7.142857142857134,
-    "evalSpeedupPercent": 18.181818181818173,
-    "registrationSpeedupPercent": 41.66666666666667,
-    "memorySavingsPercent": 0
+    "firstRenderMs": 36.8,
+    "updateMs": 4.9,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 2929060,
+    "speedupPercent": -20.66,
+    "updateSpeedupPercent": -4.26,
+    "evalSpeedupPercent": -6.25,
+    "registrationSpeedupPercent": -200,
+    "memorySavingsPercent": -0.01
   }
 }

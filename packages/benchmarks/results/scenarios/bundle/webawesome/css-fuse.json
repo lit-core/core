@@ -1,0 +1,170 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "bundle-webawesome-css-fuse",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "componentConcepts": [
+      "button",
+      "checkbox",
+      "radio",
+      "switch",
+      "text-input",
+      "select",
+      "dialog",
+      "badge",
+      "tabs",
+      "progress-bar",
+      "spinner",
+      "slider",
+      "menu",
+      "divider",
+      "icon",
+      "icon-button",
+      "card",
+      "elevation",
+      "list",
+      "chips"
+    ]
+  },
+  "suite": {
+    "id": "webawesome",
+    "name": "Web Awesome (20 Canonical Components)",
+    "packageName": "@awesome.me/webawesome",
+    "version": "3.14.0"
+  },
+  "variant": {
+    "id": "css-fuse",
+    "name": "CSS AST deduplication (css-fuse)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-10T10:04:25.471Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "f947067",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 367975,
+    "gzipBytes": 86812,
+    "brotliBytes": 69719,
+    "buildTimeMs": 212.48391699999996,
+    "firstRenderMs": 76.2,
+    "updateMs": 7.1,
+    "scriptEvalMs": 9.8,
+    "registrationMs": 3.2,
+    "heapUsedBytes": 3643507,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "wa-button",
+        "wa-checkbox",
+        "wa-radio",
+        "wa-switch",
+        "wa-input",
+        "wa-select",
+        "wa-dialog",
+        "wa-badge",
+        "wa-tab-group",
+        "wa-progress-bar",
+        "wa-spinner",
+        "wa-slider",
+        "wa-dropdown",
+        "wa-divider",
+        "wa-icon",
+        "wa-copy-button",
+        "wa-card",
+        "wa-popover",
+        "wa-details",
+        "wa-breadcrumb"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "baseline": {
+    "rawBytes": 372874,
+    "gzipBytes": 87593,
+    "brotliBytes": 70118,
+    "buildTimeMs": 52.691709,
+    "firstRenderMs": 35,
+    "updateMs": 6.9,
+    "scriptEvalMs": 3.3,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 3664726,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "wa-button",
+        "wa-checkbox",
+        "wa-radio",
+        "wa-switch",
+        "wa-input",
+        "wa-select",
+        "wa-dialog",
+        "wa-badge",
+        "wa-tab-group",
+        "wa-progress-bar",
+        "wa-spinner",
+        "wa-slider",
+        "wa-dropdown",
+        "wa-divider",
+        "wa-icon",
+        "wa-copy-button",
+        "wa-card",
+        "wa-popover",
+        "wa-details",
+        "wa-breadcrumb"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "deltas": {
+    "rawBytes": -4899,
+    "rawPercent": -1.31,
+    "gzipBytes": -781,
+    "gzipPercent": -0.89,
+    "brotliBytes": -399,
+    "brotliPercent": -0.57,
+    "buildTimeMs": 159.8,
+    "firstRenderMs": 41.2,
+    "speedupPercent": -117.71,
+    "updateMs": 0.2,
+    "updateSpeedupPercent": -2.9,
+    "evalSpeedupPercent": -196.97,
+    "registrationSpeedupPercent": -166.67,
+    "memorySavingsPercent": 0.58
+  },
+  "runtime": {
+    "firstRenderMs": 76.2,
+    "updateMs": 7.1,
+    "scriptEvalMs": 9.8,
+    "registrationMs": 3.2,
+    "heapUsedBytes": 3643507,
+    "speedupPercent": -117.71,
+    "updateSpeedupPercent": -2.9,
+    "evalSpeedupPercent": -196.97,
+    "registrationSpeedupPercent": -166.67,
+    "memorySavingsPercent": 0.58
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 49,
+    "verified": true
+  }
+}
