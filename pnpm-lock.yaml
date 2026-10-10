@@ -542,6 +542,9 @@ importers:
       '@types/node':
         specifier: ^26.6.4
         version: 26.6.4
+      lit:
+        specifier: ^3.3.3
+        version: 3.3.3
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -603,6 +606,9 @@ importers:
       '@types/webpack':
         specifier: ^5.28.5
         version: 5.28.5
+      lit:
+        specifier: ^3.3.3
+        version: 3.3.3
       typescript:
         specifier: ^7.0.2
         version: 7.0.2

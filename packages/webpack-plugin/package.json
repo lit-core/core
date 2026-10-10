@@ -63,6 +63,7 @@
   "devDependencies": {
     "@types/node": "^26.6.4",
     "@types/webpack": "^5.28.5",
+    "lit": "^3.3.3",
     "typescript": "^7.0.2",
     "webpack": "^5.111.1"
   },
