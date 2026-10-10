@@ -20,6 +20,7 @@
     "node": ">=24.0.0"
   },
   "scripts": {
+    "build": "vite build viewer --base=./",
     "benchmark": "node src/index.js",
     "benchmark:carbon": "node src/index.js --suite=carbon",
     "benchmark:spectrum": "node src/index.js --suite=spectrum",

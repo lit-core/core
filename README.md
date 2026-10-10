@@ -2,6 +2,14 @@
 
 > High-performance ahead-of-time (AOT) compiler toolchain and delivery architecture for Lit and Web Components.
 
+[![CI](https://github.com/lit-core/core/actions/workflows/ci.yml/badge.svg)](https://github.com/lit-core/core/actions/workflows/ci.yml)
+[![GitHub Pages](https://github.com/lit-core/core/actions/workflows/deploy-pages.yml/badge.svg)](https://lit-core.github.io/core/)
+[![Benchmarks](https://img.shields.io/badge/benchmarks-dashboard-10b981?style=flat)](https://lit-core.github.io/core/)
+[![Showcase](https://img.shields.io/badge/showcase-portal-3b82f6?style=flat)](https://lit-core.github.io/core/showcase/)
+[![Node.js version](https://img.shields.io/badge/node-%3E%3D24-339933?logo=node.js&style=flat)](https://nodejs.org)
+[![Rust toolchain](https://img.shields.io/badge/rust-stable-dea584?logo=rust&style=flat)](https://www.rust-lang.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 ---
 
 ## Introduction

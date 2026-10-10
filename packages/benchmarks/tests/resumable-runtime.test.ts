@@ -1,11 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { type Browser, chromium } from 'playwright';
-import { afterAll, describe, expect, it } from 'vitest';
+import { launchBrowser } from '@lit-core/test-kit';
+import type { Browser } from 'playwright';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { generateResumableArtifactHtml } from '../src/features/resumable.js';
 
 describe('resumable SSR Declarative Shadow DOM artifact verification', () => {
   const artifactPath = path.resolve(__dirname, '../artifacts/carbon/resumable-ssr.html');
   let browser: Browser | null = null;
+
+  beforeAll(() => {
+    if (!fs.existsSync(artifactPath)) {
+      generateResumableArtifactHtml('carbon', path.dirname(artifactPath));
+    }
+  });
 
   afterAll(async () => {
     if (browser) {
@@ -14,6 +22,9 @@ describe('resumable SSR Declarative Shadow DOM artifact verification', () => {
   });
 
   it('generates valid Declarative Shadow DOM artifact file without un-evaluated expressions', () => {
+    if (!fs.existsSync(artifactPath)) {
+      generateResumableArtifactHtml('carbon', path.dirname(artifactPath));
+    }
     expect(fs.existsSync(artifactPath)).toBe(true);
     const content = fs.readFileSync(artifactPath, 'utf8');
 
@@ -39,10 +50,7 @@ describe('resumable SSR Declarative Shadow DOM artifact verification', () => {
 
   it('verifies Declarative Shadow DOM and live interaction resumption in browser via Playwright', async () => {
     try {
-      browser = await chromium.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-      });
+      browser = await launchBrowser();
     } catch (_err) {
       console.warn('Chromium launch skipped due to sandboxed environment');
       return;

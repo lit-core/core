@@ -3,7 +3,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { launchBrowser } from '@lit-core/test-kit';
 import type { Browser } from 'playwright';
-import { afterAll, describe, expect, it } from 'vitest';
+import { build } from 'vite';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../../..');
@@ -12,6 +13,19 @@ const resultsDir = path.resolve(__dirname, '../results');
 
 describe('benchmark viewer browser runtime and data loading', () => {
   let browser: Browser | null = null;
+
+  beforeAll(async () => {
+    const indexPath = path.resolve(viewerDist, 'index.html');
+    if (!fs.existsSync(indexPath)) {
+      console.log('[test] Building viewer distribution for tests...');
+      await build({
+        configFile: path.resolve(__dirname, '../viewer/vite.config.ts'),
+        root: path.resolve(__dirname, '../viewer'),
+        base: './',
+        logLevel: 'warn',
+      });
+    }
+  });
 
   afterAll(async () => {
     if (browser) {
@@ -108,10 +122,17 @@ describe('benchmark viewer browser runtime and data loading', () => {
 
       // Default: serve index.html
       const indexPath = path.resolve(viewerDist, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        return route.fulfill({
+          status: 200,
+          contentType: 'text/html; charset=utf-8',
+          body: fs.readFileSync(indexPath),
+        });
+      }
       return route.fulfill({
-        status: 200,
-        contentType: 'text/html; charset=utf-8',
-        body: fs.readFileSync(indexPath),
+        status: 404,
+        contentType: 'text/plain',
+        body: 'Viewer index.html not found',
       });
     });
 
