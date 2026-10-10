@@ -20,6 +20,7 @@ describe('benchmark viewer browser runtime and data loading', () => {
   });
 
   it('serves manifest.json and renders dashboard in real Chromium via Playwright', async () => {
+    console.log('[test] Launching browser...');
     try {
       browser = await launchBrowser();
     } catch (_err) {
@@ -27,6 +28,7 @@ describe('benchmark viewer browser runtime and data loading', () => {
       return;
     }
 
+    console.log('[test] Creating page...');
     const context = await browser.newContext();
     const page = await context.newPage();
 
@@ -67,6 +69,28 @@ describe('benchmark viewer browser runtime and data loading', () => {
         });
       }
 
+      // Handle showcase requests
+      if (pathname.includes('/showcase/')) {
+        const relative = pathname.replace(/^.*\/showcase\//, '');
+        const cleanPath = relative.split('?')[0];
+        const targetFile = path.resolve(viewerDist, 'showcase', cleanPath);
+        if (fs.existsSync(targetFile) && fs.statSync(targetFile).isFile()) {
+          const ext = path.extname(targetFile);
+          const mime = ext === '.html' ? 'text/html' : ext === '.css' ? 'text/css' : 'application/javascript';
+          return route.fulfill({
+            status: 200,
+            contentType: `${mime}; charset=utf-8`,
+            body: fs.readFileSync(targetFile),
+          });
+        }
+        // Return lightweight mock canvas HTML to avoid recursive app mounting in iframes
+        return route.fulfill({
+          status: 200,
+          contentType: 'text/html; charset=utf-8',
+          body: '<!DOCTYPE html><html><body><div id="app"></div></body></html>',
+        });
+      }
+
       // Handle assets requests
       if (pathname.includes('/assets/')) {
         const filename = path.basename(pathname);
@@ -91,59 +115,68 @@ describe('benchmark viewer browser runtime and data loading', () => {
       });
     });
 
-    // Load viewer page
     await page.goto('http://localhost:5173/');
 
     // Wait for the app to mount and fetch manifest
     await page.waitForSelector('nav', { timeout: 5000 });
 
-    // Ensure error banner is NOT displayed
     const errorHeading = await page.$('h2:text("Failed to load benchmark data")');
     expect(errorHeading).toBeNull();
 
-    // Verify page title
     const title = await page.title();
     expect(title).toContain('Lit-core benchmark dashboard');
 
-    // Verify navigation tabs
-    const tabTexts = await page.$$eval('nav button', (btns) => btns.map((b) => b.textContent?.trim()));
-    expect(tabTexts).toContain('Overview');
-    expect(tabTexts).toContain('By scenario');
-    expect(tabTexts).toContain('By library');
-    expect(tabTexts).toContain('By feature');
-    expect(tabTexts).toContain('Showcase');
+    // Verify navigation tabs: standard 4 tabs in sentence case
+    const tabTexts = await page.$$eval('header nav button', (btns) => btns.map((b) => b.textContent?.trim()));
+    expect(tabTexts).toEqual(['Overview', 'By library', 'By feature', 'Showcase']);
 
-    // Verify Overview matrix displays libraries and KPIs
-    const tableHeader = await page.$eval('table th', (el) => el.textContent?.trim());
-    expect(tableHeader).toBeTruthy();
+    // 1. Verify Overview tab merges scenario data directly
+    const overviewContent = await page.textContent('body');
+    expect(overviewContent).toContain('Evaluation scenarios across design systems');
+    expect(overviewContent).toContain('Data grid');
+    expect(overviewContent).toContain('Interactive form');
+    expect(overviewContent).toContain('SSR dashboard');
+    expect(overviewContent).toContain('Dynamic feed');
+    expect(overviewContent).toContain('Selective application');
+    expect(overviewContent).toContain('Multi-component bundle');
 
-    // Click "By scenario" tab
-    await page.click('button:text("By scenario")');
+    // 2. Click "By library" tab
+    await page.click('header nav button:text("By library")', { timeout: 3000 });
     await page.waitForTimeout(300);
 
-    // Verify scenario view renders all 6 authentic scenarios as selectable options
-    const scenarioPills = await page.$$eval('button', (els) => els.map((el) => el.textContent?.trim()));
-    expect(scenarioPills).toContain('Data grid');
-    expect(scenarioPills).toContain('Interactive form');
-    expect(scenarioPills).toContain('SSR dashboard');
-    expect(scenarioPills).toContain('Dynamic feed');
-    expect(scenarioPills).toContain('Selective application');
-    expect(scenarioPills).toContain('Multi-component bundle');
+    const libraryContent = await page.textContent('body');
+    expect(libraryContent).toContain('Scenarios evaluated for');
+    expect(libraryContent).toContain('Tested components');
+    expect(libraryContent).toContain('Full feature comparison');
 
-    // Verify scenario overview heading outside card
-    const scenarioHeading = await page.$eval('h2', (el) => el.textContent?.trim());
-    expect(scenarioHeading).toContain('Scenario overview');
-
-    // Click "By feature" tab
-    await page.click('button:text("By feature")');
+    // 3. Click "By feature" tab
+    await page.click('header nav button:text("By feature")', { timeout: 3000 });
     await page.waitForTimeout(300);
 
     const featureViewText = await page.textContent('body');
     expect(featureViewText).toContain('Comparison across design systems');
-    expect(featureViewText).toContain('Evaluation scenario');
+    expect(featureViewText).toContain('Scenarios unified in the combined pipeline');
+
+    // 4. Click "Showcase" tab
+    await page.click('header nav button:text("Showcase")', { timeout: 3000 });
+    await page.waitForTimeout(300);
+
+    // Verify showcase view switcher includes "By scenario"
+    const showcaseViewButtons = await page.$$eval('main button', (btns) => btns.map((b) => b.textContent?.trim()));
+    expect(showcaseViewButtons).toContain('By scenario');
+    expect(showcaseViewButtons).toContain('By library');
+    expect(showcaseViewButtons).toContain('Matrix view');
+
+    // Click "By scenario" in Showcase
+    await page.locator('button').filter({ hasText: 'By scenario' }).click({ timeout: 5000 });
+    await page.waitForTimeout(300);
+
+    const showcaseScenarioText = await page.textContent('body');
+    expect(showcaseScenarioText).toContain('Data grid');
+    expect(showcaseScenarioText).toContain('Interactive form');
 
     // Assert zero unhandled console or page errors
     expect(pageErrors).toHaveLength(0);
     expect(consoleErrors).toHaveLength(0);
-  });
+  }, 30000);
 });

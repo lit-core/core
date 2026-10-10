@@ -1,7 +1,26 @@
-import { Activity, ArrowDownRight, Boxes, Building2, Check, CheckCircle2, CircleDashed, ClipboardCheck, Clock, Cpu, Layers, LayoutGrid, Shield, ShieldAlert, ShieldCheck, Zap } from 'lucide-react';
+import {
+  Activity,
+  ArrowDownRight,
+  Boxes,
+  Building2,
+  Check,
+  CheckCircle2,
+  CircleDashed,
+  ClipboardCheck,
+  Clock,
+  Cpu,
+  Layers,
+  LayoutGrid,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Workflow,
+  Zap,
+} from 'lucide-react';
 import type React from 'react';
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { ALL_CANONICAL_COMPONENTS, CONCEPTS, type ComponentItem, LIBRARIES } from '../canonical-registry.js';
+import { getManifestScenarios, getScenarioForFeature, getScenariosForComponent } from '../scenarios-registry.js';
 import type { ManifestData } from '../types.js';
 import { Dropdown } from './Dropdown.js';
 
@@ -9,11 +28,12 @@ export interface ShowcaseViewerProps {
   manifest?: ManifestData | null;
   selectedSuiteId?: string;
   selectedFeatureId?: string;
+  initialScenarioId?: string;
   onSelectSuite?: (suiteId: string) => void;
   onSelectFeature?: (featureId: string) => void;
 }
 
-type ViewMode = 'library' | 'matrix' | 'concept' | 'report';
+type ViewMode = 'library' | 'matrix' | 'scenario' | 'concept' | 'report';
 
 interface ComponentAuditState {
   item: ComponentItem;
@@ -25,12 +45,15 @@ interface ComponentAuditState {
   error?: string;
 }
 
-export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, selectedSuiteId = 'carbon', selectedFeatureId = 'all', onSelectSuite, onSelectFeature }) => {
+export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, selectedSuiteId = 'carbon', selectedFeatureId = 'all', initialScenarioId, onSelectSuite, onSelectFeature }) => {
   const [currentSuite, setCurrentSuite] = useState<string>(selectedSuiteId);
   const [currentFeature, setCurrentFeature] = useState<string>(selectedFeatureId);
-  const [viewMode, setViewMode] = useState<ViewMode>(selectedSuiteId === 'all' ? 'matrix' : 'library');
+  const [viewMode, setViewMode] = useState<ViewMode>(initialScenarioId ? 'scenario' : selectedSuiteId === 'all' ? 'matrix' : 'library');
   const [selectedConcept, setSelectedConcept] = useState<string>('all');
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>(initialScenarioId || 'all');
   const uid = useId().replace(/:/g, '');
+
+  const scenarios = useMemo(() => getManifestScenarios(manifest), [manifest]);
 
   const [auditStates, setAuditStates] = useState<Record<string, ComponentAuditState>>(() => {
     const initial: Record<string, ComponentAuditState> = {};
@@ -51,17 +74,24 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
   useEffect(() => {
     if (selectedSuiteId && selectedSuiteId !== currentSuite) {
       setCurrentSuite(selectedSuiteId);
-      if (selectedSuiteId !== 'all') {
+      if (selectedSuiteId !== 'all' && viewMode !== 'scenario') {
         setViewMode('library');
       }
     }
-  }, [selectedSuiteId, currentSuite]);
+  }, [selectedSuiteId, currentSuite, viewMode]);
 
   useEffect(() => {
     if (selectedFeatureId && selectedFeatureId !== currentFeature) {
       setCurrentFeature(selectedFeatureId);
     }
   }, [selectedFeatureId, currentFeature]);
+
+  useEffect(() => {
+    if (initialScenarioId) {
+      setSelectedScenarioId(initialScenarioId);
+      setViewMode('scenario');
+    }
+  }, [initialScenarioId]);
 
   // Listen for audit reports dispatched by the isolated canvas iframes
   useEffect(() => {
@@ -110,13 +140,21 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
 
   const handleSuiteChange = (suiteId: string) => {
     setCurrentSuite(suiteId);
-    if (suiteId !== 'all') setViewMode('library');
+    if (suiteId !== 'all' && viewMode !== 'scenario') setViewMode('library');
     if (onSelectSuite) onSelectSuite(suiteId);
   };
 
   const handleFeatureChange = (featureId: string) => {
     setCurrentFeature(featureId);
     if (onSelectFeature) onSelectFeature(featureId);
+
+    // If currently viewing scenarios, auto-focus on the scenario custom-built for this feature
+    if (featureId !== 'all' && featureId !== 'baseline') {
+      const matchScen = getScenarioForFeature(featureId, manifest);
+      if (matchScen) {
+        setSelectedScenarioId(matchScen.id);
+      }
+    }
   };
 
   const features = manifest?.features || [
@@ -124,7 +162,11 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
     { id: 'css-fuse', name: 'CSS AST deduplication', description: 'Cross-component shared constructable sheets' },
     { id: 'props-lower', name: 'Lit decorator lowering', description: 'Compile-time property descriptor lowering' },
     { id: 'html-aot', name: 'AOT template compilation', description: 'Static compiled template descriptors' },
-    { id: 'tag-shake', name: 'Tag shake dead code elimination', description: 'Eliminates unreferenced custom element registrations and imports' },
+    {
+      id: 'tag-shake',
+      name: 'Tag shake dead code elimination',
+      description: 'Eliminates unreferenced custom element registrations and imports',
+    },
     { id: 'all', name: 'All optimizations combined', description: 'Unified multi-pass compiler pipeline' },
   ];
 
@@ -154,7 +196,7 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Top control bar: view switcher, search, interactive tests directly on canvas */}
+      {/* Top control bar: view switcher directly on canvas */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-1.5 p-1.5 bg-zinc-100/80 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
           <button
@@ -176,6 +218,16 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
           >
             <LayoutGrid className="w-4 h-4 stroke-[1.5]" />
             <span>Matrix view</span>
+          </button>
+          <button
+            type="button"
+            className={`inline-flex items-center gap-2 px-5 py-2 text-base rounded-full transition-all cursor-pointer ${
+              viewMode === 'scenario' ? 'bg-white text-zinc-950 font-medium shadow-[0_2px_8px_rgba(0,0,0,0.06)]' : 'text-zinc-600 font-light hover:text-zinc-950'
+            }`}
+            onClick={() => setViewMode('scenario')}
+          >
+            <Workflow className="w-4 h-4 stroke-[1.5]" />
+            <span>By scenario</span>
           </button>
           <button
             type="button"
@@ -231,6 +283,23 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
           ]}
           onChange={handleFeatureChange}
         />
+
+        {viewMode === 'scenario' && (
+          <Dropdown
+            label="Scenario"
+            icon={Workflow}
+            value={selectedScenarioId}
+            options={[
+              { value: 'all', label: 'All scenarios' },
+              ...scenarios.map((s) => ({
+                value: s.id,
+                label: s.name,
+                description: `${s.relevantFeatures.length} passes`,
+              })),
+            ]}
+            onChange={setSelectedScenarioId}
+          />
+        )}
 
         {viewMode === 'concept' && (
           <Dropdown
@@ -398,15 +467,95 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
             </div>
           </div>
         </div>
+      ) : viewMode === 'scenario' ? (
+        /* Scenario mode: displays scenarios per feature with real component iframe canvases */
+        <div className="flex flex-col gap-10">
+          {scenarios
+            .filter((sc) => {
+              if (selectedScenarioId !== 'all') return sc.id === selectedScenarioId;
+              if (currentFeature !== 'all' && currentFeature !== 'baseline') {
+                return sc.relevantFeatures.includes(currentFeature);
+              }
+              return true;
+            })
+            .map((scenario) => {
+              const conceptSet = new Set(scenario.componentConcepts);
+              const scenarioComps = activeComponents.filter((comp) => conceptSet.has(comp.concept));
+
+              return (
+                <div key={scenario.id} className="flex flex-col gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 px-1">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-lg font-medium text-zinc-950 tracking-tight">{scenario.name}</h2>
+                      <span className="text-base font-light text-zinc-600 bg-zinc-100/90 px-3 py-0.5 rounded-full">
+                        {scenario.relevantFeatures.includes(currentFeature) ? `Custom scenario for ${activeFeat.name.split(' (')[0]}` : `${scenario.relevantFeatures.length} passes`}
+                      </span>
+                    </div>
+                    <span className="text-base font-light text-zinc-500">
+                      {scenarioComps.length} components • {scenario.relevantFeatures.join(', ')}
+                    </span>
+                  </div>
+
+                  <p className="text-base font-light text-zinc-500 px-1 max-w-4xl leading-relaxed">{scenario.description}</p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {scenarioComps.map((comp) => {
+                      const audit = auditStates[comp.tag];
+                      const instanceId = `canvas-${uid}-${comp.library}-${comp.concept}`;
+                      const canvasUrl = `./showcase/${currentFeature}/index.html?canvas=true&tag=${comp.tag}&id=${instanceId}`;
+                      return (
+                        <div
+                          key={comp.tag}
+                          className="bg-white rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.06)] ring-1 ring-zinc-900/5 hover:bg-zinc-50/40 transition-all"
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <span className="text-base font-medium text-zinc-950 block">{comp.conceptLabel}</span>
+                              <span className="text-base font-light text-zinc-500">{comp.libraryLabel}</span>
+                            </div>
+                            <span className="text-base font-light text-zinc-600 bg-zinc-100/90 px-2.5 py-1 rounded-lg font-mono">{comp.tag}</span>
+                          </div>
+
+                          {/* Individual component canvas as an isolated iframe */}
+                          <div className="h-[150px] flex items-center justify-center bg-zinc-50/80 rounded-xl overflow-hidden">
+                            <iframe src={canvasUrl} className="w-full h-full border-none bg-transparent" title={`${comp.libraryLabel} ${comp.conceptLabel}`} loading="lazy" />
+                          </div>
+
+                          <div className="flex justify-between items-center text-base font-light text-zinc-500 pt-1">
+                            <span className={`inline-flex items-center gap-1.5 ${audit?.isDefined ? 'text-emerald-700 font-normal' : 'text-zinc-500'}`}>
+                              {audit?.isDefined ? <Check className="w-4 h-4 stroke-[2]" /> : null}
+                              <span>{audit?.isDefined ? 'defined' : 'ready'}</span>
+                            </span>
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-light ${
+                                audit?.hasShadowRoot ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'
+                              }`}
+                            >
+                              {audit?.hasShadowRoot ? <ShieldCheck className="w-4 h-4 stroke-[2]" /> : <Shield className="w-4 h-4 stroke-[1.5]" />}
+                              <span>{audit?.hasShadowRoot ? 'Shadow DOM' : 'Isolated'}</span>
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
       ) : viewMode === 'matrix' ? (
         /* Matrix view: grouped by 20 canonical concepts */
         <div className="flex flex-col gap-10">
           {CONCEPTS.filter((c) => activeComponents.some((comp) => comp.concept === c.id)).map((concept) => {
             const group = activeComponents.filter((comp) => comp.concept === concept.id);
+            const compScenarios = getScenariosForComponent(concept.id, manifest);
             return (
               <div key={concept.id} className="flex flex-col gap-3">
                 <div className="flex justify-between items-baseline px-1">
-                  <h2 className="text-lg font-medium text-zinc-950 tracking-tight">{concept.label}</h2>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-medium text-zinc-950 tracking-tight">{concept.label}</h2>
+                    {compScenarios.length > 0 && <span className="text-base font-light text-zinc-500 bg-zinc-100/80 px-2.5 py-0.5 rounded-md">{compScenarios[0].name}</span>}
+                  </div>
                   <span className="text-base font-light text-zinc-500">{group.length} design systems evaluated</span>
                 </div>
 
@@ -465,6 +614,8 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
               const audit = auditStates[comp.tag];
               const instanceId = `canvas-${uid}-${comp.library}-${comp.concept}`;
               const canvasUrl = `./showcase/${currentFeature}/index.html?canvas=true&tag=${comp.tag}&id=${instanceId}`;
+              const compScenarios = getScenariosForComponent(comp.concept, manifest);
+
               return (
                 <div
                   key={comp.tag}
@@ -473,7 +624,10 @@ export const ShowcaseViewer: React.FC<ShowcaseViewerProps> = ({ manifest, select
                   <div className="flex justify-between items-center">
                     <div>
                       <span className="text-base font-medium text-zinc-950 block">{comp.conceptLabel}</span>
-                      <span className="text-base font-light text-zinc-500">{comp.libraryLabel}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-light text-zinc-500">{comp.libraryLabel}</span>
+                        {compScenarios.length > 0 && <span className="text-base font-light text-zinc-400 bg-zinc-100/80 px-2 py-0.2 rounded">{compScenarios[0].name}</span>}
+                      </div>
                     </div>
                     <span className="text-base font-light text-zinc-600 bg-zinc-100/90 px-2.5 py-1 rounded-lg font-mono">{comp.tag}</span>
                   </div>

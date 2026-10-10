@@ -1,10 +1,11 @@
-import { ArrowRight, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Zap } from 'lucide-react';
 import type React from 'react';
+import { useMemo } from 'react';
+import { getManifestScenarios, getScenarioForFeature } from '../scenarios-registry.js';
 import type { ManifestData, StandaloneBenchmarkResult } from '../types.js';
 import { DiagnosticsViewer } from './DiagnosticsViewer.js';
 import { Dropdown } from './Dropdown.js';
 import { MetricCards } from './MetricCards.js';
-import { DEFAULT_SCENARIOS } from './ScenarioView.js';
 
 interface FeatureViewProps {
   manifest: ManifestData;
@@ -13,11 +14,10 @@ interface FeatureViewProps {
   selectedResult: StandaloneBenchmarkResult | null;
   onSelectFeature: (featureId: string) => void;
   onSelectSuite: (suiteId: string) => void;
-  onOpenShowcase?: () => void;
-  onOpenScenario?: (scenarioId?: string) => void;
+  onOpenShowcase?: (suiteId?: string, featureId?: string) => void;
 }
 
-export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuiteId, selectedFeatureId, selectedResult, onSelectFeature, onSelectSuite, onOpenScenario }) => {
+export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuiteId, selectedFeatureId, selectedResult, onSelectFeature, onSelectSuite, onOpenShowcase }) => {
   const { features, libraries, runs } = manifest;
 
   // Filter runs for this feature across all libraries
@@ -27,51 +27,142 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
   const allFeat = features.find((f) => f.id === 'all');
   const individualFeats = features.filter((f) => f.id !== 'baseline' && f.id !== 'all');
 
-  const allScenarios = manifest.scenarios && manifest.scenarios.length > 0 ? manifest.scenarios : DEFAULT_SCENARIOS;
-  const currentScenario = allScenarios.find((s) => s.relevantFeatures.includes(selectedFeatureId) || (selectedResult?.scenario && selectedResult.scenario.id === s.id));
+  const allScenarios = useMemo(() => getManifestScenarios(manifest), [manifest]);
+  const currentScenario = useMemo(() => getScenarioForFeature(selectedFeatureId, manifest), [selectedFeatureId, manifest]);
 
   return (
     <div className="flex flex-col gap-10">
       {/* Feature selector */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Dropdown
-          label="Optimization"
-          icon={Zap}
-          value={selectedFeatureId}
-          options={[
-            ...(allFeat ? [{ value: 'all', label: 'All combined', group: 'Macro options' }] : []),
-            ...(baselineFeat ? [{ value: 'baseline', label: 'Baseline', group: 'Macro options' }] : []),
-            ...individualFeats.map((feat) => ({
-              value: feat.id,
-              label: feat.name,
-              description: feat.category,
-              group: 'Compiler passes',
-            })),
-          ]}
-          onChange={onSelectFeature}
-        />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Dropdown
+            label="Optimization"
+            icon={Zap}
+            value={selectedFeatureId}
+            options={[
+              ...(allFeat ? [{ value: 'all', label: 'All combined', group: 'Macro options' }] : []),
+              ...(baselineFeat ? [{ value: 'baseline', label: 'Baseline', group: 'Macro options' }] : []),
+              ...individualFeats.map((feat) => ({
+                value: feat.id,
+                label: feat.name,
+                description: feat.category,
+                group: 'Compiler passes',
+              })),
+            ]}
+            onChange={onSelectFeature}
+          />
+        </div>
+
+        {onOpenShowcase && (
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 px-5 py-2 text-base font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl transition-all shadow-none cursor-pointer"
+            onClick={() => onOpenShowcase(selectedSuiteId, selectedFeatureId)}
+          >
+            <span>Showcase</span>
+            <ArrowRight className="w-4 h-4 stroke-[1.75]" />
+          </button>
+        )}
       </div>
 
       {/* Target scenario context card */}
       {currentScenario && selectedFeatureId !== 'baseline' && (
-        <div className="p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex flex-col gap-1.5 max-w-3xl">
-            <div className="flex items-center gap-2.5">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-light bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600/20">Evaluation scenario</span>
-              <h3 className="text-base font-medium text-zinc-950 tracking-tight">{currentScenario.name}</h3>
+        <div className="p-6 sm:p-7 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5 flex flex-col gap-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col gap-1.5 max-w-3xl">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-light bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600/20">Target evaluation scenario</span>
+                <h3 className="text-base font-medium text-zinc-950 tracking-tight">{currentScenario.name}</h3>
+              </div>
+              <p className="text-base font-light text-zinc-600 leading-relaxed">{currentScenario.description}</p>
             </div>
-            <p className="text-base font-light text-zinc-600 leading-relaxed">{currentScenario.description}</p>
+
+            {onOpenShowcase && (
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium transition-all shrink-0 cursor-pointer shadow-none"
+                onClick={() => onOpenShowcase(selectedSuiteId, selectedFeatureId)}
+              >
+                <span>View scenario in showcase</span>
+                <ArrowRight className="w-4 h-4 stroke-[1.75]" />
+              </button>
+            )}
           </div>
-          {onOpenScenario && (
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-100/90 hover:bg-zinc-200/80 text-zinc-800 text-base font-medium transition-all shrink-0 cursor-pointer shadow-none"
-              onClick={() => onOpenScenario(currentScenario.id)}
-            >
-              <span>Inspect scenario</span>
-              <ArrowRight className="w-4 h-4 stroke-[1.75]" />
-            </button>
-          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-zinc-100">
+            <div className="flex flex-col gap-1">
+              <span className="text-base font-light text-zinc-400">Tested canonical components</span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {currentScenario.componentConcepts.slice(0, 6).map((concept) => (
+                  <span key={concept} className="px-2 py-0.5 rounded-md bg-zinc-50 text-zinc-700 text-base font-light ring-1 ring-zinc-900/5 font-mono">
+                    {concept}
+                  </span>
+                ))}
+                {currentScenario.componentConcepts.length > 6 && (
+                  <span className="px-2 py-0.5 rounded-md bg-zinc-50 text-zinc-400 text-base font-light">+{currentScenario.componentConcepts.length - 6} more</span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-base font-light text-zinc-400">Co-evaluated compiler passes</span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {currentScenario.relevantFeatures.map((fId) => {
+                  const isCurrent = fId === selectedFeatureId;
+                  const feat = features.find((f) => f.id === fId);
+                  return (
+                    <button
+                      key={fId}
+                      type="button"
+                      className={`px-2 py-0.5 rounded-md text-base transition-colors cursor-pointer ${
+                        isCurrent ? 'bg-emerald-100 text-emerald-800 font-medium ring-1 ring-emerald-600/30' : 'bg-zinc-100/80 text-zinc-700 font-light hover:bg-zinc-200/80'
+                      }`}
+                      onClick={() => onSelectFeature(fId)}
+                    >
+                      {feat?.name.split(' (')[0] || fId}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-base font-light text-zinc-400">Verification</span>
+              <div className="flex items-center gap-2 text-emerald-700 mt-1">
+                <CheckCircle2 className="w-4 h-4 stroke-[2]" />
+                <span className="text-base font-medium">Equivalence tested in Chromium</span>
+              </div>
+              <span className="text-base font-light text-zinc-500">Full DOM structure verified via Playwright.</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* When All Combined is selected, show scenario overview list */}
+      {selectedFeatureId === 'all' && (
+        <div className="p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5 flex flex-col gap-4">
+          <div className="flex items-baseline justify-between">
+            <h3 className="text-base font-medium text-zinc-950 tracking-tight">Scenarios unified in the combined pipeline</h3>
+            <span className="text-base font-light text-zinc-500">{allScenarios.length} scenarios</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {allScenarios.map((sc) => (
+              <div
+                key={sc.id}
+                className="p-4 rounded-xl bg-zinc-50/70 hover:bg-zinc-100/70 transition-colors flex flex-col gap-1.5 cursor-pointer"
+                onClick={() => {
+                  const feat = sc.relevantFeatures[0] || 'all';
+                  onSelectFeature(feat);
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-base font-medium text-zinc-900">{sc.name}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+                </div>
+                <span className="text-base font-light text-zinc-500 line-clamp-2">{sc.description}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

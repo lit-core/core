@@ -7,7 +7,6 @@ import { Header } from './components/Header.js';
 import { LibraryView } from './components/LibraryView.js';
 import { MatrixOverview } from './components/MatrixOverview.js';
 import type { TabView } from './components/Navigation.js';
-import { ScenarioView } from './components/ScenarioView.js';
 import { ShowcaseViewer } from './components/ShowcaseViewer.js';
 import type { ManifestData, StandaloneBenchmarkResult } from './types.js';
 
@@ -30,7 +29,11 @@ export const App: React.FC = () => {
       const suiteParam = params.get('suite');
       const featureParam = params.get('feature');
 
-      if (tabParam && ['matrix', 'scenario', 'library', 'feature', 'showcase'].includes(tabParam)) setCurrentTab(tabParam);
+      if (tabParam && ['matrix', 'library', 'feature', 'showcase'].includes(tabParam)) {
+        setCurrentTab(tabParam);
+      } else if (tabParam === ('scenario' as any)) {
+        setCurrentTab('matrix');
+      }
       if (suiteParam) setSelectedSuiteId(suiteParam);
       if (featureParam) setSelectedFeatureId(featureParam);
     }
@@ -112,6 +115,17 @@ export const App: React.FC = () => {
     setCurrentTab('library');
   };
 
+  const handleOpenShowcase = (suiteId?: string, featureId?: string) => {
+    if (suiteId) setSelectedSuiteId(suiteId);
+    if (featureId) setSelectedFeatureId(featureId);
+    setCurrentTab('showcase');
+  };
+
+  const handleOpenFeature = (featureId: string) => {
+    setSelectedFeatureId(featureId);
+    setCurrentTab('feature');
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-zinc-900 font-sans">
       <Header currentTab={currentTab} onSelectTab={setCurrentTab} />
@@ -145,20 +159,7 @@ export const App: React.FC = () => {
 
         {manifest && (
           <>
-            {currentTab === 'matrix' && <MatrixOverview manifest={manifest} onSelectRun={handleSelectRun} onOpenScenarioView={() => setCurrentTab('scenario')} />}
-
-            {currentTab === 'scenario' && (
-              <ScenarioView
-                manifest={manifest}
-                selectedSuiteId={selectedSuiteId}
-                onSelectSuite={setSelectedSuiteId}
-                onSelectFeature={(featId) => {
-                  setSelectedFeatureId(featId);
-                  setCurrentTab('feature');
-                }}
-                onOpenFeatureView={() => setCurrentTab('feature')}
-              />
-            )}
+            {currentTab === 'matrix' && <MatrixOverview manifest={manifest} onSelectRun={handleSelectRun} onOpenFeature={handleOpenFeature} onOpenShowcase={handleOpenShowcase} />}
 
             {currentTab === 'library' && (
               <LibraryView
@@ -168,7 +169,7 @@ export const App: React.FC = () => {
                 selectedResult={selectedResult}
                 onSelectSuite={setSelectedSuiteId}
                 onSelectFeature={setSelectedFeatureId}
-                onOpenShowcase={() => setCurrentTab('showcase')}
+                onOpenShowcase={handleOpenShowcase}
               />
             )}
 
@@ -180,8 +181,7 @@ export const App: React.FC = () => {
                 selectedResult={selectedResult}
                 onSelectFeature={setSelectedFeatureId}
                 onSelectSuite={setSelectedSuiteId}
-                onOpenShowcase={() => setCurrentTab('showcase')}
-                onOpenScenario={() => setCurrentTab('scenario')}
+                onOpenShowcase={handleOpenShowcase}
               />
             )}
 

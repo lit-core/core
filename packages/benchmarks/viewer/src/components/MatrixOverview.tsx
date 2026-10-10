@@ -1,13 +1,15 @@
 import { Activity, Archive, ArrowRight, Cpu, Database, Layers, RefreshCw, Scale, SlidersHorizontal, Zap } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
+import { getManifestScenarios } from '../scenarios-registry.js';
 import type { ManifestData, ManifestRunEntry } from '../types.js';
 import { Dropdown } from './Dropdown.js';
 
 interface MatrixOverviewProps {
   manifest: ManifestData;
   onSelectRun: (suiteId: string, featureId: string) => void;
-  onOpenScenarioView?: () => void;
+  onOpenFeature?: (featureId: string) => void;
+  onOpenShowcase?: (suiteId?: string, featureId?: string) => void;
 }
 
 type Category = 'payload' | 'performance';
@@ -16,7 +18,7 @@ type PayloadUnit = 'percent' | 'kb';
 type PerfMetric = 'firstRender' | 'update' | 'scriptEval' | 'registration' | 'heap' | 'buildTime';
 type PerfUnit = 'ms' | 'percent';
 
-export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSelectRun, onOpenScenarioView }) => {
+export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSelectRun, onOpenFeature, onOpenShowcase }) => {
   const [category, setCategory] = useState<Category>('payload');
   const [payloadFormat, setPayloadFormat] = useState<PayloadFormat>('gzip');
   const [payloadUnit, setPayloadUnit] = useState<PayloadUnit>('percent');
@@ -24,6 +26,7 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
   const [perfUnit, setPerfUnit] = useState<PerfUnit>('ms');
 
   const { libraries, features, runs } = manifest;
+  const scenarios = getManifestScenarios(manifest);
 
   // Build lookup map: suiteId -> featureId -> ManifestRunEntry
   const runMap: Record<string, Record<string, ManifestRunEntry>> = {};
@@ -727,28 +730,103 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
           </div>
         </div>
 
-        {/* Methodology note delineating static leaf matrix vs dynamic scenarios */}
-        <div className="p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex flex-col gap-2 max-w-4xl">
-            <h3 className="text-base font-medium text-zinc-950 tracking-tight">Understanding matrix vs scenario benchmarks</h3>
-            <p className="text-base font-light text-zinc-600 leading-relaxed">
-              The cross-library matrix evaluates 20 canonical atomic UI components (buttons, inputs, checkboxes, dialogs) bundled into static client-side applications. Optimizations designed for
-              dynamic data collections (such as reactive array pipeline caching in <code className="text-base font-normal text-zinc-900">memoize</code>, which yields -99.5% update latency in data
-              tables) or server-rendered Declarative Shadow DOM (such as interaction-driven hydration in <code className="text-base font-normal text-zinc-900">resumable</code>, which reduces initial
-              JavaScript payload by -99.6%) show 0.0% delta on static leaf components by design. To review these optimizations in their target execution contexts, inspect the dedicated scenario
-              benchmarks.
-            </p>
+        {/* Evaluation scenarios across design systems */}
+        <div className="flex flex-col gap-4 mt-8">
+          <div className="flex items-baseline justify-between px-1">
+            <div>
+              <h2 className="text-lg font-medium text-zinc-950 tracking-tight">Evaluation scenarios across design systems</h2>
+              <p className="text-base font-light text-zinc-500 mt-0.5">Each scenario evaluates authentic real-world component compositions tailored to specific compiler passes.</p>
+            </div>
+            <span className="text-base font-light text-zinc-400">{scenarios.length} scenarios</span>
           </div>
-          {onOpenScenarioView && (
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium transition-all shrink-0 cursor-pointer shadow-none"
-              onClick={onOpenScenarioView}
-            >
-              <span>Explore scenarios</span>
-              <ArrowRight className="w-4 h-4 stroke-[1.75]" />
-            </button>
-          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {scenarios.map((scenario) => {
+              return (
+                <div
+                  key={scenario.id}
+                  className="bg-white rounded-2xl p-6 flex flex-col justify-between gap-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.06)] ring-1 ring-zinc-900/5 transition-all"
+                >
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-base font-medium text-zinc-950">{scenario.name}</span>
+                      <span className="px-2.5 py-0.5 rounded-full text-base font-light bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600/20">{scenario.relevantFeatures.length} passes</span>
+                    </div>
+
+                    <p className="text-base font-light text-zinc-600 leading-relaxed">{scenario.description}</p>
+
+                    {/* Tested compiler passes */}
+                    <div className="flex flex-col gap-1.5 pt-3 border-t border-zinc-100">
+                      <span className="text-base font-light text-zinc-400">Tested compiler passes</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {scenario.relevantFeatures.map((fId) => {
+                          const feat = features.find((f) => f.id === fId);
+                          return (
+                            <button
+                              key={fId}
+                              type="button"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-100/90 text-zinc-800 text-base font-normal hover:bg-zinc-200 transition-colors cursor-pointer"
+                              onClick={() => {
+                                if (onOpenFeature) onOpenFeature(fId);
+                                else onSelectRun('carbon', fId);
+                              }}
+                            >
+                              <span>{feat?.name.split(' (')[0] || fId}</span>
+                              <ArrowRight className="w-3.5 h-3.5 text-zinc-400 stroke-[1.75]" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Canonical components */}
+                    <div className="flex flex-col gap-1.5 pt-3 border-t border-zinc-100">
+                      <span className="text-base font-light text-zinc-400">Canonical components</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {scenario.componentConcepts.slice(0, 5).map((concept) => (
+                          <span key={concept} className="px-2 py-0.5 rounded-md bg-zinc-50 text-zinc-600 text-base font-light ring-1 ring-zinc-900/5 font-mono">
+                            {concept}
+                          </span>
+                        ))}
+                        {scenario.componentConcepts.length > 5 && (
+                          <span className="px-2 py-0.5 rounded-md bg-zinc-50 text-zinc-400 text-base font-light">+{scenario.componentConcepts.length - 5} more</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card footer actions */}
+                  <div className="flex items-center justify-between pt-3 border-t border-zinc-100">
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 text-base font-medium text-emerald-700 hover:text-emerald-800 cursor-pointer"
+                      onClick={() => {
+                        const primaryFeat = scenario.relevantFeatures[0] || 'all';
+                        if (onOpenFeature) onOpenFeature(primaryFeat);
+                        else onSelectRun('carbon', primaryFeat);
+                      }}
+                    >
+                      <span>View feature</span>
+                      <ArrowRight className="w-4 h-4 stroke-[1.75]" />
+                    </button>
+
+                    {onOpenShowcase && (
+                      <button
+                        type="button"
+                        className="px-3 py-1.5 rounded-xl bg-zinc-100 text-zinc-700 hover:text-zinc-950 text-base font-light transition-colors cursor-pointer"
+                        onClick={() => {
+                          const primaryFeat = scenario.relevantFeatures[0] || 'all';
+                          onOpenShowcase('carbon', primaryFeat);
+                        }}
+                      >
+                        Showcase
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
