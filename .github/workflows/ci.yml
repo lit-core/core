@@ -59,8 +59,6 @@ jobs:
   test:
     name: Build and test
     runs-on: ${{ matrix.os }}
-    env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/ms-playwright
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -98,7 +96,9 @@ jobs:
         uses: actions/cache@v4
         id: playwright-cache
         with:
-          path: ${{ runner.temp }}/ms-playwright
+          path: |
+            ~/.cache/ms-playwright
+            ~/Library/Caches/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install Playwright browsers
