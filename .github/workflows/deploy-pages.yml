@@ -1,4 +1,4 @@
-name: Deploy unified documentation, benchmarks, and showcase to GitHub Pages
+name: Deploy
 
 on:
   push:

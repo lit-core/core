@@ -1,9 +1,7 @@
 # lit-core
 
-> High-performance ahead-of-time (AOT) compiler toolchain and delivery architecture for Lit and Web Components.
-
 [![CI](https://github.com/lit-core/core/actions/workflows/ci.yml/badge.svg)](https://github.com/lit-core/core/actions/workflows/ci.yml)
-[![GitHub Pages](https://github.com/lit-core/core/actions/workflows/deploy-pages.yml/badge.svg)](https://lit-core.github.io/core/)
+[![Deploy](https://github.com/lit-core/core/actions/workflows/deploy-pages.yml/badge.svg)](https://lit-core.github.io/core/)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-dashboard-10b981?style=flat)](https://lit-core.github.io/core/)
 [![Showcase](https://img.shields.io/badge/showcase-portal-3b82f6?style=flat)](https://lit-core.github.io/core/showcase/)
 [![Node.js version](https://img.shields.io/badge/node-%3E%3D24-339933?logo=node.js&style=flat)](https://nodejs.org)
@@ -12,20 +10,18 @@
 
 ---
 
-## Introduction
+## Overview
 
-### What is it?
+`@lit-core` is an ahead-of-time (AOT) compilation toolchain and bundler optimization suite designed for Lit and Web Component applications. It shifts heavy runtime responsibilities (including CSS deduplication, decorator reflection, directive evaluation, DOM traversal, and template preparation) from client devices to build time.
 
-`@lit-core` is an ahead-of-time (AOT) compilation toolchain and bundler optimization suite designed for Lit and Web Component applications. It shifts heavy runtime responsibilities—including CSS deduplication, decorator reflection, directive evaluation, DOM traversal, and template preparation—from client devices to build time.
-
-### Why does it exist?
+## Motivation
 
 Web Components offer standards-based encapsulation via the Shadow DOM, but that encapsulation creates severe architectural friction at scale:
 - **Redundant styles**: Because global utility stylesheets cannot pierce shadow boundaries, design systems duplicate design tokens, resets, and typography in every component's `static styles`. In IBM Carbon Web Components, over 50% of the entire package size is duplicate CSS declarations.
 - **Runtime reflection**: Standard TypeScript decorators (`@property`, `@state`, `@customElement`) require runtime metadata helpers (`tslib`) and dynamic reflection during module load.
 - **Hydration and mount bottlenecks**: Standard Lit mounts clone templates and traverse the entire DOM tree via `TreeWalker` to discover binding markers, and Server-Side Rendering (SSR) incurs high Total Blocking Time (TBT) during upfront hydration.
 
-### How does it work?
+## Architecture
 
 `@lit-core` intervenes during the build phase (via Vite, Rollup, or Webpack) with native Rust AST transforms powered by `oxc` and `lightningcss`:
 1. **Deduplicates CSS ASTs**: Extracts repeated CSS declaration blocks into shared constructable stylesheets (`virtual:css-fuse/*`) instantiated once in browser memory.
@@ -33,11 +29,7 @@ Web Components offer standards-based encapsulation via the Shadow DOM, but that 
 3. **Optimizes DOM mounting**: Precomputes structural child pointer paths (`dom-paths`) and hoists event listeners to the ShadowRoot (`event-hoist`).
 4. **Enables interaction-driven resumption**: Renders Declarative Shadow DOM on the server and defers component JavaScript download until first user interaction (`resumable`).
 
----
-
-## Architecture
-
-### Big picture
+### Compiler pipeline
 
 ```mermaid
 flowchart TD
