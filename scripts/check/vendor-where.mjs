@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { CANONICAL_COMPONENT_IDS, CANONICAL_COMPONENT_METADATA, CANONICAL_SUITE_DEFINITIONS } from '../../packages/benchmarks/src/suites/canonical-components.js';
+import { CANONICAL_COMPONENT_METADATA, CANONICAL_SUITE_DEFINITIONS } from '../../packages/benchmarks/src/suites/canonical-components.js';
 
 const ROOT = process.cwd();
 const req = createRequire(path.join(ROOT, 'package.json'));
@@ -38,7 +38,7 @@ for (const sName of suites) {
       continue;
     }
 
-    const meta = CANONICAL_COMPONENT_METADATA[cKey] || { label: cKey };
+    const _meta = CANONICAL_COMPONENT_METADATA[cKey] || { label: cKey };
     let resolvedPath = 'unresolved';
     try {
       resolvedPath = req.resolve(path.join(suiteDef.packageName, comp.path));

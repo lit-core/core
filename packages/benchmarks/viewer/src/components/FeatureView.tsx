@@ -147,9 +147,10 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {allScenarios.map((sc) => (
-              <div
+              <button
+                type="button"
                 key={sc.id}
-                className="p-4 rounded-xl bg-zinc-50/70 hover:bg-zinc-100/70 transition-colors flex flex-col gap-1.5 cursor-pointer"
+                className="p-4 rounded-xl bg-zinc-50/70 hover:bg-zinc-100/70 transition-colors flex flex-col gap-1.5 cursor-pointer text-left w-full"
                 onClick={() => {
                   const feat = sc.relevantFeatures[0] || 'all';
                   onSelectFeature(feat);
@@ -160,7 +161,7 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
                   <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
                 </div>
                 <span className="text-base font-light text-zinc-500 line-clamp-2">{sc.description}</span>
-              </div>
+              </button>
             ))}
           </div>
         </div>

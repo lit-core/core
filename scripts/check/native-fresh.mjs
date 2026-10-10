@@ -102,7 +102,7 @@ export function ensureNativeFresh(crates = ALL_CRATES, root = process.cwd()) {
 }
 
 // Direct CLI execution
-if (process.argv[1] && process.argv[1].endsWith('native-fresh.mjs')) {
+if (process.argv[1]?.endsWith('native-fresh.mjs')) {
   const targetCrates = process.argv.slice(2).filter((arg) => !arg.startsWith('-'));
   const crates = targetCrates.length > 0 ? targetCrates : ALL_CRATES;
   ensureNativeFresh(crates);

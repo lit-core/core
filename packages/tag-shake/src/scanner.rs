@@ -284,22 +284,20 @@ impl<'a> Visit<'a> for CustomElementAstVisitor<'a> {
         if let Some(method_name) = get_callee_method_name(&call.callee) {
             match method_name {
                 "createElement" | "get" | "whenDefined" => {
-                    if let Some(first_arg) = call.arguments.first().and_then(|a| a.as_expression())
+                    if let Some(Expression::StringLiteral(str_lit)) =
+                        call.arguments.first().and_then(|a| a.as_expression())
                     {
-                        if let Expression::StringLiteral(str_lit) = first_arg {
-                            let tag = str_lit.value.as_str().to_ascii_lowercase();
-                            if is_valid_custom_element_name(&tag) {
-                                self.tags.insert(tag);
-                            }
+                        let tag = str_lit.value.as_str().to_ascii_lowercase();
+                        if is_valid_custom_element_name(&tag) {
+                            self.tags.insert(tag);
                         }
                     }
                 }
                 "querySelector" | "querySelectorAll" | "closest" | "matches" => {
-                    if let Some(first_arg) = call.arguments.first().and_then(|a| a.as_expression())
+                    if let Some(Expression::StringLiteral(str_lit)) =
+                        call.arguments.first().and_then(|a| a.as_expression())
                     {
-                        if let Expression::StringLiteral(str_lit) = first_arg {
-                            extract_tags_from_css_selector(str_lit.value.as_str(), &mut self.tags);
-                        }
+                        extract_tags_from_css_selector(str_lit.value.as_str(), &mut self.tags);
                     }
                 }
                 _ => {}
@@ -344,7 +342,7 @@ pub fn scan_custom_element_tags(source: &str, filename: Option<&str>) -> Vec<Str
         let path_obj = filename.map(Path::new);
         let source_type = path_obj
             .and_then(|p| SourceType::from_path(p).ok())
-            .unwrap_or_else(|| SourceType::mjs())
+            .unwrap_or_else(SourceType::mjs)
             .with_module(true)
             .with_typescript(is_ts || filename.is_none())
             .with_jsx(is_jsx || filename.is_none());

@@ -53,8 +53,8 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(htmlFuse(fuseOpts));
   }
 
-  const { propsLower: propsLowerOpt = true } = options;
-  if (propsLowerOpt !== false) {
+  const propsLowerOpt = options.propsLower ?? options['props-lower'];
+  if (propsLowerOpt) {
     const lowerOpts = typeof propsLowerOpt === 'object' ? propsLowerOpt : {};
     plugins.push(propsLower(lowerOpts));
   }

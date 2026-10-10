@@ -70,6 +70,12 @@ impl PurityAndDependencyVisitor {
     }
 }
 
+impl Default for PurityAndDependencyVisitor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> Visit<'a> for PurityAndDependencyVisitor {
     fn visit_assignment_expression(&mut self, _expr: &AssignmentExpression<'a>) {
         self.is_pure = false;

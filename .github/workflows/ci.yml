@@ -56,21 +56,21 @@ jobs:
 
       - name: Format check all Rust packages
         run: |
-          for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask html-aot resumable; do
+          for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask directives html-aot resumable tag-shake; do
             echo "Checking fmt for $pkg..."
             cargo fmt --check --manifest-path packages/$pkg/Cargo.toml
           done
 
       - name: Clippy all Rust packages
         run: |
-          for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask html-aot resumable; do
+          for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask directives html-aot resumable tag-shake; do
             echo "Running clippy for $pkg..."
             cargo clippy --manifest-path packages/$pkg/Cargo.toml -- -D warnings
           done
 
       - name: Run Rust unit and integration tests
         run: |
-          for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask html-aot resumable; do
+          for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask directives html-aot resumable tag-shake; do
             echo "Running cargo test for $pkg..."
             cargo test --manifest-path packages/$pkg/Cargo.toml
           done

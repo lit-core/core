@@ -223,3 +223,5 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
     },
   };
 }
+
+export const litCssFuse = cssFuse;

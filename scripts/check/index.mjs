@@ -1,4 +1,4 @@
-import { execSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { ALL_CRATES, getAffected } from './affected.mjs';
@@ -92,7 +92,7 @@ async function main() {
       for (const crate of affected.affectedCrates) {
         const manifestPath = path.join(ROOT, 'packages', crate, 'Cargo.toml');
         if (fs.existsSync(manifestPath)) {
-          const passed = runStep(`tier 1: cargo test for ${crate}`, `cargo test -p ${crate.replace(/-/g, '_')}`);
+          const passed = runStep(`tier 1: cargo test for ${crate}`, `cargo test --manifest-path ${manifestPath}`);
           if (!passed) allPassed = false;
         }
       }
