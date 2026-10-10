@@ -1,0 +1,72 @@
+name: Benchmark matrix
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Benchmark suite to execute'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - carbon
+          - spectrum
+          - webawesome
+          - material
+          - momentum
+  schedule:
+    # Weekly benchmark check on Sunday at 02:00 UTC
+    - cron: '0 2 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Run benchmark matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Build monorepo packages
+        run: pnpm run build
+
+      - name: Run benchmark matrix
+        run: node packages/benchmarks/src/index.js --suite=${{ inputs.suite || 'all' }}
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: packages/benchmarks/results/

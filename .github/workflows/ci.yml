@@ -55,25 +55,13 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Format check all Rust packages
-        run: |
-          for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask directives html-aot resumable tag-shake; do
-            echo "Checking fmt for $pkg..."
-            cargo fmt --check --manifest-path packages/$pkg/Cargo.toml
-          done
+        run: cargo fmt --check --all
 
       - name: Clippy all Rust packages
-        run: |
-          for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask directives html-aot resumable tag-shake; do
-            echo "Running clippy for $pkg..."
-            cargo clippy --manifest-path packages/$pkg/Cargo.toml -- -D warnings
-          done
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Run Rust unit and integration tests
-        run: |
-          for pkg in css-fuse props-lower css-minifier html-minifier html-fuse native event-hoist memoize elem-proxy dom-paths dirty-mask directives html-aot resumable tag-shake; do
-            echo "Running cargo test for $pkg..."
-            cargo test --manifest-path packages/$pkg/Cargo.toml
-          done
+        run: cargo test --workspace
 
   test:
     name: Build and test
@@ -88,6 +76,9 @@ jobs:
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
 
@@ -100,7 +91,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Build workspaces

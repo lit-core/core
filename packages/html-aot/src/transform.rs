@@ -363,6 +363,10 @@ fn compact_parts_in_code(code: &str) -> String {
                             }
                         }
                     }
+                    if obj_str.contains("//") {
+                        res.push_str(&obj_str);
+                        continue;
+                    }
                     let mut compacted = String::new();
                     let mut prev_is_space = false;
                     for sc in obj_str.chars() {

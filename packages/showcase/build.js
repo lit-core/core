@@ -6,11 +6,15 @@
  * then generates a clean Scandinavian portal hub in dist/index.html for GitHub Pages.
  */
 
-import { execSync } from 'node:child_process';
+import { exec, execSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 import zlib from 'node:zlib';
+
+const pExec = promisify(exec);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../..');
@@ -358,42 +362,51 @@ export async function buildAllShowcases(filterFeature = null) {
   fs.mkdirSync(distBaseDir, { recursive: true });
 
   const results = [];
+  const concurrency = Math.max(1, Math.min(os.availableParallelism?.() || os.cpus()?.length || 2, 4));
+  console.log(`Building with concurrency: ${concurrency}`);
 
-  for (const feat of targetFeatures) {
-    const outDir = path.join(distBaseDir, feat.id);
-    fs.mkdirSync(outDir, { recursive: true });
+  let index = 0;
+  async function worker() {
+    while (index < targetFeatures.length) {
+      const feat = targetFeatures[index++];
+      const outDir = path.join(distBaseDir, feat.id);
+      fs.mkdirSync(outDir, { recursive: true });
 
-    console.log(`\n[${feat.id}] Compiling showcase build...`);
-    const startTime = Date.now();
+      console.log(`[${feat.id}] Compiling showcase build...`);
+      const startTime = Date.now();
 
-    try {
-      execSync(`./node_modules/.bin/vite build packages/showcase --config packages/showcase/vite.config.ts`, {
-        cwd: rootDir,
-        env: {
-          ...process.env,
-          FEATURE: feat.id,
-          OUT_DIR: outDir,
-        },
-        stdio: 'inherit',
-      });
+      try {
+        await pExec(`./node_modules/.bin/vite build packages/showcase --config packages/showcase/vite.config.ts`, {
+          cwd: rootDir,
+          env: {
+            ...process.env,
+            FEATURE: feat.id,
+            OUT_DIR: outDir,
+          },
+          maxBuffer: 10 * 1024 * 1024,
+        });
 
-      const buildTimeMs = Date.now() - startTime;
-      const { rawBytes, gzipBytes } = getDirSizes(outDir);
+        const buildTimeMs = Date.now() - startTime;
+        const { rawBytes, gzipBytes } = getDirSizes(outDir);
 
-      results.push({
-        id: feat.id,
-        name: feat.name,
-        description: feat.description,
-        rawBytes,
-        gzipBytes,
-        buildTimeMs,
-      });
+        results.push({
+          id: feat.id,
+          name: feat.name,
+          description: feat.description,
+          rawBytes,
+          gzipBytes,
+          buildTimeMs,
+        });
 
-      console.log(`[done] [${feat.id}] Complete in ${buildTimeMs}ms (${formatBytes(rawBytes)} raw, ${formatBytes(gzipBytes)} gzip)`);
-    } catch (err) {
-      console.error(`[error] [${feat.id}] Build failed:`, err);
+        console.log(`[done] [${feat.id}] Complete in ${buildTimeMs}ms (${formatBytes(rawBytes)} raw, ${formatBytes(gzipBytes)} gzip)`);
+      } catch (err) {
+        console.error(`[error] [${feat.id}] Build failed:`, err?.stderr || err?.message || err);
+      }
     }
   }
+
+  const workers = Array.from({ length: Math.min(concurrency, targetFeatures.length) }, () => worker());
+  await Promise.all(workers);
 
   // Always inspect all features that exist in distBaseDir for the portal hub
   const allBuiltResults = [];
