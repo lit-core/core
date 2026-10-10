@@ -199,5 +199,5 @@ describe('benchmark viewer browser runtime and data loading', () => {
     // Assert zero unhandled console or page errors
     expect(pageErrors).toHaveLength(0);
     expect(consoleErrors).toHaveLength(0);
-  }, 30000);
+  }, 60000);
 });

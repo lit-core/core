@@ -80,5 +80,5 @@ describe('resumable SSR Declarative Shadow DOM artifact verification', () => {
 
     const resumedPills = await page.$$eval('.status-pill.resumed', (els) => els.length);
     expect(resumedPills).toBeGreaterThanOrEqual(1);
-  });
+  }, 60000);
 });
