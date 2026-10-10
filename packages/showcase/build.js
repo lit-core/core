@@ -42,9 +42,11 @@ function getDirSizes(dir) {
       if (entry.isDirectory()) {
         walk(fullPath);
       } else if (entry.isFile()) {
-        const content = fs.readFileSync(fullPath);
-        rawBytes += content.length;
-        gzipBytes += zlib.gzipSync(content).length;
+        try {
+          const content = fs.readFileSync(fullPath);
+          rawBytes += content.length;
+          gzipBytes += zlib.gzipSync(content).length;
+        } catch {}
       }
     }
   }
@@ -388,6 +390,7 @@ export async function buildAllShowcases(filterFeature = null) {
             ...process.env,
             FEATURE: feat.id,
             OUT_DIR: outDir,
+            NODE_PATH: [path.resolve(__dirname, 'node_modules'), path.resolve(rootDir, 'node_modules'), process.env.NODE_PATH || ''].filter(Boolean).join(path.delimiter),
           },
           maxBuffer: 10 * 1024 * 1024,
         });

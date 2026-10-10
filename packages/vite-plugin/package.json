@@ -42,8 +42,8 @@
   "dependencies": {
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
-    "@lit-core/dirty-mask": "workspace:*",
     "@lit-core/directives": "workspace:*",
+    "@lit-core/dirty-mask": "workspace:*",
     "@lit-core/dom-paths": "workspace:*",
     "@lit-core/elem-proxy": "workspace:*",
     "@lit-core/event-hoist": "workspace:*",
@@ -60,7 +60,7 @@
     "@types/node": "^26.6.4",
     "lit": "^3.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.3.2"
+    "vite": "^8.3.4"
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0"

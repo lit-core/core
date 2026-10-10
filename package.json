@@ -24,7 +24,8 @@
     "bundler"
   ],
   "scripts": {
-    "build": "turbo run build",
+    "build:native": "node scripts/build-native.mjs --all --release",
+    "build": "pnpm run build:native && turbo run build",
     "dev": "turbo run dev",
     "lint": "biome check .",
     "check": "node scripts/check/index.mjs",
@@ -66,9 +67,11 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@momentum-design/components": "^0.140.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.4",
     "@types/webpack": "^5.28.5",
-    "playwright": "^1.63.0",
+    "playwright": "~1.63.0",
+    "tailwindcss": "^4.3.3",
     "turbo": "^2.11.7",
     "typescript": "^7.0.2",
     "vitest": "^5.0.3",

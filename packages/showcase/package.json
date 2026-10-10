@@ -33,8 +33,8 @@
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.14.0",
-    "@carbon/styles": "^1.116.0",
-    "@carbon/web-components": "^2.64.0",
+    "@carbon/styles": "^1.117.0",
+    "@carbon/web-components": "^2.65.0",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
     "@lit-core/dirty-mask": "workspace:*",
@@ -50,10 +50,10 @@
     "@lit-core/resumable": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "@material/web": "^2.5.0",
-    "@momentum-design/components": "^0.140.1",
+    "@momentum-design/components": "^0.141.2",
     "@spectrum-web-components/bundle": "^1.12.4",
     "lit": "^3.3.3",
-    "lucide-react": "^1.51.0",
+    "lucide-react": "^1.54.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
@@ -64,6 +64,6 @@
     "@types/react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.3.2"
+    "vite": "^8.3.4"
   }
 }

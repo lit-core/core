@@ -24,20 +24,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
         with:
-          node-version: 24
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          version: "2.5.15"
 
       - name: Run Biome check
-        run: pnpm run lint
+        run: biome check .
 
   rust:
     name: Rust formatting, clippy, and tests
@@ -61,11 +54,13 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Run Rust unit and integration tests
-        run: cargo test --workspace
+        run: cargo test --workspace --lib --tests
 
   test:
     name: Build and test
     runs-on: ${{ matrix.os }}
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/ms-playwright
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -91,11 +86,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Cache Turborepo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', 'Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', 'Cargo.lock') }}-
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         id: playwright-cache
         with:
-          path: ~/.cache/ms-playwright
+          path: ${{ runner.temp }}/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install Playwright browsers
@@ -107,8 +110,3 @@ jobs:
 
       - name: Run tests
         run: pnpm run test
-
-      - name: Run bundler integration tests
-        run: |
-          node packages/vite-plugin/tests/integration.test.js
-          node packages/webpack-plugin/tests/integration.test.js

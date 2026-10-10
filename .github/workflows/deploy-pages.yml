@@ -62,11 +62,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Cache Turborepo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-pages-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', 'Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-pages-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', 'Cargo.lock') }}-
+
       - name: Build monorepo packages
         run: pnpm run build
-
-      - name: Build component test showcase
-        run: node packages/showcase/build.js
 
       - name: Build React benchmark viewer dashboard
         run: pnpm --filter @lit-core/benchmarks run viewer:build

@@ -51,3 +51,10 @@ oxc_semantic = "0.151.0"
 oxc_span = "0.151.0"
 oxc_syntax = "0.151.0"
 oxc_traverse = "0.151.0"
+
+[profile.release]
+opt-level = 2
+codegen-units = 256
+lto = false
+debug = false
+strip = "debuginfo"

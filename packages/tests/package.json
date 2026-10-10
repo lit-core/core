@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.14.0",
-    "@carbon/web-components": "^2.64.0",
+    "@carbon/web-components": "^2.65.0",
     "@lit-core/benchmarks": "workspace:*",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
@@ -36,10 +36,10 @@
     "@lit-core/vite-plugin": "workspace:*",
     "@lit-core/webpack-plugin": "workspace:*",
     "@material/web": "^2.5.0",
-    "@momentum-design/components": "^0.140.1",
+    "@momentum-design/components": "^0.141.2",
     "@spectrum-web-components/bundle": "^1.12.4",
     "lit": "^3.3.3",
-    "playwright": "^1.63.0"
+    "playwright": "~1.63.0"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

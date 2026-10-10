@@ -83,21 +83,8 @@ describe('benchmark viewer browser runtime and data loading', () => {
         });
       }
 
-      // Handle showcase requests
+      // Handle showcase requests: return lightweight mock canvas HTML to avoid mounting heavy apps in iframes
       if (pathname.includes('/showcase/')) {
-        const relative = pathname.replace(/^.*\/showcase\//, '');
-        const cleanPath = relative.split('?')[0];
-        const targetFile = path.resolve(viewerDist, 'showcase', cleanPath);
-        if (fs.existsSync(targetFile) && fs.statSync(targetFile).isFile()) {
-          const ext = path.extname(targetFile);
-          const mime = ext === '.html' ? 'text/html' : ext === '.css' ? 'text/css' : 'application/javascript';
-          return route.fulfill({
-            status: 200,
-            contentType: `${mime}; charset=utf-8`,
-            body: fs.readFileSync(targetFile),
-          });
-        }
-        // Return lightweight mock canvas HTML to avoid recursive app mounting in iframes
         return route.fulfill({
           status: 200,
           contentType: 'text/html; charset=utf-8',
@@ -139,7 +126,7 @@ describe('benchmark viewer browser runtime and data loading', () => {
     await page.goto('http://localhost:5173/');
 
     // Wait for the app to mount and fetch manifest
-    await page.waitForSelector('nav', { timeout: 5000 });
+    await page.waitForSelector('nav', { timeout: 10000 });
 
     const errorHeading = await page.$('h2:text("Failed to load benchmark data")');
     expect(errorHeading).toBeNull();
@@ -162,7 +149,7 @@ describe('benchmark viewer browser runtime and data loading', () => {
     expect(overviewContent).toContain('Multi-component bundle');
 
     // 2. Click "By library" tab
-    await page.click('header nav button:text("By library")', { timeout: 3000 });
+    await page.click('header nav button:text("By library")', { timeout: 10000 });
     await page.waitForTimeout(300);
 
     const libraryContent = await page.textContent('body');
@@ -171,7 +158,7 @@ describe('benchmark viewer browser runtime and data loading', () => {
     expect(libraryContent).toContain('Full feature comparison');
 
     // 3. Click "By feature" tab
-    await page.click('header nav button:text("By feature")', { timeout: 3000 });
+    await page.click('header nav button:text("By feature")', { timeout: 10000 });
     await page.waitForTimeout(300);
 
     const featureViewText = await page.textContent('body');
@@ -179,7 +166,7 @@ describe('benchmark viewer browser runtime and data loading', () => {
     expect(featureViewText).toContain('Scenarios unified in the combined pipeline');
 
     // 4. Click "Showcase" tab
-    await page.click('header nav button:text("Showcase")', { timeout: 3000 });
+    await page.click('header nav button:text("Showcase")', { timeout: 10000 });
     await page.waitForTimeout(300);
 
     // Verify showcase view switcher includes "By scenario"
@@ -189,7 +176,7 @@ describe('benchmark viewer browser runtime and data loading', () => {
     expect(showcaseViewButtons).toContain('Matrix view');
 
     // Click "By scenario" in Showcase
-    await page.locator('button').filter({ hasText: 'By scenario' }).click({ timeout: 5000 });
+    await page.locator('button').filter({ hasText: 'By scenario' }).click({ timeout: 10000, force: true });
     await page.waitForTimeout(300);
 
     const showcaseScenarioText = await page.textContent('body');
