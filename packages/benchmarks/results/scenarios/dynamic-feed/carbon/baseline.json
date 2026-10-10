@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "dynamic-feed-carbon-baseline",
+  "scenario": {
+    "id": "dynamic-feed",
+    "name": "Dynamic feed",
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering",
+    "relevantFeatures": ["directives", "memoize", "html-fuse"],
+    "componentConcepts": ["card", "badge", "icon", "button", "chips", "divider"]
+  },
+  "suite": {
+    "id": "carbon",
+    "name": "Carbon Web Components (@carbon/web-components)",
+    "packageName": "@carbon/web-components",
+    "version": "2.64.0"
+  },
+  "variant": {
+    "id": "baseline",
+    "name": "Baseline (Standard Vite)",
+    "isBaseline": true
+  },
+  "timestamp": "2026-10-04T20:28:54.687Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "70789ef",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 635666,
+    "gzipBytes": 83521,
+    "brotliBytes": 51149,
+    "buildTimeMs": 49.822749999999985,
+    "firstRenderMs": 41.8,
+    "updateMs": 5.7,
+    "scriptEvalMs": 1.6,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 4642395,
+    "scenarioSpecific": {
+      "totalItems": 50,
+      "directivesUsed": ["repeat", "classMap", "styleMap", "ifDefined"],
+      "renderedCards": 50
+    }
+  },
+  "runtime": {
+    "firstRenderMs": 41.8,
+    "updateMs": 5.7,
+    "scriptEvalMs": 1.6,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 4642395
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 555,
+    "verified": true
+  }
+}

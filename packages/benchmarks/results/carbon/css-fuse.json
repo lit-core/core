@@ -136,13 +136,18 @@
     "description": "Cross-component CSS deduplication into shared constructable stylesheets",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:27:32.232Z",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering"
+  },
+  "timestamp": "2026-10-04T20:30:19.411Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "70789ef",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,43 +162,43 @@
     }
   },
   "metrics": {
-    "rawBytes": 924632,
-    "gzipBytes": 142329,
-    "brotliBytes": 102195,
-    "buildTimeMs": 858.6546659999985
+    "rawBytes": 926658,
+    "gzipBytes": 143090,
+    "brotliBytes": 102785,
+    "buildTimeMs": 617.8655000000001
   },
   "baseline": {
-    "rawBytes": 1438781,
-    "gzipBytes": 186286,
-    "brotliBytes": 98045,
-    "buildTimeMs": 78.04595799999879
+    "rawBytes": 1440814,
+    "gzipBytes": 187054,
+    "brotliBytes": 98661,
+    "buildTimeMs": 70.33916699999997
   },
   "deltas": {
-    "rawBytes": -514149,
-    "rawPercent": -35.7350423726752,
-    "gzipBytes": -43957,
-    "gzipPercent": -23.596512888783913,
-    "brotliBytes": 4150,
-    "brotliPercent": 4.232750267734204,
-    "buildTimeMs": 780.6087079999998
+    "rawBytes": -514156,
+    "rawPercent": -35.69,
+    "gzipBytes": -43964,
+    "gzipPercent": -23.5,
+    "brotliBytes": 4124,
+    "brotliPercent": 4.18,
+    "buildTimeMs": 547.5,
+    "firstRenderMs": -20.5,
+    "speedupPercent": 41.75,
+    "updateMs": -0.4,
+    "updateSpeedupPercent": 7.41,
+    "evalSpeedupPercent": 12.2,
+    "registrationSpeedupPercent": -60,
+    "memorySavingsPercent": 22.66
   },
   "runtime": {
-    "firstRenderMs": 40.6,
-    "updateMs": 1.7,
-    "scriptEvalMs": 3.3,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 149128,
-    "speedupPercent": 26.978417266187048,
-    "updateSpeedupPercent": 29.166666666666668,
-    "evalSpeedupPercent": 28.26086956521739,
-    "registrationSpeedupPercent": -50.000000000000014,
-    "memorySavingsPercent": -0.10202985715819998
-  },
-  "diagnostics": {
-    "rulesScanned": 23881,
-    "rulesDeduped": 14896,
-    "fusedSheetsCreated": 170,
-    "componentsRewritten": 102,
-    "bytesSavedEstimate": 521360
+    "firstRenderMs": 28.6,
+    "updateMs": 5,
+    "scriptEvalMs": 3.6,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 6104478,
+    "speedupPercent": 41.75,
+    "updateSpeedupPercent": 7.41,
+    "evalSpeedupPercent": 12.2,
+    "registrationSpeedupPercent": -60,
+    "memorySavingsPercent": 22.66
   }
 }

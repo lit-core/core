@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "selective-app-carbon-tag-shake",
+  "scenario": {
+    "id": "selective-app",
+    "name": "Selective application",
+    "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination",
+    "relevantFeatures": ["tag-shake"],
+    "componentConcepts": ["button", "badge", "card"]
+  },
+  "suite": {
+    "id": "carbon",
+    "name": "Carbon Web Components (@carbon/web-components)",
+    "packageName": "@carbon/web-components",
+    "version": "2.64.0"
+  },
+  "variant": {
+    "id": "tag-shake",
+    "name": "Tag shake dead code elimination (tag-shake)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-04T20:30:11.959Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "70789ef",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 1440234,
+    "gzipBytes": 186856,
+    "brotliBytes": 98616,
+    "buildTimeMs": 74.760875,
+    "firstRenderMs": 17,
+    "updateMs": 0.1,
+    "scriptEvalMs": 3.5,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 7458076,
+    "scenarioSpecific": {
+      "importedCustomElementsCount": 20,
+      "referencedCustomElementsCount": 3,
+      "referencedTags": ["cds-button", "cds-tag", "cds-tile"],
+      "actionDispatches": 1
+    }
+  },
+  "baseline": {
+    "rawBytes": 1440234,
+    "gzipBytes": 186856,
+    "brotliBytes": 98616,
+    "buildTimeMs": 69.471708,
+    "firstRenderMs": 19.4,
+    "updateMs": 0.3,
+    "scriptEvalMs": 4.6,
+    "registrationMs": 1.5,
+    "heapUsedBytes": 7457875,
+    "scenarioSpecific": {
+      "importedCustomElementsCount": 20,
+      "referencedCustomElementsCount": 3,
+      "referencedTags": ["cds-button", "cds-tag", "cds-tile"],
+      "actionDispatches": 1
+    }
+  },
+  "deltas": {
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": 5.3,
+    "firstRenderMs": -2.4,
+    "speedupPercent": 12.37,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 66.67,
+    "evalSpeedupPercent": 23.91,
+    "registrationSpeedupPercent": 53.33,
+    "memorySavingsPercent": 0
+  },
+  "runtime": {
+    "firstRenderMs": 17,
+    "updateMs": 0.1,
+    "scriptEvalMs": 3.5,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 7458076,
+    "speedupPercent": 12.37,
+    "updateSpeedupPercent": 66.67,
+    "evalSpeedupPercent": 23.91,
+    "registrationSpeedupPercent": 53.33,
+    "memorySavingsPercent": 0
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 9,
+    "verified": true
+  }
+}

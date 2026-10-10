@@ -183,3 +183,67 @@ export function renderCrossSuiteSummary(summaryRows) {
   output.push(botBorder);
   return output.join('\n');
 }
+
+/**
+ * Render scenario benchmark results as a clean ASCII table.
+ * Strictly adheres to sentence case casing rules.
+ * @param {{ name: string, description: string }} scenario - Scenario definition
+ * @param {Array<any>} results - Array of scenario run result objects
+ * @returns {string}
+ */
+export function renderAsciiScenarioTable(scenario, results) {
+  if (!results || results.length === 0) return '';
+
+  const headers = ['Optimization variant', 'Minified JS', 'Gzip', 'First render', 'Render speedup', 'Update latency', 'Update speedup'];
+
+  const formattedRows = results.map((r) => {
+    const rawSize = formatKb(r.metrics?.rawBytes || 0);
+    const gzipSize = formatKb(r.metrics?.gzipBytes || 0);
+    const firstRender = r.runtime?.firstRenderMs > 0 ? `${r.runtime.firstRenderMs.toFixed(2)} ms` : 'n/a';
+    const update = r.runtime?.updateMs > 0 ? `${r.runtime.updateMs.toFixed(2)} ms` : 'n/a';
+    const speedup = r.variant?.isBaseline ? 'baseline' : r.deltas?.speedupPercent !== undefined ? `${r.deltas.speedupPercent >= 0 ? '+' : ''}${r.deltas.speedupPercent.toFixed(1)}%` : 'n/a';
+    const updateSpeedup = r.variant?.isBaseline
+      ? 'baseline'
+      : r.deltas?.updateSpeedupPercent !== undefined
+        ? `${r.deltas.updateSpeedupPercent >= 0 ? '+' : ''}${r.deltas.updateSpeedupPercent.toFixed(1)}%`
+        : 'n/a';
+
+    return {
+      cells: [r.variant?.name || r.variant?.id || 'Variant', rawSize, gzipSize, firstRender, speedup, update, updateSpeedup],
+      isBaseline: !!r.variant?.isBaseline,
+    };
+  });
+
+  const colWidths = headers.map((header, i) => {
+    const maxDataWidth = Math.max(...formattedRows.map((r) => r.cells[i].length));
+    return Math.max(header.length, maxDataWidth);
+  });
+
+  const totalWidth = colWidths.reduce((sum, w) => sum + w, 0) + (colWidths.length - 1) * 3 + 4;
+  const topBorder = `┌${colWidths.map((w) => '─'.repeat(w + 2)).join('┬')}┐`;
+  const midBorder = `├${colWidths.map((w) => '─'.repeat(w + 2)).join('┼')}┤`;
+  const botBorder = `└${colWidths.map((w) => '─'.repeat(w + 2)).join('┴')}┘`;
+
+  const headerLine = `│ ${headers.map((h, i) => (i === 0 ? h.padEnd(colWidths[i]) : h.padStart(colWidths[i]))).join(' │ ')} │`;
+
+  const output = [];
+  output.push(`\n${'═'.repeat(totalWidth)}`);
+  output.push(`🎭 Scenario: ${scenario.name}`);
+  output.push(`ℹ️  ${scenario.description}`);
+  output.push(`${'═'.repeat(totalWidth)}`);
+  output.push(topBorder);
+  output.push(headerLine);
+  output.push(midBorder);
+
+  for (let idx = 0; idx < formattedRows.length; idx++) {
+    const row = formattedRows[idx];
+    const rowLine = `│ ${row.cells.map((c, i) => (i === 0 ? c.padEnd(colWidths[i]) : c.padStart(colWidths[i]))).join(' │ ')} │`;
+    output.push(rowLine);
+    if (row.isBaseline && idx < formattedRows.length - 1) {
+      output.push(midBorder);
+    }
+  }
+
+  output.push(botBorder);
+  return output.join('\n');
+}

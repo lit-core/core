@@ -1,9 +1,10 @@
-import { Zap } from 'lucide-react';
+import { ArrowRight, Zap } from 'lucide-react';
 import type React from 'react';
 import type { ManifestData, StandaloneBenchmarkResult } from '../types.js';
 import { DiagnosticsViewer } from './DiagnosticsViewer.js';
 import { Dropdown } from './Dropdown.js';
 import { MetricCards } from './MetricCards.js';
+import { DEFAULT_SCENARIOS } from './ScenarioView.js';
 
 interface FeatureViewProps {
   manifest: ManifestData;
@@ -13,9 +14,10 @@ interface FeatureViewProps {
   onSelectFeature: (featureId: string) => void;
   onSelectSuite: (suiteId: string) => void;
   onOpenShowcase?: () => void;
+  onOpenScenario?: (scenarioId?: string) => void;
 }
 
-export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuiteId, selectedFeatureId, selectedResult, onSelectFeature, onSelectSuite }) => {
+export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuiteId, selectedFeatureId, selectedResult, onSelectFeature, onSelectSuite, onOpenScenario }) => {
   const { features, libraries, runs } = manifest;
 
   // Filter runs for this feature across all libraries
@@ -24,6 +26,9 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
   const baselineFeat = features.find((f) => f.id === 'baseline');
   const allFeat = features.find((f) => f.id === 'all');
   const individualFeats = features.filter((f) => f.id !== 'baseline' && f.id !== 'all');
+
+  const allScenarios = manifest.scenarios && manifest.scenarios.length > 0 ? manifest.scenarios : DEFAULT_SCENARIOS;
+  const currentScenario = allScenarios.find((s) => s.relevantFeatures.includes(selectedFeatureId) || (selectedResult?.scenario && selectedResult.scenario.id === s.id));
 
   return (
     <div className="flex flex-col gap-10">
@@ -46,6 +51,29 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
           onChange={onSelectFeature}
         />
       </div>
+
+      {/* Target scenario context card */}
+      {currentScenario && selectedFeatureId !== 'baseline' && (
+        <div className="p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1.5 max-w-3xl">
+            <div className="flex items-center gap-2.5">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-light bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600/20">Evaluation scenario</span>
+              <h3 className="text-base font-medium text-zinc-950 tracking-tight">{currentScenario.name}</h3>
+            </div>
+            <p className="text-base font-light text-zinc-600 leading-relaxed">{currentScenario.description}</p>
+          </div>
+          {onOpenScenario && (
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-100/90 hover:bg-zinc-200/80 text-zinc-800 text-base font-medium transition-all shrink-0 cursor-pointer shadow-none"
+              onClick={() => onOpenScenario(currentScenario.id)}
+            >
+              <span>Inspect scenario</span>
+              <ArrowRight className="w-4 h-4 stroke-[1.75]" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Cross-library comparison table with heading outside the box */}
       <div className="flex flex-col gap-3">

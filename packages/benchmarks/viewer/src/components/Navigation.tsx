@@ -1,6 +1,6 @@
 import type React from 'react';
 
-export type TabView = 'matrix' | 'library' | 'feature' | 'showcase';
+export type TabView = 'matrix' | 'scenario' | 'library' | 'feature' | 'showcase';
 
 interface NavigationProps {
   currentTab: TabView;
@@ -10,6 +10,7 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = ({ currentTab, onSelectTab }) => {
   const tabs: Array<{ id: TabView; label: string }> = [
     { id: 'matrix', label: 'Overview' },
+    { id: 'scenario', label: 'By scenario' },
     { id: 'library', label: 'By library' },
     { id: 'feature', label: 'By feature' },
     { id: 'showcase', label: 'Showcase' },

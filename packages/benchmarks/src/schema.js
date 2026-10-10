@@ -137,6 +137,58 @@ export function validateBenchmarkResult(data) {
   };
 }
 
+export const SCENARIO_SCHEMA_VERSION = '3.0.0';
+
+/**
+ * Validate that a scenario result object complies with ScenarioBenchmarkResult schema 3.0.0.
+ * @param {any} data
+ * @returns {{ valid: boolean, errors: string[] }}
+ */
+export function validateScenarioResult(data) {
+  const errors = [];
+
+  if (!data || typeof data !== 'object') {
+    return { valid: false, errors: ['Scenario result must be a non-null object'] };
+  }
+
+  if (data.schemaVersion !== SCENARIO_SCHEMA_VERSION) {
+    errors.push(`Invalid schemaVersion: expected '${SCENARIO_SCHEMA_VERSION}', got '${data.schemaVersion}'`);
+  }
+
+  if (typeof data.id !== 'string' || !data.id) {
+    errors.push('Missing or invalid id');
+  }
+
+  if (!data.scenario || typeof data.scenario !== 'object' || !data.scenario.id || !data.scenario.name) {
+    errors.push('Missing or invalid scenario metadata');
+  }
+
+  if (!data.suite || typeof data.suite !== 'object' || !data.suite.id || !data.suite.name) {
+    errors.push('Missing or invalid suite metadata');
+  }
+
+  if (!data.variant || typeof data.variant !== 'object' || !data.variant.id || !data.variant.name) {
+    errors.push('Missing or invalid variant metadata');
+  }
+
+  if (typeof data.timestamp !== 'string') {
+    errors.push('Missing or invalid timestamp');
+  }
+
+  if (!data.metrics || typeof data.metrics !== 'object') {
+    errors.push('Missing or invalid metrics object');
+  }
+
+  if (!data.environment || typeof data.environment !== 'object') {
+    errors.push('Missing or invalid environment metadata');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
 /**
  * @typedef {Object} RuntimeMetrics
  * @property {number} firstRenderMs
@@ -156,6 +208,7 @@ export function validateBenchmarkResult(data) {
  * @property {string} suiteId
  * @property {string} featureId
  * @property {string} path
+ * @property {string} [scenarioId]
  * @property {string} [htmlPath]
  * @property {number} rawBytes
  * @property {number} gzipBytes

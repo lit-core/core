@@ -49,6 +49,29 @@
  */
 
 /**
+ * @typedef {Object} RuntimeMetrics
+ * @property {number} firstRenderMs
+ * @property {number} [updateMs]
+ * @property {number} [scriptEvalMs]
+ * @property {number} [registrationMs]
+ * @property {number} [heapUsedBytes]
+ * @property {number} [speedupPercent]
+ * @property {number} [updateSpeedupPercent]
+ * @property {number} [evalSpeedupPercent]
+ * @property {number} [registrationSpeedupPercent]
+ * @property {number} [memorySavingsPercent]
+ */
+
+/**
+ * @typedef {Object} ScenarioMetadata
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {string[]} relevantFeatures
+ * @property {string[]} componentConcepts
+ */
+
+/**
  * @typedef {import('./table.js').TableRow[] & {
  *   diagnostics?: Record<string, any>;
  *   suiteContext: SuiteContext;

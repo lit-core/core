@@ -9,6 +9,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab }) => {
   const tabs: Array<{ id: TabView; label: string }> = [
     { id: 'matrix', label: 'Overview' },
+    { id: 'scenario', label: 'By scenario' },
     { id: 'library', label: 'By library' },
     { id: 'feature', label: 'By feature' },
     { id: 'showcase', label: 'Showcase' },

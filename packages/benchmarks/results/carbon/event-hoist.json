@@ -136,13 +136,18 @@
     "description": "Ahead-of-time ShadowRoot event delegation",
     "isBaseline": false
   },
-  "timestamp": "2026-10-03T19:27:41.197Z",
+  "scenario": {
+    "id": "interactive-form",
+    "name": "Interactive form",
+    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration"
+  },
+  "timestamp": "2026-10-04T20:32:01.769Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "edc74ca",
+    "gitCommit": "70789ef",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -157,36 +162,54 @@
     }
   },
   "metrics": {
-    "rawBytes": 1462397,
-    "gzipBytes": 192685,
-    "brotliBytes": 98753,
-    "buildTimeMs": 65.51479099999415
+    "rawBytes": 317211,
+    "gzipBytes": 51307,
+    "brotliBytes": 35247,
+    "buildTimeMs": 49.5985
   },
   "baseline": {
-    "rawBytes": 1438781,
-    "gzipBytes": 186286,
-    "brotliBytes": 98045,
-    "buildTimeMs": 78.04595799999879
+    "rawBytes": 310671,
+    "gzipBytes": 49400,
+    "brotliBytes": 34829,
+    "buildTimeMs": 33.34837500000003,
+    "firstRenderMs": 33.2,
+    "updateMs": 0.4,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 3001534,
+    "scenarioSpecific": {
+      "sectionsCount": 5,
+      "controlsPerSection": 6,
+      "totalControls": 30,
+      "eventsDispatched": 15
+    }
   },
   "deltas": {
-    "rawBytes": 23616,
-    "rawPercent": 1.6413894817904877,
-    "gzipBytes": 6399,
-    "gzipPercent": 3.43504074380254,
-    "brotliBytes": 708,
-    "brotliPercent": 0.7221173950736907,
-    "buildTimeMs": -12.531167000004643
+    "rawBytes": 6540,
+    "rawPercent": 2.11,
+    "gzipBytes": 1907,
+    "gzipPercent": 3.86,
+    "brotliBytes": 418,
+    "brotliPercent": 1.2,
+    "buildTimeMs": 16.3,
+    "firstRenderMs": -3.5,
+    "speedupPercent": 10.54,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 25,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -1.39
   },
   "runtime": {
-    "firstRenderMs": 72.5,
-    "updateMs": 4.3,
-    "scriptEvalMs": 4,
-    "registrationMs": 1,
-    "heapUsedBytes": 152928,
-    "speedupPercent": -30.395683453237403,
-    "updateSpeedupPercent": -79.16666666666666,
-    "evalSpeedupPercent": 13.04347826086956,
-    "registrationSpeedupPercent": -66.66666666666667,
-    "memorySavingsPercent": -2.6527762861131996
+    "firstRenderMs": 29.7,
+    "updateMs": 0.3,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 3043193,
+    "speedupPercent": 10.54,
+    "updateSpeedupPercent": 25,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -1.39
   }
 }

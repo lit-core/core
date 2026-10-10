@@ -2,11 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
-import { calculateImpact, getFileSizes } from './metrics.js';
-import { FEATURE_METADATA, loadStandaloneResult, saveStandaloneResult } from './reporters/json-reporter.js';
-import { closeBrowser, measureBundleRuntime } from './runtime.js';
-import { getEnvironmentMetadata } from './schema.js';
-import { getCombinedPlugins } from './tools/index.js';
+import { getFileSizes } from './metrics.js';
+import { closeBrowser } from './runtime.js';
+import { getScenario, getScenarioForFeature, runScenarioBenchmark } from './scenarios/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../..');
@@ -116,177 +114,23 @@ export function buildRuntimeRecord(measure, comparison = {}) {
  * @returns {Promise<any>}
  */
 export async function runStandaloneBenchmark({ suite, tool, options = {}, allTools = [] }) {
+  void allTools;
   const isBaseline = tool === 'baseline';
   const isAll = tool === 'all';
   const toolId = isBaseline ? 'baseline' : isAll ? 'all' : tool.id;
-  const toolName = isBaseline ? FEATURE_METADATA.baseline.name : isAll ? FEATURE_METADATA.all.name : FEATURE_METADATA[tool.id]?.name || tool.name;
-  const toolDesc = isBaseline ? FEATURE_METADATA.baseline.description : isAll ? FEATURE_METADATA.all.description : FEATURE_METADATA[tool.id]?.description || tool.description;
+  const scenario = getScenarioForFeature(toolId);
 
-  const tempBaseDir = path.join(__dirname, `../.temp-bench-${suite.id}-${toolId}-${Date.now()}`);
-  fs.mkdirSync(tempBaseDir, { recursive: true });
-
-  const suiteContext = await suite.setup();
-
-  try {
-    if (options.verbose) {
-      console.log(`\n[${suite.name}] 🏗️  Running standalone benchmark for: ${toolName}...`);
-    }
-
-    // 1. If running a non-baseline feature, check for cached baseline or build baseline first
-    let baselineMetrics = null;
-    let baselineRuntime = null;
-
-    if (!isBaseline) {
-      const cached = loadStandaloneResult(suite.id, 'baseline', options.outDir);
-      if (cached?.metrics && cached?.runtime) {
-        baselineMetrics = cached.metrics;
-        baselineRuntime = cached.runtime;
-        if (options.verbose) {
-          console.log(`[${suite.name}] ℹ️  Using existing baseline (${baselineMetrics.rawBytes} bytes)`);
-        }
-      } else {
-        if (options.verbose) {
-          console.log(`[${suite.name}] ℹ️  No baseline found; building baseline first...`);
-        }
-        const baselineOutDir = path.join(tempBaseDir, 'dist-baseline');
-        baselineMetrics = await runViteBuild({
-          entryPath: suiteContext.entryPath,
-          outDir: baselineOutDir,
-          plugins: [],
-        });
-        const baselineBundle = path.join(baselineOutDir, 'bundle.js');
-        const rt = await measureBundleRuntime(baselineBundle, 'Baseline');
-        baselineRuntime = buildRuntimeRecord(rt);
-
-        // Save baseline JSON for future reuse
-        const baselineResult = {
-          schemaVersion: '2.0.0',
-          id: `${suite.id}-baseline`,
-          suite: {
-            id: suite.id,
-            name: suiteContext.name || suite.name,
-            packageName: suiteContext.packageName || suite.packageName,
-            version: suiteContext.version || 'unknown',
-            componentCount: suiteContext.componentCount,
-            components: suiteContext.metadata?.components || [],
-          },
-          feature: {
-            id: 'baseline',
-            name: FEATURE_METADATA.baseline.name,
-            description: FEATURE_METADATA.baseline.description,
-            isBaseline: true,
-          },
-          timestamp: new Date().toISOString(),
-          environment: getEnvironmentMetadata(),
-          metrics: baselineMetrics,
-          runtime: baselineRuntime,
-        };
-        saveStandaloneResult({
-          suiteId: suite.id,
-          featureId: 'baseline',
-          result: baselineResult,
-          outDir: options.outDir,
-        });
-      }
-    }
-
-    // 2. Build the target bundle
-    const targetOutDir = path.join(tempBaseDir, `dist-${toolId}`);
-    /** @type {import('vite').Plugin[]} */
-    let plugins = [];
-    if (!isBaseline) {
-      if (isAll) {
-        plugins = await getCombinedPlugins(allTools, suiteContext);
-      } else {
-        plugins = await tool.getPlugins(suiteContext);
-      }
-    }
-
-    const metrics = await runViteBuild({
-      entryPath: suiteContext.entryPath,
-      outDir: targetOutDir,
-      plugins,
-    });
-
-    const bundlePath = path.join(targetOutDir, 'bundle.js');
-    const runtimeMeasure = await measureBundleRuntime(bundlePath, toolName);
-
-    let deltas = null;
-    let comparison = {};
-    if (!isBaseline && baselineMetrics) {
-      const impact = calculateImpact(baselineMetrics, metrics);
-      deltas = {
-        rawBytes: impact.rawDiff,
-        rawPercent: impact.rawPercent,
-        gzipBytes: impact.gzipDiff,
-        gzipPercent: impact.gzipPercent,
-        brotliBytes: impact.brotliDiff,
-        brotliPercent: impact.brotliPercent,
-        buildTimeMs: (metrics.buildTimeMs || 0) - (baselineMetrics.buildTimeMs || 0),
-      };
-
-      if (baselineRuntime) {
-        comparison = compareRuntime(baselineRuntime, runtimeMeasure);
-      }
-    }
-
-    const runtime = buildRuntimeRecord(runtimeMeasure, comparison);
-
-    /** @type {Record<string, any>} */
-    let diagnostics = {};
-    if (!isBaseline && !isAll && typeof tool.getDiagnostics === 'function') {
-      try {
-        const diag = await tool.getDiagnostics(suiteContext);
-        if (diag) diagnostics = diag;
-      } catch {}
-    }
-
-    const standaloneResult = {
-      schemaVersion: '2.0.0',
-      id: `${suite.id}-${toolId}`,
-      suite: {
-        id: suite.id,
-        name: suiteContext.name || suite.name,
-        packageName: suiteContext.packageName || suite.packageName,
-        version: suiteContext.version || 'unknown',
-        componentCount: suiteContext.componentCount,
-        components: suiteContext.metadata?.components || [],
-      },
-      feature: {
-        id: toolId,
-        name: toolName,
-        description: toolDesc,
-        isBaseline,
-      },
-      timestamp: new Date().toISOString(),
-      environment: getEnvironmentMetadata(),
-      metrics,
-      ...(isBaseline ? {} : { baseline: baselineMetrics }),
-      ...(deltas ? { deltas } : {}),
-      runtime,
-      ...(Object.keys(diagnostics).length > 0 ? { diagnostics } : {}),
-    };
-
-    saveStandaloneResult({
-      suiteId: suite.id,
-      featureId: toolId,
-      result: standaloneResult,
-      outDir: options.outDir,
-    });
-
-    return standaloneResult;
-  } finally {
-    await closeBrowser();
-    await suite.cleanup();
-    if (fs.existsSync(tempBaseDir)) {
-      fs.rmSync(tempBaseDir, { recursive: true, force: true });
-    }
-  }
+  return runScenarioBenchmark({
+    scenario,
+    suite,
+    variantId: toolId,
+    options,
+  });
 }
 
 /**
  * Execute a benchmark run for a specific suite across all active tools.
- * Also persists standalone JSON results and HTML showcases for baseline, each tool, and combined bundle.
+ * Runs each optimization tool under its authentic designated scenario.
  * @param {import('./types.js').BenchmarkSuite} suite
  * @param {import('./types.js').BenchmarkTool[]} tools
  * @param {Object} [options]
@@ -295,38 +139,34 @@ export async function runStandaloneBenchmark({ suite, tool, options = {}, allToo
  * @returns {Promise<import('./types.js').SuiteBenchmarkResult>}
  */
 export async function runSuiteBenchmark(suite, tools, options = {}) {
-  const tempBaseDir = path.join(__dirname, `../.temp-bench-${suite.id}-${Date.now()}`);
-  fs.mkdirSync(tempBaseDir, { recursive: true });
-
-  const suiteContext = await suite.setup();
   const rows = [];
-  /** @type {Record<string, any>} */
+  const runtimeRows = [];
   const diagnostics = {};
 
   try {
-    // 1. BASELINE BUILD (Standard Vite, 0 optimizations)
-    if (options.verbose) {
-      console.log(`\n[${suite.name}] 🏗️  Building Baseline Bundle (Standard Vite)...`);
-    }
-    const baselineOutDir = path.join(tempBaseDir, 'dist-baseline');
-    const baselineMetrics = await runViteBuild({
-      entryPath: suiteContext.entryPath,
-      outDir: baselineOutDir,
-      plugins: [],
+    // 1. Run baseline for the primary bundle scenario
+    const bundleScenario = getScenario('bundle');
+    const baselineResult = await runScenarioBenchmark({
+      scenario: bundleScenario,
+      suite,
+      variantId: 'baseline',
+      options,
     });
 
-    const runtimeRows = [];
-    const baselineBundle = path.join(baselineOutDir, 'bundle.js');
-    const baselineRuntimeMeasure = await measureBundleRuntime(baselineBundle, 'Baseline');
-    const baselineRuntime = buildRuntimeRecord(baselineRuntimeMeasure);
+    rows.push({
+      name: 'Baseline (Standard Vite)',
+      description: 'Standard Vite build without optimization plugins',
+      metrics: baselineResult.metrics,
+      isBaseline: true,
+    });
 
     runtimeRows.push({
       name: 'Baseline (Standard Vite)',
-      firstRenderMs: baselineRuntime.firstRenderMs,
-      updateMs: baselineRuntime.updateMs,
-      scriptEvalMs: baselineRuntime.scriptEvalMs,
-      registrationMs: baselineRuntime.registrationMs,
-      heapUsedBytes: baselineRuntime.heapUsedBytes,
+      firstRenderMs: baselineResult.runtime.firstRenderMs,
+      updateMs: baselineResult.runtime.updateMs,
+      scriptEvalMs: baselineResult.runtime.scriptEvalMs,
+      registrationMs: baselineResult.runtime.registrationMs,
+      heapUsedBytes: baselineResult.runtime.heapUsedBytes,
       speedupPercent: 0,
       updateSpeedupPercent: 0,
       evalSpeedupPercent: 0,
@@ -334,228 +174,93 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       isBaseline: true,
     });
 
-    rows.push({
-      name: 'Baseline (Standard Vite)',
-      description: 'Standard Vite build without optimization plugins',
-      metrics: baselineMetrics,
-      isBaseline: true,
-    });
-
-    // Save baseline standalone JSON
-    saveStandaloneResult({
-      suiteId: suite.id,
-      featureId: 'baseline',
-      result: {
-        schemaVersion: '2.0.0',
-        id: `${suite.id}-baseline`,
-        suite: {
-          id: suite.id,
-          name: suiteContext.name || suite.name,
-          packageName: suiteContext.packageName || suite.packageName,
-          version: suiteContext.version || 'unknown',
-          componentCount: suiteContext.componentCount,
-          components: suiteContext.metadata?.components || [],
-        },
-        feature: {
-          id: 'baseline',
-          name: FEATURE_METADATA.baseline.name,
-          description: FEATURE_METADATA.baseline.description,
-          isBaseline: true,
-        },
-        timestamp: new Date().toISOString(),
-        environment: getEnvironmentMetadata(),
-        metrics: baselineMetrics,
-        runtime: baselineRuntime,
-      },
-      outDir: options.outDir,
-    });
-
-    // 2. RUN EACH TOOL IN ISOLATION
+    // 2. Run each tool under its authentic designated scenario
     for (const tool of tools) {
-      if (options.verbose) {
-        console.log(`[${suite.name}] 🔧 Evaluating Tool: ${tool.name}...`);
-      }
-
-      const toolPlugins = await tool.getPlugins(suiteContext);
-      const toolOutDir = path.join(tempBaseDir, `dist-${tool.id}`);
-      const toolMetrics = await runViteBuild({
-        entryPath: suiteContext.entryPath,
-        outDir: toolOutDir,
-        plugins: toolPlugins,
+      const scenario = getScenarioForFeature(tool.id);
+      const scenarioResult = await runScenarioBenchmark({
+        scenario,
+        suite,
+        variantId: tool.id,
+        options,
       });
 
-      const impact = calculateImpact(baselineMetrics, toolMetrics);
-      const toolBundle = path.join(toolOutDir, 'bundle.js');
-      const toolRuntimeMeasure = await measureBundleRuntime(toolBundle, tool.name);
-      const toolComparison = compareRuntime(baselineRuntime, toolRuntimeMeasure);
-      const toolRuntime = buildRuntimeRecord(toolRuntimeMeasure, toolComparison);
-
-      runtimeRows.push({
-        name: tool.name,
-        firstRenderMs: toolRuntime.firstRenderMs,
-        updateMs: toolRuntime.updateMs,
-        scriptEvalMs: toolRuntime.scriptEvalMs,
-        registrationMs: toolRuntime.registrationMs,
-        heapUsedBytes: toolRuntime.heapUsedBytes,
-        speedupPercent: toolRuntime.speedupPercent,
-        updateSpeedupPercent: toolRuntime.updateSpeedupPercent,
-        evalSpeedupPercent: toolRuntime.evalSpeedupPercent,
-        memorySavingsPercent: toolRuntime.memorySavingsPercent,
-      });
+      const impact = {
+        rawDiff: scenarioResult.deltas?.rawBytes || 0,
+        rawPercent: scenarioResult.deltas?.rawPercent || 0,
+        gzipDiff: scenarioResult.deltas?.gzipBytes || 0,
+        gzipPercent: scenarioResult.deltas?.gzipPercent || 0,
+        brotliDiff: scenarioResult.deltas?.brotliBytes || 0,
+        brotliPercent: scenarioResult.deltas?.brotliPercent || 0,
+      };
 
       rows.push({
         name: tool.name,
-        description: tool.description,
-        metrics: toolMetrics,
+        description: `[Scenario: ${scenario.name}] ${tool.description}`,
+        scenarioId: scenario.id,
+        scenarioName: scenario.name,
+        metrics: scenarioResult.metrics,
         impact,
       });
 
-      /** @type {Record<string, any>} */
-      let toolDiag = {};
-      if (typeof tool.getDiagnostics === 'function') {
-        const diag = await tool.getDiagnostics(suiteContext);
-        if (diag) {
-          toolDiag = diag;
-          diagnostics[tool.id] = diag;
-        }
-      }
-
-      // Save standalone JSON for this tool
-      saveStandaloneResult({
-        suiteId: suite.id,
-        featureId: tool.id,
-        result: {
-          schemaVersion: '2.0.0',
-          id: `${suite.id}-${tool.id}`,
-          suite: {
-            id: suite.id,
-            name: suiteContext.name || suite.name,
-            packageName: suiteContext.packageName || suite.packageName,
-            version: suiteContext.version || 'unknown',
-            componentCount: suiteContext.componentCount,
-            components: suiteContext.metadata?.components || [],
-          },
-          feature: {
-            id: tool.id,
-            name: FEATURE_METADATA[tool.id]?.name || tool.name,
-            description: FEATURE_METADATA[tool.id]?.description || tool.description,
-            isBaseline: false,
-          },
-          timestamp: new Date().toISOString(),
-          environment: getEnvironmentMetadata(),
-          metrics: toolMetrics,
-          baseline: baselineMetrics,
-          deltas: {
-            rawBytes: impact.rawDiff,
-            rawPercent: impact.rawPercent,
-            gzipBytes: impact.gzipDiff,
-            gzipPercent: impact.gzipPercent,
-            brotliBytes: impact.brotliDiff,
-            brotliPercent: impact.brotliPercent,
-            buildTimeMs: (toolMetrics.buildTimeMs || 0) - (baselineMetrics.buildTimeMs || 0),
-          },
-          runtime: toolRuntime,
-          ...(Object.keys(toolDiag).length > 0 ? { diagnostics: toolDiag } : {}),
-        },
-        outDir: options.outDir,
+      runtimeRows.push({
+        name: `${tool.name} [${scenario.name}]`,
+        firstRenderMs: scenarioResult.runtime.firstRenderMs,
+        updateMs: scenarioResult.runtime.updateMs,
+        scriptEvalMs: scenarioResult.runtime.scriptEvalMs,
+        registrationMs: scenarioResult.runtime.registrationMs,
+        heapUsedBytes: scenarioResult.runtime.heapUsedBytes,
+        speedupPercent: scenarioResult.deltas?.speedupPercent || 0,
+        updateSpeedupPercent: scenarioResult.deltas?.updateSpeedupPercent || 0,
+        evalSpeedupPercent: scenarioResult.deltas?.evalSpeedupPercent || 0,
+        registrationSpeedupPercent: scenarioResult.deltas?.registrationSpeedupPercent || 0,
+        memorySavingsPercent: scenarioResult.deltas?.memorySavingsPercent || 0,
       });
     }
 
-    // 3. RUN TOTAL / COMBINED (All Tools Enabled)
-    if (options.verbose) {
-      console.log(`[${suite.name}] ⚡ Building Combined Bundle (All Active Optimizations)...`);
-    }
-
-    let totalMetrics = null;
-    let totalImpact = null;
-    const totalOutDir = path.join(tempBaseDir, 'dist-total');
-
-    if (tools.length === 1) {
-      const singleToolRow = rows[1];
-      totalMetrics = singleToolRow.metrics;
-      totalImpact = singleToolRow.impact;
-    } else if (tools.length > 1) {
-      const combinedPlugins = await getCombinedPlugins(tools, suiteContext);
-      totalMetrics = await runViteBuild({
-        entryPath: suiteContext.entryPath,
-        outDir: totalOutDir,
-        plugins: combinedPlugins,
-      });
-      totalImpact = calculateImpact(baselineMetrics, totalMetrics);
-    } else {
-      totalMetrics = baselineMetrics;
-      totalImpact = calculateImpact(baselineMetrics, baselineMetrics);
-    }
-
-    const totalBundle = path.join(totalOutDir, 'bundle.js');
-    const totalRuntimeMeasure = tools.length === 1 && runtimeRows[1] ? runtimeRows[1] : fs.existsSync(totalBundle) ? await measureBundleRuntime(totalBundle, 'TOTAL') : baselineRuntime;
-    const totalComparison = compareRuntime(baselineRuntime, totalRuntimeMeasure);
-    const totalRuntime = buildRuntimeRecord(totalRuntimeMeasure, totalComparison);
-
-    runtimeRows.push({
-      name: 'TOTAL (All Optimizations Combined)',
-      firstRenderMs: totalRuntime.firstRenderMs,
-      updateMs: totalRuntime.updateMs,
-      scriptEvalMs: totalRuntime.scriptEvalMs,
-      registrationMs: totalRuntime.registrationMs,
-      heapUsedBytes: totalRuntime.heapUsedBytes,
-      speedupPercent: totalRuntime.speedupPercent,
-      updateSpeedupPercent: totalRuntime.updateSpeedupPercent,
-      evalSpeedupPercent: totalRuntime.evalSpeedupPercent,
-      memorySavingsPercent: totalRuntime.memorySavingsPercent,
-      isTotal: true,
-    });
-
-    rows.push({
-      name: 'TOTAL (All Optimizations Combined)',
-      description: 'Combined impact of all enabled optimization tools',
-      metrics: totalMetrics,
-      impact: totalImpact,
-      isTotal: true,
-    });
-
-    // Save combined standalone JSON
+    // 3. Run total / combined under bundle scenario
     if (tools.length > 1) {
-      saveStandaloneResult({
-        suiteId: suite.id,
-        featureId: 'all',
-        result: {
-          schemaVersion: '2.0.0',
-          id: `${suite.id}-all`,
-          suite: {
-            id: suite.id,
-            name: suiteContext.name || suite.name,
-            packageName: suiteContext.packageName || suite.packageName,
-            version: suiteContext.version || 'unknown',
-            componentCount: suiteContext.componentCount,
-            components: suiteContext.metadata?.components || [],
-          },
-          feature: {
-            id: 'all',
-            name: FEATURE_METADATA.all.name,
-            description: FEATURE_METADATA.all.description,
-            isBaseline: false,
-          },
-          timestamp: new Date().toISOString(),
-          environment: getEnvironmentMetadata(),
-          metrics: totalMetrics,
-          baseline: baselineMetrics,
-          deltas: totalImpact
-            ? {
-                rawBytes: totalImpact.rawDiff,
-                rawPercent: totalImpact.rawPercent,
-                gzipBytes: totalImpact.gzipDiff,
-                gzipPercent: totalImpact.gzipPercent,
-                brotliBytes: totalImpact.brotliDiff,
-                brotliPercent: totalImpact.brotliPercent,
-                buildTimeMs: (totalMetrics.buildTimeMs || 0) - (baselineMetrics.buildTimeMs || 0),
-              }
-            : {},
-          runtime: totalRuntime,
-        },
-        outDir: options.outDir,
+      const totalResult = await runScenarioBenchmark({
+        scenario: bundleScenario,
+        suite,
+        variantId: 'all',
+        options,
+      });
+
+      const totalImpact = {
+        rawDiff: totalResult.deltas?.rawBytes || 0,
+        rawPercent: totalResult.deltas?.rawPercent || 0,
+        gzipDiff: totalResult.deltas?.gzipBytes || 0,
+        gzipPercent: totalResult.deltas?.gzipPercent || 0,
+        brotliDiff: totalResult.deltas?.brotliBytes || 0,
+        brotliPercent: totalResult.deltas?.brotliPercent || 0,
+      };
+
+      rows.push({
+        name: 'TOTAL (All Optimizations Combined)',
+        description: 'All compiler passes active simultaneously',
+        metrics: totalResult.metrics,
+        impact: totalImpact,
+        isTotal: true,
+      });
+
+      runtimeRows.push({
+        name: 'TOTAL (All Optimizations Combined)',
+        firstRenderMs: totalResult.runtime.firstRenderMs,
+        updateMs: totalResult.runtime.updateMs,
+        scriptEvalMs: totalResult.runtime.scriptEvalMs,
+        registrationMs: totalResult.runtime.registrationMs,
+        heapUsedBytes: totalResult.runtime.heapUsedBytes,
+        speedupPercent: totalResult.deltas?.speedupPercent || 0,
+        updateSpeedupPercent: totalResult.deltas?.updateSpeedupPercent || 0,
+        evalSpeedupPercent: totalResult.deltas?.evalSpeedupPercent || 0,
+        registrationSpeedupPercent: totalResult.deltas?.registrationSpeedupPercent || 0,
+        memorySavingsPercent: totalResult.deltas?.memorySavingsPercent || 0,
+        isTotal: true,
       });
     }
+
+    const suiteContext = await suite.setup();
+    await suite.cleanup();
 
     return Object.assign(rows, {
       diagnostics,
@@ -565,8 +270,5 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
   } finally {
     await closeBrowser();
     await suite.cleanup();
-    if (fs.existsSync(tempBaseDir)) {
-      fs.rmSync(tempBaseDir, { recursive: true, force: true });
-    }
   }
 }

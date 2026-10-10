@@ -58,7 +58,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
   let browser = null;
   try {
     browser = await getBrowser();
-  } catch (err) {
+  } catch (_err) {
     return emptyRuntimeMetrics();
   }
   if (!browser) {

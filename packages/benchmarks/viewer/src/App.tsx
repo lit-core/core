@@ -7,6 +7,7 @@ import { Header } from './components/Header.js';
 import { LibraryView } from './components/LibraryView.js';
 import { MatrixOverview } from './components/MatrixOverview.js';
 import type { TabView } from './components/Navigation.js';
+import { ScenarioView } from './components/ScenarioView.js';
 import { ShowcaseViewer } from './components/ShowcaseViewer.js';
 import type { ManifestData, StandaloneBenchmarkResult } from './types.js';
 
@@ -29,7 +30,7 @@ export const App: React.FC = () => {
       const suiteParam = params.get('suite');
       const featureParam = params.get('feature');
 
-      if (tabParam && ['matrix', 'library', 'feature', 'showcase'].includes(tabParam)) setCurrentTab(tabParam);
+      if (tabParam && ['matrix', 'scenario', 'library', 'feature', 'showcase'].includes(tabParam)) setCurrentTab(tabParam);
       if (suiteParam) setSelectedSuiteId(suiteParam);
       if (featureParam) setSelectedFeatureId(featureParam);
     }
@@ -144,7 +145,20 @@ export const App: React.FC = () => {
 
         {manifest && (
           <>
-            {currentTab === 'matrix' && <MatrixOverview manifest={manifest} onSelectRun={handleSelectRun} />}
+            {currentTab === 'matrix' && <MatrixOverview manifest={manifest} onSelectRun={handleSelectRun} onOpenScenarioView={() => setCurrentTab('scenario')} />}
+
+            {currentTab === 'scenario' && (
+              <ScenarioView
+                manifest={manifest}
+                selectedSuiteId={selectedSuiteId}
+                onSelectSuite={setSelectedSuiteId}
+                onSelectFeature={(featId) => {
+                  setSelectedFeatureId(featId);
+                  setCurrentTab('feature');
+                }}
+                onOpenFeatureView={() => setCurrentTab('feature')}
+              />
+            )}
 
             {currentTab === 'library' && (
               <LibraryView
@@ -167,6 +181,7 @@ export const App: React.FC = () => {
                 onSelectFeature={setSelectedFeatureId}
                 onSelectSuite={setSelectedSuiteId}
                 onOpenShowcase={() => setCurrentTab('showcase')}
+                onOpenScenario={() => setCurrentTab('scenario')}
               />
             )}
 

@@ -1,4 +1,4 @@
-import { Activity, Archive, Cpu, Database, Layers, RefreshCw, Scale, SlidersHorizontal, Zap } from 'lucide-react';
+import { Activity, Archive, ArrowRight, Cpu, Database, Layers, RefreshCw, Scale, SlidersHorizontal, Zap } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import type { ManifestData, ManifestRunEntry } from '../types.js';
@@ -7,6 +7,7 @@ import { Dropdown } from './Dropdown.js';
 interface MatrixOverviewProps {
   manifest: ManifestData;
   onSelectRun: (suiteId: string, featureId: string) => void;
+  onOpenScenarioView?: () => void;
 }
 
 type Category = 'payload' | 'performance';
@@ -15,7 +16,7 @@ type PayloadUnit = 'percent' | 'kb';
 type PerfMetric = 'firstRender' | 'update' | 'scriptEval' | 'registration' | 'heap' | 'buildTime';
 type PerfUnit = 'ms' | 'percent';
 
-export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSelectRun }) => {
+export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSelectRun, onOpenScenarioView }) => {
   const [category, setCategory] = useState<Category>('payload');
   const [payloadFormat, setPayloadFormat] = useState<PayloadFormat>('gzip');
   const [payloadUnit, setPayloadUnit] = useState<PayloadUnit>('percent');
@@ -727,14 +728,27 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         </div>
 
         {/* Methodology note delineating static leaf matrix vs dynamic scenarios */}
-        <div className="p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5 flex flex-col gap-2">
-          <h3 className="text-base font-medium text-zinc-950 tracking-tight">Understanding matrix vs scenario benchmarks</h3>
-          <p className="text-base font-light text-zinc-600 leading-relaxed">
-            The cross-library matrix evaluates 20 canonical atomic UI components (buttons, inputs, checkboxes, dialogs) bundled into static client-side applications. Optimizations designed for dynamic
-            data collections (such as reactive array pipeline caching in <code className="text-base font-normal text-zinc-900">memoize</code>, which yields -99.5% update latency in data tables) or
-            server-rendered Declarative Shadow DOM (such as interaction-driven hydration in <code className="text-base font-normal text-zinc-900">resumable</code>, which reduces initial JavaScript
-            payload by -99.6%) show 0.0% delta on static leaf components by design. To review these optimizations in their target execution contexts, inspect the dedicated scenario benchmarks.
-          </p>
+        <div className="p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-2 max-w-4xl">
+            <h3 className="text-base font-medium text-zinc-950 tracking-tight">Understanding matrix vs scenario benchmarks</h3>
+            <p className="text-base font-light text-zinc-600 leading-relaxed">
+              The cross-library matrix evaluates 20 canonical atomic UI components (buttons, inputs, checkboxes, dialogs) bundled into static client-side applications. Optimizations designed for
+              dynamic data collections (such as reactive array pipeline caching in <code className="text-base font-normal text-zinc-900">memoize</code>, which yields -99.5% update latency in data
+              tables) or server-rendered Declarative Shadow DOM (such as interaction-driven hydration in <code className="text-base font-normal text-zinc-900">resumable</code>, which reduces initial
+              JavaScript payload by -99.6%) show 0.0% delta on static leaf components by design. To review these optimizations in their target execution contexts, inspect the dedicated scenario
+              benchmarks.
+            </p>
+          </div>
+          {onOpenScenarioView && (
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-base font-medium transition-all shrink-0 cursor-pointer shadow-none"
+              onClick={onOpenScenarioView}
+            >
+              <span>Explore scenarios</span>
+              <ArrowRight className="w-4 h-4 stroke-[1.75]" />
+            </button>
+          )}
         </div>
       </div>
     </div>

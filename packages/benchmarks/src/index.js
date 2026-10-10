@@ -1,6 +1,7 @@
 import { runStandaloneBenchmark, runSuiteBenchmark } from './runner.js';
+import { getScenario, runScenarioBenchmark, SCENARIOS } from './scenarios/index.js';
 import { getSuites } from './suites/index.js';
-import { renderAsciiRuntimeTable, renderAsciiTable, renderCrossSuiteSummary } from './table.js';
+import { renderAsciiRuntimeTable, renderAsciiScenarioTable, renderAsciiTable, renderCrossSuiteSummary } from './table.js';
 import { getActiveTools, registeredTools } from './tools/index.js';
 
 // Parse command line arguments
@@ -9,6 +10,11 @@ const options = {
   suite: 'all',
   /** @type {string[] | undefined} */
   tools: undefined,
+  /** @type {string | undefined} */
+  scenario: undefined,
+  scenarios: false,
+  /** @type {string | undefined} */
+  variant: undefined,
   format: 'ascii',
   verbose: false,
 };
@@ -18,6 +24,12 @@ for (const arg of args) {
     options.suite = arg.split('=')[1];
   } else if (arg.startsWith('--tools=') || arg.startsWith('--tool=')) {
     options.tools = arg.split('=')[1].split(',');
+  } else if (arg.startsWith('--scenario=')) {
+    options.scenario = arg.split('=')[1];
+  } else if (arg === '--scenarios') {
+    options.scenarios = true;
+  } else if (arg.startsWith('--variant=')) {
+    options.variant = arg.split('=')[1];
   } else if (arg.startsWith('--format=')) {
     options.format = arg.split('=')[1];
   } else if (arg === '--verbose' || arg === '-v') {
@@ -30,12 +42,15 @@ Usage:
   node src/index.js [options]
 
 Options:
-  --suite=<name>     Suite to run: 'carbon', 'spectrum', 'webawesome', 'material', 'momentum', or 'all' (default: all)
-  --tool=<id>        Single tool to test: 'baseline', 'css-fuse', 'props-lower', 'html-aot', etc., or 'all'
-  --tools=<list>     Comma-separated tool ids to test
-  --format=<type>    Output format: 'ascii' (default) or 'json'
-  --verbose, -v      Show verbose build progress
-  --help, -h         Display this help message
+  --suite=<name>       Suite to run: 'carbon', 'spectrum', 'webawesome', 'material', 'momentum', or 'all' (default: all)
+  --tool=<id>          Single tool to test under its authentic scenario: 'baseline', 'css-fuse', 'dom-paths', etc.
+  --tools=<list>       Comma-separated tool ids to test
+  --scenario=<name>    Scenario to run: 'data-grid', 'interactive-form', 'ssr-dashboard', 'dynamic-feed', 'selective-app', 'bundle'
+  --scenarios          Execute all 6 authentic scenarios across suites
+  --variant=<id>       Specific variant within scenario (default: baseline + all scenario features)
+  --format=<type>      Output format: 'ascii' (default) or 'json'
+  --verbose, -v        Show verbose build progress
+  --help, -h           Display this help message
 `);
     process.exit(0);
   }
@@ -47,6 +62,50 @@ async function main() {
   if (suites.length === 0) {
     console.error(`❌ No benchmark suites matched '${options.suite}'. Available: carbon, spectrum, webawesome, material, momentum`);
     process.exit(1);
+  }
+
+  // Handle scenario benchmark execution
+  if (options.scenarios || options.scenario) {
+    const targetScenarios = options.scenarios ? SCENARIOS : [getScenario(options.scenario || 'bundle')];
+
+    if (options.format !== 'json') {
+      console.log(`\n========================================================================================`);
+      console.log(`⚡ LIT-CORE SCENARIO BENCHMARKS: ${options.scenarios ? 'ALL SCENARIOS' : targetScenarios[0].name.toUpperCase()}`);
+      console.log(`========================================================================================`);
+      console.log(`Suites:    ${suites.map((s) => s.name).join(', ')}`);
+      console.log(`Scenarios: ${targetScenarios.map((s) => s.name).join(', ')}`);
+    }
+
+    const allScenarioResults = [];
+    for (const scenario of targetScenarios) {
+      for (const suite of suites) {
+        const variants = options.variant ? [options.variant] : ['baseline', ...scenario.relevantFeatures];
+
+        const scenarioResults = [];
+        for (const variantId of variants) {
+          if (options.format !== 'json' && options.verbose) {
+            console.log(`\n⏳ Running scenario '${scenario.name}' [${variantId}] for: ${suite.name}...`);
+          }
+          const res = await runScenarioBenchmark({
+            scenario,
+            suite,
+            variantId,
+            options: { verbose: options.verbose },
+          });
+          scenarioResults.push(res);
+          allScenarioResults.push(res);
+        }
+
+        if (options.format === 'ascii') {
+          console.log(renderAsciiScenarioTable(scenario, scenarioResults));
+        }
+      }
+    }
+
+    if (options.format === 'json') {
+      console.log(JSON.stringify(allScenarioResults, null, 2));
+    }
+    return;
   }
 
   // Handle single tool standalone run if specified as 'baseline', 'all', or a single tool id
