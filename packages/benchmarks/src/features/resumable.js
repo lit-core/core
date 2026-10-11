@@ -3,12 +3,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
-import vm from 'node:vm';
 import { compileResumableLoader } from '@lit-core/resumable/client';
 import { renderToDsd } from '@lit-core/resumable/server';
 import { ENTERPRISE_COMPONENTS, extractComponentTemplates, extractCssFromModule, findComponentCssSource } from '../fixtures.js';
 import { calculateDelta, formatDuration } from '../format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from '../reporters/index.js';
+import { getBrowser } from '../runtime.js';
 import { createBenchmarkResult } from '../schema.js';
 
 export const SUITES = [
@@ -84,23 +84,15 @@ export function cleanTemplateForDsd(raw, comp) {
  * @returns {string}
  */
 export function getSemanticFallback(comp) {
-  const tag = comp.tag.toLowerCase();
   const name = comp.name
     .split('-')
     .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
     .join(' ');
-  if (tag.includes('button')) return `<button class="cds--btn cds--btn--primary" type="button" resumes-on-click=""><slot>${name}</slot></button>`;
-  if (tag.includes('checkbox'))
-    return `<div class="cds--checkbox-wrapper"><label class="cds--checkbox-label"><input type="checkbox" class="cds--checkbox" resumes-on-change="" /><span class="cds--checkbox-label-text"><slot>${name}</slot></span></label></div>`;
-  if (tag.includes('input') || tag.includes('text')) return `<div class="cds--text-input-wrapper"><input class="cds--text-input" placeholder="${name}..." resumes-on-input="" /></div>`;
-  if (tag.includes('select')) return `<div class="cds--select"><select class="cds--select-input" resumes-on-change=""><option>${name} 1</option><option>${name} 2</option></select></div>`;
-  if (tag.includes('loading'))
-    return `<div class="cds--loading"><svg viewBox="0 0 100 100" width="36" height="36"><circle cx="50" cy="50" r="44" stroke="currentColor" fill="none" stroke-width="8"/></svg></div>`;
-  return `<div class="cds--card" resumes-on-click=""><slot>${name}</slot></div>`;
+  return `<slot>${name}</slot>`;
 }
 
 /**
- * Simulates SSR and client execution for Standard Lit SSR vs Resumable SSR.
+ * Measures SSR and client execution for standard Lit SSR vs resumable SSR using real Chromium browser metrics.
  * @param {typeof SUITES[0]} suite
  */
 export async function measureResumablePerformance(suite) {
@@ -121,6 +113,11 @@ export async function measureResumablePerformance(suite) {
   const dsdMarkups = [];
 
   for (const comp of components) {
+    const cleanName = comp.name
+      .split('-')
+      .map((/** @type {string} */ p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(' ');
+
     let shadowHtml = '';
     try {
       const tmpls = extractComponentTemplates(comp.pkg, comp.source);
@@ -128,7 +125,9 @@ export async function measureResumablePerformance(suite) {
         const bestTmpl = tmpls.reduce((a, b) => (b.length > a.length ? b : a), '');
         shadowHtml = cleanTemplateForDsd(bestTmpl, comp);
       }
-    } catch {}
+    } catch (err) {
+      console.warn(`[resumable warning] Template extraction failed for ${comp.name}:`, err);
+    }
 
     if (!shadowHtml || shadowHtml.length < 10 || !/<[a-z]/i.test(shadowHtml)) {
       shadowHtml = getSemanticFallback(comp);
@@ -140,12 +139,10 @@ export async function measureResumablePerformance(suite) {
       if (cssSource) {
         styles = extractCssFromModule(cssSource);
       }
-    } catch {}
+    } catch (err) {
+      console.warn(`[resumable warning] CSS extraction failed for ${comp.name}:`, err);
+    }
 
-    const cleanName = comp.name
-      .split('-')
-      .map((/** @type {string} */ p) => p.charAt(0).toUpperCase() + p.slice(1))
-      .join(' ');
     const lightDom = `<span>${cleanName}</span>`;
 
     const markup = renderToDsd({
@@ -160,104 +157,173 @@ export async function measureResumablePerformance(suite) {
     _totalDsdBytes += Buffer.byteLength(markup, 'utf8');
   }
 
-  // Measure execution of standard client hydration registration in V8 context
-  const t0Standard = performance.now();
-  const contextStandard = vm.createContext({
-    console,
-    performance,
-    HTMLElement: class HTMLElement {},
-    customElements: {
-      define: () => {},
-      get: () => null,
-      whenDefined: () => Promise.resolve(),
-    },
-    document: {
-      createElement: () => ({ appendChild: () => {}, setAttribute: () => {} }),
-    },
-    window: {},
-  });
+  const bundleCode = components
+    .map(
+      (/** @type {any} */ comp) =>
+        `if (!customElements.get('${comp.tag}')) { customElements.define('${comp.tag}', class extends HTMLElement { connectedCallback() { this.setAttribute('data-hydrated', 'true'); } }); }`,
+    )
+    .join('\n');
 
-  // Evaluate real Custom Element registrations for standard hydration setup
-  for (const comp of components) {
-    vm.runInContext(
-      `
-      customElements.define('${comp.tag}', class extends HTMLElement {
-        connectedCallback() {
-          this.setAttribute('data-hydrated', 'true');
+  // Collect authentic browser metrics via Playwright Chromium
+  const browser = await getBrowser();
+  if (!browser || (typeof browser.isConnected === 'function' && !browser.isConnected())) {
+    throw new Error(`[Resumable benchmark error] Chromium browser is not available for ${suite.name}`);
+  }
+
+  const context = await browser.newContext();
+  let pageStandard = null;
+  let pageResumable = null;
+
+  try {
+    // 1. Measure standard SSR in Chromium
+    pageStandard = await context.newPage();
+    const standardHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script>
+    window.__longTasks = [];
+    try {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          window.__longTasks.push(entry.duration);
         }
       });
-      `,
-      contextStandard,
-    );
+      observer.observe({ entryTypes: ['longtask'] });
+    } catch {}
+  </script>
+</head>
+<body>
+  <div id="container">${dsdMarkups.join('\n')}</div>
+  <script type="module">
+    window.__startHydration = performance.now();
+    ${bundleCode}
+    window.__hydrationDone = performance.now();
+    window.__standardReady = true;
+  </script>
+</body>
+</html>`;
+
+    await pageStandard.setContent(standardHtml, { waitUntil: 'domcontentloaded' });
+    await pageStandard.waitForFunction(() => /** @type {any} */ (window).__standardReady === true, { timeout: 15000 });
+
+    const standardMetrics = await pageStandard.evaluate(async () => {
+      const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];
+      const fcpMs = fcpEntry ? Number(fcpEntry.startTime.toFixed(2)) : 50.0;
+      const longTasks = /** @type {any} */ (window).__longTasks || [];
+      const tbtMs = Number(longTasks.reduce((/** @type {number} */ acc, /** @type {number} */ d) => acc + Math.max(0, d - 50), 0).toFixed(2));
+      const ttiMs = Number((fcpMs + tbtMs).toFixed(2));
+
+      const btn = document.querySelector('button, [resumes-on-click], input, [data-resumable]') || document.body;
+      const t0 = performance.now();
+      btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
+      const firstClickLatencyMs = Number(Math.max(0.1, performance.now() - t0).toFixed(2));
+
+      return { fcpMs, tbtMs, ttiMs, firstClickLatencyMs };
+    });
+
+    // 2. Measure resumable SSR in Chromium
+    pageResumable = await context.newPage();
+    const resumableHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script>
+    window.__longTasks = [];
+    try {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          window.__longTasks.push(entry.duration);
+        }
+      });
+      observer.observe({ entryTypes: ['longtask'] });
+    } catch {}
+  </script>
+  <script id="resumable-bundle-source" type="text/plain">
+    ${bundleCode}
+  </script>
+  <script>
+    let bundleBlobUrl = null;
+    function getBundleBlobUrl() {
+      if (!bundleBlobUrl) {
+        const bundleSourceEl = document.getElementById('resumable-bundle-source');
+        if (bundleSourceEl && bundleSourceEl.textContent.trim()) {
+          const blob = new Blob([bundleSourceEl.textContent], { type: 'application/javascript' });
+          bundleBlobUrl = URL.createObjectURL(blob);
+        }
+      }
+      return bundleBlobUrl || '';
+    }
+    window.__LIT_RESUMABLE_MANIFEST__ = new Proxy({}, {
+      get: () => getBundleBlobUrl()
+    });
+  </script>
+  <script type="module">
+    ${inlineLoaderScript}
+    window.__resumableReady = true;
+  </script>
+</head>
+<body>
+  <div id="container">${dsdMarkups.join('\n')}</div>
+</body>
+</html>`;
+
+    await pageResumable.setContent(resumableHtml, { waitUntil: 'domcontentloaded' });
+    await pageResumable.waitForFunction(() => /** @type {any} */ (window).__resumableReady === true, { timeout: 15000 });
+
+    const resumableMetrics = await pageResumable.evaluate(async () => {
+      const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];
+      const fcpMs = fcpEntry ? Number(fcpEntry.startTime.toFixed(2)) : 50.0;
+      const longTasks = /** @type {any} */ (window).__longTasks || [];
+      const tbtMs = Number(longTasks.reduce((/** @type {number} */ acc, /** @type {number} */ d) => acc + Math.max(0, d - 50), 0).toFixed(2));
+      const ttiMs = Number((fcpMs + tbtMs).toFixed(2));
+
+      const target = document.querySelector('[data-resumable]') || document.body;
+      const t0 = performance.now();
+      target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
+      const firstClickLatencyMs = Number(Math.max(0.1, performance.now() - t0).toFixed(2));
+
+      return { fcpMs, tbtMs, ttiMs, firstClickLatencyMs };
+    });
+
+    const standard = {
+      initialJsKb: standardInitialJsKb,
+      tbtMs: standardMetrics.tbtMs,
+      fcpMs: standardMetrics.fcpMs,
+      ttiMs: standardMetrics.ttiMs,
+      firstClickLatencyMs: standardMetrics.firstClickLatencyMs,
+      totalComponents,
+      deferredComponents: 0,
+    };
+
+    const resumable = {
+      initialJsKb: resumableInitialJsKb,
+      tbtMs: resumableMetrics.tbtMs,
+      fcpMs: resumableMetrics.fcpMs,
+      ttiMs: resumableMetrics.ttiMs,
+      firstClickLatencyMs: resumableMetrics.firstClickLatencyMs,
+      totalComponents,
+      deferredComponents: totalComponents,
+    };
+
+    return { suite, standard, resumable };
+  } finally {
+    if (pageStandard) {
+      try {
+        await pageStandard.close();
+      } catch {}
+    }
+    if (pageResumable) {
+      try {
+        await pageResumable.close();
+      } catch {}
+    }
+    if (context) {
+      try {
+        await context.close();
+      } catch {}
+    }
   }
-  const standardEvalDuration = performance.now() - t0Standard;
-
-  const standardTbt = Number((standardEvalDuration * 1.5 + totalComponents * 0.3).toFixed(1));
-  const standardFcp = Number((72.0 + standardInitialJsKb * 0.12).toFixed(1));
-  const standardTti = Number((standardFcp + standardTbt + 30.0).toFixed(1));
-  const standardFirstClickLatency = 2.4;
-
-  // Measure execution of Resumable micro-loader in V8 context
-  const t0Loader = performance.now();
-  /** @type {any} */
-  const winObj = {
-    requestIdleCallback: /** @param {any} cb */ (cb) => setTimeout(cb, 50),
-    cancelIdleCallback: /** @param {any} id */ (id) => clearTimeout(id),
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  };
-  const docObj = {
-    addEventListener: () => {},
-    createElement: () => ({ appendChild: () => {}, setAttribute: () => {} }),
-    head: { appendChild: () => {} },
-    querySelectorAll: () => [],
-  };
-  const ceObj = {
-    define: () => {},
-    get: () => null,
-    whenDefined: () => Promise.resolve(),
-  };
-  const contextResumable = vm.createContext({
-    window: winObj,
-    document: docObj,
-    customElements: ceObj,
-    setTimeout,
-    clearTimeout,
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  });
-  winObj.window = winObj;
-  winObj.document = docObj;
-  winObj.customElements = ceObj;
-  vm.runInContext(inlineLoaderScript, contextResumable);
-  const loaderEvalDuration = performance.now() - t0Loader;
-
-  const resumableTbt = Number(Math.max(0.5, loaderEvalDuration * 1.2).toFixed(1));
-  const resumableFcp = Number((70.0 + resumableInitialJsKb * 0.1).toFixed(1));
-  const resumableTti = Number((resumableFcp + resumableTbt + 5.0).toFixed(1));
-  const resumableFirstClickLatency = Number((standardFirstClickLatency + 0.8).toFixed(1));
-
-  const standard = {
-    initialJsKb: standardInitialJsKb,
-    tbtMs: standardTbt,
-    fcpMs: standardFcp,
-    ttiMs: standardTti,
-    firstClickLatencyMs: standardFirstClickLatency,
-    totalComponents,
-    deferredComponents: 0,
-  };
-
-  const resumable = {
-    initialJsKb: resumableInitialJsKb,
-    tbtMs: resumableTbt,
-    fcpMs: resumableFcp,
-    ttiMs: resumableTti,
-    firstClickLatencyMs: resumableFirstClickLatency,
-    totalComponents,
-    deferredComponents: totalComponents,
-  };
-
-  return { suite, standard, resumable };
 }
 
 /**
@@ -284,7 +350,9 @@ export function generateResumableArtifactHtml(suiteId = 'carbon', outDir) {
         const bestTmpl = tmpls.reduce((a, b) => (b.length > a.length ? b : a), '');
         shadowHtml = cleanTemplateForDsd(bestTmpl, comp);
       }
-    } catch {}
+    } catch (err) {
+      console.warn(`[resumable warning] Template extraction failed for ${comp.name}:`, err);
+    }
 
     if (!shadowHtml || shadowHtml.length < 10 || !/<[a-z]/i.test(shadowHtml)) {
       shadowHtml = getSemanticFallback(comp);
@@ -296,7 +364,9 @@ export function generateResumableArtifactHtml(suiteId = 'carbon', outDir) {
       if (cssSource) {
         styles = extractCssFromModule(cssSource);
       }
-    } catch {}
+    } catch (err) {
+      console.warn(`[resumable warning] CSS extraction failed for ${comp.name}:`, err);
+    }
 
     if (!styles || styles.trim().length < 5) {
       styles = ':host { display: block; box-sizing: border-box; }';

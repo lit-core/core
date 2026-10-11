@@ -1,5 +1,6 @@
 import { transformNative } from '@lit-core/native';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { NativeOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -52,8 +53,8 @@ export function native(options: NativeOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (_err) {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'native', cleanId, err);
       }
     },
   };

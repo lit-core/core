@@ -3,84 +3,6 @@ use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
-pub const LIFECYCLE_STUBS: &str = r#"class __D {
-  connectedCallback() {
-    super.connectedCallback?.();
-    this.__initLitEventHoist();
-  }
-  firstUpdated(changedProperties) {
-    super.firstUpdated?.(changedProperties);
-    this.__initLitEventHoist();
-  }
-  willUpdate(changedProperties) {
-    this.__lhActions = [];
-    super.willUpdate?.(changedProperties);
-  }
-}"#;
-
-pub const STATIC_HELPERS: &str = r#"class __D {
-  __lhActions = [];
-  __lhInitialized = false;
-
-  __initLitEventHoist() {
-    if (this.__lhInitialized) return;
-    this.__lhInitialized = true;
-    const root = this.shadowRoot || this;
-  }
-
-  __lhDispatch(eventName, event) {
-    const attr = `data-lh-${eventName}`;
-    const root = this.shadowRoot || this;
-    let stopped = false;
-    const origStop = event.stopPropagation;
-    if (origStop) {
-      event.stopPropagation = function() {
-        stopped = true;
-        return origStop.apply(this, arguments);
-      };
-    }
-    const path = event.composedPath ? event.composedPath() : [];
-    if (path.length > 0) {
-      for (const node of path) {
-        if (node === root) break;
-        if (node.nodeType === 1 && node.hasAttribute && node.hasAttribute(attr)) {
-          if (node.getRootNode && node.getRootNode() !== root) {
-            continue;
-          }
-          const actionId = Number(node.getAttribute(attr));
-          const handler = this.__lhActions && this.__lhActions[actionId];
-          if (typeof handler === 'function') {
-            handler.call(this, event);
-          }
-          if (event.cancelBubble || stopped) break;
-        }
-      }
-    } else {
-      let target = event.target;
-      while (target && target !== root && target.nodeType === 1) {
-        if (target.hasAttribute(attr)) {
-          if (!target.getRootNode || target.getRootNode() === root) {
-            const actionId = Number(target.getAttribute(attr));
-            const handler = this.__lhActions && this.__lhActions[actionId];
-            if (typeof handler === 'function') {
-              handler.call(this, event);
-            }
-            if (event.cancelBubble || stopped) break;
-          }
-        }
-        target = target.parentElement;
-      }
-    }
-  }
-
-  __lhAction(handler) {
-    if (!this.__lhActions) this.__lhActions = [];
-    const id = this.__lhActions.length;
-    this.__lhActions.push(handler);
-    return id;
-  }
-}"#;
-
 pub fn build_reset_lh_actions<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
     let this_expr = Expression::new_this_expression(SPAN, ast);
     let target = AssignmentTarget::new_static_member_expression(
@@ -165,4 +87,1266 @@ pub fn build_add_listener_statement<'a>(evt: &str, ast: &AstBuilder<'a>) -> Stat
 
     let call = Expression::new_call_expression(SPAN, callee, None, args, false, ast);
     Statement::new_expression_statement(SPAN, call, ast)
+}
+
+pub fn build_connected_callback_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
+    let mut stmts = ArenaVec::new_in(ast);
+
+    // super.connectedCallback?.();
+    let super_expr = Expression::new_super(SPAN, ast);
+    let member = MemberExpression::new_static_member_expression(
+        SPAN,
+        super_expr,
+        IdentifierName::new(SPAN, "connectedCallback", ast),
+        false,
+        ast,
+    );
+    let call = CallExpression::boxed(
+        SPAN,
+        Expression::from(member),
+        None,
+        ArenaVec::new_in(ast),
+        true,
+        ast,
+    );
+    let chain = Expression::new_chain_expression(SPAN, ChainElement::CallExpression(call), ast);
+    stmts.push(Statement::new_expression_statement(SPAN, chain, ast));
+
+    // this.__initLitEventHoist();
+    stmts.push(build_call_init_event_hoist(ast));
+
+    let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stmts, ast);
+    let params = FormalParameters::boxed(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        ArenaVec::new_in(ast),
+        None,
+        ast,
+    );
+    let func = Function::boxed(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        None,
+        None,
+        params,
+        None,
+        Some(body),
+        ast,
+    );
+    let key = PropertyKey::new_static_identifier(SPAN, "connectedCallback", ast);
+    ClassElement::new_method_definition(
+        SPAN,
+        MethodDefinitionType::MethodDefinition,
+        ArenaVec::new_in(ast),
+        key,
+        func,
+        MethodDefinitionKind::Method,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    )
+}
+
+pub fn build_first_updated_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
+    let mut stmts = ArenaVec::new_in(ast);
+
+    // super.firstUpdated?.(changedProperties);
+    let super_expr = Expression::new_super(SPAN, ast);
+    let member = MemberExpression::new_static_member_expression(
+        SPAN,
+        super_expr,
+        IdentifierName::new(SPAN, "firstUpdated", ast),
+        false,
+        ast,
+    );
+    let mut call_args = ArenaVec::new_in(ast);
+    call_args.push(Argument::from(Expression::new_identifier(
+        SPAN,
+        "changedProperties",
+        ast,
+    )));
+    let call = CallExpression::boxed(SPAN, Expression::from(member), None, call_args, true, ast);
+    let chain = Expression::new_chain_expression(SPAN, ChainElement::CallExpression(call), ast);
+    stmts.push(Statement::new_expression_statement(SPAN, chain, ast));
+
+    // this.__initLitEventHoist();
+    stmts.push(build_call_init_event_hoist(ast));
+
+    let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stmts, ast);
+    let mut param_vec = ArenaVec::new_in(ast);
+    param_vec.push(FormalParameter::new_plain(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "changedProperties", ast),
+        ast,
+    ));
+    let params = FormalParameters::boxed(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        param_vec,
+        None,
+        ast,
+    );
+    let func = Function::boxed(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        None,
+        None,
+        params,
+        None,
+        Some(body),
+        ast,
+    );
+    let key = PropertyKey::new_static_identifier(SPAN, "firstUpdated", ast);
+    ClassElement::new_method_definition(
+        SPAN,
+        MethodDefinitionType::MethodDefinition,
+        ArenaVec::new_in(ast),
+        key,
+        func,
+        MethodDefinitionKind::Method,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    )
+}
+
+pub fn build_will_update_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
+    let mut stmts = ArenaVec::new_in(ast);
+
+    // this.__lhActions = [];
+    stmts.push(build_reset_lh_actions(ast));
+
+    // super.willUpdate?.(changedProperties);
+    let super_expr = Expression::new_super(SPAN, ast);
+    let member = MemberExpression::new_static_member_expression(
+        SPAN,
+        super_expr,
+        IdentifierName::new(SPAN, "willUpdate", ast),
+        false,
+        ast,
+    );
+    let mut call_args = ArenaVec::new_in(ast);
+    call_args.push(Argument::from(Expression::new_identifier(
+        SPAN,
+        "changedProperties",
+        ast,
+    )));
+    let call = CallExpression::boxed(SPAN, Expression::from(member), None, call_args, true, ast);
+    let chain = Expression::new_chain_expression(SPAN, ChainElement::CallExpression(call), ast);
+    stmts.push(Statement::new_expression_statement(SPAN, chain, ast));
+
+    let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stmts, ast);
+    let mut param_vec = ArenaVec::new_in(ast);
+    param_vec.push(FormalParameter::new_plain(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "changedProperties", ast),
+        ast,
+    ));
+    let params = FormalParameters::boxed(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        param_vec,
+        None,
+        ast,
+    );
+    let func = Function::boxed(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        None,
+        None,
+        params,
+        None,
+        Some(body),
+        ast,
+    );
+    let key = PropertyKey::new_static_identifier(SPAN, "willUpdate", ast);
+    ClassElement::new_method_definition(
+        SPAN,
+        MethodDefinitionType::MethodDefinition,
+        ArenaVec::new_in(ast),
+        key,
+        func,
+        MethodDefinitionKind::Method,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    )
+}
+
+pub fn build_lh_actions_property<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
+    let empty_arr = Expression::new_array_expression(SPAN, ArenaVec::new_in(ast), ast);
+    let key = PropertyKey::new_static_identifier(SPAN, "__lhActions", ast);
+    ClassElement::new_property_definition(
+        SPAN,
+        PropertyDefinitionType::PropertyDefinition,
+        ArenaVec::new_in(ast),
+        key,
+        None,
+        Some(empty_arr),
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    )
+}
+
+pub fn build_lh_initialized_property<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
+    let false_val = Expression::new_boolean_literal(SPAN, false, ast);
+    let key = PropertyKey::new_static_identifier(SPAN, "__lhInitialized", ast);
+    ClassElement::new_property_definition(
+        SPAN,
+        PropertyDefinitionType::PropertyDefinition,
+        ArenaVec::new_in(ast),
+        key,
+        None,
+        Some(false_val),
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    )
+}
+
+pub fn build_init_lit_event_hoist_method<'a>(
+    ast: &AstBuilder<'a>,
+    sorted_events: &[String],
+) -> ClassElement<'a> {
+    let mut stmts = ArenaVec::new_in(ast);
+
+    // if (this.__lhInitialized) return;
+    let this_expr = Expression::new_this_expression(SPAN, ast);
+    let init_prop = Expression::new_static_member_expression(
+        SPAN,
+        this_expr,
+        IdentifierName::new(SPAN, "__lhInitialized", ast),
+        false,
+        ast,
+    );
+    let ret_stmt = Statement::new_return_statement(SPAN, None, ast);
+    stmts.push(Statement::new_if_statement(
+        SPAN, init_prop, ret_stmt, None, ast,
+    ));
+
+    // this.__lhInitialized = true;
+    let this_expr2 = Expression::new_this_expression(SPAN, ast);
+    let target = AssignmentTarget::new_static_member_expression(
+        SPAN,
+        this_expr2,
+        IdentifierName::new(SPAN, "__lhInitialized", ast),
+        false,
+        ast,
+    );
+    let true_val = Expression::new_boolean_literal(SPAN, true, ast);
+    let assign = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        target,
+        true_val,
+        ast,
+    );
+    stmts.push(Statement::new_expression_statement(SPAN, assign, ast));
+
+    // const root = this.shadowRoot || this;
+    let this_expr3 = Expression::new_this_expression(SPAN, ast);
+    let shadow_root = Expression::new_static_member_expression(
+        SPAN,
+        this_expr3,
+        IdentifierName::new(SPAN, "shadowRoot", ast),
+        false,
+        ast,
+    );
+    let this_expr4 = Expression::new_this_expression(SPAN, ast);
+    let or_expr =
+        Expression::new_logical_expression(SPAN, shadow_root, LogicalOperator::Or, this_expr4, ast);
+    let root_pat = BindingPattern::new_binding_identifier(SPAN, "root", ast);
+    let decl = VariableDeclarator::new(SPAN, root_pat, None, Some(or_expr), false, ast);
+    let mut decls = ArenaVec::new_in(ast);
+    decls.push(decl);
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        decls,
+        false,
+        ast,
+    ));
+
+    // for each event: root.addEventListener(...)
+    for evt in sorted_events {
+        stmts.push(build_add_listener_statement(evt, ast));
+    }
+
+    let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stmts, ast);
+    let params = FormalParameters::boxed(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        ArenaVec::new_in(ast),
+        None,
+        ast,
+    );
+    let func = Function::boxed(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        None,
+        None,
+        params,
+        None,
+        Some(body),
+        ast,
+    );
+    let key = PropertyKey::new_static_identifier(SPAN, "__initLitEventHoist", ast);
+    ClassElement::new_method_definition(
+        SPAN,
+        MethodDefinitionType::MethodDefinition,
+        ArenaVec::new_in(ast),
+        key,
+        func,
+        MethodDefinitionKind::Method,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    )
+}
+
+pub fn build_lh_action_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
+    let mut stmts = ArenaVec::new_in(ast);
+
+    // if (!this.__lhActions) this.__lhActions = [];
+    let this_expr = Expression::new_this_expression(SPAN, ast);
+    let actions_expr = Expression::new_static_member_expression(
+        SPAN,
+        this_expr,
+        IdentifierName::new(SPAN, "__lhActions", ast),
+        false,
+        ast,
+    );
+    let not_actions =
+        Expression::new_unary_expression(SPAN, UnaryOperator::LogicalNot, actions_expr, ast);
+    let this_expr2 = Expression::new_this_expression(SPAN, ast);
+    let target = AssignmentTarget::new_static_member_expression(
+        SPAN,
+        this_expr2,
+        IdentifierName::new(SPAN, "__lhActions", ast),
+        false,
+        ast,
+    );
+    let empty_arr = Expression::new_array_expression(SPAN, ArenaVec::new_in(ast), ast);
+    let assign = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        target,
+        empty_arr,
+        ast,
+    );
+    let if_stmt = Statement::new_if_statement(
+        SPAN,
+        not_actions,
+        Statement::new_expression_statement(SPAN, assign, ast),
+        None,
+        ast,
+    );
+    stmts.push(if_stmt);
+
+    // const id = this.__lhActions.length;
+    let this_expr3 = Expression::new_this_expression(SPAN, ast);
+    let actions_expr2 = Expression::new_static_member_expression(
+        SPAN,
+        this_expr3,
+        IdentifierName::new(SPAN, "__lhActions", ast),
+        false,
+        ast,
+    );
+    let len_expr = Expression::new_static_member_expression(
+        SPAN,
+        actions_expr2,
+        IdentifierName::new(SPAN, "length", ast),
+        false,
+        ast,
+    );
+    let id_pat = BindingPattern::new_binding_identifier(SPAN, "id", ast);
+    let decl = VariableDeclarator::new(SPAN, id_pat, None, Some(len_expr), false, ast);
+    let mut decls = ArenaVec::new_in(ast);
+    decls.push(decl);
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        decls,
+        false,
+        ast,
+    ));
+
+    // this.__lhActions.push(handler);
+    let this_expr4 = Expression::new_this_expression(SPAN, ast);
+    let actions_expr3 = Expression::new_static_member_expression(
+        SPAN,
+        this_expr4,
+        IdentifierName::new(SPAN, "__lhActions", ast),
+        false,
+        ast,
+    );
+    let push_member = Expression::new_static_member_expression(
+        SPAN,
+        actions_expr3,
+        IdentifierName::new(SPAN, "push", ast),
+        false,
+        ast,
+    );
+    let mut push_args = ArenaVec::new_in(ast);
+    push_args.push(Argument::from(Expression::new_identifier(
+        SPAN, "handler", ast,
+    )));
+    let push_call = Expression::new_call_expression(SPAN, push_member, None, push_args, false, ast);
+    stmts.push(Statement::new_expression_statement(SPAN, push_call, ast));
+
+    // return id;
+    let id_ident = Expression::new_identifier(SPAN, "id", ast);
+    stmts.push(Statement::new_return_statement(SPAN, Some(id_ident), ast));
+
+    let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stmts, ast);
+    let mut param_vec = ArenaVec::new_in(ast);
+    param_vec.push(FormalParameter::new_plain(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "handler", ast),
+        ast,
+    ));
+    let params = FormalParameters::boxed(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        param_vec,
+        None,
+        ast,
+    );
+    let func = Function::boxed(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        None,
+        None,
+        params,
+        None,
+        Some(body),
+        ast,
+    );
+    let key = PropertyKey::new_static_identifier(SPAN, "__lhAction", ast);
+    ClassElement::new_method_definition(
+        SPAN,
+        MethodDefinitionType::MethodDefinition,
+        ArenaVec::new_in(ast),
+        key,
+        func,
+        MethodDefinitionKind::Method,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    )
+}
+
+pub fn build_lh_dispatch_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
+    let mut stmts = ArenaVec::new_in(ast);
+
+    // const attr = `data-lh-${eventName}`;
+    let mut quasis = ArenaVec::new_in(ast);
+    quasis.push(TemplateElement::new(
+        SPAN,
+        TemplateElementValue {
+            raw: ast.allocator().alloc_str("data-lh-").into(),
+            cooked: Some(ast.allocator().alloc_str("data-lh-").into()),
+        },
+        false,
+        ast,
+    ));
+    quasis.push(TemplateElement::new(
+        SPAN,
+        TemplateElementValue {
+            raw: ast.allocator().alloc_str("").into(),
+            cooked: Some(ast.allocator().alloc_str("").into()),
+        },
+        true,
+        ast,
+    ));
+    let mut exprs = ArenaVec::new_in(ast);
+    exprs.push(Expression::new_identifier(SPAN, "eventName", ast));
+    let tmpl = Expression::new_template_literal(SPAN, quasis, exprs, ast);
+    let attr_decl = VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "attr", ast),
+        None,
+        Some(tmpl),
+        false,
+        ast,
+    );
+    let mut decls1 = ArenaVec::new_in(ast);
+    decls1.push(attr_decl);
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        decls1,
+        false,
+        ast,
+    ));
+
+    // const root = this.shadowRoot || this;
+    let this1 = Expression::new_this_expression(SPAN, ast);
+    let shadow = Expression::new_static_member_expression(
+        SPAN,
+        this1,
+        IdentifierName::new(SPAN, "shadowRoot", ast),
+        false,
+        ast,
+    );
+    let this2 = Expression::new_this_expression(SPAN, ast);
+    let root_init =
+        Expression::new_logical_expression(SPAN, shadow, LogicalOperator::Or, this2, ast);
+    let root_decl = VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "root", ast),
+        None,
+        Some(root_init),
+        false,
+        ast,
+    );
+    let mut decls2 = ArenaVec::new_in(ast);
+    decls2.push(root_decl);
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        decls2,
+        false,
+        ast,
+    ));
+
+    // let stopped = false;
+    let stopped_decl = VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "stopped", ast),
+        None,
+        Some(Expression::new_boolean_literal(SPAN, false, ast)),
+        false,
+        ast,
+    );
+    let mut decls3 = ArenaVec::new_in(ast);
+    decls3.push(stopped_decl);
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Let,
+        decls3,
+        false,
+        ast,
+    ));
+
+    // const origStop = event.stopPropagation;
+    let orig_stop_expr = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "event", ast),
+        IdentifierName::new(SPAN, "stopPropagation", ast),
+        false,
+        ast,
+    );
+    let orig_stop_decl = VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "origStop", ast),
+        None,
+        Some(orig_stop_expr),
+        false,
+        ast,
+    );
+    let mut decls4 = ArenaVec::new_in(ast);
+    decls4.push(orig_stop_decl);
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        decls4,
+        false,
+        ast,
+    ));
+
+    // if (origStop) { event.stopPropagation = function() { stopped = true; return origStop.apply(this, arguments); }; }
+    let mut stop_fn_stmts = ArenaVec::new_in(ast);
+    let stopped_target = AssignmentTarget::new_assignment_target_identifier(SPAN, "stopped", ast);
+    let assign_stopped = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        stopped_target,
+        Expression::new_boolean_literal(SPAN, true, ast),
+        ast,
+    );
+    stop_fn_stmts.push(Statement::new_expression_statement(
+        SPAN,
+        assign_stopped,
+        ast,
+    ));
+
+    let apply_member = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "origStop", ast),
+        IdentifierName::new(SPAN, "apply", ast),
+        false,
+        ast,
+    );
+    let mut apply_args = ArenaVec::new_in(ast);
+    apply_args.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
+    apply_args.push(Argument::from(Expression::new_identifier(
+        SPAN,
+        "arguments",
+        ast,
+    )));
+    let apply_call =
+        Expression::new_call_expression(SPAN, apply_member, None, apply_args, false, ast);
+    stop_fn_stmts.push(Statement::new_return_statement(SPAN, Some(apply_call), ast));
+
+    let stop_fn_body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stop_fn_stmts, ast);
+    let stop_fn = Function::boxed(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        None,
+        None,
+        FormalParameters::boxed(
+            SPAN,
+            FormalParameterKind::FormalParameter,
+            ArenaVec::new_in(ast),
+            None,
+            ast,
+        ),
+        None,
+        Some(stop_fn_body),
+        ast,
+    );
+    let event_stop_target = AssignmentTarget::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "event", ast),
+        IdentifierName::new(SPAN, "stopPropagation", ast),
+        false,
+        ast,
+    );
+    let assign_stop_fn = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        event_stop_target,
+        Expression::FunctionExpression(stop_fn),
+        ast,
+    );
+    let mut if_orig_stop_stmts = ArenaVec::new_in(ast);
+    if_orig_stop_stmts.push(Statement::new_expression_statement(
+        SPAN,
+        assign_stop_fn,
+        ast,
+    ));
+    let if_orig_stop_block = Statement::new_block_statement(SPAN, if_orig_stop_stmts, ast);
+    stmts.push(Statement::new_if_statement(
+        SPAN,
+        Expression::new_identifier(SPAN, "origStop", ast),
+        if_orig_stop_block,
+        None,
+        ast,
+    ));
+
+    // const path = event.composedPath ? event.composedPath() : [];
+    let composed_path_test = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "event", ast),
+        IdentifierName::new(SPAN, "composedPath", ast),
+        false,
+        ast,
+    );
+    let call_composed = Expression::new_call_expression(
+        SPAN,
+        composed_path_test,
+        None,
+        ArenaVec::new_in(ast),
+        false,
+        ast,
+    );
+    let empty_path_arr = Expression::new_array_expression(SPAN, ArenaVec::new_in(ast), ast);
+    let composed_path_member = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "event", ast),
+        IdentifierName::new(SPAN, "composedPath", ast),
+        false,
+        ast,
+    );
+    let path_cond = Expression::new_conditional_expression(
+        SPAN,
+        composed_path_member,
+        call_composed,
+        empty_path_arr,
+        ast,
+    );
+    let path_decl = VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "path", ast),
+        None,
+        Some(path_cond),
+        false,
+        ast,
+    );
+    let mut decls5 = ArenaVec::new_in(ast);
+    decls5.push(path_decl);
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        decls5,
+        false,
+        ast,
+    ));
+
+    // Dispatch loop helper closure statements:
+    // Handler execution block:
+    //   if (node.getRootNode && node.getRootNode() !== root) continue;
+    //   const actionId = Number(node.getAttribute(attr));
+    //   const handler = this.__lhActions && this.__lhActions[actionId];
+    //   if (typeof handler === 'function') handler.call(this, event);
+    //   if (event.cancelBubble || stopped) break;
+
+    // Helper macro/closure for building handler invocation:
+    let build_handler_execution = |node_name: &'static str,
+                                   ast: &AstBuilder<'a>|
+     -> ArenaVec<'a, Statement<'a>> {
+        let mut blk = ArenaVec::new_in(ast);
+
+        // if (node.getRootNode && node.getRootNode() !== root) continue;
+        let get_root = Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, node_name, ast),
+            IdentifierName::new(SPAN, "getRootNode", ast),
+            false,
+            ast,
+        );
+        let call_get_root = Expression::new_call_expression(
+            SPAN,
+            get_root,
+            None,
+            ArenaVec::new_in(ast),
+            false,
+            ast,
+        );
+        let neq_root = Expression::new_binary_expression(
+            SPAN,
+            call_get_root,
+            BinaryOperator::StrictInequality,
+            Expression::new_identifier(SPAN, "root", ast),
+            ast,
+        );
+        let get_root_check = Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, node_name, ast),
+            IdentifierName::new(SPAN, "getRootNode", ast),
+            false,
+            ast,
+        );
+        let root_cond = Expression::new_logical_expression(
+            SPAN,
+            get_root_check,
+            LogicalOperator::And,
+            neq_root,
+            ast,
+        );
+        let mut cont_stmts = ArenaVec::new_in(ast);
+        cont_stmts.push(Statement::new_continue_statement(SPAN, None, ast));
+        blk.push(Statement::new_if_statement(
+            SPAN,
+            root_cond,
+            Statement::new_block_statement(SPAN, cont_stmts, ast),
+            None,
+            ast,
+        ));
+
+        // const actionId = Number(node.getAttribute(attr));
+        let get_attr = Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, node_name, ast),
+            IdentifierName::new(SPAN, "getAttribute", ast),
+            false,
+            ast,
+        );
+        let mut get_attr_args = ArenaVec::new_in(ast);
+        get_attr_args.push(Argument::from(Expression::new_identifier(
+            SPAN, "attr", ast,
+        )));
+        let call_get_attr =
+            Expression::new_call_expression(SPAN, get_attr, None, get_attr_args, false, ast);
+        let mut num_args = ArenaVec::new_in(ast);
+        num_args.push(Argument::from(call_get_attr));
+        let num_call = Expression::new_call_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "Number", ast),
+            None,
+            num_args,
+            false,
+            ast,
+        );
+        let action_id_decl = VariableDeclarator::new(
+            SPAN,
+            BindingPattern::new_binding_identifier(SPAN, "actionId", ast),
+            None,
+            Some(num_call),
+            false,
+            ast,
+        );
+        let mut decls_act = ArenaVec::new_in(ast);
+        decls_act.push(action_id_decl);
+        blk.push(Statement::new_variable_declaration(
+            SPAN,
+            VariableDeclarationKind::Const,
+            decls_act,
+            false,
+            ast,
+        ));
+
+        // const handler = this.__lhActions && this.__lhActions[actionId];
+        let this_actions = Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_this_expression(SPAN, ast),
+            IdentifierName::new(SPAN, "__lhActions", ast),
+            false,
+            ast,
+        );
+        let this_actions2 = Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_this_expression(SPAN, ast),
+            IdentifierName::new(SPAN, "__lhActions", ast),
+            false,
+            ast,
+        );
+        let actions_access = Expression::new_computed_member_expression(
+            SPAN,
+            this_actions2,
+            Expression::new_identifier(SPAN, "actionId", ast),
+            false,
+            ast,
+        );
+        let handler_val = Expression::new_logical_expression(
+            SPAN,
+            this_actions,
+            LogicalOperator::And,
+            actions_access,
+            ast,
+        );
+        let handler_decl = VariableDeclarator::new(
+            SPAN,
+            BindingPattern::new_binding_identifier(SPAN, "handler", ast),
+            None,
+            Some(handler_val),
+            false,
+            ast,
+        );
+        let mut decls_h = ArenaVec::new_in(ast);
+        decls_h.push(handler_decl);
+        blk.push(Statement::new_variable_declaration(
+            SPAN,
+            VariableDeclarationKind::Const,
+            decls_h,
+            false,
+            ast,
+        ));
+
+        // if (typeof handler === 'function') { handler.call(this, event); }
+        let typeof_handler = Expression::new_unary_expression(
+            SPAN,
+            UnaryOperator::Typeof,
+            Expression::new_identifier(SPAN, "handler", ast),
+            ast,
+        );
+        let is_func = Expression::new_binary_expression(
+            SPAN,
+            typeof_handler,
+            BinaryOperator::StrictEquality,
+            Expression::new_string_literal(SPAN, "function", None, ast),
+            ast,
+        );
+        let call_member = Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "handler", ast),
+            IdentifierName::new(SPAN, "call", ast),
+            false,
+            ast,
+        );
+        let mut call_member_args = ArenaVec::new_in(ast);
+        call_member_args.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
+        call_member_args.push(Argument::from(Expression::new_identifier(
+            SPAN, "event", ast,
+        )));
+        let call_handler =
+            Expression::new_call_expression(SPAN, call_member, None, call_member_args, false, ast);
+        let mut call_handler_stmts = ArenaVec::new_in(ast);
+        call_handler_stmts.push(Statement::new_expression_statement(SPAN, call_handler, ast));
+        blk.push(Statement::new_if_statement(
+            SPAN,
+            is_func,
+            Statement::new_block_statement(SPAN, call_handler_stmts, ast),
+            None,
+            ast,
+        ));
+
+        // if (event.cancelBubble || stopped) break;
+        let cancel_bubble = Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "event", ast),
+            IdentifierName::new(SPAN, "cancelBubble", ast),
+            false,
+            ast,
+        );
+        let break_cond = Expression::new_logical_expression(
+            SPAN,
+            cancel_bubble,
+            LogicalOperator::Or,
+            Expression::new_identifier(SPAN, "stopped", ast),
+            ast,
+        );
+        let mut break_stmts = ArenaVec::new_in(ast);
+        break_stmts.push(Statement::new_break_statement(SPAN, None, ast));
+        blk.push(Statement::new_if_statement(
+            SPAN,
+            break_cond,
+            Statement::new_block_statement(SPAN, break_stmts, ast),
+            None,
+            ast,
+        ));
+
+        blk
+    };
+
+    // Construct path branch:
+    // for (const node of path) {
+    //   if (node === root) break;
+    //   if (node.nodeType === 1 && node.hasAttribute && node.hasAttribute(attr)) { ... }
+    // }
+    let mut for_body_stmts = ArenaVec::new_in(ast);
+
+    // if (node === root) break;
+    let eq_root = Expression::new_binary_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "node", ast),
+        BinaryOperator::StrictEquality,
+        Expression::new_identifier(SPAN, "root", ast),
+        ast,
+    );
+    for_body_stmts.push(Statement::new_if_statement(
+        SPAN,
+        eq_root,
+        Statement::new_break_statement(SPAN, None, ast),
+        None,
+        ast,
+    ));
+
+    // if (node.nodeType === 1 && node.hasAttribute && node.hasAttribute(attr))
+    let node_type = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "node", ast),
+        IdentifierName::new(SPAN, "nodeType", ast),
+        false,
+        ast,
+    );
+    let is_elem = Expression::new_binary_expression(
+        SPAN,
+        node_type,
+        BinaryOperator::StrictEquality,
+        Expression::new_numeric_literal(SPAN, 1.0, None, NumberBase::Decimal, ast),
+        ast,
+    );
+    let has_attr_fn = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "node", ast),
+        IdentifierName::new(SPAN, "hasAttribute", ast),
+        false,
+        ast,
+    );
+    let has_attr_call_member = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "node", ast),
+        IdentifierName::new(SPAN, "hasAttribute", ast),
+        false,
+        ast,
+    );
+    let mut has_attr_args = ArenaVec::new_in(ast);
+    has_attr_args.push(Argument::from(Expression::new_identifier(
+        SPAN, "attr", ast,
+    )));
+    let call_has_attr = Expression::new_call_expression(
+        SPAN,
+        has_attr_call_member,
+        None,
+        has_attr_args,
+        false,
+        ast,
+    );
+    let cond_elem =
+        Expression::new_logical_expression(SPAN, is_elem, LogicalOperator::And, has_attr_fn, ast);
+    let cond_all = Expression::new_logical_expression(
+        SPAN,
+        cond_elem,
+        LogicalOperator::And,
+        call_has_attr,
+        ast,
+    );
+
+    let inner_handler_stmts = build_handler_execution("node", ast);
+    for_body_stmts.push(Statement::new_if_statement(
+        SPAN,
+        cond_all,
+        Statement::new_block_statement(SPAN, inner_handler_stmts, ast),
+        None,
+        ast,
+    ));
+
+    let for_body = Statement::new_block_statement(SPAN, for_body_stmts, ast);
+    let node_pat = BindingPattern::new_binding_identifier(SPAN, "node", ast);
+    let node_decl = VariableDeclarator::new(SPAN, node_pat, None, None, false, ast);
+    let mut decls_node = ArenaVec::new_in(ast);
+    decls_node.push(node_decl);
+    let for_left = ForStatementLeft::VariableDeclaration(VariableDeclaration::boxed(
+        SPAN,
+        VariableDeclarationKind::Const,
+        decls_node,
+        false,
+        ast,
+    ));
+    let for_of = Statement::new_for_of_statement(
+        SPAN,
+        false,
+        for_left,
+        Expression::new_identifier(SPAN, "path", ast),
+        for_body,
+        ast,
+    );
+
+    // Construct else branch:
+    // let target = event.target;
+    // while (target && target !== root && target.nodeType === 1) {
+    //   if (target.hasAttribute(attr)) { ... }
+    //   target = target.parentElement;
+    // }
+    let mut else_stmts = ArenaVec::new_in(ast);
+    let target_init = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "event", ast),
+        IdentifierName::new(SPAN, "target", ast),
+        false,
+        ast,
+    );
+    let target_decl = VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "target", ast),
+        None,
+        Some(target_init),
+        false,
+        ast,
+    );
+    let mut decls_tgt = ArenaVec::new_in(ast);
+    decls_tgt.push(target_decl);
+    else_stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Let,
+        decls_tgt,
+        false,
+        ast,
+    ));
+
+    let target_ident = Expression::new_identifier(SPAN, "target", ast);
+    let neq_root_target = Expression::new_binary_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "target", ast),
+        BinaryOperator::StrictInequality,
+        Expression::new_identifier(SPAN, "root", ast),
+        ast,
+    );
+    let cond1 = Expression::new_logical_expression(
+        SPAN,
+        target_ident,
+        LogicalOperator::And,
+        neq_root_target,
+        ast,
+    );
+    let target_type = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "target", ast),
+        IdentifierName::new(SPAN, "nodeType", ast),
+        false,
+        ast,
+    );
+    let is_elem_target = Expression::new_binary_expression(
+        SPAN,
+        target_type,
+        BinaryOperator::StrictEquality,
+        Expression::new_numeric_literal(SPAN, 1.0, None, NumberBase::Decimal, ast),
+        ast,
+    );
+    let while_cond =
+        Expression::new_logical_expression(SPAN, cond1, LogicalOperator::And, is_elem_target, ast);
+
+    let mut while_body_stmts = ArenaVec::new_in(ast);
+    let target_has_attr = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "target", ast),
+        IdentifierName::new(SPAN, "hasAttribute", ast),
+        false,
+        ast,
+    );
+    let mut target_has_args = ArenaVec::new_in(ast);
+    target_has_args.push(Argument::from(Expression::new_identifier(
+        SPAN, "attr", ast,
+    )));
+    let call_target_has_attr =
+        Expression::new_call_expression(SPAN, target_has_attr, None, target_has_args, false, ast);
+
+    let target_handler_stmts = build_handler_execution("target", ast);
+    while_body_stmts.push(Statement::new_if_statement(
+        SPAN,
+        call_target_has_attr,
+        Statement::new_block_statement(SPAN, target_handler_stmts, ast),
+        None,
+        ast,
+    ));
+
+    // target = target.parentElement;
+    let parent_elem = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "target", ast),
+        IdentifierName::new(SPAN, "parentElement", ast),
+        false,
+        ast,
+    );
+    let target_assign_target =
+        AssignmentTarget::new_assignment_target_identifier(SPAN, "target", ast);
+    let assign_target = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        target_assign_target,
+        parent_elem,
+        ast,
+    );
+    while_body_stmts.push(Statement::new_expression_statement(
+        SPAN,
+        assign_target,
+        ast,
+    ));
+
+    let while_stmt = Statement::new_while_statement(
+        SPAN,
+        while_cond,
+        Statement::new_block_statement(SPAN, while_body_stmts, ast),
+        ast,
+    );
+    else_stmts.push(while_stmt);
+
+    // if (path.length > 0) { for (...) } else { ... }
+    let path_len = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "path", ast),
+        IdentifierName::new(SPAN, "length", ast),
+        false,
+        ast,
+    );
+    let has_path = Expression::new_binary_expression(
+        SPAN,
+        path_len,
+        BinaryOperator::GreaterThan,
+        Expression::new_numeric_literal(SPAN, 0.0, None, NumberBase::Decimal, ast),
+        ast,
+    );
+    let mut for_stmts = ArenaVec::new_in(ast);
+    for_stmts.push(for_of);
+    let if_path_stmt = Statement::new_if_statement(
+        SPAN,
+        has_path,
+        Statement::new_block_statement(SPAN, for_stmts, ast),
+        Some(Statement::new_block_statement(SPAN, else_stmts, ast)),
+        ast,
+    );
+    stmts.push(if_path_stmt);
+
+    let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stmts, ast);
+    let mut param_vec = ArenaVec::new_in(ast);
+    param_vec.push(FormalParameter::new_plain(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "eventName", ast),
+        ast,
+    ));
+    param_vec.push(FormalParameter::new_plain(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "event", ast),
+        ast,
+    ));
+    let params = FormalParameters::boxed(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        param_vec,
+        None,
+        ast,
+    );
+    let func = Function::boxed(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        None,
+        None,
+        params,
+        None,
+        Some(body),
+        ast,
+    );
+    let key = PropertyKey::new_static_identifier(SPAN, "__lhDispatch", ast);
+    ClassElement::new_method_definition(
+        SPAN,
+        MethodDefinitionType::MethodDefinition,
+        ArenaVec::new_in(ast),
+        key,
+        func,
+        MethodDefinitionKind::Method,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    )
 }

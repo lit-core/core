@@ -38,10 +38,14 @@ export function runFuseOptimization(options: CssFuseOptions = {}): OptimizationR
       transformedFiles.set(file.filePath, file.transformedCode);
       const abs = path.resolve(file.filePath);
       transformedFiles.set(abs, file.transformedCode);
-      try {
-        const real = fs.realpathSync(abs);
-        transformedFiles.set(real, file.transformedCode);
-      } catch {}
+      if (fs.existsSync(abs)) {
+        try {
+          const real = fs.realpathSync(abs);
+          transformedFiles.set(real, file.transformedCode);
+        } catch {
+          // Ignore special filesystem resolution issues on existing files
+        }
+      }
     }
   }
 
@@ -97,10 +101,14 @@ export function runHtmlFuseOptimization(options: HtmlFuseOptions = {}): HtmlOpti
       transformedFiles.set(file.filePath, file.transformedCode);
       const abs = path.resolve(file.filePath);
       transformedFiles.set(abs, file.transformedCode);
-      try {
-        const real = fs.realpathSync(abs);
-        transformedFiles.set(real, file.transformedCode);
-      } catch {}
+      if (fs.existsSync(abs)) {
+        try {
+          const real = fs.realpathSync(abs);
+          transformedFiles.set(real, file.transformedCode);
+        } catch {
+          // Ignore special filesystem resolution issues on existing files
+        }
+      }
     }
   }
 

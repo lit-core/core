@@ -8,7 +8,9 @@ use oxc_span::SourceType;
 
 use crate::clean_imports::clean_lit_import;
 use crate::constructor::inject_constructor_statements;
-use crate::dead_helpers::{is_identifier_used_in_statements, strip_dead_decorator_helpers};
+use crate::dead_helpers::{
+    is_identifier_referenced_semantically, strip_dead_decorator_helpers_flags,
+};
 use crate::decorate_call::try_transform_expression_statement;
 use crate::decorators::custom_element::transform_custom_element;
 use crate::decorators::event_options::try_transform_event_options;
@@ -117,16 +119,83 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
         }
     }
 
-    // 3. Clean unused decorator imports
-    let mut referenced_names = std::collections::HashSet::new();
-    for name in import_ctx.decorator_bindings.keys() {
-        if is_identifier_used_in_statements(&intermediate_statements, name) {
-            referenced_names.insert(name.clone());
-        }
-    }
+    program.body = intermediate_statements;
+    let (referenced_names, decorate_used, metadata_used) = {
+        let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&program);
+        let semantic = &semantic_ret.semantic;
 
+        let mut referenced = std::collections::HashSet::new();
+        for name in import_ctx.decorator_bindings.keys() {
+            if is_identifier_referenced_semantically(semantic, name) {
+                referenced.insert(name.clone());
+            }
+        }
+
+        // Check which helper aliases are unused
+        let mut unused_helper_aliases = std::collections::HashSet::new();
+        for helper_name in &import_ctx.helper_bindings {
+            if !is_identifier_referenced_semantically(semantic, helper_name) {
+                unused_helper_aliases.insert(helper_name.as_str());
+            }
+        }
+
+        let is_canonical_used = |canonical_name: &str| -> bool {
+            let scoping = semantic.scoping();
+            let root = scoping.root_scope_id();
+            if let Some(sym) = scoping.get_binding(root, canonical_name.into()) {
+                let total_refs = scoping.get_resolved_references(sym).count();
+                if total_refs == 0 {
+                    return false;
+                }
+                let mut alias_refs = 0;
+                for stmt in &program.body {
+                    if let Statement::VariableDeclaration(var_decl) = stmt {
+                        for decl in &var_decl.declarations {
+                            if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                                if unused_helper_aliases.contains(id.name.as_str()) {
+                                    if let Some(Expression::Identifier(init_id)) = &decl.init {
+                                        if init_id.name == canonical_name {
+                                            alias_refs += 1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                total_refs > alias_refs
+            } else {
+                scoping
+                    .root_unresolved_references()
+                    .contains_key(canonical_name)
+            }
+        };
+
+        let mut dec_used = is_canonical_used("__decorate")
+            || is_canonical_used("__decorateClass")
+            || is_canonical_used("_ts_decorate");
+        if !dec_used {
+            for helper_name in &import_ctx.helper_bindings {
+                if !unused_helper_aliases.contains(helper_name.as_str()) {
+                    dec_used = true;
+                    break;
+                }
+            }
+        }
+        let mut meta_used = is_identifier_referenced_semantically(semantic, "__metadata");
+        for meta_name in &import_ctx.metadata_bindings {
+            if is_identifier_referenced_semantically(semantic, meta_name) {
+                meta_used = true;
+                break;
+            }
+        }
+
+        (referenced, dec_used, meta_used)
+    };
+
+    let intermediate = std::mem::replace(&mut program.body, ArenaVec::new_in(&ast));
     let mut new_statements = ArenaVec::new_in(&ast);
-    for mut stmt in intermediate_statements {
+    for mut stmt in intermediate {
         if let Statement::ImportDeclaration(import_decl) = &mut stmt {
             if clean_lit_import(import_decl, &import_ctx, &referenced_names, &ast) {
                 new_statements.push(stmt);
@@ -137,7 +206,13 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     }
 
     // 3.5. Strip dead __decorate and __metadata boilerplate if no __decorate calls remain
-    strip_dead_decorator_helpers(&mut new_statements);
+    strip_dead_decorator_helpers_flags(
+        &mut new_statements,
+        decorate_used,
+        metadata_used,
+        &import_ctx.helper_bindings,
+        &import_ctx.metadata_bindings,
+    );
 
     program.body = new_statements;
 
@@ -537,6 +612,26 @@ mod tests {
         assert!(res
             .code
             .contains("customElements.define(\"my-element\", MyElement)"));
+        assert!(!res.code.contains("lit/decorators.js"));
+    }
+
+    #[test]
+    fn test_aliased_decorate_helper_lowering() {
+        let input = r#"
+      import {property} from 'lit/decorators.js';
+      import {__decorate as dec} from 'tslib';
+      class MyElement {}
+      dec([
+        property({type: String})
+      ], MyElement.prototype, "title", void 0);
+    "#;
+
+        let res = transform_code(input, TransformOptions::default());
+        assert!(!res.code.contains("dec(["));
+        assert!(res
+            .code
+            .contains("MyElement.createProperty(\"title\", { type: String })"));
+        assert!(!res.code.contains("tslib"));
         assert!(!res.code.contains("lit/decorators.js"));
     }
 }

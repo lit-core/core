@@ -40,7 +40,7 @@ pub fn minify_css_string(css: &str) -> Option<String> {
 
 struct CssMinifierTraverser<'a> {
     allocator: &'a Allocator,
-    css_idents: HashSet<String>,
+    import_ctx: CssImportContext,
     minified_templates: u32,
     bytes_saved: u32,
 }
@@ -48,10 +48,15 @@ struct CssMinifierTraverser<'a> {
 impl<'a> CssMinifierTraverser<'a> {
     fn is_css_tag(&self, expr: &Expression) -> bool {
         match expr {
-            Expression::Identifier(ident) => {
-                ident.name == "css" || self.css_idents.contains(ident.name.as_str())
+            Expression::Identifier(ident) => self.import_ctx.css_tags.contains(ident.name.as_str()),
+            Expression::StaticMemberExpression(member) => {
+                if let Expression::Identifier(obj) = &member.object {
+                    if self.import_ctx.css_namespaces.contains(obj.name.as_str()) {
+                        return member.property.name.as_str() == "css";
+                    }
+                }
+                false
             }
-            Expression::StaticMemberExpression(member) => member.property.name == "css",
             _ => false,
         }
     }
@@ -142,42 +147,61 @@ impl<'a> Traverse<'a, ()> for CssMinifierTraverser<'a> {
     }
 }
 
-fn scan_css_imports(program: &Program) -> HashSet<String> {
-    let mut idents = HashSet::new();
-    idents.insert("css".to_string());
+pub fn is_lit_css_source(src: &str) -> bool {
+    src == "lit"
+        || src.starts_with("lit/")
+        || src == "lit-element"
+        || src.starts_with("lit-element/")
+        || src == "lit-html"
+        || src.starts_with("lit-html/")
+        || src.starts_with("@lit/")
+}
+
+#[derive(Debug, Default)]
+pub struct CssImportContext {
+    pub css_tags: HashSet<String>,
+    pub css_namespaces: HashSet<String>,
+    pub has_imports: bool,
+}
+
+pub fn scan_css_imports(program: &Program) -> CssImportContext {
+    let mut ctx = CssImportContext::default();
 
     for stmt in &program.body {
         if let Statement::ImportDeclaration(import_decl) = stmt {
+            ctx.has_imports = true;
+            let src = import_decl.source.value.as_str();
+            if !is_lit_css_source(src) {
+                continue;
+            }
+
             if let Some(specifiers) = &import_decl.specifiers {
                 for spec in specifiers {
-                    if let ImportDeclarationSpecifier::ImportSpecifier(named) = spec {
-                        let imported_name = named.imported.name().as_str();
-                        if imported_name == "css" {
-                            idents.insert(named.local.name.as_str().to_string());
+                    match spec {
+                        ImportDeclarationSpecifier::ImportSpecifier(named) => {
+                            if named.imported.name().as_str() == "css" {
+                                ctx.css_tags.insert(named.local.name.as_str().to_string());
+                            }
                         }
+                        ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                            ctx.css_namespaces
+                                .insert(ns.local.name.as_str().to_string());
+                        }
+                        _ => {}
                     }
                 }
             }
         }
     }
 
-    idents
-}
+    if !ctx.has_imports {
+        ctx.css_tags.insert("css".to_string());
+    }
 
-fn has_css_template_fast_check(source: &str) -> bool {
-    source.contains("css")
+    ctx
 }
 
 pub fn transform_embedded_css(source: &str, options: MinifyCssOptions) -> MinifyCssResult {
-    if !has_css_template_fast_check(source) {
-        return MinifyCssResult {
-            code: source.to_string(),
-            map: None,
-            minified_templates: 0,
-            bytes_saved: 0,
-        };
-    }
-
     let allocator = Allocator::default();
     let source_type = SourceType::from_path(options.filename.as_deref().unwrap_or("file.ts"))
         .unwrap_or_else(|_| SourceType::ts());
@@ -193,14 +217,14 @@ pub fn transform_embedded_css(source: &str, options: MinifyCssOptions) -> Minify
     }
 
     let mut program = parsed.program;
-    let css_idents = scan_css_imports(&program);
+    let import_ctx = scan_css_imports(&program);
 
     let semantic_ret = SemanticBuilder::new().build(&program);
     let scoping = semantic_ret.semantic.into_scoping();
 
     let mut traverser = CssMinifierTraverser {
         allocator: &allocator,
-        css_idents,
+        import_ctx,
         minified_templates: 0,
         bytes_saved: 0,
     };
@@ -394,9 +418,9 @@ mod tests {
     }
 
     #[test]
-    fn test_external_library_alias_css() {
+    fn test_scoped_lit_library_alias_css() {
         let input = r#"
-      import { css as o } from '@spectrum-web-components/base';
+      import { css as o } from '@lit/reactive-element';
       const styles = o`
         :host {
           color: rgb(0, 128, 255);
@@ -428,5 +452,19 @@ mod tests {
                 || res.code.contains(":host{color:#f00;margin:0}")
         );
         assert!(res.code.contains(".header{padding:10px}"));
+    }
+
+    #[test]
+    fn test_is_lit_css_source_canonical() {
+        assert!(is_lit_css_source("lit"));
+        assert!(is_lit_css_source("lit/index.js"));
+        assert!(is_lit_css_source("lit-element"));
+        assert!(is_lit_css_source("lit-element/index.js"));
+        assert!(is_lit_css_source("lit-html"));
+        assert!(is_lit_css_source("lit-html/index.js"));
+        assert!(is_lit_css_source("@lit/reactive-element"));
+        assert!(!is_lit_css_source("@other/web-components"));
+        assert!(!is_lit_css_source("react"));
+        assert!(!is_lit_css_source("vue"));
     }
 }

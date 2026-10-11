@@ -699,12 +699,16 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
         Some(self.helper.call_expr(clone_member, clone_args, true))
     }
 
-    fn lower_unsafe_html(&mut self, call: &CallExpression<'a>) -> Option<Expression<'a>> {
+    fn lower_unsafe_template(
+        &mut self,
+        call: &CallExpression<'a>,
+        type_num: f64,
+    ) -> Option<Expression<'a>> {
         let first_arg = call.arguments.first()?.as_expression()?;
         let mut props = ArenaVec::new_in(self.ast);
 
         let key1 = PropertyKey::new_static_identifier(SPAN, "_$litType$", self.ast);
-        let val1 = self.helper.number_lit(1.0);
+        let val1 = self.helper.number_lit(type_num);
         props.push(ObjectPropertyKind::new_object_property(
             SPAN,
             PropertyKind::Init,
@@ -716,12 +720,39 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
             self.ast,
         ));
 
-        let key2 = PropertyKey::new_static_identifier(SPAN, "_$litStrings$", self.ast);
+        let key2 = PropertyKey::new_static_identifier(SPAN, "strings", self.ast);
         let mut str_elements = ArenaVec::new_in(self.ast);
         str_elements.push(ArrayExpressionElement::from(
             first_arg.clone_in(self.ast.allocator()),
         ));
-        let val2 = Expression::new_array_expression(SPAN, str_elements, self.ast);
+        let arr_expr = Expression::new_array_expression(SPAN, str_elements, self.ast);
+
+        let mut raw_str_elements = ArenaVec::new_in(self.ast);
+        raw_str_elements.push(ArrayExpressionElement::from(
+            first_arg.clone_in(self.ast.allocator()),
+        ));
+        let raw_arr_expr = Expression::new_array_expression(SPAN, raw_str_elements, self.ast);
+
+        let mut raw_props = ArenaVec::new_in(self.ast);
+        let raw_key = PropertyKey::new_static_identifier(SPAN, "raw", self.ast);
+        raw_props.push(ObjectPropertyKind::new_object_property(
+            SPAN,
+            PropertyKind::Init,
+            raw_key,
+            raw_arr_expr,
+            false,
+            false,
+            false,
+            self.ast,
+        ));
+        let raw_obj = Expression::new_object_expression(SPAN, raw_props, self.ast);
+
+        let obj_ident = self.helper.ident_ref("Object");
+        let assign_member = self.helper.static_member(obj_ident, "assign", false);
+        let mut assign_args = ArenaVec::new_in(self.ast);
+        assign_args.push(Argument::from(arr_expr));
+        assign_args.push(Argument::from(raw_obj));
+        let val2 = self.helper.call_expr(assign_member, assign_args, false);
         props.push(ObjectPropertyKind::new_object_property(
             SPAN,
             PropertyKind::Init,
@@ -747,106 +778,18 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
         ));
 
         Some(Expression::new_object_expression(SPAN, props, self.ast))
+    }
+
+    fn lower_unsafe_html(&mut self, call: &CallExpression<'a>) -> Option<Expression<'a>> {
+        self.lower_unsafe_template(call, 1.0)
     }
 
     fn lower_unsafe_svg(&mut self, call: &CallExpression<'a>) -> Option<Expression<'a>> {
-        let first_arg = call.arguments.first()?.as_expression()?;
-        let mut props = ArenaVec::new_in(self.ast);
-
-        let key1 = PropertyKey::new_static_identifier(SPAN, "_$litType$", self.ast);
-        let val1 = self.helper.number_lit(2.0);
-        props.push(ObjectPropertyKind::new_object_property(
-            SPAN,
-            PropertyKind::Init,
-            key1,
-            val1,
-            false,
-            false,
-            false,
-            self.ast,
-        ));
-
-        let key2 = PropertyKey::new_static_identifier(SPAN, "_$litStrings$", self.ast);
-        let mut str_elements = ArenaVec::new_in(self.ast);
-        str_elements.push(ArrayExpressionElement::from(
-            first_arg.clone_in(self.ast.allocator()),
-        ));
-        let val2 = Expression::new_array_expression(SPAN, str_elements, self.ast);
-        props.push(ObjectPropertyKind::new_object_property(
-            SPAN,
-            PropertyKind::Init,
-            key2,
-            val2,
-            false,
-            false,
-            false,
-            self.ast,
-        ));
-
-        let key3 = PropertyKey::new_static_identifier(SPAN, "values", self.ast);
-        let val3 = self.helper.empty_array();
-        props.push(ObjectPropertyKind::new_object_property(
-            SPAN,
-            PropertyKind::Init,
-            key3,
-            val3,
-            false,
-            false,
-            false,
-            self.ast,
-        ));
-
-        Some(Expression::new_object_expression(SPAN, props, self.ast))
+        self.lower_unsafe_template(call, 2.0)
     }
 
     fn lower_unsafe_mathml(&mut self, call: &CallExpression<'a>) -> Option<Expression<'a>> {
-        let first_arg = call.arguments.first()?.as_expression()?;
-        let mut props = ArenaVec::new_in(self.ast);
-
-        let key1 = PropertyKey::new_static_identifier(SPAN, "_$litType$", self.ast);
-        let val1 = self.helper.number_lit(3.0);
-        props.push(ObjectPropertyKind::new_object_property(
-            SPAN,
-            PropertyKind::Init,
-            key1,
-            val1,
-            false,
-            false,
-            false,
-            self.ast,
-        ));
-
-        let key2 = PropertyKey::new_static_identifier(SPAN, "_$litStrings$", self.ast);
-        let mut str_elements = ArenaVec::new_in(self.ast);
-        str_elements.push(ArrayExpressionElement::from(
-            first_arg.clone_in(self.ast.allocator()),
-        ));
-        let val2 = Expression::new_array_expression(SPAN, str_elements, self.ast);
-        props.push(ObjectPropertyKind::new_object_property(
-            SPAN,
-            PropertyKind::Init,
-            key2,
-            val2,
-            false,
-            false,
-            false,
-            self.ast,
-        ));
-
-        let key3 = PropertyKey::new_static_identifier(SPAN, "values", self.ast);
-        let val3 = self.helper.empty_array();
-        props.push(ObjectPropertyKind::new_object_property(
-            SPAN,
-            PropertyKind::Init,
-            key3,
-            val3,
-            false,
-            false,
-            false,
-            self.ast,
-        ));
-
-        Some(Expression::new_object_expression(SPAN, props, self.ast))
+        self.lower_unsafe_template(call, 3.0)
     }
 
     fn lower_until(&mut self, call: &CallExpression<'a>) -> Option<Expression<'a>> {

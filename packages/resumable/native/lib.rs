@@ -1,4 +1,5 @@
 pub mod adapter_injector;
+pub mod loader_ast;
 pub mod loader_compiler;
 
 pub use adapter_injector::{

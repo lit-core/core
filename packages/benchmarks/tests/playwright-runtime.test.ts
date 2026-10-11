@@ -1,7 +1,8 @@
 import { compileHtmlAot } from '@lit-core/html-aot';
-import { type Browser, chromium } from 'playwright';
+import { launchBrowser } from '@lit-core/test-kit';
+import type { Browser } from 'playwright';
 import { build } from 'vite';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 /**
  * Bundles a test JavaScript snippet in memory using local dependencies.
@@ -33,13 +34,17 @@ async function bundleSnippet(code: string): Promise<string> {
 describe('playwright browser runtime testing for lit-core and html-aot', () => {
   let browser: Browser;
 
-  afterAll(async () => {
+  beforeEach(async () => {
+    browser = await launchBrowser();
+  });
+
+  afterEach(async () => {
     if (browser) {
       await browser.close();
     }
   });
 
-  it('renders aot-compiled Lit templates in real browser DOM via Playwright', async (_ctx) => {
+  it('renders aot-compiled Lit templates in real browser DOM via Playwright', async () => {
     // Source component using Lit html tagged template
     const componentSource = `
       import { html, render } from 'lit';
@@ -60,16 +65,6 @@ describe('playwright browser runtime testing for lit-core and html-aot', () => {
     const compiled = compileHtmlAot(componentSource, { filename: 'greeting.js' });
     expect(compiled.templatesCount).toBe(1);
     expect(compiled.code).toContain('_$litType$');
-
-    try {
-      browser = await chromium.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
-    } catch (_err) {
-      console.warn('Chromium launch skipped due to sandboxed environment');
-      return;
-    }
 
     const page = await browser.newPage();
     const bundledCode = await bundleSnippet(compiled.code);
@@ -95,21 +90,10 @@ describe('playwright browser runtime testing for lit-core and html-aot', () => {
     const text = await page.$eval('#greeting-box', (el) => el.textContent?.trim());
     expect(text).toContain('Hello');
     expect(text).toContain('Lit Core User');
+    await page.close();
   });
 
   it('measures first-render mount latency in real browser via Playwright', async () => {
-    if (!browser) {
-      try {
-        browser = await chromium.launch({
-          headless: true,
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        });
-      } catch (_err) {
-        console.warn('Chromium launch skipped due to sandboxed environment');
-        return;
-      }
-    }
-
     const page = await browser.newPage();
 
     const testSnippet = `
@@ -142,20 +126,11 @@ describe('playwright browser runtime testing for lit-core and html-aot', () => {
     expect(typeof duration).toBe('number');
     expect(duration).toBeGreaterThan(0);
     expect(duration).toBeLessThan(1000);
+    await page.close();
   });
 
-  it('returns zero-valued runtime metrics from emptyRuntimeMetrics and fallback', async () => {
-    const { emptyRuntimeMetrics, measureBundleRuntime } = await import('../src/runtime.js');
-    const empty = emptyRuntimeMetrics();
-    expect(empty).toEqual({
-      firstRenderMs: 0,
-      updateMs: 0,
-      scriptEvalMs: 0,
-      registrationMs: 0,
-      heapUsedBytes: 0,
-    });
-
-    const nonExistentResult = await measureBundleRuntime('/non-existent-path/bundle.js');
-    expect(nonExistentResult).toEqual(empty);
+  it('rejects when bundle path does not exist', async () => {
+    const { measureBundleRuntime } = await import('../src/runtime.js');
+    await expect(measureBundleRuntime('/non-existent-path/bundle.js')).rejects.toThrow();
   });
 });

@@ -24,57 +24,50 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
     minSavings = 80,
   } = options;
 
-  function runOptimization(virtualImports = true, write = false): FuseResult | null {
-    try {
-      const res = fuse({
-        include,
-        exclude,
-        threshold,
-        outputDir,
-        write,
-        virtualImports,
-        minSavings,
-      });
+  function runOptimization(virtualImports = true, write = false): FuseResult {
+    const res = fuse({
+      include,
+      exclude,
+      threshold,
+      outputDir,
+      write,
+      virtualImports,
+      minSavings,
+    });
 
-      virtualSheets.clear();
-      sheetOrigins.clear();
-      const sheets = res.fusedSheets || [];
-      for (const sheet of sheets) {
-        virtualSheets.set(sheet.id, sheet.code);
-        virtualSheets.set(`${sheet.id}.js`, sheet.code);
-        virtualSheets.set(`${sheet.id}.ts`, sheet.code);
-        virtualSheets.set(sheet.fileName, sheet.code);
+    virtualSheets.clear();
+    sheetOrigins.clear();
+    const sheets = res.fusedSheets || [];
+    for (const sheet of sheets) {
+      virtualSheets.set(sheet.id, sheet.code);
+      virtualSheets.set(`${sheet.id}.js`, sheet.code);
+      virtualSheets.set(`${sheet.id}.ts`, sheet.code);
+      virtualSheets.set(sheet.fileName, sheet.code);
 
-        const sharedList = (sheet as any).sharedBy || (sheet as any).shared_by;
-        const origin = Array.isArray(sharedList) && sharedList.length > 0 ? sharedList[0] : null;
-        if (origin) {
-          sheetOrigins.set(sheet.id, origin);
-          sheetOrigins.set(`${sheet.id}.js`, origin);
-          sheetOrigins.set(sheet.fileName, origin);
-        }
+      const sharedList = (sheet as any).sharedBy || (sheet as any).shared_by;
+      const origin = Array.isArray(sharedList) && sharedList.length > 0 ? sharedList[0] : null;
+      if (origin) {
+        sheetOrigins.set(sheet.id, origin);
+        sheetOrigins.set(`${sheet.id}.js`, origin);
+        sheetOrigins.set(sheet.fileName, origin);
       }
-
-      transformedFiles.clear();
-      const files = res.rewrittenFiles || [];
-      for (const file of files) {
-        if (file.filePath && file.transformedCode) {
-          transformedFiles.set(file.filePath, file.transformedCode);
-          const abs = path.resolve(file.filePath);
-          transformedFiles.set(abs, file.transformedCode);
-          try {
-            const real = fs.realpathSync(abs);
-            transformedFiles.set(real, file.transformedCode);
-          } catch {}
-        }
-      }
-
-      return res;
-    } catch (err) {
-      if (config) {
-        config.logger.error(`[css-fuse] Optimization pass failed: ${err}`);
-      }
-      return null;
     }
+
+    transformedFiles.clear();
+    const files = res.rewrittenFiles || [];
+    for (const file of files) {
+      if (file.filePath && file.transformedCode) {
+        transformedFiles.set(file.filePath, file.transformedCode);
+        const abs = path.resolve(file.filePath);
+        transformedFiles.set(abs, file.transformedCode);
+        try {
+          const real = fs.realpathSync(abs);
+          transformedFiles.set(real, file.transformedCode);
+        } catch {}
+      }
+    }
+
+    return res;
   }
 
   return {
@@ -111,7 +104,19 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
       }
 
       // Production build or dev with applyInDev enabled: run in-memory AST extraction
-      fuseResult = runOptimization(true, false);
+      try {
+        fuseResult = runOptimization(true, false);
+      } catch (err: any) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (typeof this?.error === 'function') {
+          this.error({
+            message: `[css-fuse] Optimization pass failed: ${message}`,
+            stack: err?.stack,
+            cause: err,
+          });
+        }
+        throw err;
+      }
       if (fuseResult) {
         const stats = fuseResult.stats;
         config.logger.info(
@@ -230,7 +235,11 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
 
       // Re-run optimization pass
       const prevSheets = new Map(virtualSheets);
-      runOptimization(true, false);
+      try {
+        runOptimization(true, false);
+      } catch (err: any) {
+        ctx.server.config.logger.error(`[css-fuse] HMR optimization pass failed: ${err?.message || err}`);
+      }
 
       // Invalidate modified virtual sheets
       for (const [sheetKey, newCode] of virtualSheets.entries()) {

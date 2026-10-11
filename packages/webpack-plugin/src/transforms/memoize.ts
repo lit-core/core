@@ -1,6 +1,6 @@
 import { transformMemoize } from '@lit-core/memoize';
 import type { MemoizeOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 
 export const LIT_MEMOIZE_FAST_CHECK = /\brender\s*\([^)]*\)\s*\{/;
 
@@ -30,7 +30,7 @@ export function transformMemoizePlugin(code: string, id: string, options: Memoiz
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('memoize', cleanId, err);
   }
 }

@@ -6,6 +6,7 @@ pub mod micro;
 pub mod models;
 pub mod template_parser;
 pub mod vanilla;
+pub mod vanilla_ast;
 
 use crate::import_scanner::ImportContext;
 use crate::models::{ClassificationResult, ClassifyOptions, TransformOptions, TransformResult};

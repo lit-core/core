@@ -1,7 +1,7 @@
 import { scanTags, transformTagShake } from '@lit-core/tag-shake';
 import type { TagShakeOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
-import type { TransformResult } from './common.js';
+import { TransformError, type TransformResult } from './common.js';
 
 export const TAG_SHAKE_FAST_CHECK = /\.define\(|customElement\(/;
 
@@ -13,7 +13,9 @@ export function scanAppTags(code: string, id: string, targetSet: Set<string>): v
       for (const t of tags) {
         targetSet.add(t);
       }
-    } catch {}
+    } catch (err) {
+      throw new TransformError('tag-shake:scan', cleanId, err);
+    }
   }
 }
 
@@ -53,7 +55,7 @@ export function transformTagShakePlugin(code: string, id: string, options: TagSh
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('tag-shake', cleanId, err);
   }
 }

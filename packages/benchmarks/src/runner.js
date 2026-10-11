@@ -137,6 +137,7 @@ export async function runStandaloneBenchmark({ suite, tool, options = {}, allToo
  * @param {Object} [options]
  * @param {boolean} [options.verbose]
  * @param {string} [options.outDir]
+ * @param {string} [options.scenario]
  * @returns {Promise<import('./types.js').SuiteBenchmarkResult>}
  */
 export async function runSuiteBenchmark(suite, tools, options = {}) {
@@ -144,11 +145,14 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
   const runtimeRows = [];
   const diagnostics = {};
 
+  // Enforce uniform scenario across the entire suite benchmark run.
+  // By default, evaluate the 20-component enterprise bundle scenario.
+  const targetScenario = options.scenario ? getScenario(options.scenario) : getScenario('bundle');
+
   try {
-    // 1. Run baseline for the primary bundle scenario
-    const bundleScenario = getScenario('bundle');
+    // 1. Run baseline for the target scenario
     const baselineResult = await runScenarioBenchmark({
-      scenario: bundleScenario,
+      scenario: targetScenario,
       suite,
       variantId: 'baseline',
       options,
@@ -156,7 +160,9 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
     rows.push({
       name: 'Baseline (Standard Vite)',
-      description: 'Standard Vite build without optimization plugins',
+      description: `Standard Vite build without optimization plugins [${targetScenario.name}]`,
+      scenarioId: targetScenario.id,
+      scenarioName: targetScenario.name,
       metrics: baselineResult.metrics,
       isBaseline: true,
     });
@@ -171,15 +177,15 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       speedupPercent: 0,
       updateSpeedupPercent: 0,
       evalSpeedupPercent: 0,
+      registrationSpeedupPercent: 0,
       memorySavingsPercent: 0,
       isBaseline: true,
     });
 
-    // 2. Run each tool under its authentic designated scenario
+    // 2. Run each tool under the identical target scenario
     for (const tool of tools) {
-      const scenario = getScenarioForFeature(tool.id);
       const scenarioResult = await runScenarioBenchmark({
-        scenario,
+        scenario: targetScenario,
         suite,
         variantId: tool.id,
         options,
@@ -196,15 +202,15 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
 
       rows.push({
         name: tool.name,
-        description: `[Scenario: ${scenario.name}] ${tool.description}`,
-        scenarioId: scenario.id,
-        scenarioName: scenario.name,
+        description: `[Scenario: ${targetScenario.name}] ${tool.description}`,
+        scenarioId: targetScenario.id,
+        scenarioName: targetScenario.name,
         metrics: scenarioResult.metrics,
         impact,
       });
 
       runtimeRows.push({
-        name: `${tool.name} [${scenario.name}]`,
+        name: tool.name,
         firstRenderMs: scenarioResult.runtime.firstRenderMs,
         updateMs: scenarioResult.runtime.updateMs,
         scriptEvalMs: scenarioResult.runtime.scriptEvalMs,
@@ -218,10 +224,10 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       });
     }
 
-    // 3. Run total / combined under bundle scenario
+    // 3. Run total / combined under the identical target scenario
     if (tools.length > 1) {
       const totalResult = await runScenarioBenchmark({
-        scenario: bundleScenario,
+        scenario: targetScenario,
         suite,
         variantId: 'all',
         options,
@@ -239,6 +245,8 @@ export async function runSuiteBenchmark(suite, tools, options = {}) {
       rows.push({
         name: 'TOTAL (All Optimizations Combined)',
         description: 'All compiler passes active simultaneously',
+        scenarioId: targetScenario.id,
+        scenarioName: targetScenario.name,
         metrics: totalResult.metrics,
         impact: totalImpact,
         isTotal: true,

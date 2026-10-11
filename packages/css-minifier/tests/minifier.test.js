@@ -144,10 +144,10 @@ console.log('Testing @lit-core/css-minifier native addon...');
   console.log('  ✔ Alias minifyTemplateCss works identically');
 }
 
-// Test 9: External package import alias (@spectrum-web-components/base)
+// Test 9: Scoped lit package import alias (@lit/reactive-element)
 {
   const input = `
-    import { css as o } from '@spectrum-web-components/base';
+    import { css as o } from '@lit/reactive-element';
     const styles = o\`
       :host {
         color: rgb(0, 128, 255);
@@ -157,7 +157,7 @@ console.log('Testing @lit-core/css-minifier native addon...');
   const res = minifyEmbeddedCss(input);
   assert(res.minifiedTemplates > 0);
   assert(res.code.includes(':host{color:#0080ff}'));
-  console.log('  ✔ External package import alias');
+  console.log('  ✔ Scoped lit package import alias (@lit/reactive-element)');
 }
 
 // Test 10: CallExpression css([...])

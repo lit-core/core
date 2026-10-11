@@ -49,12 +49,7 @@ describe('resumable SSR Declarative Shadow DOM artifact verification', () => {
   });
 
   it('verifies Declarative Shadow DOM and live interaction resumption in browser via Playwright', async () => {
-    try {
-      browser = await launchBrowser();
-    } catch (_err) {
-      console.warn('Chromium launch skipped due to sandboxed environment');
-      return;
-    }
+    browser = await launchBrowser();
 
     const page = await browser.newPage();
     const fileUrl = `file://${artifactPath}`;

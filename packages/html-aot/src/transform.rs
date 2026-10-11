@@ -62,14 +62,6 @@ fn is_known_lit_module(specifier: &str) -> bool {
 }
 
 pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
-    if !source.contains("html") || !source.contains('`') {
-        return HtmlAotResult {
-            code: source.to_string(),
-            map: None,
-            templates_count: 0,
-        };
-    }
-
     let allocator = Allocator::default();
     let filename = options.filename.as_deref().unwrap_or("source.ts");
     let is_ts = filename.ends_with(".ts") || filename.ends_with(".tsx");
@@ -148,105 +140,359 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let need_ssr_import = need_attr_part || need_prop_part || need_bool_part || need_event_part;
 
     // 4. Construct top-level statements to insert after imports
+    let ast = AstBuilder::new(&allocator);
     let mut header_stmts = Vec::new();
 
     if need_ssr_import {
-        let mut bindings = Vec::new();
+        let mut binding_pairs = Vec::new();
         if need_attr_part {
-            bindings.push("AttributePart: A_1");
+            binding_pairs.push(("AttributePart", "A_1"));
         }
         if need_prop_part {
-            bindings.push("PropertyPart: P_1");
+            binding_pairs.push(("PropertyPart", "P_1"));
         }
         if need_bool_part {
-            bindings.push("BooleanAttributePart: B_1");
+            binding_pairs.push(("BooleanAttributePart", "B_1"));
         }
         if need_event_part {
-            bindings.push("EventPart: E_1");
+            binding_pairs.push(("EventPart", "E_1"));
         }
 
-        let import_snippet = format!(
-            "import * as litHtmlPrivate_1 from 'lit-html/private-ssr-support.js';\nconst {{ {} }} = litHtmlPrivate_1._$LH;\n",
-            bindings.join(", ")
+        let local = BindingIdentifier::new(SPAN, "litHtmlPrivate_1", &ast);
+        let ns_spec = ImportNamespaceSpecifier::boxed(SPAN, local, &ast);
+        let mut specs = ArenaVec::new_in(&ast);
+        specs.push(ImportDeclarationSpecifier::ImportNamespaceSpecifier(
+            ns_spec,
+        ));
+        let source_lit = StringLiteral::new(SPAN, "lit-html/private-ssr-support.js", None, &ast);
+        let import_decl = ImportDeclaration::boxed(
+            SPAN,
+            Some(specs),
+            source_lit,
+            None,
+            None,
+            ImportOrExportKind::Value,
+            &ast,
         );
-        let parsed_import = Parser::new(
-            &allocator,
-            allocator.alloc_str(&import_snippet),
-            source_type,
-        )
-        .parse();
-        for stmt in parsed_import.program.body {
-            header_stmts.push(stmt);
+        header_stmts.push(Statement::ImportDeclaration(import_decl));
+
+        let mut obj_pat_props = ArenaVec::new_in(&ast);
+        for (imported_name, local_alias) in &binding_pairs {
+            let key =
+                PropertyKey::new_static_identifier(SPAN, allocator.alloc_str(imported_name), &ast);
+            let value = BindingPattern::new_binding_identifier(
+                SPAN,
+                allocator.alloc_str(local_alias),
+                &ast,
+            );
+            let prop = BindingProperty::new(SPAN, key, value, false, false, &ast);
+            obj_pat_props.push(prop);
         }
+        let binding_pat = BindingPattern::new_object_pattern(SPAN, obj_pat_props, None, &ast);
+
+        let callee_obj = Expression::new_identifier(SPAN, "litHtmlPrivate_1", &ast);
+        let prop_name = IdentifierName::new(SPAN, "_$LH", &ast);
+        let init_expr =
+            Expression::new_static_member_expression(SPAN, callee_obj, prop_name, false, &ast);
+
+        let declarator =
+            VariableDeclarator::new(SPAN, binding_pat, None, Some(init_expr), false, &ast);
+        let mut decls = ArenaVec::new_in(&ast);
+        decls.push(declarator);
+        header_stmts.push(Statement::new_variable_declaration(
+            SPAN,
+            VariableDeclarationKind::Const,
+            decls,
+            false,
+            &ast,
+        ));
     }
 
     // Security brand: const b_1 = (i) => i;
-    let brand_snippet = "const b_1 = (i) => i;\n";
-    let parsed_brand =
-        Parser::new(&allocator, allocator.alloc_str(brand_snippet), source_type).parse();
-    for stmt in parsed_brand.program.body {
-        header_stmts.push(stmt);
-    }
+    let param_pat = BindingPattern::new_binding_identifier(SPAN, "i", &ast);
+    let mut params_vec = ArenaVec::new_in(&ast);
+    params_vec.push(FormalParameter::new_plain(SPAN, param_pat, &ast));
+    let formal_params = FormalParameters::boxed(
+        SPAN,
+        FormalParameterKind::ArrowFormalParameters,
+        params_vec,
+        None,
+        &ast,
+    );
+    let arrow_body = ArrowFunctionBody::from(Expression::new_identifier(SPAN, "i", &ast));
+    let arrow_expr = Expression::new_arrow_function_expression(
+        SPAN,
+        false,
+        None,
+        formal_params,
+        None,
+        arrow_body,
+        &ast,
+    );
+
+    let b1_binding = BindingPattern::new_binding_identifier(SPAN, "b_1", &ast);
+    let declarator = VariableDeclarator::new(SPAN, b1_binding, None, Some(arrow_expr), false, &ast);
+    let mut decls = ArenaVec::new_in(&ast);
+    decls.push(declarator);
+    header_stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        decls,
+        false,
+        &ast,
+    ));
 
     // Top-level template definitions associated with their source span
     let mut tmpl_stmts: Vec<(Span, Vec<Statement<'_>>)> = Vec::new();
     for (tmpl_span, tmpl) in &template_matches {
-        let mut parts_items = Vec::new();
+        let tag_ident = Expression::new_identifier(SPAN, "b_1", &ast);
+        let mut quasis = ArenaVec::new_in(&ast);
+        let raw_html = allocator.alloc_str(&tmpl.prepared.prepared_html);
+        let val = TemplateElementValue {
+            raw: raw_html.into(),
+            cooked: Some(raw_html.into()),
+        };
+        quasis.push(TemplateElement::new(SPAN, val, true, &ast));
+        let tmpl_lit = TemplateLiteral::new(SPAN, quasis, ArenaVec::new_in(&ast), &ast);
+        let tagged_tmpl =
+            Expression::new_tagged_template_expression(SPAN, tag_ident, None, tmpl_lit, &ast);
+
+        let mut parts_elements = ArenaVec::new_in(&ast);
         for p in &tmpl.prepared.parts {
+            let mut part_props = ArenaVec::new_in(&ast);
             match &p.kind {
                 PartKind::Child => {
-                    parts_items.push(format!("{{ type: 2, index: {} }}", p.index));
+                    let key_type = PropertyKey::new_static_identifier(SPAN, "type", &ast);
+                    let val_type =
+                        Expression::new_numeric_literal(SPAN, 2.0, None, NumberBase::Decimal, &ast);
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_type,
+                        val_type,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
+                    let key_idx = PropertyKey::new_static_identifier(SPAN, "index", &ast);
+                    let val_idx = Expression::new_numeric_literal(
+                        SPAN,
+                        p.index as f64,
+                        None,
+                        NumberBase::Decimal,
+                        &ast,
+                    );
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_idx,
+                        val_idx,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
                 }
                 PartKind::Element => {
-                    parts_items.push(format!("{{ type: 6, index: {} }}", p.index));
+                    let key_type = PropertyKey::new_static_identifier(SPAN, "type", &ast);
+                    let val_type =
+                        Expression::new_numeric_literal(SPAN, 6.0, None, NumberBase::Decimal, &ast);
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_type,
+                        val_type,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
+                    let key_idx = PropertyKey::new_static_identifier(SPAN, "index", &ast);
+                    let val_idx = Expression::new_numeric_literal(
+                        SPAN,
+                        p.index as f64,
+                        None,
+                        NumberBase::Decimal,
+                        &ast,
+                    );
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_idx,
+                        val_idx,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
                 }
                 PartKind::Comment => {
-                    parts_items.push(format!("{{ type: 7, index: {} }}", p.index));
+                    let key_type = PropertyKey::new_static_identifier(SPAN, "type", &ast);
+                    let val_type =
+                        Expression::new_numeric_literal(SPAN, 7.0, None, NumberBase::Decimal, &ast);
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_type,
+                        val_type,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
+                    let key_idx = PropertyKey::new_static_identifier(SPAN, "index", &ast);
+                    let val_idx = Expression::new_numeric_literal(
+                        SPAN,
+                        p.index as f64,
+                        None,
+                        NumberBase::Decimal,
+                        &ast,
+                    );
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_idx,
+                        val_idx,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
                 }
                 PartKind::Attribute {
                     name,
                     strings,
                     ctor_type,
                 } => {
+                    let key_type = PropertyKey::new_static_identifier(SPAN, "type", &ast);
+                    let val_type =
+                        Expression::new_numeric_literal(SPAN, 1.0, None, NumberBase::Decimal, &ast);
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_type,
+                        val_type,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
+                    let key_idx = PropertyKey::new_static_identifier(SPAN, "index", &ast);
+                    let val_idx = Expression::new_numeric_literal(
+                        SPAN,
+                        p.index as f64,
+                        None,
+                        NumberBase::Decimal,
+                        &ast,
+                    );
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_idx,
+                        val_idx,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
+                    let key_name = PropertyKey::new_static_identifier(SPAN, "name", &ast);
+                    let val_name =
+                        Expression::new_string_literal(SPAN, allocator.alloc_str(name), None, &ast);
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_name,
+                        val_name,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
+                    let key_strings = PropertyKey::new_static_identifier(SPAN, "strings", &ast);
+                    let mut str_elems = ArenaVec::new_in(&ast);
+                    for s in strings {
+                        str_elems.push(ArrayExpressionElement::from(
+                            Expression::new_string_literal(
+                                SPAN,
+                                allocator.alloc_str(s),
+                                None,
+                                &ast,
+                            ),
+                        ));
+                    }
+                    let val_strings = Expression::new_array_expression(SPAN, str_elems, &ast);
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_strings,
+                        val_strings,
+                        false,
+                        false,
+                        false,
+                        &ast,
+                    ));
                     let ctor_alias = match ctor_type {
                         3 => "P_1",
                         4 => "B_1",
                         5 => "E_1",
                         _ => "A_1",
                     };
-                    let str_literals: Vec<String> = strings
-                        .iter()
-                        .map(|s| format!("'{}'", s.replace('\'', "\\'")))
-                        .collect();
-                    parts_items.push(format!(
-                        "{{ type: 1, index: {}, name: '{}', strings: [{}], ctor: {} }}",
-                        p.index,
-                        name,
-                        str_literals.join(", "),
-                        ctor_alias
+                    let key_ctor = PropertyKey::new_static_identifier(SPAN, "ctor", &ast);
+                    let val_ctor = Expression::new_identifier(SPAN, ctor_alias, &ast);
+                    part_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        key_ctor,
+                        val_ctor,
+                        false,
+                        false,
+                        false,
+                        &ast,
                     ));
                 }
             }
+            let part_obj = Expression::new_object_expression(SPAN, part_props, &ast);
+            parts_elements.push(ArrayExpressionElement::from(part_obj));
         }
 
-        let parts_json = format!("[{}]", parts_items.join(", "));
-        let template_snippet = format!(
-            "const {} = {{ h: b_1`{}`, parts: {} }};\n",
-            tmpl.var_name,
-            tmpl.prepared
-                .prepared_html
-                .replace('`', "\\`")
-                .replace('$', "\\$"),
-            parts_json
-        );
+        let parts_arr = Expression::new_array_expression(SPAN, parts_elements, &ast);
+        let mut desc_props = ArenaVec::new_in(&ast);
+        desc_props.push(ObjectPropertyKind::new_object_property(
+            SPAN,
+            PropertyKind::Init,
+            PropertyKey::new_static_identifier(SPAN, "h", &ast),
+            tagged_tmpl,
+            false,
+            false,
+            false,
+            &ast,
+        ));
+        desc_props.push(ObjectPropertyKind::new_object_property(
+            SPAN,
+            PropertyKind::Init,
+            PropertyKey::new_static_identifier(SPAN, "parts", &ast),
+            parts_arr,
+            false,
+            false,
+            false,
+            &ast,
+        ));
+        let desc_obj = Expression::new_object_expression(SPAN, desc_props, &ast);
 
-        let parsed_tmpl = Parser::new(
-            &allocator,
-            allocator.alloc_str(&template_snippet),
-            source_type,
-        )
-        .parse();
-        tmpl_stmts.push((*tmpl_span, parsed_tmpl.program.body.into_iter().collect()));
+        let var_pat =
+            BindingPattern::new_binding_identifier(SPAN, allocator.alloc_str(&tmpl.var_name), &ast);
+        let decl = VariableDeclarator::new(SPAN, var_pat, None, Some(desc_obj), false, &ast);
+        let mut decls = ArenaVec::new_in(&ast);
+        decls.push(decl);
+        let stmt = Statement::new_variable_declaration(
+            SPAN,
+            VariableDeclarationKind::Const,
+            decls,
+            false,
+            &ast,
+        );
+        tmpl_stmts.push((*tmpl_span, vec![stmt]));
     }
 
     // 5. Replace tagged template expressions with CompiledTemplateResult descriptors

@@ -1,6 +1,6 @@
 import { transformLitProps } from '@lit-core/props-lower';
 import type { PropsLowerOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 
 export const LIT_DECORATOR_FAST_CHECK = /@(?:customElement|property|state|query|queryAll|queryAsync|queryAssignedElements|queryAssignedNodes|eventOptions|localized)\b|__(?:decorate|decorateClass)\b/;
 
@@ -26,7 +26,7 @@ export function transformPropsLower(code: string, id: string, options: PropsLowe
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('props-lower', cleanId, err);
   }
 }

@@ -40,16 +40,6 @@ pub struct DirtyMaskResult {
 }
 
 pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResult {
-    if !source.contains("html") && !source.contains("svg") {
-        return DirtyMaskResult {
-            code: source.to_string(),
-            map: None,
-            components_count: 0,
-            masked_parts_count: 0,
-            properties_count: 0,
-        };
-    }
-
     let allocator = Allocator::default();
     let filename = options.filename.as_deref().unwrap_or("file.ts");
     let source_type = SourceType::from_path(filename).unwrap_or_else(|_| SourceType::ts());

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { classify, transformNative } from '@lit-core/native';
+import { classify, NATIVE_RUNTIME_SOURCE, transformNative } from '@lit-core/native';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { CARBON_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS } from '../components.js';
 import { readComponentSource, resolvePackageDir } from '../fixtures.js';
@@ -11,15 +11,9 @@ describe('@lit-core/native Playwright Chromium and real component verification',
   let page: any;
 
   beforeAll(async () => {
-    try {
-      browser = await getTestBrowser();
-      page = await browser.newPage();
-      await page.setContent('<!DOCTYPE html><html><body><div id="test-root"></div></body></html>');
-    } catch (_err) {
-      // Mach port rendezvous restricted in sandbox environment
-      browser = null;
-      page = null;
-    }
+    browser = await getTestBrowser();
+    page = await browser.newPage();
+    await page.setContent('<!DOCTYPE html><html><body><div id="test-root"></div></body></html>');
   });
 
   afterAll(async () => {
@@ -80,16 +74,12 @@ describe('@lit-core/native Playwright Chromium and real component verification',
 
   describe('Real Playwright Chromium DOM execution for Mode A vanilla component', () => {
     it('executes compiled vanilla custom element in real headless Chromium DOM', async () => {
-      if (!page) {
-        // Skipped in sandbox environment lacking Mach port rendezvous privileges
-        return;
-      }
-      const litSource = `
+      const canonicalSource = `
         import { LitElement, html, css } from 'lit';
         import { customElement, property } from 'lit/decorators.js';
 
-        @customElement('pw-vanilla-button')
-        export class PlaywrightVanillaButton extends LitElement {
+        @customElement('cds-native-action')
+        export class CDSNativeAction extends LitElement {
           static styles = css\`:host { display: inline-block; } button { color: rgb(0, 128, 0); }\`;
 
           @property({ type: String }) label = 'Initial';
@@ -101,18 +91,18 @@ describe('@lit-core/native Playwright Chromium and real component verification',
           }
 
           render() {
-            return html\`<button id="btn" @click=\${this.handleClick}><span id="txt">\${this.label}</span></button>\`;
+            return html\`<button id="btn" ?disabled=\${this.disabled} @click=\${this.handleClick}><span id="txt">\${this.label}</span></button>\`;
           }
         }
       `;
 
-      const transformed = transformNative(litSource);
+      const transformed = transformNative(canonicalSource, { filename: 'canonical-action.ts' });
       expect(transformed.vanillaCount).toBe(1);
 
       const componentCode = `
         ${transformed.code.replace(/export\s+class/, 'class')}
 
-        const el = document.createElement('pw-vanilla-button');
+        const el = document.createElement('cds-native-action');
         el.label = 'Click Me';
         document.querySelector('#test-root').appendChild(el);
       `;
@@ -121,14 +111,14 @@ describe('@lit-core/native Playwright Chromium and real component verification',
 
       // Verify DOM mount
       const text = await page.evaluate(() => {
-        const el = document.querySelector('pw-vanilla-button');
+        const el = document.querySelector('cds-native-action');
         return el?.shadowRoot?.querySelector('#txt')?.textContent;
       });
       expect(text).toBe('Click Me');
 
       // Verify CSSStyleSheet applied in Chromium
       const color = await page.evaluate(() => {
-        const el = document.querySelector('pw-vanilla-button');
+        const el = document.querySelector('cds-native-action');
         const btn = el?.shadowRoot?.querySelector('button');
         return btn ? window.getComputedStyle(btn).color : '';
       });
@@ -136,7 +126,7 @@ describe('@lit-core/native Playwright Chromium and real component verification',
 
       // Verify property reactivity
       await page.evaluate(() => {
-        const el = document.querySelector('pw-vanilla-button') as any;
+        const el = document.querySelector('cds-native-action') as any;
         if (el) {
           el.label = 'Updated Text';
           el.disabled = true;
@@ -144,25 +134,26 @@ describe('@lit-core/native Playwright Chromium and real component verification',
       });
 
       const updatedText = await page.evaluate(() => {
-        const el = document.querySelector('pw-vanilla-button');
+        const el = document.querySelector('cds-native-action');
         return el?.shadowRoot?.querySelector('#txt')?.textContent;
       });
       expect(updatedText).toBe('Updated Text');
 
       const isAttributeReflected = await page.evaluate(() => {
-        const el = document.querySelector('pw-vanilla-button');
+        const el = document.querySelector('cds-native-action');
         return el?.hasAttribute('disabled');
       });
       expect(isAttributeReflected).toBe(true);
 
       // Verify event listener
       await page.evaluate(() => {
-        const el = document.querySelector('pw-vanilla-button');
+        const el = document.querySelector('cds-native-action') as any;
+        el.disabled = false;
         (el?.shadowRoot?.querySelector('#btn') as any)?.click();
       });
 
       const clickCount = await page.evaluate(() => {
-        const el = document.querySelector('pw-vanilla-button') as any;
+        const el = document.querySelector('cds-native-action') as any;
         return el?._clicked;
       });
       expect(clickCount).toBe(1);
@@ -171,32 +162,15 @@ describe('@lit-core/native Playwright Chromium and real component verification',
 
   describe('Real Playwright Chromium DOM execution for Mode B micro-runtime', () => {
     it('executes micro-runtime with batched microtask updates and reconciler in Chromium', async () => {
-      if (!page) {
-        // Skipped in sandbox environment lacking Mach port rendezvous privileges
-        return;
-      }
-      const microCode = `
-        class MicroElement extends HTMLElement {
+      // Evaluate actual @lit-core/native runtime in Chromium page
+      const runtimeCode = `
+        ${NATIVE_RUNTIME_SOURCE.replace(/export\s+class/, 'class').replace(/export\s+function/, 'function')}
+
+        class DynamicMicroCounter extends NativeElement {
           constructor() {
             super();
-            this.attachShadow({ mode: 'open' });
-            this.__dirty = 0;
-            this.__scheduled = false;
             this.shadowRoot.innerHTML = '<ul id="list"></ul><div id="count">0</div>';
             this._count = 0;
-          }
-
-          requestUpdate(bit) {
-            this.__dirty |= bit;
-            if (!this.__scheduled) {
-              this.__scheduled = true;
-              queueMicrotask(() => {
-                this.__scheduled = false;
-                const mask = this.__dirty;
-                this.__dirty = 0;
-                this.__update(mask);
-              });
-            }
           }
 
           set count(v) {
@@ -211,16 +185,42 @@ describe('@lit-core/native Playwright Chromium and real component verification',
           }
         }
 
-        customElements.define('pw-micro-element', MicroElement);
-        const mel = document.createElement('pw-micro-element');
+        customElements.define('dynamic-micro-counter', DynamicMicroCounter);
+        const mel = document.createElement('dynamic-micro-counter');
         document.querySelector('#test-root').appendChild(mel);
+
+        // Test keyed list reconciler from runtime
+        const list = mel.shadowRoot.querySelector('#list');
+        const marker = document.createTextNode('');
+        list.appendChild(marker);
+        const cache = new Map();
+        reconcile(
+          list,
+          marker,
+          [{ id: 1, text: 'Alpha' }, { id: 2, text: 'Beta' }],
+          (i) => i.id,
+          (i) => {
+            const li = document.createElement('li');
+            li.textContent = i.text;
+            return li;
+          },
+          cache,
+        );
       `;
 
-      await page.evaluate(microCode);
+      await page.evaluate(runtimeCode);
 
-      // Mutate count
+      // Verify initial keyed reconciliation output
+      const listItems = await page.evaluate(() => {
+        const el = document.querySelector('dynamic-micro-counter');
+        const items = el?.shadowRoot?.querySelectorAll('li');
+        return Array.from(items || []).map((li: any) => li.textContent);
+      });
+      expect(listItems).toEqual(['Alpha', 'Beta']);
+
+      // Mutate count to trigger batched microtask update
       await page.evaluate(() => {
-        const el = document.querySelector('pw-micro-element') as any;
+        const el = document.querySelector('dynamic-micro-counter') as any;
         if (el) {
           el.count = 42;
         }
@@ -230,7 +230,7 @@ describe('@lit-core/native Playwright Chromium and real component verification',
       await page.evaluate(() => new Promise((r) => queueMicrotask(() => r(null))));
 
       const renderedCount = await page.evaluate(() => {
-        const el = document.querySelector('pw-micro-element');
+        const el = document.querySelector('dynamic-micro-counter');
         return el?.shadowRoot?.querySelector('#count')?.textContent;
       });
 

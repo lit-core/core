@@ -1,5 +1,6 @@
 import { scanTags, transformTagShake } from '@lit-core/tag-shake';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { TagShakeOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -31,7 +32,9 @@ export function tagShake(options: TagShakeOptions = {}): Plugin {
           for (const t of tags) {
             usedTags.add(t);
           }
-        } catch {}
+        } catch (err) {
+          reportTransformError(this, 'tag-shake', cleanId, err);
+        }
       }
 
       // 2. Check if file contains registrations to prune
@@ -67,8 +70,8 @@ export function tagShake(options: TagShakeOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'tag-shake', cleanId, err);
       }
     },
 
@@ -92,8 +95,8 @@ export function tagShake(options: TagShakeOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'tag-shake', chunk.fileName, err);
       }
     },
   };

@@ -7,8 +7,11 @@ import { compileHtmlAot } from '@lit-core/html-aot';
 import { fuse as fuseHtml } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
+import { compileResumableLoader } from '@lit-core/resumable/compiler';
 import { renderToDsd } from '@lit-core/resumable/server';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { assertMounted, mountElement } from '@lit-core/test-kit';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { bundleComponentForBrowser, getCanonicalComponent } from './bundler.js';
 import type { ComponentDescriptor } from './components.js';
 import { extractCssFromModule, findComponentCssSource, readComponentSource, resolvePackageDir } from './fixtures.js';
 import { getTestBrowser } from './harness.js';
@@ -27,17 +30,38 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
   describe(`${frameworkName} real component Playwright test suite`, () => {
     let browser: any;
     let page: any;
+    let canonicalButton: any;
+    let canonicalCheckbox: any;
 
     beforeAll(async () => {
-      try {
-        browser = await getTestBrowser();
-        if (browser) {
-          page = await browser.newPage();
-          await page.setContent('<!DOCTYPE html><html><body><div id="test-root"></div></body></html>');
-        }
-      } catch {
-        browser = null;
-        page = null;
+      browser = await getTestBrowser();
+      page = await browser.newPage();
+      canonicalButton = getCanonicalComponent(frameworkName, 'button');
+      canonicalCheckbox = getCanonicalComponent(frameworkName, 'checkbox');
+      const bundleCode = await bundleComponentForBrowser({
+        imports: [canonicalButton.importStatement, canonicalCheckbox.importStatement],
+        plugins: {
+          cssFuse: true,
+          propsLower: true,
+          cssMinifier: true,
+          htmlMinifier: true,
+          elemProxy: true,
+          eventHoist: true,
+          htmlAot: true,
+        },
+      });
+      await page.setContent(`<!DOCTYPE html><html><head><script type="module">${bundleCode}</script></head><body><div id="test-root"></div></body></html>`);
+      await page.waitForFunction((tags: string[]) => tags.every((t) => Boolean(customElements.get(t))), [canonicalButton.tag, canonicalCheckbox.tag], { timeout: 15000 });
+    });
+
+    afterEach(async () => {
+      if (page) {
+        try {
+          await page.evaluate(() => {
+            const root = document.getElementById('test-root');
+            if (root) root.innerHTML = '';
+          });
+        } catch {}
       }
     });
 
@@ -59,13 +83,11 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
           const cssContent = extractCssFromModule(rawSource);
           expect(cssContent.length).toBeGreaterThan(0);
 
-          if (!page) return;
-
           const result = await page.evaluate(
             ({ tag, css }: { tag: string; css: string }) => {
               const root = document.getElementById('test-root')!;
               const host = document.createElement(tag);
-              const shadow = host.attachShadow({ mode: 'open' });
+              const shadow = host.shadowRoot || host.attachShadow({ mode: 'open' });
               const sheet = new CSSStyleSheet();
               try {
                 sheet.replaceSync(css);
@@ -76,7 +98,7 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
               shadow.appendChild(testEl);
               root.appendChild(host);
 
-              const applied = shadow.adoptedStyleSheets.length === 1;
+              const applied = shadow.adoptedStyleSheets.length >= 1;
               const ruleCount = sheet.cssRules.length;
               root.removeChild(host);
               return { applied, ruleCount };
@@ -85,7 +107,11 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
           );
 
           expect(result.applied).toBe(true);
-          expect(result.ruleCount).toBeGreaterThanOrEqual(0);
+          if (cssContent.includes('{') && !cssContent.includes('::-ms-')) {
+            expect(result.ruleCount).toBeGreaterThan(0);
+          } else {
+            expect(result.ruleCount).toBeGreaterThanOrEqual(0);
+          }
         });
       });
 
@@ -96,37 +122,32 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
         expect(res.rewrittenFiles).toBeDefined();
       });
 
-      it('verifies shared stylesheet memory reuse across multiple shadow roots in Chromium', async () => {
-        if (!page) return;
+      it('verifies shared constructable stylesheet memory reuse across instances in real Chromium', async () => {
+        const isShared = await page.evaluate(async (tag: string) => {
+          const root = document.getElementById('test-root')!;
+          const hostA = document.createElement(tag);
+          const hostB = document.createElement(tag);
+          root.appendChild(hostA);
+          root.appendChild(hostB);
 
-        const sharedCss = ':host { box-sizing: border-box; display: inline-block; }';
-        const isShared = await page.evaluate(
-          ({ tagA, tagB, css }: { tagA: string; tagB: string; css: string }) => {
-            const root = document.getElementById('test-root')!;
-            const hostA = document.createElement(tagA);
-            const hostB = document.createElement(tagB);
-            const shadowA = hostA.attachShadow({ mode: 'open' });
-            const shadowB = hostB.attachShadow({ mode: 'open' });
+          if ((hostA as any).updateComplete) await (hostA as any).updateComplete;
+          if ((hostB as any).updateComplete) await (hostB as any).updateComplete;
 
-            const sharedSheet = new CSSStyleSheet();
-            sharedSheet.replaceSync(css);
+          const shadowA = hostA.shadowRoot;
+          const shadowB = hostB.shadowRoot;
+          if (!shadowA || !shadowB) return false;
 
-            shadowA.adoptedStyleSheets = [sharedSheet];
-            shadowB.adoptedStyleSheets = [sharedSheet];
+          const sheetsA = shadowA.adoptedStyleSheets;
+          const sheetsB = shadowB.adoptedStyleSheets;
+          if (sheetsA.length === 0 || sheetsB.length === 0) return false;
 
-            root.appendChild(hostA);
-            root.appendChild(hostB);
+          const sameReference = sheetsA[0] === sheetsB[0];
+          const rulesValid = sheetsA[0].cssRules.length > 0;
 
-            const sameReference = shadowA.adoptedStyleSheets[0] === shadowB.adoptedStyleSheets[0];
-            const rulesValid = shadowA.adoptedStyleSheets[0].cssRules.length > 0;
-
-            root.removeChild(hostA);
-            root.removeChild(hostB);
-
-            return sameReference && rulesValid;
-          },
-          { tagA: components[0].tag, tagB: components[1].tag, css: sharedCss },
-        );
+          root.removeChild(hostA);
+          root.removeChild(hostB);
+          return sameReference && rulesValid;
+        }, canonicalButton.tag);
 
         expect(isShared).toBe(true);
       });
@@ -151,78 +172,28 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
       });
 
       it('verifies lowered static properties reactive reflection in real Chromium', async () => {
-        if (!page) return;
+        const mount = await mountElement(page, canonicalButton.tag);
+        assertMounted(mount);
 
-        const reflectionValid = await page.evaluate(() => {
-          // Define a test component mirroring lowered static properties output
-          class LoweredTestElement extends HTMLElement {
-            static observedAttributes = ['active', 'label'];
-            private _active = false;
-            private _label = 'default';
-
-            constructor() {
-              super();
-              this.attachShadow({ mode: 'open' });
-            }
-
-            get active() {
-              return this._active;
-            }
-            set active(val: boolean) {
-              this._active = val;
-              if (val) {
-                this.setAttribute('active', '');
-              } else {
-                this.removeAttribute('active');
-              }
-              this.render();
-            }
-
-            get label() {
-              return this._label;
-            }
-            set label(val: string) {
-              this._label = val;
-              this.setAttribute('label', val);
-              this.render();
-            }
-
-            attributeChangedCallback(name: string, _oldVal: string, newVal: string) {
-              if (name === 'label') this._label = newVal;
-              if (name === 'active') this._active = newVal !== null;
-              this.render();
-            }
-
-            connectedCallback() {
-              this.render();
-            }
-
-            render() {
-              if (this.shadowRoot) {
-                this.shadowRoot.innerHTML = `<span class="val">${this._label}:${this._active}</span>`;
-              }
-            }
-          }
-
-          const tagName = `test-lowered-${Date.now()}`;
-          customElements.define(tagName, LoweredTestElement);
-
+        const reflectionValid = await page.evaluate(async (tag: string) => {
           const root = document.getElementById('test-root')!;
-          const el = document.createElement(tagName) as any;
+          const el = document.createElement(tag) as any;
           root.appendChild(el);
+          if (el.updateComplete) await el.updateComplete;
 
           // Property mutation reflects to attribute
-          el.label = 'reflected-val';
-          el.active = true;
+          el.disabled = true;
+          if (el.updateComplete) await el.updateComplete;
+          const hasAttr = el.hasAttribute('disabled');
 
-          const attrLabel = el.getAttribute('label');
-          const hasActiveAttr = el.hasAttribute('active');
-          const innerText = el.shadowRoot.querySelector('.val').textContent;
+          // Reverting property clears attribute
+          el.disabled = false;
+          if (el.updateComplete) await el.updateComplete;
+          const removedAttr = !el.hasAttribute('disabled');
 
           root.removeChild(el);
-
-          return attrLabel === 'reflected-val' && hasActiveAttr && innerText === 'reflected-val:true';
-        });
+          return hasAttr && removedAttr;
+        }, canonicalButton.tag);
 
         expect(reflectionValid).toBe(true);
       });
@@ -243,14 +214,13 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
           const minifiedCss = extractCssFromModule(res.code) || extractCssFromModule(rawSource);
           expect(minifiedCss.length).toBeGreaterThan(0);
 
-          if (!page) return;
-
           const parsedOk = await page.evaluate(
             ({ css }: { css: string }) => {
               const sheet = new CSSStyleSheet();
               try {
                 sheet.replaceSync(css);
-                return sheet.cssRules.length >= 0;
+                if (css.includes('::-ms-')) return sheet.cssRules.length >= 0;
+                return css.includes('{') ? sheet.cssRules.length > 0 : sheet.cssRules.length >= 0;
               } catch {
                 return false;
               }
@@ -314,57 +284,23 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
         });
       });
 
-      it('verifies lazy element proxy upgrade upon DOM insertion in Chromium', async () => {
-        if (!page) return;
+      it('verifies lazy element proxy upgrade upon DOM insertion in real Chromium', async () => {
+        const mount = await mountElement(page, canonicalCheckbox.tag);
+        assertMounted(mount);
 
-        const lazyUpgradeSuccess = await page.evaluate(() => {
-          let upgraded = false;
-
-          class HeavyComponent {
-            public initialized = true;
-            getGreeting() {
-              return 'upgraded-hello';
-            }
-          }
-
-          class LazyProxyStub extends HTMLElement {
-            private _instance: HeavyComponent | null = null;
-
-            connectedCallback() {
-              if (!this._instance) {
-                upgraded = true;
-                this._instance = new HeavyComponent();
-                this.innerHTML = `<span class="proxy-text">${this._instance.getGreeting()}</span>`;
-              }
-            }
-
-            greet() {
-              if (!this._instance) {
-                upgraded = true;
-                this._instance = new HeavyComponent();
-              }
-              return this._instance.getGreeting();
-            }
-          }
-
-          const proxyTag = `proxy-stub-${Date.now()}`;
-          customElements.define(proxyTag, LazyProxyStub);
-
-          // Element instantiated but not connected: should not be upgraded
-          const unmountedEl = document.createElement(proxyTag) as any;
-          const preMountState = upgraded;
-
-          // Connect element to DOM: triggers lazy upgrade
+        const upgradeValid = await page.evaluate(async (tag: string) => {
           const root = document.getElementById('test-root')!;
-          root.appendChild(unmountedEl);
-          const postMountState = upgraded;
-          const greetingText = unmountedEl.querySelector('.proxy-text')?.textContent;
-          root.removeChild(unmountedEl);
+          const el = document.createElement(tag) as any;
+          root.appendChild(el);
+          if (el.updateComplete) await el.updateComplete;
 
-          return !preMountState && postMountState && greetingText === 'upgraded-hello';
-        });
+          const shadow = el.shadowRoot;
+          const valid = Boolean(shadow) && shadow.childElementCount > 0;
+          root.removeChild(el);
+          return valid;
+        }, canonicalCheckbox.tag);
 
-        expect(lazyUpgradeSuccess).toBe(true);
+        expect(upgradeValid).toBe(true);
       });
     });
 
@@ -382,33 +318,29 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
       });
 
       it('verifies bubbling event delegation on host in real Chromium', async () => {
-        if (!page) return;
+        const mount = await mountElement(page, canonicalButton.tag);
+        assertMounted(mount);
 
-        const delegationOk = await page.evaluate(() => {
+        const clickCaptured = await page.evaluate(async (tag: string) => {
           const root = document.getElementById('test-root')!;
-          const host = document.createElement('div');
-          const shadow = host.attachShadow({ mode: 'open' });
+          const el = document.createElement(tag) as any;
+          root.appendChild(el);
+          if (el.updateComplete) await el.updateComplete;
 
-          const innerBtn = document.createElement('button');
-          innerBtn.id = 'action-target';
-          shadow.appendChild(innerBtn);
-
-          let caughtTargetId = '';
-          // Delegated root event listener
-          host.addEventListener('click', (event: Event) => {
-            const path = event.composedPath();
-            const target = path[0] as HTMLElement;
-            caughtTargetId = target?.id || '';
+          let received = false;
+          el.addEventListener('click', () => {
+            received = true;
           });
 
-          root.appendChild(host);
-          innerBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
-          root.removeChild(host);
+          el.disabled = false;
+          if (el.updateComplete) await el.updateComplete;
 
-          return caughtTargetId === 'action-target';
-        });
+          el.click();
+          root.removeChild(el);
+          return received;
+        }, canonicalButton.tag);
 
-        expect(delegationOk).toBe(true);
+        expect(clickCaptured).toBe(true);
       });
     });
 
@@ -426,29 +358,22 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
       });
 
       it('verifies pre-compiled template descriptors render into DOM in Chromium', async () => {
-        if (!page) return;
+        const mount = await mountElement(page, canonicalButton.tag);
+        assertMounted(mount);
 
-        const aotRenderValid = await page.evaluate(() => {
+        const renderValid = await page.evaluate(async (tag: string) => {
           const root = document.getElementById('test-root')!;
-          const host = document.createElement('div');
-          const shadow = host.attachShadow({ mode: 'open' });
+          const el = document.createElement(tag) as any;
+          root.appendChild(el);
+          if (el.updateComplete) await el.updateComplete;
 
-          // Emulate Lit AOT template result structure
-          const aotDescriptor = {
-            strings: ['<div class="aot-card"><span>', '</span></div>'],
-            values: ['AOT Compiled Value'],
-          };
+          const shadow = el.shadowRoot;
+          const hasChildren = Boolean(shadow) && shadow.childElementCount > 0;
+          root.removeChild(el);
+          return hasChildren;
+        }, canonicalButton.tag);
 
-          shadow.innerHTML = `${aotDescriptor.strings[0]}${aotDescriptor.values[0]}${aotDescriptor.strings[1]}`;
-          root.appendChild(host);
-
-          const renderedText = shadow.querySelector('.aot-card span')?.textContent;
-          root.removeChild(host);
-
-          return renderedText === 'AOT Compiled Value';
-        });
-
-        expect(aotRenderValid).toBe(true);
+        expect(renderValid).toBe(true);
       });
     });
 
@@ -467,8 +392,6 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
 
           expect(dsdMarkup).toContain('shadowrootmode="open"');
           expect(dsdMarkup).toContain(comp.tag);
-
-          if (!page) return;
 
           const hydrated = await page.evaluate(
             ({ markup, id, expectedText }: { markup: string; id: string; expectedText: string }) => {
@@ -493,44 +416,68 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
       });
 
       it('verifies resumable interaction event recording and replay queue in Chromium', async () => {
-        if (!page) return;
+        const loaderScript = compileResumableLoader();
 
-        const replayOk = await page.evaluate(() => {
-          const root = document.getElementById('test-root')!;
-          const host = document.createElement('div');
-          host.id = 'resumable-host';
-          const shadow = host.attachShadow({ mode: 'open' });
-          const actionBtn = document.createElement('button');
-          actionBtn.id = 'ssr-action-btn';
-          shadow.appendChild(actionBtn);
-          root.appendChild(host);
-
-          // Resumable interaction queue before client JS loads
-          const queuedEvents: string[] = [];
-          const recordingHandler = (e: Event) => {
-            const target = (e.composedPath?.()[0] || e.target) as HTMLElement;
-            queuedEvents.push(target?.id || '');
-          };
-          host.addEventListener('click', recordingHandler);
-
-          // User interaction occurs while page is in SSR state
-          actionBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
-
-          // Client component loads and replays events
-          host.removeEventListener('click', recordingHandler);
-          let replayedId = '';
-          const clientResumeHandler = (targetId: string) => {
-            replayedId = targetId;
-          };
-          for (const evtId of queuedEvents) {
-            clientResumeHandler(evtId);
-          }
-
-          root.removeChild(host);
-          return replayedId === 'ssr-action-btn';
+        const dsdMarkup = renderToDsd({
+          tagName: canonicalButton.tag,
+          shadowHtml: `<button id="ssr-action-btn" data-action="click">Trigger</button>`,
+          attributes: { id: 'resumable-comp' },
+          state: { active: true },
         });
 
-        expect(replayOk).toBe(true);
+        await page.evaluate(
+          ({ loader, dsd }: { loader: string; dsd: string }) => {
+            (window as any).__resumptionEvents = [];
+            const script = document.createElement('script');
+            script.textContent = loader;
+            document.head.appendChild(script);
+
+            const root = document.getElementById('test-root')!;
+            if (typeof (root as any).setHTMLUnsafe === 'function') {
+              (root as any).setHTMLUnsafe(dsd);
+            } else {
+              root.innerHTML = dsd;
+            }
+
+            (window as any).__simulateClientHydration = function () {
+              const el = document.getElementById('resumable-comp');
+              if (el) {
+                const btn = el.shadowRoot?.querySelector('#ssr-action-btn');
+                btn?.addEventListener('click', function () {
+                  (window as any).__resumptionEvents.push('ssr-action-btn');
+                });
+              }
+            };
+          },
+          { loader: loaderScript, dsd: dsdMarkup },
+        );
+
+        // Click during SSR state (intercepted by compiled resumable loader)
+        await page.evaluate(() => {
+          const el = document.getElementById('resumable-comp');
+          const btn = el?.shadowRoot?.querySelector('#ssr-action-btn') as HTMLElement;
+          btn?.click();
+        });
+
+        // Hydrate client listener
+        await page.evaluate(() => {
+          (window as any).__simulateClientHydration();
+        });
+
+        // Confirm hydrated listener receives events
+        await page.evaluate(() => {
+          const el = document.getElementById('resumable-comp');
+          const btn = el?.shadowRoot?.querySelector('#ssr-action-btn') as HTMLElement;
+          btn?.click();
+        });
+
+        const events = await page.evaluate(() => (window as any).__resumptionEvents);
+        expect(events).toContain('ssr-action-btn');
+
+        await page.evaluate(() => {
+          const root = document.getElementById('test-root')!;
+          root.innerHTML = '';
+        });
       });
     });
   });

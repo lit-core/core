@@ -1,5 +1,6 @@
 import { transformDirtyMask } from '@lit-core/dirty-mask';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { DirtyMaskOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -51,8 +52,8 @@ export function dirtyMask(options: DirtyMaskOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (_err) {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'dirty-mask', cleanId, err);
       }
     },
   };

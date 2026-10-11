@@ -89,3 +89,4 @@ export {
   TagShakeWebpackPlugin,
   tagShake,
 } from './plugin.js';
+export { TransformError } from './transforms/index.js';

@@ -1,6 +1,6 @@
 import { transformResumableComponent } from '@lit-core/resumable';
 import type { ResumableOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 import { LIT_ELEM_PROXY_FAST_CHECK } from './elem-proxy.js';
 
 export function transformResumable(code: string, id: string, options: ResumableOptions = {}): TransformResult | null {
@@ -25,8 +25,8 @@ export function transformResumable(code: string, id: string, options: ResumableO
           map: result.map ? JSON.parse(result.map) : null,
         };
       }
-    } catch (_err) {
-      return null;
+    } catch (err) {
+      throw new TransformError('resumable', cleanId, err);
     }
   }
 

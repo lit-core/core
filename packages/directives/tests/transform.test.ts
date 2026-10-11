@@ -270,6 +270,8 @@ describe('directives AOT lowering compiler pass', () => {
     expect(res.code).toContain('_$litType$: 1');
     expect(res.code).toContain('_$litType$: 2');
     expect(res.code).toContain('_$litType$: 3');
+    expect(res.code).toContain('strings: Object.assign(');
+    expect(res.code).not.toContain('_$litStrings$');
   });
 
   it('lowers until, asyncAppend, asyncReplace, and ref', () => {

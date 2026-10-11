@@ -22,7 +22,17 @@ export async function mountElement(page: Page, tag: string, props: Record<string
       for (const [k, v] of Object.entries(props)) {
         try {
           el[k] = v;
-        } catch {}
+        } catch (err: any) {
+          const errorMsg = err?.stack || err?.message || String(err);
+          return {
+            tag,
+            success: false,
+            hasShadowRoot: Boolean(el.shadowRoot),
+            childElementCount: el.shadowRoot ? el.shadowRoot.childElementCount : el.childElementCount,
+            renderedText: (el.shadowRoot?.textContent || el.textContent || '').trim().slice(0, 100),
+            error: `Property setter error for '${k}': ${errorMsg}`,
+          };
+        }
       }
 
       const t0 = performance.now();
@@ -64,4 +74,19 @@ export async function mountElement(page: Page, tag: string, props: Record<string
     },
     { tag, props },
   );
+}
+
+/**
+ * Assert that an element mounted successfully with a shadow root and child elements.
+ */
+export function assertMounted(result: MountResult): void {
+  if (!result.success) {
+    throw new Error(`Element <${result.tag}> failed to mount: ${result.error || 'unknown error'}`);
+  }
+  if (!result.hasShadowRoot) {
+    throw new Error(`Element <${result.tag}> has no shadow root`);
+  }
+  if (result.childElementCount <= 0) {
+    throw new Error(`Element <${result.tag}> shadow root has zero child elements`);
+  }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateScenarioDeltas, resolveScenarioComponents } from '../src/scenarios/harness/scenario-base.js';
+import { calculateScenarioDeltas, compareDomSnapshots, compareDomTrees, resolveScenarioComponents } from '../src/scenarios/harness/scenario-base.js';
 import { FEATURE_SCENARIO_MAP, getScenario, getScenarioForFeature, SCENARIO_MAP, SCENARIOS } from '../src/scenarios/index.js';
 import { SCENARIO_SCHEMA_VERSION, validateScenarioResult } from '../src/schema.js';
 import { registeredSuites } from '../src/suites/index.js';
@@ -368,5 +368,245 @@ describe('scenario table rendering', () => {
     expect(tableOutput).not.toContain('Render Speedup');
     expect(tableOutput).not.toContain('Update Latency');
     expect(tableOutput).not.toContain('Update Speedup');
+  });
+});
+
+describe('dom tree serialization and empirical structural comparison', () => {
+  it('matches identical dom trees with open shadow roots', () => {
+    const tree1 = {
+      type: 'element',
+      tag: 'div',
+      attributes: { id: 'container', class: 'root' },
+      children: [
+        {
+          type: 'element',
+          tag: 'custom-card',
+          attributes: { heading: 'Profile' },
+          children: [{ type: 'text', value: 'Card content' }],
+          shadowRoot: {
+            mode: 'open',
+            children: [
+              {
+                type: 'element',
+                tag: 'header',
+                attributes: { class: 'title' },
+                children: [{ type: 'text', value: 'Header text' }],
+              },
+            ],
+          },
+        },
+      ],
+    };
+    const tree2 = JSON.parse(JSON.stringify(tree1));
+
+    const result = compareDomTrees(tree1, tree2, 'root');
+    expect(result.match).toBe(true);
+    expect(result.reason).toBeNull();
+  });
+
+  it('detects tag name divergence with descriptive path in reason', () => {
+    const base = {
+      type: 'element',
+      tag: 'div',
+      attributes: {},
+      children: [{ type: 'element', tag: 'span', attributes: {}, children: [] }],
+    };
+    const variant = {
+      type: 'element',
+      tag: 'div',
+      attributes: {},
+      children: [{ type: 'element', tag: 'p', attributes: {}, children: [] }],
+    };
+
+    const result = compareDomTrees(base, variant, 'root');
+    expect(result.match).toBe(false);
+    expect(result.reason).toContain('Tag name mismatch at root > [0]: baseline=<span>, variant=<p>');
+  });
+
+  it('detects attribute value divergence', () => {
+    const base = {
+      type: 'element',
+      tag: 'button',
+      attributes: { disabled: '', 'aria-label': 'Submit form' },
+      children: [],
+    };
+    const variant = {
+      type: 'element',
+      tag: 'button',
+      attributes: { disabled: '', 'aria-label': 'Cancel form' },
+      children: [],
+    };
+
+    const result = compareDomTrees(base, variant, 'root');
+    expect(result.match).toBe(false);
+    expect(result.reason).toContain('Attribute "aria-label" mismatch');
+  });
+
+  it('detects unexpected or missing attributes in variant', () => {
+    const base = {
+      type: 'element',
+      tag: 'input',
+      attributes: { type: 'text' },
+      children: [],
+    };
+    const variant = {
+      type: 'element',
+      tag: 'input',
+      attributes: { type: 'text', readonly: '' },
+      children: [],
+    };
+
+    const result = compareDomTrees(base, variant, 'root');
+    expect(result.match).toBe(false);
+    expect(result.reason).toContain('Unexpected attribute "readonly" in variant');
+  });
+
+  it('normalizes whitespace in style attributes when comparing', () => {
+    const base = {
+      type: 'element',
+      tag: 'div',
+      attributes: { style: 'color: red;  display: flex;' },
+      children: [],
+    };
+    const variant = {
+      type: 'element',
+      tag: 'div',
+      attributes: { style: 'color: red; display: flex;' },
+      children: [],
+    };
+
+    const result = compareDomTrees(base, variant, 'root');
+    expect(result.match).toBe(true);
+    expect(result.reason).toBeNull();
+  });
+
+  it('detects shadow root presence divergence', () => {
+    const base = {
+      type: 'element',
+      tag: 'custom-element',
+      attributes: {},
+      children: [],
+      shadowRoot: { mode: 'open', children: [] },
+    };
+    const variant = {
+      type: 'element',
+      tag: 'custom-element',
+      attributes: {},
+      children: [],
+    };
+
+    const result = compareDomTrees(base, variant, 'root');
+    expect(result.match).toBe(false);
+    expect(result.reason).toContain('Shadow root presence mismatch');
+  });
+
+  it('detects shadow root child count divergence', () => {
+    const base = {
+      type: 'element',
+      tag: 'custom-widget',
+      attributes: {},
+      children: [],
+      shadowRoot: {
+        mode: 'open',
+        children: [{ type: 'element', tag: 'div', attributes: {}, children: [] }],
+      },
+    };
+    const variant = {
+      type: 'element',
+      tag: 'custom-widget',
+      attributes: {},
+      children: [],
+      shadowRoot: {
+        mode: 'open',
+        children: [],
+      },
+    };
+
+    const result = compareDomTrees(base, variant, 'root');
+    expect(result.match).toBe(false);
+    expect(result.reason).toContain('Shadow root child count mismatch');
+  });
+
+  it('detects light dom child count divergence', () => {
+    const base = {
+      type: 'element',
+      tag: 'ul',
+      attributes: {},
+      children: [
+        { type: 'element', tag: 'li', attributes: {}, children: [] },
+        { type: 'element', tag: 'li', attributes: {}, children: [] },
+      ],
+    };
+    const variant = {
+      type: 'element',
+      tag: 'ul',
+      attributes: {},
+      children: [{ type: 'element', tag: 'li', attributes: {}, children: [] }],
+    };
+
+    const result = compareDomTrees(base, variant, 'root');
+    expect(result.match).toBe(false);
+    expect(result.reason).toContain('Light DOM child count mismatch');
+  });
+
+  it('detects text content mismatch', () => {
+    const base = { type: 'text', value: 'Hello world' };
+    const variant = { type: 'text', value: 'Goodbye world' };
+
+    const result = compareDomTrees(base, variant, 'root');
+    expect(result.match).toBe(false);
+    expect(result.reason).toContain('Text content mismatch at root');
+  });
+
+  it('compares full dom snapshots across mount and update phases with compareDomSnapshots', () => {
+    const mockTree = {
+      type: 'element',
+      tag: 'div',
+      attributes: { id: 'app' },
+      children: [{ type: 'element', tag: 'span', attributes: {}, children: [{ type: 'text', value: 'Mounted' }] }],
+    };
+    const updatedTree = {
+      type: 'element',
+      tag: 'div',
+      attributes: { id: 'app' },
+      children: [{ type: 'element', tag: 'span', attributes: {}, children: [{ type: 'text', value: 'Updated' }] }],
+    };
+
+    const baseSnapshot = {
+      mount: mockTree,
+      update: updatedTree,
+      elementsCount: 2,
+    };
+    const variantSnapshot = {
+      mount: JSON.parse(JSON.stringify(mockTree)),
+      update: JSON.parse(JSON.stringify(updatedTree)),
+      elementsCount: 2,
+    };
+
+    const matchRes = compareDomSnapshots(baseSnapshot, variantSnapshot);
+    expect(matchRes.domStructureMatch).toBe(true);
+    expect(matchRes.verified).toBe(true);
+    expect(matchRes.phasesMatched.mount).toBe(true);
+    expect(matchRes.phasesMatched.update).toBe(true);
+    expect(matchRes.divergenceReason).toBeUndefined();
+
+    // Divergent update snapshot
+    const badVariantSnapshot = {
+      mount: JSON.parse(JSON.stringify(mockTree)),
+      update: mockTree, // Still has 'Mounted' instead of 'Updated'
+      elementsCount: 2,
+    };
+    const failRes = compareDomSnapshots(baseSnapshot, badVariantSnapshot);
+    expect(failRes.domStructureMatch).toBe(false);
+    expect(failRes.verified).toBe(false);
+    expect(failRes.phasesMatched.mount).toBe(true);
+    expect(failRes.phasesMatched.update).toBe(false);
+    expect(failRes.divergenceReason).toContain('Update phase divergence');
+
+    // Missing snapshot handles safely
+    const missingRes = compareDomSnapshots(null, variantSnapshot);
+    expect(missingRes.domStructureMatch).toBe(false);
+    expect(missingRes.verified).toBe(false);
+    expect(missingRes.divergenceReason).toBe('Missing baseline or variant DOM snapshot');
   });
 });

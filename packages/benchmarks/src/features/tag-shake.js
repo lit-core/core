@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
 import { transformTagShake } from '@lit-core/tag-shake';
 import { ENTERPRISE_COMPONENTS, readComponentFullSource, readComponentSource } from '../fixtures.js';
 import { calculateDelta } from '../format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from '../reporters/index.js';
 import { createBenchmarkResult } from '../schema.js';
+import { CANONICAL_SUITE_DEFINITIONS } from '../suites/canonical-components.js';
 
 /** @type {Record<string, { name: string, shortName: string, pkg: string }>} */
 export const SUITE_LABELS = {
@@ -26,11 +28,13 @@ function evaluateSuiteTagShake(suiteId, components) {
   const totalComponents = components.length;
   let shakenRegistrations = 0;
   let prunedImports = 0;
-  let totalRawBytesBefore = 0;
-  let totalRawBytesAfter = 0;
 
-  // Simulate an enterprise application referencing a subset of canonical components
-  const usedTags = ['cds-button', 'cds-modal', 'sp-button', 'wa-button', 'mdc-button', 'md-filled-button'];
+  // Derive used tags from the canonical definitions for this design system
+  const suiteDef = CANONICAL_SUITE_DEFINITIONS[suiteId];
+  const usedTags = suiteDef ? [suiteDef.components.button?.tag, suiteDef.components.dialog?.tag, suiteDef.components.card?.tag].filter(Boolean) : ['cds-button', 'cds-modal'];
+
+  const beforeBuffers = [];
+  const afterBuffers = [];
 
   for (const comp of components) {
     let source = '';
@@ -39,11 +43,13 @@ function evaluateSuiteTagShake(suiteId, components) {
     } catch {
       try {
         source = readComponentFullSource(comp.pkg, comp.source);
-      } catch {}
+      } catch (err) {
+        console.warn(`[tag-shake warning] Failed to read ${comp.name}:`, err);
+      }
     }
 
     if (source) {
-      totalRawBytesBefore += source.length;
+      beforeBuffers.push(Buffer.from(source, 'utf-8'));
       try {
         const res = transformTagShake(source, {
           usedTags,
@@ -53,19 +59,24 @@ function evaluateSuiteTagShake(suiteId, components) {
         if (res.shakenRegistrationsCount > 0) {
           shakenRegistrations += res.shakenRegistrationsCount;
           prunedImports += res.prunedImportsCount;
-          totalRawBytesAfter += res.code.length;
+          afterBuffers.push(Buffer.from(res.code, 'utf-8'));
         } else {
-          totalRawBytesAfter += source.length;
+          afterBuffers.push(Buffer.from(source, 'utf-8'));
         }
-      } catch {
-        totalRawBytesAfter += source.length;
+      } catch (err) {
+        console.warn(`[tag-shake warning] Transform failed for ${comp.name}:`, err);
+        afterBuffers.push(Buffer.from(source, 'utf-8'));
       }
     }
   }
 
+  const combinedBefore = Buffer.concat(beforeBuffers);
+  const combinedAfter = Buffer.concat(afterBuffers);
+  const totalRawBytesBefore = combinedBefore.length;
+  const totalRawBytesAfter = combinedAfter.length;
+  const gzipBytesBefore = zlib.gzipSync(combinedBefore).length;
+  const gzipBytesAfter = zlib.gzipSync(combinedAfter).length;
   const transformTimeMs = Number((performance.now() - t0).toFixed(2));
-  const estimatedGzipBefore = Math.round(totalRawBytesBefore * 0.28);
-  const estimatedGzipAfter = Math.round(totalRawBytesAfter * 0.28);
 
   return {
     suiteId,
@@ -75,12 +86,12 @@ function evaluateSuiteTagShake(suiteId, components) {
     transformTimeMs,
     baseline: {
       rawBytes: totalRawBytesBefore,
-      gzipBytes: estimatedGzipBefore,
+      gzipBytes: gzipBytesBefore,
       activeRegistrations: totalComponents,
     },
     optimized: {
       rawBytes: totalRawBytesAfter,
-      gzipBytes: estimatedGzipAfter,
+      gzipBytes: gzipBytesAfter,
       activeRegistrations: Math.max(1, totalComponents - shakenRegistrations),
     },
   };

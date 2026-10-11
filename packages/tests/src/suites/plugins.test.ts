@@ -1,5 +1,5 @@
 import { lit as viteLit } from '@lit-core/vite-plugin';
-import { LitWebpackPlugin } from '@lit-core/webpack-plugin';
+import { LitWebpackPlugin, litWebpackLoader } from '@lit-core/webpack-plugin';
 import { describe, expect, it } from 'vitest';
 import { CARBON_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS } from '../components.js';
 import { findComponentCssSource, readComponentSource } from '../fixtures.js';
@@ -32,19 +32,34 @@ describe('bundler plugins multi-framework integration suite', () => {
     });
 
     frameworks.forEach(({ name, comp }) => {
-      it(`processes real ${name} component source through Vite plugin transforms`, async () => {
+      it(`processes real ${name} component source through Vite plugin transforms without error`, async () => {
         const rawSource = readComponentSource(comp.pkg, comp.source);
         const plugins = viteLit({
           propsLower: true,
           htmlMinifier: true,
+          cssMinifier: true,
+          directives: true,
+          dirtyMask: true,
+          domPaths: true,
         });
 
         for (const p of plugins) {
           if (typeof p.transform === 'function') {
-            const transformed = await (p.transform as any).call({ error: () => {}, warn: () => {} }, rawSource, comp.source);
+            const errors: any[] = [];
+            const mockContext = {
+              error(err: any) {
+                errors.push(err);
+                throw new Error(err.message || String(err));
+              },
+              warn() {},
+            };
+
+            const transformed = await (p.transform as any).call(mockContext, rawSource, comp.source);
+            expect(errors).toHaveLength(0);
             if (transformed) {
               const code = typeof transformed === 'string' ? transformed : transformed.code;
               expect(code).toBeDefined();
+              expect(code.length).toBeGreaterThan(0);
             }
           }
         }
@@ -59,6 +74,58 @@ describe('bundler plugins multi-framework integration suite', () => {
       if (cssFusePlugin && typeof cssFusePlugin.resolveId === 'function') {
         const resolved = await (cssFusePlugin.resolveId as any).call({}, 'virtual:css-fuse/shared-sheet-abc');
         expect(resolved).toBeDefined();
+      }
+    });
+
+    it('emits actionable build error on transform failure in Vite plugin', async () => {
+      const plugins = viteLit({ propsLower: { sourcemap: 'invalid' as any } });
+      const propsLowerPlugin = plugins.find((p) => p.name === 'props-lower');
+      expect(propsLowerPlugin).toBeDefined();
+      if (!propsLowerPlugin) throw new Error('props-lower plugin not found');
+
+      const sampleSource = `
+        import { LitElement } from 'lit';
+        import { property } from 'lit/decorators.js';
+        class SampleComp extends LitElement {
+          @property() count = 0;
+        }
+      `;
+
+      let caughtError: any = null;
+      const mockContext = {
+        error(err: any) {
+          caughtError = err;
+          throw new Error(err.message || String(err));
+        },
+        warn() {},
+      };
+
+      await expect(async () => {
+        await (propsLowerPlugin.transform as any).call(mockContext, sampleSource, '/src/broken.ts');
+      }).rejects.toThrow();
+
+      expect(caughtError).toBeDefined();
+      expect(caughtError.message).toMatch(/\[props-lower\]/i);
+      expect(caughtError.id).toBe('/src/broken.ts');
+    });
+
+    it('safely passes through benign non-matching code returning null', async () => {
+      const plugins = viteLit({ propsLower: true, htmlMinifier: true });
+      const nonLitSource = `export function calculate(a: number, b: number) { return a + b; }`;
+
+      for (const p of plugins) {
+        if (typeof p.transform === 'function') {
+          let errorCalled = false;
+          const mockContext = {
+            error() {
+              errorCalled = true;
+            },
+            warn() {},
+          };
+          const result = await (p.transform as any).call(mockContext, nonLitSource, '/src/math.ts');
+          expect(errorCalled).toBe(false);
+          expect(result == null).toBe(true);
+        }
       }
     });
   });
@@ -81,6 +148,81 @@ describe('bundler plugins multi-framework integration suite', () => {
         expect(cssSource).toBeDefined();
         expect(cssSource.length).toBeGreaterThan(0);
       });
+
+      it(`processes real ${name} component source through Webpack loader pipeline`, async () => {
+        const rawSource = readComponentSource(comp.pkg, comp.source);
+        const result = await new Promise<{ code: string; map: any }>((resolve, reject) => {
+          const mockContext = {
+            resourcePath: comp.source,
+            getOptions: () => ({
+              options: {
+                propsLower: true,
+                htmlMinifier: true,
+                cssMinifier: true,
+                directives: true,
+              },
+            }),
+            async: () => (err: Error | null, code: string, map: any) => {
+              if (err) reject(err);
+              else resolve({ code, map });
+            },
+          };
+          litWebpackLoader.call(mockContext as any, rawSource);
+        });
+
+        expect(result.code).toBeDefined();
+        expect(result.code.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('propagates actionable build error to Webpack loader callback on transform failure', async () => {
+      const sampleSource = `
+        import { LitElement } from 'lit';
+        import { property } from 'lit/decorators.js';
+        class BrokenComponent extends LitElement {
+          @property() count = 0;
+        }
+      `;
+
+      await expect(
+        new Promise((resolve, reject) => {
+          const mockContext = {
+            resourcePath: '/src/broken.ts',
+            getOptions: () => ({
+              options: {
+                propsLower: { sourcemap: 'invalid' as any },
+              },
+            }),
+            async: () => (err: Error | null, code: string, map: any) => {
+              if (err) reject(err);
+              else resolve({ code, map });
+            },
+          };
+          litWebpackLoader.call(mockContext as any, sampleSource);
+        }),
+      ).rejects.toThrow(/\[lit-webpack-loader\].*props-lower/i);
+    });
+
+    it('safely passes through benign non-matching code in Webpack loader returning unmodified source', async () => {
+      const nonLitSource = `export function add(a: number, b: number) { return a + b; }`;
+      const result = await new Promise<{ code: string; map: any }>((resolve, reject) => {
+        const mockContext = {
+          resourcePath: '/src/math.ts',
+          getOptions: () => ({
+            options: {
+              propsLower: true,
+              htmlMinifier: true,
+            },
+          }),
+          async: () => (err: Error | null, code: string, map: any) => {
+            if (err) reject(err);
+            else resolve({ code, map });
+          },
+        };
+        litWebpackLoader.call(mockContext as any, nonLitSource);
+      });
+
+      expect(result.code).toBe(nonLitSource);
     });
   });
 });

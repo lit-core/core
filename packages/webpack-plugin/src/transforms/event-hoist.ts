@@ -1,6 +1,6 @@
 import { transformEventHoist } from '@lit-core/event-hoist';
 import type { EventHoistOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 
 export const LIT_EVENT_HOIST_FAST_CHECK = /html\s*`[\s\S]*?@[a-zA-Z]/;
 
@@ -31,7 +31,7 @@ export function transformEventHoistPlugin(code: string, id: string, options: Eve
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('event-hoist', cleanId, err);
   }
 }

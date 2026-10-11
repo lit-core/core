@@ -1,5 +1,6 @@
 import { transformDomPaths } from '@lit-core/dom-paths';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { DomPathsOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -52,8 +53,8 @@ export function domPaths(options: DomPathsOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (_err) {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'dom-paths', cleanId, err);
       }
     },
   };

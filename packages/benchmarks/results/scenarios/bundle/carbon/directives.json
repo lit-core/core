@@ -1,0 +1,3961 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "bundle-carbon-directives",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "componentConcepts": [
+      "button",
+      "checkbox",
+      "radio",
+      "switch",
+      "text-input",
+      "select",
+      "dialog",
+      "badge",
+      "tabs",
+      "progress-bar",
+      "spinner",
+      "slider",
+      "menu",
+      "divider",
+      "icon",
+      "icon-button",
+      "card",
+      "elevation",
+      "list",
+      "chips"
+    ]
+  },
+  "suite": {
+    "id": "carbon",
+    "name": "Carbon Web Components (@carbon/web-components)",
+    "packageName": "@carbon/web-components",
+    "version": "2.64.0"
+  },
+  "variant": {
+    "id": "directives",
+    "name": "Lit directive lowering (directives)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-11T01:06:10.635Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "1cc4959",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 1446598,
+    "gzipBytes": 187117,
+    "brotliBytes": 98494,
+    "buildTimeMs": 54.358957999997074,
+    "firstRenderMs": 29.8,
+    "updateMs": 5.2,
+    "scriptEvalMs": 3.4,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 8017008,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "cds-button",
+        "cds-checkbox",
+        "cds-radio-button",
+        "cds-toggle",
+        "cds-text-input",
+        "cds-select",
+        "cds-modal",
+        "cds-tag",
+        "cds-tabs",
+        "cds-progress-bar",
+        "cds-loading",
+        "cds-slider",
+        "cds-overflow-menu",
+        "cds-skeleton-text",
+        "cds-icon",
+        "cds-icon-button",
+        "cds-tile",
+        "cds-popover",
+        "cds-structured-list",
+        "cds-content-switcher"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "baseline": {
+    "rawBytes": 1440814,
+    "gzipBytes": 187054,
+    "brotliBytes": 98661,
+    "buildTimeMs": 70.33916699999997,
+    "firstRenderMs": 49.1,
+    "updateMs": 5.4,
+    "scriptEvalMs": 4.1,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 7892588,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "cds-button",
+        "cds-checkbox",
+        "cds-radio-button",
+        "cds-toggle",
+        "cds-text-input",
+        "cds-select",
+        "cds-modal",
+        "cds-tag",
+        "cds-tabs",
+        "cds-progress-bar",
+        "cds-loading",
+        "cds-slider",
+        "cds-overflow-menu",
+        "cds-skeleton-text",
+        "cds-icon",
+        "cds-icon-button",
+        "cds-tile",
+        "cds-popover",
+        "cds-structured-list",
+        "cds-content-switcher"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "deltas": {
+    "rawBytes": 5784,
+    "rawPercent": 0.4,
+    "gzipBytes": 63,
+    "gzipPercent": 0.03,
+    "brotliBytes": -167,
+    "brotliPercent": -0.17,
+    "buildTimeMs": -16,
+    "firstRenderMs": -19.3,
+    "speedupPercent": 39.31,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 3.7,
+    "evalSpeedupPercent": 17.07,
+    "registrationSpeedupPercent": -140,
+    "memorySavingsPercent": -1.58
+  },
+  "runtime": {
+    "firstRenderMs": 29.8,
+    "updateMs": 5.2,
+    "scriptEvalMs": 3.4,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 8017008,
+    "speedupPercent": 39.31,
+    "updateSpeedupPercent": 3.7,
+    "evalSpeedupPercent": 17.07,
+    "registrationSpeedupPercent": -140,
+    "memorySavingsPercent": -1.58
+  },
+  "domSnapshot": {
+    "mount": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "bundle-app-root",
+            "style": "display:flex; flex-direction:column; gap:24px; padding:24px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "app-nav",
+                "style": "display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e4e4e7; padding-bottom:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h2",
+                  "attributes": {
+                    "style": "font-size:20px; font-weight:400; margin:0;"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Enterprise dashboard suite"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "nav-routes",
+                    "style": "display:flex; gap:8px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Overview"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Analytics"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Settings"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "main",
+              "attributes": {
+                "class": "app-body"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "components-showcase-grid",
+                    "style": "display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-button",
+                          "attributes": {
+                            "danger-description": "",
+                            "data-canonical-tag": "cds-button",
+                            "kind": "primary",
+                            "size": "lg",
+                            "tab-index": "0",
+                            "tooltip-alignment": "",
+                            "tooltip-position": "top",
+                            "type": "button"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--lg,true cds--layout--size-lg,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "id": "button",
+                                  "part": "button",
+                                  "tabindex": "0",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "id": "badge-indicator",
+                                  "name": "badge-indicator"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-checkbox",
+                          "attributes": {
+                            "data-canonical-tag": "cds-checkbox",
+                            "id": "checkbox"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "aria-readonly": "false",
+                                  "class": "cds--checkbox",
+                                  "id": "checkbox",
+                                  "part": "input",
+                                  "type": "checkbox"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--checkbox-label",
+                                  "for": "checkbox",
+                                  "part": "label",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--checkbox-label-text"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "ai-label"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "decorator"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "slug"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--checkbox__validation-msg"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-radio-button",
+                          "attributes": {
+                            "data-canonical-tag": "cds-radio-button",
+                            "label-position": "right",
+                            "orientation": "horizontal"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "aria-readonly": "false",
+                                  "class": "cds--radio-button",
+                                  "id": "input",
+                                  "tabindex": "-1",
+                                  "type": "radio"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--radio-button__label  ",
+                                  "for": "input"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--radio-button__appearance"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--radio-button__label-text"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "ai-label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "slug"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-toggle",
+                          "attributes": {
+                            "data-canonical-tag": "cds-toggle",
+                            "id": "checkbox",
+                            "size": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-checked": "false",
+                                  "aria-labelledby": "false",
+                                  "class": "cds--toggle__button",
+                                  "id": "checkbox",
+                                  "role": "switch",
+                                  "type": "button"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--toggle__label",
+                                  "for": "checkbox"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--toggle__appearance"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--toggle__switch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "aria-hidden": "true",
+                                          "class": "cds--toggle__text"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "text",
+                                            "value": "Off"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-text-input",
+                          "attributes": {
+                            "data-canonical-tag": "cds-text-input",
+                            "placeholder": "",
+                            "type": "text",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--form-item cds--text-input-wrapper"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--text-input__label-wrapper"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "label",
+                                        "attributes": {
+                                          "class": "cds--label",
+                                          "for": "input"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "name": "label-text"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--text-input__field-outer-wrapper"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--text-input__field-wrapper"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "input",
+                                            "attributes": {
+                                              "autocomplete": "",
+                                              "class": "cds--text-input",
+                                              "id": "input",
+                                              "type": "text"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "class": "cds--slug--revert",
+                                              "name": "ai-label"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "name": "slug"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--form__helper-text",
+                                          "hidden": "",
+                                          "id": "helper-text"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "name": "helper-text"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-select",
+                          "attributes": {
+                            "data-canonical-tag": "cds-select",
+                            "placeholder": "",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--label",
+                                  "for": "select"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "label-text"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--select-input__wrapper"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "select",
+                                    "attributes": {
+                                      "aria-invalid": "false",
+                                      "aria-readonly": "false",
+                                      "class": "cds--select-input",
+                                      "id": "select",
+                                      "title": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "svg",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "class": "cds--select__arrow",
+                                      "fill": "currentColor",
+                                      "focusable": "false",
+                                      "height": "16",
+                                      "preserveAspectRatio": "xMidYMid meet",
+                                      "viewBox": "0 0 16 16",
+                                      "width": "16",
+                                      "xmlns": "http://www.w3.org/2000/svg"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "path",
+                                        "attributes": {
+                                          "d": "M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "class": "",
+                                      "name": "ai-label",
+                                      "style": "--cds-show-before: none"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-modal",
+                          "attributes": {
+                            "data-canonical-tag": "cds-modal",
+                            "loading-status": "inactive",
+                            "size": "md"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-modal-body",
+                              "attributes": {},
+                              "children": [],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "",
+                                  "aria-modal": "true",
+                                  "class": "cds--modal-container cds--modal-container--md",
+                                  "part": "dialog",
+                                  "role": "dialog",
+                                  "tabindex": "-1"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-tag",
+                          "attributes": {
+                            "data-canonical-tag": "cds-tag",
+                            "open": "",
+                            "size": "md",
+                            "type": "gray"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "icon"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "class": "cds--tag__label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "decorator"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "ai-label"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "slug"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-tabs",
+                          "attributes": {
+                            "data-canonical-tag": "cds-tabs",
+                            "icon": "",
+                            "size": "",
+                            "type": "",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "class": "cds--tab--overflow-nav-button cds--tabs__nav-caret-left cds--tab--overflow-nav-button--previous cds--tab--overflow-nav-button--hidden",
+                                  "part": "prev-button",
+                                  "tabindex": "-1"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "svg",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "fill": "currentColor",
+                                      "focusable": "false",
+                                      "height": "16",
+                                      "preserveAspectRatio": "xMidYMid meet",
+                                      "viewBox": "0 0 16 16",
+                                      "width": "16",
+                                      "xmlns": "http://www.w3.org/2000/svg"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "path",
+                                        "attributes": {
+                                          "d": "M5 8 10 3 10.7 3.7 6.4 8 10.7 12.3 10 13z"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--tabs-nav-content-container"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--tabs-nav-content",
+                                      "style": "inset-inline-start: 0px;"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--tabs-nav"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "cds--tab--list",
+                                              "id": "tablist",
+                                              "role": "tablist"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "element",
+                                                "tag": "div",
+                                                "attributes": {
+                                                  "class": "cds--sub-content-left"
+                                                },
+                                                "children": []
+                                              },
+                                              {
+                                                "type": "element",
+                                                "tag": "slot",
+                                                "attributes": {},
+                                                "children": []
+                                              },
+                                              {
+                                                "type": "element",
+                                                "tag": "div",
+                                                "attributes": {
+                                                  "class": "cds--sub-content-right"
+                                                },
+                                                "children": []
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "class": "cds--tab--overflow-nav-button cds--tabs__nav-caret-right cds--tab--overflow-nav-button--next cds--tab--overflow-nav-button--hidden",
+                                  "part": "next-button",
+                                  "tabindex": "-1"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "svg",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "fill": "currentColor",
+                                      "focusable": "false",
+                                      "height": "16",
+                                      "preserveAspectRatio": "xMidYMid meet",
+                                      "viewBox": "0 0 16 16",
+                                      "width": "16",
+                                      "xmlns": "http://www.w3.org/2000/svg"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "path",
+                                        "attributes": {
+                                          "d": "M11 8 6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-live": "assertive",
+                                  "aria-relevant": "additions text",
+                                  "class": "cds--assistive-text",
+                                  "role": "status"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "data-canonical-tag": "cds-progress-bar",
+                            "max": "100",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default cds--progress-bar--indeterminate"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "",
+                                      "aria-valuemin": "",
+                                      "aria-valuenow": "",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-loading",
+                          "attributes": {
+                            "data-canonical-tag": "cds-loading",
+                            "description": "Loading",
+                            "inactive": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "svg",
+                                "attributes": {
+                                  "class": "cds--loading__svg",
+                                  "viewBox": "0 0 100 100"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "title",
+                                    "attributes": {},
+                                    "children": [
+                                      {
+                                        "type": "text",
+                                        "value": "Loading"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "circle",
+                                    "attributes": {
+                                      "class": "cds--loading__background",
+                                      "cx": "50%",
+                                      "cy": "50%",
+                                      "hidden": "",
+                                      "r": "44"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "circle",
+                                    "attributes": {
+                                      "class": "cds--loading__stroke",
+                                      "cx": "50%",
+                                      "cy": "50%",
+                                      "r": "44"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-slider",
+                          "attributes": {
+                            "data-canonical-tag": "cds-slider",
+                            "max": "100",
+                            "max-label": "",
+                            "min": "0",
+                            "min-label": "",
+                            "step": "1",
+                            "step-multiplier": "4"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "label-text"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--slider-container"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--slider__range-label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "min-text"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "text",
+                                            "value": "0"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--slider",
+                                      "role": "presentation",
+                                      "tabindex": "-1"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--icon-tooltip cds--slider__thumb-wrapper",
+                                          "style": "left: 0%"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "aria-valuemax": "100",
+                                              "aria-valuemin": "0",
+                                              "aria-valuenow": "",
+                                              "aria-valuetext": "NaN",
+                                              "class": "cds--slider__thumb",
+                                              "id": "thumb",
+                                              "role": "slider",
+                                              "tabindex": "0"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--slider__track",
+                                          "id": "track"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds-ce--slider__filled-track-container"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "cds--slider__filled-track",
+                                              "style": "transform: translate(0%, -50%) scaleX(0);"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--slider__range-label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "max-text"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "text",
+                                            "value": "100"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--slider__validation-msg cds--slider__validation-msg--invalid cds--form-requirement"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-overflow-menu",
+                          "attributes": {
+                            "align": "top",
+                            "aria-haspopup": "true",
+                            "close-on-activation": "",
+                            "danger-description": "",
+                            "data-canonical-tag": "cds-overflow-menu",
+                            "kind": "primary",
+                            "tab-index": "0",
+                            "tooltip-alignment": "",
+                            "tooltip-position": "top",
+                            "type": "button"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "cds-tooltip",
+                                "attributes": {
+                                  "align": "top",
+                                  "backgroundtoken": "layer",
+                                  "caret": "",
+                                  "closeonactivation": "",
+                                  "enter-delay-ms": "100",
+                                  "highcontrast": "",
+                                  "leave-delay-ms": "100",
+                                  "size": "false",
+                                  "timeoutid": "0"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-expanded": "false",
+                                      "aria-haspopup": "menu",
+                                      "aria-label": "Options",
+                                      "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--undefined,false cds--layout--size-undefined,false cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false cds--btn--icon-only cds--overflow-menu",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "cds-tooltip-content",
+                                    "attributes": {
+                                      "align": "top",
+                                      "aria-hidden": "true",
+                                      "backgroundtoken": "layer",
+                                      "caret": "",
+                                      "highcontrast": "",
+                                      "role": "tooltip",
+                                      "slot": "content"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "text",
+                                        "value": "Options"
+                                      }
+                                    ],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "cds--popover"
+                                          },
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "span",
+                                              "attributes": {
+                                                "class": "cds--popover-content cds--tooltip-content",
+                                                "part": "content",
+                                                "tabindex": "-1"
+                                              },
+                                              "children": [
+                                                {
+                                                  "type": "element",
+                                                  "tag": "slot",
+                                                  "attributes": {},
+                                                  "children": []
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "element",
+                                              "tag": "span",
+                                              "attributes": {
+                                                "class": "cds--popover-caret"
+                                              },
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "span",
+                                      "attributes": {
+                                        "class": "cds--popover-container cds--popover--caret cds--popover--high-contrast cds--popover--top cds--tooltip",
+                                        "part": "popover-container"
+                                      },
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {},
+                                          "children": []
+                                        },
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {
+                                            "name": "content"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-skeleton-text",
+                          "attributes": {
+                            "data-canonical-tag": "cds-skeleton-text",
+                            "linecount": "3",
+                            "type": "",
+                            "width": "100%"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "p",
+                                "attributes": {
+                                  "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                                  "style": "width:100%"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-icon",
+                          "attributes": {
+                            "data-canonical-tag": "cds-icon"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-icon-button",
+                          "attributes": {
+                            "align": "top",
+                            "close-on-activation": "",
+                            "danger-description": "",
+                            "data-canonical-tag": "cds-icon-button",
+                            "kind": "primary",
+                            "size": "lg",
+                            "tab-index": "0",
+                            "tooltip-alignment": "",
+                            "tooltip-position": "top",
+                            "type": "button"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "cds-tooltip",
+                                "attributes": {
+                                  "align": "top",
+                                  "backgroundtoken": "layer",
+                                  "caret": "",
+                                  "closeonactivation": "",
+                                  "enter-delay-ms": "100",
+                                  "highcontrast": "",
+                                  "leave-delay-ms": "100",
+                                  "size": "false",
+                                  "timeoutid": "0"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-label": "undefined",
+                                      "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--lg,true cds--layout--size-lg,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "cds-tooltip-content",
+                                    "attributes": {
+                                      "align": "top",
+                                      "aria-hidden": "true",
+                                      "backgroundtoken": "layer",
+                                      "caret": "",
+                                      "highcontrast": "",
+                                      "role": "tooltip",
+                                      "slot": "content"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "tooltip-content"
+                                        },
+                                        "children": []
+                                      }
+                                    ],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "cds--popover"
+                                          },
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "span",
+                                              "attributes": {
+                                                "class": "cds--popover-content cds--tooltip-content",
+                                                "part": "content",
+                                                "tabindex": "-1"
+                                              },
+                                              "children": [
+                                                {
+                                                  "type": "element",
+                                                  "tag": "slot",
+                                                  "attributes": {},
+                                                  "children": []
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "element",
+                                              "tag": "span",
+                                              "attributes": {
+                                                "class": "cds--popover-caret"
+                                              },
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "span",
+                                      "attributes": {
+                                        "class": "cds--popover-container cds--popover--caret cds--popover--high-contrast cds--popover--top cds--tooltip",
+                                        "part": "popover-container"
+                                      },
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {},
+                                          "children": []
+                                        },
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {
+                                            "name": "content"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-tile",
+                          "attributes": {
+                            "color-scheme": "",
+                            "data-canonical-tag": "cds-tile"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "decorator"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "ai-label"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "slug"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-popover",
+                          "attributes": {
+                            "align": "bottom",
+                            "backgroundtoken": "layer",
+                            "caret": "",
+                            "data-canonical-tag": "cds-popover",
+                            "dropshadow": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "class": "cds--popover-container cds--popover--caret cds--popover--drop-shadow cds--popover--bottom",
+                                  "part": "popover-container"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "content"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-structured-list",
+                          "attributes": {
+                            "data-canonical-tag": "cds-structured-list",
+                            "role": "table"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "section",
+                                "attributes": {
+                                  "class": "cds--structured-list",
+                                  "id": "section"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-content-switcher",
+                          "attributes": {
+                            "data-canonical-tag": "cds-content-switcher",
+                            "icon": "",
+                            "size": "",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "bundle-app-root",
+            "style": "display:flex; flex-direction:column; gap:24px; padding:24px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "app-nav",
+                "style": "display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e4e4e7; padding-bottom:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h2",
+                  "attributes": {
+                    "style": "font-size:20px; font-weight:400; margin:0;"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Enterprise dashboard suite"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "nav-routes",
+                    "style": "display:flex; gap:8px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Overview"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Analytics"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Settings"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "main",
+              "attributes": {
+                "class": "app-body"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "components-showcase-grid",
+                    "style": "display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-button",
+                          "attributes": {
+                            "danger-description": "",
+                            "data-canonical-tag": "cds-button",
+                            "kind": "primary",
+                            "size": "lg",
+                            "tab-index": "0",
+                            "tooltip-alignment": "",
+                            "tooltip-position": "top",
+                            "type": "button"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--lg,true cds--layout--size-lg,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "id": "button",
+                                  "part": "button",
+                                  "tabindex": "0",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "id": "badge-indicator",
+                                  "name": "badge-indicator"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-checkbox",
+                          "attributes": {
+                            "data-canonical-tag": "cds-checkbox",
+                            "id": "checkbox"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "aria-readonly": "false",
+                                  "class": "cds--checkbox",
+                                  "id": "checkbox",
+                                  "part": "input",
+                                  "type": "checkbox"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--checkbox-label",
+                                  "for": "checkbox",
+                                  "part": "label",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--checkbox-label-text"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "ai-label"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "decorator"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "slug"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--checkbox__validation-msg"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-radio-button",
+                          "attributes": {
+                            "data-canonical-tag": "cds-radio-button",
+                            "label-position": "right",
+                            "orientation": "horizontal"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "aria-readonly": "false",
+                                  "class": "cds--radio-button",
+                                  "id": "input",
+                                  "tabindex": "-1",
+                                  "type": "radio"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--radio-button__label  ",
+                                  "for": "input"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--radio-button__appearance"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--radio-button__label-text"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "ai-label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "slug"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-toggle",
+                          "attributes": {
+                            "data-canonical-tag": "cds-toggle",
+                            "id": "checkbox",
+                            "size": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-checked": "false",
+                                  "aria-labelledby": "false",
+                                  "class": "cds--toggle__button",
+                                  "id": "checkbox",
+                                  "role": "switch",
+                                  "type": "button"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--toggle__label",
+                                  "for": "checkbox"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--toggle__appearance"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--toggle__switch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "aria-hidden": "true",
+                                          "class": "cds--toggle__text"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "text",
+                                            "value": "Off"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-text-input",
+                          "attributes": {
+                            "data-canonical-tag": "cds-text-input",
+                            "placeholder": "",
+                            "type": "text",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--form-item cds--text-input-wrapper"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--text-input__label-wrapper"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "label",
+                                        "attributes": {
+                                          "class": "cds--label",
+                                          "for": "input"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "name": "label-text"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--text-input__field-outer-wrapper"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--text-input__field-wrapper"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "input",
+                                            "attributes": {
+                                              "autocomplete": "",
+                                              "class": "cds--text-input",
+                                              "id": "input",
+                                              "type": "text"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "class": "cds--slug--revert",
+                                              "name": "ai-label"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "name": "slug"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--form__helper-text",
+                                          "hidden": "",
+                                          "id": "helper-text"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "name": "helper-text"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-select",
+                          "attributes": {
+                            "data-canonical-tag": "cds-select",
+                            "placeholder": "",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--label",
+                                  "for": "select"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "label-text"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--select-input__wrapper"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "select",
+                                    "attributes": {
+                                      "aria-invalid": "false",
+                                      "aria-readonly": "false",
+                                      "class": "cds--select-input",
+                                      "id": "select",
+                                      "title": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "svg",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "class": "cds--select__arrow",
+                                      "fill": "currentColor",
+                                      "focusable": "false",
+                                      "height": "16",
+                                      "preserveAspectRatio": "xMidYMid meet",
+                                      "viewBox": "0 0 16 16",
+                                      "width": "16",
+                                      "xmlns": "http://www.w3.org/2000/svg"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "path",
+                                        "attributes": {
+                                          "d": "M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "class": "",
+                                      "name": "ai-label",
+                                      "style": "--cds-show-before: none"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-modal",
+                          "attributes": {
+                            "data-canonical-tag": "cds-modal",
+                            "loading-status": "inactive",
+                            "size": "md"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-modal-body",
+                              "attributes": {},
+                              "children": [],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "",
+                                  "aria-modal": "true",
+                                  "class": "cds--modal-container cds--modal-container--md",
+                                  "part": "dialog",
+                                  "role": "dialog",
+                                  "tabindex": "-1"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-tag",
+                          "attributes": {
+                            "data-canonical-tag": "cds-tag",
+                            "open": "",
+                            "size": "md",
+                            "type": "gray"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "icon"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "class": "cds--tag__label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "decorator"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "ai-label"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "slug"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-tabs",
+                          "attributes": {
+                            "data-canonical-tag": "cds-tabs",
+                            "icon": "",
+                            "size": "",
+                            "type": "",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "class": "cds--tab--overflow-nav-button cds--tabs__nav-caret-left cds--tab--overflow-nav-button--previous cds--tab--overflow-nav-button--hidden",
+                                  "part": "prev-button",
+                                  "tabindex": "-1"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "svg",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "fill": "currentColor",
+                                      "focusable": "false",
+                                      "height": "16",
+                                      "preserveAspectRatio": "xMidYMid meet",
+                                      "viewBox": "0 0 16 16",
+                                      "width": "16",
+                                      "xmlns": "http://www.w3.org/2000/svg"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "path",
+                                        "attributes": {
+                                          "d": "M5 8 10 3 10.7 3.7 6.4 8 10.7 12.3 10 13z"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--tabs-nav-content-container"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--tabs-nav-content",
+                                      "style": "inset-inline-start: 0px;"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--tabs-nav"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "cds--tab--list",
+                                              "id": "tablist",
+                                              "role": "tablist"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "element",
+                                                "tag": "div",
+                                                "attributes": {
+                                                  "class": "cds--sub-content-left"
+                                                },
+                                                "children": []
+                                              },
+                                              {
+                                                "type": "element",
+                                                "tag": "slot",
+                                                "attributes": {},
+                                                "children": []
+                                              },
+                                              {
+                                                "type": "element",
+                                                "tag": "div",
+                                                "attributes": {
+                                                  "class": "cds--sub-content-right"
+                                                },
+                                                "children": []
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "class": "cds--tab--overflow-nav-button cds--tabs__nav-caret-right cds--tab--overflow-nav-button--next cds--tab--overflow-nav-button--hidden",
+                                  "part": "next-button",
+                                  "tabindex": "-1"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "svg",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "fill": "currentColor",
+                                      "focusable": "false",
+                                      "height": "16",
+                                      "preserveAspectRatio": "xMidYMid meet",
+                                      "viewBox": "0 0 16 16",
+                                      "width": "16",
+                                      "xmlns": "http://www.w3.org/2000/svg"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "path",
+                                        "attributes": {
+                                          "d": "M11 8 6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-live": "assertive",
+                                  "aria-relevant": "additions text",
+                                  "class": "cds--assistive-text",
+                                  "role": "status"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "data-canonical-tag": "cds-progress-bar",
+                            "max": "100",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default cds--progress-bar--indeterminate"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "",
+                                      "aria-valuemin": "",
+                                      "aria-valuenow": "",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-loading",
+                          "attributes": {
+                            "data-canonical-tag": "cds-loading",
+                            "description": "Loading",
+                            "inactive": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "svg",
+                                "attributes": {
+                                  "class": "cds--loading__svg",
+                                  "viewBox": "0 0 100 100"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "title",
+                                    "attributes": {},
+                                    "children": [
+                                      {
+                                        "type": "text",
+                                        "value": "Loading"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "circle",
+                                    "attributes": {
+                                      "class": "cds--loading__background",
+                                      "cx": "50%",
+                                      "cy": "50%",
+                                      "hidden": "",
+                                      "r": "44"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "circle",
+                                    "attributes": {
+                                      "class": "cds--loading__stroke",
+                                      "cx": "50%",
+                                      "cy": "50%",
+                                      "r": "44"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-slider",
+                          "attributes": {
+                            "data-canonical-tag": "cds-slider",
+                            "max": "100",
+                            "max-label": "",
+                            "min": "0",
+                            "min-label": "",
+                            "step": "1",
+                            "step-multiplier": "4"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "class": "cds--label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "label-text"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--slider-container"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--slider__range-label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "min-text"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "text",
+                                            "value": "0"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--slider",
+                                      "role": "presentation",
+                                      "tabindex": "-1"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--icon-tooltip cds--slider__thumb-wrapper",
+                                          "style": "left: 0%"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "aria-valuemax": "100",
+                                              "aria-valuemin": "0",
+                                              "aria-valuenow": "",
+                                              "aria-valuetext": "NaN",
+                                              "class": "cds--slider__thumb",
+                                              "id": "thumb",
+                                              "role": "slider",
+                                              "tabindex": "0"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--slider__track",
+                                          "id": "track"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds-ce--slider__filled-track-container"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "cds--slider__filled-track",
+                                              "style": "transform: translate(0%, -50%) scaleX(0);"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--slider__range-label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "max-text"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "text",
+                                            "value": "100"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--slider__validation-msg cds--slider__validation-msg--invalid cds--form-requirement"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-overflow-menu",
+                          "attributes": {
+                            "align": "top",
+                            "aria-haspopup": "true",
+                            "close-on-activation": "",
+                            "danger-description": "",
+                            "data-canonical-tag": "cds-overflow-menu",
+                            "kind": "primary",
+                            "tab-index": "0",
+                            "tooltip-alignment": "",
+                            "tooltip-position": "top",
+                            "type": "button"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "cds-tooltip",
+                                "attributes": {
+                                  "align": "top",
+                                  "backgroundtoken": "layer",
+                                  "caret": "",
+                                  "closeonactivation": "",
+                                  "enter-delay-ms": "100",
+                                  "highcontrast": "",
+                                  "leave-delay-ms": "100",
+                                  "size": "false",
+                                  "timeoutid": "0"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-expanded": "false",
+                                      "aria-haspopup": "menu",
+                                      "aria-label": "Options",
+                                      "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--undefined,false cds--layout--size-undefined,false cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false cds--btn--icon-only cds--overflow-menu",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "cds-tooltip-content",
+                                    "attributes": {
+                                      "align": "top",
+                                      "aria-hidden": "true",
+                                      "backgroundtoken": "layer",
+                                      "caret": "",
+                                      "highcontrast": "",
+                                      "role": "tooltip",
+                                      "slot": "content"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "text",
+                                        "value": "Options"
+                                      }
+                                    ],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "cds--popover"
+                                          },
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "span",
+                                              "attributes": {
+                                                "class": "cds--popover-content cds--tooltip-content",
+                                                "part": "content",
+                                                "tabindex": "-1"
+                                              },
+                                              "children": [
+                                                {
+                                                  "type": "element",
+                                                  "tag": "slot",
+                                                  "attributes": {},
+                                                  "children": []
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "element",
+                                              "tag": "span",
+                                              "attributes": {
+                                                "class": "cds--popover-caret"
+                                              },
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "span",
+                                      "attributes": {
+                                        "class": "cds--popover-container cds--popover--caret cds--popover--high-contrast cds--popover--top cds--tooltip",
+                                        "part": "popover-container"
+                                      },
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {},
+                                          "children": []
+                                        },
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {
+                                            "name": "content"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-skeleton-text",
+                          "attributes": {
+                            "data-canonical-tag": "cds-skeleton-text",
+                            "linecount": "3",
+                            "type": "",
+                            "width": "100%"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "p",
+                                "attributes": {
+                                  "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                                  "style": "width:100%"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-icon",
+                          "attributes": {
+                            "data-canonical-tag": "cds-icon"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-icon-button",
+                          "attributes": {
+                            "align": "top",
+                            "close-on-activation": "",
+                            "danger-description": "",
+                            "data-canonical-tag": "cds-icon-button",
+                            "kind": "primary",
+                            "size": "lg",
+                            "tab-index": "0",
+                            "tooltip-alignment": "",
+                            "tooltip-position": "top",
+                            "type": "button"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "cds-tooltip",
+                                "attributes": {
+                                  "align": "top",
+                                  "backgroundtoken": "layer",
+                                  "caret": "",
+                                  "closeonactivation": "",
+                                  "enter-delay-ms": "100",
+                                  "highcontrast": "",
+                                  "leave-delay-ms": "100",
+                                  "size": "false",
+                                  "timeoutid": "0"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-label": "undefined",
+                                      "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--lg,true cds--layout--size-lg,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "cds-tooltip-content",
+                                    "attributes": {
+                                      "align": "top",
+                                      "aria-hidden": "true",
+                                      "backgroundtoken": "layer",
+                                      "caret": "",
+                                      "highcontrast": "",
+                                      "role": "tooltip",
+                                      "slot": "content"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "tooltip-content"
+                                        },
+                                        "children": []
+                                      }
+                                    ],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "cds--popover"
+                                          },
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "span",
+                                              "attributes": {
+                                                "class": "cds--popover-content cds--tooltip-content",
+                                                "part": "content",
+                                                "tabindex": "-1"
+                                              },
+                                              "children": [
+                                                {
+                                                  "type": "element",
+                                                  "tag": "slot",
+                                                  "attributes": {},
+                                                  "children": []
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "element",
+                                              "tag": "span",
+                                              "attributes": {
+                                                "class": "cds--popover-caret"
+                                              },
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "span",
+                                      "attributes": {
+                                        "class": "cds--popover-container cds--popover--caret cds--popover--high-contrast cds--popover--top cds--tooltip",
+                                        "part": "popover-container"
+                                      },
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {},
+                                          "children": []
+                                        },
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {
+                                            "name": "content"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-tile",
+                          "attributes": {
+                            "color-scheme": "",
+                            "data-canonical-tag": "cds-tile"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "decorator"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "ai-label"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "slug"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-popover",
+                          "attributes": {
+                            "align": "bottom",
+                            "backgroundtoken": "layer",
+                            "caret": "",
+                            "data-canonical-tag": "cds-popover",
+                            "dropshadow": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "class": "cds--popover-container cds--popover--caret cds--popover--drop-shadow cds--popover--bottom",
+                                  "part": "popover-container"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "content"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-structured-list",
+                          "attributes": {
+                            "data-canonical-tag": "cds-structured-list",
+                            "role": "table"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "section",
+                                "attributes": {
+                                  "class": "cds--structured-list",
+                                  "id": "section"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "cds-content-switcher",
+                          "attributes": {
+                            "data-canonical-tag": "cds-content-switcher",
+                            "icon": "",
+                            "size": "",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "elementsCount": 50,
+    "customElementsCount": 21,
+    "shadowRootsCount": 21
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 50,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
+  }
+}

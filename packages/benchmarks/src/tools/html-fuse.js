@@ -33,26 +33,22 @@ export const htmlFuseTool = {
     const include = normalizeInclude(suite.includePattern);
     if (!include) return null;
 
-    try {
-      const res = fuse({
-        include,
-        exclude: [],
-        threshold: 2,
-        minFragmentLength: 15,
-        outputDir: '.fused-html',
-        write: false,
-        virtualImports: true,
-      });
+    const res = fuse({
+      include,
+      exclude: [],
+      threshold: 2,
+      minFragmentLength: 15,
+      outputDir: '.fused-html',
+      write: false,
+      virtualImports: true,
+    });
 
-      return {
-        fragmentsScanned: res.stats?.fragmentsExtracted ?? 0,
-        fragmentsDeduped: res.stats?.fragmentsDeduped ?? 0,
-        fusedTemplatesCreated: res.stats?.fusedTemplatesCreated ?? 0,
-        componentsRewritten: res.stats?.componentsRewritten ?? 0,
-        bytesSavedEstimate: res.stats?.bytesSaved ?? 0,
-      };
-    } catch {
-      return null;
-    }
+    return {
+      fragmentsScanned: res.stats?.fragmentsExtracted ?? 0,
+      fragmentsDeduped: res.stats?.fragmentsDeduped ?? 0,
+      fusedTemplatesCreated: res.stats?.fusedTemplatesCreated ?? 0,
+      componentsRewritten: res.stats?.componentsRewritten ?? 0,
+      bytesSavedEstimate: res.stats?.bytesSaved ?? 0,
+    };
   },
 };

@@ -6,6 +6,7 @@ export {
   type SafeBrowserOptions,
 } from './browser.js';
 export {
+  assertMounted,
   type MountResult,
   mountElement,
 } from './mount.js';

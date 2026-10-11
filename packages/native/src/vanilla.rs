@@ -1,11 +1,10 @@
 use crate::ast_helpers::AstHelper;
 use crate::models::ClassificationResult;
-use crate::template_parser::{parse_html_template, BindingKind, ParsedTemplate};
+use crate::template_parser::{parse_html_template, ParsedTemplate};
 use oxc_allocator::{Allocator, ArenaVec};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
-use oxc_parser::Parser;
-use oxc_span::{GetSpan, SourceType};
+use oxc_span::GetSpan;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
@@ -171,210 +170,19 @@ pub fn transform_vanilla_class<'a>(
     let sheet_var = format!("__lit_sheet_{}", comp_id);
     let tmpl_var = format!("__lit_tmpl_{}", comp_id);
 
-    let mut hoisted_code = String::new();
-    if let Some(css) = &styles_css {
-        hoisted_code.push_str(&format!(
-            "const {} = new CSSStyleSheet();\n{}.replaceSync(`{}`);\n",
-            sheet_var,
-            sheet_var,
-            css.replace('`', "\\`").replace('$', "\\$")
-        ));
-    }
-    hoisted_code.push_str(&format!(
-        "const {} = document.createElement('template');\n{}.innerHTML = `{}`;\n",
-        tmpl_var,
-        tmpl_var,
-        parsed_template.html.replace('`', "\\`")
-    ));
-
-    // Parse hoisted code into Statements
-    let hoisted_code_arena = allocator.alloc_str(&hoisted_code);
-    let parsed_hoisted = Parser::new(allocator, hoisted_code_arena, SourceType::mjs()).parse();
-    for stmt in parsed_hoisted.program.body {
+    let hoisted_stmts = crate::vanilla_ast::build_hoisted_statements(
+        ast,
+        allocator,
+        styles_css.as_deref(),
+        &parsed_template.html,
+        &sheet_var,
+        &tmpl_var,
+    );
+    for stmt in hoisted_stmts {
         out_pre_stmts.push(stmt);
     }
 
-    // 4. Synthesize class members:
-    // - static observedAttributes
-    // - constructor
-    // - property getters & setters with direct DOM mutations
-    // - attributeChangedCallback
-    let mut members_code = String::new();
-
-    // static observedAttributes
-    let observed_attrs: Vec<String> = properties
-        .iter()
-        .map(|p| format!("'{}'", p.attribute_name))
-        .collect();
-    if !observed_attrs.is_empty() {
-        members_code.push_str(&format!(
-            "  static observedAttributes = [{}];\n",
-            observed_attrs.join(", ")
-        ));
-    }
-
-    // Static Lit compatibility stubs for lowered classes
-    members_code.push_str("  static createProperty() {}\n");
-    members_code.push_str("  static getPropertyOptions() { return {}; }\n");
-    members_code.push_str("  static get elementProperties() { return new Map(); }\n");
-    members_code.push_str("  static addInitializer() {}\n");
-
-    // constructor
-    members_code.push_str("  constructor() {\n");
-    members_code.push_str("    super();\n");
-    members_code.push_str("    this.attachShadow({ mode: 'open' });\n");
-    if styles_css.is_some() {
-        members_code.push_str(&format!(
-            "    this.shadowRoot.adoptedStyleSheets = [{}];\n",
-            sheet_var
-        ));
-    }
-    members_code.push_str(&format!(
-        "    const __frag = {}.content.cloneNode(true);\n",
-        tmpl_var
-    ));
-
-    // Node path resolution and text marker replacement
-    for (idx, b) in parsed_template.bindings.iter().enumerate() {
-        let mut path_expr = "__frag".to_string();
-        for step in &b.path {
-            path_expr = format!("{}.childNodes[{}]", path_expr, step);
-        }
-
-        if b.kind == BindingKind::Text {
-            // Replace marker comment with live text node
-            members_code.push_str(&format!("    const __m_{} = {};\n", idx, path_expr));
-            members_code.push_str(&format!(
-                "    this.__lit_node_{} = document.createTextNode('');\n",
-                idx
-            ));
-            members_code.push_str(&format!(
-                "    if (__m_{}) __m_{}.replaceWith(this.__lit_node_{});\n",
-                idx, idx, idx
-            ));
-        } else if b.kind == BindingKind::Event {
-            let ev_name = b.name.as_deref().unwrap_or("click");
-            let clean_handler = b
-                .expr_str
-                .trim_start_matches("this.")
-                .trim_end_matches("()");
-            members_code.push_str(&format!("    const __btn_{} = {};\n", idx, path_expr));
-            members_code.push_str(&format!(
-                "    if (__btn_{}) __btn_{}.addEventListener('{}', (e) => this.{}(e));\n",
-                idx, idx, ev_name, clean_handler
-            ));
-        } else {
-            // Attribute or boolean attribute
-            members_code.push_str(&format!("    this.__lit_node_{} = {};\n", idx, path_expr));
-        }
-    }
-
-    members_code.push_str("    this.shadowRoot.appendChild(__frag);\n");
-
-    // Initialize property backing stores
-    for p in &properties {
-        let val = p
-            .default_value
-            .as_deref()
-            .unwrap_or(match p.prop_type.as_str() {
-                "number" => "0",
-                "boolean" => "false",
-                _ => "''",
-            });
-        members_code.push_str(&format!("    this._{} = {};\n", p.name, val));
-    }
-    members_code.push_str("  }\n");
-
-    // Getters and setters
-    for p in &properties {
-        let p_name = &p.name;
-        members_code.push_str(&format!(
-            "  get {}() {{ return this._{}; }}\n",
-            p_name, p_name
-        ));
-        members_code.push_str(&format!("  set {}(v) {{\n", p_name));
-        members_code.push_str(&format!("    if (this._{} === v) return;\n", p_name));
-        members_code.push_str(&format!("    this._{} = v;\n", p_name));
-
-        // Direct DOM updates
-        for (idx, b) in parsed_template.bindings.iter().enumerate() {
-            let matches_prop = b.expr_str.contains(p_name);
-            if matches_prop {
-                match b.kind {
-                    BindingKind::Text => {
-                        members_code.push_str(&format!(
-                            "    if (this.__lit_node_{}) {{ this.__lit_node_{}.data = String(v ?? ''); }}\n",
-                            idx, idx
-                        ));
-                    }
-                    BindingKind::BooleanAttribute => {
-                        if let Some(attr) = &b.name {
-                            members_code.push_str(&format!(
-                                "    if (this.__lit_node_{}) {{ this.__lit_node_{}.toggleAttribute('{}', Boolean(v)); }}\n",
-                                idx, idx, attr
-                            ));
-                        }
-                    }
-                    BindingKind::Attribute => {
-                        if let Some(attr) = &b.name {
-                            members_code.push_str(&format!(
-                                "    if (this.__lit_node_{}) {{ this.__lit_node_{}.setAttribute('{}', String(v ?? '')); }}\n",
-                                idx, idx, attr
-                            ));
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
-
-        if p.reflect {
-            if p.prop_type == "boolean" {
-                members_code.push_str(&format!(
-                    "    if (this.isConnected) {{\n      if (this.hasAttribute('{}') !== Boolean(v)) this.toggleAttribute('{}', Boolean(v));\n    }} else {{\n      queueMicrotask(() => {{\n        if (this.toggleAttribute && this.hasAttribute('{}') !== Boolean(this._{})) this.toggleAttribute('{}', Boolean(this._{}));\n      }});\n    }}\n",
-                    p.attribute_name, p.attribute_name, p.attribute_name, p_name, p.attribute_name, p_name
-                ));
-            } else {
-                members_code.push_str(&format!(
-                    "    if (this.isConnected) {{\n      if (v != null) {{\n        if (this.getAttribute('{}') !== String(v)) this.setAttribute('{}', String(v));\n      }} else {{\n        this.removeAttribute('{}');\n      }}\n    }} else {{\n      queueMicrotask(() => {{\n        if (this.setAttribute) {{\n          if (this._{} != null) {{\n            if (this.getAttribute('{}') !== String(this._{})) this.setAttribute('{}', String(this._{}));\n          }} else {{\n            this.removeAttribute('{}');\n          }}\n        }}\n      }});\n    }}\n",
-                    p.attribute_name, p.attribute_name, p.attribute_name, p_name, p.attribute_name, p_name, p.attribute_name, p_name, p.attribute_name
-                ));
-            }
-        }
-        members_code.push_str("  }\n");
-    }
-
-    // attributeChangedCallback
-    if !properties.is_empty() {
-        members_code.push_str("  attributeChangedCallback(name, oldVal, newVal) {\n");
-        members_code.push_str("    if (oldVal === newVal) return;\n");
-        members_code.push_str("    switch (name) {\n");
-        for p in &properties {
-            let cast = match p.prop_type.as_str() {
-                "number" => "newVal != null ? Number(newVal) : 0",
-                "boolean" => "newVal !== null",
-                _ => "newVal ?? ''",
-            };
-            members_code.push_str(&format!(
-                "      case '{}': this.{} = {}; break;\n",
-                p.attribute_name, p.name, cast
-            ));
-        }
-        members_code.push_str("    }\n");
-        members_code.push_str("  }\n");
-    }
-
-    // Lit instance lifecycle compatibility stubs
-    members_code.push_str("  get renderRoot() { return this.shadowRoot; }\n");
-    members_code.push_str("  requestUpdate() { return Promise.resolve(false); }\n");
-    members_code.push_str("  get updateComplete() { return Promise.resolve(true); }\n");
-
-    // Parse synthesized class members into AST ClassElements
-    let dummy_source = format!("class __Dummy {{\n{}\n}}", members_code);
-    let dummy_source_arena = allocator.alloc_str(&dummy_source);
-    let mut parsed_dummy = Parser::new(allocator, dummy_source_arena, SourceType::mjs()).parse();
-
-    // 5. Update class AST:
+    // 4. Update class AST:
     // Set heritage to `HTMLElement`
     let html_elem_ident = helper.ident_ref("HTMLElement");
     class.heritage = Some(ClassHeritage {
@@ -388,13 +196,35 @@ pub fn transform_vanilla_class<'a>(
     // Retain only custom non-Lit methods (filter out @property, styles, render)
     let mut new_body_elements = ArenaVec::new_in(ast);
 
-    // First push synthesized members (observedAttributes, constructor, accessors, attributeChangedCallback)
-    if let Some(Statement::ClassDeclaration(ref mut dummy_class)) =
-        parsed_dummy.program.body.get_mut(0)
+    // Push synthesized members: observedAttributes, constructor, accessors, attributeChangedCallback
+    if let Some(obs_elem) =
+        crate::vanilla_ast::build_observed_attributes_element(ast, allocator, &properties)
     {
-        for elem in dummy_class.body.body.drain(..) {
-            new_body_elements.push(elem);
-        }
+        new_body_elements.push(obs_elem);
+    }
+
+    let ctor_elem = crate::vanilla_ast::build_constructor_element(
+        ast,
+        allocator,
+        &sheet_var,
+        &tmpl_var,
+        styles_css.is_some(),
+        &parsed_template,
+        &properties,
+    );
+    new_body_elements.push(ctor_elem);
+
+    for p in &properties {
+        let (getter, setter) =
+            crate::vanilla_ast::build_property_accessors(ast, allocator, p, &parsed_template);
+        new_body_elements.push(getter);
+        new_body_elements.push(setter);
+    }
+
+    if let Some(acc_elem) =
+        crate::vanilla_ast::build_attribute_changed_callback_element(ast, allocator, &properties)
+    {
+        new_body_elements.push(acc_elem);
     }
 
     // Then retain remaining methods from original class (e.g. event handler methods)

@@ -1,3 +1,9 @@
+export {
+  type ErrorLocation,
+  extractErrorLocation,
+  type RollupErrorPayload,
+  reportTransformError,
+} from './errors.js';
 export type {
   CssFuseOptions,
   CssMinifierOptions,

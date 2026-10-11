@@ -1,6 +1,6 @@
 import { compileHtmlAot } from '@lit-core/html-aot';
 import type { HtmlAotOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 import { LIT_HTML_FAST_CHECK } from './minifiers.js';
 
 export function transformHtmlAot(code: string, id: string, options: HtmlAotOptions = {}): TransformResult | null {
@@ -29,7 +29,7 @@ export function transformHtmlAot(code: string, id: string, options: HtmlAotOptio
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('html-aot', cleanId, err);
   }
 }

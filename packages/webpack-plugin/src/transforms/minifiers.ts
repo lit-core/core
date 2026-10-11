@@ -1,7 +1,7 @@
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import type { CssMinifierOptions, HtmlMinifierOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 
 export const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`/;
 export const LIT_CSS_FAST_CHECK = /\bcss\s*`/;
@@ -32,8 +32,8 @@ export function transformHtmlMinifier(code: string, id: string, options: HtmlMin
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('html-minifier', cleanId, err);
   }
 }
 
@@ -63,7 +63,7 @@ export function transformCssMinifier(code: string, id: string, options: CssMinif
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('css-minifier', cleanId, err);
   }
 }

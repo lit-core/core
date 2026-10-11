@@ -1,6 +1,6 @@
 import { transformNative } from '@lit-core/native';
 import type { NativeOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 
 export const LIT_NATIVE_FAST_CHECK = /\bLitElement\b|@customElement\b|extends\s+(?:LitElement|ReactiveElement)\b/;
 
@@ -31,7 +31,7 @@ export function transformNativePlugin(code: string, id: string, options: NativeO
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('native', cleanId, err);
   }
 }

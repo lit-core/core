@@ -22,57 +22,50 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
     applyInDev = false,
   } = options;
 
-  function runOptimization(virtualImports = true, write = false): HtmlFuseResult | null {
-    try {
-      const res = fuseHtml({
-        include,
-        exclude,
-        threshold,
-        minFragmentLength,
-        outputDir,
-        write,
-        virtualImports,
-      });
+  function runOptimization(virtualImports = true, write = false): HtmlFuseResult {
+    const res = fuseHtml({
+      include,
+      exclude,
+      threshold,
+      minFragmentLength,
+      outputDir,
+      write,
+      virtualImports,
+    });
 
-      virtualTemplates.clear();
-      templateOrigins.clear();
-      const templates = res.fusedTemplates || [];
-      for (const tpl of templates) {
-        virtualTemplates.set(tpl.id, tpl.code);
-        virtualTemplates.set(`${tpl.id}.js`, tpl.code);
-        virtualTemplates.set(`${tpl.id}.ts`, tpl.code);
-        virtualTemplates.set(tpl.fileName, tpl.code);
+    virtualTemplates.clear();
+    templateOrigins.clear();
+    const templates = res.fusedTemplates || [];
+    for (const tpl of templates) {
+      virtualTemplates.set(tpl.id, tpl.code);
+      virtualTemplates.set(`${tpl.id}.js`, tpl.code);
+      virtualTemplates.set(`${tpl.id}.ts`, tpl.code);
+      virtualTemplates.set(tpl.fileName, tpl.code);
 
-        const sharedList = (tpl as any).sharedBy || (tpl as any).shared_by;
-        const origin = Array.isArray(sharedList) && sharedList.length > 0 ? sharedList[0] : null;
-        if (origin) {
-          templateOrigins.set(tpl.id, origin);
-          templateOrigins.set(`${tpl.id}.js`, origin);
-          templateOrigins.set(tpl.fileName, origin);
-        }
+      const sharedList = (tpl as any).sharedBy || (tpl as any).shared_by;
+      const origin = Array.isArray(sharedList) && sharedList.length > 0 ? sharedList[0] : null;
+      if (origin) {
+        templateOrigins.set(tpl.id, origin);
+        templateOrigins.set(`${tpl.id}.js`, origin);
+        templateOrigins.set(tpl.fileName, origin);
       }
-
-      transformedFiles.clear();
-      const files = res.rewrittenFiles || [];
-      for (const file of files) {
-        if (file.filePath && file.transformedCode) {
-          transformedFiles.set(file.filePath, file.transformedCode);
-          const abs = path.resolve(file.filePath);
-          transformedFiles.set(abs, file.transformedCode);
-          try {
-            const real = fs.realpathSync(abs);
-            transformedFiles.set(real, file.transformedCode);
-          } catch {}
-        }
-      }
-
-      return res;
-    } catch (err) {
-      if (config) {
-        config.logger.error(`[html-fuse] Optimization pass failed: ${err}`);
-      }
-      return null;
     }
+
+    transformedFiles.clear();
+    const files = res.rewrittenFiles || [];
+    for (const file of files) {
+      if (file.filePath && file.transformedCode) {
+        transformedFiles.set(file.filePath, file.transformedCode);
+        const abs = path.resolve(file.filePath);
+        transformedFiles.set(abs, file.transformedCode);
+        try {
+          const real = fs.realpathSync(abs);
+          transformedFiles.set(real, file.transformedCode);
+        } catch {}
+      }
+    }
+
+    return res;
   }
 
   return {
@@ -90,7 +83,19 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
         return;
       }
 
-      fuseResult = runOptimization(true, false);
+      try {
+        fuseResult = runOptimization(true, false);
+      } catch (err: any) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (typeof this?.error === 'function') {
+          this.error({
+            message: `[html-fuse] Optimization pass failed: ${message}`,
+            stack: err?.stack,
+            cause: err,
+          });
+        }
+        throw err;
+      }
       if (fuseResult && config) {
         const stats = fuseResult.stats;
         if (stats.fragmentsDeduped > 0) {

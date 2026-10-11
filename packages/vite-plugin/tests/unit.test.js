@@ -4,6 +4,7 @@ import litDefault, {
   dirtyMask,
   domPaths,
   elemProxy,
+  htmlFuse,
   htmlMinifier,
   LitCoreVitePlugin,
   lit,
@@ -16,6 +17,8 @@ import litDefault, {
   litHtmlMinifier,
   litPropsLower,
   propsLower,
+  reportTransformError,
+  tagShake,
 } from '../dist/index.js';
 
 console.log('Testing @lit-core/vite-plugin hooks and exports...');
@@ -250,3 +253,156 @@ const vBareDomPaths = plugin.resolveId.call({}, '@lit-core/dom-paths/client');
 assert.strictEqual(vBareDomPaths, '\0virtual:lit-core/dom-paths.js');
 
 console.log('✓ Vite plugin hooks and options verified successfully.');
+
+// Test strict error reporting and benign non-matches
+console.log('Testing Vite plugin strict error reporting...');
+
+// 1. props-lower: transform failure triggers build error with location and file ID
+{
+  const p = propsLower({ sourcemap: 'invalid' });
+  let reportedError = null;
+  const mockContext = {
+    error(err) {
+      reportedError = err;
+      const error = new Error(err.message || String(err));
+      Object.assign(error, err);
+      throw error;
+    },
+    warn() {},
+  };
+
+  const code = `
+    import { LitElement } from 'lit';
+    import { property } from 'lit/decorators.js';
+    class MyComp extends LitElement {
+      @property() label = 'hello';
+    }
+  `;
+
+  assert.throws(
+    () => p.transform.call(mockContext, code, '/src/broken-comp.ts'),
+    (err) => err.message.includes('[props-lower]') && err.message.includes('/src/broken-comp.ts'),
+    'props-lower must throw build error identifying transform and file',
+  );
+  assert(reportedError, 'error callback on plugin context must be invoked');
+  assert.strictEqual(reportedError.id, '/src/broken-comp.ts', 'error payload must contain clean file id');
+}
+
+// 2. props-lower: benign non-matching code returns null cleanly
+{
+  const p = propsLower();
+  let errorReported = false;
+  const mockContext = {
+    error() {
+      errorReported = true;
+    },
+    warn() {},
+  };
+  const cleanCode = `export function add(a: number, b: number): number { return a + b; }`;
+  const result = p.transform.call(mockContext, cleanCode, '/src/math.ts');
+  assert.strictEqual(result, null, 'benign non-match must return null');
+  assert.strictEqual(errorReported, false, 'benign non-match must not report error');
+}
+
+// 3. css-fuse: optimization failure in buildStart invokes this.error
+{
+  const p = cssFuse({ include: 123 });
+  p.configResolved({ command: 'build', logger: { info() {}, error() {}, warn() {} } });
+  let reportedError = null;
+  const mockContext = {
+    error(err) {
+      reportedError = err;
+      const error = new Error(err.message || String(err));
+      Object.assign(error, err);
+      throw error;
+    },
+    warn() {},
+  };
+  assert.throws(
+    () => p.buildStart.call(mockContext),
+    (err) => err.message.includes('[css-fuse] Optimization pass failed'),
+    'css-fuse must halt build when optimization fails',
+  );
+  assert(reportedError, 'error callback must be invoked in buildStart');
+}
+
+// 4. html-fuse: optimization failure in buildStart invokes this.error
+{
+  const p = htmlFuse({ include: 123 });
+  p.configResolved({ command: 'build', logger: { info() {}, error() {}, warn() {} } });
+  let reportedError = null;
+  const mockContext = {
+    error(err) {
+      reportedError = err;
+      const error = new Error(err.message || String(err));
+      Object.assign(error, err);
+      throw error;
+    },
+    warn() {},
+  };
+  assert.throws(
+    () => p.buildStart.call(mockContext),
+    (err) => err.message.includes('[html-fuse] Optimization pass failed'),
+    'html-fuse must halt build when optimization fails',
+  );
+  assert(reportedError, 'error callback must be invoked in buildStart');
+}
+
+// 5. extractErrorLocation and reportTransformError: source location extraction
+{
+  let capturedError = null;
+  const mockContext = {
+    error(err) {
+      capturedError = err;
+      const error = new Error(err.message || String(err));
+      Object.assign(error, err);
+      throw error;
+    },
+  };
+
+  const syntheticErr = {
+    message: 'Parse error at line 42, column 15',
+    line: 42,
+    column: 15,
+  };
+
+  assert.throws(
+    () => reportTransformError(mockContext, 'test-plugin', '/src/sample.ts', syntheticErr),
+    (err) => err.message.includes('[test-plugin] Transform failed for /src/sample.ts: Parse error at line 42, column 15'),
+  );
+
+  assert(capturedError, 'error must be captured');
+  assert.strictEqual(capturedError.id, '/src/sample.ts');
+  assert.deepStrictEqual(capturedError.loc, { line: 42, column: 15 });
+
+  // Standalone call without context.error throws standard Error
+  assert.throws(
+    () => reportTransformError({}, 'standalone-plugin', '/src/sample.ts', new Error('boom')),
+    (err) => err.message.includes('[standalone-plugin] Transform failed for /src/sample.ts: boom'),
+    'must throw fallback error when context.error is not defined',
+  );
+}
+
+// 6. tag-shake: transform failure invokes reportTransformError
+{
+  const p = tagShake({ sourcemap: 123 });
+  let reportedError = null;
+  const mockContext = {
+    error(err) {
+      reportedError = err;
+      const error = new Error(err.message || String(err));
+      Object.assign(error, err);
+      throw error;
+    },
+    warn() {},
+  };
+  assert.throws(
+    () => p.transform.call(mockContext, 'customElements.define("x-el", XEl);', '/src/x-el.ts'),
+    (err) => err.message.includes('[tag-shake]'),
+    'tag-shake must throw on transform error',
+  );
+  assert(reportedError, 'error callback must be invoked');
+  assert.strictEqual(reportedError.id, '/src/x-el.ts');
+}
+
+console.log('✓ Vite plugin strict error reporting verified successfully.');

@@ -35,12 +35,7 @@ describe('benchmark viewer browser runtime and data loading', () => {
 
   it('serves manifest.json and renders dashboard in real Chromium via Playwright', async () => {
     console.log('[test] Launching browser...');
-    try {
-      browser = await launchBrowser();
-    } catch (_err) {
-      console.warn('Chromium launch skipped due to sandboxed environment');
-      return;
-    }
+    browser = await launchBrowser();
 
     console.log('[test] Creating page...');
     const context = await browser.newContext();

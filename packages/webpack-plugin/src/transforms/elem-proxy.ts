@@ -1,6 +1,6 @@
 import { transformElemProxy as runTransformElemProxy } from '@lit-core/elem-proxy';
 import type { ElemProxyOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 
 export const LIT_ELEM_PROXY_FAST_CHECK = /@customElement\b|customElements\.define\b/;
 
@@ -31,7 +31,7 @@ export function transformElemProxy(code: string, id: string, options: ElemProxyO
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('elem-proxy', cleanId, err);
   }
 }

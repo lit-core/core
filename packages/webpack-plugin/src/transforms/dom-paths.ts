@@ -1,6 +1,6 @@
 import { transformDomPaths } from '@lit-core/dom-paths';
 import type { DomPathsOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 
 export const LIT_DOM_PATHS_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
 
@@ -31,7 +31,7 @@ export function transformDomPathsPlugin(code: string, id: string, options: DomPa
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('dom-paths', cleanId, err);
   }
 }

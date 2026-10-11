@@ -104,16 +104,6 @@ fn collect_classes_mut<'a, 'b>(stmts: &'b mut [Statement<'a>], out: &mut Vec<&'b
 }
 
 pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult {
-    if !source.contains("html") || !source.contains('`') {
-        return DomPathsResult {
-            code: source.to_string(),
-            map: None,
-            components_count: 0,
-            paths_count: 0,
-            paths: Vec::new(),
-        };
-    }
-
     let allocator = Allocator::default();
     let filename = options.filename.as_deref().unwrap_or("source.ts");
     let source_type = SourceType::from_path(filename).unwrap_or_default();

@@ -145,11 +145,7 @@ describe('multi-framework canonical component test showcase', () => {
     let browser: any = null;
 
     beforeAll(async () => {
-      try {
-        browser = await getTestBrowser();
-      } catch {
-        browser = null;
-      }
+      browser = await getTestBrowser();
     });
 
     afterAll(async () => {
@@ -157,11 +153,6 @@ describe('multi-framework canonical component test showcase', () => {
     });
 
     it('loads baseline showcase and verifies window.__TEST_RESULTS__', async () => {
-      if (!browser) {
-        console.warn('Chromium browser launch not supported in current environment; skipping browser navigation.');
-        return;
-      }
-
       const page = await browser.newPage();
       try {
         await page.route('https://showcase.local/**', (route: any) => {

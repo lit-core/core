@@ -1,6 +1,6 @@
 import { transformDirectives } from '@lit-core/directives';
 import type { DirectivesOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 
 export const LIT_DIRECTIVES_FAST_CHECK = /(?:lit|lit-html)\/directives\//;
 
@@ -30,7 +30,7 @@ export function transformDirectivesPlugin(code: string, id: string, options: Dir
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('directives', cleanId, err);
   }
 }

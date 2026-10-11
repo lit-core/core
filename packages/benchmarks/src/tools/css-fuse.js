@@ -33,25 +33,21 @@ export const cssFuseTool = {
     const include = normalizeInclude(suite.includePattern);
     if (!include) return null;
 
-    try {
-      const res = fuse({
-        include,
-        exclude: [],
-        threshold: 2,
-        outputDir: '.fused',
-        write: false,
-        virtualImports: true,
-      });
+    const res = fuse({
+      include,
+      exclude: [],
+      threshold: 2,
+      outputDir: '.fused',
+      write: false,
+      virtualImports: true,
+    });
 
-      return {
-        rulesScanned: res.stats?.totalRules ?? 0,
-        rulesDeduped: res.stats?.rulesDeduped ?? 0,
-        fusedSheetsCreated: res.stats?.fusedSheetsCreated ?? 0,
-        componentsRewritten: res.stats?.componentsRewritten ?? 0,
-        bytesSavedEstimate: res.stats?.bytesSaved ?? 0,
-      };
-    } catch {
-      return null;
-    }
+    return {
+      rulesScanned: res.stats?.totalRules ?? 0,
+      rulesDeduped: res.stats?.rulesDeduped ?? 0,
+      fusedSheetsCreated: res.stats?.fusedSheetsCreated ?? 0,
+      componentsRewritten: res.stats?.componentsRewritten ?? 0,
+      bytesSavedEstimate: res.stats?.bytesSaved ?? 0,
+    };
   },
 };

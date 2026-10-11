@@ -1,5 +1,6 @@
 import { compileHtmlAot } from '@lit-core/html-aot';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { HtmlAotOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -51,8 +52,8 @@ export function htmlAot(options: HtmlAotOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (_err) {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'html-aot', cleanId, err);
       }
     },
   };

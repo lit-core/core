@@ -1,5 +1,5 @@
 use oxc_ast::ast::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum LitDecoratorKind {
@@ -47,48 +47,130 @@ pub fn is_lit_import(specifier: &str) -> bool {
         || specifier == "@lit/localize"
 }
 
+pub fn is_helper_source(specifier: &str) -> bool {
+    specifier == "tslib"
+        || specifier.starts_with("tslib/")
+        || specifier == "@swc/helpers"
+        || specifier.starts_with("@swc/helpers/")
+        || specifier.starts_with("@babel/runtime/helpers/")
+        || specifier == "./decorate.js"
+        || specifier == "../decorate.js"
+        || specifier.ends_with("/decorate.js")
+        || specifier.ends_with("/decorate")
+}
+
+pub fn is_canonical_helper_name(name: &str) -> bool {
+    name == "__decorate"
+        || name == "__decorateClass"
+        || name == "_ts_decorate"
+        || name == "decorate"
+        || name == "applyDecoratedDescriptor"
+}
+
+pub fn is_canonical_metadata_name(name: &str) -> bool {
+    name == "__metadata" || name == "metadata"
+}
+
 #[derive(Debug, Default)]
 pub struct ImportContext {
     /// Maps local identifier name (as imported in the file) to its LitDecoratorKind
     pub decorator_bindings: HashMap<String, LitDecoratorKind>,
     /// Maps namespace import local name (e.g. `import * as lit from 'lit'`) to its import specifier
     pub namespace_bindings: HashMap<String, String>,
+    /// Tracked decorator helper bindings (e.g. `import { __decorate as dec } from 'tslib'`)
+    pub helper_bindings: HashSet<String>,
+    /// Tracked metadata helper bindings (e.g. `import { __metadata as meta } from 'tslib'`)
+    pub metadata_bindings: HashSet<String>,
+    /// Tracked helper namespace bindings (e.g. `import * as tslib from 'tslib'`)
+    pub helper_namespaces: HashSet<String>,
 }
 
 impl ImportContext {
-    /// Scans program import statements to populate recognized Lit decorator bindings.
-    /// Only recognizes imports from verified Lit package specifiers.
+    /// Scans program import and variable statements to populate recognized Lit decorator and helper bindings.
     pub fn scan<'a>(program: &Program<'a>) -> Self {
         let mut ctx = Self::default();
 
         for stmt in &program.body {
-            if let Statement::ImportDeclaration(import_decl) = stmt {
-                let specifier = import_decl.source.value.as_str();
-                if !is_lit_import(specifier) {
-                    continue;
-                }
+            match stmt {
+                Statement::ImportDeclaration(import_decl) => {
+                    let specifier = import_decl.source.value.as_str();
 
-                if let Some(specifiers) = &import_decl.specifiers {
-                    for spec in specifiers {
-                        match spec {
-                            ImportDeclarationSpecifier::ImportSpecifier(named_spec) => {
-                                let canonical_name = named_spec.imported.name();
-                                if let Some(kind) =
-                                    LitDecoratorKind::from_canonical_name(canonical_name.as_str())
-                                {
-                                    let local_name = named_spec.local.name.as_str().to_string();
-                                    ctx.decorator_bindings.insert(local_name, kind);
+                    if is_lit_import(specifier) {
+                        if let Some(specifiers) = &import_decl.specifiers {
+                            for spec in specifiers {
+                                match spec {
+                                    ImportDeclarationSpecifier::ImportSpecifier(named_spec) => {
+                                        let canonical_name = named_spec.imported.name();
+                                        if let Some(kind) = LitDecoratorKind::from_canonical_name(
+                                            canonical_name.as_str(),
+                                        ) {
+                                            let local_name =
+                                                named_spec.local.name.as_str().to_string();
+                                            ctx.decorator_bindings.insert(local_name, kind);
+                                        }
+                                    }
+                                    ImportDeclarationSpecifier::ImportNamespaceSpecifier(
+                                        ns_spec,
+                                    ) => {
+                                        let local_name = ns_spec.local.name.as_str().to_string();
+                                        ctx.namespace_bindings
+                                            .insert(local_name, specifier.to_string());
+                                    }
+                                    _ => {}
                                 }
                             }
-                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns_spec) => {
-                                let local_name = ns_spec.local.name.as_str().to_string();
-                                ctx.namespace_bindings
-                                    .insert(local_name, specifier.to_string());
+                        }
+                    } else if is_helper_source(specifier) {
+                        if let Some(specifiers) = &import_decl.specifiers {
+                            for spec in specifiers {
+                                match spec {
+                                    ImportDeclarationSpecifier::ImportSpecifier(named_spec) => {
+                                        let canonical_name = named_spec.imported.name();
+                                        if is_canonical_helper_name(canonical_name.as_str()) {
+                                            ctx.helper_bindings
+                                                .insert(named_spec.local.name.as_str().to_string());
+                                        } else if is_canonical_metadata_name(
+                                            canonical_name.as_str(),
+                                        ) {
+                                            ctx.metadata_bindings
+                                                .insert(named_spec.local.name.as_str().to_string());
+                                        }
+                                    }
+                                    ImportDeclarationSpecifier::ImportDefaultSpecifier(
+                                        default_spec,
+                                    ) => {
+                                        ctx.helper_bindings
+                                            .insert(default_spec.local.name.as_str().to_string());
+                                    }
+                                    ImportDeclarationSpecifier::ImportNamespaceSpecifier(
+                                        ns_spec,
+                                    ) => {
+                                        ctx.helper_namespaces
+                                            .insert(ns_spec.local.name.as_str().to_string());
+                                    }
+                                }
                             }
-                            _ => {}
                         }
                     }
                 }
+                Statement::VariableDeclaration(var_decl) => {
+                    for decl in &var_decl.declarations {
+                        if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                            if let Some(Expression::Identifier(init_id)) = &decl.init {
+                                if is_canonical_helper_name(init_id.name.as_str())
+                                    || ctx.helper_bindings.contains(init_id.name.as_str())
+                                {
+                                    ctx.helper_bindings.insert(id.name.as_str().to_string());
+                                } else if is_canonical_metadata_name(init_id.name.as_str())
+                                    || ctx.metadata_bindings.contains(init_id.name.as_str())
+                                {
+                                    ctx.metadata_bindings.insert(id.name.as_str().to_string());
+                                }
+                            }
+                        }
+                    }
+                }
+                _ => {}
             }
         }
 
@@ -114,5 +196,40 @@ impl ImportContext {
             }
         }
         None
+    }
+
+    pub fn is_decorator_helper(&self, expr: &Expression) -> bool {
+        match expr {
+            Expression::Identifier(id) => {
+                let name = id.name.as_str();
+                self.helper_bindings.contains(name) || is_canonical_helper_name(name)
+            }
+            Expression::StaticMemberExpression(mem) => {
+                let prop = mem.property.name.as_str();
+                if let Expression::Identifier(obj) = &mem.object {
+                    if self.helper_namespaces.contains(obj.name.as_str())
+                        || obj.name == "tslib"
+                        || obj.name == "babelHelpers"
+                    {
+                        return is_canonical_helper_name(prop);
+                    }
+                }
+                is_canonical_helper_name(prop)
+            }
+            _ => false,
+        }
+    }
+
+    pub fn is_metadata_helper(&self, expr: &Expression) -> bool {
+        match expr {
+            Expression::Identifier(id) => {
+                let name = id.name.as_str();
+                self.metadata_bindings.contains(name) || is_canonical_metadata_name(name)
+            }
+            Expression::StaticMemberExpression(mem) => {
+                is_canonical_metadata_name(mem.property.name.as_str())
+            }
+            _ => false,
+        }
     }
 }

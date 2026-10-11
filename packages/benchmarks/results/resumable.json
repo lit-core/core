@@ -3,13 +3,13 @@
   "benchmarkId": "resumable",
   "title": "`@lit-core/resumable` empirical benchmark results",
   "description": "Ahead-of-time Declarative Shadow DOM (DSD) SSR and event-driven runtime resumption evaluated across all 5 production Lit design systems (349 total Web Components) to measure initial JavaScript payload, Total Blocking Time (TBT), and Time to Interactive (TTI).",
-  "timestamp": "2026-09-29T20:31:17.087Z",
+  "timestamp": "2026-10-11T00:19:03.719Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a49119e",
+    "gitCommit": "1cc4959",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -33,18 +33,18 @@
       "componentCount": 99,
       "baseline": {
         "initialJsKb": 403.2,
-        "tbtMs": 31.8,
+        "tbtMs": 31.4,
         "fcpMs": 120.4,
-        "ttiMs": 182.2,
+        "ttiMs": 181.8,
         "firstClickLatencyMs": 2.4,
         "totalComponents": 99,
         "deferredComponents": 0
       },
       "optimized": {
         "initialJsKb": 1.42,
-        "tbtMs": 1.7,
+        "tbtMs": 0.5,
         "fcpMs": 70.1,
-        "ttiMs": 76.8,
+        "ttiMs": 75.6,
         "firstClickLatencyMs": 3.2,
         "totalComponents": 99,
         "deferredComponents": 99
@@ -58,25 +58,25 @@
           "isReduction": true
         },
         "tbt": {
-          "diff": -30.1,
-          "percent": -94.65408805031447,
-          "formattedDiff": "-30.1",
-          "formattedPercent": "-94.7%",
+          "diff": -30.9,
+          "percent": -98.40764331210191,
+          "formattedDiff": "-30.9",
+          "formattedPercent": "-98.4%",
           "isReduction": true
         },
         "tti": {
-          "diff": -105.39999999999999,
-          "percent": -57.84851811196488,
-          "formattedDiff": "-105.4",
-          "formattedPercent": "-57.8%",
+          "diff": -106.20000000000002,
+          "percent": -58.41584158415842,
+          "formattedDiff": "-106.2",
+          "formattedPercent": "-58.4%",
           "isReduction": true
         }
       },
       "diagnostics": {
         "totalComponents": 99,
         "initialJsReduction": "-99.6%",
-        "tbtReduction": "-94.7%",
-        "ttiImprovement": "105.40 ms",
+        "tbtReduction": "-98.4%",
+        "ttiImprovement": "106.20 ms",
         "deferredCount": "99 / 99 (100%)",
         "buildOverhead": "Fast native pass"
       }
@@ -90,9 +90,9 @@
       "componentCount": 52,
       "baseline": {
         "initialJsKb": 245.4,
-        "tbtMs": 17.1,
+        "tbtMs": 16.9,
         "fcpMs": 101.4,
-        "ttiMs": 148.5,
+        "ttiMs": 148.3,
         "firstClickLatencyMs": 2.4,
         "totalComponents": 52,
         "deferredComponents": 0
@@ -115,25 +115,25 @@
           "isReduction": true
         },
         "tbt": {
-          "diff": -16.6,
-          "percent": -97.07602339181287,
-          "formattedDiff": "-16.6",
-          "formattedPercent": "-97.1%",
+          "diff": -16.4,
+          "percent": -97.0414201183432,
+          "formattedDiff": "-16.4",
+          "formattedPercent": "-97.0%",
           "isReduction": true
         },
         "tti": {
-          "diff": -72.9,
-          "percent": -49.09090909090909,
-          "formattedDiff": "-72.9",
-          "formattedPercent": "-49.1%",
+          "diff": -72.70000000000002,
+          "percent": -49.02225219150372,
+          "formattedDiff": "-72.7",
+          "formattedPercent": "-49.0%",
           "isReduction": true
         }
       },
       "diagnostics": {
         "totalComponents": 52,
         "initialJsReduction": "-99.4%",
-        "tbtReduction": "-97.1%",
-        "ttiImprovement": "72.90 ms",
+        "tbtReduction": "-97.0%",
+        "ttiImprovement": "72.70 ms",
         "deferredCount": "52 / 52 (100%)",
         "buildOverhead": "Fast native pass"
       }
@@ -261,9 +261,9 @@
       "componentCount": 28,
       "baseline": {
         "initialJsKb": 153,
-        "tbtMs": 10,
+        "tbtMs": 9.7,
         "fcpMs": 90.4,
-        "ttiMs": 130.4,
+        "ttiMs": 130.1,
         "firstClickLatencyMs": 2.4,
         "totalComponents": 28,
         "deferredComponents": 0
@@ -286,25 +286,25 @@
           "isReduction": true
         },
         "tbt": {
-          "diff": -9.5,
-          "percent": -95,
-          "formattedDiff": "-9.5",
-          "formattedPercent": "-95.0%",
+          "diff": -9.2,
+          "percent": -94.84536082474226,
+          "formattedDiff": "-9.2",
+          "formattedPercent": "-94.8%",
           "isReduction": true
         },
         "tti": {
-          "diff": -54.80000000000001,
-          "percent": -42.02453987730062,
-          "formattedDiff": "-54.8",
-          "formattedPercent": "-42.0%",
+          "diff": -54.5,
+          "percent": -41.890853189853964,
+          "formattedDiff": "-54.5",
+          "formattedPercent": "-41.9%",
           "isReduction": true
         }
       },
       "diagnostics": {
         "totalComponents": 28,
         "initialJsReduction": "-99.1%",
-        "tbtReduction": "-95.0%",
-        "ttiImprovement": "54.80 ms",
+        "tbtReduction": "-94.8%",
+        "ttiImprovement": "54.50 ms",
         "deferredCount": "28 / 28 (100%)",
         "buildOverhead": "Fast native pass"
       }

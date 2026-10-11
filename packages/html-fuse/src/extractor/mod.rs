@@ -25,11 +25,6 @@ impl TemplateExtractor {
                 continue;
             };
 
-            // Fast pre-check: skip if neither "html" nor "svg" exists
-            if !source.contains("html") && !source.contains("svg") {
-                continue;
-            }
-
             let allocator = Allocator::default();
             let is_ts = file_path.ends_with(".ts")
                 || file_path.ends_with(".tsx")

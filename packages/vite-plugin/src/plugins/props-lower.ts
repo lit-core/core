@@ -1,5 +1,6 @@
 import { transformLitProps } from '@lit-core/props-lower';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { PropsLowerOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -48,8 +49,8 @@ export function propsLower(options: PropsLowerOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (_err) {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'props-lower', cleanId, err);
       }
     },
   };

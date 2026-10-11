@@ -1,5 +1,6 @@
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { HtmlMinifierOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -51,8 +52,8 @@ export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (_err) {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'html-minifier', cleanId, err);
       }
     },
   };

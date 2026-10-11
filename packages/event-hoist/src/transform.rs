@@ -1,5 +1,5 @@
 use napi_derive::napi;
-use oxc_allocator::{Allocator, ArenaVec};
+use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
@@ -12,8 +12,10 @@ pub use crate::analyzer::{
     collect_classes_mut, has_event_options, is_lit_html_tag, match_event_attr, SAFE_BUBBLING_EVENTS,
 };
 pub use crate::builder::{
-    build_add_listener_statement, build_call_init_event_hoist, build_reset_lh_actions,
-    LIFECYCLE_STUBS, STATIC_HELPERS,
+    build_add_listener_statement, build_call_init_event_hoist, build_connected_callback_method,
+    build_first_updated_method, build_init_lit_event_hoist_method, build_lh_action_method,
+    build_lh_actions_property, build_lh_dispatch_method, build_lh_initialized_property,
+    build_reset_lh_actions, build_will_update_method,
 };
 pub use crate::hoister::{hoist_events_in_expr, hoist_events_in_stmt};
 
@@ -36,17 +38,6 @@ pub struct EventHoistResult {
 }
 
 pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistResult {
-    // Fast check: must contain html and @
-    if !source.contains("html") || !source.contains('@') {
-        return EventHoistResult {
-            code: source.to_string(),
-            map: None,
-            hoisted_events_count: 0,
-            events: Vec::new(),
-            components_count: 0,
-        };
-    }
-
     let safe_event_set: HashSet<String> = if let Some(custom_events) = options.events {
         custom_events.into_iter().collect()
     } else {
@@ -157,57 +148,27 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
         }
 
         // Synthesize missing lifecycle methods
-        if !has_connected || !has_first_updated || !has_will_update {
-            let p_stubs = Parser::new(&allocator, LIFECYCLE_STUBS, source_type).parse();
-            if let Some(Statement::ClassDeclaration(mut d)) =
-                p_stubs.program.body.into_iter().next()
-            {
-                let stubs = std::mem::replace(&mut d.body.body, ArenaVec::new_in(&ast));
-                for elem in stubs {
-                    let keep = if let ClassElement::MethodDefinition(ref method) = elem {
-                        let name = match &method.key {
-                            PropertyKey::StaticIdentifier(ident) => Some(ident.name.as_str()),
-                            _ => None,
-                        };
-                        (!has_connected && name == Some("connectedCallback"))
-                            || (!has_first_updated && name == Some("firstUpdated"))
-                            || (!has_will_update && name == Some("willUpdate"))
-                    } else {
-                        false
-                    };
-                    if keep {
-                        class.body.body.push(elem);
-                    }
-                }
-            }
+        if !has_connected {
+            class.body.body.push(build_connected_callback_method(&ast));
+        }
+        if !has_first_updated {
+            class.body.body.push(build_first_updated_method(&ast));
+        }
+        if !has_will_update {
+            class.body.body.push(build_will_update_method(&ast));
         }
 
         let mut sorted_class_events: Vec<String> = class_hoisted_events.into_iter().collect();
         sorted_class_events.sort();
 
-        let p_helpers = Parser::new(&allocator, STATIC_HELPERS, source_type).parse();
-        if let Some(Statement::ClassDeclaration(mut d_helpers)) =
-            p_helpers.program.body.into_iter().next()
-        {
-            let helpers = std::mem::replace(&mut d_helpers.body.body, ArenaVec::new_in(&ast));
-            for mut elem in helpers {
-                if let ClassElement::MethodDefinition(ref mut method) = elem {
-                    let name = match &method.key {
-                        PropertyKey::StaticIdentifier(ident) => Some(ident.name.as_str()),
-                        _ => None,
-                    };
-                    if name == Some("__initLitEventHoist") {
-                        if let Some(ref mut body) = method.value.body {
-                            for evt in &sorted_class_events {
-                                body.statements
-                                    .push(build_add_listener_statement(evt, &ast));
-                            }
-                        }
-                    }
-                }
-                class.body.body.push(elem);
-            }
-        }
+        class.body.body.push(build_lh_actions_property(&ast));
+        class.body.body.push(build_lh_initialized_property(&ast));
+        class.body.body.push(build_init_lit_event_hoist_method(
+            &ast,
+            &sorted_class_events,
+        ));
+        class.body.body.push(build_lh_dispatch_method(&ast));
+        class.body.body.push(build_lh_action_method(&ast));
     }
 
     if transformed_components_count == 0 {

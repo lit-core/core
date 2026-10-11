@@ -7,11 +7,13 @@ use oxc_span::SourceType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+pub use crate::builder::{build_external_proxy_wrapper, build_proxy_wrapper};
 pub use crate::extractor::{
     check_and_extract_target, extract_class_properties, extract_decorator_tag, get_ce_define_call,
     inspect_properties_object, CustomElementTarget,
 };
 pub use crate::generator::{generate_external_proxy_wrapper, generate_proxy_wrapper};
+use oxc_ast::builder::AstBuilder;
 
 #[napi(object)]
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
@@ -41,6 +43,7 @@ pub struct ElemProxyResult {
 
 pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResult {
     let allocator = Allocator::default();
+    let ast = AstBuilder::new(&allocator);
     let filename = options.filename.as_deref().unwrap_or("file.ts");
     let source_type = SourceType::from_path(filename).unwrap_or_else(|_| SourceType::ts());
 
@@ -137,10 +140,8 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
             if targets.contains_key(&cls) {
                 continue;
             } else {
-                let wrapper_src = generate_external_proxy_wrapper(&tag, &cls);
-                let wrapper =
-                    Parser::new(&allocator, allocator.alloc_str(&wrapper_src), source_type).parse();
-                for s in wrapper.program.body {
+                let wrapper_stmts = build_external_proxy_wrapper(&ast, &tag, &cls);
+                for s in wrapper_stmts {
                     new_body.push(s);
                 }
                 external_elements_info.push(ProxiedElementInfo {
@@ -243,30 +244,8 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
         }
 
         if let (Some(target), Some(class_decl)) = (matched_target, class_to_wrap) {
-            let wrapper_src = generate_proxy_wrapper(&target);
-            let mut wrapper =
-                Parser::new(&allocator, allocator.alloc_str(&wrapper_src), source_type).parse();
-            let getter_name = format!("__getImpl_{}", target.class_name);
-
-            for wrapper_stmt in &mut wrapper.program.body {
-                if let Statement::FunctionDeclaration(func) = wrapper_stmt {
-                    if func.id.as_ref().map(|id| id.name.as_str()) == Some(&getter_name) {
-                        if let Some(ref mut body) = func.body {
-                            if let Some(Statement::IfStatement(if_stmt)) =
-                                body.statements.first_mut()
-                            {
-                                if let Statement::BlockStatement(ref mut block) = if_stmt.consequent
-                                {
-                                    block.body.insert(0, class_decl);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            for s in wrapper.program.body {
+            let wrapper_stmts = build_proxy_wrapper(&ast, &target, class_decl);
+            for s in wrapper_stmts {
                 new_body.push(s);
             }
         }

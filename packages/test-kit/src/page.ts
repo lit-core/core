@@ -115,7 +115,20 @@ ${options.bundleCode}
 
   if (options.bundleCode) {
     const timeout = options.timeoutMs ?? 15000;
-    await page.waitForFunction(() => (window as any).__bundleReady === true, { timeout }).catch(() => {});
+    try {
+      await page.waitForFunction(() => (window as any).__bundleReady === true, { timeout });
+    } catch (err) {
+      const bundleError = await page.evaluate(() => (window as any).__bundleError).catch(() => null);
+      const detail = bundleError ? `\nBundle evaluation error: ${bundleError}` : '';
+      throw new Error(`Failed to evaluate bundle within ${timeout}ms in test page.${detail}`, {
+        cause: err,
+      });
+    }
+
+    const bundleError = await page.evaluate(() => (window as any).__bundleError).catch(() => null);
+    if (bundleError) {
+      throw new Error(`Test bundle execution threw an uncaught error:\n${bundleError}`);
+    }
   }
 
   return {

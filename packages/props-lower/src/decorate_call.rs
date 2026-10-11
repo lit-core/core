@@ -64,16 +64,7 @@ pub fn try_transform_decorate_call<'a>(
         return None;
     }
 
-    let is_decorate = match &call.callee {
-        Expression::Identifier(id) => {
-            id.name == "__decorate" || id.name == "__decorateClass" || id.name == "_ts_decorate"
-        }
-        Expression::StaticMemberExpression(mem) => {
-            mem.property.name == "__decorate" || mem.property.name == "decorate"
-        }
-        _ => false,
-    };
-    if !is_decorate {
+    if !import_ctx.is_decorator_helper(&call.callee) {
         return None;
     }
 
@@ -106,17 +97,14 @@ pub fn try_transform_decorate_call<'a>(
                 return None; // Non-call decorator or unlowered -> bail all-or-nothing
             };
 
-            let dec_name = match &dec_call.callee {
-                Expression::Identifier(id) => id.name.as_str(),
-                Expression::StaticMemberExpression(mem) => mem.property.name.as_str(),
-                _ => return None,
-            };
-
-            if dec_name == "__metadata" || dec_name == "metadata" {
+            if import_ctx.is_metadata_helper(&dec_call.callee) {
                 continue;
             }
 
-            let Some(kind) = import_ctx.get_decorator_kind(dec_name) else {
+            let Some(kind) = crate::decorators::property::get_lit_decorator_kind(
+                elem.as_expression().unwrap(),
+                import_ctx,
+            ) else {
                 return None; // Unknown or unimported decorator -> bail all-or-nothing
             };
 
@@ -275,17 +263,14 @@ pub fn try_transform_decorate_call<'a>(
                 return None; // Non-call or unknown -> bail all-or-nothing
             };
 
-            let dec_name = match &dec_call.callee {
-                Expression::Identifier(id) => id.name.as_str(),
-                Expression::StaticMemberExpression(mem) => mem.property.name.as_str(),
-                _ => return None,
-            };
-
-            if dec_name == "__metadata" || dec_name == "metadata" {
+            if import_ctx.is_metadata_helper(&dec_call.callee) {
                 continue;
             }
 
-            let Some(kind) = import_ctx.get_decorator_kind(dec_name) else {
+            let Some(kind) = crate::decorators::property::get_lit_decorator_kind(
+                elem.as_expression().unwrap(),
+                import_ctx,
+            ) else {
                 return None; // Unknown or unimported decorator -> bail all-or-nothing (N8)
             };
 

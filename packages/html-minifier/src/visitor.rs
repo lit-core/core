@@ -26,33 +26,70 @@ pub struct CollapseResult {
     pub bytes_saved: u32,
 }
 
-pub fn scan_html_svg_imports<'a>(program: &Program<'a>) -> HashSet<String> {
-    let mut tags = HashSet::new();
-    tags.insert("html".to_string());
-    tags.insert("svg".to_string());
-    tags.insert("litHtml".to_string());
-    tags.insert("litSvg".to_string());
+pub fn is_lit_html_source(src: &str) -> bool {
+    src == "lit"
+        || src.starts_with("lit/")
+        || src == "lit-html"
+        || src.starts_with("lit-html/")
+        || src == "lit-element"
+        || src.starts_with("lit-element/")
+        || src.starts_with("@lit/")
+}
+
+#[derive(Debug, Default)]
+pub struct HtmlImportContext {
+    pub html_svg_tags: HashSet<String>,
+    pub html_svg_namespaces: HashSet<String>,
+    pub has_imports: bool,
+}
+
+pub fn scan_html_svg_imports<'a>(program: &Program<'a>) -> HtmlImportContext {
+    let mut ctx = HtmlImportContext::default();
 
     for stmt in &program.body {
         if let Statement::ImportDeclaration(import_decl) = stmt {
+            ctx.has_imports = true;
+            let src = import_decl.source.value.as_str();
+            if !is_lit_html_source(src) {
+                continue;
+            }
+
             if let Some(specifiers) = &import_decl.specifiers {
                 for spec in specifiers {
-                    if let ImportDeclarationSpecifier::ImportSpecifier(named_spec) = spec {
-                        let imported_name = named_spec.imported.name();
-                        if imported_name == "html" || imported_name == "svg" {
-                            tags.insert(named_spec.local.name.as_str().to_string());
+                    match spec {
+                        ImportDeclarationSpecifier::ImportSpecifier(named_spec) => {
+                            let imported_name = named_spec.imported.name();
+                            let imp = imported_name.as_str();
+                            if imp == "html" || imp == "svg" || imp == "litHtml" || imp == "litSvg"
+                            {
+                                ctx.html_svg_tags
+                                    .insert(named_spec.local.name.as_str().to_string());
+                            }
                         }
+                        ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                            ctx.html_svg_namespaces
+                                .insert(ns.local.name.as_str().to_string());
+                        }
+                        _ => {}
                     }
                 }
             }
         }
     }
-    tags
+
+    if !ctx.has_imports {
+        ctx.html_svg_tags.insert("html".to_string());
+        ctx.html_svg_tags.insert("svg".to_string());
+        ctx.html_svg_tags.insert("litHtml".to_string());
+        ctx.html_svg_tags.insert("litSvg".to_string());
+    }
+
+    ctx
 }
 
 struct HtmlMinifierTraverser<'a> {
     allocator: &'a Allocator,
-    html_svg_tags: HashSet<String>,
+    import_ctx: HtmlImportContext,
     templates_count: u32,
     bytes_saved: u32,
 }
@@ -61,14 +98,23 @@ impl<'a> HtmlMinifierTraverser<'a> {
     fn is_target_tag(&self, expr: &Expression<'a>) -> bool {
         match expr {
             Expression::Identifier(ident) => {
-                ident.name == "html"
-                    || ident.name == "svg"
-                    || self.html_svg_tags.contains(ident.name.as_str())
+                self.import_ctx.html_svg_tags.contains(ident.name.as_str())
             }
             Expression::StaticMemberExpression(member) => {
-                member.property.name == "html"
-                    || member.property.name == "svg"
-                    || self.html_svg_tags.contains(member.property.name.as_str())
+                if let Expression::Identifier(obj) = &member.object {
+                    if self
+                        .import_ctx
+                        .html_svg_namespaces
+                        .contains(obj.name.as_str())
+                    {
+                        let prop = member.property.name.as_str();
+                        return prop == "html"
+                            || prop == "svg"
+                            || prop == "litHtml"
+                            || prop == "litSvg";
+                    }
+                }
+                false
             }
             _ => false,
         }
@@ -116,16 +162,6 @@ impl<'a> Traverse<'a, ()> for HtmlMinifierTraverser<'a> {
 }
 
 pub fn collapse_code(source: &str, options: CollapseOptions) -> CollapseResult {
-    // Fast pre-check: if neither "html" nor "svg" exists in source, skip parser entirely
-    if !source.contains("html") && !source.contains("svg") {
-        return CollapseResult {
-            code: source.to_string(),
-            map: None,
-            templates_count: 0,
-            bytes_saved: 0,
-        };
-    }
-
     let allocator = Allocator::default();
     let filename = options.filename.as_deref().unwrap_or("file.ts");
     let is_ts = filename.ends_with(".ts")
@@ -148,14 +184,14 @@ pub fn collapse_code(source: &str, options: CollapseOptions) -> CollapseResult {
         };
     }
 
-    let html_svg_tags = scan_html_svg_imports(&parsed.program);
+    let import_ctx = scan_html_svg_imports(&parsed.program);
 
     let semantic_ret = SemanticBuilder::new().build(&parsed.program);
     let scoping = semantic_ret.semantic.into_scoping();
 
     let mut traverser = HtmlMinifierTraverser {
         allocator: &allocator,
-        html_svg_tags,
+        import_ctx,
         templates_count: 0,
         bytes_saved: 0,
     };
@@ -187,5 +223,40 @@ pub fn collapse_code(source: &str, options: CollapseOptions) -> CollapseResult {
         map: codegen_result.map.map(|m| m.to_json_string()),
         templates_count: traverser.templates_count,
         bytes_saved: traverser.bytes_saved,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_lit_html_source_canonical() {
+        assert!(is_lit_html_source("lit"));
+        assert!(is_lit_html_source("lit/html.js"));
+        assert!(is_lit_html_source("lit-html"));
+        assert!(is_lit_html_source("lit-html/lit-html.js"));
+        assert!(is_lit_html_source("lit-element"));
+        assert!(is_lit_html_source("lit-element/lit-element.js"));
+        assert!(is_lit_html_source("@lit/reactive-element"));
+        assert!(!is_lit_html_source("@other/web-components"));
+        assert!(!is_lit_html_source("react"));
+        assert!(!is_lit_html_source("vue"));
+    }
+
+    #[test]
+    fn test_collapse_code_scoped_lit() {
+        let code = r#"
+            import { html as h } from '@lit/reactive-element';
+            export const tpl = h`
+                <div>
+                    <!-- comment -->
+                    <span>hello</span>
+                </div>
+            `;
+        "#;
+        let res = collapse_code(code, CollapseOptions::default());
+        assert_eq!(res.templates_count, 1);
+        assert!(res.code.contains("<div><span>hello</span></div>"));
     }
 }

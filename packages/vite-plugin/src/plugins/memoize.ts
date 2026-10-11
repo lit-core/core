@@ -1,5 +1,6 @@
 import { transformMemoize } from '@lit-core/memoize';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { MemoizeOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -51,8 +52,8 @@ export function memoize(options: MemoizeOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (_err) {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'memoize', cleanId, err);
       }
     },
   };

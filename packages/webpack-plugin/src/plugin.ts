@@ -152,8 +152,15 @@ export class LitWebpackPlugin {
                   logger.warn(`[css-fuse] ${d.code}: ${d.message} (${filePath}:${d.line || 1})`);
                 }
               }
-            } catch (err) {
-              logger.error(`[css-fuse] Optimization pass failed: ${err}`);
+            } catch (err: any) {
+              const origMessage = err instanceof Error ? err.message : String(err);
+              const error = new Error(`[css-fuse] Optimization pass failed: ${origMessage}`);
+              if (err instanceof Error && err.stack) {
+                error.stack = err.stack;
+              }
+              logger.error(error.message);
+              callback(error);
+              return;
             }
           }
         }
@@ -175,8 +182,15 @@ export class LitWebpackPlugin {
             logger.info(
               `⚡ [html-fuse] Deduplicated ${stats.fragmentsDeduped} fragments into ${stats.fusedTemplatesCreated} shared templates across ${stats.componentsRewritten} components (~${(stats.bytesSaved / 1024).toFixed(1)} KB saved)`,
             );
-          } catch (err) {
-            logger.error(`[html-fuse] Optimization pass failed: ${err}`);
+          } catch (err: any) {
+            const origMessage = err instanceof Error ? err.message : String(err);
+            const error = new Error(`[html-fuse] Optimization pass failed: ${origMessage}`);
+            if (err instanceof Error && err.stack) {
+              error.stack = err.stack;
+            }
+            logger.error(error.message);
+            callback(error);
+            return;
           }
         }
 

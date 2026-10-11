@@ -2,6 +2,7 @@ export {
   type HtmlOptimizationResult,
   type OptimizationResult,
   shouldProcessFile,
+  TransformError,
   type TransformResult,
 } from './common.js';
 export { LIT_DIRECTIVES_FAST_CHECK, transformDirectivesPlugin } from './directives.js';

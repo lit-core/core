@@ -1,6 +1,6 @@
 import { transformDirtyMask } from '@lit-core/dirty-mask';
 import type { DirtyMaskOptions } from '../options.js';
-import { shouldProcessFile, type TransformResult } from './common.js';
+import { shouldProcessFile, TransformError, type TransformResult } from './common.js';
 
 export const LIT_DIRTY_MASK_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
 
@@ -30,7 +30,7 @@ export function transformDirtyMaskPlugin(code: string, id: string, options: Dirt
       code: result.code,
       map: result.map ? JSON.parse(result.map) : null,
     };
-  } catch (_err) {
-    return null;
+  } catch (err) {
+    throw new TransformError('dirty-mask', cleanId, err);
   }
 }

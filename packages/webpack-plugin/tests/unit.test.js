@@ -22,6 +22,7 @@ import litDefault, {
   litWebpackLoader,
   PropsLowerWebpackPlugin,
   propsLower,
+  TransformError,
 } from '../dist/index.js';
 import { transformCssMinifier, transformElemProxy, transformHtmlMinifier, transformPropsLower } from '../dist/transforms.js';
 import { extractSheetId, formatVirtualId, isVirtualFusedId } from '../dist/utils.js';
@@ -302,3 +303,113 @@ assert(typeof resolveHook === 'function', 'resolve hook must be registered');
 })();
 
 console.log('✓ Webpack plugin hooks, classes, options, and loader verified successfully.');
+
+// 10. Test strict error reporting and failure modes
+console.log('Testing Webpack plugin strict error reporting...');
+
+// Test TransformError class structure
+{
+  const err = new TransformError('test-plugin', '/src/sample.ts', {
+    message: 'Syntax error at line 10, column 4',
+    line: 10,
+    column: 4,
+  });
+  assert(err instanceof Error, 'TransformError must be instance of Error');
+  assert.strictEqual(err.name, 'TransformError');
+  assert.strictEqual(err.plugin, 'test-plugin');
+  assert.strictEqual(err.file, '/src/sample.ts');
+  assert.strictEqual(err.line, 10);
+  assert.strictEqual(err.column, 4);
+  assert.deepStrictEqual(err.loc, { line: 10, column: 4 });
+  assert(err.message.includes('[test-plugin] Transform failed on /src/sample.ts: Syntax error at line 10, column 4'));
+}
+
+// Test transformPropsLower throws TransformError on failure
+{
+  const brokenCode = `import { property } from 'lit/decorators.js'; class X { @property() x = 1; }`;
+  assert.throws(
+    () => transformPropsLower(brokenCode, '/src/broken.ts', { sourcemap: 'invalid' }),
+    (err) => err instanceof TransformError && err.plugin === 'props-lower' && err.file === '/src/broken.ts',
+    'transformPropsLower must throw TransformError on failure',
+  );
+}
+
+// Test litWebpackLoader invokes callback with Error on transform failure
+{
+  let capturedError = null;
+  const failingContext = {
+    resourcePath: '/src/broken.ts',
+    getOptions() {
+      return { options: { propsLower: { sourcemap: 'invalid' } } };
+    },
+    async() {
+      return (err) => {
+        capturedError = err;
+      };
+    },
+  };
+
+  const code = `import { property } from 'lit/decorators.js'; class X { @property() x = 1; }`;
+  litWebpackLoader.call(failingContext, code);
+
+  assert(capturedError instanceof Error, 'Loader must invoke callback with an Error on transform failure');
+  assert(capturedError.message.includes('[lit-webpack-loader]'), 'Error message must identify loader');
+  assert(capturedError.message.includes('props-lower'), 'Error message must identify failing transform pass');
+  assert(capturedError.message.includes('/src/broken.ts'), 'Error message must identify resource path');
+}
+
+// Test litWebpackLoader returns unmodified code on benign non-match
+{
+  let capturedResult = null;
+  let capturedError = null;
+  const nonMatchContext = {
+    resourcePath: '/src/math.ts',
+    getOptions() {
+      return { options: { propsLower: true, htmlMinifier: true } };
+    },
+    async() {
+      return (err, code, map) => {
+        capturedError = err;
+        capturedResult = { code, map };
+      };
+    },
+  };
+
+  const plainCode = `export function add(a, b) { return a + b; }`;
+  litWebpackLoader.call(nonMatchContext, plainCode);
+
+  assert.strictEqual(capturedError, null, 'Benign non-match must not invoke callback with an error');
+  assert(capturedResult, 'Callback must be called with result');
+  assert.strictEqual(capturedResult.code, plainCode, 'Source must remain unmodified');
+}
+
+// Test LitWebpackPlugin beforeCompile hook passes error to callback on optimization failure
+{
+  const failingPlugin = new LitWebpackPlugin({
+    cssFuse: { include: 123 },
+  });
+
+  let beforeCompileCallbackError = null;
+  const compiler = {
+    options: { mode: 'production', module: { rules: [] } },
+    getInfrastructureLogger: () => ({ warn: () => {}, error: () => {}, info: () => {} }),
+    hooks: {
+      beforeCompile: {
+        tapAsync: (_name, fn) => {
+          fn({}, (err) => {
+            beforeCompileCallbackError = err;
+          });
+        },
+      },
+      compilation: { tap: () => {} },
+      normalModuleFactory: { tap: () => {} },
+      shutdown: { tap: () => {} },
+    },
+  };
+
+  failingPlugin.apply(compiler);
+  assert(beforeCompileCallbackError instanceof Error, 'beforeCompile hook must invoke callback with Error on optimization failure');
+  assert(beforeCompileCallbackError.message.includes('[css-fuse] Optimization pass failed'), 'Error must identify css-fuse optimization failure');
+}
+
+console.log('✓ Webpack plugin strict error reporting verified successfully.');

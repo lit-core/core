@@ -47,22 +47,13 @@ export async function closeBrowser() {
  */
 export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
   if (!fs.existsSync(bundlePath)) {
-    return emptyRuntimeMetrics();
-  }
-
-  if (process.env.ALLOW_NO_BROWSER === '1' || process.argv.includes('--allow-no-browser')) {
-    return emptyRuntimeMetrics();
+    throw new Error(`[Runtime benchmark error] Bundle file not found at "${bundlePath}" for ${name}`);
   }
 
   const bundleCode = fs.readFileSync(bundlePath, 'utf-8');
-  let browser = null;
-  try {
-    browser = await getBrowser();
-  } catch (_err) {
-    return emptyRuntimeMetrics();
-  }
-  if (!browser) {
-    return emptyRuntimeMetrics();
+  const browser = await getBrowser();
+  if (!browser || (typeof browser.isConnected === 'function' && !browser.isConnected())) {
+    throw new Error(`[Runtime benchmark error] Chromium browser is not available or disconnected for ${name}`);
   }
 
   /** @type {string[]} */
@@ -128,7 +119,7 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
 </html>`;
 
       await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
-      await page.waitForFunction(() => /** @type {any} */ (window).__bundleReady === true, { timeout: 15000 }).catch(() => {});
+      await page.waitForFunction(() => /** @type {any} */ (window).__bundleReady === true, { timeout: 15000 });
 
       if (runtimeErrors.length > 0) {
         await page.close();
@@ -291,11 +282,5 @@ export async function measureBundleRuntime(bundlePath, name = 'Bundle') {
     const msg = err instanceof Error ? err.stack || err.message : String(err);
     console.error(`[Runtime Benchmark Error] Fatal failure for ${name}:`, msg);
     throw new Error(`[Runtime Benchmark Error] Fatal failure for ${name}:\n${msg}`);
-  } finally {
-    if (browser) {
-      try {
-        await browser.close();
-      } catch {}
-    }
   }
 }

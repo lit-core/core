@@ -4,8 +4,8 @@ import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
 import { getFileSizes } from '../../metrics.js';
-import { closeBrowser, emptyRuntimeMetrics, getBrowser } from '../../runtime.js';
-import { CANONICAL_SUITE_DEFINITIONS } from '../../suites/canonical-components.js';
+import { getBrowser } from '../../runtime.js';
+import { CANONICAL_COMPONENT_IDS, CANONICAL_SUITE_DEFINITIONS } from '../../suites/canonical-components.js';
 import { createBenchmarkVendorResolverPlugin } from '../../vendor-resolver.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -22,8 +22,9 @@ const rootDir = path.resolve(__dirname, '../../../../..');
 
 /**
  * Resolve canonical component definitions for a given suite and list of concepts.
+ * Defaults to all 20 canonical components if concepts is not provided.
  * @param {string} suiteId
- * @param {string[]} concepts
+ * @param {string[]} [concepts]
  * @returns {Array<{ concept: string, tag: string, path: string, importStatement: string }>}
  */
 export function resolveScenarioComponents(suiteId, concepts) {
@@ -32,8 +33,9 @@ export function resolveScenarioComponents(suiteId, concepts) {
     throw new Error(`Unknown suite ID for canonical components: ${suiteId}`);
   }
 
+  const targetConcepts = concepts && concepts.length > 0 ? concepts : CANONICAL_COMPONENT_IDS;
   const results = [];
-  for (const concept of concepts) {
+  for (const concept of targetConcepts) {
     const comp = suiteDef.components[concept];
     if (comp) {
       results.push({
@@ -90,64 +92,190 @@ export async function runScenarioViteBuild({ entryPath, outDir, plugins = [] }) 
 }
 
 /**
+ * Recursively compare two serialized DOM node trees.
+ * @param {any} base
+ * @param {any} variant
+ * @param {string} [path='root']
+ * @returns {{ match: boolean, reason: string | null }}
+ */
+export function compareDomTrees(base, variant, path = 'root') {
+  if (!base && !variant) return { match: true, reason: null };
+  if (!base || !variant) {
+    return {
+      match: false,
+      reason: `Node existence mismatch at ${path}: baseline is ${base ? 'present' : 'absent'}, variant is ${variant ? 'present' : 'absent'}`,
+    };
+  }
+  if (base.type !== variant.type) {
+    return {
+      match: false,
+      reason: `Node type mismatch at ${path}: baseline="${base.type}", variant="${variant.type}"`,
+    };
+  }
+  if (base.type === 'text') {
+    if (base.value !== variant.value) {
+      return {
+        match: false,
+        reason: `Text content mismatch at ${path}: baseline="${base.value}", variant="${variant.value}"`,
+      };
+    }
+    return { match: true, reason: null };
+  }
+  if (base.tag !== variant.tag) {
+    return {
+      match: false,
+      reason: `Tag name mismatch at ${path}: baseline=<${base.tag}>, variant=<${variant.tag}>`,
+    };
+  }
+
+  // Compare attributes
+  const baseAttrs = base.attributes || {};
+  const varAttrs = variant.attributes || {};
+  const baseKeys = Object.keys(baseAttrs).sort();
+  for (const key of baseKeys) {
+    if (key === 'style') {
+      const baseStyle = (baseAttrs[key] || '').replace(/\s+/g, ' ').trim();
+      const varStyle = (varAttrs[key] || '').replace(/\s+/g, ' ').trim();
+      if (baseStyle !== varStyle) {
+        return {
+          match: false,
+          reason: `Style attribute mismatch at ${path} (<${base.tag}>): baseline="${baseStyle}", variant="${varStyle}"`,
+        };
+      }
+      continue;
+    }
+    if (baseAttrs[key] !== varAttrs[key]) {
+      return {
+        match: false,
+        reason: `Attribute "${key}" mismatch at ${path} (<${base.tag}>): baseline="${baseAttrs[key]}", variant="${varAttrs[key]}"`,
+      };
+    }
+  }
+  for (const key of Object.keys(varAttrs)) {
+    if (!(key in baseAttrs)) {
+      return {
+        match: false,
+        reason: `Unexpected attribute "${key}" in variant at ${path} (<${base.tag}>): value="${varAttrs[key]}"`,
+      };
+    }
+  }
+
+  // Compare shadow root
+  if (Boolean(base.shadowRoot) !== Boolean(variant.shadowRoot)) {
+    return {
+      match: false,
+      reason: `Shadow root presence mismatch at ${path} (<${base.tag}>): baseline has ${base.shadowRoot ? 'open shadow root' : 'none'}, variant has ${variant.shadowRoot ? 'open shadow root' : 'none'}`,
+    };
+  }
+  if (base.shadowRoot && variant.shadowRoot) {
+    const baseShadowChildren = base.shadowRoot.children || [];
+    const varShadowChildren = variant.shadowRoot.children || [];
+    if (baseShadowChildren.length !== varShadowChildren.length) {
+      return {
+        match: false,
+        reason: `Shadow root child count mismatch at ${path} (<${base.tag}>): baseline has ${baseShadowChildren.length}, variant has ${varShadowChildren.length}`,
+      };
+    }
+    for (let i = 0; i < baseShadowChildren.length; i++) {
+      const res = compareDomTrees(baseShadowChildren[i], varShadowChildren[i], `${path} > shadowRoot > [${i}]`);
+      if (!res.match) return res;
+    }
+  }
+
+  // Compare light DOM children
+  const baseChildren = base.children || [];
+  const varChildren = variant.children || [];
+  if (baseChildren.length !== varChildren.length) {
+    return {
+      match: false,
+      reason: `Light DOM child count mismatch at ${path} (<${base.tag}>): baseline has ${baseChildren.length}, variant has ${varChildren.length}`,
+    };
+  }
+  for (let i = 0; i < baseChildren.length; i++) {
+    const res = compareDomTrees(baseChildren[i], varChildren[i], `${path} > [${i}]`);
+    if (!res.match) return res;
+  }
+
+  return { match: true, reason: null };
+}
+
+/**
+ * Compare two DOM snapshots (both mount and update phases).
+ * @param {any} baselineSnapshot
+ * @param {any} variantSnapshot
+ * @returns {{
+ *   domStructureMatch: boolean,
+ *   elementsCount: number,
+ *   verified: boolean,
+ *   divergenceReason?: string | null,
+ *   phasesMatched: { mount: boolean, update: boolean }
+ * }}
+ */
+export function compareDomSnapshots(baselineSnapshot, variantSnapshot) {
+  if (!baselineSnapshot || !variantSnapshot) {
+    return {
+      domStructureMatch: false,
+      elementsCount: variantSnapshot?.elementsCount || 0,
+      verified: false,
+      divergenceReason: 'Missing baseline or variant DOM snapshot',
+      phasesMatched: { mount: false, update: false },
+    };
+  }
+
+  const mountComparison = compareDomTrees(baselineSnapshot.mount, variantSnapshot.mount, 'mount-root');
+  const updateComparison = compareDomTrees(baselineSnapshot.update, variantSnapshot.update, 'update-root');
+  const domStructureMatch = mountComparison.match && updateComparison.match;
+  const elementsCount = variantSnapshot.elementsCount || 0;
+  const verified = domStructureMatch && elementsCount > 0;
+
+  let divergenceReason = null;
+  if (!mountComparison.match) {
+    divergenceReason = `Mount phase divergence: ${mountComparison.reason}`;
+  } else if (!updateComparison.match) {
+    divergenceReason = `Update phase divergence: ${updateComparison.reason}`;
+  }
+
+  return {
+    domStructureMatch,
+    elementsCount,
+    verified,
+    ...(divergenceReason ? { divergenceReason } : {}),
+    phasesMatched: {
+      mount: mountComparison.match,
+      update: updateComparison.match,
+    },
+  };
+}
+
+/**
  * Measure runtime performance of a scenario bundle in headless Chromium via Playwright.
  * @param {Object} params
  * @param {string} params.bundlePath
  * @param {string} params.scenarioName
  * @param {string} [params.variantName='Variant']
+ * @param {any} [params.baselineSnapshot]
  * @returns {Promise<{
  *   runtime: import('../../types.js').RuntimeMetrics,
  *   scenarioSpecific: Record<string, any>,
- *   equivalence: { domStructureMatch: boolean, elementsCount: number, verified: boolean }
+ *   domSnapshot: any,
+ *   equivalence: { domStructureMatch: boolean, elementsCount: number, verified: boolean, divergenceReason?: string | null, phasesMatched: { mount: boolean, update: boolean } }
  * }>}
  */
-export async function measureScenarioRuntime({ bundlePath, scenarioName, variantName = 'Variant' }) {
+export async function measureScenarioRuntime({ bundlePath, scenarioName, variantName = 'Variant', baselineSnapshot = null }) {
   if (!fs.existsSync(bundlePath)) {
-    return {
-      runtime: emptyRuntimeMetrics(),
-      scenarioSpecific: {},
-      equivalence: { domStructureMatch: false, elementsCount: 0, verified: false },
-    };
+    throw new Error(`[Scenario benchmark error] Bundle file not found at "${bundlePath}" for ${scenarioName} (${variantName})`);
   }
 
-  if (process.env.ALLOW_NO_BROWSER === '1' || process.argv.includes('--allow-no-browser')) {
-    return {
-      runtime: emptyRuntimeMetrics(),
-      scenarioSpecific: {},
-      equivalence: { domStructureMatch: true, elementsCount: 0, verified: true },
-    };
-  }
-
-  let browser = null;
   let context = null;
   let page = null;
-  let result = null;
   try {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        browser = await getBrowser();
-        if (!browser?.isConnected()) {
-          await closeBrowser();
-          browser = await getBrowser();
-        }
-        context = await browser.newContext();
-        page = await context.newPage();
-        break;
-      } catch {
-        await closeBrowser();
-        browser = null;
-        context = null;
-        page = null;
-      }
+    const browser = await getBrowser();
+    if (!browser || (typeof browser.isConnected === 'function' && !browser.isConnected())) {
+      throw new Error(`[Scenario benchmark error] Chromium browser is not available or disconnected for ${scenarioName} (${variantName})`);
     }
 
-    if (!page) {
-      return {
-        runtime: emptyRuntimeMetrics(),
-        scenarioSpecific: {},
-        equivalence: { domStructureMatch: true, elementsCount: 0, verified: true },
-      };
-    }
+    context = await browser.newContext();
+    page = await context.newPage();
 
     const bundleCode = fs.readFileSync(bundlePath, 'utf-8');
     /** @type {string[]} */
@@ -201,14 +329,13 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
 </html>`;
 
     await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => /** @type {any} */ (window).__bundleReady === true, { timeout: 15000 }).catch(() => {});
+    await page.waitForFunction(() => /** @type {any} */ (window).__bundleReady === true, { timeout: 15000 });
 
     if (runtimeErrors.length > 0) {
-      await page.close();
       throw new Error(`Scenario runtime failure during evaluation of ${scenarioName} (${variantName}):\n${runtimeErrors.join('\n')}`);
     }
 
-    result = await page.evaluate(async () => {
+    const result = await page.evaluate(async () => {
       const win = /** @type {any} */ (window);
       if (win.__bundleError) {
         throw new Error(`Scenario bundle execution crashed: ${win.__bundleError}`);
@@ -227,13 +354,61 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         return Promise.resolve();
       };
 
+      /**
+       * Recursively serialize DOM tree and open shadow roots.
+       * @param {Node | null} node
+       * @param {number} depth
+       * @param {number} maxDepth
+       * @returns {any}
+       */
+      function serializeDomTree(node, depth = 0, maxDepth = 30) {
+        if (depth > maxDepth || !node) return null;
+        if (node.nodeType === 3 /* Node.TEXT_NODE */) {
+          const text = (node.textContent || '').trim();
+          return text ? { type: 'text', value: text } : null;
+        }
+        if (node.nodeType !== 1 /* Node.ELEMENT_NODE */) return null;
+
+        const el = /** @type {Element} */ (node);
+        const tag = el.tagName.toLowerCase();
+        /** @type {Record<string, string>} */
+        const attributes = {};
+        const attrNames = Array.from(el.attributes || [])
+          .map((a) => a.name)
+          .filter((n) => !n.startsWith('__'))
+          .sort();
+
+        for (const name of attrNames) {
+          attributes[name] = el.getAttribute(name) || '';
+        }
+
+        const children = [];
+        for (let i = 0; i < el.childNodes.length; i++) {
+          const child = serializeDomTree(el.childNodes[i], depth + 1, maxDepth);
+          if (child) children.push(child);
+        }
+
+        /** @type {any} */
+        const res = { type: 'element', tag, attributes, children };
+        if (el.shadowRoot) {
+          const shadowChildren = [];
+          for (let i = 0; i < el.shadowRoot.childNodes.length; i++) {
+            const child = serializeDomTree(el.shadowRoot.childNodes[i], depth + 1, maxDepth);
+            if (child) shadowChildren.push(child);
+          }
+          res.shadowRoot = { mode: el.shadowRoot.mode, children: shadowChildren };
+        }
+        return res;
+      }
+
       // Settle event loop and initial microtasks
       await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 100)));
 
       let firstRenderMs = 0;
       let updateMs = 0;
       let scenarioSpecific = {};
-      let elementsCount = 0;
+      let mountSnapshot = null;
+      let updateSnapshot = null;
 
       if (win.__scenario && typeof win.__scenario.mount === 'function') {
         // 1. Measure scenario mount
@@ -243,8 +418,7 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         void container.offsetHeight;
         firstRenderMs = Math.max(0.1, performance.now() - t0);
 
-        // Count rendered child elements
-        elementsCount = container.querySelectorAll('*').length;
+        mountSnapshot = serializeDomTree(container);
 
         // 2. Measure scenario update
         if (typeof win.__scenario.update === 'function') {
@@ -253,6 +427,8 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
           void container.offsetHeight;
           updateMs = Math.max(0.1, performance.now() - t1);
         }
+
+        updateSnapshot = serializeDomTree(container);
 
         if (typeof win.__scenario.getMetrics === 'function') {
           scenarioSpecific = await win.__scenario.getMetrics(container);
@@ -271,7 +447,8 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         await Promise.all(mounted.map(safeUpdateComplete));
         void container.offsetHeight;
         firstRenderMs = Math.max(0.1, performance.now() - t0);
-        elementsCount = mounted.length;
+
+        mountSnapshot = serializeDomTree(container);
 
         const t1 = performance.now();
         for (let i = 0; i < mounted.length; i++) {
@@ -282,7 +459,17 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         await Promise.all(mounted.map(safeUpdateComplete));
         void container.offsetHeight;
         updateMs = Math.max(0.1, performance.now() - t1);
+
+        updateSnapshot = serializeDomTree(container);
       }
+
+      // Collect overall element and shadow root counters
+      const allElements = Array.from(container.querySelectorAll('*'));
+      let shadowRootsCount = 0;
+      for (const el of allElements) {
+        if (el.shadowRoot) shadowRootsCount++;
+      }
+      const customElements = allElements.filter((el) => el.tagName.includes('-'));
 
       // Memory footprint
       if (typeof win.gc === 'function') win.gc();
@@ -297,22 +484,30 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
           heapUsedBytes: heapUsed,
         },
         scenarioSpecific,
-        equivalence: {
-          domStructureMatch: elementsCount > 0,
-          elementsCount,
-          verified: elementsCount > 0,
+        domSnapshot: {
+          mount: mountSnapshot,
+          update: updateSnapshot,
+          elementsCount: allElements.length,
+          customElementsCount: customElements.length,
+          shadowRootsCount,
         },
       };
     });
-  } catch (err) {
-    if (process.env.DEBUG || process.argv.includes('--verbose')) {
-      const msg = err && typeof err === 'object' && 'message' in err ? /** @type {any} */ (err).message : String(err);
-      console.warn(`[Scenario warning: ${scenarioName} (${variantName})]`, msg);
-    }
+
+    const equivalence = baselineSnapshot
+      ? compareDomSnapshots(baselineSnapshot, result.domSnapshot)
+      : {
+          domStructureMatch: (result.domSnapshot?.elementsCount || 0) > 0,
+          elementsCount: result.domSnapshot?.elementsCount || 0,
+          verified: (result.domSnapshot?.elementsCount || 0) > 0,
+          phasesMatched: { mount: true, update: true },
+        };
+
     return {
-      runtime: emptyRuntimeMetrics(),
-      scenarioSpecific: {},
-      equivalence: { domStructureMatch: false, elementsCount: 0, verified: false },
+      runtime: result.runtime,
+      scenarioSpecific: result.scenarioSpecific,
+      domSnapshot: result.domSnapshot,
+      equivalence,
     };
   } finally {
     if (page) {
@@ -326,7 +521,6 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
       } catch {}
     }
   }
-  return result;
 }
 
 /**

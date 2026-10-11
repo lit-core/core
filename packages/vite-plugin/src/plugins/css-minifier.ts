@@ -1,5 +1,6 @@
 import { minifyEmbeddedCss } from '@lit-core/css-minifier';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { CssMinifierOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -51,8 +52,8 @@ export function cssMinifier(options: CssMinifierOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (_err) {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'css-minifier', cleanId, err);
       }
     },
   };

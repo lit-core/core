@@ -8,7 +8,7 @@ import { registeredTools } from '../tools/index.js';
 import { bundleScenario } from './bundle/index.js';
 import { dataGridScenario } from './data-grid/index.js';
 import { dynamicFeedScenario } from './dynamic-feed/index.js';
-import { calculateScenarioDeltas, measureScenarioRuntime, runScenarioViteBuild } from './harness/scenario-base.js';
+import { calculateScenarioDeltas, measureScenarioRuntime, resolveScenarioComponents, runScenarioViteBuild } from './harness/scenario-base.js';
 import { interactiveFormScenario } from './interactive-form/index.js';
 import { selectiveAppScenario } from './selective-app/index.js';
 import { ssrDashboardScenario } from './ssr-dashboard/index.js';
@@ -146,6 +146,7 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
     let baselineSize = cachedBaseline?.metrics;
     let baselineRuntime = cachedBaseline?.runtime;
     let baselineEquivalence = cachedBaseline?.equivalence;
+    let baselineDomSnapshot = cachedBaseline?.domSnapshot || null;
 
     if (!baselineSize || !baselineRuntime) {
       if (options.verbose) {
@@ -166,6 +167,7 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
       });
       baselineRuntime = baselineEval.runtime;
       baselineEquivalence = baselineEval.equivalence;
+      baselineDomSnapshot = baselineEval.domSnapshot || null;
 
       const baselineResult = {
         schemaVersion: '3.0.0',
@@ -196,6 +198,7 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
           scenarioSpecific: baselineEval.scenarioSpecific,
         },
         runtime: baselineRuntime,
+        domSnapshot: baselineDomSnapshot,
         equivalence: baselineEquivalence,
       };
 
@@ -267,6 +270,7 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
       bundlePath: variantBundle,
       scenarioName: scenario.name,
       variantName: toolName,
+      baselineSnapshot: baselineDomSnapshot,
     });
 
     const deltas = calculateScenarioDeltas(baselineSize, variantSize, baselineRuntime, variantEval.runtime);
@@ -312,6 +316,7 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
         registrationSpeedupPercent: deltas.registrationSpeedupPercent,
         memorySavingsPercent: deltas.memorySavingsPercent,
       },
+      domSnapshot: variantEval.domSnapshot,
       equivalence: variantEval.equivalence,
     };
 
@@ -325,6 +330,7 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
     });
 
     // Also sync standalone feature result (schema 2.0.0) with scenario metadata attached
+    const scenarioComps = resolveScenarioComponents(suite.id, scenario.componentConcepts);
     saveStandaloneResult({
       suiteId: suite.id,
       featureId: variantId,
@@ -336,8 +342,8 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
           name: suiteContext.name || suite.name,
           packageName: suiteContext.packageName || suite.packageName,
           version: suiteContext.version || 'unknown',
-          componentCount: suiteContext.componentCount,
-          components: suiteContext.metadata?.components || [],
+          componentCount: scenarioComps.length,
+          components: scenarioComps,
         },
         feature: {
           id: variantId,
@@ -349,6 +355,7 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
           id: scenario.id,
           name: scenario.name,
           description: scenario.description,
+          componentCount: scenarioComps.length,
         },
         timestamp: new Date().toISOString(),
         environment: getEnvironmentMetadata(),
@@ -356,6 +363,7 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
         baseline: baselineSize,
         deltas,
         runtime: scenarioResult.runtime,
+        equivalence: variantEval.equivalence,
       },
       outDir: options.outDir,
     });

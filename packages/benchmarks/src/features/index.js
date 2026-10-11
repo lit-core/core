@@ -1,9 +1,9 @@
-export { runDirectivesBenchmarks, SUITE_LABELS as DIRECTIVES_SUITE_LABELS } from './directives.js';
-export { ENTERPRISE_SUITES as DIRTY_MASK_SUITES, runDirtyMaskBenchmarks } from './dirty-mask.js';
-export { ENTERPRISE_SUITES as DOM_PATHS_SUITES, runDomPathsBenchmarks } from './dom-paths.js';
+export { runDirectivesBenchmarks } from './directives.js';
+export { runDirtyMaskBenchmarks } from './dirty-mask.js';
+export { runDomPathsBenchmarks } from './dom-paths.js';
 export { runElemProxyBenchmarks } from './elem-proxy.js';
-export { runEventHoistBenchmarks, SUITE_LABELS as EVENT_HOIST_SUITE_LABELS } from './event-hoist.js';
-export { ENTERPRISE_COLLECTIONS as MEMOIZE_COLLECTIONS, runMemoizeBenchmarks } from './memoize.js';
+export { runEventHoistBenchmarks } from './event-hoist.js';
+export { runMemoizeBenchmarks } from './memoize.js';
 export { runNativeBenchmarkSuite } from './native.js';
 export {
   cleanTemplateForDsd,

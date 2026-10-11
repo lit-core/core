@@ -1,133 +1,46 @@
 #!/usr/bin/env node
-import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
-import { transformEventHoist } from '@lit-core/event-hoist';
-import { ENTERPRISE_COMPONENTS, extractComponentTemplates, readComponentFullSource } from '../fixtures.js';
-import { calculateDelta } from '../format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from '../reporters/index.js';
+import { getScenario, runScenarioBenchmark } from '../scenarios/index.js';
 import { createBenchmarkResult } from '../schema.js';
-
-/** @type {Record<string, { name: string, shortName: string, pkg: string }>} */
-export const SUITE_LABELS = {
-  carbon: { name: 'Carbon Web Components', shortName: 'Carbon', pkg: '@carbon/web-components' },
-  spectrum: { name: 'Adobe Spectrum Web Components', shortName: 'Adobe Spectrum', pkg: '@spectrum-web-components' },
-  webawesome: { name: 'Web Awesome', shortName: 'Web Awesome', pkg: '@awesome.me/webawesome' },
-  momentum: { name: 'Cisco Momentum Design', shortName: 'Cisco Momentum', pkg: '@momentum-design/components' },
-  material: { name: 'Google Material Web', shortName: 'Google Material Web', pkg: '@material/web' },
-};
+import { carbonSuite, materialSuite, momentumSuite, spectrumSuite, webAwesomeSuite } from '../suites/index.js';
 
 /**
- * Measure real event hoisting across production enterprise component libraries.
- * @param {string} suiteId
- * @param {typeof ENTERPRISE_COMPONENTS['carbon']} components
- */
-function evaluateSuiteEventHoist(suiteId, components) {
-  const t0 = performance.now();
-  let hoistedComponents = 0;
-  let totalEventsHoisted = 0;
-  const eventTypesSet = new Set();
-  let totalBindingsInTemplates = 0;
-
-  for (const comp of components) {
-    try {
-      const source = readComponentFullSource(comp.pkg, comp.source);
-      if (source) {
-        const res = transformEventHoist(source, { filename: comp.source });
-        if (res.hoistedEventsCount > 0) {
-          hoistedComponents++;
-          totalEventsHoisted += res.hoistedEventsCount;
-          for (const evt of res.events) {
-            eventTypesSet.add(evt);
-          }
-        }
-      }
-
-      // Count actual @event bindings in component templates
-      const templates = extractComponentTemplates(comp.pkg, comp.source);
-      for (const tmpl of templates) {
-        const matches = tmpl.match(/@[a-zA-Z0-9_-]+\s*=/g);
-        if (matches) {
-          totalBindingsInTemplates += matches.length;
-        }
-      }
-    } catch {}
-  }
-  const transformTimeMs = Number((performance.now() - t0).toFixed(2));
-
-  const instances = 500;
-  const avgBindings = totalEventsHoisted > 0 ? totalEventsHoisted : Math.max(1, Math.round(totalBindingsInTemplates / components.length));
-  const uniqueEventTypesCount = Math.max(1, eventTypesSet.size);
-
-  const baselineListeners = instances * avgBindings;
-  const optimizedListeners = uniqueEventTypesCount;
-
-  return {
-    suiteId,
-    suiteMeta: SUITE_LABELS[suiteId] || { name: suiteId, shortName: suiteId, pkg: suiteId },
-    totalComponents: components.length,
-    hoistedComponents,
-    totalEventsHoisted,
-    eventTypes: Array.from(eventTypesSet),
-    baselineListeners500: baselineListeners,
-    optimizedListeners500: optimizedListeners,
-    transformTimeMs,
-  };
-}
-
-/**
- * Execute pure event-hoist benchmark measurements without formatting or disk I/O.
- * Returns a typed BenchmarkRunResult.
+ * Execute pure event-hoist benchmark measurements across production suites via authentic interactive-form scenario.
  * @param {Object} [options]
  * @param {boolean} [options.verbose=false]
  * @returns {Promise<import('../types.js').BenchmarkRunResult>}
  */
 export async function runEventHoistBenchmarks(options = {}) {
+  const suitesList = [carbonSuite, spectrumSuite, webAwesomeSuite, momentumSuite, materialSuite];
+  const scenario = getScenario('interactive-form');
   const suites = [];
-  const canonicalOrder = ['carbon', 'spectrum', 'webawesome', 'momentum', 'material'];
 
-  for (const suiteId of canonicalOrder) {
-    const meta = SUITE_LABELS[suiteId];
+  for (const suite of suitesList) {
     if (options.verbose) {
-      console.log(`  Evaluating design system: ${meta.name}...`);
+      console.log(`  Evaluating design system: ${suite.name}...`);
     }
-    const components = ENTERPRISE_COMPONENTS[suiteId] || [];
-    const metrics = evaluateSuiteEventHoist(suiteId, components);
 
-    const baseline = {
-      itemsRendered: 500,
-      domEventListeners: metrics.baselineListeners500,
-      rootListeners: 0,
-      uniqueEventTypes: metrics.eventTypes.length || 2,
-      transformTimeMs: metrics.transformTimeMs,
-    };
-
-    const optimized = {
-      itemsRendered: 500,
-      domEventListeners: metrics.optimizedListeners500,
-      rootListeners: metrics.optimizedListeners500,
-      uniqueEventTypes: metrics.eventTypes.length || 2,
-      transformTimeMs: metrics.transformTimeMs,
-    };
-
-    const listenerDelta = calculateDelta(baseline.domEventListeners, optimized.domEventListeners);
+    const result = await runScenarioBenchmark({
+      scenario,
+      suite,
+      variantId: 'event-hoist',
+      options,
+    });
 
     suites.push({
-      id: suiteId,
-      name: meta.name,
-      shortName: meta.shortName,
-      packageName: meta.pkg,
-      componentCount: metrics.totalComponents,
-      baseline,
-      optimized,
-      deltas: {
-        listeners: listenerDelta,
-      },
+      id: suite.id,
+      name: suite.name,
+      packageName: suite.packageName,
+      baseline: result.baseline,
+      optimized: result.metrics,
+      deltas: result.deltas,
+      runtime: result.runtime,
+      equivalence: result.equivalence,
       diagnostics: {
-        totalComponents: metrics.totalComponents,
-        hoistedComponents: metrics.hoistedComponents,
-        uniqueEventTypesCount: metrics.eventTypes.length || 2,
-        eventTypesStr: metrics.eventTypes.length > 0 ? metrics.eventTypes.join(', ') : 'click, change',
-        listenerReduction: listenerDelta.formattedPercent,
+        scenario: scenario.name,
+        speedupPercent: result.deltas.speedupPercent,
+        updateSpeedupPercent: result.deltas.updateSpeedupPercent,
         buildOverhead: 'Fast native pass',
       },
     });

@@ -341,4 +341,127 @@ console.log('Testing @lit-core/props-lower native addon...');
   console.log('  ✔ Initializer insertion right after super()');
 }
 
+// Test 18: Aliased __decorate helper lowering and dead helper pruning
+{
+  const input = `
+    import {property} from 'lit/decorators.js';
+    import {__decorate as dec} from 'tslib';
+
+    class MyElement {}
+    dec([
+      property({type: String})
+    ], MyElement.prototype, "title", void 0);
+  `;
+  const res = transformLitProps(input);
+  assert(!res.code.includes('dec(['), 'Should lower aliased dec call');
+  assert(res.code.includes('MyElement.createProperty("title", { type: String })'), 'Should emit createProperty');
+  assert(!res.code.includes('lit/decorators.js'), 'Should prune unused Lit decorator import');
+  assert(!res.code.includes('tslib'), 'Should prune unused aliased helper import from tslib');
+  console.log('  ✔ Aliased __decorate helper lowering and dead helper pruning');
+}
+
+// Test 19: Aliased __decorate helper with customElement lowering
+{
+  const input = `
+    import {customElement} from 'lit/decorators.js';
+    import {__decorate as dec} from 'tslib';
+
+    let MyElement = class MyElement {};
+    MyElement = dec([
+      customElement('my-element')
+    ], MyElement);
+  `;
+  const res = transformLitProps(input);
+  assert(!res.code.includes('dec(['), 'Should lower aliased dec call');
+  assert(res.code.includes('customElements.define("my-element", MyElement)'), 'Should emit customElements.define');
+  assert(!res.code.includes('tslib'), 'Should prune unused aliased helper import');
+  assert(!res.code.includes('decorators.js'), 'Should prune unused customElement import');
+  console.log('  ✔ Aliased __decorate helper with customElement lowering');
+}
+
+// Test 20: Aliased helper preserved when non-Lit decorator remains
+{
+  const input = `
+    import {property} from 'lit/decorators.js';
+    import {__decorate as dec} from 'tslib';
+    import {validate} from './validator.js';
+
+    class MyElement {}
+    dec([
+      property({type: Number})
+    ], MyElement.prototype, "count", void 0);
+
+    dec([
+      validate()
+    ], MyElement.prototype, "secret", void 0);
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('MyElement.createProperty("count", { type: Number })'), 'Should lower Lit property');
+  assert(res.code.includes('dec(['), 'Should retain surviving non-Lit decorator call');
+  assert(res.code.includes('validate()'), 'Should retain validate decorator');
+  assert(
+    res.code.includes('import { __decorate as dec } from "tslib"') || res.code.includes('__decorate as dec'),
+    'Should preserve aliased helper import because non-Lit decorator still references dec',
+  );
+  assert(!res.code.includes('lit/decorators.js'), 'Should prune unused Lit property import');
+  console.log('  ✔ Aliased helper preserved when non-Lit decorator remains');
+}
+
+// Test 21: Aliased __metadata helper pruned alongside aliased __decorate
+{
+  const input = `
+    import {property} from 'lit/decorators.js';
+    import {__decorate as dec, __metadata as meta} from 'tslib';
+
+    class MyElement {}
+    dec([
+      property({type: String}),
+      meta("design:type", String)
+    ], MyElement.prototype, "title", void 0);
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('MyElement.createProperty("title", { type: String })'), 'Should lower property');
+  assert(!res.code.includes('meta('), 'Should strip metadata call');
+  assert(!res.code.includes('tslib'), 'Should prune entire tslib import since both dec and meta are dead');
+  console.log('  ✔ Aliased __metadata helper pruned alongside aliased __decorate');
+}
+
+// Test 22: Local variable helper alias pruning
+{
+  const input = `
+    import {property} from 'lit/decorators.js';
+    var __decorate = function() {};
+    var dec = __decorate;
+
+    class MyElement {}
+    dec([
+      property({type: Boolean})
+    ], MyElement.prototype, "active", void 0);
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('MyElement.createProperty("active", { type: Boolean })'), 'Should lower property');
+  assert(!res.code.includes('dec(['), 'Should remove dec call');
+  assert(!res.code.includes('var __decorate'), 'Should prune dead __decorate variable declaration');
+  assert(!res.code.includes('var dec'), 'Should prune dead dec variable declaration');
+  console.log('  ✔ Local variable helper alias pruning');
+}
+
+// Test 23: Simultaneous aliased helper and aliased decorator lowering
+{
+  const input = `
+    import {property as litProp} from 'lit/decorators.js';
+    import {__decorate as dec} from 'tslib';
+
+    class MyElement {}
+    dec([
+      litProp({type: String})
+    ], MyElement.prototype, "name", void 0);
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('MyElement.createProperty("name", { type: String })'), 'Should lower aliased litProp');
+  assert(!res.code.includes('lit/decorators.js'), 'Should prune aliased litProp import');
+  assert(!res.code.includes('tslib'), 'Should prune aliased dec helper import');
+  console.log('  ✔ Simultaneous aliased helper and aliased decorator lowering');
+}
+
 console.log('\nAll integration tests passed successfully!\n');

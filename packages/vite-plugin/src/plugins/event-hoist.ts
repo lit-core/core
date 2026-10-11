@@ -1,5 +1,6 @@
 import { transformEventHoist } from '@lit-core/event-hoist';
 import type { Plugin } from 'vite';
+import { reportTransformError } from '../errors.js';
 import type { EventHoistOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
@@ -52,8 +53,8 @@ export function eventHoist(options: EventHoistOptions = {}): Plugin {
           code: result.code,
           map: result.map ? JSON.parse(result.map) : null,
         };
-      } catch (_err) {
-        return null;
+      } catch (err) {
+        reportTransformError(this, 'event-hoist', cleanId, err);
       }
     },
   };

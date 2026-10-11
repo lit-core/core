@@ -34,23 +34,6 @@ pub struct MemoizeResult {
 }
 
 pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
-    // Fast check: must contain render and at least one pure array method
-    if !source.contains("render")
-        || (!source.contains("map")
-            && !source.contains("filter")
-            && !source.contains("sort")
-            && !source.contains("slice")
-            && !source.contains("reduce")
-            && !source.contains("flatMap"))
-    {
-        return MemoizeResult {
-            code: source.to_string(),
-            map: None,
-            memoized_count: 0,
-            components_count: 0,
-        };
-    }
-
     let allocator = Allocator::default();
     let filename = options.filename.as_deref().unwrap_or("file.ts");
     let source_type = SourceType::from_path(filename).unwrap_or_else(|_| SourceType::ts());

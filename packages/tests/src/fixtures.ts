@@ -118,13 +118,17 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
   // Fallback for Web Awesome shared styles
   if (pkg === '@awesome.me/webawesome') {
     const pkgDir = resolvePackageDir(pkg);
-    const hostStylesPath = path.join(pkgDir, 'dist/styles/component/host.styles.js');
-    if (fs.existsSync(hostStylesPath)) {
-      return fs.readFileSync(hostStylesPath, 'utf-8');
-    }
-    const hostStylesTs = path.join(pkgDir, 'dist/styles/component/host.styles.ts');
-    if (fs.existsSync(hostStylesTs)) {
-      return fs.readFileSync(hostStylesTs, 'utf-8');
+    const buttonStylesPath = path.join(pkgDir, 'dist/components/button/button.styles.js');
+    if (fs.existsSync(buttonStylesPath)) {
+      const btnSrc = fs.readFileSync(buttonStylesPath, 'utf-8');
+      const chunkMatch = /from\s*['"](\.\.?\/[^'"]+)['"]/.exec(btnSrc);
+      if (chunkMatch) {
+        const resolved = path.resolve(path.dirname(buttonStylesPath), chunkMatch[1]);
+        if (fs.existsSync(resolved)) {
+          return fs.readFileSync(resolved, 'utf-8');
+        }
+      }
+      return btnSrc;
     }
   }
 
@@ -134,6 +138,24 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
     const componentStylesPath = path.join(pkgDir, 'dist/models/component/component.styles.js');
     if (fs.existsSync(componentStylesPath)) {
       return fs.readFileSync(componentStylesPath, 'utf-8');
+    }
+  }
+
+  // Fallback for Carbon Web Components shared styles
+  if (pkg === '@carbon/web-components') {
+    const pkgDir = resolvePackageDir(pkg);
+    const buttonStylesPath = path.join(pkgDir, 'es/components/button/button.scss.js');
+    if (fs.existsSync(buttonStylesPath)) {
+      return fs.readFileSync(buttonStylesPath, 'utf-8');
+    }
+  }
+
+  // Fallback for Spectrum Web Components shared styles
+  if (pkg === '@spectrum-web-components') {
+    const pkgDir = resolvePackageDir(pkg);
+    const buttonStylesPath = path.join(pkgDir, 'button/src/button.css.js');
+    if (fs.existsSync(buttonStylesPath)) {
+      return fs.readFileSync(buttonStylesPath, 'utf-8');
     }
   }
 
@@ -147,7 +169,7 @@ export function findComponentCssSource(pkg: string, cssSubpath?: string, sourceS
 export function extractCssFromModule(source: string): string {
   // Pattern 1: Accumulate all css`...` or aliased template literals
   let accumulated = '';
-  const templateMatches = source.matchAll(/(?:css|[a-zA-Z0-9_$]+)\s*`([\s\S]*?)`/g);
+  const templateMatches = source.matchAll(/\bcss\b\s*`([\s\S]*?)`/g);
   for (const match of templateMatches) {
     if (match[1] && match[1].length > 5) {
       accumulated += `\n${match[1]}`;
