@@ -4,6 +4,8 @@ import { type LitCorePluginOptions, lit as litPlugin } from '@lit-core/vite-plug
 import { build } from 'vite';
 // @ts-expect-error - canonical-components is an un-typed ESM module in packages/benchmarks
 import { CANONICAL_SUITE_DEFINITIONS } from '../../benchmarks/src/suites/canonical-components.js';
+// @ts-expect-error - vendor-resolver is an un-typed ESM module in packages/benchmarks
+import { createBenchmarkVendorResolverPlugin } from '../../benchmarks/src/vendor-resolver.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../..');
@@ -84,6 +86,7 @@ export async function bundleComponentForBrowser(options: ComponentBundleOptions)
       },
     },
     plugins: [
+      createBenchmarkVendorResolverPlugin(),
       {
         name: 'test-virtual-entry',
         enforce: 'pre',
