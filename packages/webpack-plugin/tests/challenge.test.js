@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import webpack from 'webpack';
-import lit, { LitWebpackPlugin, litWebpackLoader, TransformError } from '../dist/index.js';
+import lit, { LitWebpackPlugin, litWebpackLoader } from '../dist/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../../..');

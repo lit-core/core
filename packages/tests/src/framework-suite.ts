@@ -439,11 +439,11 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
               root.innerHTML = dsd;
             }
 
-            (window as any).__simulateClientHydration = function () {
+            (window as any).__simulateClientHydration = () => {
               const el = document.getElementById('resumable-comp');
               if (el) {
                 const btn = el.shadowRoot?.querySelector('#ssr-action-btn');
-                btn?.addEventListener('click', function () {
+                btn?.addEventListener('click', () => {
                   (window as any).__resumptionEvents.push('ssr-action-btn');
                 });
               }

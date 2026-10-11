@@ -1,8 +1,8 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { lit as litPlugin, type LitCorePluginOptions } from '@lit-core/vite-plugin';
+import { type LitCorePluginOptions, lit as litPlugin } from '@lit-core/vite-plugin';
 import { build } from 'vite';
-// @ts-ignore - canonical-components is an un-typed ESM module in packages/benchmarks
+// @ts-expect-error - canonical-components is an un-typed ESM module in packages/benchmarks
 import { CANONICAL_SUITE_DEFINITIONS } from '../../benchmarks/src/suites/canonical-components.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
