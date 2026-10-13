@@ -10,7 +10,8 @@ pub fn transform_micro_class<'a>(
     _target: &ClassificationResult,
     ast: &AstBuilder<'a>,
     import_ctx: &ImportContext,
-) {
+) -> bool {
     let mut lowerer = DirectiveLowerer::new(ast, import_ctx);
     lowerer.transform_class(class);
+    lowerer.lowered_count > 0
 }

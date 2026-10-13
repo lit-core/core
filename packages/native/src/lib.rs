@@ -48,6 +48,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
     let ast = AstBuilder::new(&allocator);
     let forced_mode = opts.mode.as_deref().unwrap_or("auto");
     let define_calls = classifier::scan_define_calls(&program);
+    let trailing_decorators = classifier::scan_trailing_decorators(&program);
 
     let mut classifications = Vec::new();
     let mut vanilla_count = 0u32;
@@ -63,6 +64,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                     class,
                     forced_mode,
                     &define_calls,
+                    &trailing_decorators,
                     &import_ctx,
                     &scoping,
                     None,
@@ -95,7 +97,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                             continue;
                         }
                         "micro" => {
-                            micro::transform_micro_class(
+                            let lowered = micro::transform_micro_class(
                                 class,
                                 &source,
                                 &target,
@@ -103,7 +105,9 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                                 &import_ctx,
                             );
                             new_statements.push(stmt);
-                            micro_count += 1;
+                            if lowered {
+                                micro_count += 1;
+                            }
                             continue;
                         }
                         _ => {}
@@ -117,6 +121,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                         class,
                         forced_mode,
                         &define_calls,
+                        &trailing_decorators,
                         &import_ctx,
                         &scoping,
                         None,
@@ -149,7 +154,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                                 continue;
                             }
                             "micro" => {
-                                micro::transform_micro_class(
+                                let lowered = micro::transform_micro_class(
                                     class,
                                     &source,
                                     &target,
@@ -157,7 +162,9 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                                     &import_ctx,
                                 );
                                 new_statements.push(stmt);
-                                micro_count += 1;
+                                if lowered {
+                                    micro_count += 1;
+                                }
                                 continue;
                             }
                             _ => {}
@@ -176,6 +183,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                             class,
                             forced_mode,
                             &define_calls,
+                            &trailing_decorators,
                             &import_ctx,
                             &scoping,
                             None,
@@ -208,7 +216,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                                     continue;
                                 }
                                 "micro" => {
-                                    micro::transform_micro_class(
+                                    let lowered = micro::transform_micro_class(
                                         class,
                                         &source,
                                         &target,
@@ -216,7 +224,9 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                                         &import_ctx,
                                     );
                                     new_statements.push(stmt);
-                                    micro_count += 1;
+                                    if lowered {
+                                        micro_count += 1;
+                                    }
                                     continue;
                                 }
                                 _ => {}
@@ -235,12 +245,20 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
         }
     }
 
+    if vanilla_count == 0 && micro_count == 0 {
+        return TransformResult {
+            code: source,
+            map: None,
+            vanilla_count: 0,
+            micro_count: 0,
+            classifications,
+        };
+    }
+
     program.body = new_statements;
 
     // Dead import elimination:
-    if vanilla_count > 0 || micro_count > 0 {
-        import_scanner::clean_dead_imports(&mut program, &ast);
-    }
+    import_scanner::clean_dead_imports(&mut program, &ast);
 
     let mut codegen_options = CodegenOptions::default();
     if opts.sourcemap.unwrap_or(false) {

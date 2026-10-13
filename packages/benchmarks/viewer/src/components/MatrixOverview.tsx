@@ -12,14 +12,14 @@ interface MatrixOverviewProps {
   onOpenShowcase?: (suiteId?: string, featureId?: string) => void;
 }
 
-type Category = 'payload' | 'performance';
+type Category = 'performance' | 'payload';
 type PayloadFormat = 'gzip' | 'brotli' | 'raw';
 type PayloadUnit = 'percent' | 'kb';
 type PerfMetric = 'firstRender' | 'update' | 'scriptEval' | 'registration' | 'heap' | 'buildTime';
 type PerfUnit = 'ms' | 'percent';
 
 export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSelectRun, onOpenFeature, onOpenShowcase }) => {
-  const [category, setCategory] = useState<Category>('payload');
+  const [category, setCategory] = useState<Category>('performance');
   const [payloadFormat, setPayloadFormat] = useState<PayloadFormat>('gzip');
   const [payloadUnit, setPayloadUnit] = useState<PayloadUnit>('percent');
   const [perfMetric, setPerfMetric] = useState<PerfMetric>('firstRender');
@@ -550,8 +550,8 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
           icon={SlidersHorizontal}
           value={category}
           options={[
-            { value: 'payload', label: 'Payload' },
             { value: 'performance', label: 'Performance' },
+            { value: 'payload', label: 'Payload' },
           ]}
           onChange={(val) => setCategory(val as Category)}
         />
