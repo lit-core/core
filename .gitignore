@@ -50,3 +50,12 @@ Thumbs.db
 packages/benchmarks/artifacts/
 **/artifacts/*.html
 **/artifacts/**/*.html
+
+# Test runner artifacts
+test-results
+playwright-report
+blob-report
+.vitest
+
+# Agent autonomous state
+.agents/.goal_active.json

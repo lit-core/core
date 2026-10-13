@@ -225,7 +225,7 @@ class MockNode {
 class MockElement extends MockNode {
   tagName = 'DIV';
   attributes = new Map<string, string>();
-  listeners = new Map<string, Array<{ fn: Function; capture: boolean }>>();
+  listeners = new Map<string, Array<{ fn: (...args: any[]) => any; capture: boolean }>>();
   get localName(): string {
     return this.tagName.toLowerCase();
   }
@@ -283,7 +283,7 @@ class MockElement extends MockNode {
     return shadow;
   }
 
-  addEventListener(type: string, fn: Function, opts: any = false) {
+  addEventListener(type: string, fn: (...args: any[]) => any, opts: any = false) {
     const capture = typeof opts === 'boolean' ? opts : (opts?.capture ?? false);
     if (!this.listeners.has(type)) {
       this.listeners.set(type, []);
@@ -291,7 +291,7 @@ class MockElement extends MockNode {
     this.listeners.get(type)?.push({ fn, capture });
   }
 
-  removeEventListener(type: string, fn: Function, opts: any = false) {
+  removeEventListener(type: string, fn: (...args: any[]) => any, opts: any = false) {
     const capture = typeof opts === 'boolean' ? opts : (opts?.capture ?? false);
     const list = this.listeners.get(type);
     if (!list) return;
@@ -518,10 +518,10 @@ const windowMock = {
   Node: MockNode,
   HTMLElement: MockElement,
   HTMLTemplateElement: MockTemplateElement,
-  addEventListener(type: string, fn: Function, opts: any) {
+  addEventListener(type: string, fn: (...args: any[]) => any, opts: any) {
     body.addEventListener(type, fn, opts);
   },
-  removeEventListener(type: string, fn: Function, opts: any) {
+  removeEventListener(type: string, fn: (...args: any[]) => any, opts: any) {
     body.removeEventListener(type, fn, opts);
   },
   dispatchEvent(event: any) {

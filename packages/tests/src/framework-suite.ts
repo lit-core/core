@@ -85,7 +85,8 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
 
           const result = await page.evaluate(
             ({ tag, css }: { tag: string; css: string }) => {
-              const root = document.getElementById('test-root')!;
+              const root = document.getElementById('test-root');
+              if (!root) throw new Error('Missing test-root');
               const host = document.createElement(tag);
               const shadow = host.shadowRoot || host.attachShadow({ mode: 'open' });
               const sheet = new CSSStyleSheet();
@@ -124,7 +125,8 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
 
       it('verifies shared constructable stylesheet memory reuse across instances in real Chromium', async () => {
         const isShared = await page.evaluate(async (tag: string) => {
-          const root = document.getElementById('test-root')!;
+          const root = document.getElementById('test-root');
+          if (!root) throw new Error('Missing test-root');
           const hostA = document.createElement(tag);
           const hostB = document.createElement(tag);
           root.appendChild(hostA);
@@ -176,7 +178,8 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
         assertMounted(mount);
 
         const reflectionValid = await page.evaluate(async (tag: string) => {
-          const root = document.getElementById('test-root')!;
+          const root = document.getElementById('test-root');
+          if (!root) throw new Error('Missing test-root');
           const el = document.createElement(tag) as any;
           root.appendChild(el);
           if (el.updateComplete) await el.updateComplete;
@@ -289,7 +292,8 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
         assertMounted(mount);
 
         const upgradeValid = await page.evaluate(async (tag: string) => {
-          const root = document.getElementById('test-root')!;
+          const root = document.getElementById('test-root');
+          if (!root) throw new Error('Missing test-root');
           const el = document.createElement(tag) as any;
           root.appendChild(el);
           if (el.updateComplete) await el.updateComplete;
@@ -322,7 +326,8 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
         assertMounted(mount);
 
         const clickCaptured = await page.evaluate(async (tag: string) => {
-          const root = document.getElementById('test-root')!;
+          const root = document.getElementById('test-root');
+          if (!root) throw new Error('Missing test-root');
           const el = document.createElement(tag) as any;
           root.appendChild(el);
           if (el.updateComplete) await el.updateComplete;
@@ -362,7 +367,8 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
         assertMounted(mount);
 
         const renderValid = await page.evaluate(async (tag: string) => {
-          const root = document.getElementById('test-root')!;
+          const root = document.getElementById('test-root');
+          if (!root) throw new Error('Missing test-root');
           const el = document.createElement(tag) as any;
           root.appendChild(el);
           if (el.updateComplete) await el.updateComplete;
@@ -395,7 +401,8 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
 
           const hydrated = await page.evaluate(
             ({ markup, id, expectedText }: { markup: string; id: string; expectedText: string }) => {
-              const root = document.getElementById('test-root')!;
+              const root = document.getElementById('test-root');
+              if (!root) throw new Error('Missing test-root');
               if (typeof (root as any).setHTMLUnsafe === 'function') {
                 (root as any).setHTMLUnsafe(markup);
               } else {
@@ -432,7 +439,8 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
             script.textContent = loader;
             document.head.appendChild(script);
 
-            const root = document.getElementById('test-root')!;
+            const root = document.getElementById('test-root');
+            if (!root) throw new Error('Missing test-root');
             if (typeof (root as any).setHTMLUnsafe === 'function') {
               (root as any).setHTMLUnsafe(dsd);
             } else {
@@ -475,8 +483,8 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
         expect(events).toContain('ssr-action-btn');
 
         await page.evaluate(() => {
-          const root = document.getElementById('test-root')!;
-          root.innerHTML = '';
+          const root = document.getElementById('test-root');
+          if (root) root.innerHTML = '';
         });
       });
     });

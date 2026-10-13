@@ -7,7 +7,6 @@ import { build } from 'vite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, '../../..');
 const viewerDist = path.resolve(__dirname, '../viewer/dist');
 const resultsDir = path.resolve(__dirname, '../results');
 

@@ -33,7 +33,6 @@ export const LibraryView: React.FC<LibraryViewProps> = ({ manifest, selectedSuit
   const baselineRun = suiteRuns.find((r) => r.featureId === 'baseline');
   const allRun = suiteRuns.find((r) => r.featureId === 'all');
   const individualRuns = suiteRuns.filter((r) => r.featureId !== 'baseline' && r.featureId !== 'all');
-  const currentRun = suiteRuns.find((r) => r.featureId === selectedFeatureId);
 
   const selectedLib = libraries.find((l) => l.id === selectedSuiteId);
 

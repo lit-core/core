@@ -2,8 +2,8 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { fuse as cssFuse } from '../src/index.js';
 import { fuse as htmlFuse } from '../../html-fuse/src/index.js';
+import { fuse as cssFuse } from '../src/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const testDir = path.join(__dirname, '.challenger-empirical-suite');

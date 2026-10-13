@@ -1,19 +1,19 @@
-import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
-import path from 'node:path';
 import os from 'node:os';
-import { transformLitProps } from '../props-lower/src/index.js';
-import { transformElemProxy } from '../elem-proxy/src/index.js';
-import { classify, transformNative } from '../native/src/index.js';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { fuse } from '../css-fuse/src/index.js';
+import { minifyEmbeddedCss } from '../css-minifier/src/index.js';
 import { transformDirectives } from '../directives/src/index.js';
-import { transformMemoize } from '../memoize/src/index.js';
-import { transformEventHoist } from '../event-hoist/src/index.js';
 import { transformDirtyMask } from '../dirty-mask/src/index.js';
 import { transformDomPaths } from '../dom-paths/src/index.js';
-import { transformTagShake, scanTags } from '../tag-shake/src/index.js';
+import { transformElemProxy } from '../elem-proxy/src/index.js';
+import { transformEventHoist } from '../event-hoist/src/index.js';
 import { minifyHtmlTemplates } from '../html-minifier/src/index.js';
-import { minifyEmbeddedCss } from '../css-minifier/src/index.js';
-import { fuse } from '../css-fuse/src/index.js';
+import { transformMemoize } from '../memoize/src/index.js';
+import { classify, transformNative } from '../native/src/index.js';
+import { transformLitProps } from '../props-lower/src/index.js';
+import { scanTags, transformTagShake } from '../tag-shake/src/index.js';
 
 function prepareRunnableCode(code: string): string {
   return code

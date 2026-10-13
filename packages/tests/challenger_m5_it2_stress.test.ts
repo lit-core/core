@@ -169,7 +169,7 @@ customElements.define('recursive-el', RecursiveEl);
       const instance2 = new ProxyEl();
       let readError: any = null;
       try {
-        const val = instance2.label;
+        void instance2.label;
       } catch (err) {
         readError = err;
       }

@@ -38,7 +38,7 @@ export async function launchBrowser(options: SafeBrowserOptions = {}): Promise<B
     return browser;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    throw new Error(`Failed to launch sandbox-safe Chromium browser. ` + `Verify Playwright Chromium is installed and flags include --single-process.\n` + `Original error: ${message}`, {
+    throw new Error(`Failed to launch sandbox-safe Chromium browser. Verify Playwright Chromium is installed and flags include --single-process.\nOriginal error: ${message}`, {
       cause: err,
     });
   }
