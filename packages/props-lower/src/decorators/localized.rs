@@ -15,6 +15,7 @@ pub fn transform_localized<'a>(
 ) -> Option<Statement<'a>> {
     let mut remove_index = None;
     let mut binding_name = "updateWhenLocaleChanges";
+    let mut namespace_name: Option<String> = None;
 
     for (i, dec) in class.decorators.iter().enumerate() {
         if let Some(kind) =
@@ -22,18 +23,31 @@ pub fn transform_localized<'a>(
         {
             if kind == LitDecoratorKind::Localized {
                 remove_index = Some(i);
-                let callee_ident = match &dec.expression {
+                match &dec.expression {
                     Expression::CallExpression(call) => match &call.callee {
-                        Expression::Identifier(id) => Some(id.name.as_str()),
-                        _ => None,
+                        Expression::Identifier(id) => {
+                            if id.name != "localized" {
+                                binding_name = ast.allocator().alloc_str(id.name.as_str());
+                            }
+                        }
+                        Expression::StaticMemberExpression(mem) => {
+                            if let Expression::Identifier(obj) = &mem.object {
+                                namespace_name = Some(obj.name.as_str().to_string());
+                            }
+                        }
+                        _ => {}
                     },
-                    Expression::Identifier(id) => Some(id.name.as_str()),
-                    _ => None,
-                };
-                if let Some(ident) = callee_ident {
-                    if ident != "localized" {
-                        binding_name = ast.allocator().alloc_str(ident);
+                    Expression::Identifier(id) => {
+                        if id.name != "localized" {
+                            binding_name = ast.allocator().alloc_str(id.name.as_str());
+                        }
                     }
+                    Expression::StaticMemberExpression(mem) => {
+                        if let Expression::Identifier(obj) = &mem.object {
+                            namespace_name = Some(obj.name.as_str().to_string());
+                        }
+                    }
+                    _ => {}
                 }
                 break;
             }
@@ -43,9 +57,14 @@ pub fn transform_localized<'a>(
     let idx = remove_index?;
     class.decorators.remove(idx);
 
-    // updateWhenLocaleChanges(this);
+    // updateWhenLocaleChanges(this) or loc.updateWhenLocaleChanges(this)
     let helper = AstHelper::new(ast);
-    let callee = helper.ident_ref(binding_name);
+    let callee = if let Some(ns) = namespace_name {
+        let ns_ident = helper.ident_ref(ast.allocator().alloc_str(&ns));
+        helper.static_member(ns_ident, "updateWhenLocaleChanges", false)
+    } else {
+        helper.ident_ref(binding_name)
+    };
     let mut args = ArenaVec::new_in(ast);
     args.push(Argument::from(helper.this_expr()));
 

@@ -464,4 +464,61 @@ console.log('Testing @lit-core/props-lower native addon...');
   console.log('  ✔ Simultaneous aliased helper and aliased decorator lowering');
 }
 
+// Test 24: Synthesized constructor without superclass does not call super()
+{
+  const input = `
+    import {property} from 'lit/decorators.js';
+    class Standalone {
+      @property({type: String}) name = 'test';
+    }
+  `;
+  const res = transformLitProps(input);
+  assert(!res.code.includes('super()'), 'Should not emit super() when class has no superclass');
+  assert(res.code.includes('this.name'), 'Should initialize property in constructor');
+  console.log('  ✔ Constructor synthesis without superclass does not emit super()');
+}
+
+// Test 25: Unmergeable static properties cleanly bails out
+{
+  const input = `
+    import {property} from 'lit/decorators.js';
+    class DynamicElement extends LitElement {
+      static properties = getProps();
+      @property({type: String}) label = 'val';
+    }
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('@property'), 'Should leave @property decorator untouched when bailing out');
+  assert(res.code.includes('static properties = getProps()'), 'Should preserve existing dynamic static properties');
+  console.log('  ✔ Unmergeable static properties clean bailout');
+}
+
+// Test 26: Cached query avoids collision with existing __ property
+{
+  const input = `
+    import {query} from 'lit/decorators.js';
+    class QueryElement extends LitElement {
+      __header = "already exists";
+      @query('#hdr', true) header;
+    }
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('this.___header ??='), 'Should use ___header to avoid colliding with __header');
+  console.log('  ✔ Cached query collision avoidance with existing class members');
+}
+
+// Test 27: Namespace @loc.localized() produces loc.updateWhenLocaleChanges(this)
+{
+  const input = `
+    import * as loc from '@lit/localize';
+    @loc.localized()
+    class LocalizedElement extends LitElement {}
+  `;
+  const res = transformLitProps(input);
+  assert(!res.code.includes('@loc.localized'), 'Should remove @loc.localized decorator');
+  assert(res.code.includes('loc.updateWhenLocaleChanges(this)'), 'Should emit loc.updateWhenLocaleChanges(this)');
+  assert(res.code.includes('@lit/localize'), 'Should preserve namespace import');
+  console.log('  ✔ Namespace @loc.localized() produces loc.updateWhenLocaleChanges(this)');
+}
+
 console.log('\nAll integration tests passed successfully!\n');

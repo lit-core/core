@@ -261,4 +261,223 @@ export class SimpleEl extends LitElement {
     const secondPass = fn(firstPass.code);
     expect(secondPass.code).toBe(firstPass.code);
   });
+
+  it('handles aliased noChange imports without emitting unaliased noChange', () => {
+    const input = `
+import { LitElement, html, noChange as nc } from 'lit';
+import { property } from 'lit/decorators.js';
+
+export class LitComp extends LitElement {
+  @property() name = 'world';
+  render() { return html\`<div>\${this.name}</div>\`; }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.maskedPartsCount).toBe(1);
+    expect(res.code).toContain('? this.name : nc');
+    expect(res.code).not.toContain('? this.name : noChange');
+    expect(res.code).not.toMatch(/import\s*\{[^}]*\bnoChange\b(?!\s+as)[^}]*\}\s*from/);
+  });
+
+  it('synthesizes conflict-free alias when unrelated noChange exists in root scope', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+import { property } from 'lit/decorators.js';
+
+const noChange = 'unrelated local constant';
+
+export class LitComp extends LitElement {
+  @property() name = 'world';
+  render() { return html\`<div>\${this.name}</div>\`; }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.maskedPartsCount).toBe(1);
+    expect(res.code).toContain('? this.name : _litNoChange');
+    expect(res.code).not.toContain('? this.name : noChange');
+    expect(res.code).toMatch(/noChange as _litNoChange/);
+    expect(res.code).toMatch(/const noChange = ["']unrelated local constant["'];/);
+  });
+
+  it('recognizes intra-module intermediate base classes extending LitElement', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+import { property } from 'lit/decorators.js';
+
+export class BaseElement extends LitElement {}
+
+export class MyElement extends BaseElement {
+  @property() name = 'world';
+  render() { return html\`<div>\${this.name}</div>\`; }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.maskedPartsCount).toBe(1);
+    expect(res.code).toContain('? this.name : noChange');
+    expect(res.code).toContain('super.update(changedProperties)');
+  });
+
+  it('inherits reactive properties from in-module base classes', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+import { property } from 'lit/decorators.js';
+
+export class BaseElement extends LitElement {
+  @property() baseProp = 'base';
+}
+
+export class MyElement extends BaseElement {
+  @property() childProp = 'child';
+  render() {
+    return html\`<div>\${this.baseProp + ' ' + this.childProp}</div>\`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.maskedPartsCount).toBe(1);
+    expect(res.propertiesCount).toBe(2);
+    expect(res.code).toContain('this.__litDirtyMask & 3');
+    expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']baseProp["']\)\)\s*mask\s*\|=\s*1;/);
+    expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']childProp["']\)\)\s*mask\s*\|=\s*2;/);
+  });
+
+  it('handles multi-level intermediate inheritance hierarchies', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+import { property } from 'lit/decorators.js';
+
+export class RootElement extends LitElement {
+  @property() rootVal = 1;
+}
+
+export class MidElement extends RootElement {
+  @property() midVal = 2;
+}
+
+export class LeafElement extends MidElement {
+  @property() leafVal = 3;
+  render() {
+    return html\`<div>\${this.rootVal + ' ' + this.leafVal}</div>\`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.maskedPartsCount).toBe(1);
+    expect(res.propertiesCount).toBe(3);
+    // rootVal = 1 (1 << 0 = 1), midVal = 2 (1 << 1 = 2), leafVal = 3 (1 << 2 = 4)
+    // rootVal + leafVal = 1 | 4 = 5
+    expect(res.code).toContain('this.__litDirtyMask & 5');
+    expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']rootVal["']\)\)\s*mask\s*\|=\s*1;/);
+    expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']midVal["']\)\)\s*mask\s*\|=\s*2;/);
+    expect(res.code).toMatch(/if\s*\(changedProperties\.has\(["']leafVal["']\)\)\s*mask\s*\|=\s*4;/);
+  });
+
+  it('guards dirty mask assignment against superclass update clobbering', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+
+export class BaseElement extends LitElement {
+  static properties = { baseProp: { type: String } };
+  render() {
+    return html\`<div>\${this.baseProp}</div>\`;
+  }
+}
+
+export class LeafElement extends BaseElement {
+  static properties = { childProp: { type: String } };
+  render() {
+    return html\`<div>\${this.childProp}</div>\`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(2);
+    expect(res.code).toMatch(/if\s*\(!this\.constructor\s*\|\|\s*this\.constructor\s*===\s*BaseElement\)\s*\{\s*this\.__litDirtyMask\s*=\s*mask;\s*\}/);
+    expect(res.code).toMatch(/if\s*\(!this\.constructor\s*\|\|\s*this\.constructor\s*===\s*LeafElement\)\s*\{\s*this\.__litDirtyMask\s*=\s*mask;\s*\}/);
+
+    // Lifecycle simulation
+    class FakeLitElement {
+      hasUpdated = true;
+      update(_changedProps: Map<string, unknown>) {}
+    }
+
+    const noChange = Symbol.for('lit-noChange');
+    const html = (_strings: TemplateStringsArray, ...values: unknown[]) => values[0];
+
+    const cleanCode = res.code
+      .replace(/import\s*\{[^}]*\}\s*from\s*["\x27][^"\x27]+["\x27];?/g, '')
+      .replace(/export class BaseElement extends LitElement/g, 'class BaseElement extends FakeLitElement')
+      .replace(/export class LeafElement extends BaseElement/g, 'class LeafElement extends BaseElement');
+
+    const fnEval = new Function(
+      'FakeLitElement',
+      'noChange',
+      'html',
+      `
+      ${cleanCode}
+      return { BaseElement, LeafElement };
+    `,
+    );
+    const { LeafElement } = fnEval(FakeLitElement, noChange, html) as {
+      LeafElement: new () => {
+        childProp: string;
+        __litDirtyMask: number;
+        update: (changedProps: Map<string, unknown>) => void;
+        render: () => unknown;
+      };
+    };
+
+    const leaf = new LeafElement();
+    leaf.childProp = 'updated child value';
+    leaf.update(new Map([['childProp', 'child']]));
+
+    expect(leaf.__litDirtyMask).toBe(2);
+    expect(leaf.render()).toBe('updated child value');
+  });
+
+  it('supports anonymous class expressions assigned to variable declarations inheriting base properties', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+const Base = class extends LitElement {
+  static properties = { b: { type: String } };
+};
+const Child = class extends Base {
+  static properties = { c: { type: String } };
+  render() { return html\`<div>\${this.b} - \${this.c}</div>\`; }
+};
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.maskedPartsCount).toBe(2);
+    expect(res.propertiesCount).toBe(2);
+
+    expect(res.code).toContain('this.__litDirtyMask & 1 ? this.b : noChange');
+    expect(res.code).toContain('this.__litDirtyMask & 2 ? this.c : noChange');
+    expect(res.code).not.toContain('this.__litDirtyMask & -1');
+    expect(res.code).toMatch(/if\s*\(!this\.constructor\s*\|\|\s*this\.constructor\s*===\s*Child\)\s*\{\s*this\.__litDirtyMask\s*=\s*mask;\s*\}/);
+  });
+
+  it('supports exported variable declarations with class expressions in inheritance hierarchies', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+export const Base = class extends LitElement {
+  static properties = { x: { type: Number } };
+};
+export const Derived = class extends Base {
+  static properties = { y: { type: Number } };
+  render() { return html\`<div>\${this.x + this.y}</div>\`; }
+};
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.propertiesCount).toBe(2);
+    // x = 1 (bit 1), y = 2 (bit 2) -> mask = 3
+    expect(res.code).toContain('this.__litDirtyMask & 3');
+    expect(res.code).toMatch(/if\s*\(!this\.constructor\s*\|\|\s*this\.constructor\s*===\s*Derived\)\s*\{\s*this\.__litDirtyMask\s*=\s*mask;\s*\}/);
+  });
 });

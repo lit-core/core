@@ -30,13 +30,13 @@
     "name": "Lit directive lowering (directives)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-11T01:04:42.877Z",
+  "timestamp": "2026-10-12T23:47:39.038Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1cc4959",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -51,15 +51,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 635404,
-    "gzipBytes": 83461,
-    "brotliBytes": 51138,
-    "buildTimeMs": 55.297167,
-    "firstRenderMs": 28.3,
-    "updateMs": 4.4,
-    "scriptEvalMs": 1.8,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 5220932,
+    "rawBytes": 635410,
+    "gzipBytes": 83472,
+    "brotliBytes": 51163,
+    "buildTimeMs": 55.78375,
+    "firstRenderMs": 42.1,
+    "updateMs": 5.7,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 5208132,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -93,32 +93,32 @@
     }
   },
   "deltas": {
-    "rawBytes": -262,
+    "rawBytes": -256,
     "rawPercent": -0.04,
-    "gzipBytes": -60,
-    "gzipPercent": -0.07,
-    "brotliBytes": -11,
-    "brotliPercent": -0.02,
-    "buildTimeMs": 5.5,
-    "firstRenderMs": -13.5,
-    "speedupPercent": 32.3,
-    "updateMs": -1.3,
-    "updateSpeedupPercent": 22.81,
-    "evalSpeedupPercent": -12.5,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -12.46
+    "gzipBytes": -49,
+    "gzipPercent": -0.06,
+    "brotliBytes": 14,
+    "brotliPercent": 0.03,
+    "buildTimeMs": 6,
+    "firstRenderMs": 0.3,
+    "speedupPercent": -0.72,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -6.25,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -12.19
   },
   "runtime": {
-    "firstRenderMs": 28.3,
-    "updateMs": 4.4,
-    "scriptEvalMs": 1.8,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 5220932,
-    "speedupPercent": 32.3,
-    "updateSpeedupPercent": 22.81,
-    "evalSpeedupPercent": -12.5,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -12.46
+    "firstRenderMs": 42.1,
+    "updateMs": 5.7,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 5208132,
+    "speedupPercent": -0.72,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -6.25,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -12.19
   },
   "domSnapshot": {
     "mount": {
@@ -390,7 +390,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -443,7 +443,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -692,7 +692,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -745,7 +745,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -994,7 +994,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -1047,7 +1047,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -1296,7 +1296,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -1349,7 +1349,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -1598,7 +1598,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -1651,7 +1651,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -1900,7 +1900,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -1953,7 +1953,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -2202,7 +2202,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -2255,7 +2255,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -2504,7 +2504,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -2557,7 +2557,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -2806,7 +2806,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -2859,7 +2859,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -3109,7 +3109,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -3162,7 +3162,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -3411,7 +3411,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -3464,7 +3464,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -3713,7 +3713,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -3766,7 +3766,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -4015,7 +4015,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -4068,7 +4068,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -4317,7 +4317,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -4370,7 +4370,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -4619,7 +4619,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -4672,7 +4672,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -4921,7 +4921,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -4974,7 +4974,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -5223,7 +5223,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -5276,7 +5276,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -5525,7 +5525,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -5578,7 +5578,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -5827,7 +5827,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -5880,7 +5880,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -6130,7 +6130,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -6183,7 +6183,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -6432,7 +6432,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -6485,7 +6485,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -6734,7 +6734,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -6787,7 +6787,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -7036,7 +7036,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -7089,7 +7089,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -7338,7 +7338,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -7391,7 +7391,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -7640,7 +7640,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -7693,7 +7693,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -7942,7 +7942,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -7995,7 +7995,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -8244,7 +8244,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -8297,7 +8297,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -8546,7 +8546,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -8599,7 +8599,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -8848,7 +8848,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -8901,7 +8901,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -9151,7 +9151,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -9204,7 +9204,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -9453,7 +9453,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -9506,7 +9506,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -9755,7 +9755,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -9808,7 +9808,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -10057,7 +10057,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -10110,7 +10110,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -10359,7 +10359,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -10412,7 +10412,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -10661,7 +10661,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -10714,7 +10714,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -10963,7 +10963,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -11016,7 +11016,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -11265,7 +11265,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -11318,7 +11318,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -11567,7 +11567,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -11620,7 +11620,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -11869,7 +11869,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -11922,7 +11922,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -12172,7 +12172,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -12225,7 +12225,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -12474,7 +12474,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -12527,7 +12527,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -12776,7 +12776,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -12829,7 +12829,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -13078,7 +13078,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -13131,7 +13131,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -13380,7 +13380,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -13433,7 +13433,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -13682,7 +13682,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -13735,7 +13735,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -13984,7 +13984,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -14037,7 +14037,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -14286,7 +14286,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -14339,7 +14339,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -14588,7 +14588,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -14641,7 +14641,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -14890,7 +14890,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -14943,7 +14943,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -15193,7 +15193,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -15246,7 +15246,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -15567,7 +15567,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -15620,7 +15620,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -15870,7 +15870,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -15923,7 +15923,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -16172,7 +16172,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -16225,7 +16225,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -16475,7 +16475,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -16528,7 +16528,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -16777,7 +16777,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -16830,7 +16830,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -17080,7 +17080,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -17133,7 +17133,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -17382,7 +17382,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -17435,7 +17435,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -17684,7 +17684,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -17737,7 +17737,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -17986,7 +17986,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -18039,7 +18039,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -18289,7 +18289,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -18342,7 +18342,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -18591,7 +18591,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -18644,7 +18644,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -18894,7 +18894,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -18947,7 +18947,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -19196,7 +19196,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -19249,7 +19249,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -19499,7 +19499,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -19552,7 +19552,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -19801,7 +19801,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -19854,7 +19854,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -20104,7 +20104,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -20157,7 +20157,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -20406,7 +20406,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -20459,7 +20459,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -20708,7 +20708,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -20761,7 +20761,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -21010,7 +21010,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -21063,7 +21063,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -21313,7 +21313,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -21366,7 +21366,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -21615,7 +21615,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -21668,7 +21668,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -21918,7 +21918,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -21971,7 +21971,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -22220,7 +22220,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -22273,7 +22273,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -22523,7 +22523,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -22576,7 +22576,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -22825,7 +22825,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -22878,7 +22878,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -23128,7 +23128,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -23181,7 +23181,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -23430,7 +23430,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -23483,7 +23483,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -23732,7 +23732,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -23785,7 +23785,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -24034,7 +24034,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -24087,7 +24087,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -24337,7 +24337,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -24390,7 +24390,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -24639,7 +24639,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -24692,7 +24692,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -24942,7 +24942,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -24995,7 +24995,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -25244,7 +25244,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -25297,7 +25297,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -25547,7 +25547,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -25600,7 +25600,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -25849,7 +25849,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -25902,7 +25902,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -26152,7 +26152,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -26205,7 +26205,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -26454,7 +26454,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -26507,7 +26507,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -26756,7 +26756,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -26809,7 +26809,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -27058,7 +27058,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -27111,7 +27111,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -27361,7 +27361,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -27414,7 +27414,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -27663,7 +27663,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -27716,7 +27716,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -27966,7 +27966,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -28019,7 +28019,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -28268,7 +28268,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -28321,7 +28321,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -28571,7 +28571,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -28624,7 +28624,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -28873,7 +28873,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -28926,7 +28926,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -29176,7 +29176,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -29229,7 +29229,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -29478,7 +29478,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -29531,7 +29531,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -29780,7 +29780,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -29833,7 +29833,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -30082,7 +30082,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -30135,7 +30135,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -30384,7 +30384,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--sm,true cds--layout--size-sm,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -30437,7 +30437,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []

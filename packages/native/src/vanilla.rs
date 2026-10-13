@@ -1,38 +1,48 @@
 use crate::ast_helpers::AstHelper;
+use crate::import_scanner::ImportContext;
 use crate::models::ClassificationResult;
-use crate::template_parser::{parse_html_template, ParsedTemplate};
-use oxc_allocator::{Allocator, ArenaVec};
+use crate::template_parser::parse_html_template;
+use oxc_allocator::{Allocator, ArenaVec, CloneIn, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
-use oxc_span::GetSpan;
+use oxc_semantic::Scoping;
 use std::collections::HashSet;
 
-#[derive(Debug, Clone)]
-pub struct PropertyInfo {
+#[derive(Debug)]
+pub struct PropertyInfo<'a> {
     pub name: String,
     pub prop_type: String, // "string", "number", "boolean"
     pub reflect: bool,
     pub attribute_name: String,
-    pub default_value: Option<String>,
+    pub default_value: Option<Expression<'a>>,
 }
 
 pub fn transform_vanilla_class<'a>(
     class: &mut Class<'a>,
-    source: &str,
     target: &ClassificationResult,
     ast: &AstBuilder<'a>,
-    allocator: &'a Allocator,
+    scoping: &Scoping,
+    import_ctx: &ImportContext,
     out_pre_stmts: &mut Vec<Statement<'a>>,
     out_post_stmts: &mut Vec<Statement<'a>>,
-) {
+) -> bool {
+    let allocator = ast.allocator();
     let helper = AstHelper::new(ast);
     let comp_id = &target.component_name;
+
+    let has_custom_element_decorator = class.decorators.iter().any(|dec| {
+        let expr = match &dec.expression {
+            Expression::CallExpression(call) => &call.callee,
+            other => other,
+        };
+        import_ctx.is_custom_element_decorator(expr, scoping)
+    });
 
     // 1. Analyze class elements: extract styles, template, and properties
     let mut styles_css: Option<String> = None;
     let mut template_quasis: Vec<String> = Vec::new();
-    let mut template_exprs: Vec<String> = Vec::new();
-    let mut properties: Vec<PropertyInfo> = Vec::new();
+    let mut template_exprs: Vec<Expression<'a>> = Vec::new();
+    let mut properties: Vec<PropertyInfo<'a>> = Vec::new();
     let mut seen_props = HashSet::new();
 
     for elem in &class.body.body {
@@ -55,14 +65,10 @@ pub fn transform_vanilla_class<'a>(
                     // Check for @property or @state decorators
                     for dec in &prop.decorators {
                         if let Expression::CallExpression(call) = &dec.expression {
-                            let callee = match &call.callee {
-                                Expression::Identifier(id) => Some(id.name.as_str()),
-                                Expression::StaticMemberExpression(mem) => {
-                                    Some(mem.property.name.as_str())
-                                }
-                                _ => None,
-                            };
-                            if callee == Some("property") && seen_props.insert(prop_name.clone()) {
+                            if (import_ctx.is_property_decorator(&call.callee, scoping)
+                                || import_ctx.is_state_decorator(&call.callee, scoping))
+                                && seen_props.insert(prop_name.clone())
+                            {
                                 let mut p_type = "string".to_string();
                                 let mut reflect = false;
                                 let mut attr_name = prop_name.to_lowercase();
@@ -110,10 +116,8 @@ pub fn transform_vanilla_class<'a>(
                                     }
                                 }
 
-                                let default_val = prop.value.as_ref().map(|v| {
-                                    let s = v.span();
-                                    source[s.start as usize..s.end as usize].to_string()
-                                });
+                                let default_val =
+                                    prop.value.as_ref().map(|v| v.clone_in(allocator));
 
                                 properties.push(PropertyInfo {
                                     name: prop_name.clone(),
@@ -143,7 +147,9 @@ pub fn transform_vanilla_class<'a>(
                     if let Some(body) = &m.value.body {
                         extract_render_quasis_and_exprs(
                             body,
-                            source,
+                            allocator,
+                            scoping,
+                            import_ctx,
                             &mut template_quasis,
                             &mut template_exprs,
                         );
@@ -156,14 +162,12 @@ pub fn transform_vanilla_class<'a>(
 
     // 2. Parse HTML template with DOM path calculation
     let quasis_slices: Vec<&str> = template_quasis.iter().map(|s| s.as_str()).collect();
-    let exprs_slices: Vec<&str> = template_exprs.iter().map(|s| s.as_str()).collect();
-    let parsed_template = if !quasis_slices.is_empty() {
-        parse_html_template(&quasis_slices, &exprs_slices)
-    } else {
-        ParsedTemplate {
-            html: "<slot></slot>".to_string(),
-            bindings: Vec::new(),
-        }
+    if quasis_slices.is_empty() {
+        return false;
+    }
+    let parsed_template = match parse_html_template(&quasis_slices, template_exprs.len()) {
+        Some(p) => p,
+        None => return false,
     };
 
     // 3. Synthesize hoisted module-level stylesheet and template constants
@@ -205,18 +209,23 @@ pub fn transform_vanilla_class<'a>(
 
     let ctor_elem = crate::vanilla_ast::build_constructor_element(
         ast,
-        allocator,
         &sheet_var,
         &tmpl_var,
         styles_css.is_some(),
         &parsed_template,
+        &template_exprs,
         &properties,
     );
     new_body_elements.push(ctor_elem);
 
     for p in &properties {
-        let (getter, setter) =
-            crate::vanilla_ast::build_property_accessors(ast, allocator, p, &parsed_template);
+        let (getter, setter) = crate::vanilla_ast::build_property_accessors(
+            ast,
+            allocator,
+            p,
+            &parsed_template,
+            &template_exprs,
+        );
         new_body_elements.push(getter);
         new_body_elements.push(setter);
     }
@@ -264,12 +273,18 @@ pub fn transform_vanilla_class<'a>(
 
     class.body.body = new_body_elements;
 
-    // 6. Define custom element if tag_name is present
-    if let Some(tag) = &target.tag_name {
-        let define_stmt =
-            helper.define_custom_element(allocator.alloc_str(tag), allocator.alloc_str(comp_id));
-        out_post_stmts.push(define_stmt);
+    // 6. Define custom element if tag_name is present and class had a decorator.
+    // If the element was not defined via decorator, the input source code already contains
+    // a customElements.define statement so do not emit a duplicate.
+    if has_custom_element_decorator {
+        if let Some(tag) = &target.tag_name {
+            let define_stmt = helper
+                .define_custom_element(allocator.alloc_str(tag), allocator.alloc_str(comp_id));
+            out_post_stmts.push(define_stmt);
+        }
     }
+
+    true
 }
 
 fn extract_css_from_expr<'a>(expr: &Expression<'a>) -> Option<String> {
@@ -301,21 +316,24 @@ fn extract_css_from_expr<'a>(expr: &Expression<'a>) -> Option<String> {
 
 fn extract_render_quasis_and_exprs<'a>(
     body: &FunctionBody<'a>,
-    source: &str,
+    allocator: &'a Allocator,
+    scoping: &Scoping,
+    import_ctx: &ImportContext,
     out_quasis: &mut Vec<String>,
-    out_exprs: &mut Vec<String>,
+    out_exprs: &mut Vec<Expression<'a>>,
 ) {
     for stmt in &body.statements {
         if let Statement::ReturnStatement(ret) = stmt {
             if let Some(Expression::TaggedTemplateExpression(tag)) = &ret.argument {
-                for q in &tag.quasi.quasis {
-                    out_quasis.push(q.value.raw.as_str().to_string());
+                if import_ctx.is_html_tag(&tag.tag, scoping) {
+                    for q in &tag.quasi.quasis {
+                        out_quasis.push(q.value.raw.as_str().to_string());
+                    }
+                    for e in &tag.quasi.expressions {
+                        out_exprs.push(e.clone_in(allocator));
+                    }
+                    return;
                 }
-                for e in &tag.quasi.expressions {
-                    let s = e.span();
-                    out_exprs.push(source[s.start as usize..s.end as usize].to_string());
-                }
-                return;
             }
         }
     }

@@ -101,4 +101,63 @@ export class HelperUtil {
     expect(res.pathsCount).toBe(0);
     expect(res.code).toBe(input);
   });
+
+  it('bails out safely when class has multiple templates with expressions', () => {
+    const input = `
+export class MultiTemplateComponent extends LitElement {
+  renderHeader() {
+    return html\`<h1>\${this.title}</h1>\`;
+  }
+  render() {
+    return html\`<main>\${this.content}</main>\`;
+  }
+}
+`;
+    const res = transform(input);
+    expect(res.componentsCount).toBe(0);
+    expect(res.pathsCount).toBe(0);
+    expect(res.code).toBe(input);
+  });
+
+  it('ignores classes inheriting from non-Lit base classes', () => {
+    const input = `
+export class CustomService extends BaseService {
+  render() {
+    return html\`<div>\${this.data}</div>\`;
+  }
+}
+`;
+    const res = transform(input);
+    expect(res.componentsCount).toBe(0);
+    expect(res.pathsCount).toBe(0);
+  });
+
+  it('transforms aliased Lit imports correctly', () => {
+    const input = `
+import { LitElement as ReactiveComponent, html as template } from 'lit';
+export class AliasedComp extends ReactiveComponent {
+  render() {
+    return template\`<section><span>\${this.text}</span></section>\`;
+  }
+}
+`;
+    const res = transform(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.pathsCount).toBe(1);
+    expect(res.code).toContain('static __litPartPaths');
+  });
+
+  it('ignores html templates from non-Lit packages', () => {
+    const input = `
+import { html } from 'non-lit-package';
+export class NotLit extends Something {
+  render() {
+    return html\`<section>\${this.text}</section>\`;
+  }
+}
+`;
+    const res = transform(input);
+    expect(res.componentsCount).toBe(0);
+    expect(res.pathsCount).toBe(0);
+  });
 });

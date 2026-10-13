@@ -658,135 +658,6 @@ pub fn build_lh_dispatch_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
         ast,
     ));
 
-    // let stopped = false;
-    let stopped_decl = VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "stopped", ast),
-        None,
-        Some(Expression::new_boolean_literal(SPAN, false, ast)),
-        false,
-        ast,
-    );
-    let mut decls3 = ArenaVec::new_in(ast);
-    decls3.push(stopped_decl);
-    stmts.push(Statement::new_variable_declaration(
-        SPAN,
-        VariableDeclarationKind::Let,
-        decls3,
-        false,
-        ast,
-    ));
-
-    // const origStop = event.stopPropagation;
-    let orig_stop_expr = Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "event", ast),
-        IdentifierName::new(SPAN, "stopPropagation", ast),
-        false,
-        ast,
-    );
-    let orig_stop_decl = VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "origStop", ast),
-        None,
-        Some(orig_stop_expr),
-        false,
-        ast,
-    );
-    let mut decls4 = ArenaVec::new_in(ast);
-    decls4.push(orig_stop_decl);
-    stmts.push(Statement::new_variable_declaration(
-        SPAN,
-        VariableDeclarationKind::Const,
-        decls4,
-        false,
-        ast,
-    ));
-
-    // if (origStop) { event.stopPropagation = function() { stopped = true; return origStop.apply(this, arguments); }; }
-    let mut stop_fn_stmts = ArenaVec::new_in(ast);
-    let stopped_target = AssignmentTarget::new_assignment_target_identifier(SPAN, "stopped", ast);
-    let assign_stopped = Expression::new_assignment_expression(
-        SPAN,
-        AssignmentOperator::Assign,
-        stopped_target,
-        Expression::new_boolean_literal(SPAN, true, ast),
-        ast,
-    );
-    stop_fn_stmts.push(Statement::new_expression_statement(
-        SPAN,
-        assign_stopped,
-        ast,
-    ));
-
-    let apply_member = Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "origStop", ast),
-        IdentifierName::new(SPAN, "apply", ast),
-        false,
-        ast,
-    );
-    let mut apply_args = ArenaVec::new_in(ast);
-    apply_args.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
-    apply_args.push(Argument::from(Expression::new_identifier(
-        SPAN,
-        "arguments",
-        ast,
-    )));
-    let apply_call =
-        Expression::new_call_expression(SPAN, apply_member, None, apply_args, false, ast);
-    stop_fn_stmts.push(Statement::new_return_statement(SPAN, Some(apply_call), ast));
-
-    let stop_fn_body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stop_fn_stmts, ast);
-    let stop_fn = Function::boxed(
-        SPAN,
-        FunctionType::FunctionExpression,
-        None,
-        false,
-        false,
-        false,
-        None,
-        None,
-        FormalParameters::boxed(
-            SPAN,
-            FormalParameterKind::FormalParameter,
-            ArenaVec::new_in(ast),
-            None,
-            ast,
-        ),
-        None,
-        Some(stop_fn_body),
-        ast,
-    );
-    let event_stop_target = AssignmentTarget::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "event", ast),
-        IdentifierName::new(SPAN, "stopPropagation", ast),
-        false,
-        ast,
-    );
-    let assign_stop_fn = Expression::new_assignment_expression(
-        SPAN,
-        AssignmentOperator::Assign,
-        event_stop_target,
-        Expression::FunctionExpression(stop_fn),
-        ast,
-    );
-    let mut if_orig_stop_stmts = ArenaVec::new_in(ast);
-    if_orig_stop_stmts.push(Statement::new_expression_statement(
-        SPAN,
-        assign_stop_fn,
-        ast,
-    ));
-    let if_orig_stop_block = Statement::new_block_statement(SPAN, if_orig_stop_stmts, ast);
-    stmts.push(Statement::new_if_statement(
-        SPAN,
-        Expression::new_identifier(SPAN, "origStop", ast),
-        if_orig_stop_block,
-        None,
-        ast,
-    ));
-
     // const path = event.composedPath ? event.composedPath() : [];
     let composed_path_test = Expression::new_static_member_expression(
         SPAN,
@@ -1024,7 +895,7 @@ pub fn build_lh_dispatch_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
             ast,
         ));
 
-        // if (event.cancelBubble || stopped) break;
+        // if (event.cancelBubble) break;
         let cancel_bubble = Expression::new_static_member_expression(
             SPAN,
             Expression::new_identifier(SPAN, "event", ast),
@@ -1032,18 +903,11 @@ pub fn build_lh_dispatch_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
             false,
             ast,
         );
-        let break_cond = Expression::new_logical_expression(
-            SPAN,
-            cancel_bubble,
-            LogicalOperator::Or,
-            Expression::new_identifier(SPAN, "stopped", ast),
-            ast,
-        );
         let mut break_stmts = ArenaVec::new_in(ast);
         break_stmts.push(Statement::new_break_statement(SPAN, None, ast));
         blk.push(Statement::new_if_statement(
             SPAN,
-            break_cond,
+            cancel_bubble,
             Statement::new_block_statement(SPAN, break_stmts, ast),
             None,
             ast,

@@ -6,127 +6,43 @@
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
     "version": "1.12.4",
-    "componentCount": 20,
+    "componentCount": 6,
     "components": [
       {
-        "concept": "button",
-        "tag": "sp-button",
-        "label": "Button",
-        "path": "button/sp-button.js"
-      },
-      {
-        "concept": "checkbox",
-        "tag": "sp-checkbox",
-        "label": "Checkbox",
-        "path": "checkbox/sp-checkbox.js"
-      },
-      {
-        "concept": "radio",
-        "tag": "sp-radio",
-        "label": "Radio button",
-        "path": "radio/sp-radio.js"
-      },
-      {
-        "concept": "switch",
-        "tag": "sp-switch",
-        "label": "Switch / toggle",
-        "path": "switch/sp-switch.js"
-      },
-      {
-        "concept": "text-input",
-        "tag": "sp-textfield",
-        "label": "Text input / field",
-        "path": "textfield/sp-textfield.js"
-      },
-      {
-        "concept": "select",
-        "tag": "sp-picker",
-        "label": "Select / dropdown",
-        "path": "picker/sp-picker.js"
-      },
-      {
-        "concept": "dialog",
-        "tag": "sp-dialog",
-        "label": "Dialog / modal",
-        "path": "dialog/sp-dialog.js"
+        "concept": "card",
+        "tag": "sp-card",
+        "path": "card/sp-card.js",
+        "importStatement": "import '@spectrum-web-components/card/sp-card.js';"
       },
       {
         "concept": "badge",
         "tag": "sp-badge",
-        "label": "Badge / tag",
-        "path": "badge/sp-badge.js"
-      },
-      {
-        "concept": "tabs",
-        "tag": "sp-tabs",
-        "label": "Tabs",
-        "path": "tabs/sp-tabs.js"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "sp-progress-bar",
-        "label": "Progress bar",
-        "path": "progress-bar/sp-progress-bar.js"
-      },
-      {
-        "concept": "spinner",
-        "tag": "sp-progress-circle",
-        "label": "Spinner / loader",
-        "path": "progress-circle/sp-progress-circle.js"
-      },
-      {
-        "concept": "slider",
-        "tag": "sp-slider",
-        "label": "Slider",
-        "path": "slider/sp-slider.js"
-      },
-      {
-        "concept": "menu",
-        "tag": "sp-menu",
-        "label": "Menu / popover",
-        "path": "menu/sp-menu.js"
-      },
-      {
-        "concept": "divider",
-        "tag": "sp-divider",
-        "label": "Divider",
-        "path": "divider/sp-divider.js"
+        "path": "badge/sp-badge.js",
+        "importStatement": "import '@spectrum-web-components/badge/sp-badge.js';"
       },
       {
         "concept": "icon",
         "tag": "sp-icon",
-        "label": "Icon",
-        "path": "icon/sp-icon.js"
+        "path": "icon/sp-icon.js",
+        "importStatement": "import '@spectrum-web-components/icon/sp-icon.js';"
       },
       {
-        "concept": "icon-button",
-        "tag": "sp-action-button",
-        "label": "Icon button",
-        "path": "action-button/sp-action-button.js"
-      },
-      {
-        "concept": "card",
-        "tag": "sp-card",
-        "label": "Card / tile",
-        "path": "card/sp-card.js"
-      },
-      {
-        "concept": "elevation",
-        "tag": "sp-popover",
-        "label": "Elevation / focus",
-        "path": "popover/sp-popover.js"
-      },
-      {
-        "concept": "list",
-        "tag": "sp-sidenav",
-        "label": "List / structured",
-        "path": "sidenav/sp-sidenav.js"
+        "concept": "button",
+        "tag": "sp-button",
+        "path": "button/sp-button.js",
+        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
       },
       {
         "concept": "chips",
         "tag": "sp-action-group",
-        "label": "Chips / segmented",
-        "path": "action-group/sp-action-group.js"
+        "path": "action-group/sp-action-group.js",
+        "importStatement": "import '@spectrum-web-components/action-group/sp-action-group.js';"
+      },
+      {
+        "concept": "divider",
+        "tag": "sp-divider",
+        "path": "divider/sp-divider.js",
+        "importStatement": "import '@spectrum-web-components/divider/sp-divider.js';"
       }
     ]
   },
@@ -139,15 +55,16 @@
   "scenario": {
     "id": "dynamic-feed",
     "name": "Dynamic feed",
-    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering"
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering",
+    "componentCount": 6
   },
-  "timestamp": "2026-10-10T10:13:20.557Z",
+  "timestamp": "2026-10-12T23:47:32.972Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -162,10 +79,10 @@
     }
   },
   "metrics": {
-    "rawBytes": 250859,
-    "gzipBytes": 44241,
-    "brotliBytes": 35823,
-    "buildTimeMs": 28.269999999989523
+    "rawBytes": 252127,
+    "gzipBytes": 44660,
+    "brotliBytes": 36192,
+    "buildTimeMs": 40.64979100000005
   },
   "baseline": {
     "rawBytes": 250859,
@@ -179,36 +96,50 @@
     "heapUsedBytes": 3221093,
     "scenarioSpecific": {
       "totalItems": 50,
-      "directivesUsed": ["repeat", "classMap", "styleMap", "ifDefined"],
+      "directivesUsed": [
+        "repeat",
+        "classMap",
+        "styleMap",
+        "ifDefined"
+      ],
       "renderedCards": 50
     }
   },
   "deltas": {
-    "rawBytes": 0,
-    "rawPercent": 0,
-    "gzipBytes": 0,
-    "gzipPercent": 0,
-    "brotliBytes": 0,
-    "brotliPercent": 0,
-    "buildTimeMs": 1.5,
-    "firstRenderMs": -9.6,
-    "speedupPercent": 34.29,
-    "updateMs": -0.6,
-    "updateSpeedupPercent": 18.18,
-    "evalSpeedupPercent": -5,
-    "registrationSpeedupPercent": -400,
-    "memorySavingsPercent": 0.02
+    "rawBytes": 1268,
+    "rawPercent": 0.51,
+    "gzipBytes": 419,
+    "gzipPercent": 0.95,
+    "brotliBytes": 369,
+    "brotliPercent": 1.03,
+    "buildTimeMs": 13.9,
+    "firstRenderMs": -1.4,
+    "speedupPercent": 5,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 6.06,
+    "evalSpeedupPercent": 10,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -16.42
   },
   "runtime": {
-    "firstRenderMs": 18.4,
-    "updateMs": 2.7,
-    "scriptEvalMs": 2.1,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 3220433,
-    "speedupPercent": 34.29,
-    "updateSpeedupPercent": 18.18,
-    "evalSpeedupPercent": -5,
-    "registrationSpeedupPercent": -400,
-    "memorySavingsPercent": 0.02
+    "firstRenderMs": 26.6,
+    "updateMs": 3.1,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 3749910,
+    "speedupPercent": 5,
+    "updateSpeedupPercent": 6.06,
+    "evalSpeedupPercent": 10,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -16.42
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 555,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

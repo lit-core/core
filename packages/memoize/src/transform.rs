@@ -2,20 +2,32 @@ use napi_derive::napi;
 use oxc_allocator::{Allocator, CloneIn, Vec as ArenaVec};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
+use oxc_ast_visit::Visit;
 use oxc_codegen::Codegen;
 use oxc_parser::Parser;
+use oxc_semantic::SemanticBuilder;
 use oxc_span::SourceType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 pub use crate::analyzer::{
-    analyze_candidate, CandidateInfo, DOM_QUERY_METHODS, IMPURE_GLOBALS, MUTATING_ARRAY_METHODS,
-    PURE_ARRAY_METHODS,
+    analyze_candidate, CandidateInfo, LitSemanticAnalysis, DOM_QUERY_METHODS, IMPURE_GLOBALS,
+    MUTATING_ARRAY_METHODS, PURE_ARRAY_METHODS,
 };
 pub use crate::builder::{
     build_memo_block, collect_classes_mut, replace_candidate_exprs, replace_candidates_in_stmt,
 };
 pub use crate::finder::{collect_stmt_candidates, CandidateItem, StmtCandidateGroup};
+
+struct BindingCollector {
+    bindings: HashSet<String>,
+}
+
+impl<'a> Visit<'a> for BindingCollector {
+    fn visit_binding_identifier(&mut self, ident: &BindingIdentifier<'a>) {
+        self.bindings.insert(ident.name.as_str().to_string());
+    }
+}
 
 #[napi(object)]
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
@@ -48,6 +60,17 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
         };
     }
 
+    let (lit_analysis, existing_bindings) = {
+        let semantic_ret = SemanticBuilder::new().build(&parsed.program);
+        let lit_analysis =
+            LitSemanticAnalysis::new(&parsed.program, semantic_ret.semantic.scoping());
+        let mut collector = BindingCollector {
+            bindings: HashSet::new(),
+        };
+        collector.visit_program(&parsed.program);
+        (lit_analysis, collector.bindings)
+    };
+
     let mut classes = Vec::new();
     collect_classes_mut(&mut parsed.program.body, &mut classes);
 
@@ -64,6 +87,10 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
     let mut transformed_components_count: u32 = 0;
 
     for class in classes {
+        if !lit_analysis.is_lit_class(class) {
+            continue;
+        }
+
         let mut render_body: Option<&mut FunctionBody> = None;
 
         for elem in &mut class.body.body {
@@ -99,6 +126,8 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
             collect_stmt_candidates(
                 &stmt,
                 &allocator,
+                Some(&lit_analysis),
+                &existing_bindings,
                 &mut groups,
                 &mut used_slots,
                 &mut counter,

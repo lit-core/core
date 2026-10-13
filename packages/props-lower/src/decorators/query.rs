@@ -10,6 +10,7 @@ use crate::lit_import_scanner::{ImportContext, LitDecoratorKind};
 pub fn try_transform_query<'a>(
     element: &mut ClassElement<'a>,
     import_ctx: &ImportContext,
+    existing_members: &mut std::collections::HashSet<String>,
     ast: &AstBuilder<'a>,
 ) -> Option<ClassElement<'a>> {
     let ClassElement::PropertyDefinition(prop_def) = element else {
@@ -68,7 +69,12 @@ pub fn try_transform_query<'a>(
 
     let return_expr = if cache {
         // this.__name ??= ...
-        let private_prop = format!("__{}", prop_name);
+        // Prevent property collisions on cached query __ properties by checking existing class members
+        let mut private_prop = format!("__{}", prop_name);
+        while existing_members.contains(&private_prop) {
+            private_prop = format!("_{}", private_prop);
+        }
+        existing_members.insert(private_prop.clone());
         helper.assign_nullish(ast.allocator().alloc_str(&private_prop), coalesced)
     } else {
         coalesced

@@ -160,12 +160,17 @@ pub fn run_fuse_pipeline(config: &FuseConfig, dry_run: bool) -> FuseResult {
     let total_rules = all_normalized_rules.len() as u32;
     let unique_rules = frequency_index.rule_map.len() as u32;
     let mut rules_deduped = 0;
+    let mut bytes_saved = 0;
     for cluster in &clusters {
         let multiplier = cluster.shared_by_files.len().saturating_sub(1);
         rules_deduped += (cluster.rules.len() * multiplier) as u32;
+        let cluster_bytes: usize = cluster
+            .rules
+            .iter()
+            .map(|r| r.full_canonical_css.len())
+            .sum();
+        bytes_saved += (multiplier * cluster_bytes) as u32;
     }
-
-    let bytes_saved = rules_deduped * 35; // rough estimate of bytes saved per deduped rule
 
     let stats = FuseStats {
         files_scanned: files.len() as u32,

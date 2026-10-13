@@ -5,7 +5,7 @@ use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_semantic::SemanticBuilder;
+use oxc_semantic::{Scoping, SemanticBuilder, SymbolId};
 use oxc_span::SourceType;
 use oxc_traverse::{traverse_mut, Traverse, TraverseCtx};
 use std::collections::HashSet;
@@ -46,13 +46,34 @@ struct CssMinifierTraverser<'a> {
 }
 
 impl<'a> CssMinifierTraverser<'a> {
-    fn is_css_tag(&self, expr: &Expression) -> bool {
+    fn is_css_tag(&self, expr: &Expression, ctx: &TraverseCtx<'a, ()>) -> bool {
         match expr {
-            Expression::Identifier(ident) => self.import_ctx.css_tags.contains(ident.name.as_str()),
+            Expression::Identifier(ident) => {
+                if let Some(ref_id) = ident.reference_id.get() {
+                    let reference = ctx.scoping().get_reference(ref_id);
+                    if let Some(sym_id) = reference.symbol_id() {
+                        return self.import_ctx.css_symbols.contains(&sym_id);
+                    }
+                }
+                if !self.import_ctx.has_imports && ident.name == "css" {
+                    let is_unshadowed = if let Some(ref_id) = ident.reference_id.get() {
+                        ctx.scoping().get_reference(ref_id).symbol_id().is_none()
+                    } else {
+                        true
+                    };
+                    return is_unshadowed;
+                }
+                false
+            }
             Expression::StaticMemberExpression(member) => {
-                if let Expression::Identifier(obj) = &member.object {
-                    if self.import_ctx.css_namespaces.contains(obj.name.as_str()) {
-                        return member.property.name.as_str() == "css";
+                if member.property.name.as_str() == "css" {
+                    if let Expression::Identifier(obj) = &member.object {
+                        if let Some(ref_id) = obj.reference_id.get() {
+                            let reference = ctx.scoping().get_reference(ref_id);
+                            if let Some(sym_id) = reference.symbol_id() {
+                                return self.import_ctx.css_namespaces.contains(&sym_id);
+                            }
+                        }
                     }
                 }
                 false
@@ -66,9 +87,9 @@ impl<'a> Traverse<'a, ()> for CssMinifierTraverser<'a> {
     fn enter_tagged_template_expression(
         &mut self,
         node: &mut TaggedTemplateExpression<'a>,
-        _ctx: &mut TraverseCtx<'a, ()>,
+        ctx: &mut TraverseCtx<'a, ()>,
     ) {
-        if !self.is_css_tag(&node.tag) {
+        if !self.is_css_tag(&node.tag, ctx) {
             return;
         }
 
@@ -107,9 +128,9 @@ impl<'a> Traverse<'a, ()> for CssMinifierTraverser<'a> {
     fn enter_call_expression(
         &mut self,
         node: &mut CallExpression<'a>,
-        _ctx: &mut TraverseCtx<'a, ()>,
+        ctx: &mut TraverseCtx<'a, ()>,
     ) {
-        if !self.is_css_tag(&node.callee) {
+        if !self.is_css_tag(&node.callee, ctx) {
             return;
         }
 
@@ -159,13 +180,14 @@ pub fn is_lit_css_source(src: &str) -> bool {
 
 #[derive(Debug, Default)]
 pub struct CssImportContext {
-    pub css_tags: HashSet<String>,
-    pub css_namespaces: HashSet<String>,
+    pub css_symbols: HashSet<SymbolId>,
+    pub css_namespaces: HashSet<SymbolId>,
     pub has_imports: bool,
 }
 
-pub fn scan_css_imports(program: &Program) -> CssImportContext {
+pub fn scan_css_imports(program: &Program, scoping: &Scoping) -> CssImportContext {
     let mut ctx = CssImportContext::default();
+    let root = scoping.root_scope_id();
 
     for stmt in &program.body {
         if let Statement::ImportDeclaration(import_decl) = stmt {
@@ -180,22 +202,27 @@ pub fn scan_css_imports(program: &Program) -> CssImportContext {
                     match spec {
                         ImportDeclarationSpecifier::ImportSpecifier(named) => {
                             if named.imported.name().as_str() == "css" {
-                                ctx.css_tags.insert(named.local.name.as_str().to_string());
+                                let sym_id = named.local.symbol_id.get().or_else(|| {
+                                    scoping.get_binding(root, named.local.name.as_str().into())
+                                });
+                                if let Some(sym) = sym_id {
+                                    ctx.css_symbols.insert(sym);
+                                }
                             }
                         }
                         ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                            ctx.css_namespaces
-                                .insert(ns.local.name.as_str().to_string());
+                            let sym_id = ns.local.symbol_id.get().or_else(|| {
+                                scoping.get_binding(root, ns.local.name.as_str().into())
+                            });
+                            if let Some(sym) = sym_id {
+                                ctx.css_namespaces.insert(sym);
+                            }
                         }
                         _ => {}
                     }
                 }
             }
         }
-    }
-
-    if !ctx.has_imports {
-        ctx.css_tags.insert("css".to_string());
     }
 
     ctx
@@ -217,10 +244,10 @@ pub fn transform_embedded_css(source: &str, options: MinifyCssOptions) -> Minify
     }
 
     let mut program = parsed.program;
-    let import_ctx = scan_css_imports(&program);
 
     let semantic_ret = SemanticBuilder::new().build(&program);
     let scoping = semantic_ret.semantic.into_scoping();
+    let import_ctx = scan_css_imports(&program, &scoping);
 
     let mut traverser = CssMinifierTraverser {
         allocator: &allocator,
@@ -466,5 +493,39 @@ mod tests {
         assert!(!is_lit_css_source("@other/web-components"));
         assert!(!is_lit_css_source("react"));
         assert!(!is_lit_css_source("vue"));
+    }
+
+    #[test]
+    fn test_shadowed_css_variable_not_minified() {
+        let input = r#"
+      import { css } from 'lit';
+      function render(css) {
+        return css`
+          :host {
+            color: rgb(255, 0, 0);
+          }
+        `;
+      }
+    "#;
+
+        let res = transform_embedded_css(input, MinifyCssOptions::default());
+        assert_eq!(res.minified_templates, 0);
+        assert!(res.code.contains("rgb(255, 0, 0)"));
+    }
+
+    #[test]
+    fn test_unrelated_css_local_variable_not_minified() {
+        let input = r#"
+      const css = (strings) => strings[0];
+      const res = css`
+        :host {
+          color: rgb(255, 0, 0);
+        }
+      `;
+    "#;
+
+        let res = transform_embedded_css(input, MinifyCssOptions::default());
+        assert_eq!(res.minified_templates, 0);
+        assert!(res.code.contains("rgb(255, 0, 0)"));
     }
 }

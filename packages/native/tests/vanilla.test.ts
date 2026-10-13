@@ -92,4 +92,23 @@ export class NavItem extends LitElement {
     expect(res.code).toContain('toggleAttribute');
     expect(res.code).toContain('setAttribute');
   });
+
+  it('does not emit duplicate customElements.define when input source code already contains define call', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+
+export class ExplicitDefineComp extends LitElement {
+  render() {
+    return html\`<div>hello</div>\`;
+  }
+}
+customElements.define('explicit-define-comp', ExplicitDefineComp);
+`;
+    const res = transformNative(input);
+    expect(res.vanillaCount).toBe(1);
+
+    const matches = res.code.match(/customElements\.define\(['"]explicit-define-comp['"]/g);
+    expect(matches).not.toBeNull();
+    expect(matches).toHaveLength(1);
+  });
 });

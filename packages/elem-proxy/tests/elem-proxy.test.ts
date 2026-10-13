@@ -290,4 +290,119 @@ describe('elem-proxy runtime behavior', () => {
     expect(el.title).toBe('Hello World');
     expect(el.count).toBe(123);
   });
+
+  it('instantiates transformed proxy and reads/writes properties without RangeError', () => {
+    const input = `
+import { LitElement } from 'lit';
+
+export class LivePropEl extends LitElement {
+  static properties = {
+    message: { type: String },
+    count: { type: Number },
+  };
+  createRenderRoot() { return this; }
+  connectedCallback() {
+    this._connectedCalled = true;
+  }
+}
+customElements.define('live-prop-el', LivePropEl);
+`;
+    const res = transformElemProxy(input);
+    expect(res.proxiedElementsCount).toBe(1);
+
+    const runnable = res.code.replace(/import [^;]+;/g, '').replace(/export [^;]+;/g, '');
+    let RegisteredClass: any = null;
+
+    class MockHTMLElement {
+      isConnected = false;
+    }
+    class MockLitElement extends MockHTMLElement {
+      static finalize() {}
+    }
+
+    const fn = new Function('HTMLElement', 'LitElement', 'customElements', runnable);
+    fn(MockHTMLElement, MockLitElement, {
+      define: (_tag: string, cls: any) => {
+        RegisteredClass = cls;
+      },
+    });
+
+    expect(RegisteredClass).not.toBeNull();
+    const inst = new RegisteredClass();
+
+    // 1. Property write before connection must not throw RangeError and must store value
+    inst.message = 'hello';
+    expect(inst.message).toBe('hello');
+
+    inst.count = 100;
+    expect(inst.count).toBe(100);
+
+    // 2. connectedCallback must NOT have been called while unconnected
+    expect(inst._connectedCalled).toBeUndefined();
+
+    // 3. createRenderRoot must be copied from RealClass prototype
+    expect(typeof inst.createRenderRoot).toBe('function');
+    expect(inst.createRenderRoot()).toBe(inst);
+
+    // 4. Connecting invokes connectedCallback
+    inst.isConnected = true;
+    inst.connectedCallback();
+    expect(inst._connectedCalled).toBe(true);
+  });
+
+  it('replays pre-connection buffered attributes to RealClass attributeChangedCallback upon upgrade', () => {
+    const input = `
+import { LitElement } from 'lit';
+
+export class AttrBufferEl extends LitElement {
+  static properties = {
+    theme: { type: String, attribute: 'data-theme' },
+    size: { type: String, attribute: 'data-size' },
+  };
+  attributeChangedCallback(name, oldVal, newVal) {
+    if (!this._attrHistory) this._attrHistory = [];
+    this._attrHistory.push({ name, oldVal, newVal });
+  }
+}
+customElements.define('attr-buffer-el', AttrBufferEl);
+`;
+    const res = transformElemProxy(input);
+    expect(res.proxiedElementsCount).toBe(1);
+
+    const runnable = res.code.replace(/import [^;]+;/g, '').replace(/export [^;]+;/g, '');
+    let RegisteredClass: any = null;
+
+    class MockHTMLElement {
+      isConnected = false;
+    }
+    class MockLitElement extends MockHTMLElement {
+      static finalize() {}
+    }
+
+    const fn = new Function('HTMLElement', 'LitElement', 'customElements', runnable);
+    fn(MockHTMLElement, MockLitElement, {
+      define: (_tag: string, cls: any) => {
+        RegisteredClass = cls;
+      },
+    });
+
+    expect(RegisteredClass).not.toBeNull();
+    const inst = new RegisteredClass();
+
+    // 1. Buffer attribute before element is connected
+    inst.attributeChangedCallback('data-theme', null, 'dark');
+    inst.attributeChangedCallback('data-size', null, 'large');
+    expect(inst._attrHistory).toBeUndefined();
+
+    // 2. Connect element to trigger __upgrade()
+    inst.isConnected = true;
+    inst.connectedCallback();
+
+    // 3. Assert buffered attributes were properly replayed to RealClass.prototype.attributeChangedCallback
+    expect(inst._attrHistory).toBeDefined();
+    expect(inst._attrHistory).toEqual([
+      { name: 'data-theme', oldVal: null, newVal: 'dark' },
+      { name: 'data-size', oldVal: null, newVal: 'large' },
+    ]);
+  });
 });

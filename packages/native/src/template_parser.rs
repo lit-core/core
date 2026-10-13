@@ -13,7 +13,6 @@ pub struct BindingSite {
     pub name: Option<String>,
     pub path: Vec<usize>,
     pub expression_index: usize,
-    pub expr_str: String,
 }
 
 #[derive(Debug, Clone)]
@@ -28,48 +27,84 @@ enum DomNode {
         tag: String,
         static_attrs: String,
         children: Vec<DomNode>,
-        bindings: Vec<(BindingKind, String, usize, String)>, // (kind, name, expr_idx, expr_str)
+        bindings: Vec<(BindingKind, String, usize)>, // (kind, name, expr_idx)
     },
     Text(String),
     Marker {
         expr_idx: usize,
-        expr_str: String,
     },
     Comment(String),
 }
 
 /// Parses an HTML tagged template literal given its static string slices (quasis)
-/// and expressions (as code strings).
-pub fn parse_html_template(quasis: &[&str], expressions: &[&str]) -> ParsedTemplate {
+/// and expression count.
+pub fn parse_html_template(quasis: &[&str], num_expressions: usize) -> Option<ParsedTemplate> {
     if quasis.is_empty() {
-        return ParsedTemplate {
+        return Some(ParsedTemplate {
             html: String::new(),
             bindings: Vec::new(),
-        };
+        });
     }
 
     // Pass 1: Analyze each expression boundary to determine if it is an attribute/event binding
-    // or a child text binding.
-    // Build an annotated intermediate representation.
+    // or a child text binding using a quote- and comment-aware state machine.
     let mut combined = String::new();
-    let num_exprs = expressions.len();
+    let num_exprs = num_expressions;
 
     // Store pending attribute bindings to attach to elements during tokenization
     // expr_idx -> (is_attr, kind, name)
     let mut expr_meta: Vec<(bool, BindingKind, String)> = Vec::with_capacity(num_exprs);
+    let mut current_state = HtmlParserState::Text;
 
     for (i, quasi) in quasis.iter().enumerate() {
+        current_state = advance_html_state(current_state, quasi);
         combined.push_str(quasi);
 
         if i < num_exprs {
-            let expr_str = expressions[i];
-            // Check preceding text in `combined` to determine if we are inside a tag attribute
-            let trimmed = combined.trim_end();
-            let is_in_tag = is_inside_tag(&combined);
+            let is_in_tag = is_inside_tag_state(current_state);
 
             if is_in_tag {
+                let trimmed = combined.trim_end();
+
+                // Guard against dynamic tag names:
+                // e.g. `<${this.tag}>` or `</${this.tag}>`
+                if trimmed.ends_with('<') || trimmed.ends_with("</") {
+                    return None;
+                }
+                if let Some(last_lt) = trimmed.rfind('<') {
+                    let after_lt = &trimmed[last_lt..];
+                    if !after_lt.contains(char::is_whitespace) && !after_lt.contains('=') {
+                        return None;
+                    }
+                }
+
+                // Guard against dynamic attribute names: expression inside tag must be preceded by '='
+                let (has_eq, without_eq) = if let Some(s) = trimmed.strip_suffix("=\"") {
+                    (true, s)
+                } else if let Some(s) = trimmed.strip_suffix("='") {
+                    (true, s)
+                } else if let Some(s) = trimmed.strip_suffix('=') {
+                    (true, s)
+                } else {
+                    (false, trimmed)
+                };
+
+                if !has_eq {
+                    return None;
+                }
+
                 // Find attribute name preceding `=`
-                let (kind, attr_name) = extract_attribute_binding(trimmed);
+                let (kind, attr_name) = extract_attribute_binding(without_eq);
+                if attr_name.is_empty()
+                    || attr_name.contains('<')
+                    || attr_name.contains('>')
+                    || attr_name.contains('/')
+                    || attr_name.contains('"')
+                    || attr_name.contains('\'')
+                {
+                    return None;
+                }
+
                 expr_meta.push((true, kind, attr_name.clone()));
                 // Insert a placeholder attribute so HTML remains valid
                 combined.push_str(&format!("\"__LIT_EXP_{}__\"", i));
@@ -78,12 +113,11 @@ pub fn parse_html_template(quasis: &[&str], expressions: &[&str]) -> ParsedTempl
                 expr_meta.push((false, BindingKind::Text, String::new()));
                 combined.push_str(&format!("<!--__LIT_EXP_{}__-->", i));
             }
-            let _ = expr_str;
         }
     }
 
     // Pass 2: Parse the combined string into a DOM tree
-    let root_nodes = parse_html_to_tree(&combined, expressions, &expr_meta);
+    let root_nodes = parse_html_to_tree(&combined, &expr_meta);
 
     // Pass 3: Walk DOM tree, compute node paths, and generate clean HTML
     let mut bindings = Vec::new();
@@ -94,23 +128,131 @@ pub fn parse_html_template(quasis: &[&str], expressions: &[&str]) -> ParsedTempl
         collect_bindings_and_html(node, &current_path, &mut bindings, &mut clean_html);
     }
 
+    // Guard against malformed or empty attribute/event/prop binding names
+    for b in &bindings {
+        if b.kind != BindingKind::Text {
+            match &b.name {
+                Some(n) if n.is_empty() => return None,
+                None => return None,
+                _ => {}
+            }
+        }
+    }
+
+    // Guard against placeholder leaking into clean_html tag names
+    if clean_html.contains("<\"__lit_exp") || clean_html.contains("<\"__LIT_EXP") {
+        return None;
+    }
+
     // Sort bindings by expression_index
     bindings.sort_by_key(|b| b.expression_index);
 
-    ParsedTemplate {
+    Some(ParsedTemplate {
         html: clean_html,
         bindings,
-    }
+    })
 }
 
-fn is_inside_tag(s: &str) -> bool {
-    let last_open = s.rfind('<');
-    let last_close = s.rfind('>');
-    match (last_open, last_close) {
-        (Some(o), Some(c)) => o > c,
-        (Some(_), None) => true,
-        _ => false,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HtmlParserState {
+    Text,
+    Tag,
+    AttrDouble,
+    AttrSingle,
+    AttrUnquoted,
+    Comment,
+}
+
+fn advance_html_state(mut state: HtmlParserState, s: &str) -> HtmlParserState {
+    let chars: Vec<char> = s.chars().collect();
+    let len = chars.len();
+    let mut i = 0;
+
+    while i < len {
+        match state {
+            HtmlParserState::Comment => {
+                if i + 2 < len && chars[i] == '-' && chars[i + 1] == '-' && chars[i + 2] == '>' {
+                    i += 3;
+                    state = HtmlParserState::Text;
+                } else {
+                    i += 1;
+                }
+            }
+            HtmlParserState::AttrDouble => {
+                if chars[i] == '"' {
+                    state = HtmlParserState::Tag;
+                }
+                i += 1;
+            }
+            HtmlParserState::AttrSingle => {
+                if chars[i] == '\'' {
+                    state = HtmlParserState::Tag;
+                }
+                i += 1;
+            }
+            HtmlParserState::AttrUnquoted => {
+                if chars[i].is_whitespace() || chars[i] == '>' {
+                    state = if chars[i] == '>' {
+                        HtmlParserState::Text
+                    } else {
+                        HtmlParserState::Tag
+                    };
+                }
+                i += 1;
+            }
+            HtmlParserState::Tag => {
+                let ch = chars[i];
+                if ch == '"' {
+                    state = HtmlParserState::AttrDouble;
+                    i += 1;
+                } else if ch == '\'' {
+                    state = HtmlParserState::AttrSingle;
+                    i += 1;
+                } else if ch == '='
+                    && i + 1 < len
+                    && !chars[i + 1].is_whitespace()
+                    && chars[i + 1] != '\''
+                    && chars[i + 1] != '"'
+                {
+                    state = HtmlParserState::AttrUnquoted;
+                    i += 1;
+                } else if ch == '>' {
+                    state = HtmlParserState::Text;
+                    i += 1;
+                } else {
+                    i += 1;
+                }
+            }
+            HtmlParserState::Text => {
+                if i + 3 < len
+                    && chars[i] == '<'
+                    && chars[i + 1] == '!'
+                    && chars[i + 2] == '-'
+                    && chars[i + 3] == '-'
+                {
+                    state = HtmlParserState::Comment;
+                    i += 4;
+                } else if chars[i] == '<' {
+                    state = HtmlParserState::Tag;
+                    i += 1;
+                } else {
+                    i += 1;
+                }
+            }
+        }
     }
+
+    state
+}
+
+fn is_inside_tag_state(state: HtmlParserState) -> bool {
+    matches!(
+        state,
+        HtmlParserState::Tag
+            | HtmlParserState::AttrDouble
+            | HtmlParserState::AttrSingle
+            | HtmlParserState::AttrUnquoted
+    )
 }
 
 fn extract_attribute_binding(trimmed: &str) -> (BindingKind, String) {
@@ -140,14 +282,10 @@ type StackFrame = (
     String,
     String,
     Vec<DomNode>,
-    Vec<(BindingKind, String, usize, String)>,
+    Vec<(BindingKind, String, usize)>,
 );
 
-fn parse_html_to_tree(
-    html: &str,
-    expressions: &[&str],
-    expr_meta: &[(bool, BindingKind, String)],
-) -> Vec<DomNode> {
+fn parse_html_to_tree(html: &str, expr_meta: &[(bool, BindingKind, String)]) -> Vec<DomNode> {
     let mut chars = html.char_indices().peekable();
     let mut stack: Vec<StackFrame> = Vec::new();
     let mut top_nodes: Vec<DomNode> = Vec::new();
@@ -178,18 +316,13 @@ fn parse_html_to_tree(
             if rest.starts_with("<!--") {
                 flush_text(&mut text_buf, &mut stack, &mut top_nodes);
 
-                if let Some(end_comment) = rest.find("-->") {
+                if let Some(end_comment) = find_comment_end(rest) {
                     let comment_content = &rest[4..end_comment];
                     if comment_content.starts_with("__LIT_EXP_") && comment_content.ends_with("__")
                     {
                         let num_str = &comment_content[10..comment_content.len() - 2];
                         if let Ok(exp_idx) = num_str.parse::<usize>() {
-                            let expr_str =
-                                expressions.get(exp_idx).copied().unwrap_or("").to_string();
-                            let marker = DomNode::Marker {
-                                expr_idx: exp_idx,
-                                expr_str,
-                            };
+                            let marker = DomNode::Marker { expr_idx: exp_idx };
                             if let Some((_, _, children, _)) = stack.last_mut() {
                                 children.push(marker);
                             } else {
@@ -217,7 +350,7 @@ fn parse_html_to_tree(
             // Check for closing tag </tag>
             if rest.starts_with("</") {
                 flush_text(&mut text_buf, &mut stack, &mut top_nodes);
-                if let Some(close_idx) = rest.find('>') {
+                if let Some(close_idx) = find_closing_tag_end(rest) {
                     let tag_name = rest[2..close_idx].trim().to_ascii_lowercase();
                     // Pop from stack until matching tag
                     if let Some(pos) = stack.iter().rposition(|(t, _, _, _)| *t == tag_name) {
@@ -282,8 +415,7 @@ fn parse_html_to_tree(
                 let mut elem_bindings = Vec::new();
                 for (expr_idx, &(is_attr, ref kind, ref name)) in expr_meta.iter().enumerate() {
                     if is_attr && tag_body.contains(&format!("__LIT_EXP_{}__", expr_idx)) {
-                        let expr_str = expressions.get(expr_idx).copied().unwrap_or("").to_string();
-                        elem_bindings.push((kind.clone(), name.clone(), expr_idx, expr_str));
+                        elem_bindings.push((kind.clone(), name.clone(), expr_idx));
                     }
                 }
 
@@ -381,6 +513,28 @@ fn clean_static_attributes(tag_body: &str, tag_name_len: usize) -> String {
     result.trim().to_string()
 }
 
+fn find_comment_end(s: &str) -> Option<usize> {
+    let bytes = s.as_bytes();
+    if bytes.len() < 7 {
+        return None;
+    }
+    let mut i = 4;
+    while i + 2 < bytes.len() {
+        if bytes[i] == b'-' && bytes[i + 1] == b'-' && bytes[i + 2] == b'>' {
+            return Some(i);
+        }
+        i += 1;
+    }
+    None
+}
+
+fn find_closing_tag_end(s: &str) -> Option<usize> {
+    s.char_indices()
+        .skip(2)
+        .find(|&(_, c)| c == '>')
+        .map(|(i, _)| i)
+}
+
 fn find_tag_end(s: &str) -> Option<usize> {
     let mut in_quote = None;
     for (i, ch) in s.char_indices() {
@@ -416,13 +570,12 @@ fn collect_bindings_and_html(
             bindings: elem_bindings,
         } => {
             // Record element bindings (attributes, properties, events)
-            for (kind, name, expr_idx, expr_str) in elem_bindings {
+            for (kind, name, expr_idx) in elem_bindings {
                 bindings.push(BindingSite {
                     kind: kind.clone(),
                     name: Some(name.clone()),
                     path: path.to_vec(),
                     expression_index: *expr_idx,
-                    expr_str: expr_str.clone(),
                 });
             }
 
@@ -453,13 +606,12 @@ fn collect_bindings_and_html(
         DomNode::Text(text) => {
             html.push_str(text);
         }
-        DomNode::Marker { expr_idx, expr_str } => {
+        DomNode::Marker { expr_idx } => {
             bindings.push(BindingSite {
                 kind: BindingKind::Text,
                 name: None,
                 path: path.to_vec(),
                 expression_index: *expr_idx,
-                expr_str: expr_str.clone(),
             });
             // Output a placeholder comment in template HTML
             html.push_str("<!---->");
@@ -469,5 +621,50 @@ fn collect_bindings_and_html(
             html.push_str(comment);
             html.push_str("-->");
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_quote_aware_attribute_parsing() {
+        // Tag with attribute value containing '>' inside quotes
+        let quasis = vec!["<button title=\"hello > world\" @submit=", "></button>"];
+        let parsed = parse_html_template(&quasis, 1).unwrap();
+        assert_eq!(parsed.bindings.len(), 1);
+        assert_eq!(parsed.bindings[0].kind, BindingKind::Event);
+        assert_eq!(parsed.bindings[0].name.as_deref(), Some("submit"));
+        assert!(parsed.html.contains("title=\"hello > world\""));
+    }
+
+    #[test]
+    fn test_comment_aware_parsing() {
+        // Comment containing '>' characters
+        let quasis = vec!["<div><!-- comment > arrow -->", "</div>"];
+        let parsed = parse_html_template(&quasis, 1).unwrap();
+        assert_eq!(parsed.bindings.len(), 1);
+        assert_eq!(parsed.bindings[0].kind, BindingKind::Text);
+        assert!(parsed.html.contains("<!-- comment > arrow -->"));
+    }
+
+    #[test]
+    fn test_empty_template() {
+        let quasis: Vec<&str> = Vec::new();
+        let parsed = parse_html_template(&quasis, 0).unwrap();
+        assert!(parsed.html.is_empty());
+        assert!(parsed.bindings.is_empty());
+    }
+
+    #[test]
+    fn test_dynamic_tag_and_attribute_bailout() {
+        // Dynamic tag name
+        let dyn_tag_quasis = vec!["<", ">Header</", ">"];
+        assert!(parse_html_template(&dyn_tag_quasis, 2).is_none());
+
+        // Dynamic attribute name without '='
+        let dyn_attr_quasis = vec!["<div ", "=\"val\">Content</div>"];
+        assert!(parse_html_template(&dyn_attr_quasis, 1).is_none());
     }
 }

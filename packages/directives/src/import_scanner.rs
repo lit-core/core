@@ -1,4 +1,5 @@
 use oxc_ast::ast::*;
+use oxc_semantic::{Scoping, SymbolId};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -134,10 +135,16 @@ pub fn is_directive_export_module(specifier: &str) -> bool {
 
 #[derive(Debug, Default)]
 pub struct ImportContext {
+    /// Maps SymbolId of imported directive binding to its DirectiveKind
+    pub directive_symbols: HashMap<SymbolId, DirectiveKind>,
+    /// Maps SymbolId of imported namespace binding to its DirectiveKind
+    pub namespace_symbols: HashMap<SymbolId, DirectiveKind>,
     /// Maps local identifier name (as imported in the file) to its DirectiveKind
     pub directive_bindings: HashMap<String, DirectiveKind>,
     /// Maps namespace local name to its DirectiveKind (if namespace import from lit/directives/*)
     pub namespace_bindings: HashMap<String, DirectiveKind>,
+    /// Maps SymbolId to local identifier name
+    pub symbol_to_local_name: HashMap<SymbolId, String>,
     /// Whether `nothing` is already imported from lit/lit-html
     pub has_nothing_imported: bool,
     /// Specifier for existing lit import if any ("lit" or "lit-html")
@@ -145,8 +152,9 @@ pub struct ImportContext {
 }
 
 impl ImportContext {
-    pub fn scan<'a>(program: &Program<'a>) -> Self {
+    pub fn scan<'a>(program: &Program<'a>, scoping: &Scoping) -> Self {
         let mut ctx = Self::default();
+        let root = scoping.root_scope_id();
 
         for stmt in &program.body {
             if let Statement::ImportDeclaration(import_decl) = stmt {
@@ -160,10 +168,27 @@ impl ImportContext {
                                 match spec {
                                     ImportDeclarationSpecifier::ImportSpecifier(named) => {
                                         let local_name = named.local.name.as_str().to_string();
+                                        let sym_id = named.local.symbol_id.get().or_else(|| {
+                                            scoping
+                                                .get_binding(root, named.local.name.as_str().into())
+                                        });
+                                        if let Some(sym) = sym_id {
+                                            ctx.directive_symbols.insert(sym, kind_from_slug);
+                                            ctx.symbol_to_local_name
+                                                .insert(sym, local_name.clone());
+                                        }
                                         ctx.directive_bindings.insert(local_name, kind_from_slug);
                                     }
                                     ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
                                         let local_name = ns.local.name.as_str().to_string();
+                                        let sym_id = ns.local.symbol_id.get().or_else(|| {
+                                            scoping.get_binding(root, ns.local.name.as_str().into())
+                                        });
+                                        if let Some(sym) = sym_id {
+                                            ctx.namespace_symbols.insert(sym, kind_from_slug);
+                                            ctx.symbol_to_local_name
+                                                .insert(sym, local_name.clone());
+                                        }
                                         ctx.namespace_bindings.insert(local_name, kind_from_slug);
                                     }
                                     _ => {}
@@ -187,6 +212,13 @@ impl ImportContext {
                                     DirectiveKind::from_canonical_name(imported_name.as_str())
                                 {
                                     let local_name = named.local.name.as_str().to_string();
+                                    let sym_id = named.local.symbol_id.get().or_else(|| {
+                                        scoping.get_binding(root, named.local.name.as_str().into())
+                                    });
+                                    if let Some(sym) = sym_id {
+                                        ctx.directive_symbols.insert(sym, kind);
+                                        ctx.symbol_to_local_name.insert(sym, local_name.clone());
+                                    }
                                     ctx.directive_bindings.insert(local_name, kind);
                                 }
                             }
@@ -200,10 +232,21 @@ impl ImportContext {
     }
 
     pub fn has_directives(&self) -> bool {
-        !self.directive_bindings.is_empty() || !self.namespace_bindings.is_empty()
+        !self.directive_symbols.is_empty()
+            || !self.namespace_symbols.is_empty()
+            || !self.directive_bindings.is_empty()
+            || !self.namespace_bindings.is_empty()
     }
 
     pub fn get_directive_kind(&self, local_name: &str) -> Option<DirectiveKind> {
         self.directive_bindings.get(local_name).copied()
+    }
+
+    pub fn get_directive_kind_by_symbol(&self, sym: SymbolId) -> Option<DirectiveKind> {
+        self.directive_symbols.get(&sym).copied()
+    }
+
+    pub fn get_namespace_kind_by_symbol(&self, sym: SymbolId) -> Option<DirectiveKind> {
+        self.namespace_symbols.get(&sym).copied()
     }
 }

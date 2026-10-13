@@ -42,7 +42,9 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
     }
 
     let mut program = parsed.program;
-    let import_ctx = ImportContext::scan(&program);
+    let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&program);
+    let scoping = semantic_ret.semantic.into_scoping();
+    let import_ctx = ImportContext::scan(&program, &scoping);
     let ast = AstBuilder::new(&allocator);
     let forced_mode = opts.mode.as_deref().unwrap_or("auto");
     let define_calls = classifier::scan_define_calls(&program);
@@ -57,31 +59,39 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
     for mut stmt in old_statements {
         match &mut stmt {
             Statement::ClassDeclaration(class) => {
-                if let Some(target) =
-                    classifier::classify_class(class, forced_mode, &define_calls, &import_ctx, None)
-                {
+                if let Some(target) = classifier::classify_class(
+                    class,
+                    forced_mode,
+                    &define_calls,
+                    &import_ctx,
+                    &scoping,
+                    None,
+                ) {
                     classifications.push(target.clone());
                     match target.mode.as_str() {
                         "vanilla" => {
                             let mut pre_stmts = Vec::new();
                             let mut post_stmts = Vec::new();
-                            vanilla::transform_vanilla_class(
+                            if vanilla::transform_vanilla_class(
                                 class,
-                                &source,
                                 &target,
                                 &ast,
-                                &allocator,
+                                &scoping,
+                                &import_ctx,
                                 &mut pre_stmts,
                                 &mut post_stmts,
-                            );
-                            for s in pre_stmts {
-                                new_statements.push(s);
+                            ) {
+                                for s in pre_stmts {
+                                    new_statements.push(s);
+                                }
+                                new_statements.push(stmt);
+                                for s in post_stmts {
+                                    new_statements.push(s);
+                                }
+                                vanilla_count += 1;
+                            } else {
+                                new_statements.push(stmt);
                             }
-                            new_statements.push(stmt);
-                            for s in post_stmts {
-                                new_statements.push(s);
-                            }
-                            vanilla_count += 1;
                             continue;
                         }
                         "micro" => {
@@ -108,6 +118,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                         forced_mode,
                         &define_calls,
                         &import_ctx,
+                        &scoping,
                         None,
                     ) {
                         classifications.push(target.clone());
@@ -115,23 +126,26 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                             "vanilla" => {
                                 let mut pre_stmts = Vec::new();
                                 let mut post_stmts = Vec::new();
-                                vanilla::transform_vanilla_class(
+                                if vanilla::transform_vanilla_class(
                                     class,
-                                    &source,
                                     &target,
                                     &ast,
-                                    &allocator,
+                                    &scoping,
+                                    &import_ctx,
                                     &mut pre_stmts,
                                     &mut post_stmts,
-                                );
-                                for s in pre_stmts {
-                                    new_statements.push(s);
+                                ) {
+                                    for s in pre_stmts {
+                                        new_statements.push(s);
+                                    }
+                                    new_statements.push(stmt);
+                                    for s in post_stmts {
+                                        new_statements.push(s);
+                                    }
+                                    vanilla_count += 1;
+                                } else {
+                                    new_statements.push(stmt);
                                 }
-                                new_statements.push(stmt);
-                                for s in post_stmts {
-                                    new_statements.push(s);
-                                }
-                                vanilla_count += 1;
                                 continue;
                             }
                             "micro" => {
@@ -163,6 +177,7 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                             forced_mode,
                             &define_calls,
                             &import_ctx,
+                            &scoping,
                             None,
                         ) {
                             classifications.push(target.clone());
@@ -170,23 +185,26 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                                 "vanilla" => {
                                     let mut pre_stmts = Vec::new();
                                     let mut post_stmts = Vec::new();
-                                    vanilla::transform_vanilla_class(
+                                    if vanilla::transform_vanilla_class(
                                         class,
-                                        &source,
                                         &target,
                                         &ast,
-                                        &allocator,
+                                        &scoping,
+                                        &import_ctx,
                                         &mut pre_stmts,
                                         &mut post_stmts,
-                                    );
-                                    for s in pre_stmts {
-                                        new_statements.push(s);
+                                    ) {
+                                        for s in pre_stmts {
+                                            new_statements.push(s);
+                                        }
+                                        new_statements.push(stmt);
+                                        for s in post_stmts {
+                                            new_statements.push(s);
+                                        }
+                                        vanilla_count += 1;
+                                    } else {
+                                        new_statements.push(stmt);
                                     }
-                                    new_statements.push(stmt);
-                                    for s in post_stmts {
-                                        new_statements.push(s);
-                                    }
-                                    vanilla_count += 1;
                                     continue;
                                 }
                                 "micro" => {

@@ -12,7 +12,6 @@ pub use crate::extractor::{
     check_and_extract_target, extract_class_properties, extract_decorator_tag, get_ce_define_call,
     inspect_properties_object, CustomElementTarget,
 };
-pub use crate::generator::{generate_external_proxy_wrapper, generate_proxy_wrapper};
 use oxc_ast::builder::AstBuilder;
 
 #[napi(object)]
@@ -88,21 +87,37 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
         }
     }
 
+    let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
+    let scoping = semantic_ret.semantic.into_scoping();
+    let decorator_ctx = crate::extractor::LitDecoratorContext::scan(&parsed.program, &scoping);
+
     let mut targets: HashMap<String, CustomElementTarget> = HashMap::new();
 
     // Scan classes in program body
     for stmt in &parsed.program.body {
         match stmt {
             Statement::ClassDeclaration(class) => {
-                if let Some(target) = check_and_extract_target(class, false, false, &define_calls) {
+                if let Some(target) = check_and_extract_target(
+                    class,
+                    false,
+                    false,
+                    &define_calls,
+                    &decorator_ctx,
+                    &scoping,
+                ) {
                     targets.insert(target.class_name.clone(), target);
                 }
             }
             Statement::ExportDeclaration(export_decl) => {
                 if let Declaration::ClassDeclaration(class) = &export_decl.declaration {
-                    if let Some(target) =
-                        check_and_extract_target(class, true, false, &define_calls)
-                    {
+                    if let Some(target) = check_and_extract_target(
+                        class,
+                        true,
+                        false,
+                        &define_calls,
+                        &decorator_ctx,
+                        &scoping,
+                    ) {
                         targets.insert(target.class_name.clone(), target);
                     }
                 }
@@ -111,8 +126,14 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                     &export_decl.declaration
                 {
-                    if let Some(target) = check_and_extract_target(class, true, true, &define_calls)
-                    {
+                    if let Some(target) = check_and_extract_target(
+                        class,
+                        true,
+                        true,
+                        &define_calls,
+                        &decorator_ctx,
+                        &scoping,
+                    ) {
                         targets.insert(target.class_name.clone(), target);
                     }
                 }
@@ -172,7 +193,7 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                     matched_target = Some(target);
                     class
                         .decorators
-                        .retain(|d| extract_decorator_tag(d).is_none());
+                        .retain(|d| extract_decorator_tag(d, &decorator_ctx, &scoping).is_none());
                     class_to_wrap = Some(Statement::ClassDeclaration(class));
                 } else {
                     new_body.push(Statement::ClassDeclaration(class));
@@ -195,9 +216,9 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                             .unwrap()
                             .clone();
                         matched_target = Some(target);
-                        class
-                            .decorators
-                            .retain(|d| extract_decorator_tag(d).is_none());
+                        class.decorators.retain(|d| {
+                            extract_decorator_tag(d, &decorator_ctx, &scoping).is_none()
+                        });
                         class_to_wrap = Some(Statement::ClassDeclaration(class));
                     }
                 } else {
@@ -226,9 +247,9 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                             .unwrap()
                             .clone();
                         matched_target = Some(target);
-                        class
-                            .decorators
-                            .retain(|d| extract_decorator_tag(d).is_none());
+                        class.decorators.retain(|d| {
+                            extract_decorator_tag(d, &decorator_ctx, &scoping).is_none()
+                        });
                         class_to_wrap = Some(Statement::ClassDeclaration(class));
                     }
                 } else {

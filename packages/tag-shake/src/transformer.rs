@@ -332,4 +332,26 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn test_aliased_decorator_helper_custom_element() {
+        let code = r#"
+            import { customElement } from 'lit/decorators.js';
+            import { __decorate as dec } from 'tslib';
+            let DeadWidget = class DeadWidget {};
+            DeadWidget = dec([
+                customElement('dead-widget')
+            ], DeadWidget);
+        "#;
+        let res = transform_code(
+            code,
+            TagShakeOptions {
+                used_tags: Some(vec![]),
+                ..Default::default()
+            },
+        );
+        assert_eq!(res.shaken_registrations_count, 1);
+        assert_eq!(res.removed_tags, vec!["dead-widget"]);
+        assert!(!res.code.contains("dead-widget"));
+    }
 }

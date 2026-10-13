@@ -6,127 +6,43 @@
     "name": "Web Awesome (20 Canonical Components)",
     "packageName": "@awesome.me/webawesome",
     "version": "3.14.0",
-    "componentCount": 20,
+    "componentCount": 6,
     "components": [
       {
-        "concept": "button",
-        "tag": "wa-button",
-        "label": "Button",
-        "path": "dist/components/button/button.js"
-      },
-      {
-        "concept": "checkbox",
-        "tag": "wa-checkbox",
-        "label": "Checkbox",
-        "path": "dist/components/checkbox/checkbox.js"
-      },
-      {
-        "concept": "radio",
-        "tag": "wa-radio",
-        "label": "Radio button",
-        "path": "dist/components/radio/radio.js"
-      },
-      {
-        "concept": "switch",
-        "tag": "wa-switch",
-        "label": "Switch / toggle",
-        "path": "dist/components/switch/switch.js"
-      },
-      {
-        "concept": "text-input",
-        "tag": "wa-input",
-        "label": "Text input / field",
-        "path": "dist/components/input/input.js"
-      },
-      {
-        "concept": "select",
-        "tag": "wa-select",
-        "label": "Select / dropdown",
-        "path": "dist/components/select/select.js"
-      },
-      {
-        "concept": "dialog",
-        "tag": "wa-dialog",
-        "label": "Dialog / modal",
-        "path": "dist/components/dialog/dialog.js"
+        "concept": "card",
+        "tag": "wa-card",
+        "path": "dist/components/card/card.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/card/card.js';"
       },
       {
         "concept": "badge",
         "tag": "wa-badge",
-        "label": "Badge / tag",
-        "path": "dist/components/badge/badge.js"
-      },
-      {
-        "concept": "tabs",
-        "tag": "wa-tab-group",
-        "label": "Tabs",
-        "path": "dist/components/tab-group/tab-group.js"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "wa-progress-bar",
-        "label": "Progress bar",
-        "path": "dist/components/progress-bar/progress-bar.js"
-      },
-      {
-        "concept": "spinner",
-        "tag": "wa-spinner",
-        "label": "Spinner / loader",
-        "path": "dist/components/spinner/spinner.js"
-      },
-      {
-        "concept": "slider",
-        "tag": "wa-slider",
-        "label": "Slider",
-        "path": "dist/components/slider/slider.js"
-      },
-      {
-        "concept": "menu",
-        "tag": "wa-dropdown",
-        "label": "Menu / popover",
-        "path": "dist/components/dropdown/dropdown.js"
-      },
-      {
-        "concept": "divider",
-        "tag": "wa-divider",
-        "label": "Divider",
-        "path": "dist/components/divider/divider.js"
+        "path": "dist/components/badge/badge.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/badge/badge.js';"
       },
       {
         "concept": "icon",
         "tag": "wa-icon",
-        "label": "Icon",
-        "path": "dist/components/icon/icon.js"
+        "path": "dist/components/icon/icon.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/icon/icon.js';"
       },
       {
-        "concept": "icon-button",
-        "tag": "wa-copy-button",
-        "label": "Icon button",
-        "path": "dist/components/copy-button/copy-button.js"
-      },
-      {
-        "concept": "card",
-        "tag": "wa-card",
-        "label": "Card / tile",
-        "path": "dist/components/card/card.js"
-      },
-      {
-        "concept": "elevation",
-        "tag": "wa-popover",
-        "label": "Elevation / focus",
-        "path": "dist/components/popover/popover.js"
-      },
-      {
-        "concept": "list",
-        "tag": "wa-details",
-        "label": "List / structured",
-        "path": "dist/components/details/details.js"
+        "concept": "button",
+        "tag": "wa-button",
+        "path": "dist/components/button/button.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/button/button.js';"
       },
       {
         "concept": "chips",
         "tag": "wa-breadcrumb",
-        "label": "Chips / segmented",
-        "path": "dist/components/breadcrumb/breadcrumb.js"
+        "path": "dist/components/breadcrumb/breadcrumb.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/breadcrumb/breadcrumb.js';"
+      },
+      {
+        "concept": "divider",
+        "tag": "wa-divider",
+        "path": "dist/components/divider/divider.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/divider/divider.js';"
       }
     ]
   },
@@ -139,15 +55,16 @@
   "scenario": {
     "id": "dynamic-feed",
     "name": "Dynamic feed",
-    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering"
+    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering",
+    "componentCount": 6
   },
-  "timestamp": "2026-10-10T10:11:48.658Z",
+  "timestamp": "2026-10-12T23:47:40.677Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -162,10 +79,10 @@
     }
   },
   "metrics": {
-    "rawBytes": 152743,
-    "gzipBytes": 38793,
-    "brotliBytes": 32392,
-    "buildTimeMs": 18.071665999999823
+    "rawBytes": 152726,
+    "gzipBytes": 38799,
+    "brotliBytes": 32349,
+    "buildTimeMs": 19.411458999999923
   },
   "baseline": {
     "rawBytes": 152679,
@@ -179,36 +96,50 @@
     "heapUsedBytes": 2928856,
     "scenarioSpecific": {
       "totalItems": 50,
-      "directivesUsed": ["repeat", "classMap", "styleMap", "ifDefined"],
+      "directivesUsed": [
+        "repeat",
+        "classMap",
+        "styleMap",
+        "ifDefined"
+      ],
       "renderedCards": 50
     }
   },
   "deltas": {
-    "rawBytes": 64,
-    "rawPercent": 0.04,
-    "gzipBytes": 12,
-    "gzipPercent": 0.03,
-    "brotliBytes": 59,
-    "brotliPercent": 0.18,
-    "buildTimeMs": -1.6,
-    "firstRenderMs": 9.5,
-    "speedupPercent": -31.15,
-    "updateMs": 0.3,
-    "updateSpeedupPercent": -6.38,
-    "evalSpeedupPercent": 12.5,
-    "registrationSpeedupPercent": -300,
-    "memorySavingsPercent": 1.39
+    "rawBytes": 47,
+    "rawPercent": 0.03,
+    "gzipBytes": 18,
+    "gzipPercent": 0.05,
+    "brotliBytes": 16,
+    "brotliPercent": 0.05,
+    "buildTimeMs": -0.2,
+    "firstRenderMs": 5,
+    "speedupPercent": -16.39,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 2.13,
+    "evalSpeedupPercent": 6.25,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -18.83
   },
   "runtime": {
-    "firstRenderMs": 40,
-    "updateMs": 5,
-    "scriptEvalMs": 1.4,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 2888077,
-    "speedupPercent": -31.15,
-    "updateSpeedupPercent": -6.38,
-    "evalSpeedupPercent": 12.5,
-    "registrationSpeedupPercent": -300,
-    "memorySavingsPercent": 1.39
+    "firstRenderMs": 35.5,
+    "updateMs": 4.6,
+    "scriptEvalMs": 1.5,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 3480498,
+    "speedupPercent": -16.39,
+    "updateSpeedupPercent": 2.13,
+    "evalSpeedupPercent": 6.25,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -18.83
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 555,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

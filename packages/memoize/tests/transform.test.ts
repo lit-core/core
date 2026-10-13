@@ -269,4 +269,88 @@ class TestComponent {
     expect(render5).not.toBe(render4);
     expect(render5).toEqual([{ text: 'blueberry' }]);
   });
+
+  it('does not memoize direct in-place sort on this.items', () => {
+    const input = `
+export class InPlaceSortComponent extends LitElement {
+  render() {
+    return html\`
+      <div>
+        \${this.items.sort((a, b) => a - b)}
+      </div>
+    \`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.memoizedCount).toBe(0);
+    expect(res.code).not.toContain('__memo_');
+  });
+
+  it('memoizes sort on fresh array copies (slice or array spread)', () => {
+    const input = `
+export class FreshSortComponent extends LitElement {
+  render() {
+    return html\`
+      <div>
+        \${this.items.slice().sort((a, b) => a - b).map(x => html\`<span>\${x}</span>\`)}
+        \${[...this.items].sort((a, b) => a - b).map(x => html\`<span>\${x}</span>\`)}
+      </div>
+    \`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.memoizedCount).toBe(2);
+    expect(res.componentsCount).toBe(1);
+    expect(res.code).toContain('__memo_items_ref === this.items');
+  });
+
+  it('avoids identifier collision when _memoized_items already exists in scope', () => {
+    const input = `
+export class CollisionComponent extends LitElement {
+  render() {
+    const _memoized_items = 'existing';
+    return html\`
+      <div>
+        \${_memoized_items}
+        \${this.items.map(x => html\`<span>\${x}</span>\`)}
+      </div>
+    \`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.memoizedCount).toBe(1);
+    expect(res.code).toContain('let _memoized_items_1;');
+    expect(res.code).toMatch(/const _memoized_items = ['"]existing['"];/);
+  });
+
+  it('handles aliased LitElement import and bails out on non-Lit classes', () => {
+    const aliasedInput = `
+import { LitElement as CustomLitBase, html } from 'lit';
+
+export class AliasedComponent extends CustomLitBase {
+  render() {
+    return html\`<div>\${this.items.map(x => html\`<li>\${x}</li>\`)}</div>\`;
+  }
+}
+`;
+    const aliasedRes = fn(aliasedInput);
+    expect(aliasedRes.memoizedCount).toBe(1);
+    expect(aliasedRes.componentsCount).toBe(1);
+
+    const nonLitInput = `
+import { OtherBase } from './other-lib';
+
+export class NonLitComponent extends OtherBase {
+  render() {
+    return html\`<div>\${this.items.map(x => html\`<li>\${x}</li>\`)}</div>\`;
+  }
+}
+`;
+    const nonLitRes = fn(nonLitInput);
+    expect(nonLitRes.memoizedCount).toBe(0);
+    expect(nonLitRes.componentsCount).toBe(0);
+  });
 });

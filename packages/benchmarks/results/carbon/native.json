@@ -142,13 +142,13 @@
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
     "componentCount": 20
   },
-  "timestamp": "2026-10-11T01:05:56.179Z",
+  "timestamp": "2026-10-12T23:46:13.561Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1cc4959",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -166,7 +166,7 @@
     "rawBytes": 1448010,
     "gzipBytes": 187824,
     "brotliBytes": 98894,
-    "buildTimeMs": 58.848792000000685
+    "buildTimeMs": 70.65195899999998
   },
   "baseline": {
     "rawBytes": 1440814,
@@ -212,26 +212,26 @@
     "gzipPercent": 0.41,
     "brotliBytes": 233,
     "brotliPercent": 0.24,
-    "buildTimeMs": -11.5,
-    "firstRenderMs": -12.5,
-    "speedupPercent": 25.46,
-    "updateMs": -0.1,
-    "updateSpeedupPercent": 1.85,
-    "evalSpeedupPercent": -17.07,
-    "registrationSpeedupPercent": -80,
-    "memorySavingsPercent": -1.76
+    "buildTimeMs": 0.3,
+    "firstRenderMs": -14.1,
+    "speedupPercent": 28.72,
+    "updateMs": -0.7,
+    "updateSpeedupPercent": 12.96,
+    "evalSpeedupPercent": -2.44,
+    "registrationSpeedupPercent": -120,
+    "memorySavingsPercent": -1.96
   },
   "runtime": {
-    "firstRenderMs": 36.6,
-    "updateMs": 5.3,
-    "scriptEvalMs": 4.8,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 8031787,
-    "speedupPercent": 25.46,
-    "updateSpeedupPercent": 1.85,
-    "evalSpeedupPercent": -17.07,
-    "registrationSpeedupPercent": -80,
-    "memorySavingsPercent": -1.76
+    "firstRenderMs": 35,
+    "updateMs": 4.7,
+    "scriptEvalMs": 4.2,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 8046891,
+    "speedupPercent": 28.72,
+    "updateSpeedupPercent": 12.96,
+    "evalSpeedupPercent": -2.44,
+    "registrationSpeedupPercent": -120,
+    "memorySavingsPercent": -1.96
   },
   "equivalence": {
     "domStructureMatch": true,

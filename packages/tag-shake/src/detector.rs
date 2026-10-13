@@ -77,8 +77,13 @@ impl RegistrationDetector {
         stmt_index: usize,
         resolver: &SymbolResolver,
     ) -> Option<DetectedRegistration> {
-        let Expression::CallExpression(call) = expr else {
-            return None;
+        let call = match expr {
+            Expression::CallExpression(call) => call,
+            Expression::AssignmentExpression(assign) => match &assign.right {
+                Expression::CallExpression(call) => call,
+                _ => return None,
+            },
+            _ => return None,
         };
 
         // 1. Check customElements.define(...) or window.customElements.define(...) or globalThis.customElements.define(...)
@@ -143,51 +148,44 @@ impl RegistrationDetector {
         }
 
         // 3. Check transpiled decorators: __decorate([customElement('tag')], Component)
-        if let Expression::Identifier(callee_ident) = &call.callee {
-            if (callee_ident.name == "__decorate" || callee_ident.name == "_ts_decorate")
-                && call.arguments.len() >= 2
-            {
-                if let (Some(Expression::ArrayExpression(arr)), Some(second_arg)) = (
-                    call.arguments.first().and_then(|a| a.as_expression()),
-                    call.arguments.get(1).and_then(|a| a.as_expression()),
-                ) {
-                    for elem in &arr.elements {
-                        if let Some(Expression::CallExpression(dec_call)) = elem.as_expression() {
-                            if resolver.is_custom_element_decorator(&dec_call.callee) {
-                                let (tag, is_dynamic) = match dec_call
-                                    .arguments
-                                    .first()
-                                    .and_then(|a| a.as_expression())
-                                {
+        if resolver.is_decorator_helper_callee(&call.callee) && call.arguments.len() >= 2 {
+            if let (Some(Expression::ArrayExpression(arr)), Some(second_arg)) = (
+                call.arguments.first().and_then(|a| a.as_expression()),
+                call.arguments.get(1).and_then(|a| a.as_expression()),
+            ) {
+                for elem in &arr.elements {
+                    if let Some(Expression::CallExpression(dec_call)) = elem.as_expression() {
+                        if resolver.is_custom_element_decorator(&dec_call.callee) {
+                            let (tag, is_dynamic) =
+                                match dec_call.arguments.first().and_then(|a| a.as_expression()) {
                                     Some(Expression::StringLiteral(str_lit)) => {
                                         (str_lit.value.as_str().to_string(), false)
                                     }
                                     _ => ("".to_string(), true),
                                 };
 
-                                let (comp_name, comp_span) = match second_arg {
-                                    Expression::Identifier(ident) => {
-                                        (ident.name.as_str().to_string(), ident.span)
-                                    }
-                                    _ => ("".to_string(), Span::default()),
-                                };
+                            let (comp_name, comp_span) = match second_arg {
+                                Expression::Identifier(ident) => {
+                                    (ident.name.as_str().to_string(), ident.span)
+                                }
+                                _ => ("".to_string(), Span::default()),
+                            };
 
-                                let dec_name = match &dec_call.callee {
-                                    Expression::Identifier(id) => id.name.as_str().to_string(),
-                                    _ => String::new(),
-                                };
+                            let dec_name = match &dec_call.callee {
+                                Expression::Identifier(id) => id.name.as_str().to_string(),
+                                _ => String::new(),
+                            };
 
-                                return Some(DetectedRegistration {
-                                    tag,
-                                    kind: RegistrationKind::TranspiledDecorate {
-                                        component_name: comp_name,
-                                        component_span: comp_span,
-                                        decorator_name: dec_name,
-                                    },
-                                    statement_index: stmt_index,
-                                    is_dynamic,
-                                });
-                            }
+                            return Some(DetectedRegistration {
+                                tag,
+                                kind: RegistrationKind::TranspiledDecorate {
+                                    component_name: comp_name,
+                                    component_span: comp_span,
+                                    decorator_name: dec_name,
+                                },
+                                statement_index: stmt_index,
+                                is_dynamic,
+                            });
                         }
                     }
                 }

@@ -1,5 +1,265 @@
 use oxc_ast::ast::*;
-use std::collections::HashMap;
+use oxc_semantic::Scoping;
+use std::collections::{HashMap, HashSet};
+
+pub fn is_canonical_lit_specifier(src: &str) -> bool {
+    src == "lit"
+        || src.starts_with("lit/")
+        || src == "lit-html"
+        || src.starts_with("lit-html/")
+        || src == "lit-element"
+        || src.starts_with("lit-element/")
+        || src == "@lit/reactive-element"
+        || src.starts_with("@lit/reactive-element/")
+        || src.starts_with("@lit/")
+}
+
+#[derive(Clone, Debug)]
+pub struct LitSemanticAnalysis {
+    pub has_imports: bool,
+    pub lit_tag_names: HashSet<String>,
+    pub lit_decorator_names: HashSet<String>,
+    pub lit_class_names: HashSet<String>,
+    pub lit_namespaces: HashSet<String>,
+    pub lit_no_change_name: Option<String>,
+}
+
+pub fn get_class_name<'a>(class: &Class<'a>) -> Option<&'a str> {
+    class.id.as_ref().map(|id| id.name.as_str())
+}
+
+pub fn get_super_class_name<'a>(class: &Class<'a>) -> Option<&'a str> {
+    if let Some(ref heritage) = class.heritage {
+        match &heritage.expression {
+            Expression::Identifier(ident) => Some(ident.name.as_str()),
+            _ => None,
+        }
+    } else {
+        None
+    }
+}
+
+pub fn collect_named_classes<'a, 'b>(stmts: &'b [Statement<'a>]) -> Vec<(&'a str, &'b Class<'a>)> {
+    let mut out = Vec::new();
+    for stmt in stmts {
+        match stmt {
+            Statement::ClassDeclaration(class) => {
+                if let Some(name) = get_class_name(class) {
+                    out.push((name, class.as_ref()));
+                }
+            }
+            Statement::ExportDeclaration(export_decl) => match &export_decl.declaration {
+                Declaration::ClassDeclaration(class) => {
+                    if let Some(name) = get_class_name(class) {
+                        out.push((name, class.as_ref()));
+                    }
+                }
+                Declaration::VariableDeclaration(var_decl) => {
+                    for decl in &var_decl.declarations {
+                        if let Some(Expression::ClassExpression(class)) = &decl.init {
+                            if let Some(name) = get_class_name(class) {
+                                out.push((name, class.as_ref()));
+                            } else if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                                out.push((id.name.as_str(), class.as_ref()));
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            },
+            Statement::ExportDefaultDeclaration(export_decl) => {
+                if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
+                    &export_decl.declaration
+                {
+                    if let Some(name) = get_class_name(class) {
+                        out.push((name, class.as_ref()));
+                    }
+                }
+            }
+            Statement::VariableDeclaration(var_decl) => {
+                for decl in &var_decl.declarations {
+                    if let Some(Expression::ClassExpression(class)) = &decl.init {
+                        if let Some(name) = get_class_name(class) {
+                            out.push((name, class.as_ref()));
+                        } else if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                            out.push((id.name.as_str(), class.as_ref()));
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    out
+}
+
+impl LitSemanticAnalysis {
+    pub fn new(program: &Program, scoping: &Scoping) -> Self {
+        let mut analysis = Self {
+            has_imports: false,
+            lit_tag_names: HashSet::new(),
+            lit_decorator_names: HashSet::new(),
+            lit_class_names: HashSet::new(),
+            lit_namespaces: HashSet::new(),
+            lit_no_change_name: None,
+        };
+
+        let root = scoping.root_scope_id();
+
+        for stmt in &program.body {
+            if let Statement::ImportDeclaration(import_decl) = stmt {
+                analysis.has_imports = true;
+                let src = import_decl.source.value.as_str();
+                if is_canonical_lit_specifier(src) {
+                    if let Some(specifiers) = &import_decl.specifiers {
+                        for spec in specifiers {
+                            match spec {
+                                ImportDeclarationSpecifier::ImportSpecifier(named) => {
+                                    let imported_name = named.imported.name();
+                                    let local_name = named.local.name.as_str().to_string();
+                                    let sym_id = named.local.symbol_id.get().or_else(|| {
+                                        scoping.get_binding(root, named.local.name.as_str().into())
+                                    });
+                                    if sym_id.is_some() {
+                                        if imported_name == "html" || imported_name == "svg" {
+                                            analysis.lit_tag_names.insert(local_name);
+                                        } else if imported_name == "property"
+                                            || imported_name == "state"
+                                        {
+                                            analysis.lit_decorator_names.insert(local_name);
+                                        } else if imported_name == "LitElement"
+                                            || imported_name == "ReactiveElement"
+                                        {
+                                            analysis.lit_class_names.insert(local_name);
+                                        } else if imported_name == "noChange" {
+                                            analysis.lit_no_change_name = Some(local_name);
+                                        }
+                                    }
+                                }
+                                ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                                    let sym_id = ns.local.symbol_id.get().or_else(|| {
+                                        scoping.get_binding(root, ns.local.name.as_str().into())
+                                    });
+                                    if sym_id.is_some() {
+                                        analysis
+                                            .lit_namespaces
+                                            .insert(ns.local.name.as_str().to_string());
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if !analysis.has_imports {
+            analysis.lit_class_names.insert("LitElement".to_string());
+            analysis
+                .lit_class_names
+                .insert("ReactiveElement".to_string());
+        }
+
+        let named_classes = collect_named_classes(&program.body);
+        let mut changed = true;
+        while changed {
+            changed = false;
+            for (name, class) in &named_classes {
+                if !analysis.lit_class_names.contains(*name) {
+                    let (is_reactive, _) = analysis.is_reactive_class(class);
+                    if is_reactive {
+                        analysis.lit_class_names.insert((*name).to_string());
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        analysis
+    }
+
+    pub fn is_lit_tag(&self, expr: &Expression) -> bool {
+        match expr {
+            Expression::Identifier(ident) => {
+                if self.has_imports {
+                    self.lit_tag_names.contains(ident.name.as_str())
+                } else {
+                    ident.name == "html" || ident.name == "svg"
+                }
+            }
+            Expression::StaticMemberExpression(mem) => {
+                if mem.property.name == "html" || mem.property.name == "svg" {
+                    if let Expression::Identifier(obj) = &mem.object {
+                        if self.has_imports {
+                            return self.lit_namespaces.contains(obj.name.as_str());
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
+            _ => false,
+        }
+    }
+
+    pub fn is_reactive_decorator(&self, expr: &Expression) -> bool {
+        match expr {
+            Expression::Identifier(ident) => {
+                if self.has_imports {
+                    self.lit_decorator_names.contains(ident.name.as_str())
+                } else {
+                    ident.name == "property" || ident.name == "state"
+                }
+            }
+            Expression::CallExpression(call) => self.is_reactive_decorator(&call.callee),
+            Expression::StaticMemberExpression(mem) => {
+                if mem.property.name == "property" || mem.property.name == "state" {
+                    if let Expression::Identifier(obj) = &mem.object {
+                        if self.has_imports {
+                            return self.lit_namespaces.contains(obj.name.as_str());
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
+            _ => false,
+        }
+    }
+
+    pub fn is_reactive_class(&self, class: &Class) -> (bool, bool) {
+        if let Some(ref heritage) = class.heritage {
+            let extends_reactive = match &heritage.expression {
+                Expression::Identifier(ident) => {
+                    self.lit_class_names.contains(ident.name.as_str())
+                        || (!self.has_imports
+                            && (ident.name == "LitElement" || ident.name == "ReactiveElement"))
+                }
+                Expression::StaticMemberExpression(mem)
+                    if mem.property.name == "LitElement"
+                        || mem.property.name == "ReactiveElement" =>
+                {
+                    if let Expression::Identifier(obj) = &mem.object {
+                        if self.has_imports {
+                            self.lit_namespaces.contains(obj.name.as_str())
+                        } else {
+                            true
+                        }
+                    } else {
+                        false
+                    }
+                }
+                _ => false,
+            };
+            (extends_reactive, extends_reactive)
+        } else {
+            (!self.has_imports, false)
+        }
+    }
+}
 
 pub fn is_lit_html_tag(tag: &Expression) -> bool {
     match tag {
@@ -195,29 +455,54 @@ pub fn compute_part_mask(expr: &Expression, reactive_props: &HashMap<String, usi
 
 pub fn collect_classes_mut<'a, 'b>(
     stmts: &'b mut [Statement<'a>],
-    out: &mut Vec<&'b mut Class<'a>>,
+    out: &mut Vec<(Option<&'a str>, &'b mut Class<'a>)>,
 ) {
     for stmt in stmts {
         match stmt {
             Statement::ClassDeclaration(class) => {
-                out.push(class);
+                let name = get_class_name(class);
+                out.push((name, class));
             }
-            Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
-                    out.push(class);
+            Statement::ExportDeclaration(export_decl) => match &mut export_decl.declaration {
+                Declaration::ClassDeclaration(class) => {
+                    let name = get_class_name(class);
+                    out.push((name, class));
                 }
-            }
+                Declaration::VariableDeclaration(var_decl) => {
+                    for decl in &mut var_decl.declarations {
+                        if let Some(Expression::ClassExpression(class)) = &mut decl.init {
+                            let name = get_class_name(class).or_else(|| {
+                                if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                                    Some(id.name.as_str())
+                                } else {
+                                    None
+                                }
+                            });
+                            out.push((name, class));
+                        }
+                    }
+                }
+                _ => {}
+            },
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                     &mut export_decl.declaration
                 {
-                    out.push(class);
+                    let name = get_class_name(class);
+                    out.push((name, class));
                 }
             }
             Statement::VariableDeclaration(var_decl) => {
                 for decl in &mut var_decl.declarations {
                     if let Some(Expression::ClassExpression(class)) = &mut decl.init {
-                        out.push(class);
+                        let name = get_class_name(class).or_else(|| {
+                            if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                                Some(id.name.as_str())
+                            } else {
+                                None
+                            }
+                        });
+                        out.push((name, class));
                     }
                 }
             }
@@ -226,11 +511,22 @@ pub fn collect_classes_mut<'a, 'b>(
     }
 }
 
+pub type ReactiveProps = (HashMap<String, usize>, Vec<(String, usize)>);
+
 pub fn collect_reactive_properties(
     class: &Class,
-) -> (HashMap<String, usize>, Vec<(String, usize)>) {
+    ctx: Option<&LitSemanticAnalysis>,
+) -> ReactiveProps {
     let mut prop_indices: HashMap<String, usize> = HashMap::new();
     let mut sorted_props: Vec<(String, usize)> = Vec::new();
+
+    let check_decorator = |d: &Expression| -> bool {
+        if let Some(c) = ctx {
+            c.is_reactive_decorator(d)
+        } else {
+            is_reactive_decorator(d)
+        }
+    };
 
     let mut add_prop = |name: String| {
         if !prop_indices.contains_key(&name) {
@@ -264,7 +560,7 @@ pub fn collect_reactive_properties(
                     let has_reactive_decorator = prop_def
                         .decorators
                         .iter()
-                        .any(|d| is_reactive_decorator(&d.expression));
+                        .any(|d| check_decorator(&d.expression));
 
                     if has_reactive_decorator {
                         if let Some(name) = prop_def.key.static_name() {
@@ -277,7 +573,7 @@ pub fn collect_reactive_properties(
                 let has_reactive_decorator = accessor_def
                     .decorators
                     .iter()
-                    .any(|d| is_reactive_decorator(&d.expression));
+                    .any(|d| check_decorator(&d.expression));
 
                 if has_reactive_decorator {
                     if let Some(name) = accessor_def.key.static_name() {
@@ -314,7 +610,7 @@ pub fn collect_reactive_properties(
                     let has_reactive_decorator = method_def
                         .decorators
                         .iter()
-                        .any(|d| is_reactive_decorator(&d.expression));
+                        .any(|d| check_decorator(&d.expression));
 
                     if has_reactive_decorator {
                         if let Some(name) = method_def.key.static_name() {
@@ -324,6 +620,94 @@ pub fn collect_reactive_properties(
                 }
             }
             _ => {}
+        }
+    }
+
+    (prop_indices, sorted_props)
+}
+
+pub fn collect_reactive_properties_with_inheritance<'a>(
+    class: &Class<'a>,
+    classes_by_name: &HashMap<&str, &Class<'a>>,
+    external_props: Option<&HashMap<String, Vec<String>>>,
+    ctx: Option<&LitSemanticAnalysis>,
+) -> ReactiveProps {
+    collect_reactive_properties_with_inheritance_named(
+        class,
+        classes_by_name,
+        external_props,
+        ctx,
+        None,
+    )
+}
+
+pub fn collect_reactive_properties_with_inheritance_named<'a>(
+    class: &Class<'a>,
+    classes_by_name: &HashMap<&str, &Class<'a>>,
+    external_props: Option<&HashMap<String, Vec<String>>>,
+    ctx: Option<&LitSemanticAnalysis>,
+    class_name: Option<&str>,
+) -> ReactiveProps {
+    let mut ancestors = Vec::new();
+    let mut current_super = get_super_class_name(class);
+    let mut visited = HashSet::new();
+    let effective_name = class_name.or_else(|| get_class_name(class));
+    if let Some(name) = effective_name {
+        visited.insert(name);
+    }
+
+    while let Some(super_name) = current_super {
+        if !visited.insert(super_name) {
+            break;
+        }
+        if let Some(&super_class) = classes_by_name.get(super_name) {
+            ancestors.push((super_name, super_class));
+            current_super = get_super_class_name(super_class);
+        } else {
+            break;
+        }
+    }
+
+    ancestors.reverse();
+
+    let mut prop_indices: HashMap<String, usize> = HashMap::new();
+    let mut sorted_props: Vec<(String, usize)> = Vec::new();
+
+    let mut add_prop = |name: String| {
+        if !prop_indices.contains_key(&name) {
+            let idx = sorted_props.len();
+            prop_indices.insert(name.clone(), idx);
+            sorted_props.push((name, idx));
+        }
+    };
+
+    // 1. Inherit properties from all ancestor classes in order (oldest first)
+    for (anc_name, anc_class) in ancestors {
+        let (_, anc_sorted) = collect_reactive_properties(anc_class, ctx);
+        for (prop_name, _) in anc_sorted {
+            add_prop(prop_name);
+        }
+        if let Some(ext) = external_props {
+            if let Some(extra) = ext.get(anc_name) {
+                for prop_name in extra {
+                    add_prop(prop_name.clone());
+                }
+            }
+        }
+    }
+
+    // 2. Add class's own properties
+    let (_, own_sorted) = collect_reactive_properties(class, ctx);
+    for (prop_name, _) in own_sorted {
+        add_prop(prop_name);
+    }
+    if let Some(ext) = external_props {
+        if let Some(name) = effective_name {
+            if let Some(extra) = ext.get(name) {
+                for prop_name in extra {
+                    add_prop(prop_name.clone());
+                }
+            }
         }
     }
 

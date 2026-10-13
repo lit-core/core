@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { closeSharedBrowser, createTestPage, getSharedBrowser, mapStackTrace, mountElement } from '@lit-core/test-kit';
 import { CANONICAL_SUITE_DEFINITIONS } from '../../packages/benchmarks/src/suites/canonical-components.js';
+import { createBenchmarkVendorResolverPlugin } from '../../packages/benchmarks/src/vendor-resolver.js';
 
 const ROOT = process.cwd();
 const benchmarksReq = createRequire(path.join(ROOT, 'packages', 'benchmarks', 'package.json'));
@@ -50,6 +51,7 @@ async function verifyComponent(suiteName, componentId, compDef, browser) {
         },
       },
       plugins: [
+        createBenchmarkVendorResolverPlugin(),
         {
           name: 'verify-entry-plugin',
           enforce: 'pre',

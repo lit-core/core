@@ -3,13 +3,13 @@
   "benchmarkId": "tag-shake",
   "title": "`@lit-core/tag-shake` empirical benchmark results",
   "description": "Ahead-of-time Web Component dead code elimination evaluated across production Web Component libraries to prune unreferenced custom element registrations and unused class imports.",
-  "timestamp": "2026-10-03T21:12:58.078Z",
+  "timestamp": "2026-10-12T23:47:46.741Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1ee1348",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -31,13 +31,13 @@
       "packageName": "@carbon/web-components",
       "componentCount": 51,
       "baseline": {
-        "rawBytes": 476139,
-        "gzipBytes": 133319,
+        "rawBytes": 476145,
+        "gzipBytes": 85564,
         "activeRegistrations": 51
       },
       "optimized": {
-        "rawBytes": 476139,
-        "gzipBytes": 133319,
+        "rawBytes": 476145,
+        "gzipBytes": 85564,
         "activeRegistrations": 51
       },
       "deltas": {
@@ -67,9 +67,9 @@
         "totalComponents": 51,
         "shakenRegistrations": 0,
         "prunedImports": 0,
-        "transformTimeMs": 18.22,
+        "transformTimeMs": 74.3,
         "gzipSavings": "0.0%",
-        "buildOverhead": "18.22ms native pass"
+        "buildOverhead": "74.3ms native pass"
       }
     },
     {
@@ -79,13 +79,13 @@
       "packageName": "@spectrum-web-components",
       "componentCount": 51,
       "baseline": {
-        "rawBytes": 246382,
-        "gzipBytes": 68987,
+        "rawBytes": 248202,
+        "gzipBytes": 53844,
         "activeRegistrations": 51
       },
       "optimized": {
-        "rawBytes": 246382,
-        "gzipBytes": 68987,
+        "rawBytes": 248202,
+        "gzipBytes": 53844,
         "activeRegistrations": 51
       },
       "deltas": {
@@ -115,9 +115,9 @@
         "totalComponents": 51,
         "shakenRegistrations": 0,
         "prunedImports": 0,
-        "transformTimeMs": 18.94,
+        "transformTimeMs": 20.58,
         "gzipSavings": "0.0%",
-        "buildOverhead": "18.94ms native pass"
+        "buildOverhead": "20.58ms native pass"
       }
     },
     {
@@ -128,12 +128,12 @@
       "componentCount": 51,
       "baseline": {
         "rawBytes": 38964,
-        "gzipBytes": 10910,
+        "gzipBytes": 2479,
         "activeRegistrations": 51
       },
       "optimized": {
         "rawBytes": 38964,
-        "gzipBytes": 10910,
+        "gzipBytes": 2479,
         "activeRegistrations": 51
       },
       "deltas": {
@@ -163,9 +163,9 @@
         "totalComponents": 51,
         "shakenRegistrations": 0,
         "prunedImports": 0,
-        "transformTimeMs": 12.57,
+        "transformTimeMs": 8.6,
         "gzipSavings": "0.0%",
-        "buildOverhead": "12.57ms native pass"
+        "buildOverhead": "8.6ms native pass"
       }
     },
     {
@@ -175,13 +175,13 @@
       "packageName": "@momentum-design/components",
       "componentCount": 51,
       "baseline": {
-        "rawBytes": 570270,
-        "gzipBytes": 159676,
+        "rawBytes": 570300,
+        "gzipBytes": 101504,
         "activeRegistrations": 51
       },
       "optimized": {
-        "rawBytes": 570270,
-        "gzipBytes": 159676,
+        "rawBytes": 570300,
+        "gzipBytes": 101504,
         "activeRegistrations": 51
       },
       "deltas": {
@@ -211,9 +211,9 @@
         "totalComponents": 51,
         "shakenRegistrations": 0,
         "prunedImports": 0,
-        "transformTimeMs": 19.41,
+        "transformTimeMs": 31.44,
         "gzipSavings": "0.0%",
-        "buildOverhead": "19.41ms native pass"
+        "buildOverhead": "31.44ms native pass"
       }
     },
     {
@@ -223,45 +223,45 @@
       "packageName": "@material/web",
       "componentCount": 51,
       "baseline": {
-        "rawBytes": 60826,
-        "gzipBytes": 17031,
+        "rawBytes": 60890,
+        "gzipBytes": 9904,
         "activeRegistrations": 51
       },
       "optimized": {
-        "rawBytes": 60826,
-        "gzipBytes": 17031,
-        "activeRegistrations": 51
+        "rawBytes": 53311,
+        "gzipBytes": 9390,
+        "activeRegistrations": 4
       },
       "deltas": {
         "raw": {
-          "diff": 0,
-          "percent": 0,
-          "formattedDiff": "0.0",
-          "formattedPercent": "0.0%",
-          "isReduction": false
+          "diff": -7579,
+          "percent": -12.447035638035803,
+          "formattedDiff": "-7,579.0",
+          "formattedPercent": "-12.4%",
+          "isReduction": true
         },
         "gzip": {
-          "diff": 0,
-          "percent": 0,
-          "formattedDiff": "0.0",
-          "formattedPercent": "0.0%",
-          "isReduction": false
+          "diff": -514,
+          "percent": -5.189822294022617,
+          "formattedDiff": "-514.0",
+          "formattedPercent": "-5.2%",
+          "isReduction": true
         },
         "registrations": {
-          "diff": 0,
-          "percent": 0,
-          "formattedDiff": "0.0",
-          "formattedPercent": "0.0%",
-          "isReduction": false
+          "diff": -47,
+          "percent": -92.15686274509804,
+          "formattedDiff": "-47.0",
+          "formattedPercent": "-92.2%",
+          "isReduction": true
         }
       },
       "diagnostics": {
         "totalComponents": 51,
-        "shakenRegistrations": 0,
-        "prunedImports": 0,
-        "transformTimeMs": 13.77,
-        "gzipSavings": "0.0%",
-        "buildOverhead": "13.77ms native pass"
+        "shakenRegistrations": 47,
+        "prunedImports": 47,
+        "transformTimeMs": 10.67,
+        "gzipSavings": "-5.2%",
+        "buildOverhead": "10.67ms native pass"
       }
     }
   ]

@@ -25,8 +25,13 @@ impl StyleExtractor {
         let source_type = SourceType::from_path(&norm_path).unwrap_or_default();
         let parser = Parser::new(&allocator, source_code, source_type);
         let parsed = parser.parse();
+        if !parsed.diagnostics.is_empty() && parsed.program.body.is_empty() {
+            return (Vec::new(), Vec::new());
+        }
 
-        let mut visitor = CssTagVisitor::new(source_code, &norm_path_str);
+        let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
+        let scoping = semantic_ret.semantic.into_scoping();
+        let mut visitor = CssTagVisitor::new(source_code, &norm_path_str, &scoping);
         visitor.visit_program(&parsed.program);
 
         let related_imports = visitor

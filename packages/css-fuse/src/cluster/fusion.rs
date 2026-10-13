@@ -96,7 +96,7 @@ impl ClusterEngine {
         let mut namespace_groups: HashMap<String, Vec<usize>> = HashMap::new();
         for (idx, candidate) in candidate_rules.iter().enumerate() {
             if let Some(ns) = &candidate.namespace {
-                if ns.len() >= 3 {
+                if ns.len() >= 2 {
                     namespace_groups.entry(ns.clone()).or_default().push(idx);
                 }
             }
@@ -371,33 +371,31 @@ fn extract_selector_namespace(selector: &str) -> Option<String> {
     None
 }
 
-/// Normalize token into root stem across standard BEM, kebab-case, or vendor prefix conventions.
+/// Normalize token into root stem across standard BEM or kebab-case conventions.
 fn clean_namespace_token(token: &str) -> String {
     let lower = token.to_ascii_lowercase();
 
+    // Standard BEM: extract block before element (__) or modifier (--)
     let base = if let Some(idx) = lower.find("__") {
-        let prefix = &lower[..idx];
-        if prefix.len() <= 2 {
-            &lower[idx + 2..]
+        if idx > 0 {
+            &lower[..idx]
         } else {
-            prefix
+            &lower[2..]
         }
     } else if let Some(idx) = lower.find("--") {
-        let prefix = &lower[..idx];
-        if prefix.len() <= 2 {
-            &lower[idx + 2..]
+        if idx > 0 {
+            &lower[..idx]
         } else {
-            prefix
+            &lower[2..]
         }
     } else {
         &lower
     };
 
+    // Standard kebab-case: extract leading token without library-specific prefix stripping
     let parts: Vec<&str> = base.split('-').collect();
-    if parts.len() > 1 && parts[0].len() >= 3 {
+    if parts.len() > 1 && !parts[0].is_empty() {
         parts[0].to_string()
-    } else if parts.len() > 1 && parts[0].len() <= 2 && parts[1].len() >= 3 {
-        parts[1].to_string()
     } else {
         base.to_string()
     }

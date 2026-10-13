@@ -1,5 +1,148 @@
 use oxc_ast::ast::*;
+use oxc_semantic::{Scoping, SymbolId};
 use std::collections::{HashMap, HashSet};
+
+pub fn is_canonical_lit_decorator_source(source: &str) -> bool {
+    source == "lit"
+        || source == "lit/decorators.js"
+        || source == "lit/decorators"
+        || source.starts_with("lit/decorators/")
+        || source == "lit-element"
+        || source == "lit-element/decorators.js"
+        || source == "lit-element/decorators"
+        || source.starts_with("lit-element/decorators/")
+        || source == "@lit/reactive-element"
+        || source.starts_with("@lit/reactive-element/decorators")
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DecoratorKind {
+    CustomElement,
+    Property,
+    State,
+}
+
+#[derive(Debug, Default)]
+pub struct LitDecoratorContext {
+    pub has_imports: bool,
+    pub decorator_symbols: HashMap<SymbolId, DecoratorKind>,
+    pub decorator_namespaces: HashSet<SymbolId>,
+    pub local_name_to_kind: HashMap<String, DecoratorKind>,
+    pub namespace_names: HashSet<String>,
+}
+
+impl LitDecoratorContext {
+    pub fn scan<'a>(program: &Program<'a>, scoping: &Scoping) -> Self {
+        let mut ctx = Self::default();
+        let root = scoping.root_scope_id();
+
+        for stmt in &program.body {
+            if let Statement::ImportDeclaration(import_decl) = stmt {
+                let source = import_decl.source.value.as_str();
+                if is_canonical_lit_decorator_source(source) {
+                    ctx.has_imports = true;
+                    if let Some(specifiers) = &import_decl.specifiers {
+                        for spec in specifiers {
+                            match spec {
+                                ImportDeclarationSpecifier::ImportSpecifier(named) => {
+                                    let imported = named.imported.name();
+                                    let kind = match imported.as_str() {
+                                        "customElement" => Some(DecoratorKind::CustomElement),
+                                        "property" => Some(DecoratorKind::Property),
+                                        "state" => Some(DecoratorKind::State),
+                                        _ => None,
+                                    };
+                                    if let Some(k) = kind {
+                                        let sym = named.local.symbol_id.get().or_else(|| {
+                                            scoping
+                                                .get_binding(root, named.local.name.as_str().into())
+                                        });
+                                        if let Some(s) = sym {
+                                            ctx.decorator_symbols.insert(s, k);
+                                        }
+                                        ctx.local_name_to_kind
+                                            .insert(named.local.name.as_str().to_string(), k);
+                                    }
+                                }
+                                ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                                    let sym = ns.local.symbol_id.get().or_else(|| {
+                                        scoping.get_binding(root, ns.local.name.as_str().into())
+                                    });
+                                    if let Some(s) = sym {
+                                        ctx.decorator_namespaces.insert(s);
+                                    }
+                                    ctx.namespace_names
+                                        .insert(ns.local.name.as_str().to_string());
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ctx
+    }
+
+    pub fn resolve_decorator_kind(
+        &self,
+        expr: &Expression,
+        scoping: &Scoping,
+    ) -> Option<DecoratorKind> {
+        match expr {
+            Expression::Identifier(ident) => {
+                let sym_id = if let Some(ref_id) = ident.reference_id.get() {
+                    scoping.get_reference(ref_id).symbol_id()
+                } else {
+                    let root = scoping.root_scope_id();
+                    scoping.get_binding(root, ident.name.as_str().into())
+                };
+
+                if let Some(sym) = sym_id {
+                    self.decorator_symbols.get(&sym).copied()
+                } else if !self.has_imports {
+                    match ident.name.as_str() {
+                        "customElement" => Some(DecoratorKind::CustomElement),
+                        "property" => Some(DecoratorKind::Property),
+                        "state" => Some(DecoratorKind::State),
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
+            }
+            Expression::StaticMemberExpression(mem) => {
+                let prop_kind = match mem.property.name.as_str() {
+                    "customElement" => Some(DecoratorKind::CustomElement),
+                    "property" => Some(DecoratorKind::Property),
+                    "state" => Some(DecoratorKind::State),
+                    _ => None,
+                }?;
+
+                if let Expression::Identifier(obj) = &mem.object {
+                    let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
+                        scoping.get_reference(ref_id).symbol_id()
+                    } else {
+                        let root = scoping.root_scope_id();
+                        scoping.get_binding(root, obj.name.as_str().into())
+                    };
+
+                    if let Some(sym) = obj_sym {
+                        if self.decorator_namespaces.contains(&sym) {
+                            return Some(prop_kind);
+                        }
+                    } else if !self.has_imports && self.namespace_names.contains(obj.name.as_str())
+                    {
+                        return Some(prop_kind);
+                    }
+                }
+                None
+            }
+            _ => None,
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct CustomElementTarget {
@@ -11,14 +154,13 @@ pub struct CustomElementTarget {
     pub observed_attributes: Vec<String>,
 }
 
-pub fn extract_decorator_tag<'a>(dec: &Decorator<'a>) -> Option<String> {
+pub fn extract_decorator_tag<'a>(
+    dec: &Decorator<'a>,
+    ctx: &LitDecoratorContext,
+    scoping: &Scoping,
+) -> Option<String> {
     if let Expression::CallExpression(call) = &dec.expression {
-        let is_custom_element = match &call.callee {
-            Expression::Identifier(ident) => ident.name == "customElement",
-            Expression::StaticMemberExpression(mem) => mem.property.name == "customElement",
-            _ => false,
-        };
-        if is_custom_element {
+        if ctx.resolve_decorator_kind(&call.callee, scoping) == Some(DecoratorKind::CustomElement) {
             if let Some(first_arg) = call.arguments.first() {
                 if let Some(Expression::StringLiteral(str_lit)) = first_arg.as_expression() {
                     return Some(str_lit.value.as_str().to_string());
@@ -31,6 +173,8 @@ pub fn extract_decorator_tag<'a>(dec: &Decorator<'a>) -> Option<String> {
 
 pub fn extract_class_properties<'a>(
     class: &Class<'a>,
+    ctx: &LitDecoratorContext,
+    scoping: &Scoping,
     out_properties: &mut Vec<String>,
     out_attributes: &mut Vec<String>,
 ) {
@@ -52,15 +196,9 @@ pub fn extract_class_properties<'a>(
 
                 for dec in &prop.decorators {
                     if let Expression::CallExpression(call) = &dec.expression {
-                        let callee_name = match &call.callee {
-                            Expression::Identifier(id) => Some(id.name.as_str()),
-                            Expression::StaticMemberExpression(mem) => {
-                                Some(mem.property.name.as_str())
-                            }
-                            _ => None,
-                        };
+                        let dec_kind = ctx.resolve_decorator_kind(&call.callee, scoping);
 
-                        if callee_name == Some("property") {
+                        if dec_kind == Some(DecoratorKind::Property) {
                             is_lit_prop = true;
                             if let Some(arg) = call.arguments.first() {
                                 if let Some(Expression::ObjectExpression(obj)) = arg.as_expression()
@@ -103,7 +241,7 @@ pub fn extract_class_properties<'a>(
                                     }
                                 }
                             }
-                        } else if callee_name == Some("state") {
+                        } else if dec_kind == Some(DecoratorKind::State) {
                             is_lit_prop = true;
                             observes_attr = false;
                         }
@@ -285,13 +423,15 @@ pub fn check_and_extract_target<'a>(
     is_export: bool,
     is_default_export: bool,
     define_calls: &HashMap<String, String>,
+    ctx: &LitDecoratorContext,
+    scoping: &Scoping,
 ) -> Option<CustomElementTarget> {
     let class_name = class.id.as_ref().map(|id| id.name.as_str().to_string())?;
 
     let mut tag_name: Option<String> = None;
 
     for dec in &class.decorators {
-        if let Some(tag) = extract_decorator_tag(dec) {
+        if let Some(tag) = extract_decorator_tag(dec, ctx, scoping) {
             tag_name = Some(tag);
             break;
         }
@@ -307,7 +447,13 @@ pub fn check_and_extract_target<'a>(
 
     let mut properties = Vec::new();
     let mut observed_attributes = Vec::new();
-    extract_class_properties(class, &mut properties, &mut observed_attributes);
+    extract_class_properties(
+        class,
+        ctx,
+        scoping,
+        &mut properties,
+        &mut observed_attributes,
+    );
 
     Some(CustomElementTarget {
         tag_name: tag,
@@ -317,4 +463,51 @@ pub fn check_and_extract_target<'a>(
         properties,
         observed_attributes,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use oxc_allocator::Allocator;
+    use oxc_parser::Parser;
+    use oxc_semantic::SemanticBuilder;
+    use oxc_span::SourceType;
+
+    #[test]
+    fn test_aliased_lit_decorators() {
+        let code = r#"
+            import { customElement as ce, property as p, state as s } from 'lit/decorators.js';
+            @ce('aliased-elem')
+            class AliasedElem {
+                @p({ type: String, attribute: 'my-attr' })
+                title = 'hello';
+
+                @s()
+                internal = 42;
+            }
+        "#;
+        let allocator = Allocator::default();
+        let parsed = Parser::new(&allocator, code, SourceType::ts()).parse();
+        assert!(parsed.diagnostics.is_empty());
+        let semantic_ret = SemanticBuilder::new().build(&parsed.program);
+        let scoping = semantic_ret.semantic.into_scoping();
+        let ctx = LitDecoratorContext::scan(&parsed.program, &scoping);
+
+        let define_calls = HashMap::new();
+        let mut target = None;
+        for stmt in &parsed.program.body {
+            if let Statement::ClassDeclaration(class) = stmt {
+                target =
+                    check_and_extract_target(class, false, false, &define_calls, &ctx, &scoping);
+            }
+        }
+
+        let target = target.expect("target should be found");
+        assert_eq!(target.tag_name, "aliased-elem");
+        assert_eq!(target.class_name, "AliasedElem");
+        assert!(target.properties.contains(&"title".to_string()));
+        assert!(target.properties.contains(&"internal".to_string()));
+        assert!(target.observed_attributes.contains(&"my-attr".to_string()));
+        assert!(!target.observed_attributes.contains(&"internal".to_string()));
+    }
 }

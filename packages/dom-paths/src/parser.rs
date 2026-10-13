@@ -37,6 +37,7 @@ enum ParserState {
     AttrSingle,
     AttrDouble,
     Comment,
+    CData,
 }
 
 pub fn compute_template_paths(quasis: &[String], normalize_whitespace: bool) -> Vec<Vec<u32>> {
@@ -75,6 +76,15 @@ pub fn compute_template_parts(
             match state {
                 ParserState::Comment => {
                     if i + 2 < len && chars[i] == '-' && chars[i + 1] == '-' && chars[i + 2] == '>'
+                    {
+                        i += 3;
+                        state = ParserState::Text;
+                    } else {
+                        i += 1;
+                    }
+                }
+                ParserState::CData => {
+                    if i + 2 < len && chars[i] == ']' && chars[i + 1] == ']' && chars[i + 2] == '>'
                     {
                         i += 3;
                         state = ParserState::Text;
@@ -121,13 +131,21 @@ pub fn compute_template_parts(
                     {
                         state = ParserState::AttrUnquoted;
                         i += 1;
-                    } else if ch == '/' && i + 1 < len && chars[i + 1] == '>' {
-                        // Self-closing element like <circle /> or <path />
-                        if let Some(mut opening) = current_opening.take() {
-                            opening.is_self_closing = true;
+                    } else if ch == '/' {
+                        let mut j = i + 1;
+                        while j < len && chars[j].is_whitespace() {
+                            j += 1;
                         }
-                        i += 2;
-                        state = ParserState::Text;
+                        if j < len && chars[j] == '>' {
+                            // Self-closing element like <circle /> or <path />
+                            if let Some(mut opening) = current_opening.take() {
+                                opening.is_self_closing = true;
+                            }
+                            i = j + 1;
+                            state = ParserState::Text;
+                        } else {
+                            i += 1;
+                        }
                     } else if ch == '>' {
                         i += 1;
                         state = ParserState::Text;
@@ -162,6 +180,30 @@ pub fn compute_template_parts(
                         );
                         state = ParserState::Comment;
                         i += 4;
+                        continue;
+                    }
+
+                    // Check CDATA <![CDATA[
+                    if i + 8 < len
+                        && chars[i] == '<'
+                        && chars[i + 1] == '!'
+                        && chars[i + 2] == '['
+                        && chars[i + 3] == 'C'
+                        && chars[i + 4] == 'D'
+                        && chars[i + 5] == 'A'
+                        && chars[i + 6] == 'T'
+                        && chars[i + 7] == 'A'
+                        && chars[i + 8] == '['
+                    {
+                        flush_pending_text(
+                            &mut pending_text,
+                            normalize_whitespace,
+                            &mut stack,
+                            &mut root_child_count,
+                            &mut root_last_child_was_text,
+                        );
+                        state = ParserState::CData;
+                        i += 9;
                         continue;
                     }
 
@@ -398,5 +440,16 @@ mod tests {
         ];
         let paths = compute_template_paths(&quasis, true);
         assert_eq!(paths, vec![vec![0, 0, 0], vec![0, 0, 1]]);
+    }
+
+    #[test]
+    fn test_cdata_and_self_closing() {
+        let quasis = vec![
+            "<svg><![CDATA[some data]]><circle cx=\"10\" cy=\"10\" r=\"".to_string(),
+            "\"  /><text>".to_string(),
+            "</text></svg>".to_string(),
+        ];
+        let paths = compute_template_paths(&quasis, true);
+        assert_eq!(paths, vec![vec![0, 0], vec![0, 1, 0]]);
     }
 }

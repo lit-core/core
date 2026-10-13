@@ -1,4 +1,4 @@
-use oxc_allocator::{Allocator, ArenaVec};
+use oxc_allocator::{Allocator, ArenaVec, CloneIn, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
@@ -79,10 +79,10 @@ pub fn build_hoisted_statements<'a>(
 pub fn build_observed_attributes_element<'a>(
     ast: &AstBuilder<'a>,
     allocator: &'a Allocator,
-    properties: &[PropertyInfo],
+    properties: &[PropertyInfo<'a>],
 ) -> Option<ClassElement<'a>> {
     let helper = AstHelper::new(ast);
-    let observed: Vec<&PropertyInfo> = properties
+    let observed: Vec<&PropertyInfo<'a>> = properties
         .iter()
         .filter(|p| !p.attribute_name.is_empty())
         .collect();
@@ -131,13 +131,14 @@ pub fn build_observed_attributes_element<'a>(
 /// ```
 pub fn build_constructor_element<'a>(
     ast: &AstBuilder<'a>,
-    allocator: &'a Allocator,
     sheet_var: &str,
     tmpl_var: &str,
     has_styles: bool,
     parsed_template: &ParsedTemplate,
-    properties: &[PropertyInfo],
+    template_expr_nodes: &[Expression<'a>],
+    properties: &[PropertyInfo<'a>],
 ) -> ClassElement<'a> {
+    let allocator = ast.allocator();
     let helper = AstHelper::new(ast);
     let mut stmts = ArenaVec::new_in(ast);
 
@@ -278,17 +279,20 @@ pub fn build_constructor_element<'a>(
                 ));
             }
             BindingKind::Event => {
+                let Some(ref ev_name) = b.name else {
+                    continue;
+                };
+                if ev_name.is_empty() {
+                    continue;
+                }
+                let Some(handler_expr) = template_expr_nodes.get(b.expression_index) else {
+                    continue;
+                };
+
                 let btn_var_name = allocator.alloc_str(&format!("__btn_{}", idx));
                 stmts.push(helper.const_declaration(btn_var_name, path_expr));
 
-                let ev_name = b.name.as_deref().unwrap_or("click");
-                let clean_handler = b
-                    .expr_str
-                    .trim_start_matches("this.")
-                    .trim_end_matches("()");
-                let clean_handler_alloc = allocator.alloc_str(clean_handler);
-
-                // (e) => this._onClick(e)
+                // (e) => handler(e)
                 let mut arrow_params = ArenaVec::new_in(ast);
                 arrow_params.push(FormalParameter::new_plain(
                     SPAN,
@@ -296,7 +300,7 @@ pub fn build_constructor_element<'a>(
                     ast,
                 ));
                 let call_handler = helper.call_expr(
-                    helper.static_member(helper.this_expr(), clean_handler_alloc, false),
+                    handler_expr.clone_in(allocator),
                     {
                         let mut a = ArenaVec::new_in(ast);
                         a.push(Argument::from(helper.ident_ref("e")));
@@ -320,7 +324,7 @@ pub fn build_constructor_element<'a>(
                     ast,
                 );
 
-                // if (__btn_X) __btn_X.addEventListener('click', (e) => this.handler(e));
+                // if (__btn_X) __btn_X.addEventListener(ev_name, (e) => handler(e));
                 let call_add_listener = helper.call_expr(
                     helper.static_member(helper.ident_ref(btn_var_name), "addEventListener", false),
                     {
@@ -364,26 +368,10 @@ pub fn build_constructor_element<'a>(
 
     // 7. Initialize property backing stores: this._propName = default;
     for p in properties {
-        let backing_prop = allocator.alloc_str(&format!("_{}", p.name));
-        let default_expr = if let Some(def) = &p.default_value {
-            if def == "true" {
-                helper.bool_lit(true)
-            } else if def == "false" {
-                helper.bool_lit(false)
-            } else if let Ok(num) = def.parse::<f64>() {
-                helper.number_lit(num)
-            } else {
-                let trimmed = def.trim_matches('\'').trim_matches('"');
-                helper.string_lit(allocator.alloc_str(trimmed))
-            }
-        } else {
-            match p.prop_type.as_str() {
-                "number" => helper.number_lit(0.0),
-                "boolean" => helper.bool_lit(false),
-                _ => helper.string_lit(""),
-            }
-        };
-        stmts.push(helper.this_prop_assign(backing_prop, default_expr));
+        if let Some(ref def_expr) = p.default_value {
+            let backing_prop = allocator.alloc_str(&format!("_{}", p.name));
+            stmts.push(helper.this_prop_assign(backing_prop, def_expr.clone_in(allocator)));
+        }
     }
 
     let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stmts, ast);
@@ -428,8 +416,9 @@ pub fn build_constructor_element<'a>(
 pub fn build_property_accessors<'a>(
     ast: &AstBuilder<'a>,
     allocator: &'a Allocator,
-    p: &PropertyInfo,
+    p: &PropertyInfo<'a>,
     parsed_template: &ParsedTemplate,
+    template_expr_nodes: &[Expression<'a>],
 ) -> (ClassElement<'a>, ClassElement<'a>) {
     let helper = AstHelper::new(ast);
     let p_name = allocator.alloc_str(&p.name);
@@ -505,7 +494,10 @@ pub fn build_property_accessors<'a>(
 
         // Direct DOM updates for bindings referencing this property
         for (idx, b) in parsed_template.bindings.iter().enumerate() {
-            if b.expr_str.contains(&p.name) {
+            let Some(binding_expr) = template_expr_nodes.get(b.expression_index) else {
+                continue;
+            };
+            if expr_references_property(binding_expr, &p.name) {
                 let node_prop = allocator.alloc_str(&format!("__lit_node_{}", idx));
                 let node_expr = helper.static_member(helper.this_expr(), node_prop, false);
 
@@ -581,37 +573,77 @@ pub fn build_property_accessors<'a>(
                     }
                     BindingKind::Attribute => {
                         if let Some(attr) = &b.name {
-                            // this.__lit_node_X.setAttribute('attr', String(v ?? ''));
-                            let v_coalesce = helper
-                                .nullish_coalescing(helper.ident_ref("v"), helper.string_lit(""));
-                            let str_call = helper.call_expr(
-                                helper.ident_ref("String"),
-                                {
-                                    let mut a = ArenaVec::new_in(ast);
-                                    a.push(Argument::from(v_coalesce));
-                                    a
-                                },
-                                false,
-                            );
-                            let set_call = helper.call_expr(
-                                helper.static_member(node_expr, "setAttribute", false),
-                                {
-                                    let mut a = ArenaVec::new_in(ast);
-                                    a.push(Argument::from(
-                                        helper.string_lit(allocator.alloc_str(attr)),
-                                    ));
-                                    a.push(Argument::from(str_call));
-                                    a
-                                },
-                                false,
-                            );
-                            stmts.push(Statement::new_if_statement(
-                                SPAN,
-                                helper.static_member(helper.this_expr(), node_prop, false),
-                                helper.expr_stmt(set_call),
-                                None,
-                                ast,
-                            ));
+                            if !attr.is_empty() {
+                                // this.__lit_node_X.setAttribute('attr', String(v ?? ''));
+                                let v_coalesce = helper.nullish_coalescing(
+                                    helper.ident_ref("v"),
+                                    helper.string_lit(""),
+                                );
+                                let str_call = helper.call_expr(
+                                    helper.ident_ref("String"),
+                                    {
+                                        let mut a = ArenaVec::new_in(ast);
+                                        a.push(Argument::from(v_coalesce));
+                                        a
+                                    },
+                                    false,
+                                );
+                                let set_call = helper.call_expr(
+                                    helper.static_member(node_expr, "setAttribute", false),
+                                    {
+                                        let mut a = ArenaVec::new_in(ast);
+                                        a.push(Argument::from(
+                                            helper.string_lit(allocator.alloc_str(attr)),
+                                        ));
+                                        a.push(Argument::from(str_call));
+                                        a
+                                    },
+                                    false,
+                                );
+                                stmts.push(Statement::new_if_statement(
+                                    SPAN,
+                                    helper.static_member(helper.this_expr(), node_prop, false),
+                                    helper.expr_stmt(set_call),
+                                    None,
+                                    ast,
+                                ));
+                            }
+                        }
+                    }
+                    BindingKind::Property => {
+                        if let Some(prop_name) = &b.name {
+                            if !prop_name.is_empty() {
+                                // this.__lit_node_X[prop_name] = v;
+                                let prop_alloc = allocator.alloc_str(prop_name);
+                                let assign_stmt = Statement::new_expression_statement(
+                                    SPAN,
+                                    Expression::new_assignment_expression(
+                                        SPAN,
+                                        AssignmentOperator::Assign,
+                                        AssignmentTarget::from(
+                                            MemberExpression::new_computed_member_expression(
+                                                SPAN,
+                                                node_expr,
+                                                Expression::new_string_literal(
+                                                    SPAN, prop_alloc, None, ast,
+                                                ),
+                                                false,
+                                                ast,
+                                            ),
+                                        ),
+                                        Expression::new_identifier(SPAN, "v", ast),
+                                        ast,
+                                    ),
+                                    ast,
+                                );
+                                stmts.push(Statement::new_if_statement(
+                                    SPAN,
+                                    helper.static_member(helper.this_expr(), node_prop, false),
+                                    assign_stmt,
+                                    None,
+                                    ast,
+                                ));
+                            }
                         }
                     }
                     _ => {}
@@ -829,10 +861,10 @@ pub fn build_property_accessors<'a>(
 pub fn build_attribute_changed_callback_element<'a>(
     ast: &AstBuilder<'a>,
     allocator: &'a Allocator,
-    properties: &[PropertyInfo],
+    properties: &[PropertyInfo<'a>],
 ) -> Option<ClassElement<'a>> {
     let helper = AstHelper::new(ast);
-    let observed: Vec<&PropertyInfo> = properties
+    let observed: Vec<&PropertyInfo<'a>> = properties
         .iter()
         .filter(|p| !p.attribute_name.is_empty())
         .collect();
@@ -967,4 +999,50 @@ pub fn build_attribute_changed_callback_element<'a>(
         None,
         ast,
     ))
+}
+
+pub fn expr_references_property(expr: &Expression, prop_name: &str) -> bool {
+    match expr {
+        Expression::Identifier(id) => id.name == prop_name,
+        Expression::StaticMemberExpression(mem) => {
+            if mem.property.name == prop_name {
+                match &mem.object {
+                    Expression::ThisExpression(_) => true,
+                    Expression::Identifier(id) => id.name == "this",
+                    _ => expr_references_property(&mem.object, prop_name),
+                }
+            } else {
+                expr_references_property(&mem.object, prop_name)
+            }
+        }
+        Expression::ComputedMemberExpression(mem) => {
+            expr_references_property(&mem.object, prop_name)
+                || expr_references_property(&mem.expression, prop_name)
+        }
+        Expression::CallExpression(call) => {
+            expr_references_property(&call.callee, prop_name)
+                || call.arguments.iter().any(|arg| {
+                    arg.as_expression()
+                        .is_some_and(|e| expr_references_property(e, prop_name))
+                })
+        }
+        Expression::BinaryExpression(bin) => {
+            expr_references_property(&bin.left, prop_name)
+                || expr_references_property(&bin.right, prop_name)
+        }
+        Expression::UnaryExpression(u) => expr_references_property(&u.argument, prop_name),
+        Expression::LogicalExpression(log) => {
+            expr_references_property(&log.left, prop_name)
+                || expr_references_property(&log.right, prop_name)
+        }
+        Expression::ConditionalExpression(cond) => {
+            expr_references_property(&cond.test, prop_name)
+                || expr_references_property(&cond.consequent, prop_name)
+                || expr_references_property(&cond.alternate, prop_name)
+        }
+        Expression::ParenthesizedExpression(paren) => {
+            expr_references_property(&paren.expression, prop_name)
+        }
+        _ => false,
+    }
 }

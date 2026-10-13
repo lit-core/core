@@ -3,13 +3,13 @@
   "benchmarkId": "dom-paths",
   "title": "`@lit-core/dom-paths` empirical benchmark results",
   "description": "Ahead-of-time structural DOM child pointer path compilation evaluated across 255 production Web Components to eliminate runtime TreeWalker traversal during component mount.",
-  "timestamp": "2026-10-11T00:19:11.384Z",
+  "timestamp": "2026-10-12T23:47:27.784Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1cc4959",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -26,256 +26,406 @@
   "suites": [
     {
       "id": "carbon",
-      "name": "IBM Carbon Web Components",
-      "shortName": "IBM Carbon",
-      "packageName": "@carbon/web-components",
-      "componentCount": 51,
+      "name": "Carbon Web Components (@carbon/web-components)",
       "baseline": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 500,
-        "nodesVisited": 1863,
-        "mountLatencyMs": 0.14,
-        "heapKb": 175.1
+        "rawBytes": 472149,
+        "gzipBytes": 65240,
+        "brotliBytes": 42578,
+        "buildTimeMs": 71.74383399999999,
+        "firstRenderMs": 280,
+        "updateMs": 5.4,
+        "scriptEvalMs": 6.2,
+        "registrationMs": 0.6,
+        "heapUsedBytes": 4904791,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 0,
-        "nodesVisited": 0,
-        "mountLatencyMs": 0.09,
-        "heapKb": 268.5
+        "rawBytes": 473547,
+        "gzipBytes": 65463,
+        "brotliBytes": 42721,
+        "buildTimeMs": 43.25062499999996,
+        "firstRenderMs": 290.2,
+        "updateMs": 5,
+        "scriptEvalMs": 1.5,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 6518935,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "latency": {
-          "diff": -0.05000000000000002,
-          "percent": -35.71428571428572,
-          "formattedDiff": "-0.1",
-          "formattedPercent": "-35.7%",
-          "isReduction": true
-        },
-        "nodes": {
-          "diff": -1863,
-          "percent": -100,
-          "formattedDiff": "-1,863.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "walker": {
-          "diff": -500,
-          "percent": -100,
-          "formattedDiff": "-500.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": 1398,
+        "rawPercent": 0.3,
+        "gzipBytes": 223,
+        "gzipPercent": 0.34,
+        "brotliBytes": 143,
+        "brotliPercent": 0.34,
+        "buildTimeMs": -28.5,
+        "firstRenderMs": 10.2,
+        "speedupPercent": -3.64,
+        "updateMs": -0.4,
+        "updateSpeedupPercent": 7.41,
+        "evalSpeedupPercent": 75.81,
+        "registrationSpeedupPercent": 50,
+        "memorySavingsPercent": -32.91
+      },
+      "runtime": {
+        "firstRenderMs": 290.2,
+        "updateMs": 5,
+        "scriptEvalMs": 1.5,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 6518935,
+        "speedupPercent": -3.64,
+        "updateSpeedupPercent": 7.41,
+        "evalSpeedupPercent": 75.81,
+        "registrationSpeedupPercent": 50,
+        "memorySavingsPercent": -32.91
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "templatesCount": 60,
-        "pathsCount": 350,
-        "traversalReduction": "-100.0%",
+        "scenario": "Data grid",
+        "speedupPercent": -3.64,
+        "updateSpeedupPercent": 7.41,
         "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "spectrum",
-      "name": "Adobe Spectrum Web Components",
-      "shortName": "Adobe Spectrum",
-      "packageName": "@spectrum-web-components",
-      "componentCount": 51,
+      "name": "Spectrum Web Components (@spectrum-web-components)",
       "baseline": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 500,
-        "nodesVisited": 1000,
-        "mountLatencyMs": 0.08,
-        "heapKb": 159.3
+        "rawBytes": 175417,
+        "gzipBytes": 30783,
+        "brotliBytes": 24803,
+        "buildTimeMs": 22.290208000005805,
+        "firstRenderMs": 30.6,
+        "updateMs": 3.1,
+        "scriptEvalMs": 1.7,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3034820,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 0,
-        "nodesVisited": 0,
-        "mountLatencyMs": 0.06,
-        "heapKb": 159.3
+        "rawBytes": 177042,
+        "gzipBytes": 31398,
+        "brotliBytes": 25410,
+        "buildTimeMs": 32.79337499999997,
+        "firstRenderMs": 31.2,
+        "updateMs": 2.9,
+        "scriptEvalMs": 1.7,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3776402,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "latency": {
-          "diff": -0.020000000000000004,
-          "percent": -25.000000000000007,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-25.0%",
-          "isReduction": true
-        },
-        "nodes": {
-          "diff": -1000,
-          "percent": -100,
-          "formattedDiff": "-1,000.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "walker": {
-          "diff": -500,
-          "percent": -100,
-          "formattedDiff": "-500.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": 1625,
+        "rawPercent": 0.93,
+        "gzipBytes": 615,
+        "gzipPercent": 2,
+        "brotliBytes": 607,
+        "brotliPercent": 2.45,
+        "buildTimeMs": 10.5,
+        "firstRenderMs": 0.6,
+        "speedupPercent": -1.96,
+        "updateMs": -0.2,
+        "updateSpeedupPercent": 6.45,
+        "evalSpeedupPercent": 0,
+        "registrationSpeedupPercent": 0,
+        "memorySavingsPercent": -24.44
+      },
+      "runtime": {
+        "firstRenderMs": 31.2,
+        "updateMs": 2.9,
+        "scriptEvalMs": 1.7,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3776402,
+        "speedupPercent": -1.96,
+        "updateSpeedupPercent": 6.45,
+        "evalSpeedupPercent": 0,
+        "registrationSpeedupPercent": 0,
+        "memorySavingsPercent": -24.44
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "templatesCount": 1,
-        "pathsCount": 0,
-        "traversalReduction": "-100.0%",
+        "scenario": "Data grid",
+        "speedupPercent": -1.96,
+        "updateSpeedupPercent": 6.45,
         "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "webawesome",
-      "name": "Web Awesome",
-      "shortName": "Web Awesome",
-      "packageName": "@awesome.me/webawesome",
-      "componentCount": 51,
+      "name": "Web Awesome (20 Canonical Components)",
       "baseline": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 500,
-        "nodesVisited": 2861,
-        "mountLatencyMs": 0.28,
-        "heapKb": 166
+        "rawBytes": 198164,
+        "gzipBytes": 52039,
+        "brotliBytes": 43865,
+        "buildTimeMs": 26.994583999999122,
+        "firstRenderMs": 73.2,
+        "updateMs": 4.4,
+        "scriptEvalMs": 3.7,
+        "registrationMs": 1.3,
+        "heapUsedBytes": 4445712,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 0,
-        "nodesVisited": 0,
-        "mountLatencyMs": 0.12,
-        "heapKb": 282.6
+        "rawBytes": 198116,
+        "gzipBytes": 52030,
+        "brotliBytes": 43871,
+        "buildTimeMs": 27.655375000000276,
+        "firstRenderMs": 73.3,
+        "updateMs": 4.5,
+        "scriptEvalMs": 1.8,
+        "registrationMs": 0.6,
+        "heapUsedBytes": 6449435,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "latency": {
-          "diff": -0.16000000000000003,
-          "percent": -57.14285714285715,
-          "formattedDiff": "-0.2",
-          "formattedPercent": "-57.1%",
-          "isReduction": true
-        },
-        "nodes": {
-          "diff": -2861,
-          "percent": -100,
-          "formattedDiff": "-2,861.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "walker": {
-          "diff": -500,
-          "percent": -100,
-          "formattedDiff": "-500.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": -48,
+        "rawPercent": -0.02,
+        "gzipBytes": -9,
+        "gzipPercent": -0.02,
+        "brotliBytes": 6,
+        "brotliPercent": 0.01,
+        "buildTimeMs": 0.7,
+        "firstRenderMs": 0.1,
+        "speedupPercent": -0.14,
+        "updateMs": 0.1,
+        "updateSpeedupPercent": -2.27,
+        "evalSpeedupPercent": 51.35,
+        "registrationSpeedupPercent": 53.85,
+        "memorySavingsPercent": -45.07
+      },
+      "runtime": {
+        "firstRenderMs": 73.3,
+        "updateMs": 4.5,
+        "scriptEvalMs": 1.8,
+        "registrationMs": 0.6,
+        "heapUsedBytes": 6449435,
+        "speedupPercent": -0.14,
+        "updateSpeedupPercent": -2.27,
+        "evalSpeedupPercent": 51.35,
+        "registrationSpeedupPercent": 53.85,
+        "memorySavingsPercent": -45.07
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "templatesCount": 44,
-        "pathsCount": 331,
-        "traversalReduction": "-100.0%",
+        "scenario": "Data grid",
+        "speedupPercent": -0.14,
+        "updateSpeedupPercent": -2.27,
         "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "momentum",
-      "name": "Cisco Momentum Design",
-      "shortName": "Cisco Momentum",
-      "packageName": "@momentum-design/components",
-      "componentCount": 51,
+      "name": "Momentum Design (@momentum-design/components)",
       "baseline": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 500,
-        "nodesVisited": 2103,
-        "mountLatencyMs": 0.09,
-        "heapKb": 162.5
+        "rawBytes": 198356,
+        "gzipBytes": 46920,
+        "brotliBytes": 39567,
+        "buildTimeMs": 59.56649999998626,
+        "firstRenderMs": 40.2,
+        "updateMs": 3.6,
+        "scriptEvalMs": 3.3,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 3534021,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 0,
-        "nodesVisited": 0,
-        "mountLatencyMs": 0.03,
-        "heapKb": 122.5
+        "rawBytes": 198541,
+        "gzipBytes": 46999,
+        "brotliBytes": 39649,
+        "buildTimeMs": 32.66758299999992,
+        "firstRenderMs": 39.5,
+        "updateMs": 2.4,
+        "scriptEvalMs": 2.9,
+        "registrationMs": 0.1,
+        "heapUsedBytes": 4464105,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "latency": {
-          "diff": -0.06,
-          "percent": -66.66666666666666,
-          "formattedDiff": "-0.1",
-          "formattedPercent": "-66.7%",
-          "isReduction": true
-        },
-        "nodes": {
-          "diff": -2103,
-          "percent": -100,
-          "formattedDiff": "-2,103.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "walker": {
-          "diff": -500,
-          "percent": -100,
-          "formattedDiff": "-500.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": 185,
+        "rawPercent": 0.09,
+        "gzipBytes": 79,
+        "gzipPercent": 0.17,
+        "brotliBytes": 82,
+        "brotliPercent": 0.21,
+        "buildTimeMs": -26.9,
+        "firstRenderMs": -0.7,
+        "speedupPercent": 1.74,
+        "updateMs": -1.2,
+        "updateSpeedupPercent": 33.33,
+        "evalSpeedupPercent": 12.12,
+        "registrationSpeedupPercent": 50,
+        "memorySavingsPercent": -26.32
+      },
+      "runtime": {
+        "firstRenderMs": 39.5,
+        "updateMs": 2.4,
+        "scriptEvalMs": 2.9,
+        "registrationMs": 0.1,
+        "heapUsedBytes": 4464105,
+        "speedupPercent": 1.74,
+        "updateSpeedupPercent": 33.33,
+        "evalSpeedupPercent": 12.12,
+        "registrationSpeedupPercent": 50,
+        "memorySavingsPercent": -26.32
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "templatesCount": 63,
-        "pathsCount": 337,
-        "traversalReduction": "-100.0%",
+        "scenario": "Data grid",
+        "speedupPercent": 1.74,
+        "updateSpeedupPercent": 33.33,
         "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "material",
-      "name": "Google Material Web",
-      "shortName": "Google Material Web",
-      "packageName": "@material/web",
-      "componentCount": 51,
+      "name": "Material Web (@material/web)",
       "baseline": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 500,
-        "nodesVisited": 1843,
-        "mountLatencyMs": 0.1,
-        "heapKb": 156.2
+        "rawBytes": 71634,
+        "gzipBytes": 18623,
+        "brotliBytes": 16513,
+        "buildTimeMs": 14.497707999998966,
+        "firstRenderMs": 62.2,
+        "updateMs": 5.5,
+        "scriptEvalMs": 2.4,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 3448682,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "instancesCount": 500,
-        "treeWalkerCalls": 0,
-        "nodesVisited": 0,
-        "mountLatencyMs": 0.02,
-        "heapKb": 109.9
+        "rawBytes": 71762,
+        "gzipBytes": 18652,
+        "brotliBytes": 16528,
+        "buildTimeMs": 18.484375,
+        "firstRenderMs": 66.5,
+        "updateMs": 4.6,
+        "scriptEvalMs": 2.2,
+        "registrationMs": 0.6,
+        "heapUsedBytes": 4803067,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "latency": {
-          "diff": -0.08,
-          "percent": -80,
-          "formattedDiff": "-0.1",
-          "formattedPercent": "-80.0%",
-          "isReduction": true
-        },
-        "nodes": {
-          "diff": -1843,
-          "percent": -100,
-          "formattedDiff": "-1,843.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "walker": {
-          "diff": -500,
-          "percent": -100,
-          "formattedDiff": "-500.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": 128,
+        "rawPercent": 0.18,
+        "gzipBytes": 29,
+        "gzipPercent": 0.16,
+        "brotliBytes": 15,
+        "brotliPercent": 0.09,
+        "buildTimeMs": 4,
+        "firstRenderMs": 4.3,
+        "speedupPercent": -6.91,
+        "updateMs": -0.9,
+        "updateSpeedupPercent": 16.36,
+        "evalSpeedupPercent": 8.33,
+        "registrationSpeedupPercent": -200,
+        "memorySavingsPercent": -39.27
+      },
+      "runtime": {
+        "firstRenderMs": 66.5,
+        "updateMs": 4.6,
+        "scriptEvalMs": 2.2,
+        "registrationMs": 0.6,
+        "heapUsedBytes": 4803067,
+        "speedupPercent": -6.91,
+        "updateSpeedupPercent": 16.36,
+        "evalSpeedupPercent": 8.33,
+        "registrationSpeedupPercent": -200,
+        "memorySavingsPercent": -39.27
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "templatesCount": 30,
-        "pathsCount": 130,
-        "traversalReduction": "-100.0%",
+        "scenario": "Data grid",
+        "speedupPercent": -6.91,
+        "updateSpeedupPercent": 16.36,
         "buildOverhead": "Fast native pass"
       }
     }

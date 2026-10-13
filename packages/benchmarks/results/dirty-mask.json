@@ -3,13 +3,13 @@
   "benchmarkId": "dirty-mask",
   "title": "`@lit-core/dirty-mask` empirical benchmark results",
   "description": "Ahead-of-time property-to-part dependency bitmasking evaluated across 255 production Web Components to eliminate unnecessary template re-evaluations during property updates.",
-  "timestamp": "2026-10-03T20:40:24.984Z",
+  "timestamp": "2026-10-12T23:47:11.725Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b67b735",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -26,251 +26,406 @@
   "suites": [
     {
       "id": "carbon",
-      "name": "IBM Carbon Web Components",
-      "shortName": "IBM Carbon",
-      "packageName": "@carbon/web-components",
-      "componentCount": 51,
+      "name": "Carbon Web Components (@carbon/web-components)",
       "baseline": {
-        "evaluationsCount": 7858,
-        "partDiffsCount": 7858,
-        "reRenderLatencyMs": 0.12,
-        "heapKb": 92.4
+        "rawBytes": 472149,
+        "gzipBytes": 65240,
+        "brotliBytes": 42578,
+        "buildTimeMs": 71.74383399999999,
+        "firstRenderMs": 280,
+        "updateMs": 5.4,
+        "scriptEvalMs": 6.2,
+        "registrationMs": 0.6,
+        "heapUsedBytes": 4904791,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "evaluationsCount": 568,
-        "partDiffsCount": 568,
-        "reRenderLatencyMs": 0.07,
-        "heapKb": 90.8
+        "rawBytes": 475061,
+        "gzipBytes": 65855,
+        "brotliBytes": 42998,
+        "buildTimeMs": 44.05395899999996,
+        "firstRenderMs": 256.5,
+        "updateMs": 4.1,
+        "scriptEvalMs": 1.6,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 6453847,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "evaluations": {
-          "diff": -7290,
-          "percent": -92.7716976329855,
-          "formattedDiff": "-7,290.0",
-          "formattedPercent": "-92.8%",
-          "isReduction": true
-        },
-        "partDiffs": {
-          "diff": -7290,
-          "percent": -92.7716976329855,
-          "formattedDiff": "-7,290.0",
-          "formattedPercent": "-92.8%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.04999999999999999,
-          "percent": -41.66666666666666,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-41.7%",
-          "isReduction": true
+        "rawBytes": 2912,
+        "rawPercent": 0.62,
+        "gzipBytes": 615,
+        "gzipPercent": 0.94,
+        "brotliBytes": 420,
+        "brotliPercent": 0.99,
+        "buildTimeMs": -27.7,
+        "firstRenderMs": -23.5,
+        "speedupPercent": 8.39,
+        "updateMs": -1.3,
+        "updateSpeedupPercent": 24.07,
+        "evalSpeedupPercent": 74.19,
+        "registrationSpeedupPercent": 66.67,
+        "memorySavingsPercent": -31.58
+      },
+      "runtime": {
+        "firstRenderMs": 256.5,
+        "updateMs": 4.1,
+        "scriptEvalMs": 1.6,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 6453847,
+        "speedupPercent": 8.39,
+        "updateSpeedupPercent": 24.07,
+        "evalSpeedupPercent": 74.19,
+        "registrationSpeedupPercent": 66.67,
+        "memorySavingsPercent": -31.58
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "propertiesModeled": 805,
-        "bitmasksGenerated": 805,
-        "evalReduction": "-92.8%",
-        "diffReduction": "-92.8%",
+        "scenario": "Data grid",
+        "speedupPercent": 8.39,
+        "updateSpeedupPercent": 24.07,
         "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "spectrum",
-      "name": "Adobe Spectrum Web Components",
-      "shortName": "Adobe Spectrum",
-      "packageName": "@spectrum-web-components",
-      "componentCount": 51,
+      "name": "Spectrum Web Components (@spectrum-web-components)",
       "baseline": {
-        "evaluationsCount": 3515,
-        "partDiffsCount": 3515,
-        "reRenderLatencyMs": 0.06,
-        "heapKb": 55.3
+        "rawBytes": 175417,
+        "gzipBytes": 30783,
+        "brotliBytes": 24803,
+        "buildTimeMs": 22.290208000005805,
+        "firstRenderMs": 30.6,
+        "updateMs": 3.1,
+        "scriptEvalMs": 1.7,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3034820,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "evaluationsCount": 500,
-        "partDiffsCount": 500,
-        "reRenderLatencyMs": 0.03,
-        "heapKb": 55.3
+        "rawBytes": 177042,
+        "gzipBytes": 31398,
+        "brotliBytes": 25410,
+        "buildTimeMs": 33.987082999999984,
+        "firstRenderMs": 36.7,
+        "updateMs": 2.8,
+        "scriptEvalMs": 2,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3775800,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "evaluations": {
-          "diff": -3015,
-          "percent": -85.77524893314367,
-          "formattedDiff": "-3,015.0",
-          "formattedPercent": "-85.8%",
-          "isReduction": true
-        },
-        "partDiffs": {
-          "diff": -3015,
-          "percent": -85.77524893314367,
-          "formattedDiff": "-3,015.0",
-          "formattedPercent": "-85.8%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.03,
-          "percent": -50,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-50.0%",
-          "isReduction": true
+        "rawBytes": 1625,
+        "rawPercent": 0.93,
+        "gzipBytes": 615,
+        "gzipPercent": 2,
+        "brotliBytes": 607,
+        "brotliPercent": 2.45,
+        "buildTimeMs": 11.7,
+        "firstRenderMs": 6.1,
+        "speedupPercent": -19.93,
+        "updateMs": -0.3,
+        "updateSpeedupPercent": 9.68,
+        "evalSpeedupPercent": -17.65,
+        "registrationSpeedupPercent": 0,
+        "memorySavingsPercent": -24.42
+      },
+      "runtime": {
+        "firstRenderMs": 36.7,
+        "updateMs": 2.8,
+        "scriptEvalMs": 2,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3775800,
+        "speedupPercent": -19.93,
+        "updateSpeedupPercent": 9.68,
+        "evalSpeedupPercent": -17.65,
+        "registrationSpeedupPercent": 0,
+        "memorySavingsPercent": -24.42
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "propertiesModeled": 359,
-        "bitmasksGenerated": 359,
-        "evalReduction": "-85.8%",
-        "diffReduction": "-85.8%",
+        "scenario": "Data grid",
+        "speedupPercent": -19.93,
+        "updateSpeedupPercent": 9.68,
         "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "webawesome",
-      "name": "Web Awesome",
-      "shortName": "Web Awesome",
-      "packageName": "@awesome.me/webawesome",
-      "componentCount": 51,
+      "name": "Web Awesome (20 Canonical Components)",
       "baseline": {
-        "evaluationsCount": 5723,
-        "partDiffsCount": 5723,
-        "reRenderLatencyMs": 0.09,
-        "heapKb": 72.5
+        "rawBytes": 198164,
+        "gzipBytes": 52039,
+        "brotliBytes": 43865,
+        "buildTimeMs": 26.994583999999122,
+        "firstRenderMs": 73.2,
+        "updateMs": 4.4,
+        "scriptEvalMs": 3.7,
+        "registrationMs": 1.3,
+        "heapUsedBytes": 4445712,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "evaluationsCount": 510,
-        "partDiffsCount": 510,
-        "reRenderLatencyMs": 0.04,
-        "heapKb": 72.5
+        "rawBytes": 198116,
+        "gzipBytes": 52030,
+        "brotliBytes": 43871,
+        "buildTimeMs": 28.267832999999882,
+        "firstRenderMs": 79.3,
+        "updateMs": 3.8,
+        "scriptEvalMs": 1.9,
+        "registrationMs": 0.6,
+        "heapUsedBytes": 6177537,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "evaluations": {
-          "diff": -5213,
-          "percent": -91.08858990040189,
-          "formattedDiff": "-5,213.0",
-          "formattedPercent": "-91.1%",
-          "isReduction": true
-        },
-        "partDiffs": {
-          "diff": -5213,
-          "percent": -91.08858990040189,
-          "formattedDiff": "-5,213.0",
-          "formattedPercent": "-91.1%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.049999999999999996,
-          "percent": -55.55555555555556,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-55.6%",
-          "isReduction": true
+        "rawBytes": -48,
+        "rawPercent": -0.02,
+        "gzipBytes": -9,
+        "gzipPercent": -0.02,
+        "brotliBytes": 6,
+        "brotliPercent": 0.01,
+        "buildTimeMs": 1.3,
+        "firstRenderMs": 6.1,
+        "speedupPercent": -8.33,
+        "updateMs": -0.6,
+        "updateSpeedupPercent": 13.64,
+        "evalSpeedupPercent": 48.65,
+        "registrationSpeedupPercent": 53.85,
+        "memorySavingsPercent": -38.95
+      },
+      "runtime": {
+        "firstRenderMs": 79.3,
+        "updateMs": 3.8,
+        "scriptEvalMs": 1.9,
+        "registrationMs": 0.6,
+        "heapUsedBytes": 6177537,
+        "speedupPercent": -8.33,
+        "updateSpeedupPercent": 13.64,
+        "evalSpeedupPercent": 48.65,
+        "registrationSpeedupPercent": 53.85,
+        "memorySavingsPercent": -38.95
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "propertiesModeled": 582,
-        "bitmasksGenerated": 582,
-        "evalReduction": "-91.1%",
-        "diffReduction": "-91.1%",
+        "scenario": "Data grid",
+        "speedupPercent": -8.33,
+        "updateSpeedupPercent": 13.64,
         "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "momentum",
-      "name": "Cisco Momentum Design",
-      "shortName": "Cisco Momentum",
-      "packageName": "@momentum-design/components",
-      "componentCount": 51,
+      "name": "Momentum Design (@momentum-design/components)",
       "baseline": {
-        "evaluationsCount": 6472,
-        "partDiffsCount": 6472,
-        "reRenderLatencyMs": 0.1,
-        "heapKb": 78.4
+        "rawBytes": 198356,
+        "gzipBytes": 46920,
+        "brotliBytes": 39567,
+        "buildTimeMs": 59.56649999998626,
+        "firstRenderMs": 40.2,
+        "updateMs": 3.6,
+        "scriptEvalMs": 3.3,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 3534021,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "evaluationsCount": 540,
-        "partDiffsCount": 540,
-        "reRenderLatencyMs": 0.06,
-        "heapKb": 78.4
+        "rawBytes": 198541,
+        "gzipBytes": 46999,
+        "brotliBytes": 39649,
+        "buildTimeMs": 34.68679199999997,
+        "firstRenderMs": 39.7,
+        "updateMs": 2.9,
+        "scriptEvalMs": 2.4,
+        "registrationMs": 0.1,
+        "heapUsedBytes": 4473038,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "evaluations": {
-          "diff": -5932,
-          "percent": -91.65636588380717,
-          "formattedDiff": "-5,932.0",
-          "formattedPercent": "-91.7%",
-          "isReduction": true
-        },
-        "partDiffs": {
-          "diff": -5932,
-          "percent": -91.65636588380717,
-          "formattedDiff": "-5,932.0",
-          "formattedPercent": "-91.7%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.04000000000000001,
-          "percent": -40.00000000000001,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-40.0%",
-          "isReduction": true
+        "rawBytes": 185,
+        "rawPercent": 0.09,
+        "gzipBytes": 79,
+        "gzipPercent": 0.17,
+        "brotliBytes": 82,
+        "brotliPercent": 0.21,
+        "buildTimeMs": -24.9,
+        "firstRenderMs": -0.5,
+        "speedupPercent": 1.24,
+        "updateMs": -0.7,
+        "updateSpeedupPercent": 19.44,
+        "evalSpeedupPercent": 27.27,
+        "registrationSpeedupPercent": 50,
+        "memorySavingsPercent": -26.57
+      },
+      "runtime": {
+        "firstRenderMs": 39.7,
+        "updateMs": 2.9,
+        "scriptEvalMs": 2.4,
+        "registrationMs": 0.1,
+        "heapUsedBytes": 4473038,
+        "speedupPercent": 1.24,
+        "updateSpeedupPercent": 19.44,
+        "evalSpeedupPercent": 27.27,
+        "registrationSpeedupPercent": 50,
+        "memorySavingsPercent": -26.57
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "propertiesModeled": 658,
-        "bitmasksGenerated": 658,
-        "evalReduction": "-91.7%",
-        "diffReduction": "-91.7%",
+        "scenario": "Data grid",
+        "speedupPercent": 1.24,
+        "updateSpeedupPercent": 19.44,
         "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "material",
-      "name": "Google Material Web",
-      "shortName": "Google Material Web",
-      "packageName": "@material/web",
-      "componentCount": 51,
+      "name": "Material Web (@material/web)",
       "baseline": {
-        "evaluationsCount": 2451,
-        "partDiffsCount": 2451,
-        "reRenderLatencyMs": 0.04,
-        "heapKb": 62.6
+        "rawBytes": 71634,
+        "gzipBytes": 18623,
+        "brotliBytes": 16513,
+        "buildTimeMs": 14.497707999998966,
+        "firstRenderMs": 62.2,
+        "updateMs": 5.5,
+        "scriptEvalMs": 2.4,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 3448682,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "optimized": {
-        "evaluationsCount": 500,
-        "partDiffsCount": 500,
-        "reRenderLatencyMs": 0.02,
-        "heapKb": 62.6
+        "rawBytes": 71982,
+        "gzipBytes": 18729,
+        "brotliBytes": 16612,
+        "buildTimeMs": 18.133041999999477,
+        "firstRenderMs": 66.2,
+        "updateMs": 4.3,
+        "scriptEvalMs": 2.2,
+        "registrationMs": 0.5,
+        "heapUsedBytes": 4627247,
+        "scenarioSpecific": {
+          "rowCount": 100,
+          "customElementsPerCell": 4,
+          "totalCustomElements": 400,
+          "renderedNodes": 801
+        }
       },
       "deltas": {
-        "evaluations": {
-          "diff": -1951,
-          "percent": -79.6001631986944,
-          "formattedDiff": "-1,951.0",
-          "formattedPercent": "-79.6%",
-          "isReduction": true
-        },
-        "partDiffs": {
-          "diff": -1951,
-          "percent": -79.6001631986944,
-          "formattedDiff": "-1,951.0",
-          "formattedPercent": "-79.6%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.02,
-          "percent": -50,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-50.0%",
-          "isReduction": true
+        "rawBytes": 348,
+        "rawPercent": 0.49,
+        "gzipBytes": 106,
+        "gzipPercent": 0.57,
+        "brotliBytes": 99,
+        "brotliPercent": 0.6,
+        "buildTimeMs": 3.6,
+        "firstRenderMs": 4,
+        "speedupPercent": -6.43,
+        "updateMs": -1.2,
+        "updateSpeedupPercent": 21.82,
+        "evalSpeedupPercent": 8.33,
+        "registrationSpeedupPercent": -150,
+        "memorySavingsPercent": -34.17
+      },
+      "runtime": {
+        "firstRenderMs": 66.2,
+        "updateMs": 4.3,
+        "scriptEvalMs": 2.2,
+        "registrationMs": 0.5,
+        "heapUsedBytes": 4627247,
+        "speedupPercent": -6.43,
+        "updateSpeedupPercent": 21.82,
+        "evalSpeedupPercent": 8.33,
+        "registrationSpeedupPercent": -150,
+        "memorySavingsPercent": -34.17
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 801,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "componentsScanned": 51,
-        "propertiesModeled": 248,
-        "bitmasksGenerated": 248,
-        "evalReduction": "-79.6%",
-        "diffReduction": "-79.6%",
+        "scenario": "Data grid",
+        "speedupPercent": -6.43,
+        "updateSpeedupPercent": 21.82,
         "buildOverhead": "Fast native pass"
       }
     }

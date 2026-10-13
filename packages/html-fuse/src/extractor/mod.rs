@@ -38,8 +38,15 @@ impl TemplateExtractor {
 
             let parser = Parser::new(&allocator, &source, source_type);
             let parsed = parser.parse();
+            if !parsed.diagnostics.is_empty() && parsed.program.body.is_empty() {
+                continue;
+            }
 
-            let mut visitor = TemplateVisitor::new(&source, file_path, min_fragment_length);
+            let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
+            let scoping = semantic_ret.semantic.into_scoping();
+
+            let mut visitor =
+                TemplateVisitor::new(&source, file_path, min_fragment_length, &scoping);
             visitor.scan_imports(&parsed.program);
             visitor.visit_program(&parsed.program);
 

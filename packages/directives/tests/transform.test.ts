@@ -190,7 +190,7 @@ describe('directives AOT lowering compiler pass', () => {
     expect(res.code).toContain('html`<span>${item.id}</span>`');
   });
 
-  it('lowers live, keyed, and cache into lightweight descriptors', () => {
+  it('cleanly bails out on live, keyed, and cache leaving calls and imports untouched', () => {
     const input = `
       import { html } from 'lit';
       import { live } from 'lit/directives/live.js';
@@ -206,13 +206,11 @@ describe('directives AOT lowering compiler pass', () => {
       }
     `;
     const res = transformDirectives(input);
-    expect(res.loweredCount).toBe(3);
-    expect(res.directivesUsed).toContain('live');
-    expect(res.directivesUsed).toContain('keyed');
-    expect(res.directivesUsed).toContain('cache');
-    expect(res.code).toContain('_$litLive$');
-    expect(res.code).toContain('_$litKey$');
-    expect(res.code).toContain('_$litCache$');
+    expect(res.loweredCount).toBe(0);
+    expect(res.code.trim()).toBe(input.trim());
+    expect(res.code).not.toContain('_$litLive$');
+    expect(res.code).not.toContain('_$litKey$');
+    expect(res.code).not.toContain('_$litCache$');
   });
 
   it('lowers repeat into Array.from map', () => {
@@ -274,7 +272,7 @@ describe('directives AOT lowering compiler pass', () => {
     expect(res.code).not.toContain('_$litStrings$');
   });
 
-  it('lowers until, asyncAppend, asyncReplace, and ref', () => {
+  it('cleanly bails out on until, asyncAppend, asyncReplace, and ref leaving calls and imports untouched', () => {
     const input = `
       import { html } from 'lit';
       import { until } from 'lit/directives/until.js';
@@ -292,13 +290,81 @@ describe('directives AOT lowering compiler pass', () => {
       }
     `;
     const res = transformDirectives(input);
-    expect(res.loweredCount).toBe(4);
-    expect(res.directivesUsed).toContain('until');
-    expect(res.directivesUsed).toContain('asyncAppend');
-    expect(res.directivesUsed).toContain('asyncReplace');
-    expect(res.directivesUsed).toContain('ref');
-    expect(res.code).toContain('_$litAsyncAppend$');
-    expect(res.code).toContain('_$litAsyncReplace$');
-    expect(res.code).toContain('_$litRef$');
+    expect(res.loweredCount).toBe(0);
+    expect(res.code.trim()).toBe(input.trim());
+    expect(res.code).not.toContain('_$litAsyncAppend$');
+    expect(res.code).not.toContain('_$litAsyncReplace$');
+    expect(res.code).not.toContain('_$litRef$');
+  });
+
+  it('does not rewrite directive calls when shadowed by local parameter or variable', () => {
+    const input = `
+      import { html } from 'lit';
+      import { when } from 'lit/directives/when.js';
+
+      export function render(when) {
+        return html\`<div>\${when(true, () => 'yes', () => 'no')}</div>\`;
+      }
+    `;
+    const res = transformDirectives(input);
+    expect(res.loweredCount).toBe(0);
+    expect(res.code.trim()).toBe(input.trim());
+  });
+
+  it('preserves imports of unlowered or bailed out directives while pruning lowered ones', () => {
+    const input = `
+      import { html } from 'lit';
+      import { classMap } from 'lit/directives/class-map.js';
+      import { live } from 'lit/directives/live.js';
+
+      export function render(item) {
+        return html\`<input class=\${classMap({ active: item.active })} .value=\${live(item.val)}>\`;
+      }
+    `;
+    const res = transformDirectives(input);
+    expect(res.loweredCount).toBe(1);
+    expect(res.directivesUsed).toContain('classMap');
+    expect(res.code).not.toContain('lit/directives/class-map.js');
+    expect(res.code).toContain('lit/directives/live.js');
+    expect(res.code).toContain('live(item.val)');
+  });
+
+  it('generates valid JavaScript for dynamic classMap fallback without broken filter(Boolean)', () => {
+    const input = `
+      import { html } from 'lit';
+      import { classMap } from 'lit/directives/class-map.js';
+
+      export function render(dynamicClasses) {
+        return html\`<div class=\${classMap(dynamicClasses)}></div>\`;
+      }
+    `;
+    const res = transformDirectives(input);
+    expect(res.loweredCount).toBe(1);
+    expect(res.directivesUsed).toContain('classMap');
+    expect(res.code).not.toContain('.filter(Boolean)');
+    expect(res.code).toContain('Object.entries(dynamicClasses).filter(');
+    expect(res.code).toContain('.map(');
+    expect(res.code).toContain('.join(" ")');
+  });
+
+  it('lowers generalized range beyond 30 elements and supports start/end/step', () => {
+    const input = `
+      import { html } from 'lit';
+      import { range } from 'lit/directives/range.js';
+
+      export function render() {
+        return html\`
+          \${range(50)}
+          \${range(2, 6)}
+          \${range(0, 10, 2)}
+        \`;
+      }
+    `;
+    const res = transformDirectives(input);
+    expect(res.loweredCount).toBe(3);
+    expect(res.directivesUsed).toContain('range');
+    expect(res.code).toContain('49'); // Range of 50 contains 0..49
+    expect(res.code).toMatch(/\[\s*2,\s*3,\s*4,\s*5\s*\]/);
+    expect(res.code).toMatch(/\[\s*0,\s*2,\s*4,\s*6,\s*8\s*\]/);
   });
 });

@@ -153,6 +153,53 @@ export class LifecycleElem extends LitElement {
     expect(res.code).toMatch(/firstUpdated\(props\)\s*\{\s*this\.__initLitEventHoist\(\);/);
     expect(res.code).not.toMatch(/super\.connectedCallback\?\.[\s\S]*super\.connectedCallback\?\./);
   });
+
+  it('does not monkey patch event.stopPropagation or mutate Event prototype', () => {
+    const input = `
+export class CleanEventElem extends LitElement {
+  render() {
+    return html\`<button @click=\${this._onClick}>Click</button>\`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.code).not.toContain('origStop');
+    expect(res.code).not.toContain('event.stopPropagation =');
+    expect(res.code).toContain('if (event.cancelBubble)');
+  });
+
+  it('ignores classes not inheriting from LitElement or ReactiveElement', () => {
+    const input = `
+export class RegularClass extends NonLitBase {
+  render() {
+    return html\`<button @click=\${this._onClick}>Click</button>\`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(0);
+    expect(res.hoistedEventsCount).toBe(0);
+  });
+
+  it('handles aliased Lit imports semantically', () => {
+    const input = `
+import { LitElement as BaseEl, html as litHtml, eventOptions as litOpt } from 'lit';
+export class AliasedElem extends BaseEl {
+  render() {
+    return litHtml\`
+      <button @click=\${this._onClick}>Standard</button>
+      <button @click=\${litOpt({ capture: true })(this._onCapture)}>Capture</button>
+    \`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.hoistedEventsCount).toBe(1);
+    expect(res.events).toEqual(['click']);
+    expect(res.code).toContain('data-lh-click=');
+    expect(res.code).toContain('@click=${litOpt({ capture: true })(this._onCapture)}');
+  });
 });
 
 describe('runtime dispatcher and event propagation logic', () => {

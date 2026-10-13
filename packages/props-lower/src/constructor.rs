@@ -44,11 +44,19 @@ pub fn inject_constructor_statements<'a>(
     // }
     let mut body_statements = ArenaVec::new_in(ast);
 
-    // super();
-    let super_expr = Expression::new_super(SPAN, ast);
-    let super_call =
-        Expression::new_call_expression(SPAN, super_expr, None, ArenaVec::new_in(ast), false, ast);
-    body_statements.push(Statement::new_expression_statement(SPAN, super_call, ast));
+    // super(); only emit if the class extends a superclass
+    if class.heritage.is_some() {
+        let super_expr = Expression::new_super(SPAN, ast);
+        let super_call = Expression::new_call_expression(
+            SPAN,
+            super_expr,
+            None,
+            ArenaVec::new_in(ast),
+            false,
+            ast,
+        );
+        body_statements.push(Statement::new_expression_statement(SPAN, super_call, ast));
+    }
 
     for stmt in extra_statements {
         body_statements.push(stmt);

@@ -4,7 +4,28 @@ use oxc_ast_visit::Visit;
 use oxc_span::GetSpan;
 use std::collections::HashSet;
 
-use crate::analyzer::{analyze_candidate, is_lit_html_tag};
+use crate::analyzer::{analyze_candidate, is_lit_html_tag, LitSemanticAnalysis};
+
+pub fn generate_unique_var_name(
+    base_prop: &str,
+    counter: usize,
+    used_slots: &HashSet<String>,
+    existing_bindings: &HashSet<String>,
+) -> String {
+    let mut candidate = if used_slots.contains(&format!("_memo_{}", base_prop)) {
+        format!("_memoized_{}_{}", base_prop, counter)
+    } else {
+        format!("_memoized_{}", base_prop)
+    };
+
+    let mut idx = counter;
+    while existing_bindings.contains(&candidate) || used_slots.contains(&candidate) {
+        idx += 1;
+        candidate = format!("_memoized_{}_{}", base_prop, idx);
+    }
+
+    candidate
+}
 
 #[derive(Debug)]
 pub struct CandidateItem<'a> {
@@ -27,16 +48,23 @@ pub struct StmtCandidateGroup<'a> {
 }
 
 /// Visitor that walks tagged templates inside statements to find candidate expressions
-pub struct TemplateCandidateFinder<'a> {
+pub struct TemplateCandidateFinder<'a, 's> {
     pub allocator: &'a Allocator,
+    pub lit_analysis: Option<&'s LitSemanticAnalysis>,
+    pub existing_bindings: &'s HashSet<String>,
     pub candidates: Vec<CandidateItem<'a>>,
     pub used_slots: HashSet<String>,
     pub counter: usize,
 }
 
-impl<'a> Visit<'a> for TemplateCandidateFinder<'a> {
+impl<'a, 's> Visit<'a> for TemplateCandidateFinder<'a, 's> {
     fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
-        if is_lit_html_tag(&tagged.tag) {
+        let is_lit = match self.lit_analysis {
+            Some(analysis) => analysis.is_lit_tag(&tagged.tag),
+            None => is_lit_html_tag(&tagged.tag),
+        };
+
+        if is_lit {
             for expr in &tagged.quasi.expressions {
                 if let Some(cand) = analyze_candidate(expr) {
                     let base_prop = cand.root_prop.clone();
@@ -47,12 +75,14 @@ impl<'a> Visit<'a> for TemplateCandidateFinder<'a> {
                     };
                     self.used_slots.insert(val_slot.clone());
 
-                    let var_name = if self.used_slots.contains(&format!("_memo_{}", base_prop)) {
-                        format!("_memoized_{}_{}", base_prop, self.counter)
-                    } else {
-                        format!("_memoized_{}", base_prop)
-                    };
+                    let var_name = generate_unique_var_name(
+                        &base_prop,
+                        self.counter,
+                        &self.used_slots,
+                        self.existing_bindings,
+                    );
                     self.used_slots.insert(format!("_memo_{}", base_prop));
+                    self.used_slots.insert(var_name.clone());
                     self.counter += 1;
 
                     let expr_cloned = expr.clone_in(self.allocator);
@@ -79,9 +109,11 @@ impl<'a> Visit<'a> for TemplateCandidateFinder<'a> {
     }
 }
 
-pub fn collect_stmt_candidates<'a>(
+pub fn collect_stmt_candidates<'a, 's>(
     stmt: &Statement<'a>,
     allocator: &'a Allocator,
+    lit_analysis: Option<&'s LitSemanticAnalysis>,
+    existing_bindings: &'s HashSet<String>,
     out: &mut Vec<StmtCandidateGroup<'a>>,
     used_slots: &mut HashSet<String>,
     counter: &mut usize,
@@ -96,7 +128,12 @@ pub fn collect_stmt_candidates<'a>(
                             BindingPattern::BindingIdentifier(ident) => {
                                 ident.name.as_str().to_string()
                             }
-                            _ => format!("_memoized_{}", cand.root_prop),
+                            _ => generate_unique_var_name(
+                                &cand.root_prop,
+                                *counter,
+                                used_slots,
+                                existing_bindings,
+                            ),
                         };
 
                         let val_slot = if used_slots.contains(&cand.root_prop) {
@@ -105,6 +142,7 @@ pub fn collect_stmt_candidates<'a>(
                             cand.root_prop.clone()
                         };
                         used_slots.insert(val_slot.clone());
+                        used_slots.insert(var_name.clone());
                         *counter += 1;
 
                         let expr_cloned = init_expr.clone_in(allocator);
@@ -130,6 +168,8 @@ pub fn collect_stmt_candidates<'a>(
                     // Otherwise, scan init for inline template candidates
                     let mut finder = TemplateCandidateFinder {
                         allocator,
+                        lit_analysis,
+                        existing_bindings,
                         candidates: Vec::new(),
                         used_slots: used_slots.clone(),
                         counter: *counter,
@@ -163,7 +203,13 @@ pub fn collect_stmt_candidates<'a>(
                     };
                     used_slots.insert(val_slot.clone());
 
-                    let var_name = format!("_memoized_{}", val_slot);
+                    let var_name = generate_unique_var_name(
+                        &val_slot,
+                        *counter,
+                        used_slots,
+                        existing_bindings,
+                    );
+                    used_slots.insert(var_name.clone());
                     *counter += 1;
 
                     let expr_cloned = arg.clone_in(allocator);
@@ -189,6 +235,8 @@ pub fn collect_stmt_candidates<'a>(
                 // Scan return argument for inline template candidates
                 let mut finder = TemplateCandidateFinder {
                     allocator,
+                    lit_analysis,
+                    existing_bindings,
                     candidates: Vec::new(),
                     used_slots: used_slots.clone(),
                     counter: *counter,
@@ -213,6 +261,8 @@ pub fn collect_stmt_candidates<'a>(
         Statement::ExpressionStatement(expr_stmt) => {
             let mut finder = TemplateCandidateFinder {
                 allocator,
+                lit_analysis,
+                existing_bindings,
                 candidates: Vec::new(),
                 used_slots: used_slots.clone(),
                 counter: *counter,
@@ -234,35 +284,91 @@ pub fn collect_stmt_candidates<'a>(
             }
         }
         Statement::IfStatement(if_stmt) => {
-            collect_stmt_candidates(&if_stmt.consequent, allocator, out, used_slots, counter);
+            collect_stmt_candidates(
+                &if_stmt.consequent,
+                allocator,
+                lit_analysis,
+                existing_bindings,
+                out,
+                used_slots,
+                counter,
+            );
             if let Some(alt) = &if_stmt.alternate {
-                collect_stmt_candidates(alt, allocator, out, used_slots, counter);
+                collect_stmt_candidates(
+                    alt,
+                    allocator,
+                    lit_analysis,
+                    existing_bindings,
+                    out,
+                    used_slots,
+                    counter,
+                );
             }
         }
         Statement::BlockStatement(block) => {
             for s in &block.body {
-                collect_stmt_candidates(s, allocator, out, used_slots, counter);
+                collect_stmt_candidates(
+                    s,
+                    allocator,
+                    lit_analysis,
+                    existing_bindings,
+                    out,
+                    used_slots,
+                    counter,
+                );
             }
         }
         Statement::TryStatement(try_stmt) => {
             for s in &try_stmt.block.body {
-                collect_stmt_candidates(s, allocator, out, used_slots, counter);
+                collect_stmt_candidates(
+                    s,
+                    allocator,
+                    lit_analysis,
+                    existing_bindings,
+                    out,
+                    used_slots,
+                    counter,
+                );
             }
             if let Some(h) = &try_stmt.handler {
                 for s in &h.body.body {
-                    collect_stmt_candidates(s, allocator, out, used_slots, counter);
+                    collect_stmt_candidates(
+                        s,
+                        allocator,
+                        lit_analysis,
+                        existing_bindings,
+                        out,
+                        used_slots,
+                        counter,
+                    );
                 }
             }
             if let Some(f) = &try_stmt.finalizer {
                 for s in &f.body {
-                    collect_stmt_candidates(s, allocator, out, used_slots, counter);
+                    collect_stmt_candidates(
+                        s,
+                        allocator,
+                        lit_analysis,
+                        existing_bindings,
+                        out,
+                        used_slots,
+                        counter,
+                    );
                 }
             }
         }
         Statement::SwitchStatement(sw) => {
             for case in &sw.cases {
                 for s in &case.consequent {
-                    collect_stmt_candidates(s, allocator, out, used_slots, counter);
+                    collect_stmt_candidates(
+                        s,
+                        allocator,
+                        lit_analysis,
+                        existing_bindings,
+                        out,
+                        used_slots,
+                        counter,
+                    );
                 }
             }
         }

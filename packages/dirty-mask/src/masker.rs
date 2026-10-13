@@ -4,17 +4,27 @@ use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 use std::collections::HashMap;
 
-use crate::analyzer::{compute_part_mask, is_lit_html_tag};
+use crate::analyzer::{compute_part_mask, is_lit_html_tag, LitSemanticAnalysis};
 
 pub fn mask_expressions_in_expr<'a>(
     expr: &mut Expression<'a>,
     reactive_props: &HashMap<String, usize>,
     allocator: &'a Allocator,
     masked_count: &mut u32,
+    ctx: Option<&LitSemanticAnalysis>,
+    no_change_ident: &str,
 ) {
+    let is_tag = |tag: &Expression| -> bool {
+        if let Some(c) = ctx {
+            c.is_lit_tag(tag)
+        } else {
+            is_lit_html_tag(tag)
+        }
+    };
+
     match expr {
         Expression::TaggedTemplateExpression(tagged) => {
-            if is_lit_html_tag(&tagged.tag) {
+            if is_tag(&tagged.tag) {
                 for quasi_expr in &mut tagged.quasi.expressions {
                     if let Expression::ConditionalExpression(cond) = quasi_expr {
                         if let Expression::BinaryExpression(bin) = &cond.test {
@@ -53,13 +63,21 @@ pub fn mask_expressions_in_expr<'a>(
                         &ast,
                     );
 
-                    let placeholder = Expression::new_identifier(SPAN, "noChange", &ast);
+                    let placeholder = Expression::new_identifier(
+                        SPAN,
+                        allocator.alloc_str(no_change_ident),
+                        &ast,
+                    );
                     let original = std::mem::replace(quasi_expr, placeholder);
                     let conditional = Expression::new_conditional_expression(
                         SPAN,
                         test,
                         original,
-                        Expression::new_identifier(SPAN, "noChange", &ast),
+                        Expression::new_identifier(
+                            SPAN,
+                            allocator.alloc_str(no_change_ident),
+                            &ast,
+                        ),
                         &ast,
                     );
                     *quasi_expr = conditional;
@@ -67,7 +85,14 @@ pub fn mask_expressions_in_expr<'a>(
                 }
             } else {
                 for quasi_expr in &mut tagged.quasi.expressions {
-                    mask_expressions_in_expr(quasi_expr, reactive_props, allocator, masked_count);
+                    mask_expressions_in_expr(
+                        quasi_expr,
+                        reactive_props,
+                        allocator,
+                        masked_count,
+                        ctx,
+                        no_change_ident,
+                    );
                 }
             }
         }
@@ -77,17 +102,35 @@ pub fn mask_expressions_in_expr<'a>(
                 reactive_props,
                 allocator,
                 masked_count,
+                ctx,
+                no_change_ident,
             );
         }
         Expression::ConditionalExpression(cond) => {
-            mask_expressions_in_expr(&mut cond.test, reactive_props, allocator, masked_count);
+            mask_expressions_in_expr(
+                &mut cond.test,
+                reactive_props,
+                allocator,
+                masked_count,
+                ctx,
+                no_change_ident,
+            );
             mask_expressions_in_expr(
                 &mut cond.consequent,
                 reactive_props,
                 allocator,
                 masked_count,
+                ctx,
+                no_change_ident,
             );
-            mask_expressions_in_expr(&mut cond.alternate, reactive_props, allocator, masked_count);
+            mask_expressions_in_expr(
+                &mut cond.alternate,
+                reactive_props,
+                allocator,
+                masked_count,
+                ctx,
+                no_change_ident,
+            );
         }
         _ => {}
     }
@@ -98,11 +141,20 @@ pub fn mask_expressions_in_stmt<'a>(
     reactive_props: &HashMap<String, usize>,
     allocator: &'a Allocator,
     masked_count: &mut u32,
+    ctx: Option<&LitSemanticAnalysis>,
+    no_change_ident: &str,
 ) {
     match stmt {
         Statement::ReturnStatement(ret) => {
             if let Some(ref mut arg) = ret.argument {
-                mask_expressions_in_expr(arg, reactive_props, allocator, masked_count);
+                mask_expressions_in_expr(
+                    arg,
+                    reactive_props,
+                    allocator,
+                    masked_count,
+                    ctx,
+                    no_change_ident,
+                );
             }
         }
         Statement::ExpressionStatement(expr_stmt) => {
@@ -111,30 +163,62 @@ pub fn mask_expressions_in_stmt<'a>(
                 reactive_props,
                 allocator,
                 masked_count,
+                ctx,
+                no_change_ident,
             );
         }
         Statement::VariableDeclaration(var_decl) => {
             for decl in &mut var_decl.declarations {
                 if let Some(ref mut init) = decl.init {
-                    mask_expressions_in_expr(init, reactive_props, allocator, masked_count);
+                    mask_expressions_in_expr(
+                        init,
+                        reactive_props,
+                        allocator,
+                        masked_count,
+                        ctx,
+                        no_change_ident,
+                    );
                 }
             }
         }
         Statement::BlockStatement(block) => {
             for s in &mut block.body {
-                mask_expressions_in_stmt(s, reactive_props, allocator, masked_count);
+                mask_expressions_in_stmt(
+                    s,
+                    reactive_props,
+                    allocator,
+                    masked_count,
+                    ctx,
+                    no_change_ident,
+                );
             }
         }
         Statement::IfStatement(if_stmt) => {
-            mask_expressions_in_expr(&mut if_stmt.test, reactive_props, allocator, masked_count);
+            mask_expressions_in_expr(
+                &mut if_stmt.test,
+                reactive_props,
+                allocator,
+                masked_count,
+                ctx,
+                no_change_ident,
+            );
             mask_expressions_in_stmt(
                 &mut if_stmt.consequent,
                 reactive_props,
                 allocator,
                 masked_count,
+                ctx,
+                no_change_ident,
             );
             if let Some(ref mut alt) = if_stmt.alternate {
-                mask_expressions_in_stmt(alt, reactive_props, allocator, masked_count);
+                mask_expressions_in_stmt(
+                    alt,
+                    reactive_props,
+                    allocator,
+                    masked_count,
+                    ctx,
+                    no_change_ident,
+                );
             }
         }
         _ => {}
@@ -146,8 +230,17 @@ pub fn mask_expressions_in_body<'a>(
     reactive_props: &HashMap<String, usize>,
     allocator: &'a Allocator,
     masked_count: &mut u32,
+    ctx: Option<&LitSemanticAnalysis>,
+    no_change_ident: &str,
 ) {
     for stmt in &mut body.statements {
-        mask_expressions_in_stmt(stmt, reactive_props, allocator, masked_count);
+        mask_expressions_in_stmt(
+            stmt,
+            reactive_props,
+            allocator,
+            masked_count,
+            ctx,
+            no_change_ident,
+        );
     }
 }

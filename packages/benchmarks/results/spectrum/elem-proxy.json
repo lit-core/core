@@ -6,127 +6,43 @@
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
     "version": "1.12.4",
-    "componentCount": 20,
+    "componentCount": 6,
     "components": [
       {
-        "concept": "button",
-        "tag": "sp-button",
-        "label": "Button",
-        "path": "button/sp-button.js"
+        "concept": "text-input",
+        "tag": "sp-textfield",
+        "path": "textfield/sp-textfield.js",
+        "importStatement": "import '@spectrum-web-components/textfield/sp-textfield.js';"
       },
       {
         "concept": "checkbox",
         "tag": "sp-checkbox",
-        "label": "Checkbox",
-        "path": "checkbox/sp-checkbox.js"
-      },
-      {
-        "concept": "radio",
-        "tag": "sp-radio",
-        "label": "Radio button",
-        "path": "radio/sp-radio.js"
+        "path": "checkbox/sp-checkbox.js",
+        "importStatement": "import '@spectrum-web-components/checkbox/sp-checkbox.js';"
       },
       {
         "concept": "switch",
         "tag": "sp-switch",
-        "label": "Switch / toggle",
-        "path": "switch/sp-switch.js"
+        "path": "switch/sp-switch.js",
+        "importStatement": "import '@spectrum-web-components/switch/sp-switch.js';"
       },
       {
-        "concept": "text-input",
-        "tag": "sp-textfield",
-        "label": "Text input / field",
-        "path": "textfield/sp-textfield.js"
+        "concept": "radio",
+        "tag": "sp-radio",
+        "path": "radio/sp-radio.js",
+        "importStatement": "import '@spectrum-web-components/radio/sp-radio.js';"
       },
       {
         "concept": "select",
         "tag": "sp-picker",
-        "label": "Select / dropdown",
-        "path": "picker/sp-picker.js"
+        "path": "picker/sp-picker.js",
+        "importStatement": "import '@spectrum-web-components/picker/sp-picker.js';"
       },
       {
-        "concept": "dialog",
-        "tag": "sp-dialog",
-        "label": "Dialog / modal",
-        "path": "dialog/sp-dialog.js"
-      },
-      {
-        "concept": "badge",
-        "tag": "sp-badge",
-        "label": "Badge / tag",
-        "path": "badge/sp-badge.js"
-      },
-      {
-        "concept": "tabs",
-        "tag": "sp-tabs",
-        "label": "Tabs",
-        "path": "tabs/sp-tabs.js"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "sp-progress-bar",
-        "label": "Progress bar",
-        "path": "progress-bar/sp-progress-bar.js"
-      },
-      {
-        "concept": "spinner",
-        "tag": "sp-progress-circle",
-        "label": "Spinner / loader",
-        "path": "progress-circle/sp-progress-circle.js"
-      },
-      {
-        "concept": "slider",
-        "tag": "sp-slider",
-        "label": "Slider",
-        "path": "slider/sp-slider.js"
-      },
-      {
-        "concept": "menu",
-        "tag": "sp-menu",
-        "label": "Menu / popover",
-        "path": "menu/sp-menu.js"
-      },
-      {
-        "concept": "divider",
-        "tag": "sp-divider",
-        "label": "Divider",
-        "path": "divider/sp-divider.js"
-      },
-      {
-        "concept": "icon",
-        "tag": "sp-icon",
-        "label": "Icon",
-        "path": "icon/sp-icon.js"
-      },
-      {
-        "concept": "icon-button",
-        "tag": "sp-action-button",
-        "label": "Icon button",
-        "path": "action-button/sp-action-button.js"
-      },
-      {
-        "concept": "card",
-        "tag": "sp-card",
-        "label": "Card / tile",
-        "path": "card/sp-card.js"
-      },
-      {
-        "concept": "elevation",
-        "tag": "sp-popover",
-        "label": "Elevation / focus",
-        "path": "popover/sp-popover.js"
-      },
-      {
-        "concept": "list",
-        "tag": "sp-sidenav",
-        "label": "List / structured",
-        "path": "sidenav/sp-sidenav.js"
-      },
-      {
-        "concept": "chips",
-        "tag": "sp-action-group",
-        "label": "Chips / segmented",
-        "path": "action-group/sp-action-group.js"
+        "concept": "button",
+        "tag": "sp-button",
+        "path": "button/sp-button.js",
+        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
       }
     ]
   },
@@ -139,15 +55,16 @@
   "scenario": {
     "id": "interactive-form",
     "name": "Interactive form",
-    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration"
+    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration",
+    "componentCount": 6
   },
-  "timestamp": "2026-10-10T10:13:12.347Z",
+  "timestamp": "2026-10-12T23:45:54.075Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -162,43 +79,63 @@
     }
   },
   "metrics": {
-    "rawBytes": 504793,
-    "gzipBytes": 95567,
-    "brotliBytes": 75438,
-    "buildTimeMs": 48.3382500000007
+    "rawBytes": 504583,
+    "gzipBytes": 95562,
+    "brotliBytes": 75411,
+    "buildTimeMs": 62.464750000000095
   },
   "baseline": {
     "rawBytes": 504793,
     "gzipBytes": 95567,
     "brotliBytes": 75438,
-    "buildTimeMs": 43.29183299999568
+    "buildTimeMs": 43.29183299999568,
+    "firstRenderMs": 22.5,
+    "updateMs": 0.2,
+    "scriptEvalMs": 2.2,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 3843541,
+    "scenarioSpecific": {
+      "sectionsCount": 5,
+      "controlsPerSection": 6,
+      "totalControls": 30,
+      "eventsDispatched": 15
+    }
   },
   "deltas": {
-    "rawBytes": 0,
-    "rawPercent": 0,
-    "gzipBytes": 0,
-    "gzipPercent": 0,
-    "brotliBytes": 0,
-    "brotliPercent": 0,
-    "buildTimeMs": 5,
-    "firstRenderMs": -3.3,
-    "speedupPercent": 14.67,
-    "updateMs": -0.1,
-    "updateSpeedupPercent": 50,
-    "evalSpeedupPercent": 4.55,
+    "rawBytes": -210,
+    "rawPercent": -0.04,
+    "gzipBytes": -5,
+    "gzipPercent": -0.01,
+    "brotliBytes": -27,
+    "brotliPercent": -0.04,
+    "buildTimeMs": 19.2,
+    "firstRenderMs": -1.4,
+    "speedupPercent": 6.22,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -4.55,
     "registrationSpeedupPercent": 20,
-    "memorySavingsPercent": 0
+    "memorySavingsPercent": -3.53
   },
   "runtime": {
-    "firstRenderMs": 19.2,
-    "updateMs": 0.1,
-    "scriptEvalMs": 2.1,
+    "firstRenderMs": 21.1,
+    "updateMs": 0.2,
+    "scriptEvalMs": 2.3,
     "registrationMs": 0.4,
-    "heapUsedBytes": 3843685,
-    "speedupPercent": 14.67,
-    "updateSpeedupPercent": 50,
-    "evalSpeedupPercent": 4.55,
+    "heapUsedBytes": 3979363,
+    "speedupPercent": 6.22,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -4.55,
     "registrationSpeedupPercent": 20,
-    "memorySavingsPercent": 0
+    "memorySavingsPercent": -3.53
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 46,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

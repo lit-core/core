@@ -4,8 +4,19 @@ use oxc_ast::ast::{
     TaggedTemplateExpression, VariableDeclaration,
 };
 use oxc_ast_visit::Visit;
+use oxc_semantic::{Scoping, SymbolId};
 use oxc_span::Span;
 use std::collections::{HashMap, HashSet};
+
+pub fn is_lit_css_source(src: &str) -> bool {
+    src == "lit"
+        || src.starts_with("lit/")
+        || src == "lit-element"
+        || src.starts_with("lit-element/")
+        || src == "lit-html"
+        || src.starts_with("lit-html/")
+        || src.starts_with("@lit/")
+}
 
 pub struct CssTagVisitor<'a> {
     pub source_code: &'a str,
@@ -13,21 +24,26 @@ pub struct CssTagVisitor<'a> {
     pub extracted_styles: Vec<ExtractedStyle>,
     pub imported_styles_identifiers: HashMap<String, String>, // ident -> import_specifier
     pub css_identifiers: HashSet<String>,
+    pub lit_css_symbols: HashSet<SymbolId>,
+    pub lit_css_namespaces: HashSet<SymbolId>,
+    pub has_imports: bool,
+    pub scoping: &'a Scoping,
     current_class_name: Option<String>,
     current_tag_name: Option<String>,
 }
 
 impl<'a> CssTagVisitor<'a> {
-    pub fn new(source_code: &'a str, file_path: &'a str) -> Self {
-        let mut css_identifiers = HashSet::new();
-        css_identifiers.insert("css".to_string());
-
+    pub fn new(source_code: &'a str, file_path: &'a str, scoping: &'a Scoping) -> Self {
         Self {
             source_code,
             file_path,
             extracted_styles: Vec::new(),
             imported_styles_identifiers: HashMap::new(),
-            css_identifiers,
+            css_identifiers: HashSet::new(),
+            lit_css_symbols: HashSet::new(),
+            lit_css_namespaces: HashSet::new(),
+            has_imports: false,
+            scoping,
             current_class_name: None,
             current_tag_name: None,
         }
@@ -63,18 +79,50 @@ impl<'a> CssTagVisitor<'a> {
     fn get_css_tag_name(&self, expr: &Expression<'a>) -> Option<String> {
         match expr {
             Expression::Identifier(ident) => {
-                if ident.name == "css" || self.css_identifiers.contains(ident.name.as_str()) {
-                    Some(ident.name.to_string())
-                } else {
-                    None
+                if let Some(ref_id) = ident.reference_id.get() {
+                    let reference = self.scoping.get_reference(ref_id);
+                    if let Some(sym_id) = reference.symbol_id() {
+                        if self.lit_css_symbols.contains(&sym_id) {
+                            return Some(ident.name.to_string());
+                        } else {
+                            return None;
+                        }
+                    }
                 }
+                if self.lit_css_symbols.is_empty() {
+                    if self.has_imports {
+                        return None;
+                    }
+                    if ident.name == "css" {
+                        let is_unshadowed = if let Some(ref_id) = ident.reference_id.get() {
+                            self.scoping.get_reference(ref_id).symbol_id().is_none()
+                        } else {
+                            true
+                        };
+                        if is_unshadowed {
+                            return Some("css".to_string());
+                        }
+                    }
+                }
+                None
             }
             Expression::StaticMemberExpression(member) => {
                 if member.property.name == "css" {
-                    Some("css".to_string())
-                } else {
-                    None
+                    if let Expression::Identifier(obj) = &member.object {
+                        if let Some(ref_id) = obj.reference_id.get() {
+                            let reference = self.scoping.get_reference(ref_id);
+                            if let Some(sym_id) = reference.symbol_id() {
+                                if self.lit_css_namespaces.contains(&sym_id) {
+                                    return Some("css".to_string());
+                                }
+                            }
+                        }
+                        if self.lit_css_namespaces.is_empty() && !self.has_imports {
+                            return Some("css".to_string());
+                        }
+                    }
                 }
+                None
             }
             _ => None,
         }
@@ -273,7 +321,10 @@ impl<'a> CssTagVisitor<'a> {
 
 impl<'a> Visit<'a> for CssTagVisitor<'a> {
     fn visit_import_declaration(&mut self, import_decl: &oxc_ast::ast::ImportDeclaration<'a>) {
+        self.has_imports = true;
         let source_str = import_decl.source.value.to_string();
+        let is_lit = is_lit_css_source(&source_str);
+
         if let Some(specifiers) = &import_decl.specifiers {
             for spec in specifiers {
                 match spec {
@@ -287,7 +338,14 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
                             self.imported_styles_identifiers
                                 .insert(local_name.clone(), source_str.clone());
                         }
-                        if imported_name == "css" {
+                        if is_lit && imported_name == "css" {
+                            let root = self.scoping.root_scope_id();
+                            let sym_id = s.local.symbol_id.get().or_else(|| {
+                                self.scoping.get_binding(root, s.local.name.as_str().into())
+                            });
+                            if let Some(sym) = sym_id {
+                                self.lit_css_symbols.insert(sym);
+                            }
                             self.css_identifiers.insert(local_name);
                         }
                     }
@@ -296,7 +354,18 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
                         self.imported_styles_identifiers
                             .insert(local_name, source_str.clone());
                     }
-                    _ => {}
+                    oxc_ast::ast::ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                        if is_lit {
+                            let root = self.scoping.root_scope_id();
+                            let sym_id = ns.local.symbol_id.get().or_else(|| {
+                                self.scoping
+                                    .get_binding(root, ns.local.name.as_str().into())
+                            });
+                            if let Some(sym) = sym_id {
+                                self.lit_css_namespaces.insert(sym);
+                            }
+                        }
+                    }
                 }
             }
         }

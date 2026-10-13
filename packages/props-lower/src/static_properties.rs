@@ -18,6 +18,74 @@ pub fn create_property_key<'a>(name: &str, ast: &AstBuilder<'a>) -> PropertyKey<
     }
 }
 
+/// Checks if static properties can be safely merged into this class.
+/// Returns true if static properties does not exist or exists as an object expression (property or getter return).
+/// Returns false if static properties exists in an unmergeable form (non-object or complex expression).
+pub fn can_merge_static_properties(class: &Class<'_>) -> bool {
+    for element in &class.body.body {
+        match element {
+            ClassElement::PropertyDefinition(prop_def) => {
+                if prop_def.r#static && prop_def.key.is_specific_static_name("properties") {
+                    return matches!(prop_def.value, Some(Expression::ObjectExpression(_)));
+                }
+            }
+            ClassElement::MethodDefinition(method_def)
+                if method_def.r#static
+                    && method_def.kind == MethodDefinitionKind::Get
+                    && method_def.key.is_specific_static_name("properties") =>
+            {
+                if let Some(ref body) = method_def.value.body {
+                    if let Some(Statement::ReturnStatement(ret_stmt)) = body.statements.first() {
+                        return matches!(ret_stmt.argument, Some(Expression::ObjectExpression(_)));
+                    }
+                }
+                return false;
+            }
+            _ => {}
+        }
+    }
+    true
+}
+
+/// Checks if a class has reactive property decorators (@property or @state).
+pub fn class_has_reactive_properties(
+    class: &Class<'_>,
+    import_ctx: &crate::lit_import_scanner::ImportContext,
+) -> bool {
+    for element in &class.body.body {
+        if let ClassElement::PropertyDefinition(prop_def) = element {
+            if !prop_def.r#static {
+                for dec in &prop_def.decorators {
+                    if let Some(kind) = crate::decorators::property::get_lit_decorator_kind(
+                        &dec.expression,
+                        import_ctx,
+                    ) {
+                        if kind == crate::lit_import_scanner::LitDecoratorKind::Property
+                            || kind == crate::lit_import_scanner::LitDecoratorKind::State
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } else if let ClassElement::MethodDefinition(method_def) = element {
+            if method_def.kind == MethodDefinitionKind::Get && !method_def.r#static {
+                for dec in &method_def.decorators {
+                    if let Some(kind) = crate::decorators::property::get_lit_decorator_kind(
+                        &dec.expression,
+                        import_ctx,
+                    ) {
+                        if kind == crate::lit_import_scanner::LitDecoratorKind::Property {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    false
+}
+
 /// Injects or merges reactive properties into static properties.
 /// Returns true if successfully injected or merged, false if static properties exists in an unmergeable form.
 pub fn inject_or_merge_static_properties<'a>(

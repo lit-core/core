@@ -425,3 +425,54 @@ fn test_custom_property_contract_audit() {
     let diags_with_fallback = audit_custom_properties(&style_with_fallback);
     assert!(diags_with_fallback.is_empty());
 }
+
+#[test]
+fn test_semantic_lit_import_isolation() {
+    let source_unrelated = r#"
+    import { css } from '@unrelated/styles';
+    export class OtherComponent {
+      static styles = css`
+        :host { display: block; }
+      `;
+    }
+  "#;
+
+    let (styles_unrelated, _) = StyleExtractor::extract_from_source(source_unrelated, "other.ts");
+    assert!(
+        styles_unrelated.is_empty(),
+        "css imported from non-Lit module must be ignored"
+    );
+
+    let source_lit = r#"
+    import { css } from 'lit';
+    export class LitComponent {
+      static styles = css`
+        :host { display: block; }
+      `;
+    }
+  "#;
+
+    let (styles_lit, _) = StyleExtractor::extract_from_source(source_lit, "lit-comp.ts");
+    assert_eq!(
+        styles_lit.len(),
+        1,
+        "css imported from canonical Lit specifier must be extracted"
+    );
+}
+
+#[test]
+fn test_clean_bailout_when_no_clusters_apply() {
+    let source = r#"
+    import { css } from 'lit';
+    export class Comp extends LitElement {
+      static styles = css`:host { color: red; }`;
+    }
+  "#;
+    let (styles, _) = StyleExtractor::extract_from_source(source, "comp.ts");
+    let clusters = vec![];
+    let rewritten = rewrite_file("comp.ts", source, &styles, &clusters, ".fused", false);
+    assert!(
+        rewritten.is_none(),
+        "rewrite_file must cleanly bail out returning None when no clusters apply"
+    );
+}

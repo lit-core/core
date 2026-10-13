@@ -123,4 +123,40 @@ console.log('Testing @lit-core/html-minifier native addon...');
   console.log('  ✔ Fast pre-check skips non-template files');
 }
 
-console.log('\nAll 6 html-minifier integration tests passed successfully!\n');
+// Test 7: Shadowed html parameter is not collapsed
+{
+  const input = `
+    import { html } from 'lit';
+    function render(html) {
+      return html\`
+        <div>
+          <!-- do not remove comment -->
+          <span>hello</span>
+        </div>
+      \`;
+    }
+  `;
+  const res = minifyHtmlTemplates(input);
+  assert.strictEqual(res.templatesCount, 0);
+  assert(res.code.includes('<!-- do not remove comment -->'));
+  console.log('  ✔ Shadowed html parameter is not collapsed');
+}
+
+// Test 8: Colliding local variable with no Lit import is not collapsed
+{
+  const input = `
+    const html = (strings) => strings[0];
+    export const tpl = html\`
+      <div>
+        <!-- do not remove comment -->
+        <span>hello</span>
+      </div>
+    \`;
+  `;
+  const res = minifyHtmlTemplates(input);
+  assert.strictEqual(res.templatesCount, 0);
+  assert(res.code.includes('<!-- do not remove comment -->'));
+  console.log('  ✔ Colliding local variable with no Lit import is not collapsed');
+}
+
+console.log('\nAll 8 html-minifier integration tests passed successfully!\n');

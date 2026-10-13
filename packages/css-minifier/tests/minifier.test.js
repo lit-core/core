@@ -176,4 +176,38 @@ console.log('Testing @lit-core/css-minifier native addon...');
   console.log('  ✔ CallExpression css(["..."]) minification');
 }
 
-console.log('\nAll 10 integration tests passed successfully!\n');
+// Test 11: Shadowed css parameter is not minified
+{
+  const input = `
+    import { css } from 'lit';
+    function render(css) {
+      return css\`
+        :host {
+          color: rgb(255, 0, 0);
+        }
+      \`;
+    }
+  `;
+  const res = minifyEmbeddedCss(input);
+  assert.strictEqual(res.minifiedTemplates, 0);
+  assert(res.code.includes('rgb(255, 0, 0)'));
+  console.log('  ✔ Shadowed css parameter is not minified');
+}
+
+// Test 12: Colliding local variable with no Lit import is not minified
+{
+  const input = `
+    const css = (strings) => strings[0];
+    const res = css\`
+      :host {
+        color: rgb(255, 0, 0);
+      }
+    \`;
+  `;
+  const res = minifyEmbeddedCss(input);
+  assert.strictEqual(res.minifiedTemplates, 0);
+  assert(res.code.includes('rgb(255, 0, 0)'));
+  console.log('  ✔ Colliding local variable with no Lit import is not minified');
+}
+
+console.log('\nAll 12 integration tests passed successfully!\n');

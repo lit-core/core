@@ -6,127 +6,31 @@
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
     "version": "1.12.4",
-    "componentCount": 20,
+    "componentCount": 4,
     "components": [
-      {
-        "concept": "button",
-        "tag": "sp-button",
-        "label": "Button",
-        "path": "button/sp-button.js"
-      },
       {
         "concept": "checkbox",
         "tag": "sp-checkbox",
-        "label": "Checkbox",
-        "path": "checkbox/sp-checkbox.js"
-      },
-      {
-        "concept": "radio",
-        "tag": "sp-radio",
-        "label": "Radio button",
-        "path": "radio/sp-radio.js"
-      },
-      {
-        "concept": "switch",
-        "tag": "sp-switch",
-        "label": "Switch / toggle",
-        "path": "switch/sp-switch.js"
-      },
-      {
-        "concept": "text-input",
-        "tag": "sp-textfield",
-        "label": "Text input / field",
-        "path": "textfield/sp-textfield.js"
-      },
-      {
-        "concept": "select",
-        "tag": "sp-picker",
-        "label": "Select / dropdown",
-        "path": "picker/sp-picker.js"
-      },
-      {
-        "concept": "dialog",
-        "tag": "sp-dialog",
-        "label": "Dialog / modal",
-        "path": "dialog/sp-dialog.js"
+        "path": "checkbox/sp-checkbox.js",
+        "importStatement": "import '@spectrum-web-components/checkbox/sp-checkbox.js';"
       },
       {
         "concept": "badge",
         "tag": "sp-badge",
-        "label": "Badge / tag",
-        "path": "badge/sp-badge.js"
+        "path": "badge/sp-badge.js",
+        "importStatement": "import '@spectrum-web-components/badge/sp-badge.js';"
       },
       {
-        "concept": "tabs",
-        "tag": "sp-tabs",
-        "label": "Tabs",
-        "path": "tabs/sp-tabs.js"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "sp-progress-bar",
-        "label": "Progress bar",
-        "path": "progress-bar/sp-progress-bar.js"
-      },
-      {
-        "concept": "spinner",
-        "tag": "sp-progress-circle",
-        "label": "Spinner / loader",
-        "path": "progress-circle/sp-progress-circle.js"
-      },
-      {
-        "concept": "slider",
-        "tag": "sp-slider",
-        "label": "Slider",
-        "path": "slider/sp-slider.js"
-      },
-      {
-        "concept": "menu",
-        "tag": "sp-menu",
-        "label": "Menu / popover",
-        "path": "menu/sp-menu.js"
-      },
-      {
-        "concept": "divider",
-        "tag": "sp-divider",
-        "label": "Divider",
-        "path": "divider/sp-divider.js"
-      },
-      {
-        "concept": "icon",
-        "tag": "sp-icon",
-        "label": "Icon",
-        "path": "icon/sp-icon.js"
+        "concept": "button",
+        "tag": "sp-button",
+        "path": "button/sp-button.js",
+        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
       },
       {
         "concept": "icon-button",
         "tag": "sp-action-button",
-        "label": "Icon button",
-        "path": "action-button/sp-action-button.js"
-      },
-      {
-        "concept": "card",
-        "tag": "sp-card",
-        "label": "Card / tile",
-        "path": "card/sp-card.js"
-      },
-      {
-        "concept": "elevation",
-        "tag": "sp-popover",
-        "label": "Elevation / focus",
-        "path": "popover/sp-popover.js"
-      },
-      {
-        "concept": "list",
-        "tag": "sp-sidenav",
-        "label": "List / structured",
-        "path": "sidenav/sp-sidenav.js"
-      },
-      {
-        "concept": "chips",
-        "tag": "sp-action-group",
-        "label": "Chips / segmented",
-        "path": "action-group/sp-action-group.js"
+        "path": "action-button/sp-action-button.js",
+        "importStatement": "import '@spectrum-web-components/action-button/sp-action-button.js';"
       }
     ]
   },
@@ -139,15 +43,16 @@
   "scenario": {
     "id": "data-grid",
     "name": "Data grid",
-    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation"
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
+    "componentCount": 4
   },
-  "timestamp": "2026-10-10T10:13:19.316Z",
+  "timestamp": "2026-10-12T23:47:08.801Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -162,10 +67,10 @@
     }
   },
   "metrics": {
-    "rawBytes": 175417,
-    "gzipBytes": 30783,
-    "brotliBytes": 24803,
-    "buildTimeMs": 21.72508299999754
+    "rawBytes": 177042,
+    "gzipBytes": 31398,
+    "brotliBytes": 25410,
+    "buildTimeMs": 33.987082999999984
   },
   "baseline": {
     "rawBytes": 175417,
@@ -185,31 +90,40 @@
     }
   },
   "deltas": {
-    "rawBytes": 0,
-    "rawPercent": 0,
-    "gzipBytes": 0,
-    "gzipPercent": 0,
-    "brotliBytes": 0,
-    "brotliPercent": 0,
-    "buildTimeMs": -0.6,
-    "firstRenderMs": 13.8,
-    "speedupPercent": -45.1,
-    "updateMs": 0.3,
-    "updateSpeedupPercent": -9.68,
-    "evalSpeedupPercent": 5.88,
-    "registrationSpeedupPercent": -33.33,
-    "memorySavingsPercent": -0.01
+    "rawBytes": 1625,
+    "rawPercent": 0.93,
+    "gzipBytes": 615,
+    "gzipPercent": 2,
+    "brotliBytes": 607,
+    "brotliPercent": 2.45,
+    "buildTimeMs": 11.7,
+    "firstRenderMs": 6.1,
+    "speedupPercent": -19.93,
+    "updateMs": -0.3,
+    "updateSpeedupPercent": 9.68,
+    "evalSpeedupPercent": -17.65,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -24.42
   },
   "runtime": {
-    "firstRenderMs": 44.4,
-    "updateMs": 3.4,
-    "scriptEvalMs": 1.6,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 3035050,
-    "speedupPercent": -45.1,
-    "updateSpeedupPercent": -9.68,
-    "evalSpeedupPercent": 5.88,
-    "registrationSpeedupPercent": -33.33,
-    "memorySavingsPercent": -0.01
+    "firstRenderMs": 36.7,
+    "updateMs": 2.8,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 3775800,
+    "speedupPercent": -19.93,
+    "updateSpeedupPercent": 9.68,
+    "evalSpeedupPercent": -17.65,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -24.42
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 801,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

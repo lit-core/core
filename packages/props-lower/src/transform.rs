@@ -22,7 +22,9 @@ use crate::decorators::query_assigned::try_transform_query_assigned;
 use crate::decorators::query_async::try_transform_query_async;
 use crate::decorators::state::try_transform_state;
 use crate::lit_import_scanner::ImportContext;
-use crate::static_properties::inject_or_merge_static_properties;
+use crate::static_properties::{
+    can_merge_static_properties, class_has_reactive_properties, inject_or_merge_static_properties,
+};
 
 #[napi(object)]
 #[derive(Default, Clone, Debug)]
@@ -238,6 +240,11 @@ pub fn transform_class<'a>(
     import_ctx: &ImportContext,
     ast: &AstBuilder<'a>,
 ) -> Vec<Statement<'a>> {
+    // 0. All-or-nothing bailout: verify static properties are mergeable BEFORE stripping decorators
+    if class_has_reactive_properties(class, import_ctx) && !can_merge_static_properties(class) {
+        return Vec::new();
+    }
+
     let mut post_class_statements = Vec::new();
     let mut constructor_statements = Vec::new();
     let mut reactive_props = Vec::new();
@@ -256,6 +263,21 @@ pub fn transform_class<'a>(
         .as_ref()
         .map(|id| id.name.as_str().to_string())
         .unwrap_or_default();
+
+    // Collect existing class member names to prevent collision on synthesized properties
+    let mut existing_members: std::collections::HashSet<String> = class
+        .body
+        .body
+        .iter()
+        .filter_map(|element| match element {
+            ClassElement::PropertyDefinition(prop) => prop.key.static_name().map(|s| s.to_string()),
+            ClassElement::MethodDefinition(method) => {
+                method.key.static_name().map(|s| s.to_string())
+            }
+            ClassElement::AccessorProperty(acc) => acc.key.static_name().map(|s| s.to_string()),
+            _ => None,
+        })
+        .collect();
 
     // 2. Transform members
     let old_elements = std::mem::replace(&mut class.body.body, ArenaVec::new_in(ast));
@@ -287,7 +309,9 @@ pub fn transform_class<'a>(
         }
 
         // @query
-        if let Some(getter) = try_transform_query(&mut element, import_ctx, ast) {
+        if let Some(getter) =
+            try_transform_query(&mut element, import_ctx, &mut existing_members, ast)
+        {
             new_elements.push(getter);
             continue;
         }
@@ -633,5 +657,73 @@ mod tests {
             .contains("MyElement.createProperty(\"title\", { type: String })"));
         assert!(!res.code.contains("tslib"));
         assert!(!res.code.contains("lit/decorators.js"));
+    }
+
+    #[test]
+    fn test_constructor_without_superclass_no_super() {
+        let input = r#"
+      import {property} from 'lit/decorators.js';
+      class Standalone {
+        @property({type: String}) name = 'test';
+      }
+    "#;
+
+        let res = transform_code(input, TransformOptions::default());
+        assert!(!res.code.contains("super()"));
+        assert!(
+            res.code.contains("this.name = 'test'") || res.code.contains("this.name = \"test\"")
+        );
+    }
+
+    #[test]
+    fn test_unmergeable_static_properties_bailout() {
+        let input = r#"
+      import {property} from 'lit/decorators.js';
+      class DynamicElement extends LitElement {
+        static properties = getProps();
+        @property({type: String}) label = 'val';
+      }
+    "#;
+
+        let res = transform_code(input, TransformOptions::default());
+        // Clean bailout: class is untouched, decorators preserved
+        assert!(res.code.contains("@property"));
+        assert!(res.code.contains("static properties = getProps()"));
+    }
+
+    #[test]
+    fn test_cached_query_collision_avoidance() {
+        let input = r#"
+      import {query} from 'lit/decorators.js';
+      class QueryElement extends LitElement {
+        __header = "already exists";
+        @query('#hdr', true) header;
+      }
+    "#;
+
+        let res = transform_code(input, TransformOptions::default());
+        // Since __header exists on the class, the cached query property must use ___header
+        assert!(res.code.contains("this.___header ??="));
+        assert!(
+            res.code.contains("__header = \"already exists\"")
+                || res.code.contains("__header = 'already exists'")
+        );
+    }
+
+    #[test]
+    fn test_localized_namespace_import() {
+        let input = r#"
+      import * as loc from '@lit/localize';
+      @loc.localized()
+      class LocalizedElement extends LitElement {}
+    "#;
+
+        let res = transform_code(input, TransformOptions::default());
+        assert!(!res.code.contains("@loc.localized"));
+        assert!(res.code.contains("loc.updateWhenLocaleChanges(this)"));
+        assert!(
+            res.code.contains("import * as loc from \"@lit/localize\"")
+                || res.code.contains("import * as loc from '@lit/localize'")
+        );
     }
 }

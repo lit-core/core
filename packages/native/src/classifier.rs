@@ -3,6 +3,7 @@ use crate::models::{ClassificationResult, ClassifyOptions};
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
 use oxc_parser::Parser;
+use oxc_semantic::{Scoping, SemanticBuilder};
 use oxc_span::SourceType;
 use std::collections::HashMap;
 
@@ -66,7 +67,9 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
     }
 
     let program = &parsed.program;
-    let import_ctx = ImportContext::scan(program);
+    let semantic_ret = SemanticBuilder::new().build(program);
+    let scoping = semantic_ret.semantic.into_scoping();
+    let import_ctx = ImportContext::scan(program, &scoping);
     let define_calls = scan_define_calls(program);
     let mut results = Vec::new();
 
@@ -75,17 +78,27 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
     for stmt in &program.body {
         match stmt {
             Statement::ClassDeclaration(class) => {
-                if let Some(res) =
-                    classify_class(class, forced_mode, &define_calls, &import_ctx, None)
-                {
+                if let Some(res) = classify_class(
+                    class,
+                    forced_mode,
+                    &define_calls,
+                    &import_ctx,
+                    &scoping,
+                    None,
+                ) {
                     results.push(res);
                 }
             }
             Statement::ExportDeclaration(export_decl) => match &export_decl.declaration {
                 Declaration::ClassDeclaration(class) => {
-                    if let Some(res) =
-                        classify_class(class, forced_mode, &define_calls, &import_ctx, None)
-                    {
+                    if let Some(res) = classify_class(
+                        class,
+                        forced_mode,
+                        &define_calls,
+                        &import_ctx,
+                        &scoping,
+                        None,
+                    ) {
                         results.push(res);
                     }
                 }
@@ -96,9 +109,14 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
                                 BindingPattern::BindingIdentifier(id) => Some(id.name.as_str()),
                                 _ => None,
                             };
-                            if let Some(res) =
-                                classify_class(class, forced_mode, &define_calls, &import_ctx, name)
-                            {
+                            if let Some(res) = classify_class(
+                                class,
+                                forced_mode,
+                                &define_calls,
+                                &import_ctx,
+                                &scoping,
+                                name,
+                            ) {
                                 results.push(res);
                             }
                         }
@@ -108,16 +126,26 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
             },
             Statement::ExportDefaultDeclaration(export_decl) => match &export_decl.declaration {
                 ExportDefaultDeclarationKind::ClassDeclaration(class) => {
-                    if let Some(res) =
-                        classify_class(class, forced_mode, &define_calls, &import_ctx, None)
-                    {
+                    if let Some(res) = classify_class(
+                        class,
+                        forced_mode,
+                        &define_calls,
+                        &import_ctx,
+                        &scoping,
+                        None,
+                    ) {
                         results.push(res);
                     }
                 }
                 ExportDefaultDeclarationKind::ClassExpression(class) => {
-                    if let Some(res) =
-                        classify_class(class, forced_mode, &define_calls, &import_ctx, None)
-                    {
+                    if let Some(res) = classify_class(
+                        class,
+                        forced_mode,
+                        &define_calls,
+                        &import_ctx,
+                        &scoping,
+                        None,
+                    ) {
                         results.push(res);
                     }
                 }
@@ -130,9 +158,14 @@ pub fn classify_code(source: &str, options: ClassifyOptions) -> Vec<Classificati
                             BindingPattern::BindingIdentifier(id) => Some(id.name.as_str()),
                             _ => None,
                         };
-                        if let Some(res) =
-                            classify_class(class, forced_mode, &define_calls, &import_ctx, name)
-                        {
+                        if let Some(res) = classify_class(
+                            class,
+                            forced_mode,
+                            &define_calls,
+                            &import_ctx,
+                            &scoping,
+                            name,
+                        ) {
                             results.push(res);
                         }
                     }
@@ -150,6 +183,7 @@ pub fn classify_class<'a>(
     forced_mode: &str,
     define_calls: &HashMap<String, String>,
     import_ctx: &ImportContext,
+    scoping: &Scoping,
     fallback_name: Option<&str>,
 ) -> Option<ClassificationResult> {
     let component_name = class
@@ -159,7 +193,7 @@ pub fn classify_class<'a>(
         .or_else(|| fallback_name.map(|s| s.to_string()))
         .unwrap_or_else(|| "AnonymousComponent".to_string());
 
-    let tag_name = extract_tag_name(class, define_calls, fallback_name);
+    let tag_name = extract_tag_name(class, define_calls, fallback_name, import_ctx, scoping);
     let has_render_method = class.body.body.iter().any(|elem| match elem {
         ClassElement::MethodDefinition(m) => {
             m.key.static_name().map(|n| n == "render").unwrap_or(false)
@@ -167,30 +201,15 @@ pub fn classify_class<'a>(
         _ => false,
     });
 
-    // Only components that define a render() method are candidates for AOT compilation.
-    // Classes without a render() method (e.g. abstract base classes, controller hosts, or mixins)
-    // are skipped so their capability inheritance remains intact.
     if !has_render_method {
         return None;
     }
 
-    if forced_mode == "vanilla-only" {
-        return Some(ClassificationResult {
-            mode: "vanilla".to_string(),
-            component_name,
-            tag_name,
-            reason: Some("Forced vanilla-only mode".to_string()),
-        });
-    }
-
-    if forced_mode == "micro-only" {
-        return Some(ClassificationResult {
-            mode: "micro".to_string(),
-            component_name,
-            tag_name,
-            reason: Some("Forced micro-only mode".to_string()),
-        });
-    }
+    let extends_direct_lit = match &class.heritage {
+        Some(h) => import_ctx.is_lit_element(&h.expression, scoping),
+        None => false,
+    };
+    let has_lit_decorator = has_any_lit_decorator(class, import_ctx, scoping);
 
     // Inspect complexity of the class
     let mut has_structural_directive = false;
@@ -221,6 +240,7 @@ pub fn classify_class<'a>(
                             inspect_render_statement(
                                 stmt,
                                 import_ctx,
+                                scoping,
                                 &mut has_structural_directive,
                                 &mut has_lowerable_directive,
                                 &mut num_html_templates,
@@ -239,14 +259,9 @@ pub fn classify_class<'a>(
                     if !prop.r#static && p_name != "styles" {
                         for dec in &prop.decorators {
                             if let Expression::CallExpression(call) = &dec.expression {
-                                let callee_name = match &call.callee {
-                                    Expression::Identifier(id) => Some(id.name.as_str()),
-                                    Expression::StaticMemberExpression(mem) => {
-                                        Some(mem.property.name.as_str())
-                                    }
-                                    _ => None,
-                                };
-                                if callee_name == Some("property") || callee_name == Some("state") {
+                                if import_ctx.is_property_decorator(&call.callee, scoping)
+                                    || import_ctx.is_state_decorator(&call.callee, scoping)
+                                {
                                     num_reactive_props += 1;
                                 }
                             }
@@ -258,20 +273,35 @@ pub fn classify_class<'a>(
         }
     }
 
-    let extends_direct_lit = match &class.heritage {
-        Some(h) => match &h.expression {
-            Expression::Identifier(id) => {
-                id.name == "LitElement"
-                    || id.name == "ReactiveElement"
-                    || import_ctx.lit_bindings.contains(id.name.as_str())
-            }
-            Expression::StaticMemberExpression(mem) => {
-                mem.property.name == "LitElement" || mem.property.name == "ReactiveElement"
-            }
-            _ => false,
-        },
-        None => false,
-    };
+    // Only components that extend a Lit base class, use Lit decorators,
+    // or import Lit and render Lit HTML templates are candidates for Lit AOT compilation.
+    // Non-Lit classes (such as React components, ORM models, or plain utility classes)
+    // are never classified.
+    let is_lit_component = extends_direct_lit
+        || has_lit_decorator
+        || (import_ctx.has_lit_imports && (num_html_templates > 0 || tag_name.is_some()));
+
+    if !is_lit_component {
+        return None;
+    }
+
+    if forced_mode == "vanilla-only" {
+        return Some(ClassificationResult {
+            mode: "vanilla".to_string(),
+            component_name,
+            tag_name,
+            reason: Some("Forced vanilla-only mode".to_string()),
+        });
+    }
+
+    if forced_mode == "micro-only" {
+        return Some(ClassificationResult {
+            mode: "micro".to_string(),
+            component_name,
+            tag_name,
+            reason: Some("Forced micro-only mode".to_string()),
+        });
+    }
 
     // Classification decision:
     // 1. If not directly extending LitElement (e.g. custom base element) -> Mode B micro
@@ -310,6 +340,7 @@ pub fn classify_class<'a>(
 fn inspect_render_statement<'a>(
     stmt: &Statement<'a>,
     import_ctx: &ImportContext,
+    scoping: &Scoping,
     has_structural: &mut bool,
     has_lowerable: &mut bool,
     num_templates: &mut usize,
@@ -320,6 +351,7 @@ fn inspect_render_statement<'a>(
                 inspect_render_expression(
                     arg,
                     import_ctx,
+                    scoping,
                     has_structural,
                     has_lowerable,
                     num_templates,
@@ -330,6 +362,7 @@ fn inspect_render_statement<'a>(
             inspect_render_expression(
                 &expr_stmt.expression,
                 import_ctx,
+                scoping,
                 has_structural,
                 has_lowerable,
                 num_templates,
@@ -339,6 +372,7 @@ fn inspect_render_statement<'a>(
             inspect_render_expression(
                 &if_stmt.test,
                 import_ctx,
+                scoping,
                 has_structural,
                 has_lowerable,
                 num_templates,
@@ -346,6 +380,7 @@ fn inspect_render_statement<'a>(
             inspect_render_statement(
                 &if_stmt.consequent,
                 import_ctx,
+                scoping,
                 has_structural,
                 has_lowerable,
                 num_templates,
@@ -354,6 +389,7 @@ fn inspect_render_statement<'a>(
                 inspect_render_statement(
                     alt,
                     import_ctx,
+                    scoping,
                     has_structural,
                     has_lowerable,
                     num_templates,
@@ -365,6 +401,7 @@ fn inspect_render_statement<'a>(
                 inspect_render_statement(
                     s,
                     import_ctx,
+                    scoping,
                     has_structural,
                     has_lowerable,
                     num_templates,
@@ -378,21 +415,21 @@ fn inspect_render_statement<'a>(
 fn inspect_render_expression<'a>(
     expr: &Expression<'a>,
     import_ctx: &ImportContext,
+    scoping: &Scoping,
     has_structural: &mut bool,
     has_lowerable: &mut bool,
     num_templates: &mut usize,
 ) {
     match expr {
         Expression::TaggedTemplateExpression(tag) => {
-            if let Expression::Identifier(id) = &tag.tag {
-                if id.name == "html" {
-                    *num_templates += 1;
-                }
+            if import_ctx.is_html_tag(&tag.tag, scoping) {
+                *num_templates += 1;
             }
             for e in &tag.quasi.expressions {
                 inspect_render_expression(
                     e,
                     import_ctx,
+                    scoping,
                     has_structural,
                     has_lowerable,
                     num_templates,
@@ -400,21 +437,19 @@ fn inspect_render_expression<'a>(
             }
         }
         Expression::CallExpression(call) => {
-            if let Expression::Identifier(id) = &call.callee {
-                if let Some(directive) = import_ctx.get_directive_kind(&id.name) {
-                    match directive {
-                        DirectiveKind::Repeat
-                        | DirectiveKind::Cache
-                        | DirectiveKind::Until
-                        | DirectiveKind::Live => {
-                            *has_structural = true;
-                        }
-                        DirectiveKind::ClassMap
-                        | DirectiveKind::StyleMap
-                        | DirectiveKind::IfDefined
-                        | DirectiveKind::Guard => {
-                            *has_lowerable = true;
-                        }
+            if let Some(directive) = import_ctx.get_directive_kind_by_expr(&call.callee, scoping) {
+                match directive {
+                    DirectiveKind::Repeat
+                    | DirectiveKind::Cache
+                    | DirectiveKind::Until
+                    | DirectiveKind::Live => {
+                        *has_structural = true;
+                    }
+                    DirectiveKind::ClassMap
+                    | DirectiveKind::StyleMap
+                    | DirectiveKind::IfDefined
+                    | DirectiveKind::Guard => {
+                        *has_lowerable = true;
                     }
                 }
             }
@@ -423,6 +458,7 @@ fn inspect_render_expression<'a>(
                     inspect_render_expression(
                         e,
                         import_ctx,
+                        scoping,
                         has_structural,
                         has_lowerable,
                         num_templates,
@@ -434,6 +470,7 @@ fn inspect_render_expression<'a>(
             inspect_render_expression(
                 &cond.test,
                 import_ctx,
+                scoping,
                 has_structural,
                 has_lowerable,
                 num_templates,
@@ -441,6 +478,7 @@ fn inspect_render_expression<'a>(
             inspect_render_expression(
                 &cond.consequent,
                 import_ctx,
+                scoping,
                 has_structural,
                 has_lowerable,
                 num_templates,
@@ -448,10 +486,83 @@ fn inspect_render_expression<'a>(
             inspect_render_expression(
                 &cond.alternate,
                 import_ctx,
+                scoping,
                 has_structural,
                 has_lowerable,
                 num_templates,
             );
+        }
+        Expression::LogicalExpression(log) => {
+            inspect_render_expression(
+                &log.left,
+                import_ctx,
+                scoping,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
+            inspect_render_expression(
+                &log.right,
+                import_ctx,
+                scoping,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
+        }
+        Expression::BinaryExpression(bin) => {
+            inspect_render_expression(
+                &bin.left,
+                import_ctx,
+                scoping,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
+            inspect_render_expression(
+                &bin.right,
+                import_ctx,
+                scoping,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
+        }
+        Expression::ParenthesizedExpression(p) => {
+            inspect_render_expression(
+                &p.expression,
+                import_ctx,
+                scoping,
+                has_structural,
+                has_lowerable,
+                num_templates,
+            );
+        }
+        Expression::ArrayExpression(arr) => {
+            for el in &arr.elements {
+                if let Some(e) = el.as_expression() {
+                    inspect_render_expression(
+                        e,
+                        import_ctx,
+                        scoping,
+                        has_structural,
+                        has_lowerable,
+                        num_templates,
+                    );
+                }
+            }
+        }
+        Expression::SequenceExpression(seq) => {
+            for e in &seq.expressions {
+                inspect_render_expression(
+                    e,
+                    import_ctx,
+                    scoping,
+                    has_structural,
+                    has_lowerable,
+                    num_templates,
+                );
+            }
         }
         _ => {}
     }
@@ -461,15 +572,12 @@ fn extract_tag_name<'a>(
     class: &Class<'a>,
     define_calls: &HashMap<String, String>,
     fallback_name: Option<&str>,
+    import_ctx: &ImportContext,
+    scoping: &Scoping,
 ) -> Option<String> {
     for dec in &class.decorators {
         if let Expression::CallExpression(call) = &dec.expression {
-            let is_custom_elem = match &call.callee {
-                Expression::Identifier(id) => id.name == "customElement",
-                Expression::StaticMemberExpression(mem) => mem.property.name == "customElement",
-                _ => false,
-            };
-            if is_custom_elem {
+            if import_ctx.is_custom_element_decorator(&call.callee, scoping) {
                 if let Some(first_arg) = call.arguments.first() {
                     if let Some(Expression::StringLiteral(str_lit)) = first_arg.as_expression() {
                         return Some(str_lit.value.as_str().to_string());
@@ -486,4 +594,102 @@ fn extract_tag_name<'a>(
         .or(fallback_name)?;
 
     define_calls.get(class_name).cloned()
+}
+
+fn is_decorator_lit<'a>(
+    expr: &Expression<'a>,
+    import_ctx: &ImportContext,
+    scoping: &Scoping,
+) -> bool {
+    let callee = match expr {
+        Expression::CallExpression(call) => &call.callee,
+        other => other,
+    };
+    import_ctx.is_custom_element_decorator(callee, scoping)
+        || import_ctx.is_property_decorator(callee, scoping)
+        || import_ctx.is_state_decorator(callee, scoping)
+        || import_ctx.is_other_lit_decorator(callee, scoping)
+}
+
+fn has_any_lit_decorator<'a>(
+    class: &Class<'a>,
+    import_ctx: &ImportContext,
+    scoping: &Scoping,
+) -> bool {
+    for dec in &class.decorators {
+        if is_decorator_lit(&dec.expression, import_ctx, scoping) {
+            return true;
+        }
+    }
+
+    for elem in &class.body.body {
+        match elem {
+            ClassElement::PropertyDefinition(prop) => {
+                for dec in &prop.decorators {
+                    if is_decorator_lit(&dec.expression, import_ctx, scoping) {
+                        return true;
+                    }
+                }
+            }
+            ClassElement::AccessorProperty(acc) => {
+                for dec in &acc.decorators {
+                    if is_decorator_lit(&dec.expression, import_ctx, scoping) {
+                        return true;
+                    }
+                }
+            }
+            ClassElement::MethodDefinition(meth) => {
+                for dec in &meth.decorators {
+                    if is_decorator_lit(&dec.expression, import_ctx, scoping) {
+                        return true;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_aliased_semantic_classification() {
+        let code = r#"
+            import { LitElement as MyElement, html as litHtml } from 'lit';
+            import { customElement as ce, property as prop } from 'lit/decorators.js';
+
+            @ce('custom-button')
+            export class CustomButton extends MyElement {
+                @prop({ type: String }) label = 'ok';
+                render() {
+                    return litHtml`<button>${this.label}</button>`;
+                }
+            }
+        "#;
+        let results = classify_code(code, ClassifyOptions::default());
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].mode, "vanilla");
+        assert_eq!(results[0].component_name, "CustomButton");
+        assert_eq!(results[0].tag_name.as_deref(), Some("custom-button"));
+    }
+
+    #[test]
+    fn test_non_lit_class_with_same_name_skipped() {
+        let code = r#"
+            import { LitElement } from 'not-lit';
+
+            export class FakeButton extends LitElement {
+                render() {
+                    return `<button>fake</button>`;
+                }
+            }
+        "#;
+        let results = classify_code(code, ClassifyOptions::default());
+        // Since it does not extend canonical LitElement and has no Lit decorators, it is skipped
+        assert_eq!(results.len(), 0);
+    }
 }

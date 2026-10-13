@@ -3,6 +3,7 @@ use crate::models::{ExtractedFragment, SourceSpan};
 use crate::normalizer::normalize_fragment;
 use oxc_ast::ast::{Expression, Program, Statement, TaggedTemplateExpression};
 use oxc_ast_visit::Visit;
+use oxc_semantic::Scoping;
 use oxc_span::Span;
 
 pub struct TemplateVisitor<'a> {
@@ -10,17 +11,24 @@ pub struct TemplateVisitor<'a> {
     pub file_path: &'a str,
     pub min_fragment_length: usize,
     pub resolver: ImportResolver,
+    pub scoping: &'a Scoping,
     pub extracted_fragments: Vec<ExtractedFragment>,
     pub templates_scanned: u32,
 }
 
 impl<'a> TemplateVisitor<'a> {
-    pub fn new(source_code: &'a str, file_path: &'a str, min_fragment_length: usize) -> Self {
+    pub fn new(
+        source_code: &'a str,
+        file_path: &'a str,
+        min_fragment_length: usize,
+        scoping: &'a Scoping,
+    ) -> Self {
         Self {
             source_code,
             file_path,
             min_fragment_length,
             resolver: ImportResolver::new(),
+            scoping,
             extracted_fragments: Vec::new(),
             templates_scanned: 0,
         }
@@ -29,7 +37,7 @@ impl<'a> TemplateVisitor<'a> {
     pub fn scan_imports(&mut self, program: &Program) {
         for stmt in &program.body {
             if let Statement::ImportDeclaration(import_decl) = stmt {
-                self.resolver.process_import(import_decl);
+                self.resolver.process_import(import_decl, self.scoping);
             }
         }
     }
@@ -64,22 +72,69 @@ impl<'a> TemplateVisitor<'a> {
     fn get_target_tag(&self, expr: &Expression) -> Option<(String, bool)> {
         match expr {
             Expression::Identifier(ident) => {
-                let name = ident.name.as_str();
-                if self.resolver.is_target_tag(name) {
-                    let is_svg = name == "svg" || name == "litSvg";
-                    Some((name.to_string(), is_svg))
-                } else {
-                    None
+                if let Some(ref_id) = ident.reference_id.get() {
+                    let reference = self.scoping.get_reference(ref_id);
+                    if let Some(sym_id) = reference.symbol_id() {
+                        if self.resolver.lit_html_symbols.contains(&sym_id) {
+                            let is_svg = self.resolver.lit_svg_symbols.contains(&sym_id)
+                                || ident.name == "svg"
+                                || ident.name == "litSvg";
+                            return Some((ident.name.to_string(), is_svg));
+                        } else {
+                            return None;
+                        }
+                    }
                 }
+                if self.resolver.lit_html_symbols.is_empty() {
+                    if self.resolver.has_imports {
+                        return None;
+                    }
+                    if ident.name == "html" || ident.name == "svg" {
+                        let is_unshadowed = if let Some(ref_id) = ident.reference_id.get() {
+                            self.scoping.get_reference(ref_id).symbol_id().is_none()
+                        } else {
+                            true
+                        };
+                        if is_unshadowed {
+                            let is_svg = ident.name == "svg";
+                            return Some((ident.name.to_string(), is_svg));
+                        }
+                    }
+                }
+                None
             }
             Expression::StaticMemberExpression(member) => {
                 let prop_name = member.property.name.as_str();
-                if self.resolver.is_target_tag(prop_name) {
-                    let is_svg = prop_name == "svg" || prop_name == "litSvg";
-                    Some((prop_name.to_string(), is_svg))
-                } else {
-                    None
+                if prop_name == "html" || prop_name == "svg" {
+                    if let Expression::Identifier(obj) = &member.object {
+                        if let Some(ref_id) = obj.reference_id.get() {
+                            let reference = self.scoping.get_reference(ref_id);
+                            if let Some(sym_id) = reference.symbol_id() {
+                                if self.resolver.lit_namespaces.contains(&sym_id) {
+                                    let is_svg = prop_name == "svg";
+                                    return Some((prop_name.to_string(), is_svg));
+                                } else {
+                                    return None;
+                                }
+                            }
+                        }
+                        if self.resolver.lit_namespaces.is_empty()
+                            && !self.resolver.has_imports
+                            && (obj.name == "Lit" || obj.name == "lit")
+                        {
+                            let is_unshadowed = if let Some(ref_id) = obj.reference_id.get() {
+                                self.scoping.get_reference(ref_id).symbol_id().is_none()
+                            } else {
+                                true
+                            };
+                            if is_unshadowed {
+                                let is_svg = prop_name == "svg";
+                                return Some((prop_name.to_string(), is_svg));
+                            }
+                        }
+                    }
                 }
+                None
             }
             _ => None,
         }
@@ -154,6 +209,28 @@ impl<'a> Visit<'a> for TemplateVisitor<'a> {
     }
 }
 
+fn scan_html_comment(bytes: &[u8], mut idx: usize) -> Option<usize> {
+    if idx + 4 > bytes.len() || &bytes[idx..idx + 4] != b"<!--" {
+        return None;
+    }
+    idx += 4;
+    while idx + 2 < bytes.len() {
+        if bytes[idx] == b'-' && bytes[idx + 1] == b'-' && bytes[idx + 2] == b'>' {
+            return Some(idx + 3);
+        }
+        if idx + 3 < bytes.len()
+            && bytes[idx] == b'-'
+            && bytes[idx + 1] == b'-'
+            && bytes[idx + 2] == b'!'
+            && bytes[idx + 3] == b'>'
+        {
+            return Some(idx + 4);
+        }
+        idx += 1;
+    }
+    None
+}
+
 /// Finds balanced static DOM element subtrees in a quasi text slice.
 /// Returns (start_offset, end_offset, text, is_svg)
 pub fn find_static_subtrees(raw: &str, min_length: usize) -> Vec<(usize, usize, String, bool)> {
@@ -165,13 +242,9 @@ pub fn find_static_subtrees(raw: &str, min_length: usize) -> Vec<(usize, usize, 
     while i < len {
         if bytes[i] == b'<' {
             // Check for comment
-            if i + 3 < len && &bytes[i..i + 4] == b"<!--" {
-                if let Some(pos) = raw[i + 4..].find("-->") {
-                    i += 4 + pos + 3;
-                    continue;
-                } else {
-                    break;
-                }
+            if let Some(comment_end) = scan_html_comment(bytes, i) {
+                i = comment_end;
+                continue;
             }
 
             // Skip closing tags
@@ -203,24 +276,7 @@ pub fn find_static_subtrees(raw: &str, min_length: usize) -> Vec<(usize, usize, 
             }
 
             let tag_name = &raw[tag_start..tag_end];
-            let is_svg = matches!(
-                tag_name.to_ascii_lowercase().as_str(),
-                "svg"
-                    | "path"
-                    | "circle"
-                    | "rect"
-                    | "g"
-                    | "polygon"
-                    | "line"
-                    | "ellipse"
-                    | "polyline"
-                    | "text"
-                    | "use"
-                    | "defs"
-                    | "clippath"
-                    | "mask"
-                    | "symbol"
-            );
+            let is_svg = tag_name.eq_ignore_ascii_case("svg");
 
             // Find end of opening tag '>'
             let mut open_tag_end = tag_end;
@@ -251,25 +307,7 @@ pub fn find_static_subtrees(raw: &str, min_length: usize) -> Vec<(usize, usize, 
 
             let elem_start = i;
 
-            let is_void_tag = matches!(
-                tag_name.to_ascii_lowercase().as_str(),
-                "area"
-                    | "base"
-                    | "br"
-                    | "col"
-                    | "embed"
-                    | "hr"
-                    | "img"
-                    | "input"
-                    | "link"
-                    | "meta"
-                    | "param"
-                    | "source"
-                    | "track"
-                    | "wbr"
-            );
-
-            if is_self_closing || is_void_tag {
+            if is_self_closing {
                 let elem_end = open_tag_end + 1;
                 let text = &raw[elem_start..elem_end];
                 if text.len() >= min_length {
@@ -287,11 +325,9 @@ pub fn find_static_subtrees(raw: &str, min_length: usize) -> Vec<(usize, usize, 
             while scan < len {
                 if bytes[scan] == b'<' {
                     // Check for comment
-                    if scan + 3 < len && &bytes[scan..scan + 4] == b"<!--" {
-                        if let Some(pos) = raw[scan + 4..].find("-->") {
-                            scan += 4 + pos + 3;
-                            continue;
-                        }
+                    if let Some(comment_end) = scan_html_comment(bytes, scan) {
+                        scan = comment_end;
+                        continue;
                     }
 
                     // Check for closing tag
@@ -429,5 +465,39 @@ mod tests {
         assert!(subtrees
             .iter()
             .any(|s| s.2 == "<button type=\"button\">Click</button>"));
+    }
+
+    #[test]
+    fn test_scan_html_comment_complex() {
+        let comment1 = b"<!-- -- test -- complex -- -->remainder";
+        let end1 = scan_html_comment(comment1, 0);
+        assert_eq!(end1, Some(30));
+
+        let comment2 = b"<!-- bang comment --!>after";
+        let end2 = scan_html_comment(comment2, 0);
+        assert_eq!(end2, Some(22));
+    }
+
+    #[test]
+    fn test_unrelated_import_not_targeted() {
+        use oxc_allocator::Allocator;
+        use oxc_parser::Parser;
+        use oxc_span::SourceType;
+
+        let source = r#"
+            import { html } from 'hyperhtml';
+            const tmpl = html`<div>hello</div>`;
+        "#;
+        let allocator = Allocator::default();
+        let parsed = Parser::new(&allocator, source, SourceType::ts()).parse();
+        let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
+        let scoping = semantic_ret.semantic.into_scoping();
+        let mut visitor = TemplateVisitor::new(source, "test.ts", 10, &scoping);
+        visitor.scan_imports(&parsed.program);
+
+        assert!(
+            !visitor.resolver.is_target_tag("html"),
+            "html from non-Lit library must not be considered a target tag"
+        );
     }
 }

@@ -6,127 +6,31 @@
     "name": "Material Web (@material/web)",
     "packageName": "@material/web",
     "version": "2.5.0",
-    "componentCount": 20,
+    "componentCount": 4,
     "components": [
-      {
-        "concept": "button",
-        "tag": "md-filled-button",
-        "label": "Button",
-        "path": "button/filled-button.js"
-      },
       {
         "concept": "checkbox",
         "tag": "md-checkbox",
-        "label": "Checkbox",
-        "path": "checkbox/checkbox.js"
-      },
-      {
-        "concept": "radio",
-        "tag": "md-radio",
-        "label": "Radio button",
-        "path": "radio/radio.js"
-      },
-      {
-        "concept": "switch",
-        "tag": "md-switch",
-        "label": "Switch / toggle",
-        "path": "switch/switch.js"
-      },
-      {
-        "concept": "text-input",
-        "tag": "md-filled-text-field",
-        "label": "Text input / field",
-        "path": "textfield/filled-text-field.js"
-      },
-      {
-        "concept": "select",
-        "tag": "md-filled-select",
-        "label": "Select / dropdown",
-        "path": "select/filled-select.js"
-      },
-      {
-        "concept": "dialog",
-        "tag": "md-dialog",
-        "label": "Dialog / modal",
-        "path": "dialog/dialog.js"
+        "path": "checkbox/checkbox.js",
+        "importStatement": "import '@material/web/checkbox/checkbox.js';"
       },
       {
         "concept": "badge",
         "tag": "md-badge",
-        "label": "Badge / tag",
-        "path": "labs/badge/badge.js"
+        "path": "labs/badge/badge.js",
+        "importStatement": "import '@material/web/labs/badge/badge.js';"
       },
       {
-        "concept": "tabs",
-        "tag": "md-tabs",
-        "label": "Tabs",
-        "path": "tabs/tabs.js"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "md-linear-progress",
-        "label": "Progress bar",
-        "path": "progress/linear-progress.js"
-      },
-      {
-        "concept": "spinner",
-        "tag": "md-circular-progress",
-        "label": "Spinner / loader",
-        "path": "progress/circular-progress.js"
-      },
-      {
-        "concept": "slider",
-        "tag": "md-slider",
-        "label": "Slider",
-        "path": "slider/slider.js"
-      },
-      {
-        "concept": "menu",
-        "tag": "md-menu",
-        "label": "Menu / popover",
-        "path": "menu/menu.js"
-      },
-      {
-        "concept": "divider",
-        "tag": "md-divider",
-        "label": "Divider",
-        "path": "divider/divider.js"
-      },
-      {
-        "concept": "icon",
-        "tag": "md-icon",
-        "label": "Icon",
-        "path": "icon/icon.js"
+        "concept": "button",
+        "tag": "md-filled-button",
+        "path": "button/filled-button.js",
+        "importStatement": "import '@material/web/button/filled-button.js';"
       },
       {
         "concept": "icon-button",
         "tag": "md-icon-button",
-        "label": "Icon button",
-        "path": "iconbutton/icon-button.js"
-      },
-      {
-        "concept": "card",
-        "tag": "md-elevation",
-        "label": "Card / tile",
-        "path": "elevation/elevation.js"
-      },
-      {
-        "concept": "elevation",
-        "tag": "md-focus-ring",
-        "label": "Elevation / focus",
-        "path": "focus/md-focus-ring.js"
-      },
-      {
-        "concept": "list",
-        "tag": "md-list",
-        "label": "List / structured",
-        "path": "list/list.js"
-      },
-      {
-        "concept": "chips",
-        "tag": "md-chip-set",
-        "label": "Chips / segmented",
-        "path": "chips/chip-set.js"
+        "path": "iconbutton/icon-button.js",
+        "importStatement": "import '@material/web/iconbutton/icon-button.js';"
       }
     ]
   },
@@ -139,15 +43,16 @@
   "scenario": {
     "id": "data-grid",
     "name": "Data grid",
-    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation"
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
+    "componentCount": 4
   },
-  "timestamp": "2026-10-10T10:12:00.208Z",
+  "timestamp": "2026-10-12T23:47:27.743Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -162,10 +67,10 @@
     }
   },
   "metrics": {
-    "rawBytes": 72607,
-    "gzipBytes": 18730,
-    "brotliBytes": 16617,
-    "buildTimeMs": 14.290041000000201
+    "rawBytes": 71762,
+    "gzipBytes": 18652,
+    "brotliBytes": 16528,
+    "buildTimeMs": 18.484375
   },
   "baseline": {
     "rawBytes": 71634,
@@ -185,31 +90,40 @@
     }
   },
   "deltas": {
-    "rawBytes": 973,
-    "rawPercent": 1.36,
-    "gzipBytes": 107,
-    "gzipPercent": 0.57,
-    "brotliBytes": 104,
-    "brotliPercent": 0.63,
-    "buildTimeMs": -0.2,
-    "firstRenderMs": -0.5,
-    "speedupPercent": 0.8,
-    "updateMs": -0.7,
-    "updateSpeedupPercent": 12.73,
-    "evalSpeedupPercent": 4.17,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -0.2
+    "rawBytes": 128,
+    "rawPercent": 0.18,
+    "gzipBytes": 29,
+    "gzipPercent": 0.16,
+    "brotliBytes": 15,
+    "brotliPercent": 0.09,
+    "buildTimeMs": 4,
+    "firstRenderMs": 4.3,
+    "speedupPercent": -6.91,
+    "updateMs": -0.9,
+    "updateSpeedupPercent": 16.36,
+    "evalSpeedupPercent": 8.33,
+    "registrationSpeedupPercent": -200,
+    "memorySavingsPercent": -39.27
   },
   "runtime": {
-    "firstRenderMs": 61.7,
-    "updateMs": 4.8,
-    "scriptEvalMs": 2.3,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 3455508,
-    "speedupPercent": 0.8,
-    "updateSpeedupPercent": 12.73,
-    "evalSpeedupPercent": 4.17,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -0.2
+    "firstRenderMs": 66.5,
+    "updateMs": 4.6,
+    "scriptEvalMs": 2.2,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 4803067,
+    "speedupPercent": -6.91,
+    "updateSpeedupPercent": 16.36,
+    "evalSpeedupPercent": 8.33,
+    "registrationSpeedupPercent": -200,
+    "memorySavingsPercent": -39.27
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 801,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

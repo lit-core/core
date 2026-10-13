@@ -3,13 +3,13 @@
   "benchmarkId": "directives",
   "title": "`@lit-core/directives` empirical benchmark results",
   "description": "Ahead-of-time Lit built-in directive compiler evaluated across 255 production Web Components to eliminate runtime directive object allocations and prune dead imports.",
-  "timestamp": "2026-10-03T20:06:43.661Z",
+  "timestamp": "2026-10-12T23:47:41.973Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "9795425",
+    "gitCommit": "3856fa7",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -26,257 +26,447 @@
   "suites": [
     {
       "id": "carbon",
-      "name": "Carbon Web Components",
-      "shortName": "Carbon",
-      "packageName": "@carbon/web-components",
-      "componentCount": 51,
+      "name": "Carbon Web Components (@carbon/web-components)",
       "baseline": {
-        "directiveObjectsAllocated": 8000,
-        "renderLatencyMs": 0.47,
-        "estimatedGcPauseMs": 0.09,
-        "runtimeDirectiveImports": 118
+        "rawBytes": 635666,
+        "gzipBytes": 83521,
+        "brotliBytes": 51149,
+        "buildTimeMs": 49.822749999999985,
+        "firstRenderMs": 41.8,
+        "updateMs": 5.7,
+        "scriptEvalMs": 1.6,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 4642395,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "optimized": {
-        "directiveObjectsAllocated": 0,
-        "renderLatencyMs": 0.14,
-        "estimatedGcPauseMs": 0,
-        "runtimeDirectiveImports": 0
+        "rawBytes": 635410,
+        "gzipBytes": 83472,
+        "brotliBytes": 51163,
+        "buildTimeMs": 55.78375,
+        "firstRenderMs": 42.1,
+        "updateMs": 5.7,
+        "scriptEvalMs": 1.7,
+        "registrationMs": 0.4,
+        "heapUsedBytes": 5208132,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "deltas": {
-        "allocations": {
-          "diff": -8000,
-          "percent": -100,
-          "formattedDiff": "-8,000.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.32999999999999996,
-          "percent": -70.2127659574468,
-          "formattedDiff": "-0.3",
-          "formattedPercent": "-70.2%",
-          "isReduction": true
-        },
-        "imports": {
-          "diff": -118,
-          "percent": -100,
-          "formattedDiff": "-118.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": -256,
+        "rawPercent": -0.04,
+        "gzipBytes": -49,
+        "gzipPercent": -0.06,
+        "brotliBytes": 14,
+        "brotliPercent": 0.03,
+        "buildTimeMs": 6,
+        "firstRenderMs": 0.3,
+        "speedupPercent": -0.72,
+        "updateMs": 0,
+        "updateSpeedupPercent": 0,
+        "evalSpeedupPercent": -6.25,
+        "registrationSpeedupPercent": -100,
+        "memorySavingsPercent": -12.19
+      },
+      "runtime": {
+        "firstRenderMs": 42.1,
+        "updateMs": 5.7,
+        "scriptEvalMs": 1.7,
+        "registrationMs": 0.4,
+        "heapUsedBytes": 5208132,
+        "speedupPercent": -0.72,
+        "updateSpeedupPercent": 0,
+        "evalSpeedupPercent": -6.25,
+        "registrationSpeedupPercent": -100,
+        "memorySavingsPercent": -12.19
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 555,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "totalComponents": 51,
-        "componentsWithDirectives": 30,
-        "totalDirectivesLowered": 118,
-        "directivesUsed": "classMap, ifDefined",
-        "transformTimeMs": 23.23,
-        "allocationReduction": "-100.0%",
-        "buildOverhead": "23.23ms native pass"
+        "scenario": "Dynamic feed",
+        "speedupPercent": -0.72,
+        "updateSpeedupPercent": 0,
+        "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "spectrum",
-      "name": "Adobe Spectrum Web Components",
-      "shortName": "Adobe Spectrum",
-      "packageName": "@spectrum-web-components",
-      "componentCount": 51,
+      "name": "Spectrum Web Components (@spectrum-web-components)",
       "baseline": {
-        "directiveObjectsAllocated": 6000,
-        "renderLatencyMs": 0.05,
-        "estimatedGcPauseMs": 0.07,
-        "runtimeDirectiveImports": 56
+        "rawBytes": 250859,
+        "gzipBytes": 44241,
+        "brotliBytes": 35823,
+        "buildTimeMs": 26.752250000005006,
+        "firstRenderMs": 28,
+        "updateMs": 3.3,
+        "scriptEvalMs": 2,
+        "registrationMs": 0.1,
+        "heapUsedBytes": 3221093,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "optimized": {
-        "directiveObjectsAllocated": 0,
-        "renderLatencyMs": 0.02,
-        "estimatedGcPauseMs": 0,
-        "runtimeDirectiveImports": 0
+        "rawBytes": 252127,
+        "gzipBytes": 44660,
+        "brotliBytes": 36192,
+        "buildTimeMs": 38.734083000000055,
+        "firstRenderMs": 27.8,
+        "updateMs": 3.7,
+        "scriptEvalMs": 1.9,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3896091,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "deltas": {
-        "allocations": {
-          "diff": -6000,
-          "percent": -100,
-          "formattedDiff": "-6,000.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.030000000000000002,
-          "percent": -60,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-60.0%",
-          "isReduction": true
-        },
-        "imports": {
-          "diff": -56,
-          "percent": -100,
-          "formattedDiff": "-56.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": 1268,
+        "rawPercent": 0.51,
+        "gzipBytes": 419,
+        "gzipPercent": 0.95,
+        "brotliBytes": 369,
+        "brotliPercent": 1.03,
+        "buildTimeMs": 12,
+        "firstRenderMs": -0.2,
+        "speedupPercent": 0.71,
+        "updateMs": 0.4,
+        "updateSpeedupPercent": -12.12,
+        "evalSpeedupPercent": 5,
+        "registrationSpeedupPercent": -200,
+        "memorySavingsPercent": -20.96
+      },
+      "runtime": {
+        "firstRenderMs": 27.8,
+        "updateMs": 3.7,
+        "scriptEvalMs": 1.9,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3896091,
+        "speedupPercent": 0.71,
+        "updateSpeedupPercent": -12.12,
+        "evalSpeedupPercent": 5,
+        "registrationSpeedupPercent": -200,
+        "memorySavingsPercent": -20.96
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 555,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "totalComponents": 51,
-        "componentsWithDirectives": 19,
-        "totalDirectivesLowered": 56,
-        "directivesUsed": "when, ifDefined, join, classMap, repeat",
-        "transformTimeMs": 12.94,
-        "allocationReduction": "-100.0%",
-        "buildOverhead": "12.94ms native pass"
+        "scenario": "Dynamic feed",
+        "speedupPercent": 0.71,
+        "updateSpeedupPercent": -12.12,
+        "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "webawesome",
-      "name": "Web Awesome",
-      "shortName": "Web Awesome",
-      "packageName": "@awesome.me/webawesome",
-      "componentCount": 51,
+      "name": "Web Awesome (20 Canonical Components)",
       "baseline": {
-        "directiveObjectsAllocated": 10000,
-        "renderLatencyMs": 0.21,
-        "estimatedGcPauseMs": 0.11,
-        "runtimeDirectiveImports": 142
+        "rawBytes": 152679,
+        "gzipBytes": 38781,
+        "brotliBytes": 32333,
+        "buildTimeMs": 19.63916700000027,
+        "firstRenderMs": 30.5,
+        "updateMs": 4.7,
+        "scriptEvalMs": 1.6,
+        "registrationMs": 0.1,
+        "heapUsedBytes": 2928856,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "optimized": {
-        "directiveObjectsAllocated": 0,
-        "renderLatencyMs": 0.03,
-        "estimatedGcPauseMs": 0,
-        "runtimeDirectiveImports": 0
+        "rawBytes": 152726,
+        "gzipBytes": 38799,
+        "brotliBytes": 32349,
+        "buildTimeMs": 19.411458999999923,
+        "firstRenderMs": 35.5,
+        "updateMs": 4.6,
+        "scriptEvalMs": 1.5,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 3480498,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "deltas": {
-        "allocations": {
-          "diff": -10000,
-          "percent": -100,
-          "formattedDiff": "-10,000.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.18,
-          "percent": -85.71428571428571,
-          "formattedDiff": "-0.2",
-          "formattedPercent": "-85.7%",
-          "isReduction": true
-        },
-        "imports": {
-          "diff": -142,
-          "percent": -100,
-          "formattedDiff": "-142.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": 47,
+        "rawPercent": 0.03,
+        "gzipBytes": 18,
+        "gzipPercent": 0.05,
+        "brotliBytes": 16,
+        "brotliPercent": 0.05,
+        "buildTimeMs": -0.2,
+        "firstRenderMs": 5,
+        "speedupPercent": -16.39,
+        "updateMs": -0.1,
+        "updateSpeedupPercent": 2.13,
+        "evalSpeedupPercent": 6.25,
+        "registrationSpeedupPercent": -100,
+        "memorySavingsPercent": -18.83
+      },
+      "runtime": {
+        "firstRenderMs": 35.5,
+        "updateMs": 4.6,
+        "scriptEvalMs": 1.5,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 3480498,
+        "speedupPercent": -16.39,
+        "updateSpeedupPercent": 2.13,
+        "evalSpeedupPercent": 6.25,
+        "registrationSpeedupPercent": -100,
+        "memorySavingsPercent": -18.83
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 555,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "totalComponents": 51,
-        "componentsWithDirectives": 28,
-        "totalDirectivesLowered": 142,
-        "directivesUsed": "classMap, styleMap, ifDefined, map, live, unsafeHTML, when",
-        "transformTimeMs": 14.71,
-        "allocationReduction": "-100.0%",
-        "buildOverhead": "14.71ms native pass"
+        "scenario": "Dynamic feed",
+        "speedupPercent": -16.39,
+        "updateSpeedupPercent": 2.13,
+        "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "momentum",
-      "name": "Cisco Momentum Design",
-      "shortName": "Cisco Momentum",
-      "packageName": "@momentum-design/components",
-      "componentCount": 51,
+      "name": "Momentum Design (@momentum-design/components)",
       "baseline": {
-        "directiveObjectsAllocated": 8000,
-        "renderLatencyMs": 0.05,
-        "estimatedGcPauseMs": 0.09,
-        "runtimeDirectiveImports": 56
+        "rawBytes": 129428,
+        "gzipBytes": 28560,
+        "brotliBytes": 24229,
+        "buildTimeMs": 47.09412500000326,
+        "firstRenderMs": 32.7,
+        "updateMs": 4.9,
+        "scriptEvalMs": 1.8,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 2626196,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "optimized": {
-        "directiveObjectsAllocated": 0,
-        "renderLatencyMs": 0,
-        "estimatedGcPauseMs": 0,
-        "runtimeDirectiveImports": 0
+        "rawBytes": 129614,
+        "gzipBytes": 28630,
+        "brotliBytes": 24326,
+        "buildTimeMs": 28.354333000000224,
+        "firstRenderMs": 28.1,
+        "updateMs": 4.3,
+        "scriptEvalMs": 1.9,
+        "registrationMs": 0.1,
+        "heapUsedBytes": 3364712,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "deltas": {
-        "allocations": {
-          "diff": -8000,
-          "percent": -100,
-          "formattedDiff": "-8,000.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.05,
-          "percent": -100,
-          "formattedDiff": "-0.1",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "imports": {
-          "diff": -56,
-          "percent": -100,
-          "formattedDiff": "-56.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": 186,
+        "rawPercent": 0.14,
+        "gzipBytes": 70,
+        "gzipPercent": 0.25,
+        "brotliBytes": 97,
+        "brotliPercent": 0.4,
+        "buildTimeMs": -18.7,
+        "firstRenderMs": -4.6,
+        "speedupPercent": 14.07,
+        "updateMs": -0.6,
+        "updateSpeedupPercent": 12.24,
+        "evalSpeedupPercent": -5.56,
+        "registrationSpeedupPercent": 50,
+        "memorySavingsPercent": -28.12
+      },
+      "runtime": {
+        "firstRenderMs": 28.1,
+        "updateMs": 4.3,
+        "scriptEvalMs": 1.9,
+        "registrationMs": 0.1,
+        "heapUsedBytes": 3364712,
+        "speedupPercent": 14.07,
+        "updateSpeedupPercent": 12.24,
+        "evalSpeedupPercent": -5.56,
+        "registrationSpeedupPercent": 50,
+        "memorySavingsPercent": -28.12
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 555,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "totalComponents": 51,
-        "componentsWithDirectives": 15,
-        "totalDirectivesLowered": 56,
-        "directivesUsed": "ifDefined, ref, classMap, live, repeat",
-        "transformTimeMs": 20.01,
-        "allocationReduction": "-100.0%",
-        "buildOverhead": "20.01ms native pass"
+        "scenario": "Dynamic feed",
+        "speedupPercent": 14.07,
+        "updateSpeedupPercent": 12.24,
+        "buildOverhead": "Fast native pass"
       }
     },
     {
       "id": "material",
-      "name": "Google Material Web",
-      "shortName": "Google Material Web",
-      "packageName": "@material/web",
-      "componentCount": 51,
+      "name": "Material Web (@material/web)",
       "baseline": {
-        "directiveObjectsAllocated": 2000,
-        "renderLatencyMs": 0.01,
-        "estimatedGcPauseMs": 0.02,
-        "runtimeDirectiveImports": 11
+        "rawBytes": 59287,
+        "gzipBytes": 17397,
+        "brotliBytes": 15562,
+        "buildTimeMs": 23.391749999998865,
+        "firstRenderMs": 31,
+        "updateMs": 3.3,
+        "scriptEvalMs": 1.9,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 2341860,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "optimized": {
-        "directiveObjectsAllocated": 0,
-        "renderLatencyMs": 0,
-        "estimatedGcPauseMs": 0,
-        "runtimeDirectiveImports": 0
+        "rawBytes": 59352,
+        "gzipBytes": 17390,
+        "brotliBytes": 15593,
+        "buildTimeMs": 17.799041999999645,
+        "firstRenderMs": 25.2,
+        "updateMs": 2.6,
+        "scriptEvalMs": 1.9,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 2901390,
+        "scenarioSpecific": {
+          "totalItems": 50,
+          "directivesUsed": [
+            "repeat",
+            "classMap",
+            "styleMap",
+            "ifDefined"
+          ],
+          "renderedCards": 50
+        }
       },
       "deltas": {
-        "allocations": {
-          "diff": -2000,
-          "percent": -100,
-          "formattedDiff": "-2,000.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "latency": {
-          "diff": -0.01,
-          "percent": -100,
-          "formattedDiff": "-0.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
-        },
-        "imports": {
-          "diff": -11,
-          "percent": -100,
-          "formattedDiff": "-11.0",
-          "formattedPercent": "-100.0%",
-          "isReduction": true
+        "rawBytes": 65,
+        "rawPercent": 0.11,
+        "gzipBytes": -7,
+        "gzipPercent": -0.04,
+        "brotliBytes": 31,
+        "brotliPercent": 0.2,
+        "buildTimeMs": -5.6,
+        "firstRenderMs": -5.8,
+        "speedupPercent": 18.71,
+        "updateMs": -0.7,
+        "updateSpeedupPercent": 21.21,
+        "evalSpeedupPercent": 0,
+        "registrationSpeedupPercent": 0,
+        "memorySavingsPercent": -23.89
+      },
+      "runtime": {
+        "firstRenderMs": 25.2,
+        "updateMs": 2.6,
+        "scriptEvalMs": 1.9,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 2901390,
+        "speedupPercent": 18.71,
+        "updateSpeedupPercent": 21.21,
+        "evalSpeedupPercent": 0,
+        "registrationSpeedupPercent": 0,
+        "memorySavingsPercent": -23.89
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 555,
+        "verified": true,
+        "phasesMatched": {
+          "mount": true,
+          "update": true
         }
       },
       "diagnostics": {
-        "totalComponents": 51,
-        "componentsWithDirectives": 10,
-        "totalDirectivesLowered": 11,
-        "directivesUsed": "classMap",
-        "transformTimeMs": 15.78,
-        "allocationReduction": "-100.0%",
-        "buildOverhead": "15.78ms native pass"
+        "scenario": "Dynamic feed",
+        "speedupPercent": 18.71,
+        "updateSpeedupPercent": 21.21,
+        "buildOverhead": "Fast native pass"
       }
     }
   ]

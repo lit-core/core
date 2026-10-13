@@ -4,12 +4,14 @@ use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
+use oxc_semantic::SemanticBuilder;
 use oxc_span::SourceType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 pub use crate::analyzer::{
-    collect_classes_mut, has_event_options, is_lit_html_tag, match_event_attr, SAFE_BUBBLING_EVENTS,
+    collect_classes_mut, has_event_options, is_canonical_lit_specifier, is_lit_html_tag,
+    match_event_attr, LitSemanticAnalysis, SAFE_BUBBLING_EVENTS,
 };
 pub use crate::builder::{
     build_add_listener_statement, build_call_init_event_hoist, build_connected_callback_method,
@@ -17,7 +19,7 @@ pub use crate::builder::{
     build_lh_actions_property, build_lh_dispatch_method, build_lh_initialized_property,
     build_reset_lh_actions, build_will_update_method,
 };
-pub use crate::hoister::{hoist_events_in_expr, hoist_events_in_stmt};
+pub use crate::hoister::{hoist_events_in_expr, hoist_events_in_stmt, HoistContext};
 
 #[napi(object)]
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
@@ -59,6 +61,11 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
         };
     }
 
+    let lit_analysis = {
+        let semantic_ret = SemanticBuilder::new().build(&parsed.program);
+        LitSemanticAnalysis::new(&parsed.program, semantic_ret.semantic.scoping())
+    };
+
     let mut classes = Vec::new();
     collect_classes_mut(&mut parsed.program.body, &mut classes);
 
@@ -77,6 +84,10 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
     let mut all_unique_events = HashSet::new();
 
     for class in classes {
+        if !lit_analysis.is_lit_class(class) {
+            continue;
+        }
+
         let mut class_hoisted_events = HashSet::new();
         let mut class_hoisted_count = 0u32;
 
@@ -93,16 +104,15 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
 
                 if let Some(ref mut body) = method.value.body {
                     if method_name == Some("render") {
+                        let mut ctx = HoistContext {
+                            safe_events: &safe_event_set,
+                            allocator: &allocator,
+                            lit_analysis: &lit_analysis,
+                            hoisted_events: &mut class_hoisted_events,
+                            hoisted_count: &mut class_hoisted_count,
+                        };
                         for stmt in &mut body.statements {
-                            hoist_events_in_stmt(
-                                stmt,
-                                source,
-                                &safe_event_set,
-                                &allocator,
-                                source_type,
-                                &mut class_hoisted_events,
-                                &mut class_hoisted_count,
-                            );
+                            hoist_events_in_stmt(stmt, &mut ctx);
                         }
                     } else if method_name == Some("connectedCallback") {
                         has_connected = true;
