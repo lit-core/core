@@ -330,6 +330,19 @@ export interface LitPluginOptions {
    * Kebab-case alias for `tagShake`.
    */
   'tag-shake'?: boolean | TagShakeOptions;
+
+  /**
+   * First-class server-side rendering engine via @lit-core/ssr.
+   * Supports streaming, static prerendering, islands mode, and dual builds.
+   * Pass `true` or an `SsrOptions` object to enable.
+   * @default false
+   */
+  ssr?: boolean | SsrOptions;
+
+  /**
+   * Kebab-case alias for `ssr`.
+   */
+  'lit-ssr'?: boolean | SsrOptions;
 }
 
 export interface ResumableOptions {
@@ -590,6 +603,153 @@ export interface TagShakeOptions {
 }
 
 export type LitTagShakeOptions = TagShakeOptions;
+
+/**
+ * Static prerender configuration for build-time HTML generation.
+ */
+export interface SsrPrerenderOptions {
+  /**
+   * Routes or entry HTML files to prerender at build time.
+   * @default ['/']
+   */
+  routes?: string[];
+
+  /**
+   * Server entry module exporting root template, component, or render function.
+   */
+  entry?: string;
+
+  /**
+   * Output directory for prerendered HTML files.
+   * Defaults to Vite's build.outDir.
+   */
+  outDir?: string;
+
+  /**
+   * Concurrency limit for parallel page rendering.
+   * @default 8
+   */
+  concurrency?: number;
+}
+
+/**
+ * Islands mode configuration for selective client hydration.
+ */
+export interface SsrIslandsOptions {
+  /**
+   * Tag names or glob patterns treated as client interactive islands.
+   */
+  include?: string[];
+
+  /**
+   * Tag names or glob patterns excluded from client hydration.
+   */
+  exclude?: string[];
+
+  /**
+   * Default hydration loading strategy for islands:
+   * - 'visible': Hydrates when element intersects the viewport.
+   * - 'idle': Hydrates when the browser is idle.
+   * - 'interaction': Hydrates upon first user interaction.
+   * - 'load': Hydrates immediately upon page load.
+   * @default 'visible'
+   */
+  strategy?: 'load' | 'idle' | 'visible' | 'interaction';
+}
+
+/**
+ * First-class server-side rendering options for @lit-core/vite-plugin.
+ */
+export interface SsrOptions {
+  /**
+   * High-level rendering mode preset:
+   * - 'stream': Web Standard ReadableStream response streaming with low TTFB.
+   * - 'static': Build-time static prerendering of HTML pages or routes.
+   * - 'islands': Selective client hydration for interactive components only.
+   * - 'resumable': Zero client component JavaScript with event-driven resumption.
+   * @default 'stream'
+   */
+  mode?: 'stream' | 'static' | 'islands' | 'resumable';
+
+  /**
+   * Enable Web Standard ReadableStream streaming responses in development and server handlers.
+   * @default true
+   */
+  streaming?: boolean;
+
+  /**
+   * Static prerender configuration.
+   * When true, prerenders the root route ('/').
+   * @default false
+   */
+  prerender?: boolean | SsrPrerenderOptions;
+
+  /**
+   * Islands mode configuration for selective hydration.
+   * @default false
+   */
+  islands?: boolean | SsrIslandsOptions;
+
+  /**
+   * Enable @lit-core/resumable state snapshots and event-driven runtime resumption.
+   * @default false
+   */
+  resumable?: boolean;
+
+  /**
+   * Emit clean Declarative Shadow DOM without comment markers.
+   * @default true
+   */
+  cleanShadowDom?: boolean;
+
+  /**
+   * Inject state snapshot tag for resumable state.
+   * @default true
+   */
+  injectState?: boolean;
+
+  /**
+   * Dual client/server build coordination.
+   * @default true
+   */
+  dualBuild?: boolean;
+
+  /**
+   * Custom server entry module exporting root template or render handler.
+   */
+  entry?: string;
+
+  /**
+   * Enable structural DOM paths indexing metadata.
+   * @default false
+   */
+  domPaths?: boolean;
+
+  /**
+   * File patterns to include for SSR transformation.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude from SSR transformation.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Scoped custom element registry to resolve component constructors during render.
+   */
+  customElements?: any;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitSsrOptions = SsrOptions;
 export type LitCorePluginOptions = LitPluginOptions;
 export type LitCoreVitePluginOptions = LitPluginOptions;
 export type LitVitePluginOptions = LitPluginOptions;

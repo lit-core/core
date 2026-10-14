@@ -25,12 +25,14 @@ import {
   litMemoize,
   litNative,
   litPropsLower,
+  litSsr,
   litTagShake,
   litVirtual,
   litVirtualPlugin,
   memoize,
   native,
   propsLower,
+  ssr,
   tagShake,
 } from './plugins/index.js';
 
@@ -131,6 +133,12 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(tagShake(shakeOpts));
   }
 
+  const ssrOpt = options.ssr ?? options['lit-ssr'];
+  if (ssrOpt) {
+    const ssrOpts = typeof ssrOpt === 'object' ? ssrOpt : {};
+    plugins.push(ssr(ssrOpts));
+  }
+
   return plugins;
 }
 
@@ -164,12 +172,14 @@ export {
   litMemoize,
   litNative,
   litPropsLower,
+  litSsr,
   litTagShake,
   litVirtual,
   litVirtualPlugin,
   memoize,
   native,
   propsLower,
+  ssr,
   tagShake,
 };
 

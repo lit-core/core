@@ -1,12 +1,13 @@
 import './styles.css';
 import { runInteractiveTests, testStates, updateAuditMetrics } from './audit/test-state.js';
 import { ALL_CANONICAL_COMPONENTS, CONCEPTS, LIBRARIES } from './canonical-components.js';
+import { attachSsrDemoHandlers, renderSsrDemo, type SsrDemoState } from './ssr-demo.js';
 import { renderFilters } from './views/filters.js';
 import { renderAuditReportTable } from './views/report.js';
 
 declare const __FEATURE__: string | undefined;
 
-type ViewMode = 'matrix' | 'library' | 'concept' | 'report';
+type ViewMode = 'matrix' | 'library' | 'concept' | 'report' | 'ssr';
 
 const urlParams = new URLSearchParams(window.location.search);
 const activeFeature = (typeof __FEATURE__ !== 'undefined' ? __FEATURE__ : '') || urlParams.get('feature') || 'all';
@@ -17,9 +18,17 @@ const canvasTag = urlParams.get('tag') || '';
 const canvasId = urlParams.get('id') || `comp-${canvasTag}`;
 
 let selectedLibrary: string = paramLib && (LIBRARIES.some((l) => l.id === paramLib) || paramLib === 'all') ? paramLib : 'all';
-let currentView: ViewMode = (urlParams.get('view') as ViewMode) || (selectedLibrary !== 'all' ? 'library' : 'matrix');
+let currentView: ViewMode = (urlParams.get('view') as ViewMode) || (activeFeature === 'ssr' || urlParams.get('feature') === 'ssr' ? 'ssr' : selectedLibrary !== 'all' ? 'library' : 'matrix');
 let selectedConcept: string = urlParams.get('concept') || 'all';
 let searchQuery: string = urlParams.get('q') || '';
+
+const ssrDemoState: SsrDemoState = {
+  selectedSuite: 'carbon',
+  previewMode: 'markup',
+  diffView: 'split',
+  isStreaming: false,
+  streamProgress: 100,
+};
 
 function handleRunInteractiveTests(): Promise<void> {
   return runInteractiveTests(activeFeature, () => renderApp());
@@ -101,6 +110,9 @@ function renderApp(): void {
             <button type="button" class="nav-tab-btn px-5 py-2 text-base rounded-full transition-all cursor-pointer ${currentView === 'concept' ? 'bg-white text-zinc-950 font-medium shadow-[0_2px_8px_rgba(0,0,0,0.06)]' : 'text-zinc-600 font-light hover:text-zinc-950'}" data-view="concept">
               By concept
             </button>
+            <button type="button" class="nav-tab-btn px-5 py-2 text-base rounded-full transition-all cursor-pointer ${currentView === 'ssr' ? 'bg-white text-zinc-950 font-medium shadow-[0_2px_8px_rgba(0,0,0,0.06)]' : 'text-zinc-600 font-light hover:text-zinc-950'}" data-view="ssr">
+              SSR demo
+            </button>
             <button type="button" class="nav-tab-btn px-5 py-2 text-base rounded-full transition-all cursor-pointer ${currentView === 'report' ? 'bg-white text-zinc-950 font-medium shadow-[0_2px_8px_rgba(0,0,0,0.06)]' : 'text-zinc-600 font-light hover:text-zinc-950'}" data-view="report">
               Audit report
             </button>
@@ -120,6 +132,10 @@ function renderApp(): void {
       }
 
       <main class="flex-1 py-10 w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-14">
+        ${
+          currentView === 'ssr'
+            ? renderViewContent()
+            : `
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <div class="bg-white rounded-2xl p-6 flex flex-col gap-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.06)] hover:bg-zinc-50/50 transition-all">
             <span class="text-base font-light text-zinc-500">Optimization</span>
@@ -154,6 +170,8 @@ function renderApp(): void {
 
         ${renderFilters(currentView, selectedLibrary, selectedConcept, searchQuery)}
         ${renderViewContent()}
+        `
+        }
       </main>
     </div>
   `;
@@ -163,6 +181,10 @@ function renderApp(): void {
 }
 
 function renderViewContent(): string {
+  if (currentView === 'ssr') {
+    return renderSsrDemo(ssrDemoState);
+  }
+
   const q = searchQuery.toLowerCase().trim();
   const allStates = Array.from(testStates.values());
 
@@ -234,6 +256,13 @@ function attachEventHandlers(): void {
       }
     });
   });
+
+  if (currentView === 'ssr') {
+    const app = document.getElementById('app');
+    if (app) {
+      attachSsrDemoHandlers(app, ssrDemoState, () => renderApp());
+    }
+  }
 
   // Library filter pills
   document.querySelectorAll('[data-lib]').forEach((btn) => {

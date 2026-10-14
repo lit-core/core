@@ -1,0 +1,275 @@
+{
+  "schemaVersion": "1.0.0",
+  "benchmarkId": "ssr",
+  "title": "@lit-core/ssr empirical server rendering benchmarks",
+  "description": "Comparative performance evaluation of @lit-core/ssr versus @lit-labs/ssr across IBM Carbon, Adobe Spectrum, and Google Material Web measuring throughput, memory, streaming TTFB, and comment marker elimination.",
+  "timestamp": "2026-10-14T00:59:24.309Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "664d821",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "suites": [
+    {
+      "id": "carbon",
+      "name": "IBM Carbon Web Components",
+      "packageName": "@carbon/web-components",
+      "baseline": {
+        "rawBytes": 374743,
+        "gzipBytes": 35983,
+        "brotliBytes": 17238,
+        "buildTimeMs": 42.712582999999995,
+        "rps": 11706.2,
+        "requestsPerSec": 2509.7,
+        "memoryBytes": 37413280,
+        "retainedMemoryBytes": 0,
+        "ttfbMs": 0.1933,
+        "ttlbMs": 0.4792,
+        "commentMarkersCount": 49
+      },
+      "optimized": {
+        "rawBytes": 5007,
+        "gzipBytes": 1156,
+        "brotliBytes": 952,
+        "buildTimeMs": 52.78912500000001,
+        "rps": 9471.6,
+        "requestsPerSec": 7515.7,
+        "memoryBytes": 20619776,
+        "retainedMemoryBytes": 3504,
+        "ttfbMs": 0.005,
+        "ttlbMs": 0.1304,
+        "commentMarkersCount": 0
+      },
+      "deltas": {
+        "raw": {
+          "diff": -369736,
+          "percent": -98.66388431538414,
+          "formattedDiff": "-369,736.0",
+          "formattedPercent": "-98.7%",
+          "isReduction": true
+        },
+        "gzip": {
+          "diff": -34827,
+          "percent": -96.78737181446795,
+          "formattedDiff": "-34,827.0",
+          "formattedPercent": "-96.8%",
+          "isReduction": true
+        },
+        "brotli": {
+          "diff": -16286,
+          "percent": -94.47731755424064,
+          "formattedDiff": "-16,286.0",
+          "formattedPercent": "-94.5%",
+          "isReduction": true
+        },
+        "requests": 199.5,
+        "memory": 44.9,
+        "ttfb": 97.4,
+        "comments": 100
+      },
+      "runtime": {
+        "firstRenderMs": 0.005,
+        "speedupPercent": 97.4,
+        "heapUsedBytes": 20619776,
+        "memorySavingsPercent": 44.9
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 4,
+        "verified": true
+      },
+      "diagnostics": {
+        "commentMarkersEliminated": 49,
+        "commentMarkersCore": 0,
+        "commentMarkersLabs": 49,
+        "rawPayloadSavedBytes": 369736,
+        "gzipPayloadSavedBytes": 34827,
+        "ttfbCoreMs": 0.005,
+        "ttfbLabsMs": 0.1933,
+        "requestsPerSecCore": 7515.7,
+        "requestsPerSecLabs": 2509.7
+      }
+    },
+    {
+      "id": "spectrum",
+      "name": "Adobe Spectrum Web Components",
+      "packageName": "@spectrum-web-components/bundle",
+      "baseline": {
+        "rawBytes": 120423,
+        "gzipBytes": 12102,
+        "brotliBytes": 7083,
+        "buildTimeMs": 36.591125000000005,
+        "rps": 13664.5,
+        "requestsPerSec": 3308.8,
+        "memoryBytes": 37821472,
+        "retainedMemoryBytes": 0,
+        "ttfbMs": 0.3012,
+        "ttlbMs": 0.5038,
+        "commentMarkersCount": 54
+      },
+      "optimized": {
+        "rawBytes": 3477,
+        "gzipBytes": 899,
+        "brotliBytes": 713,
+        "buildTimeMs": 62.39545899999999,
+        "rps": 8013.4,
+        "requestsPerSec": 6818.5,
+        "memoryBytes": 36863392,
+        "retainedMemoryBytes": 0,
+        "ttfbMs": 0.0068,
+        "ttlbMs": 0.1779,
+        "commentMarkersCount": 0
+      },
+      "deltas": {
+        "raw": {
+          "diff": -116946,
+          "percent": -97.11267781071722,
+          "formattedDiff": "-116,946.0",
+          "formattedPercent": "-97.1%",
+          "isReduction": true
+        },
+        "gzip": {
+          "diff": -11203,
+          "percent": -92.57147578912577,
+          "formattedDiff": "-11,203.0",
+          "formattedPercent": "-92.6%",
+          "isReduction": true
+        },
+        "brotli": {
+          "diff": -6370,
+          "percent": -89.93364393618523,
+          "formattedDiff": "-6,370.0",
+          "formattedPercent": "-89.9%",
+          "isReduction": true
+        },
+        "requests": 106.1,
+        "memory": 2.5,
+        "ttfb": 97.7,
+        "comments": 100
+      },
+      "runtime": {
+        "firstRenderMs": 0.0068,
+        "speedupPercent": 97.7,
+        "heapUsedBytes": 36863392,
+        "memorySavingsPercent": 2.5
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 4,
+        "verified": true
+      },
+      "diagnostics": {
+        "commentMarkersEliminated": 54,
+        "commentMarkersCore": 0,
+        "commentMarkersLabs": 54,
+        "rawPayloadSavedBytes": 116946,
+        "gzipPayloadSavedBytes": 11203,
+        "ttfbCoreMs": 0.0068,
+        "ttfbLabsMs": 0.3012,
+        "requestsPerSecCore": 6818.5,
+        "requestsPerSecLabs": 3308.8
+      }
+    },
+    {
+      "id": "material",
+      "name": "Google Material Web",
+      "packageName": "@material/web",
+      "baseline": {
+        "rawBytes": 38784,
+        "gzipBytes": 5372,
+        "brotliBytes": 4562,
+        "buildTimeMs": 39.016041,
+        "rps": 12815.2,
+        "requestsPerSec": 4099.2,
+        "memoryBytes": 10558320,
+        "retainedMemoryBytes": 0,
+        "ttfbMs": 0.3151,
+        "ttlbMs": 0.4142,
+        "commentMarkersCount": 62
+      },
+      "optimized": {
+        "rawBytes": 3560,
+        "gzipBytes": 846,
+        "brotliBytes": 698,
+        "buildTimeMs": 65.03020900000001,
+        "rps": 7688.7,
+        "requestsPerSec": 6904.7,
+        "memoryBytes": 7788632,
+        "retainedMemoryBytes": 0,
+        "ttfbMs": 0.0059,
+        "ttlbMs": 0.1798,
+        "commentMarkersCount": 0
+      },
+      "deltas": {
+        "raw": {
+          "diff": -35224,
+          "percent": -90.82095709570957,
+          "formattedDiff": "-35,224.0",
+          "formattedPercent": "-90.8%",
+          "isReduction": true
+        },
+        "gzip": {
+          "diff": -4526,
+          "percent": -84.25167535368577,
+          "formattedDiff": "-4,526.0",
+          "formattedPercent": "-84.3%",
+          "isReduction": true
+        },
+        "brotli": {
+          "diff": -3864,
+          "percent": -84.69969311705393,
+          "formattedDiff": "-3,864.0",
+          "formattedPercent": "-84.7%",
+          "isReduction": true
+        },
+        "requests": 68.4,
+        "memory": 26.2,
+        "ttfb": 98.1,
+        "comments": 100
+      },
+      "runtime": {
+        "firstRenderMs": 0.0059,
+        "speedupPercent": 98.1,
+        "heapUsedBytes": 7788632,
+        "memorySavingsPercent": 26.2
+      },
+      "equivalence": {
+        "domStructureMatch": true,
+        "elementsCount": 5,
+        "verified": true
+      },
+      "diagnostics": {
+        "commentMarkersEliminated": 62,
+        "commentMarkersCore": 0,
+        "commentMarkersLabs": 62,
+        "rawPayloadSavedBytes": 35224,
+        "gzipPayloadSavedBytes": 4526,
+        "ttfbCoreMs": 0.0059,
+        "ttfbLabsMs": 0.3151,
+        "requestsPerSecCore": 6904.7,
+        "requestsPerSecLabs": 4099.2
+      }
+    }
+  ],
+  "summary": {
+    "totalSuites": 3,
+    "averageGzipSavingsPercent": 91.2,
+    "averageRawSavingsPercent": 95.5,
+    "totalCommentMarkersEliminated": 165,
+    "zeroCommentMarkersVerified": true
+  }
+}

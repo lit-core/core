@@ -15,6 +15,7 @@ import type {
   NativeOptions,
   PropsLowerOptions,
   ResumableOptions,
+  SsrOptions,
   TagShakeOptions,
 } from './options.js';
 import {
@@ -31,6 +32,7 @@ import {
   transformNativePlugin,
   transformPropsLower,
   transformResumable,
+  transformSsr,
   transformTagShakePlugin,
 } from './transforms.js';
 
@@ -266,6 +268,19 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
         }
       }
       const result = transformTagShakePlugin(currentSource, resourcePath, shakeOpts, usedSet);
+      if (result) {
+        currentSource = result.code;
+        if (result.map) {
+          currentMap = result.map;
+        }
+      }
+    }
+
+    // 8. Apply SSR ahead-of-time transform if enabled
+    const ssrOpt = options.ssr ?? options['lit-ssr'];
+    if (ssrOpt) {
+      const ssrOpts: SsrOptions = typeof ssrOpt === 'object' ? ssrOpt : {};
+      const result = transformSsr(currentSource, resourcePath, ssrOpts);
       if (result) {
         currentSource = result.code;
         if (result.map) {

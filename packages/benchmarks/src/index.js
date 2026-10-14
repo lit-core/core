@@ -108,6 +108,30 @@ async function main() {
     return;
   }
 
+  // Handle SSR comparative runtime benchmark
+  if (options.tools && options.tools.length === 1 && options.tools[0] === 'ssr') {
+    const { runSsrBenchmarks, printSsrComparisonTable } = await import('./features/ssr.js');
+    const { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } = await import('./reporters/index.js');
+
+    if (options.format !== 'json') {
+      printBenchmarkHeader('ssr', 'Evaluating universal SSR engine (@lit-core/ssr vs @lit-labs/ssr) across real production components.');
+    }
+
+    const result = await runSsrBenchmarks({
+      verbose: options.verbose,
+      suite: options.suite,
+    });
+    const jsonPath = saveBenchmarkResult(result);
+
+    if (options.format === 'json') {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      printSsrComparisonTable(result);
+      printBenchmarkFooter('ssr', { jsonPath });
+    }
+    return;
+  }
+
   // Handle single tool standalone run if specified as 'baseline', 'all', or a single tool id
   if (options.tools && options.tools.length === 1) {
     const singleToolId = options.tools[0];

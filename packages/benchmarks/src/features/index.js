@@ -12,4 +12,5 @@ export {
   runResumableBenchmark,
   SUITES as RESUMABLE_SUITES,
 } from './resumable.js';
+export { runSsrBenchmarks, SSR_SUITES } from './ssr.js';
 export { runTagShakeBenchmarks, SUITE_LABELS as TAG_SHAKE_SUITE_LABELS } from './tag-shake.js';

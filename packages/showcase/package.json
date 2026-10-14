@@ -48,6 +48,7 @@
     "@lit-core/native": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
+    "@lit-core/ssr": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "@material/web": "^2.5.0",
     "@momentum-design/components": "^0.141.2",

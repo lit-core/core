@@ -54,6 +54,7 @@
     "@lit-core/native": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
+    "@lit-core/ssr": "workspace:*",
     "@lit-core/tag-shake": "workspace:*"
   },
   "devDependencies": {

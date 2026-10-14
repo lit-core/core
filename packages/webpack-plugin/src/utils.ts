@@ -94,42 +94,50 @@ export const VIRTUAL_LIT_CORE_PREFIX = 'virtual:lit-core/';
 export const RESOLVED_LIT_CORE_PREFIX = '\0virtual:lit-core/';
 
 export function isVirtualLitCoreId(id: string): boolean {
+  const clean = id.split('?')[0] ?? id;
   return (
-    id.startsWith(VIRTUAL_LIT_CORE_PREFIX) ||
-    id.startsWith(RESOLVED_LIT_CORE_PREFIX) ||
-    id.startsWith('@lit-core/resumable/client') ||
-    id.startsWith('@lit-core/native/runtime') ||
-    id.startsWith('@lit-core/dom-paths/client')
+    clean.startsWith(VIRTUAL_LIT_CORE_PREFIX) ||
+    clean.startsWith(RESOLVED_LIT_CORE_PREFIX) ||
+    clean.startsWith('@lit-core/resumable/client') ||
+    clean.startsWith('@lit-core/native/runtime') ||
+    clean.startsWith('@lit-core/dom-paths/client') ||
+    clean.startsWith('@lit-core/ssr/client')
   );
 }
 
 export function formatVirtualLitCoreId(id: string): string {
-  if (id.startsWith(VIRTUAL_LIT_CORE_PREFIX)) {
-    return RESOLVED_LIT_CORE_PREFIX + id.slice(VIRTUAL_LIT_CORE_PREFIX.length);
+  const [base, query] = id.split('?');
+  const querySuffix = query ? `?${query}` : '';
+  if (base.startsWith(VIRTUAL_LIT_CORE_PREFIX)) {
+    return `${RESOLVED_LIT_CORE_PREFIX}${base.slice(VIRTUAL_LIT_CORE_PREFIX.length)}${querySuffix}`;
   }
-  if (id.startsWith(RESOLVED_LIT_CORE_PREFIX)) {
+  if (base.startsWith(RESOLVED_LIT_CORE_PREFIX)) {
     return id;
   }
-  if (id.startsWith('@lit-core/resumable/client')) {
-    return `${RESOLVED_LIT_CORE_PREFIX}resumable-adapter.js`;
+  if (base.startsWith('@lit-core/resumable/client')) {
+    return `${RESOLVED_LIT_CORE_PREFIX}resumable-adapter.js${querySuffix}`;
   }
-  if (id.startsWith('@lit-core/native/runtime')) {
-    return `${RESOLVED_LIT_CORE_PREFIX}native-runtime.js`;
+  if (base.startsWith('@lit-core/native/runtime')) {
+    return `${RESOLVED_LIT_CORE_PREFIX}native-runtime.js${querySuffix}`;
   }
-  if (id.startsWith('@lit-core/dom-paths/client')) {
-    return `${RESOLVED_LIT_CORE_PREFIX}dom-paths.js`;
+  if (base.startsWith('@lit-core/dom-paths/client')) {
+    return `${RESOLVED_LIT_CORE_PREFIX}dom-paths.js${querySuffix}`;
+  }
+  if (base.startsWith('@lit-core/ssr/client')) {
+    return `${RESOLVED_LIT_CORE_PREFIX}ssr-runtime.js${querySuffix}`;
   }
   return id;
 }
 
 export function extractLitCoreVirtualSubpath(resolvedId: string): string {
-  let subpath = resolvedId;
+  const [base] = resolvedId.split('?');
+  let subpath = base;
   if (subpath.startsWith(RESOLVED_LIT_CORE_PREFIX)) {
     subpath = subpath.slice(RESOLVED_LIT_CORE_PREFIX.length);
   } else if (subpath.startsWith(VIRTUAL_LIT_CORE_PREFIX)) {
     subpath = subpath.slice(VIRTUAL_LIT_CORE_PREFIX.length);
   }
-  return subpath.replace(/\.[jt]s$/, '');
+  return subpath.replace(/^\/+/, '').replace(/\.[jt]s$/, '');
 }
 
 const globRegexCache = new Map<string, RegExp>();

@@ -323,6 +323,20 @@ export interface LitPluginOptions {
    * Kebab-case alias for `tagShake`.
    */
   'tag-shake'?: boolean | TagShakeOptions;
+
+  /**
+   * Ahead-of-time server-side rendering (SSR) target integration via @lit-core/ssr.
+   * Automatically activates for 'node', 'async-node', and edge/webworker compilation targets,
+   * or when explicitly configured. Emits clean Declarative Shadow DOM without comment markers.
+   * Pass `true` or an `SsrOptions` object to configure.
+   * @default false (auto-detected when compiler target is 'node' or edge worker)
+   */
+  ssr?: boolean | SsrOptions;
+
+  /**
+   * Kebab-case alias for `ssr`.
+   */
+  'lit-ssr'?: boolean | SsrOptions;
 }
 
 export interface ResumableOptions {
@@ -584,5 +598,138 @@ export interface TagShakeOptions {
 }
 
 export type LitTagShakeOptions = TagShakeOptions;
+
+/**
+ * Static prerender configuration for build-time HTML generation.
+ */
+export interface SsrPrerenderOptions {
+  /**
+   * Routes or entry HTML files to prerender at build time.
+   * @default ['/']
+   */
+  routes?: string[];
+
+  /**
+   * Entry server module exporting render function or root template.
+   */
+  entry?: string;
+
+  /**
+   * Output directory for prerendered HTML files.
+   */
+  outDir?: string;
+
+  /**
+   * Concurrency limit for parallel page rendering.
+   * @default 8
+   */
+  concurrency?: number;
+}
+
+/**
+ * Islands mode configuration for selective hydration.
+ */
+export interface SsrIslandsOptions {
+  /**
+   * Custom element tag names or file patterns treated as interactive islands.
+   */
+  include?: string[];
+
+  /**
+   * Component patterns excluded from island hydration.
+   */
+  exclude?: string[];
+
+  /**
+   * Client island hydration strategy.
+   * - 'visible': Hydrates when scrolled into viewport using IntersectionObserver.
+   * - 'idle': Hydrates during browser idle periods using requestIdleCallback.
+   * - 'interaction': Hydrates upon first user interaction.
+   * @default 'visible'
+   */
+  strategy?: 'idle' | 'visible' | 'interaction';
+}
+
+/**
+ * SSR manifest asset emission configuration.
+ */
+export interface SsrManifestOptions {
+  /**
+   * Name of the emitted SSR manifest asset file.
+   * @default 'ssr-manifest.json'
+   */
+  fileName?: string;
+
+  /**
+   * Base path prefix for client assets in manifest.
+   */
+  basePath?: string;
+}
+
+/**
+ * First-class server-side rendering options for @lit-core/webpack-plugin.
+ */
+export interface SsrOptions {
+  /**
+   * Enable Web Standard ReadableStream response streaming.
+   * @default true
+   */
+  streaming?: boolean;
+
+  /**
+   * Static prerender configuration or boolean flag.
+   * @default false
+   */
+  prerender?: boolean | SsrPrerenderOptions;
+
+  /**
+   * Islands mode configuration for selective hydration.
+   * @default false
+   */
+  islands?: boolean | SsrIslandsOptions;
+
+  /**
+   * Seamless emission of state snapshots and DOM paths metadata.
+   * @default true
+   */
+  resumable?: boolean;
+
+  /**
+   * Emit clean Declarative Shadow DOM without comment markers.
+   * @default true
+   */
+  cleanShadowDom?: boolean;
+
+  /**
+   * File patterns to include for SSR transformation.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude from SSR transformation.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * SSR manifest emission configuration.
+   * @default true
+   */
+  manifest?: boolean | SsrManifestOptions;
+
+  /**
+   * Scoped custom element registry to resolve component constructors during render.
+   */
+  customElements?: any;
+
+  /**
+   * Generate sourcemap for transformed files.
+   * @default true
+   */
+  sourcemap?: boolean;
+}
+
+export type LitSsrOptions = SsrOptions;
 export type LitCorePluginOptions = LitPluginOptions;
 export type LitWebpackPluginOptions = LitPluginOptions;

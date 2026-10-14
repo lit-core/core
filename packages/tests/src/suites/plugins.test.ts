@@ -225,4 +225,102 @@ describe('bundler plugins multi-framework integration suite', () => {
       expect(result.code).toBe(nonLitSource);
     });
   });
+
+  describe('bundler plugins SSR option contracts', () => {
+    describe('Vite / Rollup plugin SSR options', () => {
+      it('initializes SSR sub-plugin when ssr: true is provided', () => {
+        const plugins = viteLit({ ssr: true });
+        const ssrPlugin = plugins.find((p) => p.name === 'lit-ssr' || p.name === 'ssr');
+        expect(ssrPlugin).toBeDefined();
+      });
+
+      it('initializes SSR sub-plugin with streaming mode configuration', () => {
+        const plugins = viteLit({
+          ssr: {
+            streaming: true,
+            mode: 'stream',
+          },
+        });
+        const ssrPlugin = plugins.find((p) => p.name === 'lit-ssr' || p.name === 'ssr');
+        expect(ssrPlugin).toBeDefined();
+      });
+
+      it('initializes SSR sub-plugin with static prerender configuration', () => {
+        const plugins = viteLit({
+          ssr: {
+            prerender: {
+              routes: ['/', '/about', '/contact'],
+              concurrency: 4,
+            },
+          },
+        });
+        const ssrPlugin = plugins.find((p) => p.name === 'lit-ssr' || p.name === 'ssr');
+        expect(ssrPlugin).toBeDefined();
+      });
+
+      it('initializes SSR sub-plugin with islands mode configuration', () => {
+        const plugins = viteLit({
+          ssr: {
+            islands: {
+              include: ['cds-button', 'sp-action-button'],
+              strategy: 'visible',
+            },
+          },
+        });
+        const ssrPlugin = plugins.find((p) => p.name === 'lit-ssr' || p.name === 'ssr');
+        expect(ssrPlugin).toBeDefined();
+      });
+
+      it('resolves virtual:lit-core/ssr-runtime module identifier', async () => {
+        const plugins = viteLit({ ssr: true });
+        const virtualPlugin = plugins.find((p) => p.name === 'lit-virtual' || p.name === 'lit-ssr');
+        expect(virtualPlugin).toBeDefined();
+
+        if (virtualPlugin && typeof virtualPlugin.resolveId === 'function') {
+          const resolved = await (virtualPlugin.resolveId as any).call({}, 'virtual:lit-core/ssr-runtime');
+          expect(resolved).toBeDefined();
+        }
+      });
+    });
+
+    describe('Webpack plugin SSR options', () => {
+      it('instantiates LitWebpackPlugin with ssr: true', () => {
+        const plugin = new LitWebpackPlugin({ ssr: true });
+        expect(plugin.options.ssr).toBe(true);
+      });
+
+      it('instantiates LitWebpackPlugin with structured SsrOptions', () => {
+        const plugin = new LitWebpackPlugin({
+          ssr: {
+            streaming: true,
+            prerender: { routes: ['/'] },
+            islands: true,
+          },
+        });
+        expect(typeof plugin.options.ssr).toBe('object');
+        expect((plugin.options.ssr as any).streaming).toBe(true);
+      });
+
+      it('auto-activates SSR compilation when compiler target is node', () => {
+        const plugin = new LitWebpackPlugin();
+        const mockCompiler = {
+          options: {
+            target: 'node',
+            module: { rules: [] },
+            mode: 'production',
+          },
+          getInfrastructureLogger: () => ({ info() {}, warn() {}, error() {} }),
+          hooks: {
+            beforeCompile: { tapAsync() {} },
+            compilation: { tap() {} },
+            normalModuleFactory: { tap() {} },
+            shutdown: { tap() {} },
+          },
+        };
+
+        plugin.apply(mockCompiler as any);
+        expect(mockCompiler.options.module.rules.length).toBeGreaterThanOrEqual(1);
+      });
+    });
+  });
 });

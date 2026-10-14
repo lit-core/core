@@ -9,7 +9,7 @@ export const ssrDashboardScenario = {
   id: 'ssr-dashboard',
   name: 'SSR dashboard',
   description: 'Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation',
-  relevantFeatures: ['resumable', 'html-aot'],
+  relevantFeatures: ['resumable', 'html-aot', 'ssr'],
   componentConcepts: ['card', 'badge', 'progress-bar', 'button', 'tabs'],
 
   /**

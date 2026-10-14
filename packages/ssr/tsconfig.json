@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationDir": "dist",
+    "paths": {
+      "@lit-core/dom-paths": ["../dom-paths/src/index.d.ts"],
+      "@lit-core/dom-paths/client": ["../dom-paths/src/client.d.ts"],
+      "@lit-core/resumable": ["../resumable/lib/index.d.ts"],
+      "@lit-core/resumable/server": ["../resumable/lib/server/index.d.ts"],
+      "@lit-core/html-aot": ["../html-aot/src/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tests/**/*"]
+}

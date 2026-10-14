@@ -39,6 +39,7 @@ export const FEATURE_SCENARIO_MAP = {
   'elem-proxy': 'interactive-form',
   resumable: 'ssr-dashboard',
   'html-aot': 'ssr-dashboard',
+  ssr: 'ssr-dashboard',
   directives: 'dynamic-feed',
   memoize: 'dynamic-feed',
   'html-fuse': 'dynamic-feed',
@@ -330,43 +331,45 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
     });
 
     // Also sync standalone feature result (schema 2.0.0) with scenario metadata attached
-    const scenarioComps = resolveScenarioComponents(suite.id, scenario.componentConcepts);
-    saveStandaloneResult({
-      suiteId: suite.id,
-      featureId: variantId,
-      result: {
-        schemaVersion: '2.0.0',
-        id: `${suite.id}-${variantId}`,
-        suite: {
-          id: suite.id,
-          name: suiteContext.name || suite.name,
-          packageName: suiteContext.packageName || suite.packageName,
-          version: suiteContext.version || 'unknown',
-          componentCount: scenarioComps.length,
-          components: scenarioComps,
+    if (variantId !== 'ssr') {
+      const scenarioComps = resolveScenarioComponents(suite.id, scenario.componentConcepts);
+      saveStandaloneResult({
+        suiteId: suite.id,
+        featureId: variantId,
+        result: {
+          schemaVersion: '2.0.0',
+          id: `${suite.id}-${variantId}`,
+          suite: {
+            id: suite.id,
+            name: suiteContext.name || suite.name,
+            packageName: suiteContext.packageName || suite.packageName,
+            version: suiteContext.version || 'unknown',
+            componentCount: scenarioComps.length,
+            components: scenarioComps,
+          },
+          feature: {
+            id: variantId,
+            name: toolName,
+            description: FEATURE_METADATA[variantId]?.description || toolObj?.description || '',
+            isBaseline: false,
+          },
+          scenario: {
+            id: scenario.id,
+            name: scenario.name,
+            description: scenario.description,
+            componentCount: scenarioComps.length,
+          },
+          timestamp: new Date().toISOString(),
+          environment: getEnvironmentMetadata(),
+          metrics: variantSize,
+          baseline: baselineSize,
+          deltas,
+          runtime: scenarioResult.runtime,
+          equivalence: variantEval.equivalence,
         },
-        feature: {
-          id: variantId,
-          name: toolName,
-          description: FEATURE_METADATA[variantId]?.description || toolObj?.description || '',
-          isBaseline: false,
-        },
-        scenario: {
-          id: scenario.id,
-          name: scenario.name,
-          description: scenario.description,
-          componentCount: scenarioComps.length,
-        },
-        timestamp: new Date().toISOString(),
-        environment: getEnvironmentMetadata(),
-        metrics: variantSize,
-        baseline: baselineSize,
-        deltas,
-        runtime: scenarioResult.runtime,
-        equivalence: variantEval.equivalence,
-      },
-      outDir: options.outDir,
-    });
+        outDir: options.outDir,
+      });
+    }
 
     return scenarioResult;
   } finally {

@@ -14,6 +14,7 @@ import { memoizeTool } from './memoize.js';
 import { nativeTool } from './native.js';
 import { propsLowerTool } from './props-lower.js';
 import { resumableTool } from './resumable.js';
+import { ssrTool } from './ssr.js';
 import { tagShakeTool } from './tag-shake.js';
 
 /**
@@ -35,6 +36,7 @@ export const registeredTools = [
   memoizeTool,
   directivesTool,
   resumableTool,
+  ssrTool,
   tagShakeTool,
 ];
 
@@ -157,6 +159,13 @@ export async function getCombinedPlugins(tools, suite) {
           injectAdapter: !isAll,
         }
       : false,
+    ssr: hasTool('ssr')
+      ? {
+          include,
+          exclude: [],
+          streaming: true,
+        }
+      : false,
     tagShake: hasTool('tag-shake')
       ? {
           include,
@@ -181,5 +190,6 @@ export {
   nativeTool,
   propsLowerTool,
   resumableTool,
+  ssrTool,
   tagShakeTool,
 };

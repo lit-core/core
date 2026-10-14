@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "material-ssr",
+  "suite": {
+    "id": "material",
+    "name": "Google Material Web",
+    "packageName": "@material/web",
+    "componentCount": 5
+  },
+  "feature": {
+    "id": "ssr",
+    "name": "Universal SSR engine (ssr)",
+    "description": "Universal server rendering engine emitting clean Declarative Shadow DOM with zero comment markers",
+    "category": "runtime",
+    "isBaseline": false
+  },
+  "scenario": {
+    "id": "ssr-comparison",
+    "name": "SSR comparison",
+    "description": "Server-side rendering performance comparison against @lit-labs/ssr",
+    "componentCount": 5
+  },
+  "timestamp": "2026-10-14T00:59:24.279Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "664d821",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 3560,
+    "gzipBytes": 846,
+    "brotliBytes": 698,
+    "buildTimeMs": 65.03020900000001,
+    "rps": 7688.7,
+    "requestsPerSec": 6904.7,
+    "memoryBytes": 7788632,
+    "retainedMemoryBytes": 0,
+    "ttfbMs": 0.0059,
+    "ttlbMs": 0.1798,
+    "commentMarkersCount": 0
+  },
+  "baseline": {
+    "rawBytes": 38784,
+    "gzipBytes": 5372,
+    "brotliBytes": 4562,
+    "buildTimeMs": 39.016041,
+    "rps": 12815.2,
+    "requestsPerSec": 4099.2,
+    "memoryBytes": 10558320,
+    "retainedMemoryBytes": 0,
+    "ttfbMs": 0.3151,
+    "ttlbMs": 0.4142,
+    "commentMarkersCount": 62
+  },
+  "deltas": {
+    "rawBytes": -35224,
+    "rawPercent": -90.82095709570957,
+    "gzipBytes": -4526,
+    "gzipPercent": -84.25167535368577,
+    "brotliBytes": -3864,
+    "brotliPercent": -84.69969311705393,
+    "rpsSpeedupPercent": -40,
+    "requestsSpeedupPercent": 68.4,
+    "ttfbSpeedupPercent": 98.1,
+    "memorySavingsPercent": 26.2,
+    "commentMarkerReductionPercent": 100
+  },
+  "runtime": {
+    "firstRenderMs": 0.0059,
+    "speedupPercent": 98.1,
+    "heapUsedBytes": 7788632,
+    "memorySavingsPercent": 26.2
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 5,
+    "verified": true
+  },
+  "diagnostics": {
+    "commentMarkersEliminated": 62,
+    "commentMarkersCore": 0,
+    "commentMarkersLabs": 62,
+    "rawPayloadSavedBytes": 35224,
+    "gzipPayloadSavedBytes": 4526,
+    "ttfbCoreMs": 0.0059,
+    "ttfbLabsMs": 0.3151,
+    "requestsPerSecCore": 6904.7,
+    "requestsPerSecLabs": 4099.2
+  }
+}

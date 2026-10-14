@@ -22,6 +22,7 @@ export {
 export { LIT_NATIVE_FAST_CHECK, transformNativePlugin } from './native.js';
 export { LIT_DECORATOR_FAST_CHECK, transformPropsLower } from './props-lower.js';
 export { transformResumable } from './resumable.js';
+export { LIT_SSR_FAST_CHECK, transformSsr } from './ssr.js';
 export {
   scanAppTags,
   TAG_SHAKE_FAST_CHECK,

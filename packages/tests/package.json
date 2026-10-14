@@ -15,6 +15,10 @@
     "test:plugins": "vitest run plugins",
     "test:native": "vitest run native",
     "test:showcase": "vitest run showcase",
+    "test:ssr": "vitest run ssr",
+    "test:ssr:engine": "vitest run ssr-engine",
+    "test:ssr:isolate": "vitest run ssr-isolate",
+    "test:ssr:chromium": "vitest run ssr-dsd-chromium",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

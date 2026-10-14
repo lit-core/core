@@ -16,8 +16,10 @@ import litDefault, {
   litElemProxy,
   litHtmlMinifier,
   litPropsLower,
+  litSsr,
   propsLower,
   reportTransformError,
+  ssr,
   tagShake,
 } from '../dist/index.js';
 
@@ -42,6 +44,9 @@ assert.strictEqual(typeof domPaths, 'function', 'domPaths must be a function');
 assert.strictEqual(typeof litDomPaths, 'function', 'litDomPaths must be an alias');
 assert.strictEqual(typeof htmlMinifier, 'function', 'htmlMinifier must be a function');
 assert.strictEqual(typeof litHtmlMinifier, 'function', 'litHtmlMinifier must be an alias');
+assert.strictEqual(typeof ssr, 'function', 'ssr must be a function');
+assert.strictEqual(typeof litSsr, 'function', 'litSsr must be an alias');
+assert.strictEqual(litSsr, ssr, 'litSsr must equal ssr');
 
 // Test lit() default options: includes css-fuse
 const defaultPlugins = lit();
@@ -251,6 +256,40 @@ const vBareNative = plugin.resolveId.call({}, '@lit-core/native/runtime');
 assert.strictEqual(vBareNative, '\0virtual:lit-core/native-runtime.js');
 const vBareDomPaths = plugin.resolveId.call({}, '@lit-core/dom-paths/client');
 assert.strictEqual(vBareDomPaths, '\0virtual:lit-core/dom-paths.js');
+
+// Test SSR plugin inclusion via lit({ ssr: true })
+const ssrPlugins = lit({ cssFuse: false, ssr: true });
+assert.strictEqual(ssrPlugins.length, 1);
+assert.strictEqual(ssrPlugins[0].name, 'lit-ssr');
+
+// Test SSR plugin inclusion via kebab-case
+const kebabSsrPlugins = lit({ cssFuse: false, 'lit-ssr': true });
+assert.strictEqual(kebabSsrPlugins.length, 1);
+assert.strictEqual(kebabSsrPlugins[0].name, 'lit-ssr');
+
+// Test standalone ssr() plugin hooks
+const standaloneSsr = ssr({ streaming: true, prerender: true, islands: true });
+assert.strictEqual(standaloneSsr.name, 'lit-ssr');
+assert.strictEqual(typeof standaloneSsr.resolveId, 'function');
+assert.strictEqual(typeof standaloneSsr.load, 'function');
+assert.strictEqual(typeof standaloneSsr.transform, 'function');
+assert.strictEqual(typeof standaloneSsr.transformIndexHtml, 'function');
+assert.strictEqual(typeof standaloneSsr.generateBundle, 'function');
+assert.strictEqual(typeof standaloneSsr.configureServer, 'function');
+
+// Test virtual:lit-core/ssr-runtime and virtual:lit-core/islands-loader resolution and loading
+const vSsr = standaloneSsr.resolveId.call({}, 'virtual:lit-core/ssr-runtime');
+assert.strictEqual(vSsr, '\0virtual:lit-core/ssr-runtime.js');
+const loadedSsr = standaloneSsr.load.call({}, '\0virtual:lit-core/ssr-runtime.js');
+assert(loadedSsr?.code.includes('render'), 'ssr runtime code loaded');
+
+const vIslands = standaloneSsr.resolveId.call({}, 'virtual:lit-core/islands-loader');
+assert.strictEqual(vIslands, '\0virtual:lit-core/islands-loader.js');
+const loadedIslands = standaloneSsr.load.call({}, '\0virtual:lit-core/islands-loader.js');
+assert(loadedIslands?.code.includes('hydrate'), 'islands loader code loaded');
+
+const vBareSsr = standaloneSsr.resolveId.call({}, '@lit-core/ssr/client');
+assert.strictEqual(vBareSsr, '\0virtual:lit-core/ssr-runtime.js');
 
 console.log('✓ Vite plugin hooks and options verified successfully.');
 

@@ -116,6 +116,10 @@ function copyCrateArtifacts(crate, pkgDir) {
   }
 
   // Compile TypeScript if tsconfig is present
+  compileTypeScript(crate, pkgDir);
+}
+
+function compileTypeScript(crate, pkgDir) {
   const tsconfigPath = path.resolve(pkgDir, 'tsconfig.json');
   const tscBin = path.resolve(rootDir, 'node_modules/.bin/tsc');
   if ((runTsc || ['dom-paths', 'native', 'resumable'].includes(crate)) && fs.existsSync(tsconfigPath)) {
@@ -162,7 +166,8 @@ const pkgDir = cwd.endsWith(crateName) ? cwd : path.resolve(rootDir, 'packages',
 const destNode = path.resolve(pkgDir, `${crateName}.${platformId}.node`);
 
 if (!forceRebuild && checkCrateFresh(pkgDir, destNode)) {
-  console.log(`[build-native] ${crateName} is already up to date, skipping compilation.`);
+  console.log(`[build-native] ${crateName} native binary is up to date.`);
+  compileTypeScript(crateName, pkgDir);
   process.exit(0);
 }
 

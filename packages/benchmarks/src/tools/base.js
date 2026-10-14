@@ -33,6 +33,7 @@ export function createIsolatedToolPlugin(toolKey, toolOptions) {
     'domPaths',
     'memoize',
     'resumable',
+    'ssr',
     'tagShake',
   ];
 

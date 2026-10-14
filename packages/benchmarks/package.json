@@ -13,6 +13,7 @@
     "./table": "./src/table.js",
     "./runtime": "./src/runtime.js",
     "./resumable": "./src/resumable-bench.js",
+    "./ssr": "./src/ssr-bench.js",
     "./native": "./src/native-bench.js"
   },
   "license": "MIT",
@@ -43,6 +44,7 @@
     "benchmark:memoize": "node src/memoize-bench.js",
     "benchmark:native": "node src/native-bench.js",
     "benchmark:resumable": "node src/resumable-bench.js",
+    "benchmark:ssr": "node src/ssr-bench.js",
     "benchmark:tag-shake": "node src/tag-shake-bench.js",
     "benchmark:json": "node src/index.js --format=json",
     "benchmark:compare": "node src/compare.js",
@@ -75,6 +77,7 @@
     "@lit-core/memoize": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
+    "@lit-core/ssr": "workspace:*",
     "@lit-core/tag-shake": "workspace:*",
     "@lit-core/test-kit": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",

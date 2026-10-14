@@ -1,0 +1,135 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "webawesome-ssr",
+  "suite": {
+    "id": "webawesome",
+    "name": "Web Awesome (20 Canonical Components)",
+    "packageName": "@awesome.me/webawesome",
+    "version": "3.14.0",
+    "componentCount": 5,
+    "components": [
+      {
+        "concept": "card",
+        "tag": "wa-card",
+        "path": "dist/components/card/card.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/card/card.js';"
+      },
+      {
+        "concept": "badge",
+        "tag": "wa-badge",
+        "path": "dist/components/badge/badge.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/badge/badge.js';"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "wa-progress-bar",
+        "path": "dist/components/progress-bar/progress-bar.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/progress-bar/progress-bar.js';"
+      },
+      {
+        "concept": "button",
+        "tag": "wa-button",
+        "path": "dist/components/button/button.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/button/button.js';"
+      },
+      {
+        "concept": "tabs",
+        "tag": "wa-tab-group",
+        "path": "dist/components/tab-group/tab-group.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/tab-group/tab-group.js';"
+      }
+    ]
+  },
+  "feature": {
+    "id": "ssr",
+    "name": "Universal SSR engine (ssr)",
+    "description": "Universal server rendering engine emitting clean Declarative Shadow DOM with zero comment markers",
+    "isBaseline": false
+  },
+  "scenario": {
+    "id": "ssr-dashboard",
+    "name": "SSR dashboard",
+    "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
+    "componentCount": 5
+  },
+  "timestamp": "2026-10-13T22:03:18.824Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "664d821",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 164668,
+    "gzipBytes": 40362,
+    "brotliBytes": 33872,
+    "buildTimeMs": 62.81579199999999
+  },
+  "baseline": {
+    "rawBytes": 164688,
+    "gzipBytes": 40361,
+    "brotliBytes": 33882,
+    "buildTimeMs": 20.454125000000204,
+    "firstRenderMs": 15.6,
+    "updateMs": 0.7,
+    "scriptEvalMs": 1.5,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 2408101,
+    "scenarioSpecific": {
+      "cardsCount": 4,
+      "progressBarsCount": 4,
+      "resumedInteractions": 4,
+      "renderedNodes": 41
+    }
+  },
+  "deltas": {
+    "rawBytes": -20,
+    "rawPercent": -0.01,
+    "gzipBytes": 1,
+    "gzipPercent": 0,
+    "brotliBytes": -10,
+    "brotliPercent": -0.03,
+    "buildTimeMs": 42.4,
+    "firstRenderMs": -5.6,
+    "speedupPercent": 35.9,
+    "updateMs": -0.3,
+    "updateSpeedupPercent": 42.86,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 50,
+    "memorySavingsPercent": -3.22
+  },
+  "runtime": {
+    "firstRenderMs": 10,
+    "updateMs": 0.4,
+    "scriptEvalMs": 1.5,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 2485534,
+    "speedupPercent": 35.9,
+    "updateSpeedupPercent": 42.86,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 50,
+    "memorySavingsPercent": -3.22
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 41,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
+  }
+}

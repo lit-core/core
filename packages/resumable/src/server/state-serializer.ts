@@ -13,22 +13,27 @@ export interface StateSerializerOptions {
 /**
  * Check if a value is JSON-serializable (primitives, plain objects, arrays).
  */
-export function isSerializableValue(value: unknown): boolean {
+export function isSerializableValue(value: unknown, seen = new WeakSet<object>()): boolean {
   if (value === null) return true;
   const t = typeof value;
   if (t === 'string' || t === 'number' || t === 'boolean') {
     return Number.isFinite(value as number) || t !== 'number';
   }
   if (t === 'object') {
+    if (seen.has(value as object)) {
+      return false;
+    }
+    seen.add(value as object);
+
     if (Array.isArray(value)) {
-      return value.every(isSerializableValue);
+      return value.every((item) => isSerializableValue(item, seen));
     }
     // Must be a plain object, not a DOM node or class instance
-    if (value instanceof Node) return false;
+    if (typeof Node !== 'undefined' && value instanceof Node) return false;
     const proto = Object.getPrototypeOf(value);
     if (proto === Object.prototype || proto === null) {
       for (const key of Object.keys(value as Record<string, unknown>)) {
-        if (!isSerializableValue((value as Record<string, unknown>)[key])) {
+        if (!isSerializableValue((value as Record<string, unknown>)[key], seen)) {
           return false;
         }
       }
@@ -47,7 +52,7 @@ export function extractComponentState(instanceOrProps: any, options: StateSerial
     return state;
   }
 
-  const excludeSet = new Set(options.excludeProperties || []);
+  const excludeSet = new Set(['tagName', 'shadowRoot', 'isConnected', ...(options.excludeProperties || [])]);
 
   // Determine property keys to inspect
   const candidateKeys = new Set<string>();
@@ -106,7 +111,20 @@ export function extractComponentState(instanceOrProps: any, options: StateSerial
  * Safely serialize state object to JSON string, escaping '<' to prevent script breakouts.
  */
 export function serializeStateToJson(state: Record<string, unknown>): string {
-  return JSON.stringify(state).replace(/</g, '\\u003c');
+  const seen = new WeakSet<object>();
+  try {
+    return JSON.stringify(state, (_key, val) => {
+      if (typeof val === 'object' && val !== null) {
+        if (seen.has(val)) {
+          return undefined;
+        }
+        seen.add(val);
+      }
+      return val;
+    }).replace(/</g, '\\u003c');
+  } catch {
+    return '{}';
+  }
 }
 
 /**

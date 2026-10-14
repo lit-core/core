@@ -19,6 +19,7 @@ import type {
   MemoizeOptions,
   PropsLowerOptions,
   ResumableOptions,
+  SsrOptions,
   TagShakeOptions,
 } from './options.js';
 import { runFuseOptimization, runHtmlFuseOptimization, runScopingAudit } from './transforms.js';
@@ -45,6 +46,21 @@ if (!fs.existsSync(loaderPath)) {
 }
 
 let nextPluginId = 0;
+
+/**
+ * Determines whether the Webpack compilation target is a server or isolate runtime.
+ */
+export function isSsrTarget(target: unknown): boolean {
+  if (!target) return false;
+  if (Array.isArray(target)) {
+    return target.some((t) => isSsrTarget(t));
+  }
+  if (typeof target === 'string') {
+    const t = target.toLowerCase();
+    return t === 'node' || t.startsWith('node') || t === 'async-node' || t === 'webworker' || t.includes('worker') || t === 'electron-main' || t === 'electron-preload';
+  }
+  return false;
+}
 
 export class LitWebpackPlugin {
   readonly id: string;
@@ -83,12 +99,25 @@ export class LitWebpackPlugin {
     const cssFuseOpt = options.cssFuse !== false ? (typeof options.cssFuse === 'object' ? options.cssFuse : {}) : null;
     const htmlFuseOpt = options.htmlFuse ? (typeof options.htmlFuse === 'object' ? options.htmlFuse : {}) : null;
 
+    // Detect whether current Webpack compiler target requires SSR
+    const isTargetServer = isSsrTarget(compiler.options.target);
+    const rawSsr = options.ssr ?? options['lit-ssr'];
+    const isSsrActive = rawSsr !== false && (rawSsr != null || isTargetServer);
+    const ssrOpt: SsrOptions | null = isSsrActive ? (typeof rawSsr === 'object' ? rawSsr : {}) : null;
+
+    if (isSsrActive && rawSsr == null) {
+      logger.info(`⚡ [ssr] Auto-detected server target (${String(compiler.options.target)}); activated @lit-core/ssr compilation.`);
+    }
+
     // Register active state with the loader registry
     registerPluginState(this.id, {
       transformedFiles: this.transformedFiles,
       virtualSheets: this.virtualSheets,
       virtualTemplates: this.virtualTemplates,
-      options: this.options,
+      options: {
+        ...this.options,
+        ssr: ssrOpt || false,
+      },
     });
 
     // Auto-inject loader into compiler module rules
@@ -213,7 +242,7 @@ export class LitWebpackPlugin {
           }
 
           if (isVirtualHtmlFusedId(resource) || resource.includes('html-fuse')) {
-            const templateId = extractHtmlTemplateId(resource);
+            const templateId = extractHtmlTemplateId(resource).split('?')[0];
             const code =
               this.virtualTemplates.get(templateId) ||
               this.virtualTemplates.get(path.basename(templateId)) ||
@@ -227,7 +256,7 @@ export class LitWebpackPlugin {
             throw new Error(`[html-fuse] Virtual shared template not found: ${resource}`);
           }
 
-          const sheetId = extractSheetId(resource);
+          const sheetId = extractSheetId(resource).split('?')[0];
           const code =
             this.virtualSheets.get(sheetId) || this.virtualSheets.get(path.basename(sheetId)) || this.virtualSheets.get(sheetId.replace(/\.js$/, '')) || this.virtualSheets.get(`${sheetId}.js`);
 
@@ -244,21 +273,25 @@ export class LitWebpackPlugin {
     compiler.hooks.normalModuleFactory.tap(this.name, (nmf) => {
       nmf.hooks.resolve.tap(this.name, (resolveData) => {
         if (!resolveData.request) return;
-        if (resolveData.request.startsWith('@lit-core/resumable/client')) {
-          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}resumable-adapter.js`;
-        } else if (resolveData.request.startsWith('@lit-core/native/runtime')) {
-          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}native-runtime.js`;
-        } else if (resolveData.request.startsWith('@lit-core/dom-paths/client')) {
-          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}dom-paths.js`;
-        } else if (BARE_HTML_FUSED_ID_REGEX.test(resolveData.request)) {
-          const filename = resolveData.request.endsWith('.js') ? resolveData.request : `${resolveData.request}.js`;
-          resolveData.request = `${VIRTUAL_HTML_FUSED_PREFIX}${filename}`;
-        } else if (resolveData.request.startsWith('virtual:lit-html-fuse/')) {
+        const [reqBase, reqQuery] = resolveData.request.split('?');
+        const querySuffix = reqQuery ? `?${reqQuery}` : '';
+        if (reqBase.startsWith('@lit-core/resumable/client')) {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}resumable-adapter.js${querySuffix}`;
+        } else if (reqBase.startsWith('@lit-core/native/runtime')) {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}native-runtime.js${querySuffix}`;
+        } else if (reqBase.startsWith('@lit-core/dom-paths/client')) {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}dom-paths.js${querySuffix}`;
+        } else if (reqBase.startsWith('@lit-core/ssr/client') || reqBase === 'virtual:lit-core/ssr-runtime') {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}ssr-runtime.js${querySuffix}`;
+        } else if (BARE_HTML_FUSED_ID_REGEX.test(reqBase)) {
+          const filename = reqBase.endsWith('.js') ? reqBase : `${reqBase}.js`;
+          resolveData.request = `${VIRTUAL_HTML_FUSED_PREFIX}${filename}${querySuffix}`;
+        } else if (reqBase.startsWith('virtual:lit-html-fuse/')) {
           resolveData.request = resolveData.request.replace('virtual:lit-html-fuse/', VIRTUAL_HTML_FUSED_PREFIX);
-        } else if (BARE_FUSED_ID_REGEX.test(resolveData.request)) {
-          const filename = resolveData.request.endsWith('.js') ? resolveData.request : `${resolveData.request}.js`;
-          resolveData.request = `${VIRTUAL_FUSED_PREFIX}${filename}`;
-        } else if (resolveData.request.startsWith('virtual:lit-css-fuse/')) {
+        } else if (BARE_FUSED_ID_REGEX.test(reqBase)) {
+          const filename = reqBase.endsWith('.js') ? reqBase : `${reqBase}.js`;
+          resolveData.request = `${VIRTUAL_FUSED_PREFIX}${filename}${querySuffix}`;
+        } else if (reqBase.startsWith('virtual:lit-css-fuse/')) {
           resolveData.request = resolveData.request.replace('virtual:lit-css-fuse/', VIRTUAL_FUSED_PREFIX);
         }
       });
@@ -323,6 +356,152 @@ export class LitWebpackPlugin {
               compilation.updateAsset(filename, new RawSource(modifiedHtml));
             }
           }
+        });
+      });
+    }
+
+    const compilationHook = compiler.hooks.thisCompilation || compiler.hooks.compilation;
+    if (ssrOpt && ssrOpt.manifest !== false && compilationHook) {
+      compilationHook.tap(this.name, (compilation) => {
+        if (!compiler.webpack?.Compilation || !compilation.hooks?.processAssets) return;
+        const stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS;
+        compilation.hooks.processAssets.tapPromise({ name: this.name, stage }, async (assets) => {
+          const manifestOpt = typeof ssrOpt.manifest === 'object' ? ssrOpt.manifest : {};
+          const manifestFileName = manifestOpt.fileName || 'ssr-manifest.json';
+
+          // 1. Resolve effective basePath
+          let publicPath: string;
+          if (typeof manifestOpt.basePath === 'string') {
+            publicPath = manifestOpt.basePath === '' ? '' : manifestOpt.basePath.endsWith('/') ? manifestOpt.basePath : `${manifestOpt.basePath}/`;
+          } else {
+            const rawPublicPath = compilation.outputOptions.publicPath;
+            publicPath = typeof rawPublicPath === 'string' && rawPublicPath !== 'auto' ? (rawPublicPath.endsWith('/') ? rawPublicPath : `${rawPublicPath}/`) : '/';
+          }
+
+          // 2. Check for pre-existing manifest (incremental/watch/multi-compiler passes)
+          let existingManifest: any = null;
+          const existingAsset = typeof compilation.getAsset === 'function' ? compilation.getAsset(manifestFileName) : null;
+          if (existingAsset) {
+            try {
+              const rawSource = typeof existingAsset.source?.source === 'function' ? existingAsset.source.source() : existingAsset.source;
+              const content = Buffer.isBuffer(rawSource) ? rawSource.toString('utf-8') : String(rawSource);
+              existingManifest = JSON.parse(content);
+            } catch {
+              existingManifest = null;
+            }
+          }
+
+          // 3. Initialize manifest, preserving existing timestamp for deterministic byte identity
+          const manifest: {
+            tags: Record<string, { file: string; css: string[]; imports: string[]; isIsland: boolean }>;
+            modules: Record<string, { file: string; css: string[]; tags: string[]; isIsland: boolean }>;
+            sharedStyles: string[];
+            metadata: { generator: string; version: string; target: string; timestamp: string; basePath?: string };
+          } = {
+            tags: {},
+            modules: {},
+            sharedStyles: [],
+            metadata: {
+              generator: '@lit-core/webpack-plugin',
+              version: '1.0.0',
+              target: String(compiler.options.target || 'node'),
+              timestamp: existingManifest?.metadata?.timestamp || new Date().toISOString(),
+              basePath: publicPath,
+            },
+          };
+
+          // 4. Merge existing tags, modules, and styles from prior compiler pass
+          if (existingManifest) {
+            if (existingManifest.tags && typeof existingManifest.tags === 'object') {
+              manifest.tags = { ...existingManifest.tags };
+            }
+            if (existingManifest.modules && typeof existingManifest.modules === 'object') {
+              manifest.modules = { ...existingManifest.modules };
+            }
+            if (Array.isArray(existingManifest.sharedStyles)) {
+              manifest.sharedStyles = [...existingManifest.sharedStyles];
+            }
+          }
+
+          // 5. Accumulate sharedStyles
+          for (const [sheetKey] of this.virtualSheets.entries()) {
+            const sheetUrl = `${publicPath}_fused_${sheetKey}.js`;
+            if (!manifest.sharedStyles.includes(sheetUrl)) {
+              manifest.sharedStyles.push(sheetUrl);
+            }
+          }
+
+          for (const [assetName] of Object.entries(assets)) {
+            if (assetName.endsWith('.css')) {
+              const cssUrl = `${publicPath}${assetName}`;
+              if (!manifest.sharedStyles.includes(cssUrl)) {
+                manifest.sharedStyles.push(cssUrl);
+              }
+            }
+          }
+
+          const islandsConfig = typeof ssrOpt.islands === 'object' ? ssrOpt.islands : null;
+          const islandPatterns = islandsConfig?.include || [];
+
+          // 6. Inspect chunks and populate tags/modules
+          for (const chunk of compilation.chunks) {
+            const jsFiles = Array.from(chunk.files).filter((f) => f.endsWith('.js') && !f.includes('resumable-loader'));
+            const cssFiles = Array.from(chunk.files)
+              .filter((f) => f.endsWith('.css'))
+              .map((f) => `${publicPath}${f}`);
+            const primaryJsFile = jsFiles[0] || (chunk.name ? `${chunk.name}.js` : null);
+            if (!primaryJsFile) continue;
+
+            const chunkTags = new Set<string>();
+            for (const file of jsFiles) {
+              const asset = typeof compilation.getAsset === 'function' ? compilation.getAsset(file) : null;
+              if (asset) {
+                const rawSource = typeof asset.source?.source === 'function' ? asset.source.source() : asset.source;
+                const content = Buffer.isBuffer(rawSource) ? rawSource.toString('utf-8') : String(rawSource);
+                const tags = extractCustomElementTags(content);
+                for (const t of tags) chunkTags.add(t);
+              }
+            }
+
+            const tagsArray = Array.from(chunkTags);
+            const chunkUrl = `${publicPath}${primaryJsFile}`;
+
+            for (const tag of tagsArray) {
+              const isIsland = ssrOpt.islands === true || islandPatterns.some((p) => tag === p || tag.includes(p));
+              manifest.tags[tag] = {
+                file: chunkUrl,
+                css: cssFiles,
+                imports: [],
+                isIsland,
+              };
+            }
+
+            if (chunk.name) {
+              const isIsland = ssrOpt.islands === true || tagsArray.some((tag) => islandPatterns.some((p) => tag === p || tag.includes(p)));
+              manifest.modules[chunk.name] = {
+                file: chunkUrl,
+                css: cssFiles,
+                tags: tagsArray,
+                isIsland,
+              };
+            }
+          }
+
+          // 7. Emit or update asset
+          const RawSource = compiler.webpack.sources.RawSource;
+          const manifestSource = JSON.stringify(manifest, null, 2);
+
+          if (existingAsset) {
+            if (typeof compilation.updateAsset === 'function') {
+              compilation.updateAsset(manifestFileName, new RawSource(manifestSource));
+            } else if (typeof compilation.emitAsset === 'function') {
+              compilation.emitAsset(manifestFileName, new RawSource(manifestSource));
+            }
+          } else {
+            compilation.emitAsset(manifestFileName, new RawSource(manifestSource));
+          }
+
+          logger.info(`⚡ [ssr] Emitted SSR manifest (${manifestFileName}) with ${Object.keys(manifest.tags).length} custom element tags across ${compilation.chunks.size} chunks`);
         });
       });
     }
@@ -498,6 +677,32 @@ export class TagShakeWebpackPlugin extends LitWebpackPlugin {
 export function tagShake(options: TagShakeOptions = {}): TagShakeWebpackPlugin {
   return new TagShakeWebpackPlugin(options);
 }
+
+export class SsrWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: SsrOptions = {}) {
+    super(
+      {
+        cssFuse: false,
+        htmlFuse: false,
+        propsLower: false,
+        elemProxy: false,
+        eventHoist: false,
+        dirtyMask: false,
+        htmlAot: false,
+        cssMinifier: false,
+        htmlMinifier: false,
+        ssr: options,
+      },
+      'SsrWebpackPlugin',
+    );
+  }
+}
+
+export function ssr(options: SsrOptions = {}): SsrWebpackPlugin {
+  return new SsrWebpackPlugin(options);
+}
+
+export const litSsr = ssr;
 
 export const LitCoreWebpackPlugin = LitWebpackPlugin;
 export const litCoreWebpackPlugin = lit;

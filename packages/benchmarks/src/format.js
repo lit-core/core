@@ -85,6 +85,17 @@ export function formatKb(bytes, options = {}) {
 }
 
 /**
+ * Format bytes into human-readable string with unit (B or KB).
+ * @param {number} bytes
+ * @returns {string}
+ */
+export function formatBytes(bytes) {
+  if (bytes === null || bytes === undefined || Number.isNaN(bytes)) return '0 B';
+  if (Math.abs(bytes) < 1024) return `${formatNumber(bytes)} B`;
+  return formatKb(bytes);
+}
+
+/**
  * Format milliseconds duration into human-readable string.
  * @param {number} ms
  * @param {Object} [options]

@@ -10,6 +10,7 @@
     { "path": "./packages/memoize" },
     { "path": "./packages/native" },
     { "path": "./packages/resumable" },
+    { "path": "./packages/ssr" },
     { "path": "./packages/tests" },
     { "path": "./packages/vite-plugin" },
     { "path": "./packages/webpack-plugin" }

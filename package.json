@@ -48,6 +48,7 @@
     "benchmark:memoize": "pnpm --filter @lit-core/benchmarks run benchmark:memoize",
     "benchmark:native": "pnpm --filter @lit-core/benchmarks run benchmark:native",
     "benchmark:resumable": "pnpm --filter @lit-core/benchmarks run benchmark:resumable",
+    "benchmark:ssr": "pnpm --filter @lit-core/benchmarks run benchmark:ssr",
     "benchmark:tag-shake": "pnpm --filter @lit-core/benchmarks run benchmark:tag-shake",
     "viewer:dev": "pnpm --filter @lit-core/benchmarks run viewer:dev",
     "viewer:build": "pnpm --filter @lit-core/benchmarks run viewer:build",

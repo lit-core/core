@@ -17,5 +17,6 @@ export const FEATURES = [
   { id: 'css-minifier', name: 'css-minifier', description: 'Native Lightning CSS minifier for embedded Lit css template literals' },
   { id: 'html-minifier', name: 'html-minifier', description: 'Native OXC AST minifier for embedded Lit html template literals' },
   { id: 'html-fuse', name: 'html-fuse', description: 'Cross-component static HTML and SVG fragment clustering' },
+  { id: 'ssr', name: 'ssr', description: 'Universal Declarative Shadow DOM server-side rendering with zero comment markers' },
   { id: 'all', name: 'All optimizations combined', description: 'Full lit-core ahead-of-time compiler suite enabled together' },
 ];

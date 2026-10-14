@@ -1,0 +1,135 @@
+{
+  "schemaVersion": "2.0.0",
+  "id": "momentum-ssr",
+  "suite": {
+    "id": "momentum",
+    "name": "Momentum Design (@momentum-design/components)",
+    "packageName": "@momentum-design/components",
+    "version": "0.140.1",
+    "componentCount": 5,
+    "components": [
+      {
+        "concept": "card",
+        "tag": "mdc-card",
+        "path": "dist/components/card/index.js",
+        "importStatement": "import '@momentum-design/components/dist/components/card/index.js';"
+      },
+      {
+        "concept": "badge",
+        "tag": "mdc-badge",
+        "path": "dist/components/badge/index.js",
+        "importStatement": "import '@momentum-design/components/dist/components/badge/index.js';"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "mdc-progressbar",
+        "path": "dist/components/progressbar/index.js",
+        "importStatement": "import '@momentum-design/components/dist/components/progressbar/index.js';"
+      },
+      {
+        "concept": "button",
+        "tag": "mdc-button",
+        "path": "dist/components/button/index.js",
+        "importStatement": "import '@momentum-design/components/dist/components/button/index.js';"
+      },
+      {
+        "concept": "tabs",
+        "tag": "mdc-menubar",
+        "path": "dist/components/menubar/index.js",
+        "importStatement": "import '@momentum-design/components/dist/components/menubar/index.js';"
+      }
+    ]
+  },
+  "feature": {
+    "id": "ssr",
+    "name": "Universal SSR engine (ssr)",
+    "description": "Universal server rendering engine emitting clean Declarative Shadow DOM with zero comment markers",
+    "isBaseline": false
+  },
+  "scenario": {
+    "id": "ssr-dashboard",
+    "name": "SSR dashboard",
+    "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
+    "componentCount": 5
+  },
+  "timestamp": "2026-10-13T22:03:23.300Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "664d821",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 189325,
+    "gzipBytes": 46503,
+    "brotliBytes": 39100,
+    "buildTimeMs": 51.11958299999969
+  },
+  "baseline": {
+    "rawBytes": 189140,
+    "gzipBytes": 46436,
+    "brotliBytes": 39064,
+    "buildTimeMs": 32.84949999998207,
+    "firstRenderMs": 10.1,
+    "updateMs": 0.5,
+    "scriptEvalMs": 2.4,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 2428737,
+    "scenarioSpecific": {
+      "cardsCount": 4,
+      "progressBarsCount": 4,
+      "resumedInteractions": 4,
+      "renderedNodes": 41
+    }
+  },
+  "deltas": {
+    "rawBytes": 185,
+    "rawPercent": 0.1,
+    "gzipBytes": 67,
+    "gzipPercent": 0.14,
+    "brotliBytes": 36,
+    "brotliPercent": 0.09,
+    "buildTimeMs": 18.3,
+    "firstRenderMs": 3.5,
+    "speedupPercent": -34.65,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 20,
+    "evalSpeedupPercent": -8.33,
+    "registrationSpeedupPercent": 75,
+    "memorySavingsPercent": -3.4
+  },
+  "runtime": {
+    "firstRenderMs": 13.6,
+    "updateMs": 0.4,
+    "scriptEvalMs": 2.6,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 2511287,
+    "speedupPercent": -34.65,
+    "updateSpeedupPercent": 20,
+    "evalSpeedupPercent": -8.33,
+    "registrationSpeedupPercent": 75,
+    "memorySavingsPercent": -3.4
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 41,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
+  }
+}

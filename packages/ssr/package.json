@@ -1,0 +1,95 @@
+{
+  "name": "@lit-core/ssr",
+  "version": "0.1.0",
+  "description": "Universal server-side rendering engine for Lit and Web Components emitting clean Declarative Shadow DOM",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "edge-light": "./dist/index.js",
+      "workerd": "./dist/index.js",
+      "worker": "./dist/index.js",
+      "bun": "./dist/index.js",
+      "deno": "./dist/index.js",
+      "node": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./environment": {
+      "types": "./dist/environment.d.ts",
+      "import": "./dist/environment.js",
+      "default": "./dist/environment.js"
+    },
+    "./stream": {
+      "types": "./dist/stream.d.ts",
+      "import": "./dist/stream.js",
+      "default": "./dist/stream.js"
+    },
+    "./slot": {
+      "types": "./dist/slot.d.ts",
+      "import": "./dist/slot.js",
+      "default": "./dist/slot.js"
+    },
+    "./compiler-bridge": {
+      "types": "./dist/compiler-bridge.d.ts",
+      "import": "./dist/compiler-bridge.js",
+      "default": "./dist/compiler-bridge.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "lit",
+    "ssr",
+    "server-side-rendering",
+    "declarative-shadow-dom",
+    "dsd",
+    "web-components",
+    "edge",
+    "streaming",
+    "cloudflare-workers",
+    "fastly-compute"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/ssr"
+  },
+  "dependencies": {
+    "@lit-core/dom-paths": "workspace:*",
+    "@lit-core/resumable": "workspace:*"
+  },
+  "devDependencies": {
+    "@lit-core/html-aot": "workspace:*",
+    "@lit-core/test-kit": "workspace:*",
+    "@types/node": "^26.6.4",
+    "lit": "^3.3.3",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  },
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "lit": {
+      "optional": true
+    }
+  }
+}

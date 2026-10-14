@@ -10,6 +10,7 @@ import litDefault, {
   elemProxy,
   HtmlMinifierWebpackPlugin,
   htmlMinifier,
+  isSsrTarget,
   LitWebpackPlugin,
   lit,
   litCore,
@@ -19,9 +20,12 @@ import litDefault, {
   litElemProxy,
   litHtmlMinifier,
   litPropsLower,
+  litSsr,
   litWebpackLoader,
   PropsLowerWebpackPlugin,
   propsLower,
+  SsrWebpackPlugin,
+  ssr,
   TransformError,
 } from '../dist/index.js';
 import { transformCssMinifier, transformElemProxy, transformHtmlMinifier, transformPropsLower } from '../dist/transforms.js';
@@ -45,10 +49,15 @@ assert.strictEqual(typeof cssMinifier, 'function', 'cssMinifier must be a functi
 assert.strictEqual(typeof litCssMinifier, 'function', 'litCssMinifier must be an alias');
 assert.strictEqual(typeof domPaths, 'function', 'domPaths must be a function');
 assert.strictEqual(typeof litDomPaths, 'function', 'litDomPaths must be an alias');
+assert.strictEqual(typeof ssr, 'function', 'ssr must be a function');
+assert.strictEqual(typeof litSsr, 'function', 'litSsr must be an alias');
+assert.strictEqual(litSsr, ssr, 'litSsr must equal ssr');
+assert.strictEqual(typeof isSsrTarget, 'function', 'isSsrTarget must be a function');
 assert.strictEqual(typeof litWebpackLoader, 'function', 'litWebpackLoader must be exported');
 
 // 2. Verify classes
 assert.strictEqual(typeof LitWebpackPlugin, 'function', 'LitWebpackPlugin class must exist');
+assert.strictEqual(typeof SsrWebpackPlugin, 'function', 'SsrWebpackPlugin class must exist');
 assert.strictEqual(typeof CssFuseWebpackPlugin, 'function', 'CssFuseWebpackPlugin class must exist');
 assert.strictEqual(typeof PropsLowerWebpackPlugin, 'function', 'PropsLowerWebpackPlugin class must exist');
 assert.strictEqual(typeof ElemProxyWebpackPlugin, 'function', 'ElemProxyWebpackPlugin class must exist');
@@ -108,6 +117,30 @@ assert.strictEqual(standaloneHtml.options.cssFuse, false);
 const standaloneCss = cssMinifier({ sourcemap: true });
 assert(standaloneCss instanceof CssMinifierWebpackPlugin);
 assert.strictEqual(standaloneCss.options.cssFuse, false);
+
+// Test standalone ssr() factory
+const standaloneSsr = ssr({ streaming: true, prerender: true, islands: true });
+assert(standaloneSsr instanceof SsrWebpackPlugin);
+assert(standaloneSsr instanceof LitWebpackPlugin);
+assert.strictEqual(standaloneSsr.options.cssFuse, false);
+assert.strictEqual(standaloneSsr.options.ssr?.streaming, true);
+assert.strictEqual(standaloneSsr.options.ssr?.prerender, true);
+
+// Test lit() with SSR options
+const ssrPluginOpt = lit({ ssr: { streaming: true, islands: true } });
+assert.strictEqual(typeof ssrPluginOpt.options.ssr, 'object');
+assert.strictEqual(ssrPluginOpt.options.ssr?.streaming, true);
+
+const kebabSsrOpt = lit({ 'lit-ssr': true });
+assert.strictEqual(kebabSsrOpt.options['lit-ssr'], true);
+
+// Test isSsrTarget helper
+assert.strictEqual(isSsrTarget('node'), true);
+assert.strictEqual(isSsrTarget('async-node'), true);
+assert.strictEqual(isSsrTarget('webworker'), true);
+assert.strictEqual(isSsrTarget(['node', 'es2022']), true);
+assert.strictEqual(isSsrTarget('web'), false);
+assert.strictEqual(isSsrTarget(undefined), false);
 
 // 7. Test transformHtmlMinifier
 const sampleTemplate = `

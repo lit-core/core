@@ -118,6 +118,13 @@ export const FEATURE_METADATA = {
     scenarioId: 'ssr-dashboard',
     scenarioName: 'SSR dashboard',
   },
+  ssr: {
+    name: 'Universal SSR engine (ssr)',
+    description: 'Universal server rendering engine emitting clean Declarative Shadow DOM with zero comment markers',
+    category: 'runtime',
+    scenarioId: 'ssr-comparison',
+    scenarioName: 'SSR comparison',
+  },
   'tag-shake': {
     name: 'Tag shake dead code elimination (tag-shake)',
     description: 'Ahead-of-time Web Component dead code elimination and registration tag shaking',
