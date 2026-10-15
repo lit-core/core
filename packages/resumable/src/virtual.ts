@@ -43,39 +43,433 @@ export function restoreComponentState(host) {
   }
 }
 
-export function bindTemplateEventHandlers(shadowRoot, templateResult, host) {
-  if (!templateResult || typeof templateResult !== 'object' || !templateResult.strings) {
-    return;
+const VOID_TAGS = new Set([
+  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+  'link', 'meta', 'param', 'source', 'track', 'wbr',
+]);
+
+function compiledToStandard(tpl) {
+  const litType = tpl._$litType$;
+  const values = Array.isArray(tpl.values) ? tpl.values : [];
+  const htmlText = typeof litType.h === 'string'
+    ? litType.h
+    : Array.isArray(litType.h)
+      ? (litType.h[0] || '')
+      : String(litType.h || '');
+  const parts = Array.isArray(litType.parts) ? litType.parts : [];
+  const attrPartsByElem = new Map();
+  const childPartsInOrder = [];
+  for (let pIdx = 0; pIdx < parts.length; pIdx++) {
+    const p = parts[pIdx];
+    if (p.type === 1) {
+      let list = attrPartsByElem.get(p.index);
+      if (!list) {
+        list = [];
+        attrPartsByElem.set(p.index, list);
+      }
+      list.push({ part: p, partIndex: pIdx });
+    } else if (p.type === 2) {
+      childPartsInOrder.push({ part: p, partIndex: pIdx });
+    }
   }
-  const strings = templateResult.strings;
-  const values = templateResult.values;
-  if (!Array.isArray(strings) || !Array.isArray(values)) {
-    return;
-  }
-  const eventRegex = /@([a-zA-Z0-9_-]+)=\\s*["']?$/;
-  const allElements = Array.from(shadowRoot.querySelectorAll('*'));
-  for (let i = 0; i < values.length; i++) {
-    const stringPrefix = strings[i];
-    const match = eventRegex.exec(stringPrefix);
-    if (!match) continue;
-    const eventName = match[1];
-    const handler = values[i];
-    if (typeof handler === 'function') {
-      if (allElements.length > 0) {
-        const targetEl = allElements[Math.min(i, allElements.length - 1)];
-        if (targetEl) {
-          targetEl.addEventListener(eventName, handler.bind(host));
+  const strings = [];
+  const outValues = [];
+  let curStr = '';
+  let childCursor = 0;
+  let nodeIndex = -1;
+  let i = 0;
+  const len = htmlText.length;
+  while (i < len) {
+    if (i + 2 < len && htmlText[i] === '<' && htmlText[i + 1] === '?' && htmlText[i + 2] === '>') {
+      nodeIndex++;
+      strings.push(curStr);
+      curStr = '';
+      const childInfo = childPartsInOrder[childCursor++];
+      outValues.push(childInfo ? values[childInfo.partIndex] : '');
+      i += 3;
+      continue;
+    }
+    if (i + 6 < len && htmlText.slice(i, i + 7) === '<!---->') {
+      nodeIndex++;
+      strings.push(curStr);
+      curStr = '';
+      const childInfo = childPartsInOrder[childCursor++];
+      outValues.push(childInfo ? values[childInfo.partIndex] : '');
+      i += 7;
+      continue;
+    }
+    if (htmlText[i] === '<' && i + 1 < len && /[a-zA-Z_]/.test(htmlText[i + 1])) {
+      nodeIndex++;
+      const elemAttrs = attrPartsByElem.get(nodeIndex);
+      if (elemAttrs && elemAttrs.length > 0) {
+        let tagEnd = i + 1;
+        let inQuote = null;
+        while (tagEnd < len) {
+          const ch = htmlText[tagEnd];
+          if (inQuote) {
+            if (ch === inQuote) inQuote = null;
+          } else if (ch === '"' || ch === "'") {
+            inQuote = ch;
+          } else if (ch === '>') {
+            break;
+          }
+          tagEnd++;
+        }
+        if (tagEnd < len) {
+          const isSelfClose = htmlText[tagEnd - 1] === '/';
+          const insertAt = isSelfClose ? tagEnd - 1 : tagEnd;
+          curStr += htmlText.slice(i, insertAt);
+          for (const { part, partIndex } of elemAttrs) {
+            const ctorName = part.ctor && part.ctor.name ? part.ctor.name : '';
+            const valAtPart = values[partIndex];
+            const ctorType = part.ctorType ?? (
+              part.name?.startsWith('?') || ctorName.includes('Boolean')
+                ? 4
+                : part.name?.startsWith('@') || ctorName.includes('Event') || typeof valAtPart === 'function'
+                  ? 5
+                  : part.name?.startsWith('.') || ctorName.includes('Property')
+                    ? 3
+                    : 1
+            );
+            const rawName = (part.name || '').replace(/^[?@.]/, '');
+            const prefix = ctorType === 4 ? '?' : ctorType === 5 ? '@' : ctorType === 3 ? '.' : '';
+            curStr += ' ' + prefix + rawName + '=';
+            strings.push(curStr);
+            outValues.push(valAtPart);
+            curStr = '';
+          }
+          curStr += isSelfClose ? '/>' : '>';
+          i = tagEnd + 1;
+          continue;
         }
       }
     }
+    curStr += htmlText[i];
+    i++;
   }
+  strings.push(curStr);
+  return { strings, values: outValues };
+}
+
+export function flattenTemplateResult(tpl) {
+  if (!tpl || typeof tpl !== 'object') {
+    return null;
+  }
+  let base = null;
+  if (Array.isArray(tpl.strings) && Array.isArray(tpl.values)) {
+    base = { strings: Array.from(tpl.strings), values: Array.from(tpl.values) };
+  } else if (tpl._$litType$ && typeof tpl._$litType$ === 'object' && 'h' in tpl._$litType$) {
+    base = compiledToStandard(tpl);
+  } else {
+    return null;
+  }
+  const flatStrings = [];
+  const flatValues = [];
+  let accString = base.strings[0] ?? '';
+  for (let i = 0; i < base.values.length; i++) {
+    const val = base.values[i];
+    const nextString = base.strings[i + 1] ?? '';
+    const nested = flattenTemplateResult(val);
+    if (nested) {
+      accString += nested.strings[0] ?? '';
+      for (let j = 0; j < nested.values.length; j++) {
+        flatStrings.push(accString);
+        flatValues.push(nested.values[j]);
+        accString = nested.strings[j + 1] ?? '';
+      }
+      accString += nextString;
+    } else if (Array.isArray(val) && val.length > 0 && val.every((item) => flattenTemplateResult(item) !== null)) {
+      for (const item of val) {
+        const itemFlat = flattenTemplateResult(item);
+        if (itemFlat) {
+          accString += itemFlat.strings[0] ?? '';
+          for (let j = 0; j < itemFlat.values.length; j++) {
+            flatStrings.push(accString);
+            flatValues.push(itemFlat.values[j]);
+            accString = itemFlat.strings[j + 1] ?? '';
+          }
+        }
+      }
+      accString += nextString;
+    } else {
+      flatStrings.push(accString);
+      flatValues.push(val);
+      accString = nextString;
+    }
+  }
+  flatStrings.push(accString);
+  return { strings: flatStrings, values: flatValues };
+}
+
+function parseTemplateBindings(flat) {
+  const { strings, values } = flat;
+  const bindings = [];
+  let currentElementIndex = -1;
+  const openStack = [];
+  let inOpenTag = false;
+  let currentTagName = '';
+  let quoteChar = null;
+  const attrMatchRegex = /(?:^|\\s)([?@.]?[a-zA-Z0-9_.:-]+)=\\s*(["']?)([^"']*)$/;
+
+  for (let i = 0; i < values.length; i++) {
+    const chunk = strings[i] ?? '';
+    let j = 0;
+    let lastGtIndex = -1;
+    while (j < chunk.length) {
+      const ch = chunk[j];
+      if (inOpenTag) {
+        if (quoteChar) {
+          if (ch === quoteChar) quoteChar = null;
+        } else if (ch === '"' || ch === "'") {
+          quoteChar = ch;
+        } else if (ch === '>') {
+          const isSelfClosing = j > 0 && chunk[j - 1] === '/';
+          inOpenTag = false;
+          lastGtIndex = j;
+          if (isSelfClosing || VOID_TAGS.has(currentTagName)) {
+            openStack.pop();
+          }
+        }
+        j++;
+      } else {
+        if (ch === '<') {
+          if (chunk.slice(j, j + 4) === '<!--') {
+            const endComment = chunk.indexOf('-->', j + 4);
+            if (endComment !== -1) {
+              j = endComment + 3;
+              continue;
+            }
+          }
+          const closeMatch = /^<\\/\\s*([a-zA-Z][a-zA-Z0-9._-]*)\\s*>/.exec(chunk.slice(j));
+          if (closeMatch) {
+            openStack.pop();
+            j += closeMatch[0].length;
+            lastGtIndex = j - 1;
+            continue;
+          }
+          const openMatch = /^<([a-zA-Z][a-zA-Z0-9._-]*)(?=[\\s>/]|$)/.exec(chunk.slice(j));
+          if (openMatch) {
+            currentTagName = openMatch[1].toLowerCase();
+            currentElementIndex++;
+            openStack.push(currentElementIndex);
+            inOpenTag = true;
+            quoteChar = null;
+            j += openMatch[0].length;
+            continue;
+          }
+        }
+        j++;
+      }
+    }
+
+    if (inOpenTag) {
+      const attrMatch = attrMatchRegex.exec(chunk);
+      if (attrMatch) {
+        const rawAttr = attrMatch[1];
+        const openQuote = attrMatch[2];
+        const attrPrefix = attrMatch[3] || '';
+        if (openQuote && quoteChar === openQuote) {
+          quoteChar = null;
+        }
+        const kind = rawAttr.startsWith('@')
+          ? 'event'
+          : rawAttr.startsWith('?')
+            ? 'boolean-attr'
+            : rawAttr.startsWith('.')
+              ? 'prop'
+              : 'attr';
+        const name = rawAttr.replace(/^[?@.]/, '');
+        bindings.push({
+          exprIndex: i,
+          elementIndex: currentElementIndex,
+          kind,
+          name,
+          prefix: attrPrefix,
+        });
+      }
+    } else {
+      const parentElemIndex = openStack.length > 0 ? openStack[openStack.length - 1] : -1;
+      const textPrefix = lastGtIndex !== -1 ? chunk.slice(lastGtIndex + 1) : chunk;
+      const nextChunk = strings[i + 1] ?? '';
+      const nextLtIndex = nextChunk.indexOf('<');
+      const textSuffix = nextLtIndex !== -1 ? nextChunk.slice(0, nextLtIndex) : nextChunk;
+      const isClosedImmediately = nextLtIndex !== -1 && nextChunk.slice(nextLtIndex, nextLtIndex + 2) === '</';
+      const isSoleTextChild = lastGtIndex !== -1 && isClosedImmediately && !textPrefix.includes('<');
+      bindings.push({
+        exprIndex: i,
+        elementIndex: parentElemIndex,
+        kind: 'child',
+        prefix: textPrefix,
+        suffix: textSuffix,
+        isSoleTextChild,
+      });
+    }
+  }
+  return bindings;
+}
+
+export function bindTemplateEventHandlers(shadowRoot, templateResult, host) {
   const actionElements = shadowRoot.querySelectorAll('[data-action]');
   actionElements.forEach((el) => {
     const actionName = el.getAttribute('data-action');
     if (actionName && typeof host[actionName] === 'function') {
-      el.addEventListener('click', (e) => host[actionName](e));
+      if (!el.__litActionBound) {
+        el.__litActionBound = true;
+        el.addEventListener('click', (e) => host[actionName](e));
+      }
     }
   });
+
+  const flat = flattenTemplateResult(templateResult);
+  if (!flat) {
+    return;
+  }
+  const hasStyleInTemplate = /<style[\\s>]/i.test(flat.strings.join(''));
+  const allElements = Array.from(shadowRoot.querySelectorAll('*')).filter(
+    (el) => hasStyleInTemplate || el.tagName.toLowerCase() !== 'style',
+  );
+  const bindings = parseTemplateBindings(flat);
+  for (const b of bindings) {
+    if (b.kind === 'event') {
+      const handler = flat.values[b.exprIndex];
+      if (typeof handler === 'function' && allElements.length > 0 && b.elementIndex >= 0) {
+        const targetEl = allElements[Math.min(b.elementIndex, allElements.length - 1)];
+        if (targetEl) {
+          if (!targetEl.__litResumedEvents) {
+            targetEl.__litResumedEvents = new Set();
+          }
+          if (!targetEl.__litResumedEvents.has(b.name)) {
+            targetEl.__litResumedEvents.add(b.name);
+            targetEl.addEventListener(b.name, handler.bind(host));
+          }
+        }
+      }
+    }
+  }
+}
+
+function updateResumableDomInPlace(shadowRoot, prevFlat, nextFlat) {
+  if (!prevFlat || !nextFlat || prevFlat.strings.length !== nextFlat.strings.length) {
+    return false;
+  }
+  for (let i = 0; i < prevFlat.strings.length; i++) {
+    if (prevFlat.strings[i] !== nextFlat.strings[i]) {
+      return false;
+    }
+  }
+  const hasStyleInTemplate = /<style[\\s>]/i.test(nextFlat.strings.join(''));
+  const allElements = Array.from(shadowRoot.querySelectorAll('*')).filter(
+    (el) => hasStyleInTemplate || el.tagName.toLowerCase() !== 'style',
+  );
+  const bindings = parseTemplateBindings(nextFlat);
+
+  // Child bindings that share a parent element with no element children form one text run
+  // (for example "Hello, " + name + "!"). The run is rewritten as a whole.
+  const textRuns = new Map();
+  for (const b of bindings) {
+    if (b.kind === 'child' && !b.isSoleTextChild) {
+      const run = textRuns.get(b.elementIndex);
+      if (run) {
+        run.push(b);
+      } else {
+        textRuns.set(b.elementIndex, [b]);
+      }
+    }
+  }
+
+  // Verify all changed bindings can be updated in-place before mutating DOM
+  for (const b of bindings) {
+    const prevVal = prevFlat.values[b.exprIndex];
+    const nextVal = nextFlat.values[b.exprIndex];
+    if (Object.is(prevVal, nextVal) || b.kind === 'event') {
+      continue;
+    }
+    if (typeof nextVal === 'object' && nextVal !== null) {
+      return false;
+    }
+    if (b.elementIndex < 0 || b.elementIndex >= allElements.length) {
+      return false;
+    }
+    if (b.kind === 'child' && !b.isSoleTextChild) {
+      const run = textRuns.get(b.elementIndex);
+      if (allElements[b.elementIndex].children.length > 0) {
+        return false;
+      }
+      for (let r = 0; r < run.length; r++) {
+        const runVal = nextFlat.values[run[r].exprIndex];
+        if (typeof runVal === 'object' && runVal !== null) {
+          return false;
+        }
+        if (r > 0 && (run[r].exprIndex !== run[r - 1].exprIndex + 1 || nextFlat.strings[run[r].exprIndex].includes('<'))) {
+          return false;
+        }
+      }
+    }
+  }
+
+  const rewrittenRuns = new Set();
+  for (const b of bindings) {
+    const prevVal = prevFlat.values[b.exprIndex];
+    const nextVal = nextFlat.values[b.exprIndex];
+    if (Object.is(prevVal, nextVal) || b.kind === 'event') {
+      continue;
+    }
+    const targetEl = allElements[b.elementIndex];
+    if (!targetEl) continue;
+    if (b.kind === 'boolean-attr') {
+      if (nextVal) {
+        targetEl.setAttribute(b.name, '');
+      } else {
+        targetEl.removeAttribute(b.name);
+      }
+    } else if (b.kind === 'prop') {
+      targetEl[b.name] = nextVal;
+    } else if (b.kind === 'attr') {
+      if (nextVal === null || nextVal === undefined || nextVal === false) {
+        targetEl.removeAttribute(b.name);
+      } else {
+        targetEl.setAttribute(b.name, (b.prefix || '') + String(nextVal));
+      }
+    } else if (b.kind === 'child') {
+      let nextText;
+      if (b.isSoleTextChild) {
+        nextText = (b.prefix || '') + String(nextVal ?? '') + (b.suffix || '');
+      } else {
+        if (rewrittenRuns.has(b.elementIndex)) continue;
+        rewrittenRuns.add(b.elementIndex);
+        const run = textRuns.get(b.elementIndex);
+        nextText = run[0].prefix || '';
+        for (let r = 0; r < run.length; r++) {
+          nextText += String(nextFlat.values[run[r].exprIndex] ?? '');
+          nextText += r < run.length - 1 ? nextFlat.strings[run[r].exprIndex + 1] : run[r].suffix || '';
+        }
+      }
+      if (targetEl.firstChild && targetEl.firstChild.nodeType === 3 && targetEl.childNodes.length === 1) {
+        targetEl.firstChild.data = nextText;
+      } else {
+        targetEl.textContent = nextText;
+      }
+    }
+  }
+  return true;
+}
+
+function clearStaticSsrNodes(root) {
+  if (!root || root._$litPart$ || !root.childNodes) {
+    return;
+  }
+  const nodes = Array.from(root.childNodes);
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (node.nodeType === 1 && node.tagName && node.tagName.toLowerCase() === 'style') {
+      continue;
+    }
+    if (typeof node.remove === 'function') {
+      node.remove();
+    } else if (typeof root.removeChild === 'function') {
+      root.removeChild(node);
+    }
+  }
 }
 
 export function withResumable(Base) {
@@ -100,11 +494,20 @@ export function withResumable(Base) {
       const root = this.renderRoot || this.shadowRoot;
       if (isFirstUpdate && root && root.childNodes.length > 0) {
         this.hasUpdated = true;
+        if (this.renderOptions) {
+          this.renderOptions.isConnected = this.isConnected;
+        }
+        if (typeof this._$markUpdated === 'function') {
+          this._$markUpdated();
+        } else {
+          this.isUpdatePending = false;
+        }
         if (typeof this.willUpdate === 'function') {
           this.willUpdate(changedProperties);
         }
         if (typeof this.render === 'function') {
           const renderResult = this.render();
+          this.__resumablePrevFlat = flattenTemplateResult(renderResult);
           bindTemplateEventHandlers(root, renderResult, this);
         }
         if (typeof this.firstUpdated === 'function') {
@@ -115,6 +518,27 @@ export function withResumable(Base) {
         }
         return;
       }
+      if (root && !root._$litPart$) {
+        if (this.__resumablePrevFlat && typeof this.render === 'function') {
+          const nextResult = this.render();
+          const nextFlat = flattenTemplateResult(nextResult);
+          if (nextFlat && updateResumableDomInPlace(root, this.__resumablePrevFlat, nextFlat)) {
+            this.__resumablePrevFlat = nextFlat;
+            if (typeof this._$markUpdated === 'function') {
+              this._$markUpdated();
+            } else {
+              this.isUpdatePending = false;
+            }
+            return;
+          }
+          this.__resumablePrevFlat = null;
+        }
+        clearStaticSsrNodes(root);
+        if (this.renderOptions) {
+          this.renderOptions.renderBefore = undefined;
+          this.renderOptions.isConnected = this.isConnected;
+        }
+      }
       if (typeof super.update === 'function') {
         super.update(changedProperties);
       }
@@ -123,24 +547,13 @@ export function withResumable(Base) {
 }
 
 let isAdapterInstalled = false;
+const patchedPrototypes = new WeakSet();
 
-export function installResumableAdapter(LitElementOrReactiveElementClass) {
-  if (isAdapterInstalled && !LitElementOrReactiveElementClass) {
+function patchReactivePrototype(targetProto) {
+  if (!targetProto || patchedPrototypes.has(targetProto)) {
     return;
   }
-  let targetProto = null;
-  if (LitElementOrReactiveElementClass?.prototype) {
-    targetProto = LitElementOrReactiveElementClass.prototype;
-  } else if (typeof window !== 'undefined') {
-    const maybeLit = window.LitElement || window.ReactiveElement;
-    if (maybeLit?.prototype) {
-      targetProto = maybeLit.prototype;
-    }
-  }
-  if (!targetProto) {
-    isAdapterInstalled = true;
-    return;
-  }
+  patchedPrototypes.add(targetProto);
   const origConnected = targetProto.connectedCallback;
   targetProto.connectedCallback = function () {
     restoreComponentState(this);
@@ -164,11 +577,20 @@ export function installResumableAdapter(LitElementOrReactiveElementClass) {
     const root = this.renderRoot || this.shadowRoot;
     if (isFirstUpdate && root && root.childNodes.length > 0) {
       this.hasUpdated = true;
+      if (this.renderOptions) {
+        this.renderOptions.isConnected = this.isConnected;
+      }
+      if (typeof this._$markUpdated === 'function') {
+        this._$markUpdated();
+      } else {
+        this.isUpdatePending = false;
+      }
       if (typeof this.willUpdate === 'function') {
         this.willUpdate(changedProperties);
       }
       if (typeof this.render === 'function') {
         const renderResult = this.render();
+        this.__resumablePrevFlat = flattenTemplateResult(renderResult);
         bindTemplateEventHandlers(root, renderResult, this);
       }
       if (typeof this.firstUpdated === 'function') {
@@ -179,10 +601,72 @@ export function installResumableAdapter(LitElementOrReactiveElementClass) {
       }
       return;
     }
+    if (root && !root._$litPart$) {
+      if (this.__resumablePrevFlat && typeof this.render === 'function') {
+        const nextResult = this.render();
+        const nextFlat = flattenTemplateResult(nextResult);
+        if (nextFlat && updateResumableDomInPlace(root, this.__resumablePrevFlat, nextFlat)) {
+          this.__resumablePrevFlat = nextFlat;
+          if (typeof this._$markUpdated === 'function') {
+            this._$markUpdated();
+          } else {
+            this.isUpdatePending = false;
+          }
+          return;
+        }
+        this.__resumablePrevFlat = null;
+      }
+      clearStaticSsrNodes(root);
+      if (this.renderOptions) {
+        this.renderOptions.renderBefore = undefined;
+        this.renderOptions.isConnected = this.isConnected;
+      }
+    }
     if (typeof origUpdate === 'function') {
       origUpdate.call(this, changedProperties);
     }
   };
+}
+
+export function installResumableAdapter(LitElementOrReactiveElementClass) {
+  if (typeof customElements !== 'undefined' && !customElements.__litResumablePatched) {
+    customElements.__litResumablePatched = true;
+    const origDefine = customElements.define;
+    customElements.define = function (name, ctor, options) {
+      let curr = ctor;
+      let targetBase = null;
+      while (curr && curr !== HTMLElement && curr !== Function.prototype) {
+        if (
+          curr.prototype &&
+          (Object.prototype.hasOwnProperty.call(curr.prototype, 'update') ||
+            Object.prototype.hasOwnProperty.call(curr.prototype, 'performUpdate'))
+        ) {
+          targetBase = curr.prototype;
+          break;
+        }
+        curr = Object.getPrototypeOf(curr);
+      }
+      if (targetBase) {
+        patchReactivePrototype(targetBase);
+      }
+      return origDefine.call(this, name, ctor, options);
+    };
+  }
+  if (isAdapterInstalled && !LitElementOrReactiveElementClass) {
+    return;
+  }
+  let targetProto = null;
+  if (LitElementOrReactiveElementClass?.prototype) {
+    targetProto = LitElementOrReactiveElementClass.prototype;
+  } else if (typeof window !== 'undefined') {
+    const maybeLit = window.LitElement || window.ReactiveElement;
+    if (maybeLit?.prototype) {
+      targetProto = maybeLit.prototype;
+    }
+  }
+  if (targetProto) {
+    patchReactivePrototype(targetProto);
+  }
   isAdapterInstalled = true;
 }
 

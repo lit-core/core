@@ -121,7 +121,9 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(htmlMinifier(minifierOpts));
   }
 
-  const resumableOpt = options.resumable;
+  const ssrOpt = options.ssr ?? options['lit-ssr'];
+  const ssrResumable = typeof ssrOpt === 'object' && ssrOpt !== null && Boolean(ssrOpt.resumable);
+  const resumableOpt = options.resumable ?? (ssrResumable ? true : undefined);
   if (resumableOpt) {
     const resumableOpts = typeof resumableOpt === 'object' ? resumableOpt : {};
     plugins.push(litResumablePlugin(resumableOpts));
@@ -133,7 +135,6 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(tagShake(shakeOpts));
   }
 
-  const ssrOpt = options.ssr ?? options['lit-ssr'];
   if (ssrOpt) {
     const ssrOpts = typeof ssrOpt === 'object' ? ssrOpt : {};
     plugins.push(ssr(ssrOpts));

@@ -1,7 +1,9 @@
 /**
  * Pure V8 Isolate Minimal Environment (ISME) for @lit-core/ssr.
  * Stateless stubs for HTMLElement, customElements, CustomEvent, and CSSStyleSheet
- * without window, document, node:vm, or global prototype pollution.
+ * with no dependency on node:vm. createIsolateEnvironment() returns the stubs without
+ * touching globals; installIsolateGlobals() only fills globals that are still undefined
+ * (including window, aliased to globalThis) and never replaces existing ones.
  */
 
 export interface CustomElementRegistryLike {
@@ -312,12 +314,38 @@ export class KeyboardEventStub {
   stopImmediatePropagation(): void {}
 }
 
+export class MutationObserverStub {
+  observe(_target?: any, _options?: any): void {}
+  disconnect(): void {}
+  takeRecords(): any[] {
+    return [];
+  }
+}
+
+export class ResizeObserverStub {
+  observe(_target?: any, _options?: any): void {}
+  unobserve(_target?: any): void {}
+  disconnect(): void {}
+}
+
+export class IntersectionObserverStub {
+  observe(_target?: any): void {}
+  unobserve(_target?: any): void {}
+  disconnect(): void {}
+  takeRecords(): any[] {
+    return [];
+  }
+}
+
 export function createIsolateEnvironment(parentRegistry?: CustomElementRegistryLike): {
   customElements: IsolateCustomElementRegistry;
   HTMLElement: typeof HTMLElementStub;
   CustomEvent: typeof CustomEventStub;
   CSSStyleSheet: typeof CSSStyleSheetStub;
   KeyboardEvent: typeof KeyboardEventStub;
+  MutationObserver: typeof MutationObserverStub;
+  ResizeObserver: typeof ResizeObserverStub;
+  IntersectionObserver: typeof IntersectionObserverStub;
   document: DocumentStub;
   Document: typeof DocumentStub;
 } {
@@ -327,6 +355,9 @@ export function createIsolateEnvironment(parentRegistry?: CustomElementRegistryL
     CustomEvent: CustomEventStub,
     CSSStyleSheet: CSSStyleSheetStub,
     KeyboardEvent: KeyboardEventStub,
+    MutationObserver: MutationObserverStub,
+    ResizeObserver: ResizeObserverStub,
+    IntersectionObserver: IntersectionObserverStub,
     document: defaultDocumentStub,
     Document: DocumentStub,
   };
@@ -348,5 +379,29 @@ export function installIsolateGlobals(): void {
   }
   if (typeof g.KeyboardEvent === 'undefined') {
     g.KeyboardEvent = KeyboardEventStub;
+  }
+  if (typeof g.MutationObserver === 'undefined') {
+    g.MutationObserver = MutationObserverStub;
+  }
+  if (typeof g.ResizeObserver === 'undefined') {
+    g.ResizeObserver = ResizeObserverStub;
+  }
+  if (typeof g.IntersectionObserver === 'undefined') {
+    g.IntersectionObserver = IntersectionObserverStub;
+  }
+  if (typeof g.window === 'undefined') {
+    g.window = g;
+  }
+  if (g.window && typeof g.window.__swc === 'undefined') {
+    g.window.__swc = { issuedWarnings: new Set() };
+  }
+  if (g.window && typeof g.window.dispatchEvent === 'undefined') {
+    g.window.dispatchEvent = () => true;
+  }
+  if (g.window && typeof g.window.addEventListener === 'undefined') {
+    g.window.addEventListener = () => {};
+  }
+  if (g.window && typeof g.window.removeEventListener === 'undefined') {
+    g.window.removeEventListener = () => {};
   }
 }

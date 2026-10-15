@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildManifest, compileResumableLoader, extractCustomElementTags } from '@lit-core/resumable';
+import { IsolateCustomElementRegistry, installIsolateGlobals, renderToString } from '@lit-core/ssr';
 import type { Compiler } from 'webpack';
 import { registerPluginState, unregisterPluginState } from './loader.js';
 import type {
@@ -114,6 +115,7 @@ export class LitWebpackPlugin {
       transformedFiles: this.transformedFiles,
       virtualSheets: this.virtualSheets,
       virtualTemplates: this.virtualTemplates,
+      isSsr: isTargetServer,
       options: {
         ...this.options,
         ssr: ssrOpt || false,
@@ -499,6 +501,39 @@ export class LitWebpackPlugin {
             }
           } else {
             compilation.emitAsset(manifestFileName, new RawSource(manifestSource));
+          }
+
+          // 8. Prerender HTML assets in compilation when present
+          if (ssrOpt.prerender !== false) {
+            installIsolateGlobals();
+            const baseRegistry = ssrOpt.customElements ?? (globalThis as any).customElements;
+            const registry = new IsolateCustomElementRegistry(baseRegistry);
+            const islandsManifestMap: Record<string, string> = {};
+            for (const [tag, info] of Object.entries(manifest.tags)) {
+              islandsManifestMap[tag] = info.file;
+            }
+            for (const [assetName, asset] of Object.entries(assets)) {
+              if (assetName.endsWith('.html')) {
+                const rawSource = typeof asset.source === 'function' ? asset.source() : asset;
+                const htmlStr = Buffer.isBuffer(rawSource) ? rawSource.toString('utf-8') : String(rawSource);
+                let renderedHtml = renderToString(
+                  { strings: [htmlStr] as unknown as TemplateStringsArray, values: [] },
+                  {
+                    customElements: registry,
+                    domPaths: Boolean(ssrOpt.domPaths),
+                    resumable: Boolean(ssrOpt.resumable),
+                    mode: 'dsd',
+                  },
+                );
+                if (Object.keys(islandsManifestMap).length > 0 && !renderedHtml.includes('__LIT_ISLANDS_MANIFEST__')) {
+                  const manifestScript = `<script>window.__LIT_ISLANDS_MANIFEST__=${JSON.stringify(islandsManifestMap).replace(/</g, '\\u003c')};</script>`;
+                  renderedHtml = renderedHtml.includes('</head>') ? renderedHtml.replace('</head>', `  ${manifestScript}\n</head>`) : `${manifestScript}${renderedHtml}`;
+                }
+                if (typeof compilation.updateAsset === 'function') {
+                  compilation.updateAsset(assetName, new RawSource(renderedHtml));
+                }
+              }
+            }
           }
 
           logger.info(`⚡ [ssr] Emitted SSR manifest (${manifestFileName}) with ${Object.keys(manifest.tags).length} custom element tags across ${compilation.chunks.size} chunks`);

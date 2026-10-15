@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import { compileHtmlAot } from '@lit-core/html-aot';
 import type { Plugin } from 'vite';
 import { reportTransformError } from '../errors.js';
@@ -5,6 +6,7 @@ import type { HtmlAotOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
 const LIT_HTML_AOT_FAST_CHECK = /\b(?:html|svg)\s*`|\b[a-zA-Z0-9_$]+\.html\s*`|\bimport\b[^;]*\b(?:html|svg)\b/;
+const esmRequire = createRequire(import.meta.url);
 
 export function htmlAot(options: HtmlAotOptions = {}): Plugin {
   const { sourcemap = false } = options;
@@ -12,6 +14,21 @@ export function htmlAot(options: HtmlAotOptions = {}): Plugin {
   return {
     name: 'html-aot',
     enforce: 'pre',
+
+    resolveId(id: string) {
+      if (id === 'lit-html/private-ssr-support.js') {
+        try {
+          return esmRequire.resolve('lit-html/private-ssr-support.js');
+        } catch {
+          try {
+            const litEntry = esmRequire.resolve('lit');
+            const litRequire = createRequire(litEntry);
+            return litRequire.resolve('lit-html/private-ssr-support.js');
+          } catch {}
+        }
+      }
+      return null;
+    },
 
     transform(code: string, id: string) {
       const cleanId = id.split('?')[0] ?? id;

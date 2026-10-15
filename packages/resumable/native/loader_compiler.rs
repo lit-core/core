@@ -25,7 +25,7 @@ pub fn compile_resumable_loader(options: Option<ResumableLoaderOptions>) -> Stri
 
     let manifest_map = opts.manifest.clone().unwrap_or_default();
     let preload_on_hover = opts.preload_on_hover.unwrap_or(true);
-    let idle_hydration = opts.idle_hydration.unwrap_or(true);
+    let idle_hydration = opts.idle_hydration.unwrap_or(false);
     let idle_timeout = opts.idle_timeout.unwrap_or(2000);
 
     let mut events_list = opts.events.clone().unwrap_or_else(|| {

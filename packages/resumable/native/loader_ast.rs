@@ -19,7 +19,7 @@ pub fn build_loader_program<'a>(
     // Statement 1: const W = window, D = document, C = customElements, R = '__lit_resumed__';
     iife_stmts.push(build_globals_decl(ast));
 
-    // Statement 2: const M = W.__LIT_RESUMABLE_MANIFEST__ || { ... }, B = [], L = new Set();
+    // Statement 2: const M = W.__LIT_RESUMABLE_MANIFEST__ || { ... }, B = [], L = {};
     iife_stmts.push(build_state_decl(ast, manifest));
 
     // Statement 3: const uG = (t) => ...;
@@ -181,14 +181,8 @@ fn build_state_decl<'a>(ast: &AstBuilder<'a>, manifest: &HashMap<String, String>
         ast,
     ));
 
-    // L = new Set()
-    let l_init = Expression::new_new_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "Set", ast),
-        None,
-        ArenaVec::new_in(ast),
-        ast,
-    );
+    // L = {}
+    let l_init = Expression::new_object_expression(SPAN, ArenaVec::new_in(ast), ast);
     decls.push(VariableDeclarator::new(
         SPAN,
         BindingPattern::new_binding_identifier(SPAN, "L", ast),
@@ -201,151 +195,132 @@ fn build_state_decl<'a>(ast: &AstBuilder<'a>, manifest: &HashMap<String, String>
     Statement::new_variable_declaration(SPAN, VariableDeclarationKind::Const, decls, false, ast)
 }
 
-// const uG = (t) => (L.has(t) || (L.add(t), M[t] && import(M[t]).catch(() => {})), C.whenDefined(t));
+// const uG = (t) => M[t] ? (L[t] ||= import(M[t]).catch(() => (L[t] = 0))) : Promise.resolve();
+// L maps tag -> in-flight import promise; 0 marks a failed attempt (retried on interaction, skipped by idle).
 fn build_ug_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
-    // L.has(t)
-    let l_has = Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "L", ast),
-        IdentifierName::new(SPAN, "has", ast),
-        false,
-        ast,
-    );
-    let mut has_args = ArenaVec::new_in(ast);
-    has_args.push(Argument::from(Expression::new_identifier(SPAN, "t", ast)));
-    let call_has = Expression::new_call_expression(SPAN, l_has, None, has_args, false, ast);
+    let test = computed(ast, ident(ast, "M"), ident(ast, "t"));
 
-    // L.add(t)
-    let l_add = Expression::new_static_member_expression(
+    let import_call = Expression::new_import_expression(
         SPAN,
-        Expression::new_identifier(SPAN, "L", ast),
-        IdentifierName::new(SPAN, "add", ast),
-        false,
-        ast,
-    );
-    let mut add_args = ArenaVec::new_in(ast);
-    add_args.push(Argument::from(Expression::new_identifier(SPAN, "t", ast)));
-    let call_add = Expression::new_call_expression(SPAN, l_add, None, add_args, false, ast);
-
-    // M[t]
-    let m_t = Expression::new_computed_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "M", ast),
-        Expression::new_identifier(SPAN, "t", ast),
-        false,
-        ast,
-    );
-
-    // import(M[t])
-    let m_t2 = Expression::new_computed_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "M", ast),
-        Expression::new_identifier(SPAN, "t", ast),
-        false,
-        ast,
-    );
-    let import_call = Expression::new_import_expression(SPAN, m_t2, None, None, ast);
-
-    // import(M[t]).catch(() => {})
-    let catch_member = Expression::new_static_member_expression(
-        SPAN,
-        import_call,
-        IdentifierName::new(SPAN, "catch", ast),
-        false,
-        ast,
-    );
-    let empty_catch_arrow = Expression::new_arrow_function_expression(
-        SPAN,
-        false,
+        computed(ast, ident(ast, "M"), ident(ast, "t")),
         None,
-        FormalParameters::boxed(
+        None,
+        ast,
+    );
+    let reset = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        AssignmentTarget::new_computed_member_expression(
             SPAN,
-            FormalParameterKind::ArrowFormalParameters,
-            ArenaVec::new_in(ast),
-            None,
+            ident(ast, "L"),
+            ident(ast, "t"),
+            false,
             ast,
         ),
-        None,
-        ArrowFunctionBody::FunctionBody(FunctionBody::boxed(
+        Expression::new_numeric_literal(SPAN, 0.0, None, NumberBase::Decimal, ast),
+        ast,
+    );
+    let catch_call = call(
+        ast,
+        member(ast, import_call, "catch"),
+        vec![arrow(ast, &[], reset)],
+    );
+    let cached = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::LogicalOr,
+        AssignmentTarget::new_computed_member_expression(
             SPAN,
-            ArenaVec::new_in(ast),
-            ArenaVec::new_in(ast),
+            ident(ast, "L"),
+            ident(ast, "t"),
+            false,
             ast,
-        )),
+        ),
+        catch_call,
         ast,
     );
-    let mut catch_args = ArenaVec::new_in(ast);
-    catch_args.push(Argument::from(empty_catch_arrow));
-    let call_catch =
-        Expression::new_call_expression(SPAN, catch_member, None, catch_args, false, ast);
-
-    // M[t] && import(M[t]).catch(() => {})
-    let import_and =
-        Expression::new_logical_expression(SPAN, m_t, LogicalOperator::And, call_catch, ast);
-
-    // (L.add(t), M[t] && import(M[t]).catch(() => {}))
-    let mut seq1_exprs = ArenaVec::new_in(ast);
-    seq1_exprs.push(call_add);
-    seq1_exprs.push(import_and);
-    let seq1 = Expression::new_sequence_expression(SPAN, seq1_exprs, ast);
-
-    // L.has(t) || (...)
-    let or_expr =
-        Expression::new_logical_expression(SPAN, call_has, LogicalOperator::Or, seq1, ast);
-
-    // C.whenDefined(t)
-    let c_whendef = Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "C", ast),
-        IdentifierName::new(SPAN, "whenDefined", ast),
-        false,
+    let resolved = call(
         ast,
+        member(ast, ident(ast, "Promise"), "resolve"),
+        Vec::new(),
     );
-    let mut whendef_args = ArenaVec::new_in(ast);
-    whendef_args.push(Argument::from(Expression::new_identifier(SPAN, "t", ast)));
-    let call_whendef =
-        Expression::new_call_expression(SPAN, c_whendef, None, whendef_args, false, ast);
-
-    // (L.has(...) || (...), C.whenDefined(t))
-    let mut top_seq_exprs = ArenaVec::new_in(ast);
-    top_seq_exprs.push(or_expr);
-    top_seq_exprs.push(call_whendef);
-    let top_seq = Expression::new_sequence_expression(SPAN, top_seq_exprs, ast);
-
-    let mut param_vec = ArenaVec::new_in(ast);
-    param_vec.push(FormalParameter::new_plain(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "t", ast),
-        ast,
-    ));
-    let params = FormalParameters::boxed(
-        SPAN,
-        FormalParameterKind::ArrowFormalParameters,
-        param_vec,
-        None,
-        ast,
-    );
-    let arrow = Expression::new_arrow_function_expression(
-        SPAN,
-        false,
-        None,
-        params,
-        None,
-        ArrowFunctionBody::from(top_seq),
-        ast,
-    );
+    let body = Expression::new_conditional_expression(SPAN, test, cached, resolved, ast);
+    let ug_fn = arrow(ast, &["t"], body);
 
     let decl = VariableDeclarator::new(
         SPAN,
         BindingPattern::new_binding_identifier(SPAN, "uG", ast),
         None,
-        Some(arrow),
+        Some(ug_fn),
         false,
         ast,
     );
     let mut decls = ArenaVec::new_in(ast);
     decls.push(decl);
     Statement::new_variable_declaration(SPAN, VariableDeclarationKind::Const, decls, false, ast)
+}
+
+fn ident<'a>(ast: &AstBuilder<'a>, name: &'static str) -> Expression<'a> {
+    Expression::new_identifier(SPAN, name, ast)
+}
+
+fn member<'a>(ast: &AstBuilder<'a>, object: Expression<'a>, prop: &'static str) -> Expression<'a> {
+    Expression::new_static_member_expression(
+        SPAN,
+        object,
+        IdentifierName::new(SPAN, prop, ast),
+        false,
+        ast,
+    )
+}
+
+fn computed<'a>(
+    ast: &AstBuilder<'a>,
+    object: Expression<'a>,
+    index: Expression<'a>,
+) -> Expression<'a> {
+    Expression::new_computed_member_expression(SPAN, object, index, false, ast)
+}
+
+fn call<'a>(
+    ast: &AstBuilder<'a>,
+    callee: Expression<'a>,
+    args: Vec<Expression<'a>>,
+) -> Expression<'a> {
+    let mut out = ArenaVec::new_in(ast);
+    for arg in args {
+        out.push(Argument::from(arg));
+    }
+    Expression::new_call_expression(SPAN, callee, None, out, false, ast)
+}
+
+fn arrow<'a>(
+    ast: &AstBuilder<'a>,
+    params: &[&'static str],
+    body: Expression<'a>,
+) -> Expression<'a> {
+    let mut list = ArenaVec::new_in(ast);
+    for name in params {
+        list.push(FormalParameter::new_plain(
+            SPAN,
+            BindingPattern::new_binding_identifier(SPAN, *name, ast),
+            ast,
+        ));
+    }
+    Expression::new_arrow_function_expression(
+        SPAN,
+        false,
+        None,
+        FormalParameters::boxed(
+            SPAN,
+            FormalParameterKind::ArrowFormalParameters,
+            list,
+            None,
+            ast,
+        ),
+        None,
+        ArrowFunctionBody::from(body),
+        ast,
+    )
 }
 
 // const iT = (e) => e?.nodeType === 1 && (/^(BUTTON|INPUT|SELECT|A)$/i.test(e.tagName) || e.tabIndex >= 0 || e.localName?.includes('-') || /tabindex|data-resumable|resumes-/.test(e.getAttributeNames?.()));
@@ -697,6 +672,14 @@ fn build_hi_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
         Expression::new_unary_expression(SPAN, UnaryOperator::LogicalNot, call_c_get, ast);
     let filter_test =
         Expression::new_logical_expression(SPAN, n_inc_chain, LogicalOperator::And, not_c_get, ast);
+    // && M[n]
+    let filter_test = Expression::new_logical_expression(
+        SPAN,
+        filter_test,
+        LogicalOperator::And,
+        computed(ast, ident(ast, "M"), ident(ast, "n")),
+        ast,
+    );
 
     let mut n_params = ArenaVec::new_in(ast);
     n_params.push(FormalParameter::new_plain(
@@ -956,9 +939,24 @@ fn build_hi_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
         false,
         ast,
     );
-    let cancel_and = Expression::new_logical_expression(
+    // e.cancelable && e.type !== 'keydown' && e.preventDefault()
+    let not_keydown = Expression::new_binary_expression(
+        SPAN,
+        member(ast, ident(ast, "e"), "type"),
+        BinaryOperator::StrictInequality,
+        Expression::new_string_literal(SPAN, "keydown", None, ast),
+        ast,
+    );
+    let cancelable_not_keydown = Expression::new_logical_expression(
         SPAN,
         e_cancelable,
+        LogicalOperator::And,
+        not_keydown,
+        ast,
+    );
+    let cancel_and = Expression::new_logical_expression(
+        SPAN,
+        cancelable_not_keydown,
         LogicalOperator::And,
         call_prevent,
         ast,
@@ -1055,16 +1053,22 @@ fn build_hi_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
         false,
         ast,
     ));
-    // t: e.target
+    // t: p[0] || e.target  (composedPath()[0] is the real target; e.target is retargeted to the shadow host)
     b_obj_props.push(ObjectPropertyKind::new_object_property(
         SPAN,
         PropertyKind::Init,
         PropertyKey::new_static_identifier(SPAN, "t", ast),
-        Expression::new_static_member_expression(
+        Expression::new_logical_expression(
             SPAN,
-            Expression::new_identifier(SPAN, "e", ast),
-            IdentifierName::new(SPAN, "target", ast),
-            false,
+            Expression::new_computed_member_expression(
+                SPAN,
+                Expression::new_identifier(SPAN, "p", ast),
+                Expression::new_numeric_literal(SPAN, 0.0, None, NumberBase::Decimal, ast),
+                false,
+                ast,
+            ),
+            LogicalOperator::Or,
+            member(ast, ident(ast, "e"), "target"),
             ast,
         ),
         false,
@@ -1683,6 +1687,32 @@ fn build_idle_hydration_stmt<'a>(ast: &AstBuilder<'a>, timeout: u32) -> Statemen
         e_ln_chain,
         LogicalOperator::And,
         not_c_get_ln,
+        ast,
+    );
+    // && M[e.localName] && !(e.localName in L)
+    let find_ln_and = Expression::new_logical_expression(
+        SPAN,
+        find_ln_and,
+        LogicalOperator::And,
+        computed(
+            ast,
+            ident(ast, "M"),
+            member(ast, ident(ast, "e"), "localName"),
+        ),
+        ast,
+    );
+    let ln_in_l = Expression::new_binary_expression(
+        SPAN,
+        member(ast, ident(ast, "e"), "localName"),
+        BinaryOperator::In,
+        ident(ast, "L"),
+        ast,
+    );
+    let find_ln_and = Expression::new_logical_expression(
+        SPAN,
+        find_ln_and,
+        LogicalOperator::And,
+        Expression::new_unary_expression(SPAN, UnaryOperator::LogicalNot, ln_in_l, ast),
         ast,
     );
 

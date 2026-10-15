@@ -1293,10 +1293,12 @@ function* renderCustomElementWithInnerHtml(
   const slotCtx = slotManager.pushContext(tagName);
   context.depth++;
   try {
-    // Parse inner HTML into slotted nodes preserving mixed text nodes
-    const slottedNodes = getParsedSlottedNodes(innerHtml);
-    for (let i = 0; i < slottedNodes.length; i++) {
-      slotCtx.addNode(slottedNodes[i]);
+    // Parse inner HTML into slotted nodes preserving mixed text nodes when in flattened mode
+    if (context.mode === 'flattened') {
+      const slottedNodes = getParsedSlottedNodes(innerHtml);
+      for (let i = 0; i < slottedNodes.length; i++) {
+        slotCtx.addNode(slottedNodes[i]);
+      }
     }
 
     // Lifecycle calls

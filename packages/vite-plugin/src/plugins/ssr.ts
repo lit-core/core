@@ -1,14 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { collectResult, HTMLElementStub, IsolateCustomElementRegistry, installIsolateGlobals, renderToString } from '@lit-core/ssr';
-import ts from 'typescript';
+import { RESUMABLE_ADAPTER_SOURCE } from '@lit-core/resumable';
+import { transformResumableComponent } from '@lit-core/resumable/compiler';
+import { collectResult, IsolateCustomElementRegistry, installIsolateGlobals, renderToString, transformSsrComponent } from '@lit-core/ssr';
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { SsrOptions } from '../options.js';
 import { formatVirtualLitCoreId, isVirtualLitCoreId, matchesPattern } from '../utils.js';
 import { ISLANDS_LOADER_SOURCE, SSR_RUNTIME_SOURCE } from '../virtual.js';
 
-export const LIT_SSR_FAST_CHECK = /(?:@customElement|customElements\.define|LitElement|html`|css`)/;
+export const LIT_SSR_FAST_CHECK = /(?:@customElement|customElements\.define|LitElement|ReactiveElement|HTMLElement|html`|css`)/;
 
 /**
  * Normalizes an arbitrary prerender route into a valid, canonical HTML bundle asset path.
@@ -34,11 +35,27 @@ export function sanitizePrerenderRoute(route: unknown): string | null {
   return `${trimmed}.html`;
 }
 
+function extractModuleScriptSrcs(html: string): string[] {
+  const srcs: string[] = [];
+  const scriptRegex = /<script\b[^>]*\btype\s*=\s*["']module["'][^>]*>/gi;
+  let match = scriptRegex.exec(html);
+  while (match !== null) {
+    const tag = match[0];
+    const srcMatch = /\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i.exec(tag);
+    const src = srcMatch?.[1] ?? srcMatch?.[2] ?? srcMatch?.[3];
+    if (src && !src.startsWith('/@vite/') && !src.startsWith('http://') && !src.startsWith('https://')) {
+      srcs.push(src);
+    }
+    match = scriptRegex.exec(html);
+  }
+  return srcs;
+}
+
 /**
  * Renders custom element tags in an HTML string into genuine Declarative Shadow DOM
  * using @lit-core/ssr.
  */
-export function transformHtmlWithSsr(html: string, options: SsrOptions = {}): string {
+export function transformHtmlWithSsr(html: string, options: SsrOptions & { islandsManifest?: Record<string, string> } = {}): string {
   if (typeof html !== 'string' || html.length === 0) {
     return html;
   }
@@ -85,27 +102,7 @@ export function transformHtmlWithSsr(html: string, options: SsrOptions = {}): st
     });
   }
 
-  // 2. Identify custom elements and register fallback stub for unregistered elements
-  const customTagRegex = /<([a-z][a-z0-9._-]*-[a-z0-9._-]*)(?=[\s>/])/gi;
-  let tagMatch = customTagRegex.exec(tokenizedHtml);
-  while (tagMatch !== null) {
-    const tagName = tagMatch[1].toLowerCase();
-    if (!registry.get(tagName)) {
-      class FallbackComponent extends HTMLElementStub {
-        render() {
-          return { strings: ['<slot></slot>'], values: [] };
-        }
-      }
-      try {
-        registry.define(tagName, FallbackComponent);
-      } catch {
-        // Element already defined
-      }
-    }
-    tagMatch = customTagRegex.exec(tokenizedHtml);
-  }
-
-  // 3. Render HTML using @lit-core/ssr
+  // 2. Render HTML using @lit-core/ssr (only expanding registered custom elements in registry)
   const templateResult = { strings: [tokenizedHtml], values: [] };
   let renderedHtml = renderToString(templateResult, {
     customElements: registry,
@@ -114,9 +111,22 @@ export function transformHtmlWithSsr(html: string, options: SsrOptions = {}): st
     mode: 'dsd',
   });
 
-  // 4. Restore protected blocks
+  // 3. Restore protected blocks
   for (let i = 0; i < protectedBlocks.length; i++) {
     renderedHtml = renderedHtml.replace(`<!--__LIT_PROTECTED_BLOCK_${i}__-->`, protectedBlocks[i]);
+  }
+
+  // 4. Inject islands manifest if present
+  if (options.islandsManifest && Object.keys(options.islandsManifest).length > 0 && !renderedHtml.includes('__LIT_ISLANDS_MANIFEST__')) {
+    const manifestJson = JSON.stringify(options.islandsManifest).replace(/</g, '\\u003c');
+    const manifestScript = `<script>window.__LIT_ISLANDS_MANIFEST__=${manifestJson};</script>`;
+    if (renderedHtml.includes('</head>')) {
+      renderedHtml = renderedHtml.replace('</head>', `  ${manifestScript}\n</head>`);
+    } else if (renderedHtml.includes('</body>')) {
+      renderedHtml = renderedHtml.replace('</body>', `  ${manifestScript}\n</body>`);
+    } else {
+      renderedHtml = `${manifestScript}${renderedHtml}`;
+    }
   }
 
   // 5. Inject islands loader microloader if islands option is enabled
@@ -198,152 +208,13 @@ function isStaticAssetRequest(url: string): boolean {
   return ext !== '' && STATIC_ASSET_EXTENSIONS.has(ext);
 }
 
-function validateComponentSyntax(code: string, filename: string): void {
-  const sourceFile = ts.createSourceFile(filename, code, ts.ScriptTarget.Latest, true, filename.endsWith('.tsx') || filename.endsWith('.jsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
-
-  const diagnostics = (sourceFile as any).parseDiagnostics;
-  if (diagnostics && diagnostics.length > 0) {
-    const firstDiag = diagnostics[0];
-    const rawMessage = typeof firstDiag.messageText === 'string' ? firstDiag.messageText : firstDiag.messageText.messageText;
-    throw new Error(`Malformed component template syntax: ${rawMessage}`);
-  }
-}
-
-function transformIslandsAst(sourceText: string, filename: string, options: SsrOptions): { code: string; modified: boolean } | null {
-  const islandsConfig = typeof options.islands === 'object' ? options.islands : null;
-  const includePatterns = islandsConfig?.include;
-  const excludePatterns = islandsConfig?.exclude;
-  const isAllIslands = options.islands === true || (!includePatterns && !excludePatterns);
-
-  const sourceFile = ts.createSourceFile(filename, sourceText, ts.ScriptTarget.Latest, true, filename.endsWith('.tsx') || filename.endsWith('.jsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
-
-  const classToTag = new Map<string, string>();
-  function scanRegistrations(node: ts.Node) {
-    if (ts.isCallExpression(node)) {
-      const calleeText = node.expression.getText(sourceFile);
-      if ((calleeText === 'customElements.define' || calleeText === 'window.customElements.define' || calleeText === 'globalThis.customElements.define') && node.arguments.length >= 2) {
-        const firstArg = node.arguments[0];
-        const secondArg = node.arguments[1];
-        if (ts.isStringLiteral(firstArg)) {
-          classToTag.set(secondArg.getText(sourceFile), firstArg.text);
-        }
-      }
-    }
-    ts.forEachChild(node, scanRegistrations);
-  }
-  scanRegistrations(sourceFile);
-
-  function getTagFromDecorators(node: ts.ClassDeclaration | ts.ClassExpression): string | null {
-    const decorators = typeof ts.canHaveDecorators === 'function' && ts.canHaveDecorators(node) ? ts.getDecorators(node) : (node as any).decorators;
-    if (decorators) {
-      for (const dec of decorators) {
-        if (ts.isCallExpression(dec.expression)) {
-          const calleeText = dec.expression.expression.getText(sourceFile);
-          if ((calleeText === 'customElement' || calleeText.endsWith('.customElement')) && dec.expression.arguments.length > 0) {
-            const firstArg = dec.expression.arguments[0];
-            if (ts.isStringLiteral(firstArg)) {
-              return firstArg.text;
-            }
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  function matchesIslandCriteria(tag: string | null, isCustomElement: boolean): boolean {
-    if (excludePatterns && tag && excludePatterns.some((p) => tag === p || tag.includes(p))) {
-      return false;
-    }
-    if (isAllIslands) {
-      return isCustomElement;
-    }
-    if (!tag || !includePatterns) {
-      return false;
-    }
-    return includePatterns.some((pattern) => tag === pattern || tag.includes(pattern));
-  }
-
-  let modified = false;
-
-  const transformer: ts.TransformerFactory<ts.SourceFile> = (context) => (rootNode) => {
-    function visitor(node: ts.Node): ts.Node {
-      if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
-        let tag = getTagFromDecorators(node);
-        if (!tag && node.name) {
-          tag = classToTag.get(node.name.text) ?? null;
-        }
-
-        let isCustomElement = Boolean(tag);
-        if (!isCustomElement && node.heritageClauses) {
-          for (const hc of node.heritageClauses) {
-            if (hc.token === ts.SyntaxKind.ExtendsKeyword) {
-              for (const type of hc.types) {
-                const exprText = type.expression.getText(sourceFile);
-                if (exprText.includes('LitElement') || exprText.includes('ReactiveElement') || exprText.includes('HTMLElement')) {
-                  isCustomElement = true;
-                  break;
-                }
-              }
-            }
-          }
-        }
-
-        const shouldTag = matchesIslandCriteria(tag, isCustomElement);
-
-        const hasExistingIslandProp = node.members.some((member) => {
-          if (ts.isPropertyDeclaration(member) && member.name) {
-            const nameText = member.name.getText(sourceFile);
-            const isStatic = member.modifiers?.some((m) => m.kind === ts.SyntaxKind.StaticKeyword);
-            return nameText === '__isIsland' && isStatic;
-          }
-          return false;
-        });
-
-        if (shouldTag && !hasExistingIslandProp) {
-          modified = true;
-          const islandProperty = ts.factory.createPropertyDeclaration(
-            [ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)],
-            ts.factory.createIdentifier('__isIsland'),
-            undefined,
-            undefined,
-            ts.factory.createTrue(),
-          );
-
-          const updatedMembers = [islandProperty, ...node.members];
-
-          if (ts.isClassDeclaration(node)) {
-            return ts.factory.updateClassDeclaration(node, node.modifiers, node.name, node.typeParameters, node.heritageClauses, updatedMembers);
-          }
-          return ts.factory.updateClassExpression(node, node.modifiers, node.name, node.typeParameters, node.heritageClauses, updatedMembers);
-        }
-      }
-      return ts.visitEachChild(node, visitor, context);
-    }
-    return ts.visitNode(rootNode, visitor) as ts.SourceFile;
-  };
-
-  const transformationResult = ts.transform(sourceFile, [transformer]);
-  if (!modified) {
-    return null;
-  }
-
-  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
-  let printedCode = printer.printFile(transformationResult.transformed[0]);
-  printedCode = printedCode.replace(/\{\n\s+static __isIsland = true;/g, '{\n  static __isIsland = true;');
-
-  return {
-    code: printedCode,
-    modified: true,
-  };
-}
-
 /**
  * First-class server-side rendering sub-plugin for @lit-core/vite-plugin.
  */
 export function ssr(options: SsrOptions = {}): Plugin {
   let config: ResolvedConfig | undefined;
   let isServerBuild = false;
+  const moduleTagsMap = new Map<string, string[]>();
 
   return {
     name: 'lit-ssr',
@@ -361,6 +232,14 @@ export function ssr(options: SsrOptions = {}): Plugin {
       }
       if (cleanId === 'virtual:lit-core/islands-loader' || cleanId === 'virtual:lit-core/islands-loader.js') {
         return '\0virtual:lit-core/islands-loader.js';
+      }
+      if (
+        cleanId === 'virtual:lit-core/resumable-adapter' ||
+        cleanId === 'virtual:lit-core/resumable-adapter.js' ||
+        cleanId === '@lit-core/resumable/client' ||
+        cleanId === '@lit-core/resumable/client.js'
+      ) {
+        return '\0virtual:lit-core/resumable-adapter.js';
       }
       if (cleanId === '@lit-core/ssr/client') {
         return '\0virtual:lit-core/ssr-runtime.js';
@@ -385,10 +264,16 @@ export function ssr(options: SsrOptions = {}): Plugin {
           map: null,
         };
       }
+      if (cleanId === '\0virtual:lit-core/resumable-adapter.js' || cleanId === '\0virtual:lit-core/resumable-adapter') {
+        return {
+          code: RESUMABLE_ADAPTER_SOURCE,
+          map: null,
+        };
+      }
       return undefined;
     },
 
-    transform(code: string, id: string) {
+    transform(code: string, id: string, transformOptions?: { ssr?: boolean }) {
       const cleanId = id.split('?')[0] ?? id;
       if (!/\.[jt]sx?$/.test(cleanId)) {
         return null;
@@ -415,16 +300,46 @@ export function ssr(options: SsrOptions = {}): Plugin {
       }
 
       try {
-        validateComponentSyntax(code, cleanId);
+        const isSsrTransform = Boolean(isServerBuild || transformOptions?.ssr);
+        const islandsConfig = typeof options.islands === 'object' ? options.islands : null;
+        const result = transformSsrComponent(code, {
+          filename: cleanId,
+          sourcemap: Boolean(options.sourcemap),
+          ssrMode: isSsrTransform,
+          islands: Boolean(options.islands) && !isSsrTransform,
+          islandsInclude: islandsConfig?.include,
+          islandsExclude: islandsConfig?.exclude,
+        });
 
-        if (options.islands && !isServerBuild) {
-          const result = transformIslandsAst(code, cleanId, options);
-          if (result) {
-            return {
-              code: result.code,
-              map: null,
-            };
+        if (result.syntaxError) {
+          throw new Error(`Malformed component template syntax: ${result.syntaxError}`);
+        }
+
+        if (result.discoveredTags && result.discoveredTags.length > 0) {
+          moduleTagsMap.set(cleanId, result.discoveredTags);
+        }
+
+        let currentCode = result.modified ? result.code : code;
+        let wasModified = result.modified;
+        let currentMap = result.map ?? null;
+
+        if (options.resumable && !isSsrTransform && !currentCode.includes('withResumable')) {
+          const resumableRes = transformResumableComponent(currentCode, {
+            filename: cleanId,
+            virtualModule: 'virtual:lit-core/resumable-adapter',
+          });
+          if (resumableRes.transformed) {
+            currentCode = resumableRes.code;
+            wasModified = true;
+            currentMap = resumableRes.map ?? currentMap;
           }
+        }
+
+        if (wasModified) {
+          return {
+            code: currentCode,
+            map: currentMap,
+          };
         }
 
         return null;
@@ -444,11 +359,21 @@ export function ssr(options: SsrOptions = {}): Plugin {
         }
 
         try {
+          installIsolateGlobals();
           const rootDir = config?.root || process.cwd();
           const indexHtmlPath = path.resolve(rootDir, 'index.html');
           let rawHtml = fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf-8') : '<!DOCTYPE html><html><head></head><body><div id="app"></div></body></html>';
 
           rawHtml = await server.transformIndexHtml(url, rawHtml);
+
+          // Automatically load discovered <script type="module" src="..."> entry modules
+          // so component definitions register into customElements before SSR runs
+          const scriptSrcs = extractModuleScriptSrcs(rawHtml);
+          for (const src of scriptSrcs) {
+            try {
+              await server.ssrLoadModule(src);
+            } catch {}
+          }
 
           let renderedContent: any = rawHtml;
           if (options.entry) {
@@ -498,8 +423,28 @@ export function ssr(options: SsrOptions = {}): Plugin {
       });
     },
 
-    transformIndexHtml(html: string) {
-      return transformHtmlWithSsr(html, options);
+    transformIndexHtml(html: string, ctx?: any) {
+      const islandsManifest: Record<string, string> = {};
+      if (ctx?.bundle) {
+        for (const item of Object.values(ctx.bundle)) {
+          if ((item as any).type === 'chunk') {
+            const chunk = item as any;
+            const chunkUrl = chunk.fileName.startsWith('assets/') ? `/${chunk.fileName}` : `/assets/${chunk.fileName}`;
+            if (Array.isArray(chunk.moduleIds)) {
+              for (const modId of chunk.moduleIds) {
+                const cleanModId = String(modId).split('?')[0];
+                const tags = moduleTagsMap.get(cleanModId);
+                if (tags) {
+                  for (const tag of tags) {
+                    islandsManifest[tag] = chunkUrl;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      return transformHtmlWithSsr(html, { ...options, islandsManifest });
     },
 
     async generateBundle(_outputOptions, bundle) {
@@ -518,6 +463,38 @@ export function ssr(options: SsrOptions = {}): Plugin {
       }
       if (validRoutes.length === 0) return;
 
+      installIsolateGlobals();
+
+      // Build tag-to-chunk URL manifest across bundle chunks
+      const islandsManifest: Record<string, string> = {};
+      for (const item of Object.values(bundle)) {
+        if ((item as any).type === 'chunk') {
+          const chunk = item as any;
+          const chunkUrl = chunk.fileName.startsWith('assets/') ? `/${chunk.fileName}` : `/assets/${chunk.fileName}`;
+          if (Array.isArray(chunk.moduleIds)) {
+            for (const modId of chunk.moduleIds) {
+              const cleanModId = String(modId).split('?')[0];
+              const tags = moduleTagsMap.get(cleanModId);
+              if (tags) {
+                for (const tag of tags) {
+                  islandsManifest[tag] = chunkUrl;
+                }
+              }
+            }
+          }
+          if (typeof chunk.code === 'string' && LIT_SSR_FAST_CHECK.test(chunk.code)) {
+            try {
+              const scanResult = transformSsrComponent(chunk.code, { filename: chunk.fileName });
+              for (const tag of scanResult.discoveredTags) {
+                if (!islandsManifest[tag]) {
+                  islandsManifest[tag] = chunkUrl;
+                }
+              }
+            } catch {}
+          }
+        }
+      }
+
       // Locate client entry JS chunk from bundle
       const entryChunk = Object.values(bundle).find((c: any) => c.type === 'chunk' && Boolean(c.isEntry)) || (Object.values(bundle).find((c: any) => c.type === 'chunk') as any);
       const clientScriptTag = entryChunk ? `<script type="module" src="/assets/${entryChunk.fileName}"></script>` : '';
@@ -532,6 +509,26 @@ export function ssr(options: SsrOptions = {}): Plugin {
         baseTemplate = fs.readFileSync(indexHtmlPath, 'utf-8');
       }
 
+      // Automatically load discovered <script type="module" src="..."> entry modules
+      if (baseTemplate) {
+        const scriptSrcs = extractModuleScriptSrcs(baseTemplate);
+        for (const src of scriptSrcs) {
+          try {
+            const cleanSrc = src.replace(/^\/+/, '');
+            const resolvedSrc = path.resolve(rootDir, cleanSrc);
+            if (fs.existsSync(resolvedSrc)) {
+              await import(resolvedSrc);
+            }
+          } catch {}
+        }
+      }
+
+      if (entryChunk?.facadeModuleId && fs.existsSync(entryChunk.facadeModuleId)) {
+        try {
+          await import(entryChunk.facadeModuleId);
+        } catch {}
+      }
+
       // Check if entry module or server render function exists
       let serverEntryMod: any = null;
       const entryPath = options.entry || prerenderConfig.entry;
@@ -542,6 +539,11 @@ export function ssr(options: SsrOptions = {}): Plugin {
         } catch {}
       }
 
+      const renderOptionsWithManifest = {
+        ...options,
+        islandsManifest,
+      };
+
       for (const { raw, fileName } of validRoutes) {
         let routeHtml = '';
 
@@ -549,7 +551,7 @@ export function ssr(options: SsrOptions = {}): Plugin {
           const renderFn = serverEntryMod.render || serverEntryMod.default || serverEntryMod.template;
           if (typeof renderFn === 'function') {
             const renderResult = await renderFn(raw);
-            routeHtml = typeof renderResult === 'string' ? transformHtmlWithSsr(renderResult, options) : renderToString(renderResult, { customElements: options.customElements });
+            routeHtml = typeof renderResult === 'string' ? transformHtmlWithSsr(renderResult, renderOptionsWithManifest) : renderToString(renderResult, { customElements: options.customElements });
           } else if (renderFn && typeof renderFn === 'object') {
             routeHtml = renderToString(renderFn, { customElements: options.customElements });
           }
@@ -557,16 +559,28 @@ export function ssr(options: SsrOptions = {}): Plugin {
 
         if (!routeHtml) {
           if (baseTemplate) {
-            routeHtml = transformHtmlWithSsr(baseTemplate, options);
+            routeHtml = transformHtmlWithSsr(baseTemplate, renderOptionsWithManifest);
           } else {
             let bodyMarkup = '<div id="app"></div>';
             if (entryChunk?.code) {
               const match = /<([a-z][a-z0-9._-]*-[a-z0-9._-]*)[^>]*>([\s\S]*?)<\/\1>/i.exec(entryChunk.code);
               if (match) {
-                bodyMarkup = transformHtmlWithSsr(match[0], options);
+                bodyMarkup = transformHtmlWithSsr(match[0], renderOptionsWithManifest);
               }
             }
             routeHtml = `<!DOCTYPE html><html><head>${clientScriptTag}</head><body>${bodyMarkup}</body></html>`;
+          }
+        }
+
+        if (Object.keys(islandsManifest).length > 0 && !routeHtml.includes('__LIT_ISLANDS_MANIFEST__')) {
+          const manifestJson = JSON.stringify(islandsManifest).replace(/</g, '\\u003c');
+          const manifestScript = `<script>window.__LIT_ISLANDS_MANIFEST__=${manifestJson};</script>`;
+          if (routeHtml.includes('</head>')) {
+            routeHtml = routeHtml.replace('</head>', `  ${manifestScript}\n</head>`);
+          } else if (routeHtml.includes('<body>')) {
+            routeHtml = routeHtml.replace('<body>', `<head>${manifestScript}</head><body>`);
+          } else {
+            routeHtml = `${manifestScript}${routeHtml}`;
           }
         }
 

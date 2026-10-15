@@ -41,6 +41,7 @@ export interface PluginState {
   virtualSheets: Map<string, string>;
   virtualTemplates?: Map<string, string>;
   usedTags?: Set<string>;
+  isSsr?: boolean;
   options: LitPluginOptions;
 }
 
@@ -248,8 +249,11 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
     }
 
     // 6. Apply resumable client adapter injection if enabled
-    const resumableOpt = options.resumable;
-    if (resumableOpt) {
+    const ssrOpt = options.ssr ?? options['lit-ssr'];
+    const isSsr = Boolean(pluginState?.isSsr);
+    const ssrResumable = typeof ssrOpt === 'object' && ssrOpt !== null && Boolean(ssrOpt.resumable);
+    const resumableOpt = options.resumable ?? (ssrResumable && !isSsr ? true : undefined);
+    if (resumableOpt && !isSsr) {
       const resumableOpts: ResumableOptions = typeof resumableOpt === 'object' ? resumableOpt : {};
       const result = transformResumable(currentSource, resourcePath, resumableOpts);
       if (result) {
@@ -277,10 +281,9 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
     }
 
     // 8. Apply SSR ahead-of-time transform if enabled
-    const ssrOpt = options.ssr ?? options['lit-ssr'];
     if (ssrOpt) {
       const ssrOpts: SsrOptions = typeof ssrOpt === 'object' ? ssrOpt : {};
-      const result = transformSsr(currentSource, resourcePath, ssrOpts);
+      const result = transformSsr(currentSource, resourcePath, { ...ssrOpts, ssrMode: isSsr });
       if (result) {
         currentSource = result.code;
         if (result.map) {

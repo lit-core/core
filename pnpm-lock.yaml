@@ -87,6 +87,9 @@ importers:
       '@lit-core/resumable':
         specifier: workspace:*
         version: link:../resumable
+      '@lit-core/ssr':
+        specifier: workspace:*
+        version: link:../ssr
       '@lit-core/tag-shake':
         specifier: workspace:*
         version: link:../tag-shake
@@ -350,6 +353,9 @@ importers:
       '@lit-core/resumable':
         specifier: workspace:*
         version: link:../resumable
+      '@lit-core/ssr':
+        specifier: workspace:*
+        version: link:../ssr
       '@lit-core/vite-plugin':
         specifier: workspace:*
         version: link:../vite-plugin
@@ -396,6 +402,31 @@ importers:
       vite:
         specifier: ^8.3.4
         version: 8.3.4(@types/node@26.6.4)(jiti@2.7.0)(terser@5.51.2)
+
+  packages/ssr:
+    dependencies:
+      '@lit-core/resumable':
+        specifier: workspace:*
+        version: link:../resumable
+    devDependencies:
+      '@lit-core/html-aot':
+        specifier: workspace:*
+        version: link:../html-aot
+      '@lit-core/test-kit':
+        specifier: workspace:*
+        version: link:../test-kit
+      '@types/node':
+        specifier: ^26.6.4
+        version: 26.6.4
+      lit:
+        specifier: ^3.3.3
+        version: 3.3.3
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@26.6.4)(vite@8.3.4(@types/node@26.6.4)(jiti@2.7.0)(terser@5.51.2))
 
   packages/tag-shake:
     devDependencies:
@@ -544,6 +575,9 @@ importers:
       '@lit-core/resumable':
         specifier: workspace:*
         version: link:../resumable
+      '@lit-core/ssr':
+        specifier: workspace:*
+        version: link:../ssr
       '@lit-core/tag-shake':
         specifier: workspace:*
         version: link:../tag-shake
@@ -605,6 +639,9 @@ importers:
       '@lit-core/resumable':
         specifier: workspace:*
         version: link:../resumable
+      '@lit-core/ssr':
+        specifier: workspace:*
+        version: link:../ssr
       '@lit-core/tag-shake':
         specifier: workspace:*
         version: link:../tag-shake

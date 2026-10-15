@@ -10,7 +10,8 @@ export const ISLANDS_LOADER_SOURCE = `(function () {
     const tag = el.localName;
     if (loaded.has(tag)) return;
     loaded.add(tag);
-    const src = el.getAttribute('data-island-src') || ('/assets/' + tag + '.js');
+    const manifest = typeof window !== 'undefined' ? (window.__LIT_ISLANDS_MANIFEST__ || window.__LIT_RESUMABLE_MANIFEST__) : undefined;
+    const src = el.getAttribute('data-island-src') || (manifest && manifest[tag]) || ('/assets/' + tag + '.js');
     import(/* @vite-ignore */ src).catch(() => {});
   }
   if (typeof IntersectionObserver !== 'undefined') {

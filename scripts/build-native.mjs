@@ -24,6 +24,7 @@ const ALL_CRATES = [
   'html-aot',
   'tag-shake',
   'resumable',
+  'ssr',
 ];
 
 const args = process.argv.slice(2);
@@ -122,7 +123,7 @@ function copyCrateArtifacts(crate, pkgDir) {
 function compileTypeScript(crate, pkgDir) {
   const tsconfigPath = path.resolve(pkgDir, 'tsconfig.json');
   const tscBin = path.resolve(rootDir, 'node_modules/.bin/tsc');
-  if ((runTsc || ['dom-paths', 'native', 'resumable'].includes(crate)) && fs.existsSync(tsconfigPath)) {
+  if ((runTsc || ['dom-paths', 'native', 'resumable', 'ssr'].includes(crate)) && fs.existsSync(tsconfigPath)) {
     try {
       execSync(`"${tscBin}" -p tsconfig.json`, { cwd: pkgDir, stdio: 'inherit' });
     } catch (e) {

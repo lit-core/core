@@ -1,4 +1,7 @@
+import { createIsolateEnvironment, renderToString } from '@lit-core/ssr';
+import { html } from 'lit';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { bundleComponentForBrowser } from '../bundler.js';
 import { CARBON_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS } from '../components.js';
 import { getTestBrowser } from '../harness.js';
 import { getSsrEngine } from '../ssr-harness.js';
@@ -193,6 +196,206 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
       });
 
       expect(computedColor).toBe('rgb(255, 0, 0)');
+    });
+
+    it('resumes a server-rendered stateful counter component across 3 clicks (0 -> 1 -> 2 -> 3) without duplicating DOM nodes', async () => {
+      const env = createIsolateEnvironment();
+
+      class SsrStatefulCounter extends env.HTMLElement {
+        static properties = {
+          count: { type: Number },
+        };
+        count = 0;
+        increment() {
+          this.count++;
+        }
+        renderDisplay() {
+          return html`<span id="count-val">${this.count}</span>`;
+        }
+        render() {
+          return html`<div class="counter-wrap">${this.renderDisplay()}<button id="inc-btn" @click=${this.increment}>Increment</button></div>`;
+        }
+      }
+
+      env.customElements.define('ssr-stateful-counter', SsrStatefulCounter);
+
+      const dsdHtml = renderToString(html`<ssr-stateful-counter id="counter-host"></ssr-stateful-counter>`, {
+        customElements: env.customElements,
+        resumable: true,
+      });
+
+      expect(dsdHtml).toContain('shadowrootmode="open"');
+      expect(dsdHtml).toContain('<span id="count-val">0</span>');
+
+      const clientBundle = await bundleComponentForBrowser({
+        entrySource: `
+          import { LitElement, html } from 'lit';
+          import { withResumable } from '@lit-core/resumable/client';
+
+          class SsrStatefulCounter extends withResumable(LitElement) {
+            static properties = {
+              count: { type: Number },
+            };
+            constructor() {
+              super();
+              this.count = 0;
+            }
+            increment() {
+              this.count++;
+            }
+            renderDisplay() {
+              return html\`<span id="count-val">\${this.count}</span>\`;
+            }
+            render() {
+              return html\`<div class="counter-wrap">\${this.renderDisplay()}<button id="inc-btn" @click=\${this.increment}>Increment</button></div>\`;
+            }
+          }
+
+          if (!customElements.get('ssr-stateful-counter')) {
+            customElements.define('ssr-stateful-counter', SsrStatefulCounter);
+          }
+        `,
+        plugins: { cssFuse: false, virtual: true },
+      });
+
+      await page.setContent(`<!DOCTYPE html><html><body><div id="test-root">${dsdHtml}</div><script type="module">${clientBundle}</script></body></html>`);
+
+      const initialCheck = await page.evaluate(async () => {
+        await customElements.whenDefined('ssr-stateful-counter');
+        const host = document.getElementById('counter-host') as any;
+        if (host?.updateComplete) {
+          await host.updateComplete;
+        }
+        const shadow = host?.shadowRoot;
+        (window as any).__initialDsdButton = shadow?.querySelector('button');
+        (window as any).__initialDsdSpan = shadow?.querySelector('#count-val');
+        return {
+          countText: shadow?.querySelector('#count-val')?.textContent || '',
+          buttonCount: shadow ? shadow.querySelectorAll('button').length : 0,
+        };
+      });
+
+      expect(initialCheck.countText).toBe('0');
+      expect(initialCheck.buttonCount).toBe(1);
+
+      for (const expectedCount of ['1', '2', '3']) {
+        const afterClick = await page.evaluate(async () => {
+          const host = document.getElementById('counter-host') as any;
+          const btn = host?.shadowRoot?.querySelector('button') as HTMLButtonElement | null;
+          btn?.click();
+          if (host?.updateComplete) {
+            await host.updateComplete;
+          }
+          const currentBtn = host?.shadowRoot?.querySelector('button');
+          const currentSpan = host?.shadowRoot?.querySelector('#count-val');
+          return {
+            countText: currentSpan?.textContent || '',
+            buttonCount: host?.shadowRoot ? host.shadowRoot.querySelectorAll('button').length : 0,
+            sameButtonNode: currentBtn === (window as any).__initialDsdButton,
+            sameSpanNode: currentSpan === (window as any).__initialDsdSpan,
+          };
+        });
+
+        expect(afterClick.countText).toBe(expectedCount);
+        expect(afterClick.buttonCount).toBe(1);
+        expect(afterClick.sameButtonNode).toBe(true);
+        expect(afterClick.sameSpanNode).toBe(true);
+      }
+    });
+
+    it('resumes an html-aot compiled component with automated ssr.resumable injection across 3 clicks in Chromium', async () => {
+      const env = createIsolateEnvironment();
+
+      class SsrAotCounter extends env.HTMLElement {
+        static properties = {
+          count: { type: Number },
+        };
+        count = 10;
+        increment() {
+          this.count++;
+        }
+        render() {
+          return html`<div class="aot-wrap"><span id="aot-val">${this.count}</span><button id="aot-btn" @click=${this.increment}>Step</button></div>`;
+        }
+      }
+
+      env.customElements.define('ssr-aot-counter', SsrAotCounter);
+
+      const dsdHtml = renderToString(html`<ssr-aot-counter id="aot-host"></ssr-aot-counter>`, {
+        customElements: env.customElements,
+        resumable: true,
+      });
+
+      const clientBundle = await bundleComponentForBrowser({
+        entrySource: `
+          import { LitElement, html } from 'lit';
+
+          export class SsrAotCounter extends LitElement {
+            static properties = {
+              count: { type: Number },
+            };
+            constructor() {
+              super();
+              this.count = 0;
+            }
+            increment() {
+              this.count++;
+            }
+            render() {
+              return html\`<div class="aot-wrap"><span id="aot-val">\${this.count}</span><button id="aot-btn" @click=\${this.increment}>Step</button></div>\`;
+            }
+          }
+
+          if (!customElements.get('ssr-aot-counter')) {
+            customElements.define('ssr-aot-counter', SsrAotCounter);
+          }
+        `,
+        plugins: {
+          cssFuse: false,
+          htmlAot: true,
+          ssr: { resumable: true },
+        },
+      });
+
+      await page.setContent(`<!DOCTYPE html><html><body><div id="test-root">${dsdHtml}</div><script type="module">${clientBundle}</script></body></html>`);
+
+      const initialCheck = await page.evaluate(async () => {
+        await customElements.whenDefined('ssr-aot-counter');
+        const host = document.getElementById('aot-host') as any;
+        if (host?.updateComplete) {
+          await host.updateComplete;
+        }
+        const shadow = host?.shadowRoot;
+        (window as any).__aotBtn = shadow?.querySelector('button');
+        return {
+          countText: shadow?.querySelector('#aot-val')?.textContent || '',
+          buttonCount: shadow ? shadow.querySelectorAll('button').length : 0,
+        };
+      });
+
+      expect(initialCheck.countText).toBe('10');
+      expect(initialCheck.buttonCount).toBe(1);
+
+      for (const expectedCount of ['11', '12', '13']) {
+        const afterClick = await page.evaluate(async () => {
+          const host = document.getElementById('aot-host') as any;
+          const btn = host?.shadowRoot?.querySelector('button') as HTMLButtonElement | null;
+          btn?.click();
+          if (host?.updateComplete) {
+            await host.updateComplete;
+          }
+          const currentBtn = host?.shadowRoot?.querySelector('button');
+          return {
+            countText: host?.shadowRoot?.querySelector('#aot-val')?.textContent || '',
+            buttonCount: host?.shadowRoot ? host.shadowRoot.querySelectorAll('button').length : 0,
+            sameButtonNode: currentBtn === (window as any).__aotBtn,
+          };
+        });
+
+        expect(afterClick.countText).toBe(expectedCount);
+        expect(afterClick.buttonCount).toBe(1);
+        expect(afterClick.sameButtonNode).toBe(true);
+      }
     });
   });
 

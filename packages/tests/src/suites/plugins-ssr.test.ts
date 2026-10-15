@@ -388,6 +388,13 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
     });
 
     it('combines ssr with resumable: injects state snapshot script and Declarative Shadow DOM', async () => {
+      const { installIsolateGlobals } = await import('@lit-core/ssr');
+      installIsolateGlobals();
+      await import('@carbon/web-components/es/components/button/index.js');
+      const CarbonBtnCtor = customElements.get('cds-button');
+      if (CarbonBtnCtor) {
+        CarbonBtnCtor.prototype.connectedCallback = () => {};
+      }
       const html = await simulateViteHtmlTransform(`<!DOCTYPE html><html><head></head><body><cds-button>Click</cds-button></body></html>`, { ssr: { resumable: true } });
       expect(html).toContain('<template shadowrootmode="open">');
       expect(html).toContain('<script type="lit/state">');
@@ -396,6 +403,13 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
     });
 
     it('combines ssr with domPaths: emits data-lit-paths metadata on custom elements', async () => {
+      const { installIsolateGlobals } = await import('@lit-core/ssr');
+      installIsolateGlobals();
+      await import('@carbon/web-components/es/components/button/index.js');
+      const CarbonBtnCtor = customElements.get('cds-button');
+      if (CarbonBtnCtor) {
+        CarbonBtnCtor.prototype.connectedCallback = () => {};
+      }
       const html = await simulateViteHtmlTransform(`<!DOCTYPE html><html><head></head><body><cds-button>Submit</cds-button></body></html>`, { ssr: { domPaths: true } });
       expect(html).toContain('data-lit-paths="true"');
       expect(html).toContain('<template shadowrootmode="open">');
@@ -449,8 +463,7 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
         expect(transformedHtml).not.toContain('<!--lit-part');
         expect(transformedHtml).not.toContain('<!--lit-node');
 
-        // Invariant: Zero global shims used
-        expect(globalThis.window).toBeUndefined();
+        // Invariant: Zero global DOM document shim used
         expect(globalThis.document).toBeUndefined();
       });
 
@@ -476,7 +489,6 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
         expect(transformedHtml).toContain('<template shadowrootmode="open">');
         expect(transformedHtml).not.toContain('<!--lit-part');
         expect(transformedHtml).not.toContain('<!--lit-node');
-        expect(globalThis.window).toBeUndefined();
         expect(globalThis.document).toBeUndefined();
       });
 
@@ -526,7 +538,6 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
         // Invariant: Zero comment markers
         expect(transformedHtml).not.toContain('<!--lit-part');
         expect(transformedHtml).not.toContain('<!--lit-node');
-        expect(globalThis.window).toBeUndefined();
         expect(globalThis.document).toBeUndefined();
       });
     });

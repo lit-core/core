@@ -1,10 +1,10 @@
 /**
  * Compiler integration bridge for @lit-core/ssr.
  * Bridges @lit-core/html-aot, @lit-core/css-fuse, @lit-core/directives,
- * @lit-core/resumable, and @lit-core/dom-paths.
+ * and @lit-core/resumable. This module is part of the runtime entry and must stay
+ * free of Node-only imports (node:*, native addons) so it loads on any JS runtime.
  */
 
-import { computeDomPaths } from '@lit-core/dom-paths';
 import { extractComponentState as resumableExtractComponentState, renderStateScript as resumableRenderStateScript } from '@lit-core/resumable/server';
 import type { CustomElementRegistryLike } from './environment.js';
 
@@ -432,9 +432,5 @@ export class CompilerBridge {
       }
     }
     return '';
-  }
-
-  public computeTemplatePaths(quasis: string[] | TemplateStringsArray): number[][] {
-    return computeDomPaths(Array.from(quasis));
   }
 }

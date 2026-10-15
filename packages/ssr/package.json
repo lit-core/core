@@ -9,12 +9,6 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "edge-light": "./dist/index.js",
-      "workerd": "./dist/index.js",
-      "worker": "./dist/index.js",
-      "bun": "./dist/index.js",
-      "deno": "./dist/index.js",
-      "node": "./dist/index.js",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
@@ -42,6 +36,7 @@
   "files": [
     "dist",
     "src",
+    "*.node",
     "README.md",
     "LICENSE"
   ],
@@ -49,7 +44,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "node ../../scripts/build-native.mjs ssr --release --tsc",
+    "build:debug": "node ../../scripts/build-native.mjs ssr --tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "clean": "rm -rf dist"
@@ -73,7 +69,6 @@
     "directory": "packages/ssr"
   },
   "dependencies": {
-    "@lit-core/dom-paths": "workspace:*",
     "@lit-core/resumable": "workspace:*"
   },
   "devDependencies": {

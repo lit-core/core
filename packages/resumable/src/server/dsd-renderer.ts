@@ -11,6 +11,8 @@ export interface DsdRenderOptions {
 }
 
 export interface ComponentDsdOptions {
+  /** Registered custom element tag. Wins over the instance tagName and static is. */
+  tagName?: string;
   attributes?: Record<string, string | number | boolean | null | undefined>;
   lightDom?: string;
   serializerOptions?: StateSerializerOptions;
@@ -75,7 +77,7 @@ export function renderComponentToDsd(component: any, options: ComponentDsdOption
   }
 
   const ctor = component.constructor;
-  const tagName = component.tagName ? component.tagName.toLowerCase() : ctor.is || 'custom-element';
+  const tagName = options.tagName ? options.tagName.toLowerCase() : component.tagName ? component.tagName.toLowerCase() : ctor.is || 'custom-element';
 
   // Extract static styles
   const stylesList: string[] = [];
@@ -117,6 +119,21 @@ export function renderComponentToDsd(component: any, options: ComponentDsdOption
   const styleTag = stylesList.length > 0 ? `<style>${stylesList.join('\n')}</style>` : '';
 
   return `<${tagName}${attrStr}><template shadowrootmode="open">${styleTag}${shadowHtml}</template>${lightDom}${stateScript}</${tagName}>`;
+}
+
+/** Render one interpolated value as escaped HTML text. */
+function renderChild(val: unknown): string {
+  // null, undefined, false and symbol sentinels (Lit's nothing and noChange) render nothing
+  if (val === null || val === undefined || val === false || typeof val === 'symbol') {
+    return '';
+  }
+  if (Array.isArray(val)) {
+    return val.map(renderChild).join('');
+  }
+  if (typeof val === 'object' && 'strings' in val) {
+    return renderTemplateResult(val);
+  }
+  return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 /**
@@ -167,16 +184,7 @@ export function renderTemplateResult(result: any): string {
 
       html += str;
 
-      if (val === null || val === undefined || val === false) {
-        continue;
-      }
-      if (Array.isArray(val)) {
-        html += val.map(renderTemplateResult).join('');
-      } else if (typeof val === 'object' && 'strings' in val) {
-        html += renderTemplateResult(val);
-      } else {
-        html += String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      }
+      html += renderChild(val);
     } else {
       html += str;
     }

@@ -701,6 +701,11 @@ export interface SsrOptions {
   cleanShadowDom?: boolean;
 
   /**
+   * Enable @lit-core/dom-paths structural index binding during SSR.
+   */
+  domPaths?: boolean;
+
+  /**
    * File patterns to include for SSR transformation.
    * Defaults to [/\.[jt]sx?$/].
    */

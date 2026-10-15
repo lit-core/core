@@ -3,7 +3,7 @@ export interface ManifestOptions {
   basePath?: string;
 }
 
-const CUSTOM_ELEMENT_REGEX = /(?:@customElement\s*\(\s*['"]([a-zA-Z0-9_-]+)['"]\s*\)|customElements\.define\s*\(\s*['"]([a-zA-Z0-9_-]+)['"])/g;
+const CUSTOM_ELEMENT_REGEX = /(?:@?customElement\s*\(\s*['"]([a-zA-Z0-9_-]+)['"]\s*\)|customElements\.define\s*\(\s*['"]([a-zA-Z0-9_-]+)['"])/g;
 
 /**
  * Scan source code or chunk code to extract defined custom element tag names.
@@ -11,15 +11,19 @@ const CUSTOM_ELEMENT_REGEX = /(?:@customElement\s*\(\s*['"]([a-zA-Z0-9_-]+)['"]\
 export function extractCustomElementTags(code: string): string[] {
   const tags = new Set<string>();
 
+  // Documentation examples in comments must not register tags. Only block comments and
+  // whole-line comments are stripped, so `//` inside strings or minified code is untouched.
+  const scanned = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+
   // Reset regex index
   CUSTOM_ELEMENT_REGEX.lastIndex = 0;
-  let match = CUSTOM_ELEMENT_REGEX.exec(code);
+  let match = CUSTOM_ELEMENT_REGEX.exec(scanned);
   while (match !== null) {
     const tag = match[1] || match[2];
     if (tag?.includes('-')) {
       tags.add(tag.toLowerCase());
     }
-    match = CUSTOM_ELEMENT_REGEX.exec(code);
+    match = CUSTOM_ELEMENT_REGEX.exec(scanned);
   }
 
   return Array.from(tags);

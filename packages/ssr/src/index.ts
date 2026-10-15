@@ -5,6 +5,11 @@
  */
 
 export {
+  type TransformSsrOptions,
+  type TransformSsrResult,
+  transformSsrComponent,
+} from './compiler.js';
+export {
   type CompiledTemplateDescriptor,
   type CompiledTemplatePart,
   type CompiledTemplateResult,
@@ -29,10 +34,13 @@ export {
   DocumentStub,
   defaultDocumentStub,
   HTMLElementStub,
+  IntersectionObserverStub,
   IsolateCustomElementRegistry,
   installIsolateGlobals,
   type KeyboardEventInitLike,
   KeyboardEventStub,
+  MutationObserverStub,
+  ResizeObserverStub,
   ShadowRootStub,
 } from './environment.js';
 export {

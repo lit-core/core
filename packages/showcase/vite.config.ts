@@ -71,7 +71,7 @@ function getPluginOptions(feat: string) {
     case 'html-fuse':
       return { htmlFuse: { include } };
     case 'ssr':
-      return { ssr: { cleanShadowDom: true, streaming: true } };
+      return { ssr: { cleanShadowDom: true, streaming: true, prerender: true } };
     case 'all':
       return {
         cssFuse: { include, exclude, threshold: 1, minSavings: 0, applyInDev: true },
@@ -86,7 +86,7 @@ function getPluginOptions(feat: string) {
         native: { include },
         cssMinifier: { include },
         htmlMinifier: { include },
-        ssr: { cleanShadowDom: true, streaming: true },
+        ssr: { cleanShadowDom: true, streaming: true, prerender: true },
       };
     default:
       return null;

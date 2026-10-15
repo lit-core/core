@@ -20,35 +20,6 @@ async function setupEnvironment(targetEngine) {
     const { installIsolateGlobals, render, renderToStream, collectResult } = await import('@lit-core/ssr');
     installIsolateGlobals();
 
-    globalThis.window = globalThis.window || globalThis;
-    globalThis.window.__swc = globalThis.window.__swc || { issuedWarnings: new Set() };
-    globalThis.window.dispatchEvent = globalThis.window.dispatchEvent || (() => true);
-    globalThis.window.addEventListener = globalThis.window.addEventListener || (() => {});
-    globalThis.window.removeEventListener = globalThis.window.removeEventListener || (() => {});
-    globalThis.MutationObserver =
-      globalThis.MutationObserver ||
-      class {
-        observe() {}
-        disconnect() {}
-        takeRecords() {
-          return [];
-        }
-      };
-    globalThis.ResizeObserver =
-      globalThis.ResizeObserver ||
-      class {
-        observe() {}
-        disconnect() {}
-        unobserve() {}
-      };
-    globalThis.IntersectionObserver =
-      globalThis.IntersectionObserver ||
-      class {
-        observe() {}
-        disconnect() {}
-        unobserve() {}
-      };
-
     const { html } = await import('lit');
     return {
       engine: 'core',
