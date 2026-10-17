@@ -45,7 +45,7 @@ export class MyButton extends LitElement {
     assert(buttonResult.code.includes('customElements.define'), 'Must define custom element');
   });
 
-  it('classifies and transforms Mode B directive-using component', () => {
+  it('classifies and preserves Mode B directive-using component for directives package', () => {
     const alertSource = `
 import { LitElement, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
@@ -69,9 +69,8 @@ customElements.define('banner-alert', BannerAlert);
     assert.strictEqual(alertClassification[0].tagName, 'banner-alert');
 
     const alertResult = transformNative(alertSource);
-    assert.strictEqual(alertResult.microCount, 1);
+    assert.strictEqual(alertResult.microCount, 0);
     assert.strictEqual(alertResult.vanillaCount, 0);
-    assert(!alertResult.code.includes('lit/directives/class-map.js'), 'Must eliminate directive import');
-    assert(alertResult.code.includes('.filter(Boolean).join(" ")'), 'Must lower classMap expression');
+    assert(alertResult.code.includes('lit/directives/class-map.js'), 'Must preserve directive import for @lit-core/directives');
   });
 });

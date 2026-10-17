@@ -23,6 +23,13 @@ use crate::extractor::CustomElementTarget;
 /// customElements.define('tag-name', NameProxy);
 /// export { ... };
 /// ```
+fn concat_strs<'a>(ast: &AstBuilder<'a>, a: &str, b: &str) -> &'a str {
+    let mut s = String::with_capacity(a.len() + b.len());
+    s.push_str(a);
+    s.push_str(b);
+    ast.allocator().alloc_str(&s)
+}
+
 pub fn build_proxy_wrapper<'a>(
     ast: &AstBuilder<'a>,
     target: &CustomElementTarget,
@@ -30,18 +37,10 @@ pub fn build_proxy_wrapper<'a>(
 ) -> ArenaVec<'a, Statement<'a>> {
     let mut stmts = ArenaVec::new_in(ast);
 
-    let proxy_name = ast
-        .allocator()
-        .alloc_str(&format!("{}Proxy", target.class_name));
-    let getter_name = ast
-        .allocator()
-        .alloc_str(&format!("__getImpl_{}", target.class_name));
-    let impl_var = ast
-        .allocator()
-        .alloc_str(&format!("__impl_{}", target.class_name));
-    let props_var = ast
-        .allocator()
-        .alloc_str(&format!("__props_{}", target.class_name));
+    let proxy_name = concat_strs(ast, &target.class_name, "Proxy");
+    let getter_name = concat_strs(ast, "__getImpl_", &target.class_name);
+    let impl_var = concat_strs(ast, "__impl_", &target.class_name);
+    let props_var = concat_strs(ast, "__props_", &target.class_name);
     let class_name = ast.allocator().alloc_str(&target.class_name);
     let tag_name = ast.allocator().alloc_str(&target.tag_name);
 
@@ -97,7 +96,7 @@ pub fn build_external_proxy_wrapper<'a>(
 ) -> ArenaVec<'a, Statement<'a>> {
     let mut stmts = ArenaVec::new_in(ast);
 
-    let proxy_name = ast.allocator().alloc_str(&format!("{}Proxy", class_name));
+    let proxy_name = concat_strs(ast, class_name, "Proxy");
     let cls = ast.allocator().alloc_str(class_name);
     let tag = ast.allocator().alloc_str(tag_name);
 
@@ -1617,7 +1616,27 @@ fn build_attribute_changed_callback_method<'a>(ast: &AstBuilder<'a>) -> ClassEle
 
 fn build_connected_callback_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
     let mut stmts = ArenaVec::new_in(ast);
-    stmts.push(Statement::new_expression_statement(
+    // if (typeof this.__upgrade === 'function') { this.__upgrade(); }
+    let upg_type = Expression::new_unary_expression(
+        SPAN,
+        UnaryOperator::Typeof,
+        Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_this_expression(SPAN, ast),
+            IdentifierName::new(SPAN, "__upgrade", ast),
+            false,
+            ast,
+        ),
+        ast,
+    );
+    let is_upg_fn = Expression::new_binary_expression(
+        SPAN,
+        upg_type,
+        BinaryOperator::StrictEquality,
+        Expression::new_string_literal(SPAN, "function", None, ast),
+        ast,
+    );
+    let call_upg = Statement::new_expression_statement(
         SPAN,
         Expression::new_call_expression(
             SPAN,
@@ -1634,7 +1653,173 @@ fn build_connected_callback_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a>
             ast,
         ),
         ast,
+    );
+    let if_upg = Statement::new_if_statement(
+        SPAN,
+        is_upg_fn,
+        Statement::new_block_statement(
+            SPAN,
+            {
+                let mut s = ArenaVec::new_in(ast);
+                s.push(call_upg);
+                s
+            },
+            ast,
+        ),
+        None,
+        ast,
+    );
+    stmts.push(if_upg);
+
+    // if (!this.__connected) {
+    //   this.__connected = true;
+    //   const proto = Object.getPrototypeOf(this);
+    //   if (proto && typeof proto.connectedCallback === 'function') {
+    //     proto.connectedCallback.call(this);
+    //   }
+    // }
+    let not_connected = Expression::new_unary_expression(
+        SPAN,
+        UnaryOperator::LogicalNot,
+        Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_this_expression(SPAN, ast),
+            IdentifierName::new(SPAN, "__connected", ast),
+            false,
+            ast,
+        ),
+        ast,
+    );
+    let mark_connected = Statement::new_expression_statement(
+        SPAN,
+        Expression::new_assignment_expression(
+            SPAN,
+            AssignmentOperator::Assign,
+            AssignmentTarget::from(MemberExpression::new_static_member_expression(
+                SPAN,
+                Expression::new_this_expression(SPAN, ast),
+                IdentifierName::new(SPAN, "__connected", ast),
+                false,
+                ast,
+            )),
+            Expression::new_boolean_literal(SPAN, true, ast),
+            ast,
+        ),
+        ast,
+    );
+    let get_proto_call = Expression::new_call_expression(
+        SPAN,
+        Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "Object", ast),
+            IdentifierName::new(SPAN, "getPrototypeOf", ast),
+            false,
+            ast,
+        ),
+        None,
+        {
+            let mut a = ArenaVec::new_in(ast);
+            a.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
+            a
+        },
+        false,
+        ast,
+    );
+    let mut d = ArenaVec::new_in(ast);
+    d.push(VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "proto", ast),
+        None,
+        Some(get_proto_call),
+        false,
+        ast,
     ));
+    let proto_decl =
+        Statement::new_variable_declaration(SPAN, VariableDeclarationKind::Const, d, false, ast);
+    let proto_cb = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "proto", ast),
+        IdentifierName::new(SPAN, "connectedCallback", ast),
+        false,
+        ast,
+    );
+    let proto_cb_type =
+        Expression::new_unary_expression(SPAN, UnaryOperator::Typeof, proto_cb, ast);
+    let test_proto_cb_fn = Expression::new_binary_expression(
+        SPAN,
+        proto_cb_type,
+        BinaryOperator::StrictEquality,
+        Expression::new_string_literal(SPAN, "function", None, ast),
+        ast,
+    );
+    let test_proto_and_fn = Expression::new_logical_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "proto", ast),
+        LogicalOperator::And,
+        test_proto_cb_fn,
+        ast,
+    );
+    let call_proto_cb = Statement::new_expression_statement(
+        SPAN,
+        Expression::new_call_expression(
+            SPAN,
+            Expression::new_static_member_expression(
+                SPAN,
+                Expression::new_static_member_expression(
+                    SPAN,
+                    Expression::new_identifier(SPAN, "proto", ast),
+                    IdentifierName::new(SPAN, "connectedCallback", ast),
+                    false,
+                    ast,
+                ),
+                IdentifierName::new(SPAN, "call", ast),
+                false,
+                ast,
+            ),
+            None,
+            {
+                let mut a = ArenaVec::new_in(ast);
+                a.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
+                a
+            },
+            false,
+            ast,
+        ),
+        ast,
+    );
+    let if_proto_cb = Statement::new_if_statement(
+        SPAN,
+        test_proto_and_fn,
+        Statement::new_block_statement(
+            SPAN,
+            {
+                let mut s = ArenaVec::new_in(ast);
+                s.push(call_proto_cb);
+                s
+            },
+            ast,
+        ),
+        None,
+        ast,
+    );
+    let if_not_connected = Statement::new_if_statement(
+        SPAN,
+        not_connected,
+        Statement::new_block_statement(
+            SPAN,
+            {
+                let mut s = ArenaVec::new_in(ast);
+                s.push(mark_connected);
+                s.push(proto_decl);
+                s.push(if_proto_cb);
+                s
+            },
+            ast,
+        ),
+        None,
+        ast,
+    );
+    stmts.push(if_not_connected);
     let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stmts, ast);
     let func = Function::boxed(
         SPAN,
@@ -1820,26 +2005,41 @@ fn build_upgrade_method<'a>(
         ast,
     ));
 
-    // 7. if (RealClass.elementStyles && !this.shadowRoot && typeof this.attachShadow === 'function') { ... }
-    stmts.push(build_upgrade_shadow_root(ast));
+    // Object.setPrototypeOf(this, RealClass.prototype);
+    stmts.push(Statement::new_expression_statement(
+        SPAN,
+        Expression::new_call_expression(
+            SPAN,
+            Expression::new_static_member_expression(
+                SPAN,
+                Expression::new_identifier(SPAN, "Object", ast),
+                IdentifierName::new(SPAN, "setPrototypeOf", ast),
+                false,
+                ast,
+            ),
+            None,
+            {
+                let mut a = ArenaVec::new_in(ast);
+                a.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
+                a.push(Argument::from(Expression::new_static_member_expression(
+                    SPAN,
+                    Expression::new_identifier(SPAN, "RealClass", ast),
+                    IdentifierName::new(SPAN, "prototype", ast),
+                    false,
+                    ast,
+                )));
+                a
+            },
+            false,
+            ast,
+        ),
+        ast,
+    ));
 
-    // 8. if (!this.renderOptions) { this.renderOptions = { host: this }; }
-    stmts.push(build_upgrade_render_options(ast));
-
-    // 9. this.isUpdatePending = false; this.hasUpdated = false;
-    stmts.push(build_upgrade_flags(ast));
-
-    // 10. internals & customStates
-    stmts.push(build_upgrade_internals(ast));
-    stmts.push(build_upgrade_custom_states(ast));
-
-    // 11. instance properties reflection must precede attribute buffer replay
-    stmts.push(build_upgrade_reflect_instance(ast));
-
-    // 12. flush buffered attributes after RealClass methods are reflected onto instance
+    // Flush buffered attributes
     stmts.push(build_upgrade_attr_buffer(ast));
 
-    // 16. connectedCallback & requestUpdate
+    // connectedCallback & requestUpdate
     stmts.push(build_upgrade_connected_cb(ast, is_external));
 
     // 17. return this;
@@ -1884,434 +2084,6 @@ fn build_upgrade_method<'a>(
         None,
         ast,
     )
-}
-
-fn build_upgrade_shadow_root<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
-    // if (RealClass.elementStyles && !this.shadowRoot && typeof this.attachShadow === 'function')
-    let c1 = Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "RealClass", ast),
-        IdentifierName::new(SPAN, "elementStyles", ast),
-        false,
-        ast,
-    );
-    let c2 = Expression::new_unary_expression(
-        SPAN,
-        UnaryOperator::LogicalNot,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_this_expression(SPAN, ast),
-            IdentifierName::new(SPAN, "shadowRoot", ast),
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let and1 = Expression::new_logical_expression(SPAN, c1, LogicalOperator::And, c2, ast);
-    let attach_type = Expression::new_unary_expression(
-        SPAN,
-        UnaryOperator::Typeof,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_this_expression(SPAN, ast),
-            IdentifierName::new(SPAN, "attachShadow", ast),
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let is_fn = Expression::new_binary_expression(
-        SPAN,
-        attach_type,
-        BinaryOperator::StrictEquality,
-        Expression::new_string_literal(SPAN, "function", None, ast),
-        ast,
-    );
-    let test_expr =
-        Expression::new_logical_expression(SPAN, and1, LogicalOperator::And, is_fn, ast);
-
-    let mut body_stmts = ArenaVec::new_in(ast);
-    // const root = this.attachShadow(RealClass.shadowRootOptions || { mode: 'open' });
-    let mut default_mode_props = ArenaVec::new_in(ast);
-    default_mode_props.push(ObjectPropertyKind::new_object_property(
-        SPAN,
-        PropertyKind::Init,
-        PropertyKey::new_static_identifier(SPAN, "mode", ast),
-        Expression::new_string_literal(SPAN, "open", None, ast),
-        false,
-        false,
-        false,
-        ast,
-    ));
-    let default_mode = Expression::new_object_expression(SPAN, default_mode_props, ast);
-    let shadow_opts = Expression::new_logical_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_identifier(SPAN, "RealClass", ast),
-            IdentifierName::new(SPAN, "shadowRootOptions", ast),
-            false,
-            ast,
-        ),
-        LogicalOperator::Or,
-        default_mode,
-        ast,
-    );
-    let call_attach = Expression::new_call_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_this_expression(SPAN, ast),
-            IdentifierName::new(SPAN, "attachShadow", ast),
-            false,
-            ast,
-        ),
-        None,
-        {
-            let mut a = ArenaVec::new_in(ast);
-            a.push(Argument::from(shadow_opts));
-            a
-        },
-        false,
-        ast,
-    );
-    let mut root_decl = ArenaVec::new_in(ast);
-    root_decl.push(VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "root", ast),
-        None,
-        Some(call_attach),
-        false,
-        ast,
-    ));
-    body_stmts.push(Statement::new_variable_declaration(
-        SPAN,
-        VariableDeclarationKind::Const,
-        root_decl,
-        false,
-        ast,
-    ));
-
-    // if (Array.isArray(RealClass.elementStyles)) {
-    //   root.adoptedStyleSheets = RealClass.elementStyles.map((s) => s?.styleSheet || s).filter(Boolean);
-    // } else if (RealClass.elementStyles?.styleSheet) {
-    //   root.adoptedStyleSheets = [RealClass.elementStyles.styleSheet];
-    // }
-    let is_arr_call = Expression::new_call_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_identifier(SPAN, "Array", ast),
-            IdentifierName::new(SPAN, "isArray", ast),
-            false,
-            ast,
-        ),
-        None,
-        {
-            let mut a = ArenaVec::new_in(ast);
-            a.push(Argument::from(Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_identifier(SPAN, "RealClass", ast),
-                IdentifierName::new(SPAN, "elementStyles", ast),
-                false,
-                ast,
-            )));
-            a
-        },
-        false,
-        ast,
-    );
-
-    // root.adoptedStyleSheets = RealClass.elementStyles.map((s) => s?.styleSheet || s).filter(Boolean);
-    let s_or = Expression::new_logical_expression(
-        SPAN,
-        Expression::new_chain_expression(
-            SPAN,
-            ChainElement::new_static_member_expression(
-                SPAN,
-                Expression::new_identifier(SPAN, "s", ast),
-                IdentifierName::new(SPAN, "styleSheet", ast),
-                true,
-                ast,
-            ),
-            ast,
-        ),
-        LogicalOperator::Or,
-        Expression::new_identifier(SPAN, "s", ast),
-        ast,
-    );
-    let mut s_params = ArenaVec::new_in(ast);
-    s_params.push(FormalParameter::new_plain(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "s", ast),
-        ast,
-    ));
-    let arrow_s = Expression::new_arrow_function_expression(
-        SPAN,
-        false,
-        None,
-        FormalParameters::boxed(
-            SPAN,
-            FormalParameterKind::ArrowFormalParameters,
-            s_params,
-            None,
-            ast,
-        ),
-        None,
-        ArrowFunctionBody::from(s_or),
-        ast,
-    );
-    let map_call = Expression::new_call_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_identifier(SPAN, "RealClass", ast),
-                IdentifierName::new(SPAN, "elementStyles", ast),
-                false,
-                ast,
-            ),
-            IdentifierName::new(SPAN, "map", ast),
-            false,
-            ast,
-        ),
-        None,
-        {
-            let mut a = ArenaVec::new_in(ast);
-            a.push(Argument::from(arrow_s));
-            a
-        },
-        false,
-        ast,
-    );
-    let filter_call = Expression::new_call_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            map_call,
-            IdentifierName::new(SPAN, "filter", ast),
-            false,
-            ast,
-        ),
-        None,
-        {
-            let mut a = ArenaVec::new_in(ast);
-            a.push(Argument::from(Expression::new_identifier(
-                SPAN, "Boolean", ast,
-            )));
-            a
-        },
-        false,
-        ast,
-    );
-    let assign_arr = Statement::new_expression_statement(
-        SPAN,
-        Expression::new_assignment_expression(
-            SPAN,
-            AssignmentOperator::Assign,
-            AssignmentTarget::from(MemberExpression::new_static_member_expression(
-                SPAN,
-                Expression::new_identifier(SPAN, "root", ast),
-                IdentifierName::new(SPAN, "adoptedStyleSheets", ast),
-                false,
-                ast,
-            )),
-            filter_call,
-            ast,
-        ),
-        ast,
-    );
-
-    // else if (RealClass.elementStyles?.styleSheet) { root.adoptedStyleSheets = [RealClass.elementStyles.styleSheet]; }
-    let es_sheet = Expression::new_chain_expression(
-        SPAN,
-        ChainElement::new_static_member_expression(
-            SPAN,
-            Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_identifier(SPAN, "RealClass", ast),
-                IdentifierName::new(SPAN, "elementStyles", ast),
-                false,
-                ast,
-            ),
-            IdentifierName::new(SPAN, "styleSheet", ast),
-            true,
-            ast,
-        ),
-        ast,
-    );
-    let mut single_elem = ArenaVec::new_in(ast);
-    single_elem.push(ArrayExpressionElement::from(
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_identifier(SPAN, "RealClass", ast),
-                IdentifierName::new(SPAN, "elementStyles", ast),
-                false,
-                ast,
-            ),
-            IdentifierName::new(SPAN, "styleSheet", ast),
-            false,
-            ast,
-        ),
-    ));
-    let assign_single = Statement::new_expression_statement(
-        SPAN,
-        Expression::new_assignment_expression(
-            SPAN,
-            AssignmentOperator::Assign,
-            AssignmentTarget::from(MemberExpression::new_static_member_expression(
-                SPAN,
-                Expression::new_identifier(SPAN, "root", ast),
-                IdentifierName::new(SPAN, "adoptedStyleSheets", ast),
-                false,
-                ast,
-            )),
-            Expression::new_array_expression(SPAN, single_elem, ast),
-            ast,
-        ),
-        ast,
-    );
-    let if_single = Statement::new_if_statement(
-        SPAN,
-        es_sheet,
-        Statement::new_block_statement(
-            SPAN,
-            {
-                let mut s = ArenaVec::new_in(ast);
-                s.push(assign_single);
-                s
-            },
-            ast,
-        ),
-        None,
-        ast,
-    );
-
-    body_stmts.push(Statement::new_if_statement(
-        SPAN,
-        is_arr_call,
-        Statement::new_block_statement(
-            SPAN,
-            {
-                let mut s = ArenaVec::new_in(ast);
-                s.push(assign_arr);
-                s
-            },
-            ast,
-        ),
-        Some(if_single),
-        ast,
-    ));
-
-    Statement::new_if_statement(
-        SPAN,
-        test_expr,
-        Statement::new_block_statement(SPAN, body_stmts, ast),
-        None,
-        ast,
-    )
-}
-
-fn build_upgrade_render_options<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
-    // if (!this.renderOptions) { this.renderOptions = { host: this }; }
-    let not_ro = Expression::new_unary_expression(
-        SPAN,
-        UnaryOperator::LogicalNot,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_this_expression(SPAN, ast),
-            IdentifierName::new(SPAN, "renderOptions", ast),
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let mut ro_props = ArenaVec::new_in(ast);
-    ro_props.push(ObjectPropertyKind::new_object_property(
-        SPAN,
-        PropertyKind::Init,
-        PropertyKey::new_static_identifier(SPAN, "host", ast),
-        Expression::new_this_expression(SPAN, ast),
-        false,
-        false,
-        false,
-        ast,
-    ));
-    let assign_ro = Statement::new_expression_statement(
-        SPAN,
-        Expression::new_assignment_expression(
-            SPAN,
-            AssignmentOperator::Assign,
-            AssignmentTarget::from(MemberExpression::new_static_member_expression(
-                SPAN,
-                Expression::new_this_expression(SPAN, ast),
-                IdentifierName::new(SPAN, "renderOptions", ast),
-                false,
-                ast,
-            )),
-            Expression::new_object_expression(SPAN, ro_props, ast),
-            ast,
-        ),
-        ast,
-    );
-    Statement::new_if_statement(
-        SPAN,
-        not_ro,
-        Statement::new_block_statement(
-            SPAN,
-            {
-                let mut s = ArenaVec::new_in(ast);
-                s.push(assign_ro);
-                s
-            },
-            ast,
-        ),
-        None,
-        ast,
-    )
-}
-
-fn build_upgrade_flags<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
-    // this.isUpdatePending = false; this.hasUpdated = false;
-    let mut stmts = ArenaVec::new_in(ast);
-    stmts.push(Statement::new_expression_statement(
-        SPAN,
-        Expression::new_assignment_expression(
-            SPAN,
-            AssignmentOperator::Assign,
-            AssignmentTarget::from(MemberExpression::new_static_member_expression(
-                SPAN,
-                Expression::new_this_expression(SPAN, ast),
-                IdentifierName::new(SPAN, "isUpdatePending", ast),
-                false,
-                ast,
-            )),
-            Expression::new_boolean_literal(SPAN, false, ast),
-            ast,
-        ),
-        ast,
-    ));
-    stmts.push(Statement::new_expression_statement(
-        SPAN,
-        Expression::new_assignment_expression(
-            SPAN,
-            AssignmentOperator::Assign,
-            AssignmentTarget::from(MemberExpression::new_static_member_expression(
-                SPAN,
-                Expression::new_this_expression(SPAN, ast),
-                IdentifierName::new(SPAN, "hasUpdated", ast),
-                false,
-                ast,
-            )),
-            Expression::new_boolean_literal(SPAN, false, ast),
-            ast,
-        ),
-        ast,
-    ));
-    Statement::new_block_statement(SPAN, stmts, ast)
 }
 
 fn build_upgrade_attr_buffer<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
@@ -2460,886 +2232,6 @@ fn build_upgrade_attr_buffer<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
     )
 }
 
-fn build_upgrade_internals<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
-    // if (!this.internals && typeof this.attachInternals === 'function') { try { this.internals = this.attachInternals(); } catch {} }
-    let not_internals = Expression::new_unary_expression(
-        SPAN,
-        UnaryOperator::LogicalNot,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_this_expression(SPAN, ast),
-            IdentifierName::new(SPAN, "internals", ast),
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let attach_type = Expression::new_unary_expression(
-        SPAN,
-        UnaryOperator::Typeof,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_this_expression(SPAN, ast),
-            IdentifierName::new(SPAN, "attachInternals", ast),
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let is_fn = Expression::new_binary_expression(
-        SPAN,
-        attach_type,
-        BinaryOperator::StrictEquality,
-        Expression::new_string_literal(SPAN, "function", None, ast),
-        ast,
-    );
-    let test_expr =
-        Expression::new_logical_expression(SPAN, not_internals, LogicalOperator::And, is_fn, ast);
-
-    let assign = Statement::new_expression_statement(
-        SPAN,
-        Expression::new_assignment_expression(
-            SPAN,
-            AssignmentOperator::Assign,
-            AssignmentTarget::from(MemberExpression::new_static_member_expression(
-                SPAN,
-                Expression::new_this_expression(SPAN, ast),
-                IdentifierName::new(SPAN, "internals", ast),
-                false,
-                ast,
-            )),
-            Expression::new_call_expression(
-                SPAN,
-                Expression::new_static_member_expression(
-                    SPAN,
-                    Expression::new_this_expression(SPAN, ast),
-                    IdentifierName::new(SPAN, "attachInternals", ast),
-                    false,
-                    ast,
-                ),
-                None,
-                ArenaVec::new_in(ast),
-                false,
-                ast,
-            ),
-            ast,
-        ),
-        ast,
-    );
-    let try_block = BlockStatement::boxed(
-        SPAN,
-        {
-            let mut s = ArenaVec::new_in(ast);
-            s.push(assign);
-            s
-        },
-        ast,
-    );
-    let catch_block = CatchClause::boxed(
-        SPAN,
-        None,
-        BlockStatement::boxed(SPAN, ArenaVec::new_in(ast), ast),
-        ast,
-    );
-    let try_stmt = Statement::new_try_statement(SPAN, try_block, Some(catch_block), None, ast);
-
-    Statement::new_if_statement(
-        SPAN,
-        test_expr,
-        Statement::new_block_statement(
-            SPAN,
-            {
-                let mut s = ArenaVec::new_in(ast);
-                s.push(try_stmt);
-                s
-            },
-            ast,
-        ),
-        None,
-        ast,
-    )
-}
-
-fn build_upgrade_custom_states<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
-    // if (!this.customStates && this.internals?.states) { ... }
-    let not_cs = Expression::new_unary_expression(
-        SPAN,
-        UnaryOperator::LogicalNot,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_this_expression(SPAN, ast),
-            IdentifierName::new(SPAN, "customStates", ast),
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let int_states = Expression::new_chain_expression(
-        SPAN,
-        ChainElement::new_static_member_expression(
-            SPAN,
-            Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_this_expression(SPAN, ast),
-                IdentifierName::new(SPAN, "internals", ast),
-                false,
-                ast,
-            ),
-            IdentifierName::new(SPAN, "states", ast),
-            true,
-            ast,
-        ),
-        ast,
-    );
-    let test_expr =
-        Expression::new_logical_expression(SPAN, not_cs, LogicalOperator::And, int_states, ast);
-
-    // set: (customState, active) => { if (!this.internals?.states) return; try { if (active) this.internals.states.add(customState); else this.internals.states.delete(customState); } catch {} }
-    let mut set_fn_stmts = ArenaVec::new_in(ast);
-    let not_states = Expression::new_unary_expression(
-        SPAN,
-        UnaryOperator::LogicalNot,
-        Expression::new_chain_expression(
-            SPAN,
-            ChainElement::new_static_member_expression(
-                SPAN,
-                Expression::new_static_member_expression(
-                    SPAN,
-                    Expression::new_this_expression(SPAN, ast),
-                    IdentifierName::new(SPAN, "internals", ast),
-                    false,
-                    ast,
-                ),
-                IdentifierName::new(SPAN, "states", ast),
-                true,
-                ast,
-            ),
-            ast,
-        ),
-        ast,
-    );
-    set_fn_stmts.push(Statement::new_if_statement(
-        SPAN,
-        not_states,
-        Statement::new_return_statement(SPAN, None, ast),
-        None,
-        ast,
-    ));
-
-    let call_add = Statement::new_expression_statement(
-        SPAN,
-        Expression::new_call_expression(
-            SPAN,
-            Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_static_member_expression(
-                    SPAN,
-                    Expression::new_static_member_expression(
-                        SPAN,
-                        Expression::new_this_expression(SPAN, ast),
-                        IdentifierName::new(SPAN, "internals", ast),
-                        false,
-                        ast,
-                    ),
-                    IdentifierName::new(SPAN, "states", ast),
-                    false,
-                    ast,
-                ),
-                IdentifierName::new(SPAN, "add", ast),
-                false,
-                ast,
-            ),
-            None,
-            {
-                let mut a = ArenaVec::new_in(ast);
-                a.push(Argument::from(Expression::new_identifier(
-                    SPAN,
-                    "customState",
-                    ast,
-                )));
-                a
-            },
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let call_del = Statement::new_expression_statement(
-        SPAN,
-        Expression::new_call_expression(
-            SPAN,
-            Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_static_member_expression(
-                    SPAN,
-                    Expression::new_static_member_expression(
-                        SPAN,
-                        Expression::new_this_expression(SPAN, ast),
-                        IdentifierName::new(SPAN, "internals", ast),
-                        false,
-                        ast,
-                    ),
-                    IdentifierName::new(SPAN, "states", ast),
-                    false,
-                    ast,
-                ),
-                IdentifierName::new(SPAN, "delete", ast),
-                false,
-                ast,
-            ),
-            None,
-            {
-                let mut a = ArenaVec::new_in(ast);
-                a.push(Argument::from(Expression::new_identifier(
-                    SPAN,
-                    "customState",
-                    ast,
-                )));
-                a
-            },
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let if_active = Statement::new_if_statement(
-        SPAN,
-        Expression::new_identifier(SPAN, "active", ast),
-        call_add,
-        Some(call_del),
-        ast,
-    );
-    let try_set = Statement::new_try_statement(
-        SPAN,
-        BlockStatement::boxed(
-            SPAN,
-            {
-                let mut s = ArenaVec::new_in(ast);
-                s.push(if_active);
-                s
-            },
-            ast,
-        ),
-        Some(CatchClause::boxed(
-            SPAN,
-            None,
-            BlockStatement::boxed(SPAN, ArenaVec::new_in(ast), ast),
-            ast,
-        )),
-        None,
-        ast,
-    );
-    set_fn_stmts.push(try_set);
-
-    let mut set_params = ArenaVec::new_in(ast);
-    set_params.push(FormalParameter::new_plain(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "customState", ast),
-        ast,
-    ));
-    set_params.push(FormalParameter::new_plain(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "active", ast),
-        ast,
-    ));
-    let arrow_set = Expression::new_arrow_function_expression(
-        SPAN,
-        false,
-        None,
-        FormalParameters::boxed(
-            SPAN,
-            FormalParameterKind::ArrowFormalParameters,
-            set_params,
-            None,
-            ast,
-        ),
-        None,
-        ArrowFunctionBody::FunctionBody(FunctionBody::boxed(
-            SPAN,
-            ArenaVec::new_in(ast),
-            set_fn_stmts,
-            ast,
-        )),
-        ast,
-    );
-
-    // has: (customState) => { if (!this.internals?.states) return false; try { return this.internals.states.has(customState); } catch { return false; } }
-    let mut has_fn_stmts = ArenaVec::new_in(ast);
-    has_fn_stmts.push(Statement::new_if_statement(
-        SPAN,
-        Expression::new_unary_expression(
-            SPAN,
-            UnaryOperator::LogicalNot,
-            Expression::new_chain_expression(
-                SPAN,
-                ChainElement::new_static_member_expression(
-                    SPAN,
-                    Expression::new_static_member_expression(
-                        SPAN,
-                        Expression::new_this_expression(SPAN, ast),
-                        IdentifierName::new(SPAN, "internals", ast),
-                        false,
-                        ast,
-                    ),
-                    IdentifierName::new(SPAN, "states", ast),
-                    true,
-                    ast,
-                ),
-                ast,
-            ),
-            ast,
-        ),
-        Statement::new_return_statement(
-            SPAN,
-            Some(Expression::new_boolean_literal(SPAN, false, ast)),
-            ast,
-        ),
-        None,
-        ast,
-    ));
-
-    let call_has = Expression::new_call_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_static_member_expression(
-                    SPAN,
-                    Expression::new_this_expression(SPAN, ast),
-                    IdentifierName::new(SPAN, "internals", ast),
-                    false,
-                    ast,
-                ),
-                IdentifierName::new(SPAN, "states", ast),
-                false,
-                ast,
-            ),
-            IdentifierName::new(SPAN, "has", ast),
-            false,
-            ast,
-        ),
-        None,
-        {
-            let mut a = ArenaVec::new_in(ast);
-            a.push(Argument::from(Expression::new_identifier(
-                SPAN,
-                "customState",
-                ast,
-            )));
-            a
-        },
-        false,
-        ast,
-    );
-    let try_has = Statement::new_try_statement(
-        SPAN,
-        BlockStatement::boxed(
-            SPAN,
-            {
-                let mut s = ArenaVec::new_in(ast);
-                s.push(Statement::new_return_statement(SPAN, Some(call_has), ast));
-                s
-            },
-            ast,
-        ),
-        Some(CatchClause::boxed(
-            SPAN,
-            None,
-            BlockStatement::boxed(
-                SPAN,
-                {
-                    let mut s = ArenaVec::new_in(ast);
-                    s.push(Statement::new_return_statement(
-                        SPAN,
-                        Some(Expression::new_boolean_literal(SPAN, false, ast)),
-                        ast,
-                    ));
-                    s
-                },
-                ast,
-            ),
-            ast,
-        )),
-        None,
-        ast,
-    );
-    has_fn_stmts.push(try_has);
-
-    let mut has_params = ArenaVec::new_in(ast);
-    has_params.push(FormalParameter::new_plain(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "customState", ast),
-        ast,
-    ));
-    let arrow_has = Expression::new_arrow_function_expression(
-        SPAN,
-        false,
-        None,
-        FormalParameters::boxed(
-            SPAN,
-            FormalParameterKind::ArrowFormalParameters,
-            has_params,
-            None,
-            ast,
-        ),
-        None,
-        ArrowFunctionBody::FunctionBody(FunctionBody::boxed(
-            SPAN,
-            ArenaVec::new_in(ast),
-            has_fn_stmts,
-            ast,
-        )),
-        ast,
-    );
-
-    let mut cs_props = ArenaVec::new_in(ast);
-    cs_props.push(ObjectPropertyKind::new_object_property(
-        SPAN,
-        PropertyKind::Init,
-        PropertyKey::new_static_identifier(SPAN, "set", ast),
-        arrow_set,
-        false,
-        false,
-        false,
-        ast,
-    ));
-    cs_props.push(ObjectPropertyKind::new_object_property(
-        SPAN,
-        PropertyKind::Init,
-        PropertyKey::new_static_identifier(SPAN, "has", ast),
-        arrow_has,
-        false,
-        false,
-        false,
-        ast,
-    ));
-    let cs_obj = Expression::new_object_expression(SPAN, cs_props, ast);
-
-    let assign_cs = Statement::new_expression_statement(
-        SPAN,
-        Expression::new_assignment_expression(
-            SPAN,
-            AssignmentOperator::Assign,
-            AssignmentTarget::from(MemberExpression::new_static_member_expression(
-                SPAN,
-                Expression::new_this_expression(SPAN, ast),
-                IdentifierName::new(SPAN, "customStates", ast),
-                false,
-                ast,
-            )),
-            cs_obj,
-            ast,
-        ),
-        ast,
-    );
-
-    Statement::new_if_statement(
-        SPAN,
-        test_expr,
-        Statement::new_block_statement(
-            SPAN,
-            {
-                let mut s = ArenaVec::new_in(ast);
-                s.push(assign_cs);
-                s
-            },
-            ast,
-        ),
-        None,
-        ast,
-    )
-}
-
-fn build_upgrade_reflect_instance<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
-    let mut try_stmts = ArenaVec::new_in(ast);
-
-    // const htmlProto = typeof HTMLElement !== 'undefined' ? HTMLElement.prototype : null;
-    let html_proto_test = Expression::new_binary_expression(
-        SPAN,
-        Expression::new_unary_expression(
-            SPAN,
-            UnaryOperator::Typeof,
-            Expression::new_identifier(SPAN, "HTMLElement", ast),
-            ast,
-        ),
-        BinaryOperator::StrictInequality,
-        Expression::new_string_literal(SPAN, "undefined", None, ast),
-        ast,
-    );
-    let html_proto_consequent = Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "HTMLElement", ast),
-        IdentifierName::new(SPAN, "prototype", ast),
-        false,
-        ast,
-    );
-    let html_proto_init = Expression::new_conditional_expression(
-        SPAN,
-        html_proto_test,
-        html_proto_consequent,
-        Expression::new_null_literal(SPAN, ast),
-        ast,
-    );
-    let mut html_proto_decl = ArenaVec::new_in(ast);
-    html_proto_decl.push(VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "htmlProto", ast),
-        None,
-        Some(html_proto_init),
-        false,
-        ast,
-    ));
-    try_stmts.push(Statement::new_variable_declaration(
-        SPAN,
-        VariableDeclarationKind::Const,
-        html_proto_decl,
-        false,
-        ast,
-    ));
-
-    // let p = RealClass.prototype;
-    let p_expr = Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "RealClass", ast),
-        IdentifierName::new(SPAN, "prototype", ast),
-        false,
-        ast,
-    );
-    let mut p_decl = ArenaVec::new_in(ast);
-    p_decl.push(VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "p", ast),
-        None,
-        Some(p_expr),
-        false,
-        ast,
-    ));
-    try_stmts.push(Statement::new_variable_declaration(
-        SPAN,
-        VariableDeclarationKind::Let,
-        p_decl,
-        false,
-        ast,
-    ));
-
-    // while (p && p !== Object.prototype && p !== htmlProto) {
-    //   for (const k of Object.getOwnPropertyNames(p)) { ... }
-    //   for (const s of Object.getOwnPropertySymbols(p)) { ... }
-    //   p = Object.getPrototypeOf(p);
-    // }
-    let p_ident = Expression::new_identifier(SPAN, "p", ast);
-    let p_ne_obj = Expression::new_binary_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "p", ast),
-        BinaryOperator::StrictInequality,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_identifier(SPAN, "Object", ast),
-            IdentifierName::new(SPAN, "prototype", ast),
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let p_ne_html = Expression::new_binary_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "p", ast),
-        BinaryOperator::StrictInequality,
-        Expression::new_identifier(SPAN, "htmlProto", ast),
-        ast,
-    );
-    let test_1 =
-        Expression::new_logical_expression(SPAN, p_ident, LogicalOperator::And, p_ne_obj, ast);
-    let while_test =
-        Expression::new_logical_expression(SPAN, test_1, LogicalOperator::And, p_ne_html, ast);
-
-    let mut while_body = ArenaVec::new_in(ast);
-    while_body.push(build_copy_props_loop(ast, "p", "getOwnPropertyNames", "k"));
-    while_body.push(build_copy_props_loop(
-        ast,
-        "p",
-        "getOwnPropertySymbols",
-        "s",
-    ));
-
-    // p = Object.getPrototypeOf(p);
-    let get_proto_call = Expression::new_call_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_identifier(SPAN, "Object", ast),
-            IdentifierName::new(SPAN, "getPrototypeOf", ast),
-            false,
-            ast,
-        ),
-        None,
-        {
-            let mut a = ArenaVec::new_in(ast);
-            a.push(Argument::from(Expression::new_identifier(SPAN, "p", ast)));
-            a
-        },
-        false,
-        ast,
-    );
-    let assign_p = Statement::new_expression_statement(
-        SPAN,
-        Expression::new_assignment_expression(
-            SPAN,
-            AssignmentOperator::Assign,
-            AssignmentTarget::from(SimpleAssignmentTarget::new_assignment_target_identifier(
-                SPAN, "p", ast,
-            )),
-            get_proto_call,
-            ast,
-        ),
-        ast,
-    );
-    while_body.push(assign_p);
-
-    try_stmts.push(Statement::new_while_statement(
-        SPAN,
-        while_test,
-        Statement::new_block_statement(SPAN, while_body, ast),
-        ast,
-    ));
-
-    // catch block:
-    let catch_stmts = ArenaVec::new_in(ast);
-
-    Statement::new_try_statement(
-        SPAN,
-        BlockStatement::boxed(SPAN, try_stmts, ast),
-        Some(CatchClause::boxed(
-            SPAN,
-            None,
-            BlockStatement::boxed(SPAN, catch_stmts, ast),
-            ast,
-        )),
-        None,
-        ast,
-    )
-}
-
-fn build_copy_props_loop<'a>(
-    ast: &AstBuilder<'a>,
-    src_obj: &'a str,
-    method_name: &'a str,
-    var_name: &'a str,
-) -> Statement<'a> {
-    // !Object.prototype.hasOwnProperty.call(this, var_name)
-    let has_own_call = Expression::new_call_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_static_member_expression(
-                    SPAN,
-                    Expression::new_identifier(SPAN, "Object", ast),
-                    IdentifierName::new(SPAN, "prototype", ast),
-                    false,
-                    ast,
-                ),
-                IdentifierName::new(SPAN, "hasOwnProperty", ast),
-                false,
-                ast,
-            ),
-            IdentifierName::new(SPAN, "call", ast),
-            false,
-            ast,
-        ),
-        None,
-        {
-            let mut a = ArenaVec::new_in(ast);
-            a.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
-            a.push(Argument::from(Expression::new_identifier(
-                SPAN, var_name, ast,
-            )));
-            a
-        },
-        false,
-        ast,
-    );
-    let not_own =
-        Expression::new_unary_expression(SPAN, UnaryOperator::LogicalNot, has_own_call, ast);
-    let test_expr = if var_name == "k" {
-        let not_ctor = Expression::new_binary_expression(
-            SPAN,
-            Expression::new_identifier(SPAN, var_name, ast),
-            BinaryOperator::StrictInequality,
-            Expression::new_string_literal(SPAN, "constructor", None, ast),
-            ast,
-        );
-        Expression::new_logical_expression(SPAN, not_ctor, LogicalOperator::And, not_own, ast)
-    } else {
-        not_own
-    };
-
-    let get_desc = Expression::new_call_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_identifier(SPAN, "Object", ast),
-            IdentifierName::new(SPAN, "getOwnPropertyDescriptor", ast),
-            false,
-            ast,
-        ),
-        None,
-        {
-            let mut a = ArenaVec::new_in(ast);
-            a.push(Argument::from(Expression::new_identifier(
-                SPAN, src_obj, ast,
-            )));
-            a.push(Argument::from(Expression::new_identifier(
-                SPAN, var_name, ast,
-            )));
-            a
-        },
-        false,
-        ast,
-    );
-    let mut desc_decl = ArenaVec::new_in(ast);
-    desc_decl.push(VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "desc", ast),
-        None,
-        Some(get_desc),
-        false,
-        ast,
-    ));
-
-    let call_def = Statement::new_expression_statement(
-        SPAN,
-        Expression::new_call_expression(
-            SPAN,
-            Expression::new_static_member_expression(
-                SPAN,
-                Expression::new_identifier(SPAN, "Object", ast),
-                IdentifierName::new(SPAN, "defineProperty", ast),
-                false,
-                ast,
-            ),
-            None,
-            {
-                let mut a = ArenaVec::new_in(ast);
-                a.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
-                a.push(Argument::from(Expression::new_identifier(
-                    SPAN, var_name, ast,
-                )));
-                a.push(Argument::from(Expression::new_identifier(
-                    SPAN, "desc", ast,
-                )));
-                a
-            },
-            false,
-            ast,
-        ),
-        ast,
-    );
-    let if_desc = Statement::new_if_statement(
-        SPAN,
-        Expression::new_identifier(SPAN, "desc", ast),
-        call_def,
-        None,
-        ast,
-    );
-
-    let mut inner_try = ArenaVec::new_in(ast);
-    inner_try.push(Statement::new_variable_declaration(
-        SPAN,
-        VariableDeclarationKind::Const,
-        desc_decl,
-        false,
-        ast,
-    ));
-    inner_try.push(if_desc);
-
-    let try_desc = Statement::new_try_statement(
-        SPAN,
-        BlockStatement::boxed(SPAN, inner_try, ast),
-        Some(CatchClause::boxed(
-            SPAN,
-            None,
-            BlockStatement::boxed(SPAN, ArenaVec::new_in(ast), ast),
-            ast,
-        )),
-        None,
-        ast,
-    );
-
-    let if_not_in = Statement::new_if_statement(
-        SPAN,
-        test_expr,
-        Statement::new_block_statement(
-            SPAN,
-            {
-                let mut s = ArenaVec::new_in(ast);
-                s.push(try_desc);
-                s
-            },
-            ast,
-        ),
-        None,
-        ast,
-    );
-
-    let get_names = Expression::new_call_expression(
-        SPAN,
-        Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_identifier(SPAN, "Object", ast),
-            IdentifierName::new(SPAN, method_name, ast),
-            false,
-            ast,
-        ),
-        None,
-        {
-            let mut a = ArenaVec::new_in(ast);
-            a.push(Argument::from(Expression::new_identifier(
-                SPAN, src_obj, ast,
-            )));
-            a
-        },
-        false,
-        ast,
-    );
-
-    let mut left_decls = ArenaVec::new_in(ast);
-    left_decls.push(VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, var_name, ast),
-        None,
-        None,
-        false,
-        ast,
-    ));
-    let for_left = ForStatementLeft::VariableDeclaration(VariableDeclaration::boxed(
-        SPAN,
-        VariableDeclarationKind::Const,
-        left_decls,
-        false,
-        ast,
-    ));
-
-    Statement::new_for_of_statement(
-        SPAN,
-        false,
-        for_left,
-        get_names,
-        Statement::new_block_statement(
-            SPAN,
-            {
-                let mut s = ArenaVec::new_in(ast);
-                s.push(if_not_in);
-                s
-            },
-            ast,
-        ),
-        ast,
-    )
-}
-
 fn build_upgrade_connected_cb<'a>(ast: &AstBuilder<'a>, is_external: bool) -> Statement<'a> {
     let mut stmts = ArenaVec::new_in(ast);
 
@@ -3372,9 +2264,28 @@ fn build_upgrade_connected_cb<'a>(ast: &AstBuilder<'a>, is_external: bool) -> St
         false,
         ast,
     );
-    let test_real_cb = Expression::new_logical_expression(
+    let not_already_connected = Expression::new_unary_expression(
+        SPAN,
+        UnaryOperator::LogicalNot,
+        Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_this_expression(SPAN, ast),
+            IdentifierName::new(SPAN, "__connected", ast),
+            false,
+            ast,
+        ),
+        ast,
+    );
+    let test_conn = Expression::new_logical_expression(
         SPAN,
         this_connected,
+        LogicalOperator::And,
+        not_already_connected,
+        ast,
+    );
+    let test_real_cb = Expression::new_logical_expression(
+        SPAN,
+        test_conn,
         LogicalOperator::And,
         test_real_cb_func,
         ast,
@@ -3513,6 +2424,26 @@ fn build_upgrade_connected_cb<'a>(ast: &AstBuilder<'a>, is_external: bool) -> St
             ),
             ast,
         );
+        let make_mark_connected = || {
+            Statement::new_expression_statement(
+                SPAN,
+                Expression::new_assignment_expression(
+                    SPAN,
+                    AssignmentOperator::Assign,
+                    AssignmentTarget::from(MemberExpression::new_static_member_expression(
+                        SPAN,
+                        Expression::new_this_expression(SPAN, ast),
+                        IdentifierName::new(SPAN, "__connected", ast),
+                        false,
+                        ast,
+                    )),
+                    Expression::new_boolean_literal(SPAN, true, ast),
+                    ast,
+                ),
+                ast,
+            )
+        };
+
         let else_branch = Statement::new_if_statement(
             SPAN,
             test_else,
@@ -3520,6 +2451,7 @@ fn build_upgrade_connected_cb<'a>(ast: &AstBuilder<'a>, is_external: bool) -> St
                 SPAN,
                 {
                     let mut s = ArenaVec::new_in(ast);
+                    s.push(make_mark_connected());
                     s.push(call_real_opt);
                     s
                 },
@@ -3536,6 +2468,7 @@ fn build_upgrade_connected_cb<'a>(ast: &AstBuilder<'a>, is_external: bool) -> St
                 SPAN,
                 {
                     let mut s = ArenaVec::new_in(ast);
+                    s.push(make_mark_connected());
                     s.push(call_real_cb);
                     s
                 },
@@ -3545,6 +2478,24 @@ fn build_upgrade_connected_cb<'a>(ast: &AstBuilder<'a>, is_external: bool) -> St
             ast,
         )
     } else {
+        let mark_conn = Statement::new_expression_statement(
+            SPAN,
+            Expression::new_assignment_expression(
+                SPAN,
+                AssignmentOperator::Assign,
+                AssignmentTarget::from(MemberExpression::new_static_member_expression(
+                    SPAN,
+                    Expression::new_this_expression(SPAN, ast),
+                    IdentifierName::new(SPAN, "__connected", ast),
+                    false,
+                    ast,
+                )),
+                Expression::new_boolean_literal(SPAN, true, ast),
+                ast,
+            ),
+            ast,
+        );
+
         Statement::new_if_statement(
             SPAN,
             test_real_cb,
@@ -3552,6 +2503,7 @@ fn build_upgrade_connected_cb<'a>(ast: &AstBuilder<'a>, is_external: bool) -> St
                 SPAN,
                 {
                     let mut s = ArenaVec::new_in(ast);
+                    s.push(mark_conn);
                     s.push(call_real_cb);
                     s
                 },

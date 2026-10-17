@@ -4,7 +4,77 @@ use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 use std::collections::HashMap;
 
-use crate::analyzer::{compute_part_mask, is_lit_html_tag, LitSemanticAnalysis};
+use crate::analyzer::{compute_part_mask, is_directive_name, is_lit_html_tag, LitSemanticAnalysis};
+
+fn is_event_binding_quasi(quasi_raw: &str) -> bool {
+    let trimmed = quasi_raw.trim_end();
+    let s = if let Some(stripped) = trimmed.strip_suffix('"') {
+        stripped.trim_end()
+    } else if let Some(stripped) = trimmed.strip_suffix('\'') {
+        stripped.trim_end()
+    } else {
+        trimmed
+    };
+    if let Some(eq_pos) = s.rfind('=') {
+        let before_eq = s[..eq_pos].trim_end();
+        if let Some(at_pos) = before_eq.rfind('@') {
+            let event_name = &before_eq[at_pos + 1..];
+            if !event_name.is_empty()
+                && event_name
+                    .chars()
+                    .all(|c| c.is_alphanumeric() || c == '-' || c == '_' || c == ':' || c == '.')
+            {
+                let before_at = &before_eq[..at_pos];
+                if before_at.is_empty()
+                    || before_at.ends_with(char::is_whitespace)
+                    || before_at.ends_with('<')
+                {
+                    return true;
+                }
+            }
+        }
+        if let Some(lh_pos) = before_eq.rfind("data-lh-") {
+            let before_lh = &before_eq[..lh_pos];
+            if before_lh.is_empty()
+                || before_lh.ends_with(char::is_whitespace)
+                || before_lh.ends_with('<')
+            {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn is_lh_action_call(call: &CallExpression) -> bool {
+    match call.callee.without_parentheses() {
+        Expression::Identifier(id) => id.name == "__lhAction",
+        Expression::StaticMemberExpression(mem) => mem.property.name == "__lhAction",
+        _ => false,
+    }
+}
+
+fn is_directive_expression(expr: &Expression, ctx: Option<&LitSemanticAnalysis>) -> bool {
+    match expr {
+        Expression::CallExpression(call) => {
+            if is_lh_action_call(call) {
+                return true;
+            }
+            if let Some(c) = ctx {
+                c.is_directive_call(call)
+            } else {
+                match &call.callee {
+                    Expression::Identifier(id) => is_directive_name(id.name.as_str()),
+                    Expression::StaticMemberExpression(mem) => {
+                        is_directive_name(mem.property.name.as_str())
+                    }
+                    _ => false,
+                }
+            }
+        }
+        _ => false,
+    }
+}
 
 pub fn mask_expressions_in_expr<'a>(
     expr: &mut Expression<'a>,
@@ -25,7 +95,8 @@ pub fn mask_expressions_in_expr<'a>(
     match expr {
         Expression::TaggedTemplateExpression(tagged) => {
             if is_tag(&tagged.tag) {
-                for quasi_expr in &mut tagged.quasi.expressions {
+                for expr_idx in 0..tagged.quasi.expressions.len() {
+                    let quasi_expr = &tagged.quasi.expressions[expr_idx];
                     if let Expression::ConditionalExpression(cond) = quasi_expr {
                         if let Expression::BinaryExpression(bin) = &cond.test {
                             if let Expression::StaticMemberExpression(mem) = &bin.left {
@@ -36,6 +107,18 @@ pub fn mask_expressions_in_expr<'a>(
                         }
                     }
 
+                    if expr_idx < tagged.quasi.quasis.len() {
+                        let raw = tagged.quasi.quasis[expr_idx].value.raw.as_str();
+                        if is_event_binding_quasi(raw) {
+                            continue;
+                        }
+                    }
+
+                    if is_directive_expression(quasi_expr, ctx) {
+                        continue;
+                    }
+
+                    let quasi_expr = &mut tagged.quasi.expressions[expr_idx];
                     let mask = compute_part_mask(quasi_expr, reactive_props);
                     let ast = AstBuilder::new(allocator);
 

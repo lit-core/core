@@ -5,6 +5,22 @@ use oxc_span::SPAN;
 
 use crate::finder::CandidateItem;
 
+pub fn memo_ref_prop_name(dep: &str) -> String {
+    let mut s = String::with_capacity(7 + dep.len() + 4);
+    s.push_str("__memo_");
+    s.push_str(dep);
+    s.push_str("_ref");
+    s
+}
+
+pub fn memo_val_prop_name(val_slot: &str) -> String {
+    let mut s = String::with_capacity(7 + val_slot.len() + 4);
+    s.push_str("__memo_");
+    s.push_str(val_slot);
+    s.push_str("_val");
+    s
+}
+
 pub fn build_memo_block<'a>(
     var_name: &str,
     val_slot: &str,
@@ -32,7 +48,8 @@ pub fn build_memo_block<'a>(
     let mut guard_opt: Option<Expression<'a>> = None;
     for dep in dependencies {
         let this_l = Expression::new_this_expression(SPAN, ast);
-        let prop_l = ast.allocator().alloc_str(&format!("__memo_{}_ref", dep));
+        let prop_name = memo_ref_prop_name(dep);
+        let prop_l = ast.allocator().alloc_str(&prop_name);
         let left = Expression::new_static_member_expression(
             SPAN,
             this_l,
@@ -75,9 +92,8 @@ pub fn build_memo_block<'a>(
     // Consequent block: {var_name} = this.__memo_{val_slot}_val;
     let target = AssignmentTarget::new_assignment_target_identifier(SPAN, var_ident, ast);
     let this_val = Expression::new_this_expression(SPAN, ast);
-    let slot_prop = ast
-        .allocator()
-        .alloc_str(&format!("__memo_{}_val", val_slot));
+    let val_slot_name = memo_val_prop_name(val_slot);
+    let slot_prop = ast.allocator().alloc_str(&val_slot_name);
     let val_member = Expression::new_static_member_expression(
         SPAN,
         this_val,
@@ -101,7 +117,8 @@ pub fn build_memo_block<'a>(
     let mut else_stmts = ArenaVec::new_in(ast);
     for dep in dependencies {
         let this_l = Expression::new_this_expression(SPAN, ast);
-        let prop_l = ast.allocator().alloc_str(&format!("__memo_{}_ref", dep));
+        let dep_ref_name = memo_ref_prop_name(dep);
+        let prop_l = ast.allocator().alloc_str(&dep_ref_name);
         let target = AssignmentTarget::new_static_member_expression(
             SPAN,
             this_l,

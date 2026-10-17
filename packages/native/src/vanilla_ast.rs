@@ -366,11 +366,13 @@ pub fn build_constructor_element<'a>(
     );
     stmts.push(helper.expr_stmt(call_append));
 
-    // 7. Initialize property backing stores: this._propName = default;
+    // 7. Initialize properties through their accessors: this.propName = default;
+    // The setter writes the backing store and pushes the value into the bound DOM parts.
+    // Attribute reflection inside the setter is guarded by isConnected, so it is inert here.
     for p in properties {
         if let Some(ref def_expr) = p.default_value {
-            let backing_prop = allocator.alloc_str(&format!("_{}", p.name));
-            stmts.push(helper.this_prop_assign(backing_prop, def_expr.clone_in(allocator)));
+            let prop_name = allocator.alloc_str(&p.name);
+            stmts.push(helper.this_prop_assign(prop_name, def_expr.clone_in(allocator)));
         }
     }
 
@@ -503,7 +505,6 @@ pub fn build_property_accessors<'a>(
 
                 match b.kind {
                     BindingKind::Text => {
-                        // this.__lit_node_X.data = String(v ?? '');
                         let data_target =
                             AssignmentTarget::from(MemberExpression::new_static_member_expression(
                                 SPAN,
@@ -512,8 +513,12 @@ pub fn build_property_accessors<'a>(
                                 false,
                                 ast,
                             ));
-                        let v_coalesce =
-                            helper.nullish_coalescing(helper.ident_ref("v"), helper.string_lit(""));
+                        let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
+                            helper.ident_ref("v")
+                        } else {
+                            binding_expr.clone_in(allocator)
+                        };
+                        let v_coalesce = helper.nullish_coalescing(val_expr, helper.string_lit(""));
                         let str_call = helper.call_expr(
                             helper.ident_ref("String"),
                             {
@@ -540,12 +545,16 @@ pub fn build_property_accessors<'a>(
                     }
                     BindingKind::BooleanAttribute => {
                         if let Some(attr) = &b.name {
-                            // this.__lit_node_X.toggleAttribute('attr', Boolean(v));
+                            let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
+                                helper.ident_ref("v")
+                            } else {
+                                binding_expr.clone_in(allocator)
+                            };
                             let bool_call = helper.call_expr(
                                 helper.ident_ref("Boolean"),
                                 {
                                     let mut a = ArenaVec::new_in(ast);
-                                    a.push(Argument::from(helper.ident_ref("v")));
+                                    a.push(Argument::from(val_expr));
                                     a
                                 },
                                 false,
@@ -574,11 +583,13 @@ pub fn build_property_accessors<'a>(
                     BindingKind::Attribute => {
                         if let Some(attr) = &b.name {
                             if !attr.is_empty() {
-                                // this.__lit_node_X.setAttribute('attr', String(v ?? ''));
-                                let v_coalesce = helper.nullish_coalescing(
-                                    helper.ident_ref("v"),
-                                    helper.string_lit(""),
-                                );
+                                let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
+                                    helper.ident_ref("v")
+                                } else {
+                                    binding_expr.clone_in(allocator)
+                                };
+                                let v_coalesce =
+                                    helper.nullish_coalescing(val_expr, helper.string_lit(""));
                                 let str_call = helper.call_expr(
                                     helper.ident_ref("String"),
                                     {
@@ -613,7 +624,11 @@ pub fn build_property_accessors<'a>(
                     BindingKind::Property => {
                         if let Some(prop_name) = &b.name {
                             if !prop_name.is_empty() {
-                                // this.__lit_node_X[prop_name] = v;
+                                let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
+                                    helper.ident_ref("v")
+                                } else {
+                                    binding_expr.clone_in(allocator)
+                                };
                                 let prop_alloc = allocator.alloc_str(prop_name);
                                 let assign_stmt = Statement::new_expression_statement(
                                     SPAN,
@@ -631,7 +646,7 @@ pub fn build_property_accessors<'a>(
                                                 ast,
                                             ),
                                         ),
-                                        Expression::new_identifier(SPAN, "v", ast),
+                                        val_expr,
                                         ast,
                                     ),
                                     ast,
@@ -652,7 +667,7 @@ pub fn build_property_accessors<'a>(
         }
 
         // Attribute reflection
-        if p.reflect {
+        if p.reflect && !p.attribute_name.is_empty() {
             let attr_alloc = allocator.alloc_str(&p.attribute_name);
             if p.prop_type == "boolean" {
                 // if (this.isConnected) { if (this.hasAttribute('attr') !== Boolean(v)) this.toggleAttribute('attr', Boolean(v)); }
@@ -1042,6 +1057,16 @@ pub fn expr_references_property(expr: &Expression, prop_name: &str) -> bool {
         }
         Expression::ParenthesizedExpression(paren) => {
             expr_references_property(&paren.expression, prop_name)
+        }
+        _ => false,
+    }
+}
+
+pub fn is_direct_prop_access(expr: &Expression, prop_name: &str) -> bool {
+    match expr {
+        Expression::Identifier(id) => id.name == prop_name,
+        Expression::StaticMemberExpression(mem) if mem.property.name == prop_name => {
+            matches!(&mem.object, Expression::ThisExpression(_))
         }
         _ => false,
     }

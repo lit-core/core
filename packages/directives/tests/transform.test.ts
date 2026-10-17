@@ -174,7 +174,7 @@ describe('directives AOT lowering compiler pass', () => {
     expect(res.code).toMatch(/\[\s*0,\s*1,\s*2,\s*3,\s*4\s*\]/);
   });
 
-  it('lowers guard by inlining zero-arg arrow evaluation', () => {
+  it('cleanly bails out on guard to preserve dependency memoization semantics', () => {
     const input = `
       import { html } from 'lit';
       import { guard } from 'lit/directives/guard.js';
@@ -184,10 +184,8 @@ describe('directives AOT lowering compiler pass', () => {
       }
     `;
     const res = transformDirectives(input);
-    expect(res.loweredCount).toBe(1);
-    expect(res.directivesUsed).toContain('guard');
-    expect(res.code).not.toContain('guard(');
-    expect(res.code).toContain('html`<span>${item.id}</span>`');
+    expect(res.loweredCount).toBe(0);
+    expect(res.code).toContain('guard(');
   });
 
   it('cleanly bails out on live, keyed, and cache leaving calls and imports untouched', () => {
@@ -329,7 +327,7 @@ describe('directives AOT lowering compiler pass', () => {
     expect(res.code).toContain('live(item.val)');
   });
 
-  it('generates valid JavaScript for dynamic classMap fallback without broken filter(Boolean)', () => {
+  it('cleanly bails out on dynamic non-literal classMap without bloated fallback', () => {
     const input = `
       import { html } from 'lit';
       import { classMap } from 'lit/directives/class-map.js';
@@ -339,12 +337,9 @@ describe('directives AOT lowering compiler pass', () => {
       }
     `;
     const res = transformDirectives(input);
-    expect(res.loweredCount).toBe(1);
-    expect(res.directivesUsed).toContain('classMap');
-    expect(res.code).not.toContain('.filter(Boolean)');
-    expect(res.code).toContain('Object.entries(dynamicClasses).filter(');
-    expect(res.code).toContain('.map(');
-    expect(res.code).toContain('.join(" ")');
+    expect(res.loweredCount).toBe(0);
+    expect(res.code).toContain('classMap(dynamicClasses)');
+    expect(res.code).not.toContain('Object.entries');
   });
 
   it('lowers generalized range beyond 30 elements and supports start/end/step', () => {

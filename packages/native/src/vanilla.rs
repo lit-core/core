@@ -71,7 +71,13 @@ pub fn transform_vanilla_class<'a>(
                             {
                                 let mut p_type = "string".to_string();
                                 let mut reflect = false;
-                                let mut attr_name = prop_name.to_lowercase();
+                                // Internal state never maps to an attribute.
+                                let is_state = import_ctx.is_state_decorator(&call.callee, scoping);
+                                let mut attr_name = if is_state {
+                                    String::new()
+                                } else {
+                                    prop_name.to_lowercase()
+                                };
 
                                 if let Some(arg) = call.arguments.first() {
                                     if let Some(Expression::ObjectExpression(obj)) =
@@ -104,11 +110,18 @@ pub fn transform_vanilla_class<'a>(
                                                         reflect = b.value;
                                                     }
                                                 }
-                                                if k == Some("attribute") {
-                                                    if let Expression::StringLiteral(s) =
-                                                        &prop_kv.value
-                                                    {
-                                                        attr_name = s.value.as_str().to_string();
+                                                if k == Some("attribute") && !is_state {
+                                                    match &prop_kv.value {
+                                                        Expression::StringLiteral(s) => {
+                                                            attr_name =
+                                                                s.value.as_str().to_string();
+                                                        }
+                                                        Expression::BooleanLiteral(b)
+                                                            if !b.value =>
+                                                        {
+                                                            attr_name.clear();
+                                                        }
+                                                        _ => {}
                                                     }
                                                 }
                                             }

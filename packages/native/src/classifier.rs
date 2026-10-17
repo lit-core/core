@@ -411,6 +411,7 @@ pub fn classify_class<'a>(
     // Inspect complexity of the class
     let mut has_structural_directive = false;
     let mut has_lowerable_directive = false;
+    let mut has_unsupported_template_expr = false;
     let mut num_html_templates = 0;
     let mut num_reactive_props = 0;
     let mut template_quasis: Vec<String> = Vec::new();
@@ -420,8 +421,8 @@ pub fn classify_class<'a>(
         match elem {
             ClassElement::MethodDefinition(m) => {
                 let name = m.key.static_name().unwrap_or_default();
-                if name == "render" {
-                    if let Some(body) = &m.value.body {
+                if let Some(body) = &m.value.body {
+                    if name == "render" {
                         // Count templates and inspect directives
                         for stmt in &body.statements {
                             inspect_render_statement(
@@ -431,6 +432,7 @@ pub fn classify_class<'a>(
                                 &mut has_structural_directive,
                                 &mut has_lowerable_directive,
                                 &mut num_html_templates,
+                                &mut has_unsupported_template_expr,
                             );
                             if let Statement::ReturnStatement(ret) = stmt {
                                 if let Some(Expression::TaggedTemplateExpression(tag)) =
@@ -444,6 +446,16 @@ pub fn classify_class<'a>(
                                     }
                                 }
                             }
+                        }
+                    } else {
+                        // Inspect helper methods for html tagged templates
+                        for stmt in &body.statements {
+                            count_html_templates_in_statement(
+                                stmt,
+                                import_ctx,
+                                scoping,
+                                &mut num_html_templates,
+                            );
                         }
                     }
                 }
@@ -569,6 +581,11 @@ pub fn classify_class<'a>(
             "micro",
             Some("Complex lifecycle or multiple templates".to_string()),
         )
+    } else if has_unsupported_template_expr {
+        (
+            "micro",
+            Some("Template expressions contain method calls or unsupported structures".to_string()),
+        )
     } else if num_reactive_props > 12 {
         ("micro", Some("Large property surface".to_string()))
     } else {
@@ -583,6 +600,102 @@ pub fn classify_class<'a>(
     })
 }
 
+fn count_html_templates_in_statement<'a>(
+    stmt: &Statement<'a>,
+    import_ctx: &ImportContext,
+    scoping: &Scoping,
+    num_templates: &mut usize,
+) {
+    match stmt {
+        Statement::ReturnStatement(ret) => {
+            if let Some(arg) = &ret.argument {
+                count_html_templates_in_expression(arg, import_ctx, scoping, num_templates);
+            }
+        }
+        Statement::ExpressionStatement(expr_stmt) => {
+            count_html_templates_in_expression(
+                &expr_stmt.expression,
+                import_ctx,
+                scoping,
+                num_templates,
+            );
+        }
+        Statement::IfStatement(if_stmt) => {
+            count_html_templates_in_expression(&if_stmt.test, import_ctx, scoping, num_templates);
+            count_html_templates_in_statement(
+                &if_stmt.consequent,
+                import_ctx,
+                scoping,
+                num_templates,
+            );
+            if let Some(alt) = &if_stmt.alternate {
+                count_html_templates_in_statement(alt, import_ctx, scoping, num_templates);
+            }
+        }
+        Statement::BlockStatement(block) => {
+            for s in &block.body {
+                count_html_templates_in_statement(s, import_ctx, scoping, num_templates);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn count_html_templates_in_expression<'a>(
+    expr: &Expression<'a>,
+    import_ctx: &ImportContext,
+    scoping: &Scoping,
+    num_templates: &mut usize,
+) {
+    match expr {
+        Expression::TaggedTemplateExpression(tag) => {
+            if import_ctx.is_html_tag(&tag.tag, scoping) {
+                *num_templates += 1;
+            }
+            for e in &tag.quasi.expressions {
+                count_html_templates_in_expression(e, import_ctx, scoping, num_templates);
+            }
+        }
+        Expression::CallExpression(call) => {
+            count_html_templates_in_expression(&call.callee, import_ctx, scoping, num_templates);
+            for arg in &call.arguments {
+                if let Some(e) = arg.as_expression() {
+                    count_html_templates_in_expression(e, import_ctx, scoping, num_templates);
+                }
+            }
+        }
+        Expression::ConditionalExpression(cond) => {
+            count_html_templates_in_expression(&cond.test, import_ctx, scoping, num_templates);
+            count_html_templates_in_expression(
+                &cond.consequent,
+                import_ctx,
+                scoping,
+                num_templates,
+            );
+            count_html_templates_in_expression(&cond.alternate, import_ctx, scoping, num_templates);
+        }
+        Expression::LogicalExpression(log) => {
+            count_html_templates_in_expression(&log.left, import_ctx, scoping, num_templates);
+            count_html_templates_in_expression(&log.right, import_ctx, scoping, num_templates);
+        }
+        Expression::BinaryExpression(bin) => {
+            count_html_templates_in_expression(&bin.left, import_ctx, scoping, num_templates);
+            count_html_templates_in_expression(&bin.right, import_ctx, scoping, num_templates);
+        }
+        Expression::ParenthesizedExpression(p) => {
+            count_html_templates_in_expression(&p.expression, import_ctx, scoping, num_templates);
+        }
+        Expression::ArrayExpression(arr) => {
+            for el in &arr.elements {
+                if let Some(e) = el.as_expression() {
+                    count_html_templates_in_expression(e, import_ctx, scoping, num_templates);
+                }
+            }
+        }
+        _ => {}
+    }
+}
+
 fn inspect_render_statement<'a>(
     stmt: &Statement<'a>,
     import_ctx: &ImportContext,
@@ -590,6 +703,7 @@ fn inspect_render_statement<'a>(
     has_structural: &mut bool,
     has_lowerable: &mut bool,
     num_templates: &mut usize,
+    has_unsupported_expr: &mut bool,
 ) {
     match stmt {
         Statement::ReturnStatement(ret) => {
@@ -601,6 +715,7 @@ fn inspect_render_statement<'a>(
                     has_structural,
                     has_lowerable,
                     num_templates,
+                    has_unsupported_expr,
                 );
             }
         }
@@ -612,6 +727,7 @@ fn inspect_render_statement<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
         }
         Statement::IfStatement(if_stmt) => {
@@ -622,6 +738,7 @@ fn inspect_render_statement<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
             inspect_render_statement(
                 &if_stmt.consequent,
@@ -630,6 +747,7 @@ fn inspect_render_statement<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
             if let Some(alt) = &if_stmt.alternate {
                 inspect_render_statement(
@@ -639,6 +757,7 @@ fn inspect_render_statement<'a>(
                     has_structural,
                     has_lowerable,
                     num_templates,
+                    has_unsupported_expr,
                 );
             }
         }
@@ -651,6 +770,7 @@ fn inspect_render_statement<'a>(
                     has_structural,
                     has_lowerable,
                     num_templates,
+                    has_unsupported_expr,
                 );
             }
         }
@@ -665,6 +785,7 @@ fn inspect_render_expression<'a>(
     has_structural: &mut bool,
     has_lowerable: &mut bool,
     num_templates: &mut usize,
+    has_unsupported_expr: &mut bool,
 ) {
     match expr {
         Expression::TaggedTemplateExpression(tag) => {
@@ -679,6 +800,7 @@ fn inspect_render_expression<'a>(
                     has_structural,
                     has_lowerable,
                     num_templates,
+                    has_unsupported_expr,
                 );
             }
         }
@@ -698,6 +820,8 @@ fn inspect_render_expression<'a>(
                         *has_lowerable = true;
                     }
                 }
+            } else {
+                *has_unsupported_expr = true;
             }
             for arg in &call.arguments {
                 if let Some(e) = arg.as_expression() {
@@ -708,6 +832,7 @@ fn inspect_render_expression<'a>(
                         has_structural,
                         has_lowerable,
                         num_templates,
+                        has_unsupported_expr,
                     );
                 }
             }
@@ -720,6 +845,7 @@ fn inspect_render_expression<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
             inspect_render_expression(
                 &cond.consequent,
@@ -728,6 +854,7 @@ fn inspect_render_expression<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
             inspect_render_expression(
                 &cond.alternate,
@@ -736,6 +863,7 @@ fn inspect_render_expression<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
         }
         Expression::LogicalExpression(log) => {
@@ -746,6 +874,7 @@ fn inspect_render_expression<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
             inspect_render_expression(
                 &log.right,
@@ -754,6 +883,7 @@ fn inspect_render_expression<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
         }
         Expression::BinaryExpression(bin) => {
@@ -764,6 +894,7 @@ fn inspect_render_expression<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
             inspect_render_expression(
                 &bin.right,
@@ -772,6 +903,7 @@ fn inspect_render_expression<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
         }
         Expression::ParenthesizedExpression(p) => {
@@ -782,6 +914,7 @@ fn inspect_render_expression<'a>(
                 has_structural,
                 has_lowerable,
                 num_templates,
+                has_unsupported_expr,
             );
         }
         Expression::ArrayExpression(arr) => {
@@ -794,6 +927,7 @@ fn inspect_render_expression<'a>(
                         has_structural,
                         has_lowerable,
                         num_templates,
+                        has_unsupported_expr,
                     );
                 }
             }
@@ -807,6 +941,7 @@ fn inspect_render_expression<'a>(
                     has_structural,
                     has_lowerable,
                     num_templates,
+                    has_unsupported_expr,
                 );
             }
         }

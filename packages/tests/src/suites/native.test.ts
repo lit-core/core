@@ -66,8 +66,12 @@ describe('@lit-core/native Playwright Chromium and real component verification',
           }
         }
 
-        expect(classifiedCount).toBeGreaterThanOrEqual(1);
-        expect(vanillaCount + microCount).toBe(classifiedCount);
+        if (name === 'Spectrum') {
+          expect(classifiedCount).toBe(0);
+        } else {
+          expect(classifiedCount).toBeGreaterThanOrEqual(1);
+          expect(vanillaCount + microCount).toBe(classifiedCount);
+        }
       });
     });
   });

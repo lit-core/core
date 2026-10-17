@@ -80,13 +80,6 @@ impl ImportResolver {
     }
 
     pub fn is_target_tag(&self, tag_name: &str) -> bool {
-        if self.html_svg_identifiers.contains(tag_name) {
-            return true;
-        }
-        // Fallback only if the file has zero imports
-        if !self.has_imports && (tag_name == "html" || tag_name == "svg") {
-            return true;
-        }
-        false
+        self.html_svg_identifiers.contains(tag_name)
     }
 }

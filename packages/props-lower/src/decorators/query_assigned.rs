@@ -157,7 +157,13 @@ pub fn build_query_assigned_return_expr<'a>(
 
     // Slot selector string
     let slot_selector = match slot_name {
-        Some(slot) => format!("slot[name={}]", slot),
+        Some(slot) => {
+            let mut s = String::with_capacity(11 + slot.len());
+            s.push_str("slot[name=");
+            s.push_str(slot);
+            s.push(']');
+            s
+        }
         None => "slot:not([name])".to_string(),
     };
 

@@ -9,13 +9,14 @@ describe('dom-paths compiler', () => {
 
     const paths = compute(quasis);
     expect(paths).toEqual([
-      [0, 1, 1], // Part 0: ${this.count} inside <p>
-      [0, 2], // Part 1: @click attribute on <button>
+      [0, 3, 1], // Part 0: ${this.count} inside <p>
+      [0, 5], // Part 1: @click attribute on <button>
     ]);
   });
 
   it('transforms Lit component class to inject static __litPartPaths', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class CounterComponent extends LitElement {
   render() {
     return html\`
@@ -33,13 +34,13 @@ export class CounterComponent extends LitElement {
     expect(res.componentsCount).toBe(1);
     expect(res.pathsCount).toBe(2);
     expect(res.paths[0]).toEqual([
-      [0, 1, 1],
-      [0, 2],
+      [1, 3, 1],
+      [1, 5],
     ]);
 
     expect(res.code).toContain('static __litPartPaths = [');
-    expect(res.code.replace(/\s+/g, '')).toContain('[0,1,1]');
-    expect(res.code.replace(/\s+/g, '')).toContain('[0,2]');
+    expect(res.code.replace(/\s+/g, '')).toContain('[1,3,1]');
+    expect(res.code.replace(/\s+/g, '')).toContain('[1,5]');
     expect(res.code).toContain('render()');
   });
 
@@ -47,7 +48,7 @@ export class CounterComponent extends LitElement {
     const quasis = ['<div>\n  <section>\n    <article>\n      <span>', '</span>\n    </article>\n  </section>\n</div>'];
 
     const paths = compute(quasis);
-    expect(paths).toEqual([[0, 0, 0, 0, 0]]);
+    expect(paths).toEqual([[0, 1, 1, 1, 0]]);
   });
 
   it('handles SVG subtrees with self-closing and text tags', () => {
@@ -55,8 +56,8 @@ export class CounterComponent extends LitElement {
 
     const paths = compute(quasis);
     expect(paths).toEqual([
-      [0, 0], // Attribute on <circle>
-      [0, 1, 0], // Child inside <text>
+      [0, 1], // Attribute on <circle>
+      [0, 3, 0], // Child inside <text>
     ]);
   });
 
@@ -65,8 +66,8 @@ export class CounterComponent extends LitElement {
 
     const paths = compute(quasis);
     expect(paths).toEqual([
-      [0, 0, 0], // First child expression in <span>
-      [0, 0, 1], // Second child expression in <span>
+      [0, 1, 0], // First child expression in <span>
+      [0, 1, 1], // Second child expression in <span>
     ]);
   });
 
@@ -83,8 +84,8 @@ export class CounterComponent extends LitElement {
     const paths = compute(quasis);
     expect(paths).toEqual([
       [0, 0], // Inside <header>
-      [1, 0], // Inside <main>
-      [2, 0], // Inside <footer>
+      [2, 0], // Inside <main>
+      [4, 0], // Inside <footer>
     ]);
   });
 

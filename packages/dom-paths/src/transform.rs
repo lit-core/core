@@ -111,22 +111,15 @@ impl LitSemanticAnalysis {
     }
 
     pub fn is_lit_tag(&self, expr: &Expression) -> bool {
+        if !self.has_lit_imports {
+            return false;
+        }
         match expr {
-            Expression::Identifier(ident) => {
-                if self.has_any_imports {
-                    self.lit_tag_names.contains(ident.name.as_str())
-                } else {
-                    ident.name == "html" || ident.name == "svg"
-                }
-            }
+            Expression::Identifier(ident) => self.lit_tag_names.contains(ident.name.as_str()),
             Expression::StaticMemberExpression(mem) => {
                 if mem.property.name == "html" || mem.property.name == "svg" {
                     if let Expression::Identifier(obj) = &mem.object {
-                        if self.has_any_imports {
-                            return self.lit_namespaces.contains(obj.name.as_str());
-                        } else {
-                            return true;
-                        }
+                        return self.lit_namespaces.contains(obj.name.as_str());
                     }
                 }
                 false
@@ -136,25 +129,18 @@ impl LitSemanticAnalysis {
     }
 
     pub fn is_lit_class(&self, class: &Class) -> bool {
+        if !self.has_lit_imports {
+            return false;
+        }
         if let Some(ref heritage) = class.heritage {
             match &heritage.expression {
-                Expression::Identifier(ident) => {
-                    if self.has_any_imports {
-                        self.lit_class_names.contains(ident.name.as_str())
-                    } else {
-                        ident.name == "LitElement" || ident.name == "ReactiveElement"
-                    }
-                }
+                Expression::Identifier(ident) => self.lit_class_names.contains(ident.name.as_str()),
                 Expression::StaticMemberExpression(mem)
                     if mem.property.name == "LitElement"
                         || mem.property.name == "ReactiveElement" =>
                 {
                     if let Expression::Identifier(obj) = &mem.object {
-                        if self.has_any_imports {
-                            self.lit_namespaces.contains(obj.name.as_str())
-                        } else {
-                            true
-                        }
+                        self.lit_namespaces.contains(obj.name.as_str())
                     } else {
                         false
                     }

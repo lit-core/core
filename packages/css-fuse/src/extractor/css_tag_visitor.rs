@@ -84,23 +84,6 @@ impl<'a> CssTagVisitor<'a> {
                     if let Some(sym_id) = reference.symbol_id() {
                         if self.lit_css_symbols.contains(&sym_id) {
                             return Some(ident.name.to_string());
-                        } else {
-                            return None;
-                        }
-                    }
-                }
-                if self.lit_css_symbols.is_empty() {
-                    if self.has_imports {
-                        return None;
-                    }
-                    if ident.name == "css" {
-                        let is_unshadowed = if let Some(ref_id) = ident.reference_id.get() {
-                            self.scoping.get_reference(ref_id).symbol_id().is_none()
-                        } else {
-                            true
-                        };
-                        if is_unshadowed {
-                            return Some("css".to_string());
                         }
                     }
                 }
@@ -117,13 +100,11 @@ impl<'a> CssTagVisitor<'a> {
                                 }
                             }
                         }
-                        if self.lit_css_namespaces.is_empty() && !self.has_imports {
-                            return Some("css".to_string());
-                        }
                     }
                 }
                 None
             }
+
             _ => None,
         }
     }
@@ -142,13 +123,16 @@ impl<'a> CssTagVisitor<'a> {
             None => return,
         };
 
+        // When the template contains dynamic expressions, cleanly bail out.
+        // Only fully static CSS templates may be extracted and rewritten.
+        if !tagged.quasi.expressions.is_empty() {
+            return;
+        }
+
         // Extract raw text from the template quasis
         let mut raw_css = String::new();
-        for (i, quasi) in tagged.quasi.quasis.iter().enumerate() {
+        for quasi in &tagged.quasi.quasis {
             raw_css.push_str(quasi.value.raw.as_str());
-            if i < tagged.quasi.expressions.len() {
-                raw_css.push_str("/*__INTERPOLATION__*/");
-            }
         }
 
         let span = self.compute_span(tagged.span);
@@ -181,7 +165,7 @@ impl<'a> CssTagVisitor<'a> {
             None => return,
         };
 
-        if call.arguments.is_empty() {
+        if call.arguments.len() != 1 {
             return;
         }
 
@@ -198,15 +182,17 @@ impl<'a> CssTagVisitor<'a> {
                                         raw_css.push_str(lit.value.as_str());
                                     }
                                     Expression::TemplateLiteral(temp) => {
-                                        for (i, quasi) in temp.quasis.iter().enumerate() {
+                                        if !temp.expressions.is_empty() {
+                                            return;
+                                        }
+                                        for quasi in &temp.quasis {
                                             raw_css.push_str(quasi.value.raw.as_str());
-                                            if i < temp.expressions.len() {
-                                                raw_css.push_str("/*__INTERPOLATION__*/");
-                                            }
                                         }
                                     }
-                                    _ => {}
+                                    _ => return,
                                 }
+                            } else {
+                                return;
                             }
                         }
                     }
@@ -214,15 +200,17 @@ impl<'a> CssTagVisitor<'a> {
                         raw_css.push_str(lit.value.as_str());
                     }
                     Expression::TemplateLiteral(temp) => {
-                        for (i, quasi) in temp.quasis.iter().enumerate() {
+                        if !temp.expressions.is_empty() {
+                            return;
+                        }
+                        for quasi in &temp.quasis {
                             raw_css.push_str(quasi.value.raw.as_str());
-                            if i < temp.expressions.len() {
-                                raw_css.push_str("/*__INTERPOLATION__*/");
-                            }
                         }
                     }
-                    _ => {}
+                    _ => return,
                 }
+            } else {
+                return;
             }
         }
 
@@ -512,5 +500,66 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
                 None,
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use oxc_allocator::Allocator;
+    use oxc_parser::Parser;
+    use oxc_semantic::SemanticBuilder;
+    use oxc_span::SourceType;
+
+    #[test]
+    fn test_dynamic_interpolation_bailout() {
+        let source = r#"
+            import { css } from 'lit';
+            const dynColor = 'red';
+            const styles = css`
+                :host {
+                    color: ${dynColor};
+                }
+            `;
+            const staticStyles = css`
+                :host {
+                    display: block;
+                }
+            `;
+        "#;
+        let allocator = Allocator::default();
+        let parsed = Parser::new(&allocator, source, SourceType::ts()).parse();
+        let semantic_ret = SemanticBuilder::new().build(&parsed.program);
+        let scoping = semantic_ret.semantic.into_scoping();
+        let mut visitor = CssTagVisitor::new(source, "test.ts", &scoping);
+        visitor.visit_program(&parsed.program);
+
+        assert_eq!(visitor.extracted_styles.len(), 1);
+        assert_eq!(
+            visitor.extracted_styles[0].css_text.trim(),
+            ":host {\n                    display: block;\n                }"
+        );
+    }
+
+    #[test]
+    fn test_call_expression_dynamic_interpolation_bailout() {
+        let source = r#"
+            import { css } from 'lit';
+            const dyn = 'blue';
+            const dynamicCall = css([":host { color: ", "; }"], dyn);
+            const staticCall = css([":host { display: block; }"]);
+        "#;
+        let allocator = Allocator::default();
+        let parsed = Parser::new(&allocator, source, SourceType::ts()).parse();
+        let semantic_ret = SemanticBuilder::new().build(&parsed.program);
+        let scoping = semantic_ret.semantic.into_scoping();
+        let mut visitor = CssTagVisitor::new(source, "test.ts", &scoping);
+        visitor.visit_program(&parsed.program);
+
+        assert_eq!(visitor.extracted_styles.len(), 1);
+        assert_eq!(
+            visitor.extracted_styles[0].css_text.trim(),
+            ":host { display: block; }"
+        );
     }
 }

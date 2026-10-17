@@ -204,103 +204,72 @@ export class AliasedElem extends BaseEl {
 
 describe('runtime dispatcher and event propagation logic', () => {
   it('executes delegated handler with correct context and stops on cancelBubble', () => {
-    // Create component instance mock with injected dispatcher methods
-    const calls: string[] = [];
+    const input = `
+import { LitElement, html } from 'lit';
+export class DelegatedButtonComponent extends LitElement {
+  render() {
+    return html\`
+      <div @click=\${this.onDiv}>
+        <button @click=\${this.onBtn}>Click</button>
+      </div>
+    \`;
+  }
+}
+`;
+    const res = transformEventHoist(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.hoistedEventsCount).toBe(2);
+    expect(res.events).toEqual(['click']);
 
-    class TestComponent {
+    class FakeLitElement {
       shadowRoot = {
         listeners: {} as Record<string, (...args: any[]) => any>,
         addEventListener(evt: string, fn: (...args: any[]) => any) {
           this.listeners[evt] = fn;
         },
       };
-      __lhActions: ((...args: any[]) => any)[] = [];
-      __lhInitialized = false;
-
-      __initLitEventHoist() {
-        if (this.__lhInitialized) return;
-        this.__lhInitialized = true;
-        const root: any = this.shadowRoot || this;
-        root.addEventListener('click', (e: any) => this.__lhDispatch('click', e));
-      }
-
-      __lhAction(handler: (...args: any[]) => any) {
-        if (!this.__lhActions) this.__lhActions = [];
-        const id = this.__lhActions.length;
-        this.__lhActions.push(handler);
-        return id;
-      }
-
-      __lhDispatch(eventName: string, event: any) {
-        const attr = `data-lh-${eventName}`;
-        const root = this.shadowRoot || this;
-        let stopped = false;
-        const origStop = event.stopPropagation;
-        if (origStop) {
-          event.stopPropagation = function (...args: any[]) {
-            stopped = true;
-            return origStop.apply(this, args);
-          };
-        }
-        const path = event.composedPath ? event.composedPath() : [];
-        if (path.length > 0) {
-          for (const node of path) {
-            if (node === root) break;
-            if (node.nodeType === 1 && node.hasAttribute && node.hasAttribute(attr)) {
-              if (node.getRootNode && node.getRootNode() !== root) {
-                continue;
-              }
-              const actionId = Number(node.getAttribute(attr));
-              const handler = this.__lhActions?.[actionId];
-              if (typeof handler === 'function') {
-                handler.call(this, event);
-              }
-              if (event.cancelBubble || stopped) break;
-            }
-          }
-        } else {
-          let target = event.target;
-          while (target && target !== root && target.nodeType === 1) {
-            if (target.hasAttribute(attr)) {
-              if (!target.getRootNode || target.getRootNode() === root) {
-                const actionId = Number(target.getAttribute(attr));
-                const handler = this.__lhActions?.[actionId];
-                if (typeof handler === 'function') {
-                  handler.call(this, event);
-                }
-                if (event.cancelBubble || stopped) break;
-              }
-            }
-            target = target.parentElement;
-          }
-        }
-      }
+      connectedCallback() {}
     }
 
-    const comp = new TestComponent();
-    comp.__initLitEventHoist();
+    const html = (_strings: TemplateStringsArray, ...values: unknown[]) => values;
+    const cleanCode = res.code.replace(/import\s*\{[^}]*\}\s*from\s*["\x27][^"\x27]+["\x27];?/g, '').replace(/export\s+/g, '');
+    const factory = new Function(
+      'LitElement',
+      'html',
+      `
+      ${cleanCode}
+      return DelegatedButtonComponent;
+    `,
+    );
+    const DelegatedButtonComponent = factory(FakeLitElement, html) as any;
 
-    const btnHandler = function (this: any, e: any) {
+    const comp = new DelegatedButtonComponent();
+    comp.connectedCallback();
+
+    const calls: string[] = [];
+    comp.onBtn = function (this: any, e: any) {
       calls.push('btn');
       e.stopPropagation();
     };
-    const divHandler = function (this: any, _e: any) {
+    comp.onDiv = function (this: any, _e: any) {
       calls.push('div');
     };
 
-    const btnId = comp.__lhAction(btnHandler);
-    const divId = comp.__lhAction(divHandler);
+    comp.render();
+
+    const divActionId = comp.__lhActions.indexOf(comp.onDiv);
+    const btnActionId = comp.__lhActions.indexOf(comp.onBtn);
 
     const btnNode = {
       nodeType: 1,
-      getAttribute: (attr: string) => (attr === 'data-lh-click' ? String(btnId) : null),
+      getAttribute: (attr: string) => (attr === 'data-lh-click' ? String(btnActionId) : null),
       hasAttribute: (attr: string) => attr === 'data-lh-click',
       getRootNode: () => comp.shadowRoot,
     };
 
     const divNode = {
       nodeType: 1,
-      getAttribute: (attr: string) => (attr === 'data-lh-click' ? String(divId) : null),
+      getAttribute: (attr: string) => (attr === 'data-lh-click' ? String(divActionId) : null),
       hasAttribute: (attr: string) => attr === 'data-lh-click',
       getRootNode: () => comp.shadowRoot,
     };
@@ -323,54 +292,50 @@ describe('runtime dispatcher and event propagation logic', () => {
   });
 
   it('preserves shadow DOM boundaries by ignoring elements with different root node', () => {
-    const calls: string[] = [];
+    const input = `
+import { LitElement, html } from 'lit';
+export class HostBoundaryComponent extends LitElement {
+  render() {
+    return html\`
+      <div @click=\${this.onHostClick}>Host content</div>
+    \`;
+  }
+}
+`;
+    const res = transformEventHoist(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.hoistedEventsCount).toBe(1);
 
-    class HostComponent {
+    class FakeLitElement {
       shadowRoot = {
         listeners: {} as Record<string, (...args: any[]) => any>,
         addEventListener(evt: string, fn: (...args: any[]) => any) {
           this.listeners[evt] = fn;
         },
       };
-      __lhActions: ((...args: any[]) => any)[] = [];
-      __lhInitialized = false;
-
-      __initLitEventHoist() {
-        const root: any = this.shadowRoot || this;
-        root.addEventListener('click', (e: any) => this.__lhDispatch('click', e));
-      }
-
-      __lhAction(handler: (...args: any[]) => any) {
-        if (!this.__lhActions) this.__lhActions = [];
-        const id = this.__lhActions.length;
-        this.__lhActions.push(handler);
-        return id;
-      }
-
-      __lhDispatch(eventName: string, event: any) {
-        const attr = `data-lh-${eventName}`;
-        const root = this.shadowRoot || this;
-        const path = event.composedPath ? event.composedPath() : [];
-        for (const node of path) {
-          if (node === root) break;
-          if (node.nodeType === 1 && node.hasAttribute && node.hasAttribute(attr)) {
-            if (node.getRootNode && node.getRootNode() !== root) {
-              continue;
-            }
-            const actionId = Number(node.getAttribute(attr));
-            const handler = this.__lhActions?.[actionId];
-            if (typeof handler === 'function') {
-              handler.call(this, event);
-            }
-          }
-        }
-      }
+      connectedCallback() {}
     }
 
-    const host = new HostComponent();
-    host.__initLitEventHoist();
+    const html = (_strings: TemplateStringsArray, ...values: unknown[]) => values;
+    const cleanCode = res.code.replace(/import\s*\{[^}]*\}\s*from\s*["\x27][^"\x27]+["\x27];?/g, '').replace(/export\s+/g, '');
+    const factory = new Function(
+      'LitElement',
+      'html',
+      `
+      ${cleanCode}
+      return HostBoundaryComponent;
+    `,
+    );
+    const HostBoundaryComponent = factory(FakeLitElement, html) as any;
 
-    const hostActionId = host.__lhAction(() => calls.push('host'));
+    const host = new HostBoundaryComponent();
+    host.connectedCallback();
+
+    const calls: string[] = [];
+    host.onHostClick = () => calls.push('host');
+    host.render();
+
+    const hostActionId = host.__lhActions.indexOf(host.onHostClick);
 
     const innerShadowRoot = {};
     const innerChildNode = {
@@ -398,5 +363,77 @@ describe('runtime dispatcher and event propagation logic', () => {
 
     // Host only executed its own node, ignoring inner shadow child's data-lh-click!
     expect(calls).toEqual(['host']);
+  });
+
+  it('delegates events in Light DOM components where root is this', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+export class LightDomComponent extends LitElement {
+  createRenderRoot() {
+    return this;
+  }
+  render() {
+    return html\`
+      <button @click=\${this.onBtnClick}>Click me</button>
+    \`;
+  }
+}
+`;
+    const res = transformEventHoist(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.hoistedEventsCount).toBe(1);
+
+    class FakeLitElement {
+      nodeType = 1; // HTMLElement
+      shadowRoot = undefined;
+      listeners: Record<string, (...args: any[]) => any> = {};
+      addEventListener(evt: string, fn: (...args: any[]) => any) {
+        this.listeners[evt] = fn;
+      }
+      contains(node: any) {
+        return node === this || node._parent === this;
+      }
+      connectedCallback() {}
+    }
+
+    const html = (_strings: TemplateStringsArray, ...values: unknown[]) => values;
+    const cleanCode = res.code.replace(/import\s*\{[^}]*\}\s*from\s*["\x27][^"\x27]+["\x27];?/g, '').replace(/export\s+/g, '');
+    const factory = new Function(
+      'LitElement',
+      'html',
+      `
+      ${cleanCode}
+      return LightDomComponent;
+    `,
+    );
+    const LightDomComponent = factory(FakeLitElement, html) as any;
+
+    const comp = new LightDomComponent();
+    comp.connectedCallback();
+
+    const calls: string[] = [];
+    comp.onBtnClick = () => calls.push('clicked');
+    comp.render();
+
+    const actionId = comp.__lhActions.indexOf(comp.onBtnClick);
+
+    const doc = {};
+    const btnNode = {
+      nodeType: 1,
+      _parent: comp,
+      getAttribute: (attr: string) => (attr === 'data-lh-click' ? String(actionId) : null),
+      hasAttribute: (attr: string) => attr === 'data-lh-click',
+      getRootNode: () => doc, // In Light DOM, getRootNode returns document!
+    };
+
+    const mockEvent = {
+      target: btnNode,
+      composedPath() {
+        return [btnNode, comp];
+      },
+    };
+
+    comp.listeners.click(mockEvent);
+    expect(calls).toEqual(['clicked']);
   });
 });

@@ -106,12 +106,11 @@ pub fn parse_html_template(quasis: &[&str], num_expressions: usize) -> Option<Pa
                 }
 
                 expr_meta.push((true, kind, attr_name.clone()));
-                // Insert a placeholder attribute so HTML remains valid
-                combined.push_str(&format!("\"__LIT_EXP_{}__\"", i));
+                combined.push_str("\"__LIT_EXP__\"");
             } else {
                 // Child text position: insert marker comment
                 expr_meta.push((false, BindingKind::Text, String::new()));
-                combined.push_str(&format!("<!--__LIT_EXP_{}__-->", i));
+                combined.push_str("<!--?-->");
             }
         }
     }
@@ -137,11 +136,6 @@ pub fn parse_html_template(quasis: &[&str], num_expressions: usize) -> Option<Pa
                 _ => {}
             }
         }
-    }
-
-    // Guard against placeholder leaking into clean_html tag names
-    if clean_html.contains("<\"__lit_exp") || clean_html.contains("<\"__LIT_EXP") {
-        return None;
     }
 
     // Sort bindings by expression_index
@@ -289,6 +283,7 @@ fn parse_html_to_tree(html: &str, expr_meta: &[(bool, BindingKind, String)]) -> 
     let mut chars = html.char_indices().peekable();
     let mut stack: Vec<StackFrame> = Vec::new();
     let mut top_nodes: Vec<DomNode> = Vec::new();
+    let mut next_expr_idx = 0usize;
 
     let void_elements: [&str; 14] = [
         "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param",
@@ -312,30 +307,35 @@ fn parse_html_to_tree(html: &str, expr_meta: &[(bool, BindingKind, String)]) -> 
         if ch == '<' {
             let rest = &html[idx..];
 
+            // Check for expression marker comment <!--?-->
+            if rest.starts_with("<!--?-->") {
+                flush_text(&mut text_buf, &mut stack, &mut top_nodes);
+                let marker = DomNode::Marker {
+                    expr_idx: next_expr_idx,
+                };
+                next_expr_idx += 1;
+                if let Some((_, _, children, _)) = stack.last_mut() {
+                    children.push(marker);
+                } else {
+                    top_nodes.push(marker);
+                }
+                for _ in 0..8 {
+                    chars.next();
+                }
+                continue;
+            }
+
             // Check for comment <!--...-->
             if rest.starts_with("<!--") {
                 flush_text(&mut text_buf, &mut stack, &mut top_nodes);
 
                 if let Some(end_comment) = find_comment_end(rest) {
                     let comment_content = &rest[4..end_comment];
-                    if comment_content.starts_with("__LIT_EXP_") && comment_content.ends_with("__")
-                    {
-                        let num_str = &comment_content[10..comment_content.len() - 2];
-                        if let Ok(exp_idx) = num_str.parse::<usize>() {
-                            let marker = DomNode::Marker { expr_idx: exp_idx };
-                            if let Some((_, _, children, _)) = stack.last_mut() {
-                                children.push(marker);
-                            } else {
-                                top_nodes.push(marker);
-                            }
-                        }
+                    let comment = DomNode::Comment(comment_content.to_string());
+                    if let Some((_, _, children, _)) = stack.last_mut() {
+                        children.push(comment);
                     } else {
-                        let comment = DomNode::Comment(comment_content.to_string());
-                        if let Some((_, _, children, _)) = stack.last_mut() {
-                            children.push(comment);
-                        } else {
-                            top_nodes.push(comment);
-                        }
+                        top_nodes.push(comment);
                     }
 
                     // Advance past comment
@@ -409,15 +409,17 @@ fn parse_html_to_tree(html: &str, expr_meta: &[(bool, BindingKind, String)]) -> 
                     .unwrap_or("")
                     .to_ascii_lowercase();
 
-                let static_attrs = clean_static_attributes(trimmed_body, tag_name.len());
-
-                // Scan for __LIT_EXP_X__ in tag_body
-                let mut elem_bindings = Vec::new();
-                for (expr_idx, &(is_attr, ref kind, ref name)) in expr_meta.iter().enumerate() {
-                    if is_attr && tag_body.contains(&format!("__LIT_EXP_{}__", expr_idx)) {
-                        elem_bindings.push((kind.clone(), name.clone(), expr_idx));
+                let count = tag_body.matches("__LIT_EXP__").count();
+                let mut elem_bindings = Vec::with_capacity(count);
+                for _ in 0..count {
+                    if next_expr_idx < expr_meta.len() {
+                        let (_, ref kind, ref name) = expr_meta[next_expr_idx];
+                        elem_bindings.push((kind.clone(), name.clone(), next_expr_idx));
+                        next_expr_idx += 1;
                     }
                 }
+
+                let static_attrs = clean_static_attributes(trimmed_body, tag_name.len());
 
                 let is_void = void_elements.contains(&tag_name.as_str()) || is_self_closing;
 
@@ -490,7 +492,7 @@ fn clean_static_attributes(tag_body: &str, tag_name_len: usize) -> String {
             }
             ' ' | '\t' | '\n' | '\r' if in_quote.is_none() => {
                 if !current_token.is_empty() {
-                    if !current_token.contains("__LIT_EXP_") {
+                    if !current_token.contains("__LIT_EXP__") {
                         if !result.is_empty() {
                             result.push(' ');
                         }
@@ -504,7 +506,7 @@ fn clean_static_attributes(tag_body: &str, tag_name_len: usize) -> String {
             }
         }
     }
-    if !current_token.is_empty() && !current_token.contains("__LIT_EXP_") {
+    if !current_token.is_empty() && !current_token.contains("__LIT_EXP__") {
         if !result.is_empty() {
             result.push(' ');
         }

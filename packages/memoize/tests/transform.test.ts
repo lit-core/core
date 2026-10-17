@@ -353,4 +353,38 @@ export class NonLitComponent extends OtherBase {
     expect(nonLitRes.memoizedCount).toBe(0);
     expect(nonLitRes.componentsCount).toBe(0);
   });
+
+  it('declares memoization properties on class body to prevent undeclared mutations', () => {
+    const input = `
+export class UserList extends LitElement {
+  render() {
+    return html\`
+      <ul>
+        \${this.items.map(x => html\`<li>\${x}</li>\`)}
+      </ul>
+    \`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.memoizedCount).toBe(1);
+    expect(res.code).toContain('__memo_items_ref;');
+    expect(res.code).toContain('__memo_items_val;');
+  });
+
+  it('harmonizes with dirty-mask by memoizing expressions inside dirty-mask conditionals', () => {
+    const input = `
+export class MaskedList extends LitElement {
+  render() {
+    return html\`
+      <div>\${this.__litDirtyMask & 1 ? this.items.map(x => html\`<span>\${x}</span>\`) : noChange}</div>
+    \`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.memoizedCount).toBe(1);
+    expect(res.code).toContain('let _memoized_items;');
+    expect(res.code).toContain('this.__litDirtyMask & 1 ? _memoized_items : noChange');
+  });
 });

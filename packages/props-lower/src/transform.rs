@@ -7,7 +7,7 @@ use oxc_parser::Parser;
 use oxc_span::SourceType;
 
 use crate::clean_imports::clean_lit_import;
-use crate::constructor::inject_constructor_statements;
+use crate::constructor::{can_safely_lower_constructor, inject_constructor_statements};
 use crate::dead_helpers::{
     is_identifier_referenced_semantically, strip_dead_decorator_helpers_flags,
 };
@@ -240,8 +240,13 @@ pub fn transform_class<'a>(
     import_ctx: &ImportContext,
     ast: &AstBuilder<'a>,
 ) -> Vec<Statement<'a>> {
-    // 0. All-or-nothing bailout: verify static properties are mergeable BEFORE stripping decorators
+    // 0. All-or-nothing bailout:
+    // a. Verify static properties are mergeable BEFORE stripping decorators
     if class_has_reactive_properties(class, import_ctx) && !can_merge_static_properties(class) {
+        return Vec::new();
+    }
+    // b. In derived classes, verify that constructor can safely accept injected statements
+    if class.heritage.is_some() && !can_safely_lower_constructor(class) {
         return Vec::new();
     }
 
@@ -601,6 +606,31 @@ mod tests {
             res.code.contains("console.log(\"init\")") || res.code.contains("console.log('init')")
         );
         assert!(res.code.contains("this.msg = \"hi\"") || res.code.contains("this.msg = 'hi'"));
+    }
+
+    #[test]
+    fn test_derived_class_constructor_missing_super_bailout() {
+        let input = r#"
+      import {LitElement} from 'lit';
+      import {property} from 'lit/decorators.js';
+
+      class MyElement extends LitElement {
+        constructor() {
+          // No top-level super() call!
+          console.log('no super');
+        }
+
+        @property()
+        msg = 'hi';
+      }
+    "#;
+
+        let res = transform_code(input, TransformOptions::default());
+        // Must bail out completely: class and decorators remain untouched!
+        assert!(!res.code.contains("this.msg"));
+        assert!(!res.code.contains("static properties"));
+        assert!(res.code.contains("@property"));
+        assert!(res.code.contains("msg = \"hi\"") || res.code.contains("msg = 'hi'"));
     }
 
     #[test]

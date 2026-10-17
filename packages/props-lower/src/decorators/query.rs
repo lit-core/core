@@ -70,9 +70,11 @@ pub fn try_transform_query<'a>(
     let return_expr = if cache {
         // this.__name ??= ...
         // Prevent property collisions on cached query __ properties by checking existing class members
-        let mut private_prop = format!("__{}", prop_name);
+        let mut private_prop = String::with_capacity(prop_name.len() + 4);
+        private_prop.push_str("__");
+        private_prop.push_str(&prop_name);
         while existing_members.contains(&private_prop) {
-            private_prop = format!("_{}", private_prop);
+            private_prop.insert(0, '_');
         }
         existing_members.insert(private_prop.clone());
         helper.assign_nullish(ast.allocator().alloc_str(&private_prop), coalesced)

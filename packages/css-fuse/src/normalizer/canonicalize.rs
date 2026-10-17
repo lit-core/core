@@ -25,14 +25,6 @@ pub fn normalize_css(extracted: &ExtractedStyle) -> Vec<NormalizedRule> {
             &printer_opts,
             &mut normalized_rules,
         );
-    } else {
-        // Graceful fallback for templates with interpolation or non-standard syntax
-        fallback_tokenize_rules(
-            css_content,
-            &extracted.file_path,
-            &extracted.span,
-            &mut normalized_rules,
-        );
     }
 
     normalized_rules
@@ -173,51 +165,6 @@ pub fn split_and_canonicalize_declarations(body: &str) -> Vec<String> {
     decls.sort();
     decls.dedup();
     decls
-}
-
-/// Fallback tokenizer when lightningcss cannot parse entire template (e.g. interpolations)
-fn fallback_tokenize_rules(
-    css: &str,
-    file_path: &str,
-    span: &SourceSpan,
-    out: &mut Vec<NormalizedRule>,
-) {
-    let mut current = String::new();
-    let mut in_brace = false;
-    let mut selector = String::new();
-
-    for ch in css.chars() {
-        if ch == '{' && !in_brace {
-            in_brace = true;
-            selector = current.trim().to_string();
-            current.clear();
-        } else if ch == '}' && in_brace {
-            in_brace = false;
-            let body = current.trim().to_string();
-            current.clear();
-
-            if !selector.is_empty() && !body.is_empty() {
-                let declarations = split_and_canonicalize_declarations(&body);
-                let canonical_body = declarations.join(";");
-                let full_css = format!("{} {{{}}}", selector, canonical_body);
-                let hash = compute_rule_hash(&selector, &canonical_body);
-                out.push(NormalizedRule {
-                    at_rule: None,
-                    selector: selector.clone(),
-                    declarations,
-                    canonical_body,
-                    full_canonical_css: full_css,
-                    hash,
-                    source_file: file_path.to_string(),
-                    span: span.clone(),
-                    is_keyframes_or_media: selector.starts_with('@'),
-                });
-            }
-            selector.clear();
-        } else {
-            current.push(ch);
-        }
-    }
 }
 
 /// Subtract extracted shared rules from a component's local stylesheet.

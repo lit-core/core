@@ -521,4 +521,21 @@ console.log('Testing @lit-core/props-lower native addon...');
   console.log('  ✔ Namespace @loc.localized() produces loc.updateWhenLocaleChanges(this)');
 }
 
+// Test 28: Derived class constructor with unverifiable super cleanly bails out
+{
+  const input = `
+    import { LitElement } from "lit";
+    import { property } from "lit/decorators.js";
+    export class Derived extends LitElement {
+      @property() title = "default";
+      constructor(x) { if (x) super(); else super(); }
+    }
+  `;
+  const res = transformLitProps(input);
+  assert(res.code.includes('@property'), 'Should leave @property decorator untouched');
+  assert(res.code.includes('title = "default"') || res.code.includes("title = 'default'"), 'Should preserve property initializer');
+  assert(!res.code.includes('static properties'), 'Should not synthesize static properties when bailing out');
+  console.log('  ✔ Derived class unverifiable super constructor clean bailout');
+}
+
 console.log('\nAll integration tests passed successfully!\n');

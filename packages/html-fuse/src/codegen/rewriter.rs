@@ -43,7 +43,7 @@ pub fn rewrite_file(
 
     let file_frags: Vec<&ExtractedFragment> = fragments
         .iter()
-        .filter(|f| f.file_path == file_path)
+        .filter(|f| f.file_path == file_path && f.is_full_template)
         .collect();
 
     if file_frags.is_empty() {
@@ -468,62 +468,8 @@ fn walk_expression<'a>(
             return;
         }
 
-        // Subtree candidates within the template literal quasis
-        // Process quasis
-        let mut q_idx = 0;
-        while q_idx < tagged.quasi.quasis.len() {
-            let quasi_start = tagged.quasi.quasis[q_idx].span.start as usize;
-            let quasi_end = tagged.quasi.quasis[q_idx].span.end as usize;
-
-            // Find all replacements that fall strictly within this quasi
-            let mut matching_reps: Vec<&FragReplacement> = replacements
-                .iter()
-                .filter(|r| !r.is_full_template && r.start >= quasi_start && r.end <= quasi_end)
-                .collect();
-
-            if matching_reps.is_empty() {
-                q_idx += 1;
-                continue;
-            }
-
-            // Sort matching replacements descending by start offset
-            matching_reps.sort_by_key(|r| std::cmp::Reverse(r.start));
-
-            for rep in matching_reps {
-                let rel_start = rep.start - quasi_start;
-                let rel_end = rep.end - quasi_start;
-                let raw = tagged.quasi.quasis[q_idx].value.raw.as_str().to_string();
-
-                if rel_start <= rel_end && rel_end <= raw.len() {
-                    let part_before = &raw[..rel_start];
-                    let part_after = &raw[rel_end..];
-                    let was_tail = tagged.quasi.quasis[q_idx].tail;
-
-                    let before_str = allocator.alloc_str(part_before);
-                    tagged.quasi.quasis[q_idx].value.raw = before_str.into();
-                    tagged.quasi.quasis[q_idx].value.cooked = Some(before_str.into());
-                    tagged.quasi.quasis[q_idx].tail = false;
-
-                    let after_str = allocator.alloc_str(part_after);
-                    let val_after = TemplateElementValue {
-                        raw: after_str.into(),
-                        cooked: Some(after_str.into()),
-                    };
-                    let new_quasi = TemplateElement::new(SPAN, val_after, was_tail, ast);
-
-                    let new_expr =
-                        Expression::new_identifier(SPAN, allocator.alloc_str(&rep.cluster.id), ast);
-
-                    tagged.quasi.quasis.insert(q_idx + 1, new_quasi);
-                    tagged.quasi.expressions.insert(q_idx, new_expr);
-                    *rewritten_count += 1;
-                }
-            }
-
-            q_idx += 1;
-        }
-
         // Walk expressions inside the template
+
         for expr_child in &mut tagged.quasi.expressions {
             walk_expression(expr_child, ast, allocator, replacements, rewritten_count);
         }

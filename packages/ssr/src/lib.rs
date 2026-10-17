@@ -171,11 +171,11 @@ fn is_custom_elements_define(callee: &Expression<'_>) -> bool {
         if mem.property.name == "define" {
             match &mem.object {
                 Expression::Identifier(id) => return id.name == "customElements",
-                Expression::StaticMemberExpression(inner) => {
-                    if inner.property.name == "customElements" {
-                        if let Expression::Identifier(root) = &inner.object {
-                            return root.name == "window" || root.name == "globalThis";
-                        }
+                Expression::StaticMemberExpression(inner)
+                    if inner.property.name == "customElements" =>
+                {
+                    if let Expression::Identifier(root) = &inner.object {
+                        return root.name == "window" || root.name == "globalThis";
                     }
                 }
                 _ => {}

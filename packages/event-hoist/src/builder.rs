@@ -709,7 +709,7 @@ pub fn build_lh_dispatch_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
 
     // Dispatch loop helper closure statements:
     // Handler execution block:
-    //   if (node.getRootNode && node.getRootNode() !== root) continue;
+    //   if (root.nodeType === 11 ? (node.getRootNode && node.getRootNode() !== root) : !root.contains(node)) continue;
     //   const actionId = Number(node.getAttribute(attr));
     //   const handler = this.__lhActions && this.__lhActions[actionId];
     //   if (typeof handler === 'function') handler.call(this, event);
@@ -721,7 +721,16 @@ pub fn build_lh_dispatch_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
      -> ArenaVec<'a, Statement<'a>> {
         let mut blk = ArenaVec::new_in(ast);
 
-        // if (node.getRootNode && node.getRootNode() !== root) continue;
+        // if (root !== this ? (node.getRootNode && node.getRootNode() !== root) : !root.contains(node)) continue;
+        let this_expr = Expression::new_this_expression(SPAN, ast);
+        let is_shadow_root = Expression::new_binary_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "root", ast),
+            BinaryOperator::StrictInequality,
+            this_expr,
+            ast,
+        );
+
         let get_root = Expression::new_static_member_expression(
             SPAN,
             Expression::new_identifier(SPAN, node_name, ast),
@@ -751,11 +760,35 @@ pub fn build_lh_dispatch_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
             false,
             ast,
         );
-        let root_cond = Expression::new_logical_expression(
+        let shadow_cond = Expression::new_logical_expression(
             SPAN,
             get_root_check,
             LogicalOperator::And,
             neq_root,
+            ast,
+        );
+
+        let root_contains = Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "root", ast),
+            IdentifierName::new(SPAN, "contains", ast),
+            false,
+            ast,
+        );
+        let mut contains_args = ArenaVec::new_in(ast);
+        contains_args.push(Argument::from(Expression::new_identifier(
+            SPAN, node_name, ast,
+        )));
+        let call_contains =
+            Expression::new_call_expression(SPAN, root_contains, None, contains_args, false, ast);
+        let not_contains =
+            Expression::new_unary_expression(SPAN, UnaryOperator::LogicalNot, call_contains, ast);
+
+        let root_cond = Expression::new_conditional_expression(
+            SPAN,
+            is_shadow_root,
+            shadow_cond,
+            not_contains,
             ast,
         );
         let mut cont_stmts = ArenaVec::new_in(ast);
@@ -1108,7 +1141,8 @@ pub fn build_lh_dispatch_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
         ast,
     ));
 
-    // target = target.parentElement;
+    // for (; cond; target = target.parentElement) { if (target.hasAttribute(attr)) { ... } }
+    // The step lives in the update clause, so a `continue` inside the handler block still advances.
     let parent_elem = Expression::new_static_member_expression(
         SPAN,
         Expression::new_identifier(SPAN, "target", ast),
@@ -1125,19 +1159,16 @@ pub fn build_lh_dispatch_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a> {
         parent_elem,
         ast,
     );
-    while_body_stmts.push(Statement::new_expression_statement(
-        SPAN,
-        assign_target,
-        ast,
-    ));
 
-    let while_stmt = Statement::new_while_statement(
+    let loop_stmt = Statement::new_for_statement(
         SPAN,
-        while_cond,
+        None,
+        Some(while_cond),
+        Some(assign_target),
         Statement::new_block_statement(SPAN, while_body_stmts, ast),
         ast,
     );
-    else_stmts.push(while_stmt);
+    else_stmts.push(loop_stmt);
 
     // if (path.length > 0) { for (...) } else { ... }
     let path_len = Expression::new_static_member_expression(

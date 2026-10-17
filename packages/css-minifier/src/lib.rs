@@ -38,6 +38,77 @@ pub fn minify_css_string(css: &str) -> Option<String> {
     Some(res.code)
 }
 
+/// Returns true when every expression of the template sits between complete CSS rules or
+/// statements. Each quasi before an expression must end outside any block, parenthesis, string
+/// or comment, and its last significant character must be `}` or `;`.
+fn quasis_end_at_rule_boundaries(quasis: &[TemplateElement<'_>]) -> bool {
+    let Some((_, before_expressions)) = quasis.split_last() else {
+        return true;
+    };
+    before_expressions.iter().all(|quasi| {
+        let mut chars = quasi.value.raw.as_str().chars().peekable();
+        let mut braces = 0i32;
+        let mut parens = 0i32;
+        let mut last_significant: Option<char> = None;
+        while let Some(ch) = chars.next() {
+            match ch {
+                '\\' => {
+                    chars.next();
+                    last_significant = Some(ch);
+                }
+                '/' if chars.peek() == Some(&'*') => {
+                    chars.next();
+                    let mut closed = false;
+                    while let Some(inner) = chars.next() {
+                        if inner == '*' && chars.peek() == Some(&'/') {
+                            chars.next();
+                            closed = true;
+                            break;
+                        }
+                    }
+                    if !closed {
+                        return false;
+                    }
+                }
+                '"' | '\'' => {
+                    let mut closed = false;
+                    while let Some(inner) = chars.next() {
+                        if inner == '\\' {
+                            chars.next();
+                        } else if inner == ch {
+                            closed = true;
+                            break;
+                        }
+                    }
+                    if !closed {
+                        return false;
+                    }
+                    last_significant = Some(ch);
+                }
+                '{' => {
+                    braces += 1;
+                    last_significant = Some(ch);
+                }
+                '}' => {
+                    braces -= 1;
+                    last_significant = Some(ch);
+                }
+                '(' => {
+                    parens += 1;
+                    last_significant = Some(ch);
+                }
+                ')' => {
+                    parens -= 1;
+                    last_significant = Some(ch);
+                }
+                c if c.is_whitespace() => {}
+                c => last_significant = Some(c),
+            }
+        }
+        braces == 0 && parens == 0 && matches!(last_significant, None | Some('}') | Some(';'))
+    })
+}
+
 struct CssMinifierTraverser<'a> {
     allocator: &'a Allocator,
     import_ctx: CssImportContext,
@@ -55,16 +126,9 @@ impl<'a> CssMinifierTraverser<'a> {
                         return self.import_ctx.css_symbols.contains(&sym_id);
                     }
                 }
-                if !self.import_ctx.has_imports && ident.name == "css" {
-                    let is_unshadowed = if let Some(ref_id) = ident.reference_id.get() {
-                        ctx.scoping().get_reference(ref_id).symbol_id().is_none()
-                    } else {
-                        true
-                    };
-                    return is_unshadowed;
-                }
                 false
             }
+
             Expression::StaticMemberExpression(member) => {
                 if member.property.name.as_str() == "css" {
                     if let Expression::Identifier(obj) = &member.object {
@@ -107,9 +171,9 @@ impl<'a> Traverse<'a, ()> for CssMinifierTraverser<'a> {
                     }
                 }
             }
-        } else {
-            // Template literal with interpolations:
-            // Try to minify individual quasi slices if they form valid CSS blocks
+        } else if quasis_end_at_rule_boundaries(&node.quasi.quasis) {
+            // Every expression sits between complete rules, so each quasi slice is a standalone
+            // stylesheet and can be minified without touching the expressions.
             for quasi in node.quasi.quasis.iter_mut() {
                 let raw_css = quasi.value.raw.as_str();
                 if let Some(minified) = minify_css_string(raw_css) {
@@ -123,6 +187,9 @@ impl<'a> Traverse<'a, ()> for CssMinifierTraverser<'a> {
                 }
             }
         }
+        // Any other interpolated template is left untouched: an expression inside a rule, selector
+        // or value means a slice is not a standalone stylesheet, and minifying it in isolation
+        // reorders or drops tokens around the expression.
     }
 
     fn enter_call_expression(

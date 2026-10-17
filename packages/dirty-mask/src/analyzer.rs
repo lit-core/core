@@ -22,6 +22,34 @@ pub struct LitSemanticAnalysis {
     pub lit_class_names: HashSet<String>,
     pub lit_namespaces: HashSet<String>,
     pub lit_no_change_name: Option<String>,
+    pub lit_directive_names: HashSet<String>,
+}
+
+pub fn is_directive_name(name: &str) -> bool {
+    matches!(
+        name,
+        "classMap"
+            | "styleMap"
+            | "ifDefined"
+            | "when"
+            | "choose"
+            | "map"
+            | "join"
+            | "range"
+            | "guard"
+            | "live"
+            | "keyed"
+            | "cache"
+            | "repeat"
+            | "templateContent"
+            | "unsafeHTML"
+            | "unsafeSVG"
+            | "unsafeMathML"
+            | "until"
+            | "asyncAppend"
+            | "asyncReplace"
+            | "ref"
+    )
 }
 
 pub fn get_class_name<'a>(class: &Class<'a>) -> Option<&'a str> {
@@ -102,6 +130,7 @@ impl LitSemanticAnalysis {
             lit_class_names: HashSet::new(),
             lit_namespaces: HashSet::new(),
             lit_no_change_name: None,
+            lit_directive_names: HashSet::new(),
         };
 
         let root = scoping.root_scope_id();
@@ -122,17 +151,23 @@ impl LitSemanticAnalysis {
                                     });
                                     if sym_id.is_some() {
                                         if imported_name == "html" || imported_name == "svg" {
-                                            analysis.lit_tag_names.insert(local_name);
+                                            analysis.lit_tag_names.insert(local_name.clone());
                                         } else if imported_name == "property"
                                             || imported_name == "state"
                                         {
-                                            analysis.lit_decorator_names.insert(local_name);
+                                            analysis.lit_decorator_names.insert(local_name.clone());
                                         } else if imported_name == "LitElement"
                                             || imported_name == "ReactiveElement"
                                         {
-                                            analysis.lit_class_names.insert(local_name);
+                                            analysis.lit_class_names.insert(local_name.clone());
                                         } else if imported_name == "noChange" {
-                                            analysis.lit_no_change_name = Some(local_name);
+                                            analysis.lit_no_change_name = Some(local_name.clone());
+                                        }
+
+                                        if is_directive_name(imported_name.as_str())
+                                            || src.contains("directive")
+                                        {
+                                            analysis.lit_directive_names.insert(local_name);
                                         }
                                     }
                                 }
@@ -257,6 +292,32 @@ impl LitSemanticAnalysis {
             (extends_reactive, extends_reactive)
         } else {
             (!self.has_imports, false)
+        }
+    }
+
+    pub fn is_directive_call(&self, call: &CallExpression) -> bool {
+        match &call.callee {
+            Expression::Identifier(ident) => {
+                if self.has_imports {
+                    self.lit_directive_names.contains(ident.name.as_str())
+                } else {
+                    is_directive_name(ident.name.as_str())
+                }
+            }
+            Expression::StaticMemberExpression(mem) => {
+                if is_directive_name(mem.property.name.as_str()) {
+                    if let Expression::Identifier(obj) = &mem.object {
+                        if self.has_imports {
+                            return self.lit_namespaces.contains(obj.name.as_str())
+                                || self.lit_directive_names.contains(obj.name.as_str());
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
+            _ => false,
         }
     }
 }

@@ -4,11 +4,8 @@ use oxc_ast::builder::AstBuilder;
 use oxc_span::{SourceType, SPAN};
 use std::collections::HashMap;
 
-use crate::loader_compiler::ResumableLoaderOptions;
-
 pub fn build_loader_program<'a>(
     ast: &AstBuilder<'a>,
-    _opts: &ResumableLoaderOptions,
     manifest: &HashMap<String, String>,
     events: &[String],
     idle_hydration: bool,
@@ -195,7 +192,7 @@ fn build_state_decl<'a>(ast: &AstBuilder<'a>, manifest: &HashMap<String, String>
     Statement::new_variable_declaration(SPAN, VariableDeclarationKind::Const, decls, false, ast)
 }
 
-// const uG = (t) => M[t] ? (L[t] ||= import(M[t]).catch(() => (L[t] = 0))) : Promise.resolve();
+// const uG = (t) => M[t] ? (L[t] ||= import(M[t]).catch((e) => (console.error("[lit-resumable] chunk failed to load:", t, e), L[t] = 0))) : Promise.resolve();
 // L maps tag -> in-flight import promise; 0 marks a failed attempt (retried on interaction, skipped by idle).
 fn build_ug_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
     let test = computed(ast, ident(ast, "M"), ident(ast, "t"));
@@ -220,10 +217,28 @@ fn build_ug_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
         Expression::new_numeric_literal(SPAN, 0.0, None, NumberBase::Decimal, ast),
         ast,
     );
+    let report = call(
+        ast,
+        member(ast, ident(ast, "console"), "error"),
+        vec![
+            Expression::new_string_literal(
+                SPAN,
+                "[lit-resumable] chunk failed to load:",
+                None,
+                ast,
+            ),
+            ident(ast, "t"),
+            ident(ast, "e"),
+        ],
+    );
+    let mut steps = ArenaVec::new_in(ast);
+    steps.push(report);
+    steps.push(reset);
+    let handler_body = Expression::new_sequence_expression(SPAN, steps, ast);
     let catch_call = call(
         ast,
         member(ast, import_call, "catch"),
-        vec![arrow(ast, &[], reset)],
+        vec![arrow(ast, &["e"], handler_body)],
     );
     let cached = Expression::new_assignment_expression(
         SPAN,

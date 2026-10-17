@@ -106,19 +106,9 @@ impl<'a> HtmlMinifierTraverser<'a> {
                         return self.import_ctx.html_svg_symbols.contains(&sym_id);
                     }
                 }
-                if !self.import_ctx.has_imports {
-                    let name = ident.name.as_str();
-                    if name == "html" || name == "svg" || name == "litHtml" || name == "litSvg" {
-                        let is_unshadowed = if let Some(ref_id) = ident.reference_id.get() {
-                            ctx.scoping().get_reference(ref_id).symbol_id().is_none()
-                        } else {
-                            true
-                        };
-                        return is_unshadowed;
-                    }
-                }
                 false
             }
+
             Expression::StaticMemberExpression(member) => {
                 let prop = member.property.name.as_str();
                 if prop == "html" || prop == "svg" || prop == "litHtml" || prop == "litSvg" {

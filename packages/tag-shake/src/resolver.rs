@@ -4,6 +4,7 @@ use std::collections::HashSet;
 
 pub struct SymbolResolver<'a> {
     pub semantic: &'a Semantic<'a>,
+    pub program: &'a Program<'a>,
     pub custom_element_decorator_names: HashSet<String>,
     pub decorator_namespaces: HashSet<String>,
     pub decorator_helper_names: HashSet<String>,
@@ -49,7 +50,7 @@ pub fn is_decorator_helper_name(name: &str) -> bool {
 }
 
 impl<'a> SymbolResolver<'a> {
-    pub fn new(semantic: &'a Semantic<'a>, program: &Program) -> Self {
+    pub fn new(semantic: &'a Semantic<'a>, program: &'a Program<'a>) -> Self {
         let mut custom_element_decorator_names = HashSet::new();
         let mut decorator_namespaces = HashSet::new();
         let mut decorator_helper_names = HashSet::new();
@@ -121,9 +122,134 @@ impl<'a> SymbolResolver<'a> {
 
         Self {
             semantic,
+            program,
             custom_element_decorator_names,
             decorator_namespaces,
             decorator_helper_names,
+        }
+    }
+
+    /// Check whether a module specifier source is a known component module.
+    pub fn is_component_module_source(src: &str) -> bool {
+        let s = src.to_lowercase();
+        s == "lit"
+            || s == "lit-element"
+            || s == "@lit/reactive-element"
+            || s.starts_with("lit/")
+            || s.contains("web-component")
+            || s.contains("custom-element")
+            || ((s.contains("component") || s.contains("element"))
+                && !s.contains("schema")
+                && !s.contains("model")
+                && !s.contains("validator"))
+    }
+
+    /// Check whether a class name represents a custom element or component class.
+    pub fn is_element_class_name(name: &str) -> bool {
+        name == "HTMLElement"
+            || name == "LitElement"
+            || name == "ReactiveElement"
+            || name.ends_with("Element")
+            || name.ends_with("Component")
+    }
+
+    /// Check whether an identifier reference refers to a class declaration extending
+    /// a component base class or imported from a component module.
+    pub fn is_component_reference(&self, ident: &IdentifierReference) -> bool {
+        let name = ident.name.as_str();
+
+        // 1. Check if imported from an external component module
+        if let Some(loc) = Self::find_import_location(self.program, name) {
+            let src = loc.source.to_lowercase();
+            let imported = loc.specifier_name.as_str();
+            if Self::is_component_module_source(&src) || Self::is_element_class_name(imported) {
+                return true;
+            }
+        }
+
+        // 2. Check if declared as a class in the current program extending a component base class
+        for stmt in &self.program.body {
+            let class_opt = match stmt {
+                Statement::ClassDeclaration(cls) => Some(cls.as_ref()),
+                Statement::ExportDeclaration(exp) => {
+                    if let Declaration::ClassDeclaration(cls) = &exp.declaration {
+                        Some(cls.as_ref())
+                    } else {
+                        None
+                    }
+                }
+                Statement::ExportDefaultDeclaration(exp) => {
+                    if let ExportDefaultDeclarationKind::ClassDeclaration(cls) = &exp.declaration {
+                        Some(cls.as_ref())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            };
+
+            if let Some(cls) = class_opt {
+                if let Some(cls_id) = &cls.id {
+                    if cls_id.name.as_str() == name {
+                        if let Some(ref heritage) = cls.heritage {
+                            if self.is_component_heritage(&heritage.expression) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        false
+    }
+
+    /// Check whether a class heritage expression refers semantically to a component base class.
+    pub fn is_component_heritage(&self, expr: &Expression) -> bool {
+        match expr {
+            Expression::Identifier(super_id) => {
+                let s_name = super_id.name.as_str();
+                // 1. Global unshadowed HTMLElement
+                if s_name == "HTMLElement" && self.is_global_reference(super_id) {
+                    return true;
+                }
+                // 2. Resolve import semantically
+                if let Some(loc) = Self::find_import_location(self.program, s_name) {
+                    let src = loc.source.to_lowercase();
+                    let imported = loc.specifier_name.as_str();
+                    if Self::is_element_class_name(imported)
+                        || Self::is_component_module_source(&src)
+                    {
+                        return true;
+                    }
+                }
+                // 3. Fallback for unminified identifier spelling
+                Self::is_element_class_name(s_name)
+            }
+            Expression::StaticMemberExpression(mem) => {
+                let prop = mem.property.name.as_str();
+                if prop == "HTMLElement" {
+                    if let Expression::Identifier(obj_id) = &mem.object {
+                        if obj_id.name == "window" || obj_id.name == "globalThis" {
+                            return true;
+                        }
+                    }
+                }
+                if let Expression::Identifier(obj_id) = &mem.object {
+                    if let Some(loc) =
+                        Self::find_import_location(self.program, obj_id.name.as_str())
+                    {
+                        let src = loc.source.to_lowercase();
+                        if Self::is_component_module_source(&src)
+                            && Self::is_element_class_name(prop)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                Self::is_element_class_name(prop)
+            }
+            _ => false,
         }
     }
 
@@ -169,8 +295,6 @@ impl<'a> SymbolResolver<'a> {
             Expression::StaticMemberExpression(mem) if mem.property.name == "customElement" => {
                 if let Expression::Identifier(obj_id) = &mem.object {
                     self.decorator_namespaces.contains(obj_id.name.as_str())
-                        || obj_id.name == "lit"
-                        || obj_id.name == "decorators"
                 } else {
                     false
                 }

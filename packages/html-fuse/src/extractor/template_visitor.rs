@@ -76,27 +76,7 @@ impl<'a> TemplateVisitor<'a> {
                     let reference = self.scoping.get_reference(ref_id);
                     if let Some(sym_id) = reference.symbol_id() {
                         if self.resolver.lit_html_symbols.contains(&sym_id) {
-                            let is_svg = self.resolver.lit_svg_symbols.contains(&sym_id)
-                                || ident.name == "svg"
-                                || ident.name == "litSvg";
-                            return Some((ident.name.to_string(), is_svg));
-                        } else {
-                            return None;
-                        }
-                    }
-                }
-                if self.resolver.lit_html_symbols.is_empty() {
-                    if self.resolver.has_imports {
-                        return None;
-                    }
-                    if ident.name == "html" || ident.name == "svg" {
-                        let is_unshadowed = if let Some(ref_id) = ident.reference_id.get() {
-                            self.scoping.get_reference(ref_id).symbol_id().is_none()
-                        } else {
-                            true
-                        };
-                        if is_unshadowed {
-                            let is_svg = ident.name == "svg";
+                            let is_svg = self.resolver.lit_svg_symbols.contains(&sym_id);
                             return Some((ident.name.to_string(), is_svg));
                         }
                     }
@@ -113,23 +93,7 @@ impl<'a> TemplateVisitor<'a> {
                                 if self.resolver.lit_namespaces.contains(&sym_id) {
                                     let is_svg = prop_name == "svg";
                                     return Some((prop_name.to_string(), is_svg));
-                                } else {
-                                    return None;
                                 }
-                            }
-                        }
-                        if self.resolver.lit_namespaces.is_empty()
-                            && !self.resolver.has_imports
-                            && (obj.name == "Lit" || obj.name == "lit")
-                        {
-                            let is_unshadowed = if let Some(ref_id) = obj.reference_id.get() {
-                                self.scoping.get_reference(ref_id).symbol_id().is_none()
-                            } else {
-                                true
-                            };
-                            if is_unshadowed {
-                                let is_svg = prop_name == "svg";
-                                return Some((prop_name.to_string(), is_svg));
                             }
                         }
                     }
@@ -168,40 +132,10 @@ impl<'a> Visit<'a> for TemplateVisitor<'a> {
                     });
                 }
             }
-
-            // Target B: Static DOM subtrees within each quasi
-            for quasi in &tagged.quasi.quasis {
-                let raw = quasi.value.raw.as_str();
-                let subtrees = find_static_subtrees(raw, self.min_fragment_length);
-
-                for (start_offset, end_offset, subtree_text, is_element_svg) in subtrees {
-                    let (canonical, hash) = normalize_fragment(&subtree_text);
-                    let abs_start = quasi.span.start as usize + start_offset;
-                    let abs_end = quasi.span.start as usize + end_offset;
-
-                    let span = SourceSpan {
-                        start: abs_start,
-                        end: abs_end,
-                        line: 0,
-                        column: 0,
-                    };
-
-                    let is_svg = is_template_svg || is_element_svg;
-
-                    self.extracted_fragments.push(ExtractedFragment {
-                        file_path: self.file_path.to_string(),
-                        raw_text: subtree_text,
-                        canonical_text: canonical,
-                        is_svg,
-                        is_full_template: false,
-                        span,
-                        hash,
-                    });
-                }
-            }
         }
 
         // Visit children (nested templates)
+
         self.visit_expression(&tagged.tag);
         for expr in &tagged.quasi.expressions {
             self.visit_expression(expr);
@@ -209,273 +143,36 @@ impl<'a> Visit<'a> for TemplateVisitor<'a> {
     }
 }
 
-fn scan_html_comment(bytes: &[u8], mut idx: usize) -> Option<usize> {
-    if idx + 4 > bytes.len() || &bytes[idx..idx + 4] != b"<!--" {
-        return None;
-    }
-    idx += 4;
-    while idx + 2 < bytes.len() {
-        if bytes[idx] == b'-' && bytes[idx + 1] == b'-' && bytes[idx + 2] == b'>' {
-            return Some(idx + 3);
-        }
-        if idx + 3 < bytes.len()
-            && bytes[idx] == b'-'
-            && bytes[idx + 1] == b'-'
-            && bytes[idx + 2] == b'!'
-            && bytes[idx + 3] == b'>'
-        {
-            return Some(idx + 4);
-        }
-        idx += 1;
-    }
-    None
-}
-
-/// Finds balanced static DOM element subtrees in a quasi text slice.
-/// Returns (start_offset, end_offset, text, is_svg)
-pub fn find_static_subtrees(raw: &str, min_length: usize) -> Vec<(usize, usize, String, bool)> {
-    let mut results = Vec::new();
-    let bytes = raw.as_bytes();
-    let len = bytes.len();
-    let mut i = 0;
-
-    while i < len {
-        if bytes[i] == b'<' {
-            // Check for comment
-            if let Some(comment_end) = scan_html_comment(bytes, i) {
-                i = comment_end;
-                continue;
-            }
-
-            // Skip closing tags
-            if i + 1 < len && bytes[i + 1] == b'/' {
-                i += 2;
-                while i < len && bytes[i] != b'>' {
-                    i += 1;
-                }
-                if i < len {
-                    i += 1;
-                }
-                continue;
-            }
-
-            // Parse opening tag name
-            let tag_start = i + 1;
-            let mut tag_end = tag_start;
-            while tag_end < len
-                && (bytes[tag_end].is_ascii_alphanumeric()
-                    || bytes[tag_end] == b'-'
-                    || bytes[tag_end] == b'_')
-            {
-                tag_end += 1;
-            }
-
-            if tag_end == tag_start {
-                i += 1;
-                continue;
-            }
-
-            let tag_name = &raw[tag_start..tag_end];
-            let is_svg = tag_name.eq_ignore_ascii_case("svg");
-
-            // Find end of opening tag '>'
-            let mut open_tag_end = tag_end;
-            let mut in_quote = None;
-            let mut is_self_closing = false;
-
-            while open_tag_end < len {
-                let b = bytes[open_tag_end];
-                if let Some(q) = in_quote {
-                    if b == q && (open_tag_end == 0 || bytes[open_tag_end - 1] != b'\\') {
-                        in_quote = None;
-                    }
-                } else if b == b'"' || b == b'\'' {
-                    in_quote = Some(b);
-                } else if b == b'/' && open_tag_end + 1 < len && bytes[open_tag_end + 1] == b'>' {
-                    is_self_closing = true;
-                    open_tag_end += 1;
-                    break;
-                } else if b == b'>' {
-                    break;
-                }
-                open_tag_end += 1;
-            }
-
-            if open_tag_end >= len {
-                break;
-            }
-
-            let elem_start = i;
-
-            if is_self_closing {
-                let elem_end = open_tag_end + 1;
-                let text = &raw[elem_start..elem_end];
-                if text.len() >= min_length {
-                    results.push((elem_start, elem_end, text.to_string(), is_svg));
-                }
-                i = elem_end;
-                continue;
-            }
-
-            // Standard opening tag: find matching closing tag `</tag_name>`
-            let mut depth = 1;
-            let mut scan = open_tag_end + 1;
-            let mut matched_end = None;
-
-            while scan < len {
-                if bytes[scan] == b'<' {
-                    // Check for comment
-                    if let Some(comment_end) = scan_html_comment(bytes, scan) {
-                        scan = comment_end;
-                        continue;
-                    }
-
-                    // Check for closing tag
-                    if scan + 1 < len && bytes[scan + 1] == b'/' {
-                        let c_tag_start = scan + 2;
-                        let mut c_tag_end = c_tag_start;
-                        while c_tag_end < len
-                            && (bytes[c_tag_end].is_ascii_alphanumeric()
-                                || bytes[c_tag_end] == b'-'
-                                || bytes[c_tag_end] == b'_')
-                        {
-                            c_tag_end += 1;
-                        }
-                        let c_tag_name = &raw[c_tag_start..c_tag_end];
-                        if c_tag_name.eq_ignore_ascii_case(tag_name) {
-                            depth -= 1;
-                            let mut close_end = c_tag_end;
-                            while close_end < len && bytes[close_end] != b'>' {
-                                close_end += 1;
-                            }
-                            if close_end < len {
-                                close_end += 1;
-                            }
-                            if depth == 0 {
-                                matched_end = Some(close_end);
-                                break;
-                            }
-                            scan = close_end;
-                            continue;
-                        }
-                    } else {
-                        // Nested opening tag of same name
-                        let n_start = scan + 1;
-                        let mut n_end = n_start;
-                        while n_end < len
-                            && (bytes[n_end].is_ascii_alphanumeric()
-                                || bytes[n_end] == b'-'
-                                || bytes[n_end] == b'_')
-                        {
-                            n_end += 1;
-                        }
-                        let n_name = &raw[n_start..n_end];
-                        if n_name.eq_ignore_ascii_case(tag_name) {
-                            let mut check_pos = n_end;
-                            let mut n_in_quote = None;
-                            let mut n_self_closing = false;
-                            while check_pos < len {
-                                let b = bytes[check_pos];
-                                if let Some(q) = n_in_quote {
-                                    if b == q && (check_pos == 0 || bytes[check_pos - 1] != b'\\') {
-                                        n_in_quote = None;
-                                    }
-                                } else if b == b'"' || b == b'\'' {
-                                    n_in_quote = Some(b);
-                                } else if b == b'/'
-                                    && check_pos + 1 < len
-                                    && bytes[check_pos + 1] == b'>'
-                                {
-                                    n_self_closing = true;
-                                    break;
-                                } else if b == b'>' {
-                                    break;
-                                }
-                                check_pos += 1;
-                            }
-                            if !n_self_closing {
-                                depth += 1;
-                            }
-                        }
-                    }
-                }
-                scan += 1;
-            }
-
-            if let Some(elem_end) = matched_end {
-                let text = &raw[elem_start..elem_end];
-                if text.len() >= min_length {
-                    results.push((elem_start, elem_end, text.to_string(), is_svg));
-                }
-            }
-            i = open_tag_end + 1;
-        } else {
-            i += 1;
-        }
-    }
-
-    results
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_find_static_subtrees_svg() {
-        let quasi = r#"
-        <div class="test">
-          <svg viewBox="0 0 16 16"><path d="M4 6" /></svg>
-        </div>
+    fn test_extract_full_static_template() {
+        use oxc_allocator::Allocator;
+        use oxc_parser::Parser;
+        use oxc_span::SourceType;
+
+        let source = r#"
+            import { html, svg } from 'lit';
+            const icon = svg`<svg viewBox="0 0 16 16"><path d="M4 6" /></svg>`;
+            const tmpl = html`<div><span>Static block</span></div>`;
         "#;
-        let subtrees = find_static_subtrees(quasi, 20);
-        // Extracts both the outer general HTML element and the inner SVG element
-        assert_eq!(subtrees.len(), 2);
-        assert!(!subtrees[0].3); // outer div is not svg
-        assert!(subtrees[0].2.starts_with("<div class=\"test\">"));
-        let svg_tuple = &subtrees[1];
-        assert!(svg_tuple.3); // is_svg
-        assert_eq!(
-            svg_tuple.2,
-            "<svg viewBox=\"0 0 16 16\"><path d=\"M4 6\" /></svg>"
-        );
-    }
+        let allocator = Allocator::default();
+        let parsed = Parser::new(&allocator, source, SourceType::ts()).parse();
+        let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
+        let scoping = semantic_ret.semantic.into_scoping();
+        let mut visitor = TemplateVisitor::new(source, "test.ts", 10, &scoping);
+        visitor.scan_imports(&parsed.program);
+        visitor.visit_program(&parsed.program);
 
-    #[test]
-    fn test_find_static_subtrees_slot() {
-        let quasi = r#"<slot name="decorator" slot="decorator"></slot>"#;
-        let subtrees = find_static_subtrees(quasi, 15);
-        assert_eq!(subtrees.len(), 1);
-        assert_eq!(
-            subtrees[0].2,
-            "<slot name=\"decorator\" slot=\"decorator\"></slot>"
-        );
-    }
-
-    #[test]
-    fn test_find_static_subtrees_generic_html() {
-        let quasi = r#"<div class="card"><span class="label">User</span><button type="button">Click</button></div>"#;
-        let subtrees = find_static_subtrees(quasi, 15);
-        assert!(subtrees
+        assert_eq!(visitor.extracted_fragments.len(), 2);
+        assert!(visitor
+            .extracted_fragments
             .iter()
-            .any(|s| s.2.starts_with("<div class=\"card\">")));
-        assert!(subtrees
-            .iter()
-            .any(|s| s.2 == "<span class=\"label\">User</span>"));
-        assert!(subtrees
-            .iter()
-            .any(|s| s.2 == "<button type=\"button\">Click</button>"));
-    }
-
-    #[test]
-    fn test_scan_html_comment_complex() {
-        let comment1 = b"<!-- -- test -- complex -- -->remainder";
-        let end1 = scan_html_comment(comment1, 0);
-        assert_eq!(end1, Some(30));
-
-        let comment2 = b"<!-- bang comment --!>after";
-        let end2 = scan_html_comment(comment2, 0);
-        assert_eq!(end2, Some(22));
+            .all(|f| f.is_full_template));
+        assert!(visitor.extracted_fragments[0].is_svg);
+        assert!(!visitor.extracted_fragments[1].is_svg);
     }
 
     #[test]
@@ -498,6 +195,31 @@ mod tests {
         assert!(
             !visitor.resolver.is_target_tag("html"),
             "html from non-Lit library must not be considered a target tag"
+        );
+    }
+
+    #[test]
+    fn test_aliased_html_as_svg_classified_as_html() {
+        use oxc_allocator::Allocator;
+        use oxc_parser::Parser;
+        use oxc_span::SourceType;
+
+        let source = r#"
+            import { html as svg } from 'lit';
+            export const banner = svg`<div class="banner"><span>Title</span></div>`;
+        "#;
+        let allocator = Allocator::default();
+        let parsed = Parser::new(&allocator, source, SourceType::ts()).parse();
+        let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
+        let scoping = semantic_ret.semantic.into_scoping();
+        let mut visitor = TemplateVisitor::new(source, "test.ts", 10, &scoping);
+        visitor.scan_imports(&parsed.program);
+        visitor.visit_program(&parsed.program);
+
+        assert_eq!(visitor.extracted_fragments.len(), 1);
+        assert!(
+            !visitor.extracted_fragments[0].is_svg,
+            "aliased html as svg must not be classified as svg"
         );
     }
 }

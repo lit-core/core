@@ -10,7 +10,7 @@ pub enum RegistrationKind {
         component_name: String,
         component_span: Span,
     },
-    /// `Component.define('tag')` (Shoelace / Web Awesome style)
+    /// Static component registration via `Component.define('tag')`.
     StaticMethodDefine {
         component_name: String,
         component_span: Span,
@@ -116,13 +116,14 @@ impl RegistrationDetector {
             });
         }
 
-        // 2. Check Component.define('tag') (Shoelace / Web Awesome style)
+        // 2. Check static component registration via Component.define('tag')
         if let Expression::StaticMemberExpression(mem) = &call.callee {
             if mem.property.name == "define" {
                 if let Expression::Identifier(cls_ident) = &mem.object {
                     if cls_ident.name != "customElements"
                         && cls_ident.name != "window"
                         && cls_ident.name != "globalThis"
+                        && resolver.is_component_reference(cls_ident)
                     {
                         if let Some(first_arg) = call.arguments.first() {
                             let (tag, is_dynamic) = match first_arg.as_expression() {
@@ -131,6 +132,11 @@ impl RegistrationDetector {
                                 }
                                 _ => ("".to_string(), true),
                             };
+
+                            // Ensure static define calls are only shaken if tag name contains a hyphen
+                            if !is_dynamic && !tag.contains('-') {
+                                return None;
+                            }
 
                             return Some(DetectedRegistration {
                                 tag,

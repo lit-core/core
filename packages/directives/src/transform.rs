@@ -234,7 +234,9 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
                     if b.value {
                         if let Some(cur_acc) = acc {
                             let spaced_key = if let Expression::StringLiteral(s) = &key_expr {
-                                let space_str = format!(" {}", s.value);
+                                let mut space_str = String::with_capacity(1 + s.value.len());
+                                space_str.push(' ');
+                                space_str.push_str(s.value.as_str());
                                 let space_lit = self.ast.allocator().alloc_str(&space_str);
                                 self.helper.string_lit(space_lit)
                             } else {
@@ -251,7 +253,9 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
 
                 if let Some(cur_acc) = acc {
                     let spaced_key = if let Expression::StringLiteral(s) = &key_expr {
-                        let space_str = format!(" {}", s.value);
+                        let mut space_str = String::with_capacity(1 + s.value.len());
+                        space_str.push(' ');
+                        space_str.push_str(s.value.as_str());
                         let space_lit = self.ast.allocator().alloc_str(&space_str);
                         self.helper.string_lit(space_lit)
                     } else {
@@ -270,80 +274,9 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
             return acc.or_else(|| Some(self.helper.string_lit("")));
         }
 
-        // Dynamic fallback: Object.entries(arg).filter(e => Boolean(e[1])).map(e => e[0]).join(' ')
-        let obj_ident = self.helper.ident_ref("Object");
-        let entries_member = self.helper.static_member(obj_ident, "entries", false);
-        let mut entries_args = ArenaVec::new_in(self.ast);
-        entries_args.push(Argument::from(first_arg.clone_in(self.ast.allocator())));
-        let entries_call = self.helper.call_expr(entries_member, entries_args, false);
-
-        // .filter(e => Boolean(e[1]))
-        let filter_member = self.helper.static_member(entries_call, "filter", false);
-        let e_ident = self.helper.ident_ref("e");
-        let num_1 = Expression::new_numeric_literal(SPAN, 1.0, None, NumberBase::Decimal, self.ast);
-        let e_1 = Expression::new_computed_member_expression(SPAN, e_ident, num_1, false, self.ast);
-        let bool_ident = self.helper.ident_ref("Boolean");
-        let mut bool_args = ArenaVec::new_in(self.ast);
-        bool_args.push(Argument::from(e_1));
-        let bool_call = self.helper.call_expr(bool_ident, bool_args, false);
-
-        let mut filter_params = ArenaVec::new_in(self.ast);
-        let filter_param_pat = BindingPattern::new_binding_identifier(SPAN, "e", self.ast);
-        filter_params.push(FormalParameter::new_plain(SPAN, filter_param_pat, self.ast));
-        let filter_params_box = FormalParameters::boxed(
-            SPAN,
-            FormalParameterKind::FormalParameter,
-            filter_params,
-            None,
-            self.ast,
-        );
-        let filter_arrow = Expression::new_arrow_function_expression(
-            SPAN,
-            false,
-            None,
-            filter_params_box,
-            None,
-            ArrowFunctionBody::from(bool_call),
-            self.ast,
-        );
-        let mut filter_args = ArenaVec::new_in(self.ast);
-        filter_args.push(Argument::from(filter_arrow));
-        let filtered = self.helper.call_expr(filter_member, filter_args, false);
-
-        // .map(e => e[0])
-        let map_member = self.helper.static_member(filtered, "map", false);
-        let e_ident2 = self.helper.ident_ref("e");
-        let num_0 = Expression::new_numeric_literal(SPAN, 0.0, None, NumberBase::Decimal, self.ast);
-        let e_0 =
-            Expression::new_computed_member_expression(SPAN, e_ident2, num_0, false, self.ast);
-        let mut map_params = ArenaVec::new_in(self.ast);
-        let map_param_pat = BindingPattern::new_binding_identifier(SPAN, "e", self.ast);
-        map_params.push(FormalParameter::new_plain(SPAN, map_param_pat, self.ast));
-        let map_params_box = FormalParameters::boxed(
-            SPAN,
-            FormalParameterKind::FormalParameter,
-            map_params,
-            None,
-            self.ast,
-        );
-        let map_arrow = Expression::new_arrow_function_expression(
-            SPAN,
-            false,
-            None,
-            map_params_box,
-            None,
-            ArrowFunctionBody::from(e_0),
-            self.ast,
-        );
-        let mut map_args = ArenaVec::new_in(self.ast);
-        map_args.push(Argument::from(map_arrow));
-        let mapped = self.helper.call_expr(map_member, map_args, false);
-
-        // .join(' ')
-        let join_member = self.helper.static_member(mapped, "join", false);
-        let mut join_args = ArenaVec::new_in(self.ast);
-        join_args.push(Argument::from(self.helper.string_lit(" ")));
-        Some(self.helper.call_expr(join_member, join_args, false))
+        // Non-literal dynamic objects cannot be lowered safely at compile time without
+        // generating bloated runtime wrappers; bail out cleanly leaving directive call intact.
+        None
     }
 
     fn lower_style_map(&mut self, call: &CallExpression<'a>) -> Option<Expression<'a>> {
@@ -373,12 +306,23 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
 
                     match &prop.value {
                         Expression::StringLiteral(s) => {
-                            let style_str = format!("{}: {};", prop_name, s.value);
+                            let mut style_str =
+                                String::with_capacity(prop_name.len() + 3 + s.value.len());
+                            style_str.push_str(&prop_name);
+                            style_str.push_str(": ");
+                            style_str.push_str(s.value.as_str());
+                            style_str.push(';');
                             let style_lit = self.ast.allocator().alloc_str(&style_str);
                             parts.push(self.helper.string_lit(style_lit));
                         }
                         Expression::NumericLiteral(num) => {
-                            let style_str = format!("{}: {};", prop_name, num.value);
+                            let num_val = num.value.to_string();
+                            let mut style_str =
+                                String::with_capacity(prop_name.len() + 3 + num_val.len());
+                            style_str.push_str(&prop_name);
+                            style_str.push_str(": ");
+                            style_str.push_str(&num_val);
+                            style_str.push(';');
                             let style_lit = self.ast.allocator().alloc_str(&style_str);
                             parts.push(self.helper.string_lit(style_lit));
                         }
@@ -394,7 +338,9 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
                                 self.ast,
                             );
 
-                            let prefix = format!("{}: ", prop_name);
+                            let mut prefix = String::with_capacity(prop_name.len() + 2);
+                            prefix.push_str(&prop_name);
+                            prefix.push_str(": ");
                             let prefix_lit = self.ast.allocator().alloc_str(&prefix);
                             let prefix_expr = self.helper.string_lit(prefix_lit);
                             let with_val = self.helper.binary_plus(prefix_expr, val_for_plus);
@@ -653,21 +599,10 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
         None
     }
 
-    fn lower_guard(&mut self, call: &CallExpression<'a>) -> Option<Expression<'a>> {
-        if call.arguments.len() >= 2 {
-            let fn_arg = call.arguments.get(1)?.as_expression()?;
-            if let Expression::ArrowFunctionExpression(arrow) = fn_arg {
-                if let Some(concise) = extract_arrow_expr(arrow) {
-                    return Some(concise.clone_in(self.ast.allocator()));
-                }
-            }
-            let call_args = ArenaVec::new_in(self.ast);
-            return Some(self.helper.call_expr(
-                fn_arg.clone_in(self.ast.allocator()),
-                call_args,
-                false,
-            ));
-        }
+    fn lower_guard(&mut self, _call: &CallExpression<'a>) -> Option<Expression<'a>> {
+        // Dependency memoization requires runtime cache state; stripping dependencies
+        // causes unconditional re-evaluation on every render and destroys memoization semantics.
+        // Bail out cleanly to preserve the author directive and runtime dependency tracking.
         None
     }
 
@@ -684,14 +619,15 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
     }
 
     fn lower_repeat(&mut self, call: &CallExpression<'a>) -> Option<Expression<'a>> {
-        let items_arg = call.arguments.first()?.as_expression()?;
-        let template_arg = if call.arguments.len() == 2 {
-            call.arguments.get(1)?.as_expression()?
-        } else if call.arguments.len() >= 3 {
-            call.arguments.get(2)?.as_expression()?
-        } else {
+        // When a key function is provided (repeat(items, keyFn, templateFn)),
+        // lowering to Array.from would discard the key function and destroy Lit's keyed DOM reconciliation.
+        // Bail out cleanly unless only 2 arguments (items, templateFn) are present without keys.
+        if call.arguments.len() != 2 {
             return None;
-        };
+        }
+
+        let items_arg = call.arguments.first()?.as_expression()?;
+        let template_arg = call.arguments.get(1)?.as_expression()?;
 
         let items_test = items_arg.clone_in(self.ast.allocator());
         let items_for_from = items_arg.clone_in(self.ast.allocator());

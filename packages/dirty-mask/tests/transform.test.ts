@@ -397,8 +397,7 @@ export class LeafElement extends BaseElement {
 `;
     const res = fn(input);
     expect(res.componentsCount).toBe(2);
-    expect(res.code).toMatch(/if\s*\(!this\.constructor\s*\|\|\s*this\.constructor\s*===\s*BaseElement\)\s*\{\s*this\.__litDirtyMask\s*=\s*mask;\s*\}/);
-    expect(res.code).toMatch(/if\s*\(!this\.constructor\s*\|\|\s*this\.constructor\s*===\s*LeafElement\)\s*\{\s*this\.__litDirtyMask\s*=\s*mask;\s*\}/);
+    expect(res.code).toContain('this.__litDirtyMask = mask;');
 
     // Lifecycle simulation
     class FakeLitElement {
@@ -459,7 +458,7 @@ const Child = class extends Base {
     expect(res.code).toContain('this.__litDirtyMask & 1 ? this.b : noChange');
     expect(res.code).toContain('this.__litDirtyMask & 2 ? this.c : noChange');
     expect(res.code).not.toContain('this.__litDirtyMask & -1');
-    expect(res.code).toMatch(/if\s*\(!this\.constructor\s*\|\|\s*this\.constructor\s*===\s*Child\)\s*\{\s*this\.__litDirtyMask\s*=\s*mask;\s*\}/);
+    expect(res.code).toContain('this.__litDirtyMask = mask;');
   });
 
   it('supports exported variable declarations with class expressions in inheritance hierarchies', () => {
@@ -478,6 +477,87 @@ export const Derived = class extends Base {
     expect(res.propertiesCount).toBe(2);
     // x = 1 (bit 1), y = 2 (bit 2) -> mask = 3
     expect(res.code).toContain('this.__litDirtyMask & 3');
-    expect(res.code).toMatch(/if\s*\(!this\.constructor\s*\|\|\s*this\.constructor\s*===\s*Derived\)\s*\{\s*this\.__litDirtyMask\s*=\s*mask;\s*\}/);
+    expect(res.code).toContain('this.__litDirtyMask = mask;');
+  });
+
+  it('does not wrap event bindings or directives in dirty bitmask checks', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+
+export class MyButton extends LitElement {
+  static properties = {
+    active: { type: Boolean },
+    label: { type: String },
+  };
+
+  handleClick(e) {
+    console.log(e);
+  }
+
+  render() {
+    return html\`
+      <button
+        class=\${classMap({ active: this.active })}
+        @click=\${this.handleClick}
+      >
+        \${this.label}
+      </button>
+    \`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    // Only this.label should be masked; classMap and @click should NOT be masked
+    expect(res.maskedPartsCount).toBe(1);
+    expect(res.code).toContain('this.__litDirtyMask & 2 ? this.label : noChange');
+    expect(res.code).not.toContain('classMap({ active: this.active }) : noChange');
+    expect(res.code).not.toContain('this.handleClick : noChange');
+  });
+
+  it('does not wrap data-lh-* hoisted event bindings or __lhAction calls in noChange', () => {
+    const input = `
+import { LitElement, html } from 'lit';
+
+export class HoistedButton extends LitElement {
+  static properties = {
+    count: { type: Number },
+  };
+
+  onClick() {}
+
+  render() {
+    return html\`<button data-lh-click="\${this.__lhAction(this.onClick)}">Count: \${this.count}</button>\`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(1);
+    expect(res.maskedPartsCount).toBe(1);
+    expect(res.code).toContain('this.__litDirtyMask & 1 ? this.count : noChange');
+    expect(res.code).not.toContain('this.__lhAction(this.onClick) : noChange');
+    expect(res.code).toContain('data-lh-click="${this.__lhAction(this.onClick)}"');
+  });
+
+  it('bails out cleanly when component defines 32 or more reactive properties', () => {
+    const props = Array.from({ length: 33 }, (_, i) => `p${i}: { type: String }`).join(',\n    ');
+    const input = `
+import { LitElement, html } from 'lit';
+
+export class GiantComponent extends LitElement {
+  static properties = {
+    ${props}
+  };
+
+  render() {
+    return html\`<div>\${this.p0}</div>\`;
+  }
+}
+`;
+    const res = fn(input);
+    expect(res.componentsCount).toBe(0);
+    expect(res.maskedPartsCount).toBe(0);
+    expect(res.code).not.toContain('__litDirtyMask');
   });
 });

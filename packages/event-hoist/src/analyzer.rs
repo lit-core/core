@@ -207,42 +207,47 @@ pub fn is_lit_html_tag(tag: &Expression) -> bool {
 }
 
 pub fn match_event_attr(quasi_str: &str) -> Option<(usize, String, Option<char>)> {
-    let mut chars = quasi_str.chars().rev().peekable();
-    let mut quote = None;
-
-    if let Some(&ch) = chars.peek() {
-        if ch == '"' || ch == '\'' {
-            quote = Some(ch);
-            chars.next();
-        }
-    }
-
-    if chars.next() != Some('=') {
+    let bytes = quasi_str.as_bytes();
+    if bytes.is_empty() {
         return None;
     }
 
-    let mut event_name_rev = String::new();
-    while let Some(&ch) = chars.peek() {
-        if ch.is_ascii_alphanumeric() || ch == '-' || ch == '_' {
-            event_name_rev.push(ch);
-            chars.next();
+    let mut idx = bytes.len();
+
+    let quote = if bytes[idx - 1] == b'"' || bytes[idx - 1] == b'\'' {
+        let q = bytes[idx - 1] as char;
+        idx -= 1;
+        Some(q)
+    } else {
+        None
+    };
+
+    if idx == 0 || bytes[idx - 1] != b'=' {
+        return None;
+    }
+    idx -= 1;
+
+    let end_event = idx;
+    while idx > 0 {
+        let b = bytes[idx - 1];
+        if b.is_ascii_alphanumeric() || b == b'-' || b == b'_' {
+            idx -= 1;
         } else {
             break;
         }
     }
 
-    if event_name_rev.is_empty() {
+    if idx == end_event {
         return None;
     }
 
-    if chars.next() != Some('@') {
+    if idx == 0 || bytes[idx - 1] != b'@' {
         return None;
     }
+    idx -= 1;
 
-    let event_name: String = event_name_rev.chars().rev().collect();
-    let quote_len = if quote.is_some() { 1 } else { 0 };
-    let total_matched_len = 1 + event_name.len() + 1 + quote_len;
-    let at_offset = quasi_str.len() - total_matched_len;
+    let at_offset = idx;
+    let event_name = quasi_str[at_offset + 1..end_event].to_string();
 
     Some((at_offset, event_name, quote))
 }

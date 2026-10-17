@@ -39,6 +39,59 @@ fn test_all_fixtures_transform_to_valid_ast() {
             parsed.diagnostics
         );
 
+        // Verify genuine AST transformation per fixture rather than superficial diagnostics check
+        match file_name {
+            "carbon_button.js" => {
+                assert!(
+                    !result.code.contains("__decorate"),
+                    "carbon_button.js must eliminate transpiled __decorate calls"
+                );
+                assert!(
+                    result.code.contains("createProperty")
+                        || result.code.contains("static properties"),
+                    "carbon_button.js must lower properties to createProperty or static properties"
+                );
+                assert!(result.code.contains("disabled"));
+                assert!(result.code.contains("kind"));
+                assert!(result.code.contains("size"));
+            }
+            "spectrum_button.js" => {
+                assert!(
+                    !result.code.contains("@property"),
+                    "spectrum_button.js must eliminate @property decorators"
+                );
+                assert!(
+                    result.code.contains("static properties"),
+                    "spectrum_button.js must synthesize static properties"
+                );
+                assert!(result.code.contains("emphasized"));
+                assert!(result.code.contains("holdAffordance"));
+            }
+            "standard_lit_element.js" => {
+                assert!(
+                    !result.code.contains("@customElement"),
+                    "standard_lit_element.js must eliminate @customElement decorator"
+                );
+                assert!(
+                    !result.code.contains("@property"),
+                    "standard_lit_element.js must eliminate @property decorator"
+                );
+                assert!(
+                    !result.code.contains("@state"),
+                    "standard_lit_element.js must eliminate @state decorator"
+                );
+                assert!(
+                    result.code.contains("customElements.define"),
+                    "standard_lit_element.js must emit customElements.define"
+                );
+                assert!(
+                    result.code.contains("static properties"),
+                    "standard_lit_element.js must synthesize static properties"
+                );
+            }
+            _ => {}
+        }
+
         count += 1;
     }
 

@@ -46,7 +46,6 @@ pub fn compile_resumable_loader(options: Option<ResumableLoaderOptions>) -> Stri
 
     let program = build_loader_program(
         &ast,
-        &opts,
         &manifest_map,
         &events_list,
         idle_hydration,

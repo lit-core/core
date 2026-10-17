@@ -1,12 +1,12 @@
 use napi_derive::napi;
-use oxc_allocator::{Allocator, CloneIn, Vec as ArenaVec};
+use oxc_allocator::{Allocator, CloneIn, GetAllocator, Vec as ArenaVec};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_ast_visit::Visit;
 use oxc_codegen::Codegen;
 use oxc_parser::Parser;
 use oxc_semantic::SemanticBuilder;
-use oxc_span::SourceType;
+use oxc_span::{SourceType, SPAN};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -121,6 +121,8 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
         let mut new_statements = ArenaVec::new_in(&ast);
         let mut class_modified = false;
 
+        let mut declared_slots: Vec<String> = Vec::new();
+
         for mut stmt in old_statements {
             let mut groups: Vec<StmtCandidateGroup> = Vec::new();
             collect_stmt_candidates(
@@ -148,6 +150,17 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
                 let var_name = groups[0].var_name.as_deref().unwrap_or(&cand.var_name);
                 total_memoized_count += 1;
 
+                for dep in &cand.dependencies {
+                    let name = crate::builder::memo_ref_prop_name(dep);
+                    if !declared_slots.contains(&name) {
+                        declared_slots.push(name);
+                    }
+                }
+                let val_name = crate::builder::memo_val_prop_name(&cand.val_slot);
+                if !declared_slots.contains(&val_name) {
+                    declared_slots.push(val_name);
+                }
+
                 for s in build_memo_block(
                     var_name,
                     &cand.val_slot,
@@ -161,6 +174,17 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
                 for group in &groups {
                     for cand in &group.candidates {
                         total_memoized_count += 1;
+
+                        for dep in &cand.dependencies {
+                            let name = crate::builder::memo_ref_prop_name(dep);
+                            if !declared_slots.contains(&name) {
+                                declared_slots.push(name);
+                            }
+                        }
+                        let val_name = crate::builder::memo_val_prop_name(&cand.val_slot);
+                        if !declared_slots.contains(&val_name) {
+                            declared_slots.push(val_name);
+                        }
 
                         for s in build_memo_block(
                             &cand.var_name,
@@ -183,6 +207,51 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
 
         if class_modified {
             transformed_components_count += 1;
+
+            // Declare memoization slot properties on the class body to avoid mutating
+            // undeclared properties on `this` at runtime and de-optimizing V8 hidden classes.
+            let mut existing_class_props: HashSet<String> = HashSet::new();
+            for elem in &class.body.body {
+                if let ClassElement::PropertyDefinition(prop) = elem {
+                    if let Some(name) = prop.key.static_name() {
+                        existing_class_props.insert(name.to_string());
+                    }
+                }
+            }
+
+            let mut declared_elements = ArenaVec::new_in(&ast);
+            for slot in &declared_slots {
+                if !existing_class_props.contains(slot) {
+                    let prop_key = PropertyKey::new_static_identifier(
+                        SPAN,
+                        ast.allocator().alloc_str(slot),
+                        &ast,
+                    );
+                    let prop_def = ClassElement::new_property_definition(
+                        SPAN,
+                        PropertyDefinitionType::PropertyDefinition,
+                        ArenaVec::new_in(&ast),
+                        prop_key,
+                        None,
+                        None,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        None,
+                        &ast,
+                    );
+                    declared_elements.push(prop_def);
+                }
+            }
+
+            for elem in class.body.body.drain(..) {
+                declared_elements.push(elem);
+            }
+            class.body.body = declared_elements;
         }
     }
 

@@ -216,7 +216,9 @@ pub fn collapse_template_quasis(quasis: &[&str]) -> Vec<String> {
 
                 // Non-whitespace character
                 if !pending_ws.is_empty() {
-                    if !out.is_empty() && (!is_first_quasi || !out.is_empty()) {
+                    // Output exists either in this quasi or, for later quasis, as the preceding
+                    // expression hole, so whitespace after a hole collapses to one space.
+                    if !is_first_quasi || !out.is_empty() {
                         out.push(' ');
                     }
                     pending_ws.clear();
@@ -317,8 +319,9 @@ pub fn collapse_template_quasis(quasis: &[&str]) -> Vec<String> {
             if !pending_ws.is_empty() {
                 if !state.in_tag {
                     // In text mode: collapse multiple whitespace to single space
-                    // If immediately after tag close (e.g. >\n  ${expr}), preserve single space if needed
-                    if !out.is_empty() {
+                    // If immediately after tag close (e.g. >\n  ${expr}), preserve single space if needed.
+                    // A later quasi is always preceded by an expression hole, which counts as content.
+                    if !is_first_quasi || !out.is_empty() {
                         out.push(' ');
                     }
                 } else {
@@ -333,6 +336,10 @@ pub fn collapse_template_quasis(quasis: &[&str]) -> Vec<String> {
         }
 
         result.push(out);
+    }
+
+    if state.in_comment || state.quote.is_some() {
+        return quasis.iter().map(|s| s.to_string()).collect();
     }
 
     result
@@ -427,5 +434,18 @@ mod tests {
         assert_eq!(output[1], ">");
         assert_eq!(output[2], "</");
         assert_eq!(output[3], ">");
+    }
+
+    #[test]
+    fn test_ambiguous_context_bailout() {
+        // Unclosed comment
+        let input_comment = vec!["<div><!-- unclosed comment \n  <span>test</span>"];
+        let output_comment = collapse_template_quasis(&input_comment);
+        assert_eq!(output_comment[0], input_comment[0]);
+
+        // Unclosed quote in attribute
+        let input_quote = vec!["<div class=\"unclosed string \n  here>"];
+        let output_quote = collapse_template_quasis(&input_quote);
+        assert_eq!(output_quote[0], input_quote[0]);
     }
 }

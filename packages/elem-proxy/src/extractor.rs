@@ -101,13 +101,6 @@ impl LitDecoratorContext {
 
                 if let Some(sym) = sym_id {
                     self.decorator_symbols.get(&sym).copied()
-                } else if !self.has_imports {
-                    match ident.name.as_str() {
-                        "customElement" => Some(DecoratorKind::CustomElement),
-                        "property" => Some(DecoratorKind::Property),
-                        "state" => Some(DecoratorKind::State),
-                        _ => None,
-                    }
                 } else {
                     None
                 }
@@ -132,9 +125,6 @@ impl LitDecoratorContext {
                         if self.decorator_namespaces.contains(&sym) {
                             return Some(prop_kind);
                         }
-                    } else if !self.has_imports && self.namespace_names.contains(obj.name.as_str())
-                    {
-                        return Some(prop_kind);
                     }
                 }
                 None

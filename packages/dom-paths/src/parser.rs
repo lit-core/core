@@ -79,6 +79,13 @@ pub fn compute_template_parts(
                     {
                         i += 3;
                         state = ParserState::Text;
+                        if let Some(parent) = stack.last_mut() {
+                            parent.child_count += 1;
+                            parent.last_child_was_text = false;
+                        } else {
+                            root_child_count += 1;
+                            root_last_child_was_text = false;
+                        }
                     } else {
                         i += 1;
                     }
@@ -332,11 +339,7 @@ pub fn compute_template_parts(
                             target_tag: Some(cur.tag.clone()),
                         });
                     } else {
-                        parts.push(PartDescriptor {
-                            path: vec![root_child_count.saturating_sub(1) as u32],
-                            is_attribute: true,
-                            target_tag: None,
-                        });
+                        return Vec::new();
                     }
                 }
                 _ => {
@@ -378,7 +381,7 @@ pub fn compute_template_parts(
 
 fn flush_pending_text(
     pending_text: &mut String,
-    normalize_whitespace: bool,
+    _normalize_whitespace: bool,
     stack: &mut [OpenElement],
     root_child_count: &mut usize,
     root_last_child_was_text: &mut bool,
@@ -387,12 +390,7 @@ fn flush_pending_text(
         return;
     }
 
-    let is_pure_ws = pending_text.chars().all(|c| c.is_whitespace());
     pending_text.clear();
-
-    if normalize_whitespace && is_pure_ws {
-        return;
-    }
 
     if let Some(parent) = stack.last_mut() {
         if !parent.last_child_was_text {
@@ -417,7 +415,7 @@ mod tests {
             ">+</button>\n</div>".to_string(),
         ];
         let paths = compute_template_paths(&quasis, true);
-        assert_eq!(paths, vec![vec![0, 1, 1], vec![0, 2]]);
+        assert_eq!(paths, vec![vec![0, 3, 1], vec![0, 5]]);
     }
 
     #[test]
@@ -428,7 +426,7 @@ mod tests {
             "</text>\n</svg>".to_string(),
         ];
         let paths = compute_template_paths(&quasis, true);
-        assert_eq!(paths, vec![vec![0, 0], vec![0, 1, 0]]);
+        assert_eq!(paths, vec![vec![0, 1], vec![0, 3, 0]]);
     }
 
     #[test]
@@ -439,7 +437,7 @@ mod tests {
             "</span>\n</div>".to_string(),
         ];
         let paths = compute_template_paths(&quasis, true);
-        assert_eq!(paths, vec![vec![0, 0, 0], vec![0, 0, 1]]);
+        assert_eq!(paths, vec![vec![0, 1, 0], vec![0, 1, 1]]);
     }
 
     #[test]

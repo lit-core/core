@@ -43,9 +43,14 @@ pub fn hoist_events_in_expr<'a>(expr: &mut Expression<'a>, ctx: &mut HoistContex
                         // 1. Rewrite prev_quasi via AstBuilder
                         let prev_raw = tagged.quasi.quasis[i].value.raw.as_str();
                         let prefix = &prev_raw[..at_offset];
-                        let new_prev_raw = ctx
-                            .allocator
-                            .alloc_str(&format!("{prefix}data-lh-{event_name}={q_char}"));
+                        let mut prev_buf =
+                            String::with_capacity(prefix.len() + 9 + event_name.len() + 1);
+                        prev_buf.push_str(prefix);
+                        prev_buf.push_str("data-lh-");
+                        prev_buf.push_str(&event_name);
+                        prev_buf.push('=');
+                        prev_buf.push(q_char);
+                        let new_prev_raw = ctx.allocator.alloc_str(&prev_buf);
                         let prev_tail = tagged.quasi.quasis[i].tail;
                         tagged.quasi.quasis[i] = TemplateElement::new(
                             SPAN,
@@ -88,7 +93,10 @@ pub fn hoist_events_in_expr<'a>(expr: &mut Expression<'a>, ctx: &mut HoistContex
                             } else {
                                 next_orig_raw
                             };
-                            let new_next_raw = ctx.allocator.alloc_str(&format!("{q_char}{rest}"));
+                            let mut next_buf = String::with_capacity(1 + rest.len());
+                            next_buf.push(q_char);
+                            next_buf.push_str(rest);
+                            let new_next_raw = ctx.allocator.alloc_str(&next_buf);
                             let next_tail = tagged.quasi.quasis[i + 1].tail;
                             tagged.quasi.quasis[i + 1] = TemplateElement::new(
                                 SPAN,

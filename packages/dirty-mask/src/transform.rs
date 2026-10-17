@@ -136,12 +136,22 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
             None => {
                 if scoping.get_binding(root_scope, "noChange".into()).is_some() {
                     let mut alias = "_litNoChange".to_string();
-                    let mut counter = 1;
+                    let mut counter: usize = 1;
                     while scoping
                         .get_binding(root_scope, alias.as_str().into())
                         .is_some()
                     {
-                        alias = format!("_litNoChange_{}", counter);
+                        alias.clear();
+                        alias.push_str("_litNoChange_");
+                        let mut num = counter;
+                        let mut digits = Vec::new();
+                        while num > 0 {
+                            digits.push((b'0' + (num % 10) as u8) as char);
+                            num /= 10;
+                        }
+                        for d in digits.into_iter().rev() {
+                            alias.push(d);
+                        }
                         counter += 1;
                     }
                     (alias, true)
@@ -307,7 +317,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
             )
         };
 
-        if reactive_props.is_empty() {
+        if reactive_props.is_empty() || reactive_props.len() >= 32 {
             continue;
         }
 

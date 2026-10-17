@@ -40,15 +40,12 @@ pub fn is_lit_import_source(src: &str) -> bool {
         || src == "lit-html"
         || src.starts_with("lit-html/")
         || src.starts_with("@lit/")
-        || src == "@spectrum-web-components/base"
-        || src.starts_with("@spectrum-web-components/base/")
 }
 
 pub fn is_lit_directive_source(src: &str) -> bool {
     src.contains("lit/directives/")
         || src.contains("lit-html/directives/")
         || src.contains("@lit/directive")
-        || src.contains("@spectrum-web-components/base/src/directives")
 }
 
 #[derive(Debug, Default)]
@@ -116,7 +113,7 @@ impl ImportContext {
                                 if is_lit {
                                     ctx.lit_bindings.insert(local_name.to_string());
                                     match imported_name.as_str() {
-                                        "LitElement" | "ReactiveElement" | "SpectrumElement" => {
+                                        "LitElement" | "ReactiveElement" => {
                                             if let Some(s) = sym_id {
                                                 ctx.lit_element_symbols.insert(s);
                                             }

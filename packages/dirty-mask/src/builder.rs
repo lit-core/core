@@ -42,7 +42,7 @@ pub fn build_alias_statement<'a>(
 
 pub fn build_mask_calc_statements<'a>(
     sorted_props: &[(String, usize)],
-    class_name: Option<&str>,
+    _class_name: Option<&str>,
     ast: &AstBuilder<'a>,
 ) -> ArenaVec<'a, Statement<'a>> {
     let mut stmts = ArenaVec::new_in(ast);
@@ -62,6 +62,9 @@ pub fn build_mask_calc_statements<'a>(
 
     let mut if_stmts = ArenaVec::new_in(ast);
     for (prop_name, idx) in sorted_props {
+        if *idx >= 32 {
+            continue;
+        }
         let bit = 1u32 << idx;
 
         let cp_ident = Expression::new_identifier(SPAN, "changedProperties", ast);
@@ -140,43 +143,44 @@ pub fn build_mask_calc_statements<'a>(
     );
     let assign_stmt = Statement::new_expression_statement(SPAN, assign_mask, ast);
 
-    if let Some(name) = class_name {
-        let this_expr_1 = Expression::new_this_expression(SPAN, ast);
-        let ctor_prop_1 = IdentifierName::new(SPAN, "constructor", ast);
-        let this_ctor_1 =
-            Expression::new_static_member_expression(SPAN, this_expr_1, ctor_prop_1, false, ast);
-        let not_this_ctor =
-            Expression::new_unary_expression(SPAN, UnaryOperator::LogicalNot, this_ctor_1, ast);
+    let this_expr3 = Expression::new_this_expression(SPAN, ast);
+    let calc_prop = IdentifierName::new(SPAN, "__litMaskCalculated", ast);
+    let this_calc =
+        Expression::new_static_member_expression(SPAN, this_expr3, calc_prop, false, ast);
+    let cp_ident = Expression::new_identifier(SPAN, "changedProperties", ast);
+    let cond = Expression::new_binary_expression(
+        SPAN,
+        this_calc,
+        BinaryOperator::StrictInequality,
+        cp_ident,
+        ast,
+    );
 
-        let this_expr_2 = Expression::new_this_expression(SPAN, ast);
-        let ctor_prop_2 = IdentifierName::new(SPAN, "constructor", ast);
-        let this_ctor_2 =
-            Expression::new_static_member_expression(SPAN, this_expr_2, ctor_prop_2, false, ast);
-        let class_ident = Expression::new_identifier(SPAN, ast.allocator().alloc_str(name), ast);
-        let ctor_eq_class = Expression::new_binary_expression(
-            SPAN,
-            this_ctor_2,
-            BinaryOperator::StrictEquality,
-            class_ident,
-            ast,
-        );
+    let this_expr4 = Expression::new_this_expression(SPAN, ast);
+    let calc_prop2 = IdentifierName::new(SPAN, "__litMaskCalculated", ast);
+    let target_calc =
+        AssignmentTarget::new_static_member_expression(SPAN, this_expr4, calc_prop2, false, ast);
+    let assign_calc = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::Assign,
+        target_calc,
+        Expression::new_identifier(SPAN, "changedProperties", ast),
+        ast,
+    );
+    let assign_calc_stmt = Statement::new_expression_statement(SPAN, assign_calc, ast);
 
-        let cond = Expression::new_logical_expression(
-            SPAN,
-            not_this_ctor,
-            LogicalOperator::Or,
-            ctor_eq_class,
-            ast,
-        );
+    let mut guard_body = ArenaVec::new_in(ast);
+    guard_body.push(assign_stmt);
+    guard_body.push(assign_calc_stmt);
+    let guard_block = Statement::new_block_statement(SPAN, guard_body, ast);
 
-        let mut block_stmts = ArenaVec::new_in(ast);
-        block_stmts.push(assign_stmt);
-        let block = Statement::new_block_statement(SPAN, block_stmts, ast);
-
-        stmts.push(Statement::new_if_statement(SPAN, cond, block, None, ast));
-    } else {
-        stmts.push(assign_stmt);
-    }
+    stmts.push(Statement::new_if_statement(
+        SPAN,
+        cond,
+        guard_block,
+        None,
+        ast,
+    ));
 
     stmts
 }

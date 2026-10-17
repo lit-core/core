@@ -6,22 +6,49 @@ use std::collections::HashSet;
 
 use crate::analyzer::{analyze_candidate, is_lit_html_tag, LitSemanticAnalysis};
 
+pub fn make_memo_slot(base_prop: &str, counter: usize) -> String {
+    let mut s = String::with_capacity(base_prop.len() + 1 + 8);
+    s.push_str(base_prop);
+    s.push('_');
+    s.push_str(&counter.to_string());
+    s
+}
+
+pub fn make_memoized_var_name(base_prop: &str, idx: Option<usize>) -> String {
+    let mut s = String::with_capacity(10 + base_prop.len() + 8);
+    s.push_str("_memoized_");
+    s.push_str(base_prop);
+    if let Some(i) = idx {
+        s.push('_');
+        s.push_str(&i.to_string());
+    }
+    s
+}
+
+pub fn make_memo_key(base_prop: &str) -> String {
+    let mut s = String::with_capacity(6 + base_prop.len());
+    s.push_str("_memo_");
+    s.push_str(base_prop);
+    s
+}
+
 pub fn generate_unique_var_name(
     base_prop: &str,
     counter: usize,
     used_slots: &HashSet<String>,
     existing_bindings: &HashSet<String>,
 ) -> String {
-    let mut candidate = if used_slots.contains(&format!("_memo_{}", base_prop)) {
-        format!("_memoized_{}_{}", base_prop, counter)
+    let memo_key = make_memo_key(base_prop);
+    let mut candidate = if used_slots.contains(&memo_key) {
+        make_memoized_var_name(base_prop, Some(counter))
     } else {
-        format!("_memoized_{}", base_prop)
+        make_memoized_var_name(base_prop, None)
     };
 
     let mut idx = counter;
     while existing_bindings.contains(&candidate) || used_slots.contains(&candidate) {
         idx += 1;
-        candidate = format!("_memoized_{}_{}", base_prop, idx);
+        candidate = make_memoized_var_name(base_prop, Some(idx));
     }
 
     candidate
@@ -66,10 +93,29 @@ impl<'a, 's> Visit<'a> for TemplateCandidateFinder<'a, 's> {
 
         if is_lit {
             for expr in &tagged.quasi.expressions {
-                if let Some(cand) = analyze_candidate(expr) {
+                let unmasked_expr = if let Expression::ConditionalExpression(cond) = expr {
+                    if let Expression::BinaryExpression(bin) = &cond.test {
+                        if let Expression::StaticMemberExpression(mem) = &bin.left {
+                            if mem.property.name == "__litDirtyMask" {
+                                Some(&cond.consequent)
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
+
+                let target_expr = unmasked_expr.unwrap_or(expr);
+                if let Some(cand) = analyze_candidate(target_expr) {
                     let base_prop = cand.root_prop.clone();
                     let val_slot = if self.used_slots.contains(&base_prop) {
-                        format!("{}_{}", base_prop, self.counter)
+                        make_memo_slot(&base_prop, self.counter)
                     } else {
                         base_prop.clone()
                     };
@@ -81,11 +127,11 @@ impl<'a, 's> Visit<'a> for TemplateCandidateFinder<'a, 's> {
                         &self.used_slots,
                         self.existing_bindings,
                     );
-                    self.used_slots.insert(format!("_memo_{}", base_prop));
+                    self.used_slots.insert(make_memo_key(&base_prop));
                     self.used_slots.insert(var_name.clone());
                     self.counter += 1;
 
-                    let expr_cloned = expr.clone_in(self.allocator);
+                    let expr_cloned = target_expr.clone_in(self.allocator);
 
                     self.candidates.push(CandidateItem {
                         expr_start: cand.expr_start,
@@ -137,7 +183,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                         };
 
                         let val_slot = if used_slots.contains(&cand.root_prop) {
-                            format!("{}_{}", cand.root_prop, counter)
+                            make_memo_slot(&cand.root_prop, *counter)
                         } else {
                             cand.root_prop.clone()
                         };
@@ -197,7 +243,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                 // If the return argument itself is a pure array call chain:
                 if let Some(cand) = analyze_candidate(arg) {
                     let val_slot = if used_slots.contains(&cand.root_prop) {
-                        format!("{}_{}", cand.root_prop, counter)
+                        make_memo_slot(&cand.root_prop, *counter)
                     } else {
                         cand.root_prop.clone()
                     };

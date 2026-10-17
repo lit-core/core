@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { classify, transformNative } from '../src/index.js';
 
-describe('Mode B directive lowering compiler', () => {
+describe('mode B directive handling', () => {
   it('classifies component with repeat() directive as Mode B micro', () => {
     const input = `
 import { LitElement, html } from 'lit';
@@ -26,7 +26,7 @@ customElements.define('todo-list', TodoList);
     expect(res[0].reason).toContain('structural');
   });
 
-  it('lowers classMap directive and eliminates directive import', () => {
+  it('preserves classMap directive and leaves component untouched for directives package', () => {
     const input = `
 import { LitElement, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
@@ -42,18 +42,15 @@ export class BannerAlert extends LitElement {
 }
 `;
     const res = transformNative(input);
-    expect(res.microCount).toBe(1);
+    expect(res.microCount).toBe(0);
     expect(res.vanillaCount).toBe(0);
 
-    // Verify directive import was eliminated
-    expect(res.code).not.toContain('lit/directives/class-map.js');
-    expect(res.code).not.toContain('classMap(');
-
-    // Verify lowered inline expressions
-    expect(res.code).toContain('.filter(Boolean).join(" ")');
+    // Verify directive import and call are preserved for @lit-core/directives
+    expect(res.code).toContain('lit/directives/class-map.js');
+    expect(res.code).toContain('classMap(');
   });
 
-  it('lowers ifDefined directive to nullish coalescing', () => {
+  it('preserves ifDefined directive and leaves component untouched for directives package', () => {
     const input = `
 import { LitElement, html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
@@ -67,12 +64,11 @@ export class LinkButton extends LitElement {
 }
 `;
     const res = transformNative(input);
-    expect(res.microCount).toBe(1);
+    expect(res.microCount).toBe(0);
 
-    // Verify directive import was eliminated
-    expect(res.code).not.toContain('lit/directives/if-defined.js');
-    expect(res.code).not.toContain('ifDefined(');
-    expect(res.code).toContain('?? nothing');
+    // Verify directive import and call are preserved for @lit-core/directives
+    expect(res.code).toContain('lit/directives/if-defined.js');
+    expect(res.code).toContain('ifDefined(');
   });
 
   it('respects forced mode overrides', () => {

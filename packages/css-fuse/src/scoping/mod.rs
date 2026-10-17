@@ -1,5 +1,4 @@
 pub mod custom_props;
-pub mod slot_dist;
 pub mod slotted;
 
 use crate::models::{Diagnostic, ExtractedStyle};
