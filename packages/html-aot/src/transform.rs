@@ -55,6 +55,12 @@ fn contains_octal_escape(quasis: &[TemplateElement]) -> bool {
 }
 
 fn is_known_lit_module(specifier: &str) -> bool {
+    if specifier.contains("static-html")
+        || specifier.ends_with("/static.js")
+        || specifier.ends_with("/static")
+    {
+        return false;
+    }
     specifier == "lit"
         || specifier == "lit-html"
         || specifier.starts_with("lit/")

@@ -1,0 +1,3210 @@
+{
+  "schemaVersion": "3.0.0",
+  "id": "bundle-spectrum-dom-paths",
+  "scenario": {
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "relevantFeatures": [
+      "css-fuse",
+      "props-lower",
+      "css-minifier",
+      "html-minifier",
+      "all",
+      "baseline"
+    ],
+    "componentConcepts": [
+      "button",
+      "checkbox",
+      "radio",
+      "switch",
+      "text-input",
+      "select",
+      "dialog",
+      "badge",
+      "tabs",
+      "progress-bar",
+      "spinner",
+      "slider",
+      "menu",
+      "divider",
+      "icon",
+      "icon-button",
+      "card",
+      "elevation",
+      "list",
+      "chips"
+    ]
+  },
+  "suite": {
+    "id": "spectrum",
+    "name": "Spectrum Web Components (@spectrum-web-components)",
+    "packageName": "@spectrum-web-components/bundle",
+    "version": "1.12.4"
+  },
+  "variant": {
+    "id": "dom-paths",
+    "name": "Structural DOM paths (dom-paths)",
+    "isBaseline": false
+  },
+  "timestamp": "2026-10-17T16:31:23.036Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 8,
+    "gitCommit": "7d68f91",
+    "gitBranch": "main",
+    "versions": {
+      "lit": "3.3.3",
+      "vite": "8.3.1",
+      "playwright": "1.63.0",
+      "node": "v24.14.0",
+      "carbon": "2.64.0",
+      "spectrum": "1.12.2",
+      "webawesome": "3.14.0",
+      "momentum": "0.139.9",
+      "material": "2.5.0"
+    }
+  },
+  "metrics": {
+    "rawBytes": 823374,
+    "gzipBytes": 148074,
+    "brotliBytes": 112416,
+    "buildTimeMs": 74.35116700000071,
+    "firstRenderMs": 31.3,
+    "updateMs": 6.2,
+    "scriptEvalMs": 10.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 5533146,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "sp-button",
+        "sp-checkbox",
+        "sp-radio",
+        "sp-switch",
+        "sp-textfield",
+        "sp-picker",
+        "sp-dialog",
+        "sp-badge",
+        "sp-tabs",
+        "sp-progress-bar",
+        "sp-progress-circle",
+        "sp-slider",
+        "sp-menu",
+        "sp-divider",
+        "sp-icon",
+        "sp-action-button",
+        "sp-card",
+        "sp-popover",
+        "sp-sidenav",
+        "sp-action-group"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "baseline": {
+    "rawBytes": 823644,
+    "gzipBytes": 148106,
+    "brotliBytes": 112517,
+    "buildTimeMs": 65.20704200000182,
+    "firstRenderMs": 35.9,
+    "updateMs": 5.9,
+    "scriptEvalMs": 10.2,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 5427853,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "sp-button",
+        "sp-checkbox",
+        "sp-radio",
+        "sp-switch",
+        "sp-textfield",
+        "sp-picker",
+        "sp-dialog",
+        "sp-badge",
+        "sp-tabs",
+        "sp-progress-bar",
+        "sp-progress-circle",
+        "sp-slider",
+        "sp-menu",
+        "sp-divider",
+        "sp-icon",
+        "sp-action-button",
+        "sp-card",
+        "sp-popover",
+        "sp-sidenav",
+        "sp-action-group"
+      ],
+      "renderedCells": 20
+    }
+  },
+  "deltas": {
+    "rawBytes": -270,
+    "rawPercent": -0.03,
+    "gzipBytes": -32,
+    "gzipPercent": -0.02,
+    "brotliBytes": -101,
+    "brotliPercent": -0.09,
+    "buildTimeMs": 9.1,
+    "firstRenderMs": -4.6,
+    "speedupPercent": 12.81,
+    "updateMs": 0.3,
+    "updateSpeedupPercent": -5.08,
+    "evalSpeedupPercent": -2.94,
+    "registrationSpeedupPercent": 11.11,
+    "memorySavingsPercent": -1.94
+  },
+  "runtime": {
+    "firstRenderMs": 31.3,
+    "updateMs": 6.2,
+    "scriptEvalMs": 10.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 5533146,
+    "speedupPercent": 12.81,
+    "updateSpeedupPercent": -5.08,
+    "evalSpeedupPercent": -2.94,
+    "registrationSpeedupPercent": 11.11,
+    "memorySavingsPercent": -1.94
+  },
+  "domSnapshot": {
+    "mount": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "bundle-app-root",
+            "style": "display:flex; flex-direction:column; gap:24px; padding:24px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "app-nav",
+                "style": "display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e4e4e7; padding-bottom:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h2",
+                  "attributes": {
+                    "style": "font-size:20px; font-weight:400; margin:0;"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Enterprise dashboard suite"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "nav-routes",
+                    "style": "display:flex; gap:8px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Overview"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Analytics"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Settings"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "main",
+              "attributes": {
+                "class": "app-body"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "components-showcase-grid",
+                    "style": "display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-button",
+                          "attributes": {
+                            "data-canonical-tag": "sp-button",
+                            "focusable": "",
+                            "role": "button",
+                            "tabindex": "0",
+                            "treatment": "fill",
+                            "variant": "accent"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "icon-only": "",
+                                  "name": "icon"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-checkbox",
+                          "attributes": {
+                            "data-canonical-tag": "sp-checkbox",
+                            "tabindex": "0"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "id": "input",
+                                  "type": "checkbox"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "box"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "for": "input",
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-radio",
+                          "attributes": {
+                            "aria-checked": "false",
+                            "data-canonical-tag": "sp-radio",
+                            "role": "radio",
+                            "tabindex": "0",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "input"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "button"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "label",
+                                  "role": "presentation"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-switch",
+                          "attributes": {
+                            "data-canonical-tag": "sp-switch",
+                            "focusable": "",
+                            "size": "m"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "aria-checked": "false",
+                                  "id": "input",
+                                  "role": "switch",
+                                  "type": "checkbox"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "switch"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "for": "input",
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-textfield",
+                          "attributes": {
+                            "data-canonical-tag": "sp-textfield",
+                            "focusable": "",
+                            "type": "text"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "textfield"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "input",
+                                    "attributes": {
+                                      "aria-describedby": "sp-help-text-f62b0ce3",
+                                      "class": "input",
+                                      "placeholder": "",
+                                      "type": "text"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-live": "assertive",
+                                  "id": "sp-help-text-f62b0ce3"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "pass-through-help-text-39fc7ef0"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "help-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-picker",
+                          "attributes": {
+                            "data-canonical-tag": "sp-picker"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-describedby": "tooltip option-picker",
+                                  "aria-expanded": "false",
+                                  "aria-haspopup": "true",
+                                  "aria-labelledby": "icon label applied-label pending-label",
+                                  "id": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "id": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": " placeholder label "
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "id": "label",
+                                          "name": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "span",
+                                            "attributes": {
+                                              "aria-hidden": "true"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "hidden": "",
+                                      "id": "applied-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "sp-icon-chevron100",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "class": "picker spectrum-UIIcon-ChevronDown100",
+                                      "label": ""
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "svg",
+                                          "attributes": {
+                                            "aria-hidden": "true",
+                                            "aria-label": "",
+                                            "fill": "currentColor",
+                                            "height": "24",
+                                            "role": "img",
+                                            "viewBox": "0 0 10 10",
+                                            "width": "24",
+                                            "xmlns": "http://www.w3.org/2000/svg"
+                                          },
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "path",
+                                              "attributes": {
+                                                "d": "M3 9.95a.875.875 0 0 1-.615-1.498L5.88 5 2.385 1.547A.875.875 0 0 1 3.615.302L7.74 4.377a.876.876 0 0 1 0 1.246L3.615 9.698A.87.87 0 0 1 3 9.95"
+                                              },
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "id": "tooltip",
+                                  "name": "tooltip"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "sp-menu",
+                                "attributes": {
+                                  "aria-labelledby": "applied-label",
+                                  "id": "menu",
+                                  "label": "",
+                                  "role": "listbox",
+                                  "selects": "single",
+                                  "size": "m"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "div",
+                                      "attributes": {
+                                        "class": "mobile-slot-wrapper"
+                                      },
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {},
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "option-picker"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "description"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-dialog",
+                          "attributes": {
+                            "data-canonical-tag": "sp-dialog",
+                            "dismiss-label": "Close",
+                            "role": "dialog",
+                            "variant": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "grid"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "hero"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "heading"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "sp-divider",
+                                    "attributes": {
+                                      "class": "divider",
+                                      "role": "separator",
+                                      "size": "m"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "content"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-badge",
+                          "attributes": {
+                            "data-canonical-tag": "sp-badge",
+                            "variant": "informative"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-tabs",
+                          "attributes": {
+                            "data-canonical-tag": "sp-tabs",
+                            "direction": "horizontal",
+                            "focusable": "",
+                            "selected": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "  ",
+                                  "id": "list",
+                                  "part": "tablist",
+                                  "role": "tablist"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "first-position",
+                                      "id": "selection-indicator",
+                                      "role": "presentation",
+                                      "style": "transform: translateX(0px) scaleX(0) scaleY(0)"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "tab-panel"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-progress-bar",
+                          "attributes": {
+                            "aria-valuemax": "100",
+                            "aria-valuemin": "0",
+                            "aria-valuenow": "0",
+                            "aria-valuetext": "0%",
+                            "data-canonical-tag": "sp-progress-bar",
+                            "label": "",
+                            "role": "progressbar"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "track"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "fill",
+                                      "style": "transform: scaleX(calc(0 / 100));"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-progress-circle",
+                          "attributes": {
+                            "aria-valuemax": "100",
+                            "aria-valuemin": "0",
+                            "aria-valuenow": "0",
+                            "aria-valuetext": "0%",
+                            "data-canonical-tag": "sp-progress-circle",
+                            "role": "progressbar",
+                            "size": "m"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "track"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "fills"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "fillMask1"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "fillSubMask1",
+                                          "style": "transform: rotate(-180deg);"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "fill"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "fillMask2"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "fillSubMask2",
+                                          "style": "transform: rotate(-180deg);"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "fill"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-slider",
+                          "attributes": {
+                            "data-canonical-tag": "sp-slider",
+                            "focusable": "",
+                            "max": "100",
+                            "min": "0"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "label-container"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "sp-field-label",
+                                    "attributes": {
+                                      "class": "  ",
+                                      "for": "input-0",
+                                      "id": "label",
+                                      "size": "m"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "label",
+                                          "attributes": {},
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "slot",
+                                              "attributes": {},
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "sp-field-label",
+                                    "attributes": {
+                                      "class": "  ",
+                                      "for": "input-0",
+                                      "id": "sp-field-label-fe515a13",
+                                      "size": "m"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "output",
+                                        "attributes": {
+                                          "aria-live": "off",
+                                          "for": "input",
+                                          "id": "value"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "text",
+                                            "value": "50"
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "label",
+                                          "attributes": {},
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "slot",
+                                              "attributes": {},
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "track"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "id": "controls"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "track",
+                                          "role": "presentation",
+                                          "style": "width:50%;--spectrum-slider-track-background-size:200%;--spectrum-slider-track-segment-position:0%;"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": " handle ",
+                                          "name": "value",
+                                          "role": "presentation",
+                                          "style": "inset-inline-start:50%;z-index:2;"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "input",
+                                            "attributes": {
+                                              "aria-describedby": "slider-description",
+                                              "aria-labelledby": "label sp-field-label-fe515a13",
+                                              "aria-valuetext": "50",
+                                              "class": "input",
+                                              "id": "input-0",
+                                              "max": "100",
+                                              "min": "0",
+                                              "step": "1",
+                                              "type": "range"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "span",
+                                            "attributes": {
+                                              "id": "slider-description"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "text",
+                                                "value": "Press escape or double click to reset the slider to its default value."
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "track",
+                                          "role": "presentation",
+                                          "style": "width:50%;--spectrum-slider-track-background-size:200%;--spectrum-slider-track-segment-position:50%;"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-menu",
+                          "attributes": {
+                            "data-canonical-tag": "sp-menu",
+                            "label": "",
+                            "role": "menu"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "mobile-slot-wrapper"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-divider",
+                          "attributes": {
+                            "data-canonical-tag": "sp-divider",
+                            "role": "separator"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": []
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-icon",
+                          "attributes": {
+                            "aria-hidden": "true",
+                            "data-canonical-tag": "sp-icon",
+                            "label": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-action-button",
+                          "attributes": {
+                            "data-canonical-tag": "sp-action-button",
+                            "focusable": "",
+                            "role": "button",
+                            "tabindex": "0"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "icon-only": "",
+                                  "name": "icon"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-card",
+                          "attributes": {
+                            "data-canonical-tag": "sp-card",
+                            "variant": "standard"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "wrapper"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "body"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "header"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "title",
+                                              "id": "heading"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "element",
+                                                "tag": "slot",
+                                                "attributes": {
+                                                  "name": "heading"
+                                                },
+                                                "children": []
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "action-button"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "element",
+                                                "tag": "slot",
+                                                "attributes": {
+                                                  "name": "actions"
+                                                },
+                                                "children": []
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "content"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "subtitle"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "element",
+                                                "tag": "slot",
+                                                "attributes": {
+                                                  "name": "subheading"
+                                                },
+                                                "children": []
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "name": "description"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "footer"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-popover",
+                          "attributes": {
+                            "data-canonical-tag": "sp-popover"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-sidenav",
+                          "attributes": {
+                            "data-canonical-tag": "sp-sidenav",
+                            "focusable": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "nav",
+                                "attributes": {},
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "role": "list"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "descendant"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-action-group",
+                          "attributes": {
+                            "data-canonical-tag": "sp-action-group"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "role": "presentation"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "bundle-app-root",
+            "style": "display:flex; flex-direction:column; gap:24px; padding:24px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "app-nav",
+                "style": "display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e4e4e7; padding-bottom:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h2",
+                  "attributes": {
+                    "style": "font-size:20px; font-weight:400; margin:0;"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Enterprise dashboard suite"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "nav-routes",
+                    "style": "display:flex; gap:8px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Overview"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Analytics"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Settings"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "main",
+              "attributes": {
+                "class": "app-body"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "components-showcase-grid",
+                    "style": "display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-button",
+                          "attributes": {
+                            "data-canonical-tag": "sp-button",
+                            "focusable": "",
+                            "role": "button",
+                            "tabindex": "0",
+                            "treatment": "fill",
+                            "variant": "accent"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "icon-only": "",
+                                  "name": "icon"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-checkbox",
+                          "attributes": {
+                            "data-canonical-tag": "sp-checkbox",
+                            "tabindex": "0"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "id": "input",
+                                  "type": "checkbox"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "box"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "for": "input",
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-radio",
+                          "attributes": {
+                            "aria-checked": "false",
+                            "data-canonical-tag": "sp-radio",
+                            "role": "radio",
+                            "tabindex": "0",
+                            "value": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "input"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "button"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "label",
+                                  "role": "presentation"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-switch",
+                          "attributes": {
+                            "data-canonical-tag": "sp-switch",
+                            "focusable": "",
+                            "size": "m"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "aria-checked": "false",
+                                  "id": "input",
+                                  "role": "switch",
+                                  "type": "checkbox"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "switch"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "label",
+                                "attributes": {
+                                  "for": "input",
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-textfield",
+                          "attributes": {
+                            "data-canonical-tag": "sp-textfield",
+                            "focusable": "",
+                            "type": "text"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "textfield"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "input",
+                                    "attributes": {
+                                      "aria-describedby": "sp-help-text-5380c859",
+                                      "class": "input",
+                                      "placeholder": "",
+                                      "type": "text"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-live": "assertive",
+                                  "id": "sp-help-text-5380c859"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "pass-through-help-text-923756d3"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "help-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-picker",
+                          "attributes": {
+                            "data-canonical-tag": "sp-picker"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-describedby": "tooltip option-picker",
+                                  "aria-expanded": "false",
+                                  "aria-haspopup": "true",
+                                  "aria-labelledby": "icon label applied-label pending-label",
+                                  "id": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "id": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": " placeholder label "
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "id": "label",
+                                          "name": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "span",
+                                            "attributes": {
+                                              "aria-hidden": "true"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "hidden": "",
+                                      "id": "applied-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "sp-icon-chevron100",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "class": "picker spectrum-UIIcon-ChevronDown100",
+                                      "label": ""
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "svg",
+                                          "attributes": {
+                                            "aria-hidden": "true",
+                                            "aria-label": "",
+                                            "fill": "currentColor",
+                                            "height": "24",
+                                            "role": "img",
+                                            "viewBox": "0 0 10 10",
+                                            "width": "24",
+                                            "xmlns": "http://www.w3.org/2000/svg"
+                                          },
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "path",
+                                              "attributes": {
+                                                "d": "M3 9.95a.875.875 0 0 1-.615-1.498L5.88 5 2.385 1.547A.875.875 0 0 1 3.615.302L7.74 4.377a.876.876 0 0 1 0 1.246L3.615 9.698A.87.87 0 0 1 3 9.95"
+                                              },
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "id": "tooltip",
+                                  "name": "tooltip"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "sp-menu",
+                                "attributes": {
+                                  "aria-labelledby": "applied-label",
+                                  "id": "menu",
+                                  "label": "",
+                                  "role": "listbox",
+                                  "selects": "single",
+                                  "size": "m"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "div",
+                                      "attributes": {
+                                        "class": "mobile-slot-wrapper"
+                                      },
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "slot",
+                                          "attributes": {},
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "option-picker"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "description"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-dialog",
+                          "attributes": {
+                            "data-canonical-tag": "sp-dialog",
+                            "dismiss-label": "Close",
+                            "role": "dialog",
+                            "variant": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "grid"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "hero"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "heading"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "sp-divider",
+                                    "attributes": {
+                                      "class": "divider",
+                                      "role": "separator",
+                                      "size": "m"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "content"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-badge",
+                          "attributes": {
+                            "data-canonical-tag": "sp-badge",
+                            "variant": "informative"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-tabs",
+                          "attributes": {
+                            "data-canonical-tag": "sp-tabs",
+                            "direction": "horizontal",
+                            "focusable": "",
+                            "selected": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "  ",
+                                  "id": "list",
+                                  "part": "tablist",
+                                  "role": "tablist"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "first-position",
+                                      "id": "selection-indicator",
+                                      "role": "presentation",
+                                      "style": "transform: translateX(0px) scaleX(0) scaleY(0)"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "tab-panel"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-progress-bar",
+                          "attributes": {
+                            "aria-valuemax": "100",
+                            "aria-valuemin": "0",
+                            "aria-valuenow": "0",
+                            "aria-valuetext": "0%",
+                            "data-canonical-tag": "sp-progress-bar",
+                            "label": "",
+                            "role": "progressbar"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "track"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "fill",
+                                      "style": "transform: scaleX(calc(0 / 100));"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-progress-circle",
+                          "attributes": {
+                            "aria-valuemax": "100",
+                            "aria-valuemin": "0",
+                            "aria-valuenow": "0",
+                            "aria-valuetext": "0%",
+                            "data-canonical-tag": "sp-progress-circle",
+                            "role": "progressbar",
+                            "size": "m"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "track"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "fills"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "fillMask1"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "fillSubMask1",
+                                          "style": "transform: rotate(-180deg);"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "fill"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "fillMask2"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "fillSubMask2",
+                                          "style": "transform: rotate(-180deg);"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "fill"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-slider",
+                          "attributes": {
+                            "data-canonical-tag": "sp-slider",
+                            "focusable": "",
+                            "max": "100",
+                            "min": "0"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "label-container"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "sp-field-label",
+                                    "attributes": {
+                                      "class": "  ",
+                                      "for": "input-0",
+                                      "id": "label",
+                                      "size": "m"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "label",
+                                          "attributes": {},
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "slot",
+                                              "attributes": {},
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "sp-field-label",
+                                    "attributes": {
+                                      "class": "  ",
+                                      "for": "input-0",
+                                      "id": "sp-field-label-f06bb4d2",
+                                      "size": "m"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "output",
+                                        "attributes": {
+                                          "aria-live": "off",
+                                          "for": "input",
+                                          "id": "value"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "text",
+                                            "value": "50"
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "label",
+                                          "attributes": {},
+                                          "children": [
+                                            {
+                                              "type": "element",
+                                              "tag": "slot",
+                                              "attributes": {},
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "id": "track"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "id": "controls"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "track",
+                                          "role": "presentation",
+                                          "style": "width:50%;--spectrum-slider-track-background-size:200%;--spectrum-slider-track-segment-position:0%;"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": " handle ",
+                                          "name": "value",
+                                          "role": "presentation",
+                                          "style": "inset-inline-start:50%;z-index:2;"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "input",
+                                            "attributes": {
+                                              "aria-describedby": "slider-description",
+                                              "aria-labelledby": "label sp-field-label-f06bb4d2",
+                                              "aria-valuetext": "50",
+                                              "class": "input",
+                                              "id": "input-0",
+                                              "max": "100",
+                                              "min": "0",
+                                              "step": "1",
+                                              "type": "range"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "span",
+                                            "attributes": {
+                                              "id": "slider-description"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "text",
+                                                "value": "Press escape or double click to reset the slider to its default value."
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "track",
+                                          "role": "presentation",
+                                          "style": "width:50%;--spectrum-slider-track-background-size:200%;--spectrum-slider-track-segment-position:50%;"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-menu",
+                          "attributes": {
+                            "data-canonical-tag": "sp-menu",
+                            "label": "",
+                            "role": "menu"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "mobile-slot-wrapper"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-divider",
+                          "attributes": {
+                            "data-canonical-tag": "sp-divider",
+                            "role": "separator"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": []
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-icon",
+                          "attributes": {
+                            "aria-hidden": "true",
+                            "data-canonical-tag": "sp-icon",
+                            "label": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-action-button",
+                          "attributes": {
+                            "data-canonical-tag": "sp-action-button",
+                            "focusable": "",
+                            "role": "button",
+                            "tabindex": "0"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "icon-only": "",
+                                  "name": "icon"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-card",
+                          "attributes": {
+                            "data-canonical-tag": "sp-card",
+                            "variant": "standard"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "wrapper"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "body"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "header"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "title",
+                                              "id": "heading"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "element",
+                                                "tag": "slot",
+                                                "attributes": {
+                                                  "name": "heading"
+                                                },
+                                                "children": []
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "action-button"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "element",
+                                                "tag": "slot",
+                                                "attributes": {
+                                                  "name": "actions"
+                                                },
+                                                "children": []
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "content"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "div",
+                                            "attributes": {
+                                              "class": "subtitle"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "element",
+                                                "tag": "slot",
+                                                "attributes": {
+                                                  "name": "subheading"
+                                                },
+                                                "children": []
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {
+                                              "name": "description"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "footer"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-popover",
+                          "attributes": {
+                            "data-canonical-tag": "sp-popover"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-sidenav",
+                          "attributes": {
+                            "data-canonical-tag": "sp-sidenav",
+                            "focusable": ""
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "nav",
+                                "attributes": {},
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "role": "list"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "descendant"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-action-group",
+                          "attributes": {
+                            "data-canonical-tag": "sp-action-group"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "role": "presentation"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "elementsCount": 49,
+    "customElementsCount": 20,
+    "shadowRootsCount": 20
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 49,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
+  }
+}

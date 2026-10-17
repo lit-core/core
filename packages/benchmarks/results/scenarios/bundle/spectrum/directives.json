@@ -5,7 +5,14 @@
     "id": "bundle",
     "name": "Multi-component bundle",
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "relevantFeatures": [
+      "css-fuse",
+      "props-lower",
+      "css-minifier",
+      "html-minifier",
+      "all",
+      "baseline"
+    ],
     "componentConcepts": [
       "button",
       "checkbox",
@@ -40,13 +47,13 @@
     "name": "Lit directive lowering (directives)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-11T01:04:50.313Z",
+  "timestamp": "2026-10-17T16:31:26.083Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1cc4959",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -64,12 +71,12 @@
     "rawBytes": 823374,
     "gzipBytes": 148074,
     "brotliBytes": 112416,
-    "buildTimeMs": 125.60745800000001,
-    "firstRenderMs": 23.2,
-    "updateMs": 5.4,
-    "scriptEvalMs": 10.7,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 5912862,
+    "buildTimeMs": 69.81445799999346,
+    "firstRenderMs": 31.3,
+    "updateMs": 6.7,
+    "scriptEvalMs": 13.7,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 5520670,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -141,26 +148,26 @@
     "gzipPercent": -0.02,
     "brotliBytes": -101,
     "brotliPercent": -0.09,
-    "buildTimeMs": 60.4,
-    "firstRenderMs": -12.7,
-    "speedupPercent": 35.38,
-    "updateMs": -0.5,
-    "updateSpeedupPercent": 8.47,
-    "evalSpeedupPercent": -4.9,
-    "registrationSpeedupPercent": 33.33,
-    "memorySavingsPercent": -8.94
+    "buildTimeMs": 4.6,
+    "firstRenderMs": -4.6,
+    "speedupPercent": 12.81,
+    "updateMs": 0.8,
+    "updateSpeedupPercent": -13.56,
+    "evalSpeedupPercent": -34.31,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -1.71
   },
   "runtime": {
-    "firstRenderMs": 23.2,
-    "updateMs": 5.4,
-    "scriptEvalMs": 10.7,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 5912862,
-    "speedupPercent": 35.38,
-    "updateSpeedupPercent": 8.47,
-    "evalSpeedupPercent": -4.9,
-    "registrationSpeedupPercent": 33.33,
-    "memorySavingsPercent": -8.94
+    "firstRenderMs": 31.3,
+    "updateMs": 6.7,
+    "scriptEvalMs": 13.7,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 5520670,
+    "speedupPercent": 12.81,
+    "updateSpeedupPercent": -13.56,
+    "evalSpeedupPercent": -34.31,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -1.71
   },
   "domSnapshot": {
     "mount": {
@@ -524,7 +531,7 @@
                                     "type": "element",
                                     "tag": "input",
                                     "attributes": {
-                                      "aria-describedby": "sp-help-text-5456f207",
+                                      "aria-describedby": "sp-help-text-66d795e7",
                                       "class": "input",
                                       "placeholder": "",
                                       "type": "text"
@@ -538,14 +545,14 @@
                                 "tag": "div",
                                 "attributes": {
                                   "aria-live": "assertive",
-                                  "id": "sp-help-text-5456f207"
+                                  "id": "sp-help-text-66d795e7"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "slot",
                                     "attributes": {
-                                      "name": "pass-through-help-text-7c8394bd"
+                                      "name": "pass-through-help-text-3c188bc3"
                                     },
                                     "children": [
                                       {
@@ -1162,7 +1169,7 @@
                                     "attributes": {
                                       "class": "  ",
                                       "for": "input-0",
-                                      "id": "sp-field-label-7dad7849",
+                                      "id": "sp-field-label-3f045473",
                                       "size": "m"
                                     },
                                     "children": [
@@ -1242,7 +1249,7 @@
                                             "tag": "input",
                                             "attributes": {
                                               "aria-describedby": "slider-description",
-                                              "aria-labelledby": "label sp-field-label-7dad7849",
+                                              "aria-labelledby": "label sp-field-label-3f045473",
                                               "aria-valuetext": "50",
                                               "class": "input",
                                               "id": "input-0",
@@ -2036,7 +2043,7 @@
                                     "type": "element",
                                     "tag": "input",
                                     "attributes": {
-                                      "aria-describedby": "sp-help-text-a7ad25c4",
+                                      "aria-describedby": "sp-help-text-57df6d50",
                                       "class": "input",
                                       "placeholder": "",
                                       "type": "text"
@@ -2050,14 +2057,14 @@
                                 "tag": "div",
                                 "attributes": {
                                   "aria-live": "assertive",
-                                  "id": "sp-help-text-a7ad25c4"
+                                  "id": "sp-help-text-57df6d50"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "slot",
                                     "attributes": {
-                                      "name": "pass-through-help-text-61899f91"
+                                      "name": "pass-through-help-text-abe2cd62"
                                     },
                                     "children": [
                                       {
@@ -2674,7 +2681,7 @@
                                     "attributes": {
                                       "class": "  ",
                                       "for": "input-0",
-                                      "id": "sp-field-label-f7ceca46",
+                                      "id": "sp-field-label-ef5a1d87",
                                       "size": "m"
                                     },
                                     "children": [
@@ -2754,7 +2761,7 @@
                                             "tag": "input",
                                             "attributes": {
                                               "aria-describedby": "slider-description",
-                                              "aria-labelledby": "label sp-field-label-f7ceca46",
+                                              "aria-labelledby": "label sp-field-label-ef5a1d87",
                                               "aria-valuetext": "50",
                                               "class": "input",
                                               "id": "input-0",

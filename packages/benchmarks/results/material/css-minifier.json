@@ -11,122 +11,122 @@
       {
         "concept": "button",
         "tag": "md-filled-button",
-        "label": "Button",
-        "path": "button/filled-button.js"
+        "path": "button/filled-button.js",
+        "importStatement": "import '@material/web/button/filled-button.js';"
       },
       {
         "concept": "checkbox",
         "tag": "md-checkbox",
-        "label": "Checkbox",
-        "path": "checkbox/checkbox.js"
+        "path": "checkbox/checkbox.js",
+        "importStatement": "import '@material/web/checkbox/checkbox.js';"
       },
       {
         "concept": "radio",
         "tag": "md-radio",
-        "label": "Radio button",
-        "path": "radio/radio.js"
+        "path": "radio/radio.js",
+        "importStatement": "import '@material/web/radio/radio.js';"
       },
       {
         "concept": "switch",
         "tag": "md-switch",
-        "label": "Switch / toggle",
-        "path": "switch/switch.js"
+        "path": "switch/switch.js",
+        "importStatement": "import '@material/web/switch/switch.js';"
       },
       {
         "concept": "text-input",
         "tag": "md-filled-text-field",
-        "label": "Text input / field",
-        "path": "textfield/filled-text-field.js"
+        "path": "textfield/filled-text-field.js",
+        "importStatement": "import '@material/web/textfield/filled-text-field.js';"
       },
       {
         "concept": "select",
         "tag": "md-filled-select",
-        "label": "Select / dropdown",
-        "path": "select/filled-select.js"
+        "path": "select/filled-select.js",
+        "importStatement": "import '@material/web/select/filled-select.js';"
       },
       {
         "concept": "dialog",
         "tag": "md-dialog",
-        "label": "Dialog / modal",
-        "path": "dialog/dialog.js"
+        "path": "dialog/dialog.js",
+        "importStatement": "import '@material/web/dialog/dialog.js';"
       },
       {
         "concept": "badge",
         "tag": "md-badge",
-        "label": "Badge / tag",
-        "path": "labs/badge/badge.js"
+        "path": "labs/badge/badge.js",
+        "importStatement": "import '@material/web/labs/badge/badge.js';"
       },
       {
         "concept": "tabs",
         "tag": "md-tabs",
-        "label": "Tabs",
-        "path": "tabs/tabs.js"
+        "path": "tabs/tabs.js",
+        "importStatement": "import '@material/web/tabs/tabs.js';"
       },
       {
         "concept": "progress-bar",
         "tag": "md-linear-progress",
-        "label": "Progress bar",
-        "path": "progress/linear-progress.js"
+        "path": "progress/linear-progress.js",
+        "importStatement": "import '@material/web/progress/linear-progress.js';"
       },
       {
         "concept": "spinner",
         "tag": "md-circular-progress",
-        "label": "Spinner / loader",
-        "path": "progress/circular-progress.js"
+        "path": "progress/circular-progress.js",
+        "importStatement": "import '@material/web/progress/circular-progress.js';"
       },
       {
         "concept": "slider",
         "tag": "md-slider",
-        "label": "Slider",
-        "path": "slider/slider.js"
+        "path": "slider/slider.js",
+        "importStatement": "import '@material/web/slider/slider.js';"
       },
       {
         "concept": "menu",
         "tag": "md-menu",
-        "label": "Menu / popover",
-        "path": "menu/menu.js"
+        "path": "menu/menu.js",
+        "importStatement": "import '@material/web/menu/menu.js';"
       },
       {
         "concept": "divider",
         "tag": "md-divider",
-        "label": "Divider",
-        "path": "divider/divider.js"
+        "path": "divider/divider.js",
+        "importStatement": "import '@material/web/divider/divider.js';"
       },
       {
         "concept": "icon",
         "tag": "md-icon",
-        "label": "Icon",
-        "path": "icon/icon.js"
+        "path": "icon/icon.js",
+        "importStatement": "import '@material/web/icon/icon.js';"
       },
       {
         "concept": "icon-button",
         "tag": "md-icon-button",
-        "label": "Icon button",
-        "path": "iconbutton/icon-button.js"
+        "path": "iconbutton/icon-button.js",
+        "importStatement": "import '@material/web/iconbutton/icon-button.js';"
       },
       {
         "concept": "card",
         "tag": "md-elevation",
-        "label": "Card / tile",
-        "path": "elevation/elevation.js"
+        "path": "elevation/elevation.js",
+        "importStatement": "import '@material/web/elevation/elevation.js';"
       },
       {
         "concept": "elevation",
         "tag": "md-focus-ring",
-        "label": "Elevation / focus",
-        "path": "focus/md-focus-ring.js"
+        "path": "focus/md-focus-ring.js",
+        "importStatement": "import '@material/web/focus/md-focus-ring.js';"
       },
       {
         "concept": "list",
         "tag": "md-list",
-        "label": "List / structured",
-        "path": "list/list.js"
+        "path": "list/list.js",
+        "importStatement": "import '@material/web/list/list.js';"
       },
       {
         "concept": "chips",
         "tag": "md-chip-set",
-        "label": "Chips / segmented",
-        "path": "chips/chip-set.js"
+        "path": "chips/chip-set.js",
+        "importStatement": "import '@material/web/chips/chip-set.js';"
       }
     ]
   },
@@ -139,15 +139,16 @@
   "scenario": {
     "id": "bundle",
     "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering"
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "componentCount": 20
   },
-  "timestamp": "2026-10-10T10:11:58.555Z",
+  "timestamp": "2026-10-17T16:29:55.631Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -162,10 +163,10 @@
     }
   },
   "metrics": {
-    "rawBytes": 268054,
-    "gzipBytes": 57295,
-    "brotliBytes": 46349,
-    "buildTimeMs": 26.953958000001876
+    "rawBytes": 267814,
+    "gzipBytes": 57245,
+    "brotliBytes": 46354,
+    "buildTimeMs": 63.35887499999808
   },
   "baseline": {
     "rawBytes": 271249,
@@ -205,31 +206,40 @@
     }
   },
   "deltas": {
-    "rawBytes": -3195,
-    "rawPercent": -1.18,
-    "gzipBytes": -360,
-    "gzipPercent": -0.62,
-    "brotliBytes": -281,
-    "brotliPercent": -0.6,
-    "buildTimeMs": -0.9,
-    "firstRenderMs": -11.3,
-    "speedupPercent": 35.65,
-    "updateMs": -2.5,
-    "updateSpeedupPercent": 31.65,
-    "evalSpeedupPercent": 3.39,
-    "registrationSpeedupPercent": 42.11,
-    "memorySavingsPercent": 0.37
+    "rawBytes": -3435,
+    "rawPercent": -1.27,
+    "gzipBytes": -410,
+    "gzipPercent": -0.71,
+    "brotliBytes": -276,
+    "brotliPercent": -0.59,
+    "buildTimeMs": 35.5,
+    "firstRenderMs": -3.7,
+    "speedupPercent": 11.67,
+    "updateMs": -1.4,
+    "updateSpeedupPercent": 17.72,
+    "evalSpeedupPercent": 11.86,
+    "registrationSpeedupPercent": 5.26,
+    "memorySavingsPercent": -3.1
   },
   "runtime": {
-    "firstRenderMs": 20.4,
-    "updateMs": 5.4,
-    "scriptEvalMs": 5.7,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 3315450,
-    "speedupPercent": 35.65,
-    "updateSpeedupPercent": 31.65,
-    "evalSpeedupPercent": 3.39,
-    "registrationSpeedupPercent": 42.11,
-    "memorySavingsPercent": 0.37
+    "firstRenderMs": 28,
+    "updateMs": 6.5,
+    "scriptEvalMs": 5.2,
+    "registrationMs": 1.8,
+    "heapUsedBytes": 3430805,
+    "speedupPercent": 11.67,
+    "updateSpeedupPercent": 17.72,
+    "evalSpeedupPercent": 11.86,
+    "registrationSpeedupPercent": 5.26,
+    "memorySavingsPercent": -3.1
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 49,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

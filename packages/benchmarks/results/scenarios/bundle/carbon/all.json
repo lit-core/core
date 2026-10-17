@@ -5,7 +5,14 @@
     "id": "bundle",
     "name": "Multi-component bundle",
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "relevantFeatures": [
+      "css-fuse",
+      "props-lower",
+      "css-minifier",
+      "html-minifier",
+      "all",
+      "baseline"
+    ],
     "componentConcepts": [
       "button",
       "checkbox",
@@ -40,13 +47,13 @@
     "name": "All optimizations combined",
     "isBaseline": false
   },
-  "timestamp": "2026-10-11T01:06:16.099Z",
+  "timestamp": "2026-10-17T16:30:31.558Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1cc4959",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -61,15 +68,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 1491991,
-    "gzipBytes": 198720,
-    "brotliBytes": 103150,
-    "buildTimeMs": 772.3717079999988,
-    "firstRenderMs": 29.5,
-    "updateMs": 4.6,
+    "rawBytes": 1447888,
+    "gzipBytes": 193021,
+    "brotliBytes": 100975,
+    "buildTimeMs": 1148.6023750000022,
+    "firstRenderMs": 34.4,
+    "updateMs": 4.9,
     "scriptEvalMs": 3.1,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 8173644,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 8007470,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -135,32 +142,32 @@
     }
   },
   "deltas": {
-    "rawBytes": 51177,
-    "rawPercent": 3.55,
-    "gzipBytes": 11666,
-    "gzipPercent": 6.24,
-    "brotliBytes": 4489,
-    "brotliPercent": 4.55,
-    "buildTimeMs": 702,
-    "firstRenderMs": -19.6,
-    "speedupPercent": 39.92,
-    "updateMs": -0.8,
-    "updateSpeedupPercent": 14.81,
+    "rawBytes": 7074,
+    "rawPercent": 0.49,
+    "gzipBytes": 5967,
+    "gzipPercent": 3.19,
+    "brotliBytes": 2314,
+    "brotliPercent": 2.35,
+    "buildTimeMs": 1078.3,
+    "firstRenderMs": -14.7,
+    "speedupPercent": 29.94,
+    "updateMs": -0.5,
+    "updateSpeedupPercent": 9.26,
     "evalSpeedupPercent": 24.39,
-    "registrationSpeedupPercent": -80,
-    "memorySavingsPercent": -3.56
+    "registrationSpeedupPercent": -120,
+    "memorySavingsPercent": -1.46
   },
   "runtime": {
-    "firstRenderMs": 29.5,
-    "updateMs": 4.6,
+    "firstRenderMs": 34.4,
+    "updateMs": 4.9,
     "scriptEvalMs": 3.1,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 8173644,
-    "speedupPercent": 39.92,
-    "updateSpeedupPercent": 14.81,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 8007470,
+    "speedupPercent": 29.94,
+    "updateSpeedupPercent": 9.26,
     "evalSpeedupPercent": 24.39,
-    "registrationSpeedupPercent": -80,
-    "memorySavingsPercent": -3.56
+    "registrationSpeedupPercent": -120,
+    "memorySavingsPercent": -1.46
   },
   "domSnapshot": {
     "mount": {
@@ -294,7 +301,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--lg,true cds--layout--size-lg,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -356,8 +363,6 @@
                                 "attributes": {
                                   "aria-readonly": "false",
                                   "class": "cds--checkbox",
-                                  "data-lh-change": "0",
-                                  "data-lh-click": "1",
                                   "id": "checkbox",
                                   "part": "input",
                                   "type": "checkbox"
@@ -541,7 +546,6 @@
                                   "aria-checked": "false",
                                   "aria-labelledby": "false",
                                   "class": "cds--toggle__button",
-                                  "data-lh-click": "0",
                                   "id": "checkbox",
                                   "role": "switch",
                                   "type": "button"
@@ -669,8 +673,6 @@
                                             "attributes": {
                                               "autocomplete": "",
                                               "class": "cds--text-input",
-                                              "data-lh-change": "1",
-                                              "data-lh-input": "0",
                                               "id": "input",
                                               "type": "text"
                                             },
@@ -775,7 +777,6 @@
                                       "aria-invalid": "false",
                                       "aria-readonly": "false",
                                       "class": "cds--select-input",
-                                      "data-lh-input": "0",
                                       "id": "select",
                                       "title": ""
                                     },
@@ -876,7 +877,6 @@
                                   "aria-label": "",
                                   "aria-modal": "true",
                                   "class": "cds--modal-container cds--modal-container--md",
-                                  "data-lh-click": "0",
                                   "part": "dialog",
                                   "role": "dialog",
                                   "tabindex": "-1"
@@ -1312,8 +1312,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": "cds--label",
-                                  "data-lh-click": "0"
+                                  "class": "cds--label"
                                 },
                                 "children": [
                                   {
@@ -1360,9 +1359,6 @@
                                     "tag": "div",
                                     "attributes": {
                                       "class": "cds--slider",
-                                      "data-lh-click": "2",
-                                      "data-lh-keydown": "1",
-                                      "data-lh-pointerup": "3",
                                       "role": "presentation",
                                       "tabindex": "-1"
                                     },
@@ -1384,7 +1380,6 @@
                                               "aria-valuenow": "",
                                               "aria-valuetext": "NaN",
                                               "class": "cds--slider__thumb",
-                                              "data-lh-pointerdown": "4",
                                               "id": "thumb",
                                               "role": "slider",
                                               "tabindex": "0"
@@ -1514,7 +1509,7 @@
                                       "aria-expanded": "false",
                                       "aria-haspopup": "menu",
                                       "aria-label": "Options",
-                                      "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--undefined,false cds--layout--size-undefined,false cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false cds--btn--icon-only cds--overflow-menu",
+                                      "class": "cds--btn cds--btn--primary cds--btn--icon-only cds--overflow-menu",
                                       "id": "button",
                                       "part": "button",
                                       "tabindex": "0",
@@ -1665,7 +1660,7 @@
                                 "type": "element",
                                 "tag": "p",
                                 "attributes": {
-                                  "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                                  "class": " cds--skeleton__text ",
                                   "style": "width:100%"
                                 },
                                 "children": []
@@ -1751,7 +1746,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "undefined",
-                                      "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--lg,true cds--layout--size-lg,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                      "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
                                       "id": "button",
                                       "part": "button",
                                       "tabindex": "0",
@@ -2200,7 +2195,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--lg,true cds--layout--size-lg,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                  "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -2262,8 +2257,6 @@
                                 "attributes": {
                                   "aria-readonly": "false",
                                   "class": "cds--checkbox",
-                                  "data-lh-change": "0",
-                                  "data-lh-click": "1",
                                   "id": "checkbox",
                                   "part": "input",
                                   "type": "checkbox"
@@ -2447,7 +2440,6 @@
                                   "aria-checked": "false",
                                   "aria-labelledby": "false",
                                   "class": "cds--toggle__button",
-                                  "data-lh-click": "0",
                                   "id": "checkbox",
                                   "role": "switch",
                                   "type": "button"
@@ -2575,8 +2567,6 @@
                                             "attributes": {
                                               "autocomplete": "",
                                               "class": "cds--text-input",
-                                              "data-lh-change": "1",
-                                              "data-lh-input": "0",
                                               "id": "input",
                                               "type": "text"
                                             },
@@ -2681,7 +2671,6 @@
                                       "aria-invalid": "false",
                                       "aria-readonly": "false",
                                       "class": "cds--select-input",
-                                      "data-lh-input": "0",
                                       "id": "select",
                                       "title": ""
                                     },
@@ -2782,7 +2771,6 @@
                                   "aria-label": "",
                                   "aria-modal": "true",
                                   "class": "cds--modal-container cds--modal-container--md",
-                                  "data-lh-click": "0",
                                   "part": "dialog",
                                   "role": "dialog",
                                   "tabindex": "-1"
@@ -3218,8 +3206,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": "cds--label",
-                                  "data-lh-click": "0"
+                                  "class": "cds--label"
                                 },
                                 "children": [
                                   {
@@ -3266,9 +3253,6 @@
                                     "tag": "div",
                                     "attributes": {
                                       "class": "cds--slider",
-                                      "data-lh-click": "2",
-                                      "data-lh-keydown": "1",
-                                      "data-lh-pointerup": "3",
                                       "role": "presentation",
                                       "tabindex": "-1"
                                     },
@@ -3290,7 +3274,6 @@
                                               "aria-valuenow": "",
                                               "aria-valuetext": "NaN",
                                               "class": "cds--slider__thumb",
-                                              "data-lh-pointerdown": "4",
                                               "id": "thumb",
                                               "role": "slider",
                                               "tabindex": "0"
@@ -3420,7 +3403,7 @@
                                       "aria-expanded": "false",
                                       "aria-haspopup": "menu",
                                       "aria-label": "Options",
-                                      "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--undefined,false cds--layout--size-undefined,false cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false cds--btn--icon-only cds--overflow-menu",
+                                      "class": "cds--btn cds--btn--primary cds--btn--icon-only cds--overflow-menu",
                                       "id": "button",
                                       "part": "button",
                                       "tabindex": "0",
@@ -3571,7 +3554,7 @@
                                 "type": "element",
                                 "tag": "p",
                                 "attributes": {
-                                  "class": "cds--skeleton__text,true cds--skeleton__heading,false",
+                                  "class": " cds--skeleton__text ",
                                   "style": "width:100%"
                                 },
                                 "children": []
@@ -3657,7 +3640,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "undefined",
-                                      "class": "cds--btn,true cds--btn--primary,primary cds--btn--danger--tertiary,false cds--btn--danger--ghost,false cds--btn--disabled,false cds--btn--icon-only,false cds--btn--lg,true cds--layout--size-lg,true cds-ce--btn--has-icon,false cds--btn--expressive,false cds--btn--selected,false",
+                                      "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
                                       "id": "button",
                                       "part": "button",
                                       "tabindex": "0",

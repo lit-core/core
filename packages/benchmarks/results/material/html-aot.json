@@ -11,122 +11,122 @@
       {
         "concept": "button",
         "tag": "md-filled-button",
-        "label": "Button",
-        "path": "button/filled-button.js"
+        "path": "button/filled-button.js",
+        "importStatement": "import '@material/web/button/filled-button.js';"
       },
       {
         "concept": "checkbox",
         "tag": "md-checkbox",
-        "label": "Checkbox",
-        "path": "checkbox/checkbox.js"
+        "path": "checkbox/checkbox.js",
+        "importStatement": "import '@material/web/checkbox/checkbox.js';"
       },
       {
         "concept": "radio",
         "tag": "md-radio",
-        "label": "Radio button",
-        "path": "radio/radio.js"
+        "path": "radio/radio.js",
+        "importStatement": "import '@material/web/radio/radio.js';"
       },
       {
         "concept": "switch",
         "tag": "md-switch",
-        "label": "Switch / toggle",
-        "path": "switch/switch.js"
+        "path": "switch/switch.js",
+        "importStatement": "import '@material/web/switch/switch.js';"
       },
       {
         "concept": "text-input",
         "tag": "md-filled-text-field",
-        "label": "Text input / field",
-        "path": "textfield/filled-text-field.js"
+        "path": "textfield/filled-text-field.js",
+        "importStatement": "import '@material/web/textfield/filled-text-field.js';"
       },
       {
         "concept": "select",
         "tag": "md-filled-select",
-        "label": "Select / dropdown",
-        "path": "select/filled-select.js"
+        "path": "select/filled-select.js",
+        "importStatement": "import '@material/web/select/filled-select.js';"
       },
       {
         "concept": "dialog",
         "tag": "md-dialog",
-        "label": "Dialog / modal",
-        "path": "dialog/dialog.js"
+        "path": "dialog/dialog.js",
+        "importStatement": "import '@material/web/dialog/dialog.js';"
       },
       {
         "concept": "badge",
         "tag": "md-badge",
-        "label": "Badge / tag",
-        "path": "labs/badge/badge.js"
+        "path": "labs/badge/badge.js",
+        "importStatement": "import '@material/web/labs/badge/badge.js';"
       },
       {
         "concept": "tabs",
         "tag": "md-tabs",
-        "label": "Tabs",
-        "path": "tabs/tabs.js"
+        "path": "tabs/tabs.js",
+        "importStatement": "import '@material/web/tabs/tabs.js';"
       },
       {
         "concept": "progress-bar",
         "tag": "md-linear-progress",
-        "label": "Progress bar",
-        "path": "progress/linear-progress.js"
+        "path": "progress/linear-progress.js",
+        "importStatement": "import '@material/web/progress/linear-progress.js';"
       },
       {
         "concept": "spinner",
         "tag": "md-circular-progress",
-        "label": "Spinner / loader",
-        "path": "progress/circular-progress.js"
+        "path": "progress/circular-progress.js",
+        "importStatement": "import '@material/web/progress/circular-progress.js';"
       },
       {
         "concept": "slider",
         "tag": "md-slider",
-        "label": "Slider",
-        "path": "slider/slider.js"
+        "path": "slider/slider.js",
+        "importStatement": "import '@material/web/slider/slider.js';"
       },
       {
         "concept": "menu",
         "tag": "md-menu",
-        "label": "Menu / popover",
-        "path": "menu/menu.js"
+        "path": "menu/menu.js",
+        "importStatement": "import '@material/web/menu/menu.js';"
       },
       {
         "concept": "divider",
         "tag": "md-divider",
-        "label": "Divider",
-        "path": "divider/divider.js"
+        "path": "divider/divider.js",
+        "importStatement": "import '@material/web/divider/divider.js';"
       },
       {
         "concept": "icon",
         "tag": "md-icon",
-        "label": "Icon",
-        "path": "icon/icon.js"
+        "path": "icon/icon.js",
+        "importStatement": "import '@material/web/icon/icon.js';"
       },
       {
         "concept": "icon-button",
         "tag": "md-icon-button",
-        "label": "Icon button",
-        "path": "iconbutton/icon-button.js"
+        "path": "iconbutton/icon-button.js",
+        "importStatement": "import '@material/web/iconbutton/icon-button.js';"
       },
       {
         "concept": "card",
         "tag": "md-elevation",
-        "label": "Card / tile",
-        "path": "elevation/elevation.js"
+        "path": "elevation/elevation.js",
+        "importStatement": "import '@material/web/elevation/elevation.js';"
       },
       {
         "concept": "elevation",
         "tag": "md-focus-ring",
-        "label": "Elevation / focus",
-        "path": "focus/md-focus-ring.js"
+        "path": "focus/md-focus-ring.js",
+        "importStatement": "import '@material/web/focus/md-focus-ring.js';"
       },
       {
         "concept": "list",
         "tag": "md-list",
-        "label": "List / structured",
-        "path": "list/list.js"
+        "path": "list/list.js",
+        "importStatement": "import '@material/web/list/list.js';"
       },
       {
         "concept": "chips",
         "tag": "md-chip-set",
-        "label": "Chips / segmented",
-        "path": "chips/chip-set.js"
+        "path": "chips/chip-set.js",
+        "importStatement": "import '@material/web/chips/chip-set.js';"
       }
     ]
   },
@@ -137,17 +137,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "ssr-dashboard",
-    "name": "SSR dashboard",
-    "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation"
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "componentCount": 20
   },
-  "timestamp": "2026-10-10T10:11:57.887Z",
+  "timestamp": "2026-10-17T16:29:54.901Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -162,43 +163,83 @@
     }
   },
   "metrics": {
-    "rawBytes": 70338,
-    "gzipBytes": 20018,
-    "brotliBytes": 17693,
-    "buildTimeMs": 14.942999999999302
+    "rawBytes": 291365,
+    "gzipBytes": 60888,
+    "brotliBytes": 48902,
+    "buildTimeMs": 35.28754099999787
   },
   "baseline": {
-    "rawBytes": 67032,
-    "gzipBytes": 19123,
-    "brotliBytes": 16992,
-    "buildTimeMs": 16.981958000000304
+    "rawBytes": 271249,
+    "gzipBytes": 57655,
+    "brotliBytes": 46630,
+    "buildTimeMs": 27.877166999998735,
+    "firstRenderMs": 31.7,
+    "updateMs": 7.9,
+    "scriptEvalMs": 5.9,
+    "registrationMs": 1.9,
+    "heapUsedBytes": 3327627,
+    "scenarioSpecific": {
+      "canonicalComponentCount": 20,
+      "canonicalTags": [
+        "md-filled-button",
+        "md-checkbox",
+        "md-radio",
+        "md-switch",
+        "md-filled-text-field",
+        "md-filled-select",
+        "md-dialog",
+        "md-badge",
+        "md-tabs",
+        "md-linear-progress",
+        "md-circular-progress",
+        "md-slider",
+        "md-menu",
+        "md-divider",
+        "md-icon",
+        "md-icon-button",
+        "md-elevation",
+        "md-focus-ring",
+        "md-list",
+        "md-chip-set"
+      ],
+      "renderedCells": 20
+    }
   },
   "deltas": {
-    "rawBytes": 3306,
-    "rawPercent": 4.93,
-    "gzipBytes": 895,
-    "gzipPercent": 4.68,
-    "brotliBytes": 701,
-    "brotliPercent": 4.13,
-    "buildTimeMs": -2,
-    "firstRenderMs": 1.8,
-    "speedupPercent": -21.69,
-    "updateMs": 0.1,
-    "updateSpeedupPercent": -7.69,
-    "evalSpeedupPercent": 9.09,
-    "registrationSpeedupPercent": 40,
-    "memorySavingsPercent": -1.12
+    "rawBytes": 20116,
+    "rawPercent": 7.42,
+    "gzipBytes": 3233,
+    "gzipPercent": 5.61,
+    "brotliBytes": 2272,
+    "brotliPercent": 4.87,
+    "buildTimeMs": 7.4,
+    "firstRenderMs": -2.6,
+    "speedupPercent": 8.2,
+    "updateMs": -1.5,
+    "updateSpeedupPercent": 18.99,
+    "evalSpeedupPercent": -13.56,
+    "registrationSpeedupPercent": 47.37,
+    "memorySavingsPercent": -7.23
   },
   "runtime": {
-    "firstRenderMs": 10.1,
-    "updateMs": 1.4,
-    "scriptEvalMs": 2,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 1966455,
-    "speedupPercent": -21.69,
-    "updateSpeedupPercent": -7.69,
-    "evalSpeedupPercent": 9.09,
-    "registrationSpeedupPercent": 40,
-    "memorySavingsPercent": -1.12
+    "firstRenderMs": 29.1,
+    "updateMs": 6.4,
+    "scriptEvalMs": 6.7,
+    "registrationMs": 1,
+    "heapUsedBytes": 3568160,
+    "speedupPercent": 8.2,
+    "updateSpeedupPercent": 18.99,
+    "evalSpeedupPercent": -13.56,
+    "registrationSpeedupPercent": 47.37,
+    "memorySavingsPercent": -7.23
+  },
+  "equivalence": {
+    "domStructureMatch": true,
+    "elementsCount": 49,
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

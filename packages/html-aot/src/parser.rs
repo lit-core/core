@@ -71,6 +71,7 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
 
     // Buffer for building the current tag's output without bound attributes
     let mut tag_output = String::new();
+    let mut attr_quote_start: Option<usize> = None;
 
     for (k, quasi) in quasis.iter().enumerate() {
         let chars: Vec<char> = quasi.chars().collect();
@@ -108,7 +109,10 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
             } else {
                 let mut found_delimiter = false;
                 while i < len {
-                    if chars[i].is_whitespace() || chars[i] == '>' {
+                    if chars[i].is_whitespace()
+                        || chars[i] == '>'
+                        || (chars[i] == '/' && i + 1 < len && chars[i + 1] == '>')
+                    {
                         found_delimiter = true;
                         break;
                     }
@@ -149,6 +153,7 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                 TagState::InAttrValueDouble => {
                     if chars[i] == '"' {
                         tag_output.push('"');
+                        attr_quote_start = None;
                         i += 1;
                         state = TagState::InTag;
                     } else {
@@ -159,6 +164,7 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                 TagState::InAttrValueSingle => {
                     if chars[i] == '\'' {
                         tag_output.push('\'');
+                        attr_quote_start = None;
                         i += 1;
                         state = TagState::InTag;
                     } else {
@@ -181,11 +187,13 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                         while tag_output.ends_with(char::is_whitespace) {
                             tag_output.pop();
                         }
+                        let is_self_closing =
+                            (i > 0 && chars[i - 1] == '/') || tag_output.ends_with('/');
                         tag_output.push('>');
                         prepared_html.push_str(&tag_output);
                         tag_output.clear();
+                        attr_quote_start = None;
 
-                        let is_self_closing = quasi[..i].ends_with('/');
                         let is_void = is_void_element(&current_tag) || is_self_closing;
                         if !is_void {
                             open_tags.push(current_tag.clone());
@@ -194,10 +202,12 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                         state = TagState::Outside;
                         i += 1;
                     } else if ch == '"' {
+                        attr_quote_start = Some(tag_output.len());
                         tag_output.push('"');
                         state = TagState::InAttrValueDouble;
                         i += 1;
                     } else if ch == '\'' {
+                        attr_quote_start = Some(tag_output.len());
                         tag_output.push('\'');
                         state = TagState::InAttrValueSingle;
                         i += 1;
@@ -236,7 +246,7 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                             if let Some(pos) = open_tags.iter().rposition(|t| t == &close_tag) {
                                 open_tags.truncate(pos);
                             }
-                            prepared_html.push_str(&quasi[i..=close_end]);
+                            prepared_html.extend(&chars[i..=close_end]);
                             i = close_end + 1;
                             continue;
                         }
@@ -251,6 +261,7 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                         current_element_index = current_node_index;
                         current_tag.clear();
                         tag_output.clear();
+                        attr_quote_start = None;
                         tag_output.push('<');
                         state = TagState::InTagName;
                         i += 1;
@@ -277,29 +288,70 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                 attr.strings.push(cur);
             } else {
                 match state {
-                    TagState::InTag
-                    | TagState::InAttrValueDouble
-                    | TagState::InAttrValueSingle
-                    | TagState::InTagName => {
-                        if let Some(eq_pos) = tag_output.rfind('=') {
-                            let before_eq = &tag_output[..eq_pos];
-                            let after_eq = &tag_output[eq_pos + 1..];
+                    TagState::InTagName => {
+                        return None;
+                    }
+                    TagState::InAttrValueDouble | TagState::InAttrValueSingle => {
+                        let quote_pos = attr_quote_start.take()?;
+                        let quote_char = if state == TagState::InAttrValueDouble {
+                            '"'
+                        } else {
+                            '\''
+                        };
+                        let prefix = tag_output[quote_pos + 1..].to_string();
+                        let before_quote = tag_output[..quote_pos].trim_end();
+                        let before_eq = before_quote.strip_suffix('=')?;
+                        let trimmed_before = before_eq.trim_end();
+                        let attr_name_start = trimmed_before
+                            .rfind(|c: char| c.is_whitespace() || c == '<')
+                            .map(|pos| pos + 1)
+                            .unwrap_or(0);
+                        let raw_attr_name = &trimmed_before[attr_name_start..];
+                        if raw_attr_name.is_empty() {
+                            return None;
+                        }
 
-                            let (quote, prefix) = if let Some(stripped) = after_eq.strip_prefix('"')
-                            {
-                                (Some('"'), stripped.to_string())
-                            } else if let Some(stripped) = after_eq.strip_prefix('\'') {
-                                (Some('\''), stripped.to_string())
+                        let (ctor_type, attr_name) =
+                            if let Some(prop) = raw_attr_name.strip_prefix('.') {
+                                (3u8, prop.to_string())
+                            } else if let Some(b) = raw_attr_name.strip_prefix('?') {
+                                (4u8, b.to_string())
+                            } else if let Some(ev) = raw_attr_name.strip_prefix('@') {
+                                (5u8, ev.to_string())
                             } else {
-                                (None, after_eq.trim_start().to_string())
+                                (1u8, raw_attr_name.to_string())
                             };
 
+                        let mut remove_pos = attr_name_start;
+                        while remove_pos > 0
+                            && tag_output.as_bytes()[remove_pos - 1].is_ascii_whitespace()
+                        {
+                            remove_pos -= 1;
+                        }
+                        tag_output.truncate(remove_pos);
+
+                        active_attr = Some(ActiveAttr {
+                            name: attr_name,
+                            ctor_type,
+                            quote: Some(quote_char),
+                            strings: vec![prefix],
+                            current_string: String::new(),
+                            element_index: current_element_index.max(0) as u32,
+                        });
+                        state = TagState::InTag;
+                    }
+                    TagState::InTag => {
+                        let trimmed_tag = tag_output.trim_end();
+                        if let Some(before_eq) = trimmed_tag.strip_suffix('=') {
                             let trimmed_before = before_eq.trim_end();
                             let attr_name_start = trimmed_before
                                 .rfind(|c: char| c.is_whitespace() || c == '<')
                                 .map(|pos| pos + 1)
                                 .unwrap_or(0);
                             let raw_attr_name = &trimmed_before[attr_name_start..];
+                            if raw_attr_name.is_empty() {
+                                return None;
+                            }
 
                             let (ctor_type, attr_name) =
                                 if let Some(prop) = raw_attr_name.strip_prefix('.') {
@@ -323,8 +375,8 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                             active_attr = Some(ActiveAttr {
                                 name: attr_name,
                                 ctor_type,
-                                quote,
-                                strings: vec![prefix],
+                                quote: None,
+                                strings: vec![String::new()],
                                 current_string: String::new(),
                                 element_index: current_element_index.max(0) as u32,
                             });
@@ -347,6 +399,10 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
                         });
                     }
                     TagState::Outside => {
+                        let trimmed_html = prepared_html.trim_end();
+                        if trimmed_html.ends_with('<') || trimmed_html.ends_with("</") {
+                            return None;
+                        }
                         current_node_index += 1;
                         parts.push(TemplatePartInfo {
                             kind: PartKind::Child,

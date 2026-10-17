@@ -142,13 +142,13 @@
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
     "componentCount": 20
   },
-  "timestamp": "2026-10-11T01:06:13.797Z",
+  "timestamp": "2026-10-17T16:30:28.915Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1cc4959",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -166,7 +166,7 @@
     "rawBytes": 1448010,
     "gzipBytes": 187824,
     "brotliBytes": 98894,
-    "buildTimeMs": 57.56733399999939
+    "buildTimeMs": 56.0712910000002
   },
   "baseline": {
     "rawBytes": 1440814,
@@ -212,25 +212,25 @@
     "gzipPercent": 0.41,
     "brotliBytes": 233,
     "brotliPercent": 0.24,
-    "buildTimeMs": -12.8,
-    "firstRenderMs": -18.7,
-    "speedupPercent": 38.09,
-    "updateMs": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 12.2,
-    "registrationSpeedupPercent": 20,
+    "buildTimeMs": -14.3,
+    "firstRenderMs": -15.8,
+    "speedupPercent": 32.18,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 1.85,
+    "evalSpeedupPercent": 7.32,
+    "registrationSpeedupPercent": -60,
     "memorySavingsPercent": -1.96
   },
   "runtime": {
-    "firstRenderMs": 30.4,
-    "updateMs": 5.4,
-    "scriptEvalMs": 3.6,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 8046939,
-    "speedupPercent": 38.09,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 12.2,
-    "registrationSpeedupPercent": 20,
+    "firstRenderMs": 33.3,
+    "updateMs": 5.3,
+    "scriptEvalMs": 3.8,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 8046927,
+    "speedupPercent": 32.18,
+    "updateSpeedupPercent": 1.85,
+    "evalSpeedupPercent": 7.32,
+    "registrationSpeedupPercent": -60,
     "memorySavingsPercent": -1.96
   },
   "equivalence": {

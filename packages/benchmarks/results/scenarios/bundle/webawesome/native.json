@@ -47,13 +47,13 @@
     "name": "Vanilla Web Component compiler (native)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-12T23:46:16.031Z",
+  "timestamp": "2026-10-17T16:29:38.751Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "3856fa7",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -71,12 +71,12 @@
     "rawBytes": 372726,
     "gzipBytes": 87580,
     "brotliBytes": 70112,
-    "buildTimeMs": 41.38854200000014,
-    "firstRenderMs": 40.2,
-    "updateMs": 6,
+    "buildTimeMs": 42.035375000000386,
+    "firstRenderMs": 42.3,
+    "updateMs": 6.4,
     "scriptEvalMs": 2.9,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 3816509,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 3815061,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -148,26 +148,26 @@
     "gzipPercent": -0.01,
     "brotliBytes": -6,
     "brotliPercent": -0.01,
-    "buildTimeMs": -11.3,
-    "firstRenderMs": 5.2,
-    "speedupPercent": -14.86,
-    "updateMs": -0.9,
-    "updateSpeedupPercent": 13.04,
+    "buildTimeMs": -10.7,
+    "firstRenderMs": 7.3,
+    "speedupPercent": -20.86,
+    "updateMs": -0.5,
+    "updateSpeedupPercent": 7.25,
     "evalSpeedupPercent": 12.12,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -4.14
+    "registrationSpeedupPercent": 8.33,
+    "memorySavingsPercent": -4.1
   },
   "runtime": {
-    "firstRenderMs": 40.2,
-    "updateMs": 6,
+    "firstRenderMs": 42.3,
+    "updateMs": 6.4,
     "scriptEvalMs": 2.9,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 3816509,
-    "speedupPercent": -14.86,
-    "updateSpeedupPercent": 13.04,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 3815061,
+    "speedupPercent": -20.86,
+    "updateSpeedupPercent": 7.25,
     "evalSpeedupPercent": 12.12,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -4.14
+    "registrationSpeedupPercent": 8.33,
+    "memorySavingsPercent": -4.1
   },
   "domSnapshot": {
     "mount": {
@@ -1787,7 +1787,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "Copy",
-                                      "aria-labelledby": "wa-tooltip-VCtRjqcfjbe50W2aqL9Ew",
+                                      "aria-labelledby": "wa-tooltip-rhfATzfXARV9TxiEq0_oD",
                                       "class": "button",
                                       "id": "copy-button",
                                       "part": "button",
@@ -1924,7 +1924,7 @@
                                     "attributes": {
                                       "class": " copy-button-tooltip ",
                                       "for": "copy-button",
-                                      "id": "wa-tooltip-VCtRjqcfjbe50W2aqL9Ew",
+                                      "id": "wa-tooltip-rhfATzfXARV9TxiEq0_oD",
                                       "part": "feedback",
                                       "placement": "top",
                                       "trigger": "hover focus"
@@ -2156,7 +2156,7 @@
                           "tag": "wa-popover",
                           "attributes": {
                             "data-canonical-tag": "wa-popover",
-                            "id": "wa-popover-5iOHHIqEJpjLlVpMe9SwW"
+                            "id": "wa-popover-Xw6KOLRuojygPksxMZR6w"
                           },
                           "children": [],
                           "shadowRoot": {
@@ -4140,7 +4140,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "Copy",
-                                      "aria-labelledby": "wa-tooltip-7S8oFG26WQAQRoHtUwFEx",
+                                      "aria-labelledby": "wa-tooltip-RXxynLhP069J1JCTFd-il",
                                       "class": "button",
                                       "id": "copy-button",
                                       "part": "button",
@@ -4277,7 +4277,7 @@
                                     "attributes": {
                                       "class": " copy-button-tooltip ",
                                       "for": "copy-button",
-                                      "id": "wa-tooltip-7S8oFG26WQAQRoHtUwFEx",
+                                      "id": "wa-tooltip-RXxynLhP069J1JCTFd-il",
                                       "part": "feedback",
                                       "placement": "top",
                                       "trigger": "hover focus"
@@ -4509,7 +4509,7 @@
                           "tag": "wa-popover",
                           "attributes": {
                             "data-canonical-tag": "wa-popover",
-                            "id": "wa-popover-EymG9BW9OKUwUP2u6-zQe"
+                            "id": "wa-popover-xEZKRmLtKVoNmAvK-n3YA"
                           },
                           "children": [],
                           "shadowRoot": {

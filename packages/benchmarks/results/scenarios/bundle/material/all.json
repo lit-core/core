@@ -5,7 +5,14 @@
     "id": "bundle",
     "name": "Multi-component bundle",
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "relevantFeatures": [
+      "css-fuse",
+      "props-lower",
+      "css-minifier",
+      "html-minifier",
+      "all",
+      "baseline"
+    ],
     "componentConcepts": [
       "button",
       "checkbox",
@@ -40,13 +47,13 @@
     "name": "All optimizations combined",
     "isBaseline": false
   },
-  "timestamp": "2026-10-10T10:12:03.777Z",
+  "timestamp": "2026-10-17T16:30:02.168Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -61,15 +68,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 302275,
-    "gzipBytes": 62294,
-    "brotliBytes": 49498,
-    "buildTimeMs": 202.52058399999805,
-    "firstRenderMs": 5.9,
-    "updateMs": 0.3,
-    "scriptEvalMs": 5,
+    "rawBytes": 291983,
+    "gzipBytes": 61079,
+    "brotliBytes": 48992,
+    "buildTimeMs": 387.50054199999795,
+    "firstRenderMs": 8.8,
+    "updateMs": 0.2,
+    "scriptEvalMs": 6.3,
     "registrationMs": 0,
-    "heapUsedBytes": 2667237,
+    "heapUsedBytes": 2660360,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -135,36 +142,985 @@
     }
   },
   "deltas": {
-    "rawBytes": 31026,
-    "rawPercent": 11.44,
-    "gzipBytes": 4639,
-    "gzipPercent": 8.05,
-    "brotliBytes": 2868,
-    "brotliPercent": 6.15,
-    "buildTimeMs": 174.6,
-    "firstRenderMs": -25.8,
-    "speedupPercent": 81.39,
-    "updateMs": -7.6,
-    "updateSpeedupPercent": 96.2,
-    "evalSpeedupPercent": 15.25,
+    "rawBytes": 20734,
+    "rawPercent": 7.64,
+    "gzipBytes": 3424,
+    "gzipPercent": 5.94,
+    "brotliBytes": 2362,
+    "brotliPercent": 5.07,
+    "buildTimeMs": 359.6,
+    "firstRenderMs": -22.9,
+    "speedupPercent": 72.24,
+    "updateMs": -7.7,
+    "updateSpeedupPercent": 97.47,
+    "evalSpeedupPercent": -6.78,
     "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 19.85
+    "memorySavingsPercent": 20.05
   },
   "runtime": {
-    "firstRenderMs": 5.9,
-    "updateMs": 0.3,
-    "scriptEvalMs": 5,
+    "firstRenderMs": 8.8,
+    "updateMs": 0.2,
+    "scriptEvalMs": 6.3,
     "registrationMs": 0,
-    "heapUsedBytes": 2667237,
-    "speedupPercent": 81.39,
-    "updateSpeedupPercent": 96.2,
-    "evalSpeedupPercent": 15.25,
+    "heapUsedBytes": 2660360,
+    "speedupPercent": 72.24,
+    "updateSpeedupPercent": 97.47,
+    "evalSpeedupPercent": -6.78,
     "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 19.85
+    "memorySavingsPercent": 20.05
+  },
+  "domSnapshot": {
+    "mount": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "bundle-app-root",
+            "style": "display:flex; flex-direction:column; gap:24px; padding:24px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "app-nav",
+                "style": "display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e4e4e7; padding-bottom:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h2",
+                  "attributes": {
+                    "style": "font-size:20px; font-weight:400; margin:0;"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Enterprise dashboard suite"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "nav-routes",
+                    "style": "display:flex; gap:8px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Overview"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Analytics"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Settings"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "main",
+              "attributes": {
+                "class": "app-body"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "components-showcase-grid",
+                    "style": "display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-filled-button",
+                          "attributes": {
+                            "data-canonical-tag": "md-filled-button"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-checkbox",
+                          "attributes": {
+                            "data-canonical-tag": "md-checkbox"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-radio",
+                          "attributes": {
+                            "data-canonical-tag": "md-radio"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-switch",
+                          "attributes": {
+                            "data-canonical-tag": "md-switch"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-filled-text-field",
+                          "attributes": {
+                            "data-canonical-tag": "md-filled-text-field"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-filled-select",
+                          "attributes": {
+                            "data-canonical-tag": "md-filled-select"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-dialog",
+                          "attributes": {
+                            "data-canonical-tag": "md-dialog"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-badge",
+                          "attributes": {
+                            "data-canonical-tag": "md-badge"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-tabs",
+                          "attributes": {
+                            "data-canonical-tag": "md-tabs"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "data-canonical-tag": "md-linear-progress"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-circular-progress",
+                          "attributes": {
+                            "data-canonical-tag": "md-circular-progress"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-slider",
+                          "attributes": {
+                            "data-canonical-tag": "md-slider"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-menu",
+                          "attributes": {
+                            "data-canonical-tag": "md-menu"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-divider",
+                          "attributes": {
+                            "data-canonical-tag": "md-divider"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-icon",
+                          "attributes": {
+                            "data-canonical-tag": "md-icon"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-icon-button",
+                          "attributes": {
+                            "data-canonical-tag": "md-icon-button"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-elevation",
+                          "attributes": {
+                            "data-canonical-tag": "md-elevation"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-focus-ring",
+                          "attributes": {
+                            "data-canonical-tag": "md-focus-ring"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-list",
+                          "attributes": {
+                            "data-canonical-tag": "md-list"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-chip-set",
+                          "attributes": {
+                            "data-canonical-tag": "md-chip-set"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "bundle-app-root",
+            "style": "display:flex; flex-direction:column; gap:24px; padding:24px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "app-nav",
+                "style": "display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e4e4e7; padding-bottom:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h2",
+                  "attributes": {
+                    "style": "font-size:20px; font-weight:400; margin:0;"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Enterprise dashboard suite"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "nav-routes",
+                    "style": "display:flex; gap:8px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Overview"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Analytics"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "button",
+                      "attributes": {
+                        "type": "button"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "Settings"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "main",
+              "attributes": {
+                "class": "app-body"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "class": "components-showcase-grid",
+                    "style": "display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-filled-button",
+                          "attributes": {
+                            "data-canonical-tag": "md-filled-button"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-checkbox",
+                          "attributes": {
+                            "data-canonical-tag": "md-checkbox"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-radio",
+                          "attributes": {
+                            "data-canonical-tag": "md-radio"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-switch",
+                          "attributes": {
+                            "data-canonical-tag": "md-switch"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-filled-text-field",
+                          "attributes": {
+                            "data-canonical-tag": "md-filled-text-field"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-filled-select",
+                          "attributes": {
+                            "data-canonical-tag": "md-filled-select"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-dialog",
+                          "attributes": {
+                            "data-canonical-tag": "md-dialog"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-badge",
+                          "attributes": {
+                            "data-canonical-tag": "md-badge"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-tabs",
+                          "attributes": {
+                            "data-canonical-tag": "md-tabs"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "data-canonical-tag": "md-linear-progress"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-circular-progress",
+                          "attributes": {
+                            "data-canonical-tag": "md-circular-progress"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-slider",
+                          "attributes": {
+                            "data-canonical-tag": "md-slider"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-menu",
+                          "attributes": {
+                            "data-canonical-tag": "md-menu"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-divider",
+                          "attributes": {
+                            "data-canonical-tag": "md-divider"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-icon",
+                          "attributes": {
+                            "data-canonical-tag": "md-icon"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-icon-button",
+                          "attributes": {
+                            "data-canonical-tag": "md-icon-button"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-elevation",
+                          "attributes": {
+                            "data-canonical-tag": "md-elevation"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-focus-ring",
+                          "attributes": {
+                            "data-canonical-tag": "md-focus-ring"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-list",
+                          "attributes": {
+                            "data-canonical-tag": "md-list"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "component-cell",
+                        "style": "padding:12px; background:#fafafa; border-radius:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-chip-set",
+                          "attributes": {
+                            "data-canonical-tag": "md-chip-set"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "elementsCount": 49,
+    "customElementsCount": 20,
+    "shadowRootsCount": 0
   },
   "equivalence": {
     "domStructureMatch": true,
     "elementsCount": 49,
-    "verified": true
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

@@ -5,7 +5,14 @@
     "id": "bundle",
     "name": "Multi-component bundle",
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "relevantFeatures": [
+      "css-fuse",
+      "props-lower",
+      "css-minifier",
+      "html-minifier",
+      "all",
+      "baseline"
+    ],
     "componentConcepts": [
       "button",
       "checkbox",
@@ -40,13 +47,13 @@
     "name": "Structural DOM paths (dom-paths)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-11T01:06:07.436Z",
+  "timestamp": "2026-10-17T16:30:22.437Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1cc4959",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -61,15 +68,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 1460528,
-    "gzipBytes": 189595,
-    "brotliBytes": 99758,
-    "buildTimeMs": 83.20570800000132,
-    "firstRenderMs": 28,
+    "rawBytes": 1450357,
+    "gzipBytes": 188395,
+    "brotliBytes": 99050,
+    "buildTimeMs": 74.22454100000323,
+    "firstRenderMs": 34.4,
     "updateMs": 4.3,
-    "scriptEvalMs": 3.3,
-    "registrationMs": 0.8,
-    "heapUsedBytes": 8116458,
+    "scriptEvalMs": 3.9,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 8061116,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -135,32 +142,32 @@
     }
   },
   "deltas": {
-    "rawBytes": 19714,
-    "rawPercent": 1.37,
-    "gzipBytes": 2541,
-    "gzipPercent": 1.36,
-    "brotliBytes": 1097,
-    "brotliPercent": 1.11,
-    "buildTimeMs": 12.9,
-    "firstRenderMs": -21.1,
-    "speedupPercent": 42.97,
+    "rawBytes": 9543,
+    "rawPercent": 0.66,
+    "gzipBytes": 1341,
+    "gzipPercent": 0.72,
+    "brotliBytes": 389,
+    "brotliPercent": 0.39,
+    "buildTimeMs": 3.9,
+    "firstRenderMs": -14.7,
+    "speedupPercent": 29.94,
     "updateMs": -1.1,
     "updateSpeedupPercent": 20.37,
-    "evalSpeedupPercent": 19.51,
-    "registrationSpeedupPercent": -60,
-    "memorySavingsPercent": -2.84
+    "evalSpeedupPercent": 4.88,
+    "registrationSpeedupPercent": -140,
+    "memorySavingsPercent": -2.14
   },
   "runtime": {
-    "firstRenderMs": 28,
+    "firstRenderMs": 34.4,
     "updateMs": 4.3,
-    "scriptEvalMs": 3.3,
-    "registrationMs": 0.8,
-    "heapUsedBytes": 8116458,
-    "speedupPercent": 42.97,
+    "scriptEvalMs": 3.9,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 8061116,
+    "speedupPercent": 29.94,
     "updateSpeedupPercent": 20.37,
-    "evalSpeedupPercent": 19.51,
-    "registrationSpeedupPercent": -60,
-    "memorySavingsPercent": -2.84
+    "evalSpeedupPercent": 4.88,
+    "registrationSpeedupPercent": -140,
+    "memorySavingsPercent": -2.14
   },
   "domSnapshot": {
     "mount": {

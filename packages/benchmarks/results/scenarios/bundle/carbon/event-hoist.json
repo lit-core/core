@@ -5,7 +5,14 @@
     "id": "bundle",
     "name": "Multi-component bundle",
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "relevantFeatures": ["css-fuse", "props-lower", "css-minifier", "html-minifier", "all", "baseline"],
+    "relevantFeatures": [
+      "css-fuse",
+      "props-lower",
+      "css-minifier",
+      "html-minifier",
+      "all",
+      "baseline"
+    ],
     "componentConcepts": [
       "button",
       "checkbox",
@@ -40,13 +47,13 @@
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-11T01:05:59.158Z",
+  "timestamp": "2026-10-17T16:30:13.789Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1cc4959",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -61,15 +68,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 1471770,
-    "gzipBytes": 193984,
-    "brotliBytes": 99603,
-    "buildTimeMs": 233.1057499999988,
-    "firstRenderMs": 29.2,
-    "updateMs": 4.8,
-    "scriptEvalMs": 3.5,
-    "registrationMs": 1,
-    "heapUsedBytes": 8151819,
+    "rawBytes": 1451732,
+    "gzipBytes": 189102,
+    "brotliBytes": 99225,
+    "buildTimeMs": 64.06179200000042,
+    "firstRenderMs": 41.8,
+    "updateMs": 5,
+    "scriptEvalMs": 4,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 8063229,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -135,32 +142,32 @@
     }
   },
   "deltas": {
-    "rawBytes": 30956,
-    "rawPercent": 2.15,
-    "gzipBytes": 6930,
-    "gzipPercent": 3.7,
-    "brotliBytes": 942,
-    "brotliPercent": 0.95,
-    "buildTimeMs": 162.8,
-    "firstRenderMs": -19.9,
-    "speedupPercent": 40.53,
-    "updateMs": -0.6,
-    "updateSpeedupPercent": 11.11,
-    "evalSpeedupPercent": 14.63,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -3.28
+    "rawBytes": 10918,
+    "rawPercent": 0.76,
+    "gzipBytes": 2048,
+    "gzipPercent": 1.09,
+    "brotliBytes": 564,
+    "brotliPercent": 0.57,
+    "buildTimeMs": -6.3,
+    "firstRenderMs": -7.3,
+    "speedupPercent": 14.87,
+    "updateMs": -0.4,
+    "updateSpeedupPercent": 7.41,
+    "evalSpeedupPercent": 2.44,
+    "registrationSpeedupPercent": -40,
+    "memorySavingsPercent": -2.16
   },
   "runtime": {
-    "firstRenderMs": 29.2,
-    "updateMs": 4.8,
-    "scriptEvalMs": 3.5,
-    "registrationMs": 1,
-    "heapUsedBytes": 8151819,
-    "speedupPercent": 40.53,
-    "updateSpeedupPercent": 11.11,
-    "evalSpeedupPercent": 14.63,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -3.28
+    "firstRenderMs": 41.8,
+    "updateMs": 5,
+    "scriptEvalMs": 4,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 8063229,
+    "speedupPercent": 14.87,
+    "updateSpeedupPercent": 7.41,
+    "evalSpeedupPercent": 2.44,
+    "registrationSpeedupPercent": -40,
+    "memorySavingsPercent": -2.16
   },
   "domSnapshot": {
     "mount": {
@@ -356,8 +363,6 @@
                                 "attributes": {
                                   "aria-readonly": "false",
                                   "class": "cds--checkbox",
-                                  "data-lh-change": "0",
-                                  "data-lh-click": "1",
                                   "id": "checkbox",
                                   "part": "input",
                                   "type": "checkbox"
@@ -541,7 +546,6 @@
                                   "aria-checked": "false",
                                   "aria-labelledby": "false",
                                   "class": "cds--toggle__button",
-                                  "data-lh-click": "0",
                                   "id": "checkbox",
                                   "role": "switch",
                                   "type": "button"
@@ -669,8 +673,6 @@
                                             "attributes": {
                                               "autocomplete": "",
                                               "class": " cds--text-input ",
-                                              "data-lh-change": "1",
-                                              "data-lh-input": "0",
                                               "id": "input",
                                               "type": "text"
                                             },
@@ -775,7 +777,6 @@
                                       "aria-invalid": "false",
                                       "aria-readonly": "false",
                                       "class": " cds--select-input ",
-                                      "data-lh-input": "0",
                                       "id": "select",
                                       "title": ""
                                     },
@@ -876,7 +877,6 @@
                                   "aria-label": "",
                                   "aria-modal": "true",
                                   "class": " cds--modal-container cds--modal-container--md ",
-                                  "data-lh-click": "0",
                                   "part": "dialog",
                                   "role": "dialog",
                                   "tabindex": "-1"
@@ -1312,8 +1312,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": " cds--label ",
-                                  "data-lh-click": "0"
+                                  "class": " cds--label "
                                 },
                                 "children": [
                                   {
@@ -1360,9 +1359,6 @@
                                     "tag": "div",
                                     "attributes": {
                                       "class": " cds--slider ",
-                                      "data-lh-click": "2",
-                                      "data-lh-keydown": "1",
-                                      "data-lh-pointerup": "3",
                                       "role": "presentation",
                                       "tabindex": "-1"
                                     },
@@ -1384,7 +1380,6 @@
                                               "aria-valuenow": "",
                                               "aria-valuetext": "NaN",
                                               "class": " cds--slider__thumb ",
-                                              "data-lh-pointerdown": "4",
                                               "id": "thumb",
                                               "role": "slider",
                                               "tabindex": "0"
@@ -2262,8 +2257,6 @@
                                 "attributes": {
                                   "aria-readonly": "false",
                                   "class": "cds--checkbox",
-                                  "data-lh-change": "0",
-                                  "data-lh-click": "1",
                                   "id": "checkbox",
                                   "part": "input",
                                   "type": "checkbox"
@@ -2447,7 +2440,6 @@
                                   "aria-checked": "false",
                                   "aria-labelledby": "false",
                                   "class": "cds--toggle__button",
-                                  "data-lh-click": "0",
                                   "id": "checkbox",
                                   "role": "switch",
                                   "type": "button"
@@ -2575,8 +2567,6 @@
                                             "attributes": {
                                               "autocomplete": "",
                                               "class": " cds--text-input ",
-                                              "data-lh-change": "1",
-                                              "data-lh-input": "0",
                                               "id": "input",
                                               "type": "text"
                                             },
@@ -2681,7 +2671,6 @@
                                       "aria-invalid": "false",
                                       "aria-readonly": "false",
                                       "class": " cds--select-input ",
-                                      "data-lh-input": "0",
                                       "id": "select",
                                       "title": ""
                                     },
@@ -2782,7 +2771,6 @@
                                   "aria-label": "",
                                   "aria-modal": "true",
                                   "class": " cds--modal-container cds--modal-container--md ",
-                                  "data-lh-click": "0",
                                   "part": "dialog",
                                   "role": "dialog",
                                   "tabindex": "-1"
@@ -3218,8 +3206,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": " cds--label ",
-                                  "data-lh-click": "0"
+                                  "class": " cds--label "
                                 },
                                 "children": [
                                   {
@@ -3266,9 +3253,6 @@
                                     "tag": "div",
                                     "attributes": {
                                       "class": " cds--slider ",
-                                      "data-lh-click": "2",
-                                      "data-lh-keydown": "1",
-                                      "data-lh-pointerup": "3",
                                       "role": "presentation",
                                       "tabindex": "-1"
                                     },
@@ -3290,7 +3274,6 @@
                                               "aria-valuenow": "",
                                               "aria-valuetext": "NaN",
                                               "class": " cds--slider__thumb ",
-                                              "data-lh-pointerdown": "4",
                                               "id": "thumb",
                                               "role": "slider",
                                               "tabindex": "0"

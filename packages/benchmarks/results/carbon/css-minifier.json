@@ -142,13 +142,13 @@
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
     "componentCount": 20
   },
-  "timestamp": "2026-10-11T01:06:02.650Z",
+  "timestamp": "2026-10-17T16:30:17.334Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "1cc4959",
+    "gitCommit": "7d68f91",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -166,7 +166,7 @@
     "rawBytes": 1443497,
     "gzipBytes": 187768,
     "brotliBytes": 100625,
-    "buildTimeMs": 92.07091700000092
+    "buildTimeMs": 253.0202089999948
   },
   "baseline": {
     "rawBytes": 1440814,
@@ -212,26 +212,26 @@
     "gzipPercent": 0.38,
     "brotliBytes": 1964,
     "brotliPercent": 1.99,
-    "buildTimeMs": 21.7,
-    "firstRenderMs": -17.3,
-    "speedupPercent": 35.23,
-    "updateMs": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 7.32,
-    "registrationSpeedupPercent": -80,
-    "memorySavingsPercent": -1.73
+    "buildTimeMs": 182.7,
+    "firstRenderMs": -17.2,
+    "speedupPercent": 35.03,
+    "updateMs": 0.9,
+    "updateSpeedupPercent": -16.67,
+    "evalSpeedupPercent": 2.44,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -7.01
   },
   "runtime": {
-    "firstRenderMs": 31.8,
-    "updateMs": 5.4,
-    "scriptEvalMs": 3.8,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 8028823,
-    "speedupPercent": 35.23,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 7.32,
-    "registrationSpeedupPercent": -80,
-    "memorySavingsPercent": -1.73
+    "firstRenderMs": 31.9,
+    "updateMs": 6.3,
+    "scriptEvalMs": 4,
+    "registrationMs": 1,
+    "heapUsedBytes": 8445943,
+    "speedupPercent": 35.03,
+    "updateSpeedupPercent": -16.67,
+    "evalSpeedupPercent": 2.44,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -7.01
   },
   "equivalence": {
     "domStructureMatch": true,
