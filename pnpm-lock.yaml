@@ -81,6 +81,9 @@ importers:
       '@lit-core/memoize':
         specifier: workspace:*
         version: link:../memoize
+      '@lit-core/morph-to-react':
+        specifier: workspace:*
+        version: link:../morph-to-react
       '@lit-core/props-lower':
         specifier: workspace:*
         version: link:../props-lower
