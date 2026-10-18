@@ -58,7 +58,7 @@
     "@lit-core/tag-shake": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.5",
     "lit": "^3.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.4"

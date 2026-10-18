@@ -51,16 +51,16 @@
     "@lit-core/ssr": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "@material/web": "^2.5.0",
-    "@momentum-design/components": "^0.141.2",
-    "@spectrum-web-components/bundle": "^1.12.4",
+    "@momentum-design/components": "^0.141.5",
+    "@spectrum-web-components/bundle": "^1.12.5",
     "lit": "^3.3.3",
-    "lucide-react": "^1.54.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "lucide-react": "^1.59.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",

@@ -69,14 +69,14 @@
     "@biomejs/biome": "^2.5.15",
     "@momentum-design/components": "^0.140.1",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.5",
     "@types/webpack": "^5.28.5",
     "playwright": "~1.63.0",
     "tailwindcss": "^4.3.3",
-    "turbo": "^2.11.7",
+    "turbo": "^2.11.9",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3",
-    "webpack": "^5.111.1"
+    "vitest": "^5.0.5",
+    "webpack": "^5.112.0"
   },
   "packageManager": "pnpm@11.11.0",
   "dependencies": {

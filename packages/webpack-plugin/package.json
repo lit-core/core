@@ -46,8 +46,8 @@
   "dependencies": {
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
-    "@lit-core/dirty-mask": "workspace:*",
     "@lit-core/directives": "workspace:*",
+    "@lit-core/dirty-mask": "workspace:*",
     "@lit-core/dom-paths": "workspace:*",
     "@lit-core/elem-proxy": "workspace:*",
     "@lit-core/event-hoist": "workspace:*",
@@ -62,11 +62,11 @@
     "@lit-core/tag-shake": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.5",
     "@types/webpack": "^5.28.5",
     "lit": "^3.3.3",
     "typescript": "^7.0.2",
-    "webpack": "^5.111.1"
+    "webpack": "^5.112.0"
   },
   "peerDependencies": {
     "webpack": "^5.0.0"
