@@ -90,7 +90,7 @@ async function main() {
       if (!passed) allPassed = false;
     } else {
       for (const crate of affected.affectedCrates) {
-        const manifestPath = path.join(ROOT, 'packages', crate, 'Cargo.toml');
+        const manifestPath = fs.existsSync(path.join(ROOT, 'crates', crate, 'Cargo.toml')) ? path.join(ROOT, 'crates', crate, 'Cargo.toml') : path.join(ROOT, 'packages', crate, 'Cargo.toml');
         if (fs.existsSync(manifestPath)) {
           const passed = runStep(`tier 1: cargo test for ${crate}`, `cargo test --manifest-path ${manifestPath}`);
           if (!passed) allPassed = false;

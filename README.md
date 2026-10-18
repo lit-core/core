@@ -61,6 +61,8 @@ flowchart TD
 | [`@lit-core/elem-proxy`](packages/elem-proxy/README.md) | Deferred custom element stubs and JIT class upgrade |
 | [`@lit-core/html-aot`](packages/html-aot/README.md) | Ahead-of-time Lit template compilation into static descriptors |
 | [`@lit-core/native`](packages/native/README.md) | Ahead-of-time vanilla Web Component and micro-runtime compiler |
+| [`@lit-core/morph-to-react`](packages/morph-to-react/README.md) | Ahead-of-time compiler and native React 19 runtime lowering Lit components into React |
+| [`lit_analysis`](crates/lit-analysis) | Shared semantic analysis engine for Lit components, decorators, and templates |
 | [`@lit-core/css-minifier`](packages/css-minifier/README.md) | Embedded CSS template literal minification via `lightningcss` |
 | [`@lit-core/html-minifier`](packages/html-minifier/README.md) | Embedded HTML and SVG template literal minification via `oxc` |
 | [`@lit-core/resumable`](packages/resumable/README.md) | Zero-JavaScript SSR and interaction-driven runtime resumption |

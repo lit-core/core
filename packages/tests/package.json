@@ -19,6 +19,7 @@
     "test:ssr:engine": "vitest run ssr-engine",
     "test:ssr:isolate": "vitest run ssr-isolate",
     "test:ssr:chromium": "vitest run ssr-dsd-chromium",
+    "vitest": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -27,15 +28,22 @@
     "@lit-core/benchmarks": "workspace:*",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
+    "@lit-core/directives": "workspace:*",
+    "@lit-core/dirty-mask": "workspace:*",
+    "@lit-core/dom-paths": "workspace:*",
     "@lit-core/elem-proxy": "workspace:*",
     "@lit-core/event-hoist": "workspace:*",
     "@lit-core/html-aot": "workspace:*",
     "@lit-core/html-fuse": "workspace:*",
     "@lit-core/html-minifier": "workspace:*",
+    "@lit-core/memoize": "workspace:*",
+    "@lit-core/morph-to-react": "workspace:*",
     "@lit-core/native": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
     "@lit-core/showcase": "workspace:*",
+    "@lit-core/ssr": "workspace:*",
+    "@lit-core/tag-shake": "workspace:*",
     "@lit-core/test-kit": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "@lit-core/webpack-plugin": "workspace:*",
@@ -43,10 +51,14 @@
     "@momentum-design/components": "^0.141.2",
     "@spectrum-web-components/bundle": "^1.12.4",
     "lit": "^3.3.3",
-    "playwright": "~1.63.0"
+    "playwright": "~1.63.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
     "vitest": "^5.0.3"

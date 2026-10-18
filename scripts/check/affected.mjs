@@ -18,6 +18,7 @@ export const ALL_CRATES = [
   'html-aot',
   'tag-shake',
   'resumable',
+  'morph-to-react',
 ];
 
 /**
@@ -42,7 +43,7 @@ export function getAffected(options = {}) {
   const changedFiles = options.files || getChangedFiles(root);
 
   // If no files changed, or if root configuration changed, determine scope
-  const rootConfigFiles = ['pnpm-lock.yaml', 'package.json', 'turbo.json', 'tsconfig.base.json', 'Cargo.lock'];
+  const rootConfigFiles = ['pnpm-lock.yaml', 'package.json', 'turbo.json', 'tsconfig.base.json', 'Cargo.lock', 'Cargo.toml'];
   const touchesRootConfig = changedFiles.some((f) => rootConfigFiles.includes(f));
 
   if (changedFiles.length === 0 || touchesRootConfig || options.all) {
@@ -69,6 +70,15 @@ export function getAffected(options = {}) {
       if (ALL_CRATES.includes(pkgName)) {
         if (file.endsWith('.rs') || file.endsWith('Cargo.toml') || file.endsWith('build.rs')) {
           affectedCrates.add(pkgName);
+        }
+      }
+    } else if (parts[0] === 'crates' && parts[1]) {
+      const crateName = parts[1];
+      if (file.endsWith('.rs') || file.endsWith('Cargo.toml') || file.endsWith('build.rs')) {
+        affectedCrates.add(crateName);
+        if (crateName === 'lit-analysis') {
+          affectedCrates.add('morph-to-react');
+          affectedPackages.add('morph-to-react');
         }
       }
     }

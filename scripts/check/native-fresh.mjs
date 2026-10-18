@@ -60,7 +60,7 @@ export function ensureNativeFresh(crates = ALL_CRATES, root = process.cwd()) {
       binaryMtime = fs.statSync(binaryPath).mtimeMs;
     }
 
-    const latestSourceMtime = getLatestMtime(pkgDir);
+    const latestSourceMtime = crate === 'morph-to-react' ? Math.max(getLatestMtime(pkgDir), getLatestMtime(path.join(root, 'crates', 'lit-analysis'))) : getLatestMtime(pkgDir);
 
     if (binaryMtime === 0 || latestSourceMtime > binaryMtime) {
       console.log(`[native-fresh] Stale binary detected in ${crate}, rebuilding in debug mode...`);

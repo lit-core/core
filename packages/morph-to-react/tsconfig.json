@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "declaration": true,
+    "skipLibCheck": true,
+    "typeRoots": ["../../node_modules/.pnpm/@types+node@26.6.4/node_modules/@types", "../../node_modules/@types", "./node_modules/@types"],
+    "noEmit": true
+  },
+  "include": ["runtime/**/*", "src/**/*"]
+}

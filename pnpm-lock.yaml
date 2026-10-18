@@ -466,6 +466,15 @@ importers:
       '@lit-core/css-minifier':
         specifier: workspace:*
         version: link:../css-minifier
+      '@lit-core/directives':
+        specifier: workspace:*
+        version: link:../directives
+      '@lit-core/dirty-mask':
+        specifier: workspace:*
+        version: link:../dirty-mask
+      '@lit-core/dom-paths':
+        specifier: workspace:*
+        version: link:../dom-paths
       '@lit-core/elem-proxy':
         specifier: workspace:*
         version: link:../elem-proxy
@@ -481,6 +490,9 @@ importers:
       '@lit-core/html-minifier':
         specifier: workspace:*
         version: link:../html-minifier
+      '@lit-core/memoize':
+        specifier: workspace:*
+        version: link:../memoize
       '@lit-core/native':
         specifier: workspace:*
         version: link:../native
@@ -493,6 +505,12 @@ importers:
       '@lit-core/showcase':
         specifier: workspace:*
         version: link:../showcase
+      '@lit-core/ssr':
+        specifier: workspace:*
+        version: link:../ssr
+      '@lit-core/tag-shake':
+        specifier: workspace:*
+        version: link:../tag-shake
       '@lit-core/test-kit':
         specifier: workspace:*
         version: link:../test-kit

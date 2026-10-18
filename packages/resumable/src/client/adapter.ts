@@ -653,7 +653,7 @@ export function installResumableAdapter(LitElementOrReactiveElementClass?: any):
       let curr: any = ctor;
       let targetBase: any = null;
       while (curr && curr !== HTMLElement && curr !== Function.prototype) {
-        if (curr.prototype && (Object.prototype.hasOwnProperty.call(curr.prototype, 'update') || Object.prototype.hasOwnProperty.call(curr.prototype, 'performUpdate'))) {
+        if (curr.prototype && (Object.hasOwn(curr.prototype, 'update') || Object.hasOwn(curr.prototype, 'performUpdate'))) {
           targetBase = curr.prototype;
           break;
         }

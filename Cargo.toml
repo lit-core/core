@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/lit-analysis",
     "packages/css-fuse",
     "packages/css-minifier",
     "packages/dirty-mask",
@@ -12,6 +13,7 @@ members = [
     "packages/html-fuse",
     "packages/html-minifier",
     "packages/memoize",
+    "packages/morph-to-react",
     "packages/native",
     "packages/props-lower",
     "packages/resumable",
@@ -39,6 +41,13 @@ clap = { version = "4.5", features = ["derive"] }
 miette = { version = "7.6", features = ["fancy"] }
 insta = { version = "1.41", features = ["json", "redactions"] }
 
+# Internal shared analysis crate
+lit_analysis = { path = "crates/lit-analysis" }
+
+# Spec-compliant HTML5 parser
+html5ever = "0.27"
+markup5ever_rcdom = "0.3"
+
 # CSS processing
 lightningcss = "1.0.0-alpha.72"
 
@@ -59,3 +68,4 @@ codegen-units = 256
 lto = false
 debug = false
 strip = "debuginfo"
+

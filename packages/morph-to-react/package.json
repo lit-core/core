@@ -1,0 +1,74 @@
+{
+  "name": "@lit-core/morph-to-react",
+  "version": "0.1.0",
+  "description": "Ahead-of-time compiler and native React 19 runtime lowering Lit components into React without shipping the Lit runtime",
+  "type": "module",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./compiler": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./runtime": {
+      "types": "./runtime/index.ts",
+      "import": "./runtime/index.ts",
+      "default": "./runtime/index.ts"
+    },
+    "./carbon": {
+      "types": "./src/carbon/index.ts",
+      "import": "./src/carbon/index.ts",
+      "default": "./src/carbon/index.ts"
+    },
+    "./cli": {
+      "types": "./src/cli.ts",
+      "import": "./src/cli.js",
+      "default": "./src/cli.js"
+    },
+    "./vite": {
+      "types": "./src/vite.ts",
+      "import": "./src/vite.js",
+      "default": "./src/vite.js"
+    }
+  },
+  "bin": {
+    "morph-to-react": "./src/cli.js"
+  },
+  "napi": {
+    "binaryName": "morph-to-react",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-native.mjs morph-to-react --release --tsc",
+    "build:debug": "node ../../scripts/build-native.mjs morph-to-react --tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@carbon/web-components": "^2.64.0",
+    "lit": "^3.3.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  }
+}

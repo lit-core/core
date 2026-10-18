@@ -25,6 +25,7 @@ const ALL_CRATES = [
   'tag-shake',
   'resumable',
   'ssr',
+  'morph-to-react',
 ];
 
 const args = process.argv.slice(2);
@@ -76,7 +77,12 @@ function checkCrateFresh(pkgDir, destNode) {
     return false;
   }
 
-  return !hasNewer(pkgDir);
+  if (hasNewer(pkgDir)) return false;
+  if (pkgDir.endsWith('morph-to-react')) {
+    const litAnalysisDir = path.resolve(rootDir, 'crates', 'lit-analysis');
+    if (hasNewer(litAnalysisDir)) return false;
+  }
+  return true;
 }
 
 function copyCrateArtifacts(crate, pkgDir) {
