@@ -1,4 +1,3 @@
-/// <reference path="../../../node_modules/.pnpm/@types+node@26.6.4/node_modules/@types/node/index.d.ts" />
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
