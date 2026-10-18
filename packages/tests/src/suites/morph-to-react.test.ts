@@ -2695,7 +2695,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(parsedVer.version).toBe(true);
       });
 
-      it('[F81] integrates morph-to-react with Vite / Rollup plugin pipeline (Milestone 6)', () => {
+      it('[F81] integrates morph-to-react with Vite / Rollup plugin pipeline (Milestone 6)', async () => {
         const plugin = morphLit({
           tagSuffix: '-r',
           emitCss: true,
@@ -2721,7 +2721,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
             }
           }
         `;
-        const transformed = plugin.transform(litSource, 'src/components/vite-button.ts');
+        const transformed = await plugin.transform(litSource, 'src/components/vite-button.ts');
         expect(transformed).not.toBeNull();
         expect(transformed?.code).toContain('export const ViteButton');
         expect(transformed?.code).toContain('vite-button-r');

@@ -8,7 +8,7 @@ import { CANONICAL_SUITE_DEFINITIONS } from '../../benchmarks/src/suites/canonic
 import { createBenchmarkVendorResolverPlugin } from '../../benchmarks/src/vendor-resolver.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(__dirname, '../../..');
+const rootDir = path.resolve(__dirname, '..');
 
 export interface ComponentBundleOptions {
   imports?: string[];

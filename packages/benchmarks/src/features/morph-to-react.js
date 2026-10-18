@@ -389,6 +389,9 @@ export async function runMorphToReactBenchmarks() {
   return suiteResults;
 }
 
+/**
+ * @param {any[]} results
+ */
 function generateMarkdownReport(results) {
   const lines = [];
 
