@@ -10,7 +10,7 @@ import { MorphHost, partitionSlots, SlotBoundary, useMorphHost } from '@lit-core
 import { morphLit } from '@lit-core/morph-to-react/vite';
 import React, { StrictMode } from 'react';
 import { renderToString } from 'react-dom/server';
-import ts from 'typescript';
+import { transformWithOxc } from 'vite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { bundleComponentForBrowser } from '../bundler.js';
 import { getTestBrowser } from '../harness.js';
@@ -20,10 +20,46 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../../..');
 const nodeRequire = createRequire(import.meta.url);
 
-function evalComponent(code: string, componentName: string, extraRequires?: Record<string, any>): React.ComponentType<any> {
-  const trans = ts.transpileModule(code, {
-    compilerOptions: { jsx: ts.JsxEmit.React, module: ts.ModuleKind.CommonJS },
+async function transpileJsxToCjs(code: string): Promise<string> {
+  const oxc = await transformWithOxc(code, 'component.tsx', {
+    jsx: { runtime: 'classic' },
   });
+  const exportedNames: string[] = [];
+  let cjs = oxc.code
+    .replace(/^import\s+([A-Za-z_$][\w$]*)\s*,\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"];?/gm, (_m, defName, named, spec) => {
+      const mapped = named.replace(/\bas\b/g, ':');
+      if (defName === 'React') {
+        return `const {${mapped}} = require("${spec}");`;
+      }
+      return `const _mod_${defName} = require("${spec}"); const ${defName} = _mod_${defName}.default ?? _mod_${defName}; const {${mapped}} = _mod_${defName};`;
+    })
+    .replace(/^import\s+\*\s+as\s+([A-Za-z_$][\w$]*)\s+from\s*['"]([^'"]+)['"];?/gm, (_m, ns, spec) => (ns === 'React' ? '' : `const ${ns} = require("${spec}");`))
+    .replace(/^import\s+\{([^}]+)\}\s*from\s*['"]([^'"]+)['"];?/gm, (_m, named, spec) => `const {${named.replace(/\bas\b/g, ':')}} = require("${spec}");`)
+    .replace(/^import\s+([A-Za-z_$][\w$]*)\s+from\s*['"]([^'"]+)['"];?/gm, (_m, defName, spec) =>
+      defName === 'React' ? '' : `const _mod_${defName} = require("${spec}"); const ${defName} = _mod_${defName}.default ?? _mod_${defName};`,
+    )
+    .replace(/^import\s+['"]([^'"]+)['"];?/gm, (_m, spec) => `require("${spec}");`)
+    .replace(/^export\s+class\s+([A-Za-z_$][\w$]*)/gm, (_m, name) => {
+      exportedNames.push(name);
+      return `class ${name}`;
+    })
+    .replace(/^export\s+function\s+([A-Za-z_$][\w$]*)/gm, (_m, name) => {
+      exportedNames.push(name);
+      return `function ${name}`;
+    })
+    .replace(/^export\s+(const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/gm, (_m, kw, name) => {
+      return `${kw} ${name} = exports.${name} =`;
+    })
+    .replace(/^export\s+default\s+/gm, 'exports.default = ');
+
+  for (const name of exportedNames) {
+    cjs += `\nif (typeof ${name} !== "undefined") exports.${name} = ${name};`;
+  }
+  return cjs;
+}
+
+async function evalComponent(code: string, componentName: string, extraRequires?: Record<string, any>): Promise<React.ComponentType<any>> {
+  const cjsCode = await transpileJsxToCjs(code);
   const exports: any = {};
   const customRequire = (spec: string) => {
     if (extraRequires?.[spec]) return extraRequires[spec];
@@ -31,7 +67,7 @@ function evalComponent(code: string, componentName: string, extraRequires?: Reco
     if (spec === '@lit-core/morph-to-react/runtime') return morphRuntime;
     return nodeRequire(spec);
   };
-  const fn = new Function('React', 'exports', 'require', trans.outputText);
+  const fn = new Function('React', 'exports', 'require', cjsCode);
   fn(React, exports, customRequire);
   return exports[componentName];
 }
@@ -1040,7 +1076,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(parsed).toBeDefined();
       });
 
-      it('[F24] verifies static text and whitespace preservation in templates (Milestone 2)', () => {
+      it('[F24] verifies static text and whitespace preservation in templates (Milestone 2)', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           export class SpacedLabel extends LitElement {
@@ -1052,7 +1088,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         const res = compileModule(code, { filePath: 'spaced.ts' });
         expect(res.code).toMatch(/<span>Hello <\/span>|<span>{'Hello '}<\/span>|<span>Hello{' '}<\/span>|<span>Hello{" "}<\/span>/);
 
-        const Component = evalComponent(res.code, 'SpacedLabel');
+        const Component = await evalComponent(res.code, 'SpacedLabel');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput.replace(/<!-- -->/g, '')).toContain('<span>Hello </span><span>World</span>');
       });
@@ -1101,7 +1137,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).not.toContain('fill-rule=');
       });
 
-      it('[F27] lowers static style attribute strings into React style objects (Milestone 2)', () => {
+      it('[F27] lowers static style attribute strings into React style objects (Milestone 2)', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           export class StyledBox extends LitElement {
@@ -1116,12 +1152,12 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toMatch(/fontWeight:\s*["']500["']/);
         expect(res.code).not.toContain('style="color: red');
 
-        const Component = evalComponent(res.code, 'StyledBox');
+        const Component = await evalComponent(res.code, 'StyledBox');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('style="color:red;margin-top:8px;font-weight:500"');
       });
 
-      it('[F28] lowers dynamic style bindings via ref callback setting style.cssText (Milestone 2)', () => {
+      it('[F28] lowers dynamic style bindings via ref callback setting style.cssText (Milestone 2)', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           export class DynamicCard extends LitElement {
@@ -1135,12 +1171,12 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toContain('backgroundColor: bg');
         expect(res.code).toMatch(/padding:\s*["']16px["']/);
 
-        const Component = evalComponent(res.code, 'DynamicCard');
+        const Component = await evalComponent(res.code, 'DynamicCard');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('style="background-color:blue;padding:16px"');
       });
 
-      it('[F29] lowers boolean attributes (?disabled=${b} -> disabled={b ? true : undefined}) (Milestone 2)', () => {
+      it('[F29] lowers boolean attributes (?disabled=${b} -> disabled={b ? true : undefined}) (Milestone 2)', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           export class ToggleElement extends LitElement {
@@ -1155,7 +1191,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toMatch(/data-active=\{isActive\s*\?\s*["']{2}\s*:\s*undefined\}/);
         expect(res.code).toMatch(/hidden=\{isHidden\s*\?\s*true\s*:\s*undefined\}/);
 
-        const Component = evalComponent(res.code, 'ToggleElement');
+        const Component = await evalComponent(res.code, 'ToggleElement');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('data-active');
         expect(htmlOutput).not.toContain('hidden');
@@ -1171,12 +1207,12 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         `;
         const resTrue = compileModule(codeTrue, { filePath: 'toggle-true.ts' });
         expect(resTrue.code).toMatch(/hidden=\{isHidden\s*\?\s*true\s*:\s*undefined\}/);
-        const ComponentTrue = evalComponent(resTrue.code, 'ToggleElementTrue');
+        const ComponentTrue = await evalComponent(resTrue.code, 'ToggleElementTrue');
         const htmlOutputTrue = renderToString(React.createElement(ComponentTrue));
         expect(htmlOutputTrue).toContain('hidden=""');
       });
 
-      it('[F30] lowers child expressions (nothing, undefined, null -> null) (Milestone 2)', () => {
+      it('[F30] lowers child expressions (nothing, undefined, null -> null) (Milestone 2)', async () => {
         const code = `
           import { LitElement, html, nothing } from 'lit';
           export class OptionalContent extends LitElement {
@@ -1190,12 +1226,12 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toContain('null');
         expect(res.code).not.toContain('nothing');
 
-        const Component = evalComponent(res.code, 'OptionalContent');
+        const Component = await evalComponent(res.code, 'OptionalContent');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toBe('<div></div>');
       });
 
-      it('[F31] lowers unkeyed child arrays using positional index keys (Milestone 2)', () => {
+      it('[F31] lowers unkeyed child arrays using positional index keys (Milestone 2)', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           export class ChipList extends LitElement {
@@ -1212,7 +1248,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         const origWarn = console.error;
         console.error = (...args: any[]) => logs.push(args.join(' '));
         try {
-          const Component = evalComponent(res.code, 'ChipList');
+          const Component = await evalComponent(res.code, 'ChipList');
           renderToString(React.createElement(StrictMode, null, React.createElement(Component)));
           expect(logs.some((l) => l.includes('key'))).toBe(false);
         } finally {
@@ -1260,7 +1296,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.css).toContain('[data-slot-boundary]>:is(svg)');
       });
 
-      it('[F34] delivers styles via React 19 style hoisting (<style href precedence="default">) (Milestone 2)', () => {
+      it('[F34] delivers styles via React 19 style hoisting (<style href precedence="default">) (Milestone 2)', async () => {
         const code = `
           import { LitElement, html, css } from 'lit';
           export class InlinedStyleComp extends LitElement {
@@ -1274,7 +1310,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toContain(`href="${res.stylesheetId}"`);
         expect(res.code).toContain('precedence="default"');
 
-        const Component = evalComponent(res.code, 'InlinedStyleComp');
+        const Component = await evalComponent(res.code, 'InlinedStyleComp');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('<style');
         expect(htmlOutput).toContain(res.stylesheetId ?? '');
@@ -1310,7 +1346,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).not.toContain('use client');
       });
 
-      it('[F37] verifies Tier 0 components render under React Server Component constraints (Milestone 2)', () => {
+      it('[F37] verifies Tier 0 components render under React Server Component constraints (Milestone 2)', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           export class ServerIcon extends LitElement {
@@ -1328,7 +1364,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).not.toMatch(/\b(window|document|customElements|navigator)\b/);
 
         // Hermetic server execution without DOM globals
-        const Component = evalComponent(res.code, 'ServerIcon');
+        const Component = await evalComponent(res.code, 'ServerIcon');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('<svg');
         expect(htmlOutput).toContain('viewBox="0 0 16 16"');
@@ -1471,9 +1507,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         const res = compileModule(code, { filePath: 'live-input.ts' });
         expect(res.code).toContain('el.value = host.text');
 
-        const trans = ts.transpileModule(res.code, {
-          compilerOptions: { jsx: ts.JsxEmit.React, module: ts.ModuleKind.CommonJS },
-        });
+        const cjsCode = await transpileJsxToCjs(res.code);
 
         const result = await page.evaluate(async (transpiledJs: string) => {
           const container = document.createElement('div');
@@ -1563,7 +1597,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
             restoredVal,
             updatedVal,
           };
-        }, trans.outputText);
+        }, cjsCode);
 
         expect(result.success).toBe(true);
         expect(result.initialVal).toBe('initial');
@@ -1640,7 +1674,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toMatch(/key=["']branch-1["']/);
       });
 
-      it('[F55] lowers classMap directive to computed className string', () => {
+      it('[F55] lowers classMap directive to computed className string', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           import { classMap } from 'lit/directives/class-map.js';
@@ -1656,13 +1690,13 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).not.toContain('classMap(');
         expect(res.code).toContain('className=');
 
-        const Component = evalComponent(res.code, 'Card');
+        const Component = await evalComponent(res.code, 'Card');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('class="card card--active"');
         expect(htmlOutput).not.toContain('card--primary');
       });
 
-      it('[F56] lowers styleMap directive to React style object', () => {
+      it('[F56] lowers styleMap directive to React style object', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           import { styleMap } from 'lit/directives/style-map.js';
@@ -1678,12 +1712,12 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toContain('fontSize: "16px"');
         expect(res.code).toContain('"--card-bg": bg');
 
-        const Component = evalComponent(res.code, 'StyledCard');
+        const Component = await evalComponent(res.code, 'StyledCard');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('style="color:red;font-size:16px;--card-bg:blue"');
       });
 
-      it('[F57] lowers ifDefined directive (val !== undefined ? val : undefined)', () => {
+      it('[F57] lowers ifDefined directive (val !== undefined ? val : undefined)', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           import { ifDefined } from 'lit/directives/if-defined.js';
@@ -1698,13 +1732,13 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         const res = compileModule(code, { filePath: 'if-def.ts' });
         expect(res.code).not.toContain('ifDefined(');
 
-        const Component = evalComponent(res.code, 'IfDefButton');
+        const Component = await evalComponent(res.code, 'IfDefButton');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('aria-label="Submit"');
         expect(htmlOutput).not.toContain('title=');
       });
 
-      it('[F58] lowers when and choose directives to JSX conditional expressions', () => {
+      it('[F58] lowers when and choose directives to JSX conditional expressions', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           import { when } from 'lit/directives/when.js';
@@ -1726,13 +1760,13 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).not.toContain('when(');
         expect(res.code).not.toContain('choose(');
 
-        const Component = evalComponent(res.code, 'ConditionalFlow');
+        const Component = await evalComponent(res.code, 'ConditionalFlow');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('<span>Loaded</span>');
         expect(htmlOutput).toContain('<b>Success</b>');
       });
 
-      it('[F59] lowers map and repeat directives to keyed array iterations', () => {
+      it('[F59] lowers map and repeat directives to keyed array iterations', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           import { map } from 'lit/directives/map.js';
@@ -1754,13 +1788,13 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).not.toContain('map(items');
         expect(res.code).not.toContain('repeat(objects');
 
-        const Component = evalComponent(res.code, 'ListComp');
+        const Component = await evalComponent(res.code, 'ListComp');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('<li>one</li>');
         expect(htmlOutput).toContain('<li data-id="101">alpha</li>');
       });
 
-      it('[F60] lowers join and range directives to inline array operations', () => {
+      it('[F60] lowers join and range directives to inline array operations', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           import { join } from 'lit/directives/join.js';
@@ -1776,13 +1810,13 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         const res = compileModule(code, { filePath: 'inline-ops.ts' });
         expect(res.code).not.toContain('range(3)');
 
-        const Component = evalComponent(res.code, 'InlineOps');
+        const Component = await evalComponent(res.code, 'InlineOps');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('tag1, tag2, tag3');
         expect(htmlOutput).toContain('3');
       });
 
-      it('[F61] lowers keyed, ref, and guard directives to React primitives', () => {
+      it('[F61] lowers keyed, ref, and guard directives to React primitives', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           import { keyed } from 'lit/directives/keyed.js';
@@ -1806,13 +1840,13 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toContain('key="user-42"');
         expect(res.code).toContain('ref={myRef}');
 
-        const Component = evalComponent(res.code, 'PrimitivesComp');
+        const Component = await evalComponent(res.code, 'PrimitivesComp');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('Keyed content');
         expect(htmlOutput).toContain('Guarded content');
       });
 
-      it('[F62] lowers unsafeHTML and unsafeSVG to dangerouslySetInnerHTML on sole-child wrapper', () => {
+      it('[F62] lowers unsafeHTML and unsafeSVG to dangerouslySetInnerHTML on sole-child wrapper', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           import { unsafeHTML } from 'lit/directives/unsafe-html.js';
@@ -1826,12 +1860,12 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         const res = compileModule(code, { filePath: 'raw.ts' });
         expect(res.code).toContain('dangerouslySetInnerHTML={{ __html: raw }}');
 
-        const Component = evalComponent(res.code, 'RawMarkup');
+        const Component = await evalComponent(res.code, 'RawMarkup');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('<em>Sanitized HTML</em>');
       });
 
-      it('[F63] rewrites template static IDs and IDREFs via useId() for instance isolation', () => {
+      it('[F63] rewrites template static IDs and IDREFs via useId() for instance isolation', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           export class AccessibleField extends LitElement {
@@ -1850,7 +1884,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toContain('id={_id + "-input-box"}');
         expect(res.code).toContain('aria-describedby={_id + "-help-text"}');
 
-        const Component = evalComponent(res.code, 'AccessibleField');
+        const Component = await evalComponent(res.code, 'AccessibleField');
         const combinedHtml = renderToString(React.createElement(React.Fragment, null, React.createElement(Component), React.createElement(Component)));
         expect(combinedHtml).toContain('for="');
         expect(combinedHtml).toContain('id="');
@@ -1883,7 +1917,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
     // Features 65-70: hierarchy and cross-module resolution
     // -----------------------------------------------------------------------
     describe('features 65-70: hierarchy and cross-module resolution', () => {
-      it('[F65] supports class inheritance on MorphHost without whole-program flattening', () => {
+      it('[F65] supports class inheritance on MorphHost without whole-program flattening', async () => {
         const code = `
           import { LitElement, html, property } from 'lit';
           export class BaseCard extends LitElement {
@@ -1914,14 +1948,14 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toContain('...super._propertyDefaults');
         expect(res.code).toContain('export const SpecializedCard = forwardRef(');
 
-        const Component = evalComponent(res.code, 'SpecializedCard');
+        const Component = await evalComponent(res.code, 'SpecializedCard');
         const htmlOutput = renderToString(React.createElement(Component, { header: 'Custom Header', elevated: true }));
         expect(htmlOutput).toContain('Custom Header');
         expect(htmlOutput).toContain('card-specialized');
         expect(htmlOutput).toContain('elevated');
       });
 
-      it('[F66] lowers class expression mixins extending MorphHost', () => {
+      it('[F66] lowers class expression mixins extending MorphHost', async () => {
         const code = `
           import { LitElement, html, property } from 'lit';
           export const DisabledMixin = (superClass: any) => class extends superClass {
@@ -1947,7 +1981,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
             disabled = false;
           };
         try {
-          const Component = evalComponent(res.code, 'MixedCard');
+          const Component = await evalComponent(res.code, 'MixedCard');
           const htmlOutput = renderToString(React.createElement(Component, { title: 'Hello Mixin' }));
           expect(htmlOutput).toContain('Hello Mixin');
           expect(htmlOutput).toContain('card');
@@ -1991,7 +2025,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).toMatch(/import\s*\{\s*MyIcon\s*\}\s*from\s*['"]\.\/my-icon\.js['"]/);
       });
 
-      it('[F68] preserves uncompiled third-party custom elements as lowercase JSX tags', () => {
+      it('[F68] preserves uncompiled third-party custom elements as lowercase JSX tags', async () => {
         const code = `
           import { LitElement, html } from 'lit';
           export class ThirdPartyContainer extends LitElement {
@@ -2012,13 +2046,13 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(res.code).not.toContain('<ForeignGrid');
         expect(res.code).not.toContain('<UnknownBadge');
 
-        const Component = evalComponent(res.code, 'ThirdPartyContainer');
+        const Component = await evalComponent(res.code, 'ThirdPartyContainer');
         const htmlOutput = renderToString(React.createElement(Component));
         expect(htmlOutput).toContain('<foreign-grid cols="3">');
         expect(htmlOutput).toContain('<unknown-badge variant="success">OK</unknown-badge>');
       });
 
-      it('[F69] generates accurate TypeScript .d.ts declaration files', () => {
+      it('[F69] generates accurate TypeScript .d.ts declaration files', async () => {
         const code = `
           import { LitElement, html, property } from 'lit';
           export class ActionButton extends LitElement {
@@ -2066,13 +2100,11 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(dts).toContain('export declare const ActionButton: React.ForwardRefExoticComponent<React.PropsWithoutRef<ActionButtonProps> & React.RefAttributes<ActionButtonHost>>;');
 
         // 5. Authentic TypeScript syntax validation
-        const sourceFile = ts.createSourceFile('action-button.d.ts', dts, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
-        expect(sourceFile).toBeDefined();
-        const parseDiagnostics = (sourceFile as any).parseDiagnostics || [];
-        expect(parseDiagnostics).toHaveLength(0);
+        const parsedDts = await transformWithOxc(dts, 'action-button.d.ts');
+        expect(parsedDts.code).toBeDefined();
       });
 
-      it('[F70] emits strongly-typed event callback props in .d.ts', () => {
+      it('[F70] emits strongly-typed event callback props in .d.ts', async () => {
         const code = `
           import { LitElement, html, property } from 'lit';
           export interface SelectionDetail {
@@ -2111,9 +2143,8 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         expect(dts).toContain('onListChange?: (event: CustomEvent<unknown>) => void;');
 
         // Authentic TypeScript syntax validation
-        const sourceFile = ts.createSourceFile('select-list.d.ts', dts, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
-        const parseDiagnostics = (sourceFile as any).parseDiagnostics || [];
-        expect(parseDiagnostics).toHaveLength(0);
+        const parsedDts = await transformWithOxc(dts, 'select-list.d.ts');
+        expect(parsedDts.code).toBeDefined();
       });
     });
 
@@ -2209,9 +2240,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         const res = compileModule(code, { filePath: 'rating-input.ts' });
         expect(res.tier).toBe('Tier2HostedWithFacade');
 
-        const trans = ts.transpileModule(res.code, {
-          compilerOptions: { jsx: ts.JsxEmit.React, module: ts.ModuleKind.CommonJS },
-        });
+        const cjsCode = await transpileJsxToCjs(res.code);
 
         const testResult = await page.evaluate(async (transpiledJs: string) => {
           const container = document.createElement('div');
@@ -2306,7 +2335,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
             updatedRating,
             submittedRating,
           };
-        }, trans.outputText);
+        }, cjsCode);
 
         expect(testResult.success).toBe(true);
         expect(testResult.initialRating).toBe('4');
@@ -2348,9 +2377,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         const res = compileModule(code, { filePath: 'validated-field.ts' });
         expect(res.tier).toBe('Tier2HostedWithFacade');
 
-        const trans = ts.transpileModule(res.code, {
-          compilerOptions: { jsx: ts.JsxEmit.React, module: ts.ModuleKind.CommonJS },
-        });
+        const cjsCode = await transpileJsxToCjs(res.code);
 
         const testResult = await page.evaluate(async (transpiledJs: string) => {
           const container = document.createElement('div');
@@ -2430,7 +2457,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
             isFocusRedirected,
             clearedCheck,
           };
-        }, trans.outputText);
+        }, cjsCode);
 
         expect(testResult.success).toBe(true);
         expect(testResult.initialCheck).toBe(true);
@@ -2494,9 +2521,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         const res = compileModule(code, { filePath: 'full-lifecycle-control.ts' });
         expect(res.tier).toBe('Tier2HostedWithFacade');
 
-        const trans = ts.transpileModule(res.code, {
-          compilerOptions: { jsx: ts.JsxEmit.React, module: ts.ModuleKind.CommonJS },
-        });
+        const cjsCode = await transpileJsxToCjs(res.code);
 
         const testResult = await page.evaluate(async (transpiledJs: string) => {
           const container = document.createElement('div');
@@ -2641,7 +2666,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
             autofilledMode,
             autofilledFormVal,
           };
-        }, trans.outputText);
+        }, cjsCode);
 
         expect(testResult.success).toBe(true);
         // Reset verification
@@ -2986,7 +3011,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
       expect(tabsSsr).toContain('<cds-tab');
     });
 
-    it('[Combination 3] class inheritance + mixins + child element rewriting + directive lowering (Milestone 4)', () => {
+    it('[Combination 3] class inheritance + mixins + child element rewriting + directive lowering (Milestone 4)', async () => {
       const code = `
         import { LitElement, html, property } from 'lit';
         import { classMap } from 'lit/directives/class-map.js';
@@ -3032,7 +3057,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
 
       try {
         const AppBadgeMock = (props: any) => React.createElement('span', { className: 'app-badge' }, props.count);
-        const Component = evalComponent(res.code, 'ActionPanel', { './app-badge.js': { AppBadge: AppBadgeMock } });
+        const Component = await evalComponent(res.code, 'ActionPanel', { './app-badge.js': { AppBadge: AppBadgeMock } });
         const htmlOutput = renderToString(React.createElement(Component, { title: 'Workflow Actions', count: 12 }));
         expect(htmlOutput).toContain('Workflow Actions');
         expect(htmlOutput).toContain('app-badge');
@@ -3069,7 +3094,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
       expect(res.code).toContain('precedence="default"');
       expect(res.code).toContain('<style');
 
-      const Component = evalComponent(res.code, 'AccessibleCombobox');
+      const Component = await evalComponent(res.code, 'AccessibleCombobox');
 
       // 1. React 19 SSR
       const ssrOutput = renderToString(React.createElement(Component));
@@ -3078,54 +3103,52 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
       expect(ssrOutput).toContain('combo-help');
 
       // 2. Strict Mode DOM mount and hydration parity in browser page
-      const testResult = await page.evaluate(
-        async (componentCode: string) => {
-          const container = document.createElement('div');
-          container.id = 'comb-4-container';
-          document.body.appendChild(container);
+      const cjsCode = await transpileJsxToCjs(res.code);
+      const testResult = await page.evaluate(async (componentCode: string) => {
+        const container = document.createElement('div');
+        container.id = 'comb-4-container';
+        document.body.appendChild(container);
 
-          const React = (window as any).React;
-          const StrictMode = (window as any).StrictMode;
-          const createRoot = (window as any).createRoot;
-          const flushSync = (window as any).flushSync;
+        const React = (window as any).React;
+        const StrictMode = (window as any).StrictMode;
+        const createRoot = (window as any).createRoot;
+        const flushSync = (window as any).flushSync;
 
-          const exports: any = {};
-          const customRequire = (spec: string) => {
-            if (spec === 'react') return React;
-            if (spec === '@lit-core/morph-to-react/runtime') return (window as any).morphRuntime;
-            throw new Error(`Unknown spec: ${spec}`);
-          };
-          const fn = new Function('React', 'exports', 'require', componentCode);
-          fn(React, exports, customRequire);
-          const AccessibleCombobox = exports.AccessibleCombobox;
+        const exports: any = {};
+        const customRequire = (spec: string) => {
+          if (spec === 'react') return React;
+          if (spec === '@lit-core/morph-to-react/runtime') return (window as any).morphRuntime;
+          throw new Error(`Unknown spec: ${spec}`);
+        };
+        const fn = new Function('React', 'exports', 'require', componentCode);
+        fn(React, exports, customRequire);
+        const AccessibleCombobox = exports.AccessibleCombobox;
 
-          const root = createRoot(container);
-          flushSync(() => {
-            root.render(React.createElement(StrictMode, null, React.createElement(AccessibleCombobox)));
-          });
+        const root = createRoot(container);
+        flushSync(() => {
+          root.render(React.createElement(StrictMode, null, React.createElement(AccessibleCombobox)));
+        });
 
-          const label = container.querySelector('label') as HTMLLabelElement;
-          const input = container.querySelector('input') as HTMLInputElement;
-          const span = container.querySelector('span') as HTMLSpanElement;
+        const label = container.querySelector('label') as HTMLLabelElement;
+        const input = container.querySelector('input') as HTMLInputElement;
+        const span = container.querySelector('span') as HTMLSpanElement;
 
-          const labelFor = label?.getAttribute('for') || (label as any)?.htmlFor;
-          const inputId = input?.id;
-          const spanId = span?.id;
-          const describedBy = input?.getAttribute('aria-describedby');
+        const labelFor = label?.getAttribute('for') || (label as any)?.htmlFor;
+        const inputId = input?.id;
+        const spanId = span?.id;
+        const describedBy = input?.getAttribute('aria-describedby');
 
-          root.unmount();
-          container.remove();
+        root.unmount();
+        container.remove();
 
-          return {
-            labelFor,
-            inputId,
-            spanId,
-            describedBy,
-            isLinked: Boolean(labelFor && inputId && labelFor === inputId && describedBy === spanId),
-          };
-        },
-        ts.transpileModule(res.code, { compilerOptions: { jsx: ts.JsxEmit.React, module: ts.ModuleKind.CommonJS } }).outputText,
-      );
+        return {
+          labelFor,
+          inputId,
+          spanId,
+          describedBy,
+          isLinked: Boolean(labelFor && inputId && labelFor === inputId && describedBy === spanId),
+        };
+      }, cjsCode);
 
       expect(testResult.isLinked).toBe(true);
       expect(testResult.inputId).not.toBe('combo-input'); // Rewritten with useId
@@ -3171,9 +3194,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
       const res = compileModule(code, { filePath: 'validated-email-input.ts' });
       expect(res.tier).toBe('Tier2HostedWithFacade');
 
-      const trans = ts.transpileModule(res.code, {
-        compilerOptions: { jsx: ts.JsxEmit.React, module: ts.ModuleKind.CommonJS },
-      });
+      const cjsCode = await transpileJsxToCjs(res.code);
 
       const testResult = await page.evaluate(async (transpiledJs: string) => {
         const container = document.createElement('div');
@@ -3239,7 +3260,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
           clearedCheck,
           formDataVal,
         };
-      }, trans.outputText);
+      }, cjsCode);
 
       expect(testResult.proxyExists).toBe(true);
       expect(testResult.initialValid).toBe(true);
@@ -3315,7 +3336,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
       expect(res.code).toContain('export const SpectrumDashboard');
       expect(res.code).toContain('spectrum-dashboard');
 
-      const Component = evalComponent(res.code, 'SpectrumDashboard');
+      const Component = await evalComponent(res.code, 'SpectrumDashboard');
       const ssrHtml = renderToString(React.createElement(Component, { selectedTab: 'reports', refreshing: false }));
 
       const evalResult = await page.evaluate(
@@ -3365,7 +3386,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
       const res = compileModule(code, { filePath: 'material-control-panel.ts' });
       expect(res.code).toContain('export const MaterialControlPanel');
 
-      const Component = evalComponent(res.code, 'MaterialControlPanel');
+      const Component = await evalComponent(res.code, 'MaterialControlPanel');
       const ssrHtml = renderToString(React.createElement(Component, { checked: true, badgeValue: '12' }));
 
       const evalResult = await page.evaluate(
@@ -3420,7 +3441,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
       const res = compileModule(code, { filePath: 'awesome-product-card.ts' });
       expect(res.code).toContain('export const AwesomeProductCard');
 
-      const Component = evalComponent(res.code, 'AwesomeProductCard');
+      const Component = await evalComponent(res.code, 'AwesomeProductCard');
       const ssrHtml = renderToString(React.createElement(Component, { title: 'Enterprise Plan', status: 'Active' }));
 
       const evalResult = await page.evaluate(
@@ -3471,7 +3492,7 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
       const res = compileModule(code, { filePath: 'momentum-action-bar.ts' });
       expect(res.code).toContain('export const MomentumActionBar');
 
-      const Component = evalComponent(res.code, 'MomentumActionBar');
+      const Component = await evalComponent(res.code, 'MomentumActionBar');
       const ssrHtml = renderToString(React.createElement(Component, { allSelected: true, selectedCount: 7 }));
 
       const evalResult = await page.evaluate(
