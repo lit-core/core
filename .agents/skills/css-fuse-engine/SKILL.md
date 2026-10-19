@@ -51,11 +51,11 @@ All AST extraction and rewriting must be performed structurally using `oxc_alloc
 
 1. Rebuild the native module:
    ```bash
-   cd packages/css-fuse && cargo build --release
+   cd packages/transforms/css-fuse && cargo build --release
    ```
 2. Run unit and integration tests:
    ```bash
-   node packages/css-fuse/test.js
+   node packages/transforms/css-fuse/test.js
    ```
 3. Test against the benchmark harness to check for deduplication regression:
    ```bash

@@ -49,7 +49,7 @@ When compiling to Mode A, the transform must **never**:
 
 1. Rebuild the native Rust module:
    ```bash
-   cargo build --release --manifest-path packages/native/Cargo.toml && cp packages/native/target/release/libnative.dylib packages/native/native.darwin-arm64.node
+   cargo build --release --manifest-path packages/targets/native/Cargo.toml && cp packages/targets/native/target/release/libnative.dylib packages/targets/native/native.darwin-arm64.node
    ```
 2. Build TypeScript runtime types:
    ```bash
@@ -57,13 +57,13 @@ When compiling to Mode A, the transform must **never**:
    ```
 3. Run unit tests:
    ```bash
-   npx vitest run packages/native/tests/
+   npx vitest run packages/targets/native/tests/
    ```
 4. Run integration and Playwright test suite:
    ```bash
-   npx vitest run packages/tests/src/suites/native.test.ts
+   npx vitest run packages/internal/tests/src/suites/native.test.ts
    ```
 5. Run benchmarks across enterprise design systems:
    ```bash
-   node packages/benchmarks/src/features/native.js
+   node packages/internal/benchmarks/src/features/native.js
    ```

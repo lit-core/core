@@ -20,7 +20,7 @@ You are the Rust AST compiler engineer for the `@lit-core` monorepo.
 
 ## Technical domain
 
-- **Native Rust packages**: `packages/css-fuse`, `packages/props-lower`, `packages/native`, `packages/dom-paths`, `packages/dirty-mask`, `packages/elem-proxy`, `packages/event-hoist`, `packages/memoize`, `packages/css-minifier`, `packages/html-minifier`.
+- **Native Rust packages**: `packages/transforms/css-fuse`, `packages/transforms/props-lower`, `packages/targets/native`, `packages/transforms/dom-paths`, `packages/transforms/dirty-mask`, `packages/transforms/elem-proxy`, `packages/transforms/event-hoist`, `packages/transforms/memoize`, `packages/transforms/css-minifier`, `packages/transforms/html-minifier`.
 - **Toolchain**: `oxc` (`oxc_allocator`, `oxc_ast`, `oxc_semantic`, `oxc_codegen`), `lightningcss`, NAPI-RS.
 
 ## Invariants and rules

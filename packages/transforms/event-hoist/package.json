@@ -1,0 +1,56 @@
+{
+  "name": "@lit-core/event-hoist",
+  "version": "0.1.0",
+  "description": "Ahead-of-time ShadowRoot event delegation compiler pass and bundler optimization for Lit and Web Components",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "*.node"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lit-core/core",
+    "directory": "packages/transforms/event-hoist"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "events",
+    "event-delegation",
+    "shadow-dom",
+    "aot",
+    "oxc",
+    "performance"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "napi": {
+    "binaryName": "event-hoist",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "node ../../../scripts/build-native.mjs event-hoist --release",
+    "build:debug": "node ../../../scripts/build-native.mjs event-hoist",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.8",
+    "vitest": "^5.0.5"
+  }
+}

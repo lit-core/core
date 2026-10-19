@@ -18,8 +18,46 @@ export const ALL_CRATES = [
   'html-aot',
   'tag-shake',
   'resumable',
+  'ssr',
   'morph-to-react',
 ];
+
+const PACKAGE_CATEGORIES = ['transforms', 'targets', 'rendering', 'bundlers', 'primitives', 'internal'];
+
+/**
+ * Locate the directory of a workspace package by short name.
+ */
+export function findPackageDir(root, pkgName) {
+  for (const cat of PACKAGE_CATEGORIES) {
+    const candidate = path.join(root, 'packages', cat, pkgName);
+    if (fs.existsSync(path.join(candidate, 'package.json')) || fs.existsSync(path.join(candidate, 'Cargo.toml'))) {
+      return candidate;
+    }
+  }
+  const legacyCandidate = path.join(root, 'packages', pkgName);
+  if (fs.existsSync(legacyCandidate)) {
+    return legacyCandidate;
+  }
+  return null;
+}
+
+/**
+ * List all workspace package short names and their directories.
+ */
+export function getAllWorkspacePackages(root = process.cwd()) {
+  const result = new Map();
+  for (const cat of PACKAGE_CATEGORIES) {
+    const catDir = path.join(root, 'packages', cat);
+    if (!fs.existsSync(catDir)) continue;
+    for (const p of fs.readdirSync(catDir)) {
+      const pkgDir = path.join(catDir, p);
+      if (fs.existsSync(path.join(pkgDir, 'package.json'))) {
+        result.set(p, pkgDir);
+      }
+    }
+  }
+  return result;
+}
 
 /**
  * Get list of modified/untracked files relative to HEAD.
@@ -46,14 +84,13 @@ export function getAffected(options = {}) {
   const rootConfigFiles = ['pnpm-lock.yaml', 'package.json', 'turbo.json', 'tsconfig.base.json', 'Cargo.lock', 'Cargo.toml'];
   const touchesRootConfig = changedFiles.some((f) => rootConfigFiles.includes(f));
 
+  const workspaceMap = getAllWorkspacePackages(root);
+
   if (changedFiles.length === 0 || touchesRootConfig || options.all) {
-    const allPackages = fs.readdirSync(path.join(root, 'packages')).filter((p) => {
-      return fs.existsSync(path.join(root, 'packages', p, 'package.json'));
-    });
     return {
       changedFiles,
       affectedCrates: ALL_CRATES,
-      affectedPackages: allPackages,
+      affectedPackages: Array.from(workspaceMap.keys()),
       affectsAll: true,
     };
   }
@@ -63,10 +100,13 @@ export function getAffected(options = {}) {
 
   for (const file of changedFiles) {
     const parts = file.split('/');
+    let pkgName = null;
     if (parts[0] === 'packages' && parts[1]) {
-      const pkgName = parts[1];
-      affectedPackages.add(pkgName);
+      pkgName = PACKAGE_CATEGORIES.includes(parts[1]) ? parts[2] : parts[1];
+    }
 
+    if (pkgName) {
+      affectedPackages.add(pkgName);
       if (ALL_CRATES.includes(pkgName)) {
         if (file.endsWith('.rs') || file.endsWith('Cargo.toml') || file.endsWith('build.rs')) {
           affectedCrates.add(pkgName);
@@ -85,10 +125,9 @@ export function getAffected(options = {}) {
   }
 
   // Include direct dependents for JS packages
-  const packagesDir = path.join(root, 'packages');
   const packageManifests = new Map();
-  for (const p of fs.readdirSync(packagesDir)) {
-    const pkgJsonPath = path.join(packagesDir, p, 'package.json');
+  for (const [p, pkgDir] of workspaceMap.entries()) {
+    const pkgJsonPath = path.join(pkgDir, 'package.json');
     if (fs.existsSync(pkgJsonPath)) {
       try {
         packageManifests.set(p, JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')));

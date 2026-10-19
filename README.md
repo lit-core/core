@@ -11,78 +11,103 @@
 
 ## Overview
 
-`@lit-core` is an ahead-of-time (AOT) compilation toolchain and bundler optimization suite designed for Lit and Web Component applications. It shifts heavy runtime responsibilities (including CSS deduplication, decorator reflection, directive evaluation, DOM traversal, and template preparation) from client devices to build time.
-
-## Motivation
-
-Web Components offer standards-based encapsulation via the Shadow DOM, but that encapsulation creates severe architectural friction at scale:
-- **Redundant styles**: Because global utility stylesheets cannot pierce shadow boundaries, design systems duplicate design tokens, resets, and typography in every component's `static styles`. In IBM Carbon Web Components, over 50% of the entire package size is duplicate CSS declarations.
-- **Runtime reflection**: Standard TypeScript decorators (`@property`, `@state`, `@customElement`) require runtime metadata helpers (`tslib`) and dynamic reflection during module load.
-- **Hydration and mount bottlenecks**: Standard Lit mounts clone templates and traverse the entire DOM tree via `TreeWalker` to discover binding markers, and Server-Side Rendering (SSR) incurs high Total Blocking Time (TBT) during upfront hydration.
-
-## Architecture
-
-`@lit-core` intervenes during the build phase (via Vite, Rollup, or Webpack) with native Rust AST transforms powered by `oxc` and `lightningcss`:
-1. **Deduplicates CSS ASTs**: Extracts repeated CSS declaration blocks into shared constructable stylesheets (`virtual:css-fuse/*`) instantiated once in browser memory.
-2. **Lowers decorators and directives**: Compiles decorators to standard static `properties` and lowers 21 built-in Lit directives into zero-allocation JavaScript primitives.
-3. **Optimizes DOM mounting**: Precomputes structural child pointer paths (`dom-paths`) and hoists event listeners to the ShadowRoot (`event-hoist`).
-4. **Enables interaction-driven resumption**: Renders Declarative Shadow DOM on the server and defers component JavaScript download until first user interaction (`resumable`).
-
-### Compiler pipeline
-
-```mermaid
-flowchart TD
-    A["Lit component source files (.ts / .js)"] --> B["Bundler plugins: @lit-core/vite-plugin & @lit-core/webpack-plugin"]
-    B --> C["Native Rust AST compiler pipeline (oxc & lightningcss)"]
-    C --> D["File-level AOT passes: props-lower, directives, memoize, dom-paths, html-aot"]
-    C --> E["Embedded minification: css-minifier & html-minifier"]
-    B --> F["Cross-component chunk analysis (renderChunk)"]
-    F --> G["css-fuse & html-fuse: shared constructable sheets & template constants"]
-    F --> H["tag-shake: eliminate unreferenced Custom Element registrations"]
-    D & E & G & H --> I["Optimized production bundles: up to -30% size, +58% mount speed"]
-```
+`@lit-core` is an ahead-of-time (AOT) compiler, cross-framework transpiler, and server/hydration platform for Lit and Web Components. Built in Rust on top of `oxc`, `lightningcss`, and `html5ever`, `@lit-core` treats standard Lit components as a universal authoring format that can be optimized in-place, rendered on the edge with zero-JavaScript resumability, or compiled directly into native target runtimes like React 19 or vanilla Custom Elements.
 
 ---
 
-## Packages
+## Architectural pillars
 
-### Compiler passes and optimizations
+The monorepo is structured around six orthogonal architectural layers inside `packages/` and `crates/`:
+
+```mermaid
+flowchart TD
+    subgraph Authoring["1. Authoring & primitives (packages/primitives/*)"]
+        A["Standard Lit components & @lit-core authoring primitives"]
+    end
+
+    subgraph Core["Shared semantic analysis (crates/lit-analysis)"]
+        B["Rust AST & template IR engine (oxc + lightningcss + html5ever)"]
+    end
+
+    subgraph Capabilities["Compiler & runtime capabilities"]
+        direction LR
+        C["2. Build transforms\n(packages/transforms/*)\nLit -> Optimized Lit"]
+        D["3. Cross-runtime targets\n(packages/targets/*)\nLit -> Vanilla DOM / React 19"]
+        E["4. Server & hydration\n(packages/rendering/*)\nStreaming DSD SSR & Resumability"]
+    end
+
+    subgraph Orchestration["5. Bundler integrations (packages/bundlers/*)"]
+        F["@lit-core/vite-plugin & @lit-core/webpack-plugin"]
+    end
+
+    A --> B
+    B --> C & D & E
+    C & D & E --> F
+```
+
+1. **Authoring primitives (`packages/primitives/*`)**: Optional developer-facing decorators, signals, and reactive helpers that compile away ahead of time.
+2. **Build transforms (`packages/transforms/*`)**: Composable AOT compiler passes (`Lit -> Optimized Lit`) that deduplicate Shadow DOM CSS, precompile templates, lower decorators and directives, and shake unused Custom Element registrations.
+3. **Cross-runtime targets (`packages/targets/*`)**: Full cross-compilers (`Lit -> Target X`) that lower Lit components into vanilla Web Components (`@lit-core/native`) or native React 19 components (`@lit-core/morph-to-react`) without shipping the Lit runtime.
+4. **Server rendering and hydration (`packages/rendering/*`)**: Universal Declarative Shadow DOM (DSD) streaming SSR (`@lit-core/ssr`) and zero-JavaScript interaction-driven resumption (`@lit-core/resumable`).
+5. **Bundler integrations (`packages/bundlers/*`)**: Drop-in Vite, Rollup, and Webpack plugins that orchestrate file-level transforms, chunk-scoped CSS/HTML clustering, and SSR/resumable virtual modules.
+6. **Verification and benchmarks (`packages/internal/*`)**: Empirical benchmark suites, Playwright Chromium verification harnesses, and interactive showcase dashboards evaluated against 5 enterprise design systems.
+
+---
+
+## Repository structure and packages
+
+### 1. Build transforms (`packages/transforms/*`)
+Composable build-time AST passes that optimize standard Lit components without altering authoring semantics:
 
 | Package | Purpose |
 | :--- | :--- |
-| [`@lit-core/css-fuse`](packages/css-fuse/README.md) | Cross-component CSS deduplication into shared constructable sheets |
-| [`@lit-core/props-lower`](packages/props-lower/README.md) | AOT Lit decorator and reactive property lowering |
-| [`@lit-core/html-fuse`](packages/html-fuse/README.md) | Static HTML and SVG fragment clustering into shared template constants |
-| [`@lit-core/event-hoist`](packages/event-hoist/README.md) | Ahead-of-time ShadowRoot event delegation |
-| [`@lit-core/dom-paths`](packages/dom-paths/README.md) | Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal |
-| [`@lit-core/dirty-mask`](packages/dirty-mask/README.md) | Ahead-of-time property-to-part dependency bitmasking with `noChange` short-circuiting |
-| [`@lit-core/directives`](packages/directives/README.md) | Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations |
-| [`@lit-core/memoize`](packages/memoize/README.md) | Ahead-of-time reactive expression auto-memoization for pure array pipelines |
-| [`@lit-core/elem-proxy`](packages/elem-proxy/README.md) | Deferred custom element stubs and JIT class upgrade |
-| [`@lit-core/html-aot`](packages/html-aot/README.md) | Ahead-of-time Lit template compilation into static descriptors |
-| [`@lit-core/native`](packages/native/README.md) | Ahead-of-time vanilla Web Component and micro-runtime compiler |
-| [`@lit-core/morph-to-react`](packages/morph-to-react/README.md) | Ahead-of-time compiler and native React 19 runtime lowering Lit components into React |
-| [`lit_analysis`](crates/lit-analysis) | Shared semantic analysis engine for Lit components, decorators, and templates |
-| [`@lit-core/css-minifier`](packages/css-minifier/README.md) | Embedded CSS template literal minification via `lightningcss` |
-| [`@lit-core/html-minifier`](packages/html-minifier/README.md) | Embedded HTML and SVG template literal minification via `oxc` |
-| [`@lit-core/resumable`](packages/resumable/README.md) | Zero-JavaScript SSR and interaction-driven runtime resumption |
-| [`@lit-core/tag-shake`](packages/tag-shake/README.md) | Ahead-of-time Web Component dead code elimination and registration tag shaking |
+| [`@lit-core/css-fuse`](packages/transforms/css-fuse/README.md) | Cross-component CSS AST deduplication into shared constructable stylesheets |
+| [`@lit-core/html-fuse`](packages/transforms/html-fuse/README.md) | Cross-component static HTML and SVG fragment clustering into shared constants |
+| [`@lit-core/props-lower`](packages/transforms/props-lower/README.md) | AOT `@property()` and `@state()` decorator lowering eliminating runtime reflection |
+| [`@lit-core/html-aot`](packages/transforms/html-aot/README.md) | Ahead-of-time Lit template compilation into static `CompiledTemplateResult` descriptors |
+| [`@lit-core/dom-paths`](packages/transforms/dom-paths/README.md) | Structural DOM child-index path compiler eliminating `TreeWalker` mount traversal |
+| [`@lit-core/dirty-mask`](packages/transforms/dirty-mask/README.md) | Property-to-part dependency bitmasking with `noChange` short-circuiting |
+| [`@lit-core/event-hoist`](packages/transforms/event-hoist/README.md) | Ahead-of-time ShadowRoot event listener delegation |
+| [`@lit-core/directives`](packages/transforms/directives/README.md) | Ahead-of-time Lit directive lowering eliminating runtime wrapper allocations |
+| [`@lit-core/memoize`](packages/transforms/memoize/README.md) | Reactive expression auto-memoization for pure collection pipelines |
+| [`@lit-core/elem-proxy`](packages/transforms/elem-proxy/README.md) | Deferred custom element proxy stubs and JIT class upgrades |
+| [`@lit-core/tag-shake`](packages/transforms/tag-shake/README.md) | Dead code elimination for unreferenced Custom Element registrations |
+| [`@lit-core/css-minifier`](packages/transforms/css-minifier/README.md) | High-speed embedded `css` template literal minification via `lightningcss` |
+| [`@lit-core/html-minifier`](packages/transforms/html-minifier/README.md) | High-speed embedded `html` and `svg` template literal minification via `oxc` |
 
-### Bundler plugins
+### 2. Cross-runtime targets (`packages/targets/*`)
+Compilers that lower Lit components into alternative execution targets:
 
 | Package | Purpose |
 | :--- | :--- |
-| [`@lit-core/vite-plugin`](packages/vite-plugin/README.md) | Unified Vite and Rollup plugin integrating all `@lit-core` optimizations |
-| [`@lit-core/webpack-plugin`](packages/webpack-plugin/README.md) | Unified Webpack 5 plugin integrating all `@lit-core` optimizations |
+| [`@lit-core/native`](packages/targets/native/README.md) | Compiles Lit components into standalone vanilla Custom Elements with a 1.8 KB micro-runtime |
+| [`@lit-core/morph-to-react`](packages/targets/morph-to-react/README.md) | Compiles Lit components into native React 19 components (`useMorphHost`, scoped CSS, zero Lit runtime) |
 
-### Benchmarks, testing, and showcase
+### 3. Server rendering and hydration (`packages/rendering/*`)
+Server, edge, and progressive client lifecycle engines:
 
 | Package | Purpose |
 | :--- | :--- |
-| [`@lit-core/benchmarks`](packages/benchmarks/README.md) | Empirical benchmark harness and interactive React viewer across 5 design systems |
-| [`@lit-core/tests`](packages/tests/README.md) | Real component multi-framework Playwright test suite (2,305 browser tests) |
-| [`@lit-core/test-kit`](packages/test-kit/README.md) | Sandbox-safe Playwright Chromium runner and Shadow DOM testing utilities |
-| [`@lit-core/showcase`](packages/showcase/README.md) | Multi-framework component showcase with isolated compiler passes |
+| [`@lit-core/ssr`](packages/rendering/ssr/README.md) | Universal streaming Declarative Shadow DOM renderer for Node, Cloudflare Workers, Deno, and Bun |
+| [`@lit-core/resumable`](packages/rendering/resumable/README.md) | Zero-JavaScript SSR and interaction-driven lazy component resumption |
+
+### 4. Bundler integrations (`packages/bundlers/*`)
+Unified bundler plugins that wire all transforms, targets, and rendering modes into build pipelines:
+
+| Package | Purpose |
+| :--- | :--- |
+| [`@lit-core/vite-plugin`](packages/bundlers/vite-plugin/README.md) | Official Vite and Rollup plugin unifying all `@lit-core` capabilities |
+| [`@lit-core/webpack-plugin`](packages/bundlers/webpack-plugin/README.md) | Official Webpack 5 plugin and loader unifying all `@lit-core` capabilities |
+
+### 5. Shared Rust core and internal verification (`crates/*`, `packages/internal/*`)
+
+| Package | Purpose |
+| :--- | :--- |
+| [`lit_analysis`](crates/lit-analysis) | Shared Rust semantic analysis and HTML5 template IR crate (`oxc` + `html5ever`) |
+| [`@lit-core/benchmarks`](packages/internal/benchmarks/README.md) | Multi-suite bundle size, runtime latency, and SSR benchmark harness + React viewer |
+| [`@lit-core/tests`](packages/internal/tests/README.md) | Real-component Playwright Chromium verification suite across 5 design systems |
+| [`@lit-core/test-kit`](packages/internal/test-kit/README.md) | Sandboxed Playwright Chromium runner and Shadow DOM test utilities |
+| [`@lit-core/showcase`](packages/internal/showcase/README.md) | Interactive multi-framework component showcase comparing isolated compiler passes |
 
 ---
 
@@ -99,10 +124,9 @@ Evaluated across 20 canonical components from 5 enterprise design systems (Carbo
 | First render mount latency (Momentum) | 39.6 ms | 18.1 ms | +54.3% faster mount |
 | Reactive update latency (Carbon) | 4.6 ms | 2.0 ms | +56.5% faster updates |
 | Reactive update latency (Momentum) | 1.1 ms | 0.5 ms | +54.5% faster updates |
-| Script eval latency (Carbon) | 4.4 ms | 4.1 ms | +6.8% faster eval |
 | Script eval latency (Web Awesome) | 6.2 ms | 3.3 ms | +46.8% faster eval |
-| Collection reconciliation (memoize) | 48.2 ms | 0.2 ms | -99.5% latency reduction |
-| Initial JS payload on boot (SSR) | 420.5 KB | 1.2 KB | -99.6% initial download |
+| Collection reconciliation (`memoize`) | 48.2 ms | 0.2 ms | -99.5% latency reduction |
+| Initial JS payload on boot (`resumable`) | 420.5 KB | 1.2 KB | -99.6% initial download |
 
 ---
 

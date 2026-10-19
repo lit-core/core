@@ -113,30 +113,35 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 
 ## 📦 Package overview
 
-| Package | Path | Tech stack | Purpose |
-| :--- | :--- | :--- | :--- |
-| `@lit-core/css-fuse` | `packages/css-fuse` | Rust (`oxc`, `lightningcss`), NAPI-RS | Cross-component CSS deduplication into shared constructable sheets |
-| `@lit-core/html-fuse` | `packages/html-fuse` | Rust (`oxc`), NAPI-RS | Cross-component static HTML and SVG fragment clustering |
-| `@lit-core/props-lower` | `packages/props-lower` | Rust (`oxc`), NAPI-RS | AOT Lit decorator and property lowering |
-| `@lit-core/event-hoist` | `packages/event-hoist` | Rust (`oxc`), NAPI-RS | Ahead-of-time ShadowRoot event delegation |
-| `@lit-core/dom-paths` | `packages/dom-paths` | Rust (`oxc`), NAPI-RS | Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal |
-| `@lit-core/dirty-mask` | `packages/dirty-mask` | Rust (`oxc`), NAPI-RS | Ahead-of-time property-to-part dependency bitmasking |
-| `@lit-core/memoize` | `packages/memoize` | Rust (`oxc`), NAPI-RS | Ahead-of-time reactive expression auto-memoization |
-| `@lit-core/elem-proxy` | `packages/elem-proxy` | Rust (`oxc`), NAPI-RS | AOT Custom Element proxy stubs for deferred registration |
-| `@lit-core/directives` | `packages/directives` | Rust (`oxc`), NAPI-RS | Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations and pruning dead imports |
-| `@lit-core/css-minifier` | `packages/css-minifier` | Rust (`lightningcss`), NAPI-RS | High-speed CSS template literal minifier |
-| `@lit-core/html-minifier` | `packages/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML template literal minifier |
-| `@lit-core/html-aot` | `packages/html-aot` | TypeScript, `parse5`, `lit-html` | Ahead-of-time Lit template compilation eliminating runtime prepare phase |
-| `@lit-core/resumable` | `packages/resumable` | TypeScript, Lit | Zero-JavaScript SSR and interaction-driven runtime resumption |
-| `@lit-core/tag-shake` | `packages/tag-shake` | Rust (`oxc`), NAPI-RS | Ahead-of-time Web Component dead code elimination and registration tag shaking |
-| `@lit-core/native` | `packages/native` | Rust (`oxc`), NAPI-RS | AOT vanilla Web Component and micro-runtime compiler |
-| `@lit-core/morph-to-react` | `packages/morph-to-react` | Rust (`oxc`, `lightningcss`), NAPI-RS, TypeScript | AOT compiler and native React 19 runtime lowering Lit components into React |
-| `lit_analysis` | `crates/lit-analysis` | Rust (`oxc`, `html5ever`) | Shared semantic analysis engine for Lit components, decorators, and templates |
-| `@lit-core/vite-plugin` | `packages/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
-| `@lit-core/webpack-plugin` | `packages/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack |
-| `@lit-core/benchmarks` | `packages/benchmarks` | Node.js, Vite | Multi-library bundle size and deduplication benchmark harness |
-| `@lit-core/showcase` | `packages/showcase` | TypeScript, Vite | Multi-framework component visualization showcase with isolated compiler passes |
-| `@lit-core/tests` | `packages/tests` | TypeScript, Vitest, Playwright | Real component multi-framework Playwright test suite |
+Packages are organized into six architectural categories under `packages/<category>/<name>` (plus shared Rust internals in `crates/`):
+
+| Category | Package | Path | Tech stack | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **Primitives** | *(authoring APIs)* | `packages/primitives/*` | TypeScript, Rust (`oxc`) | Developer-facing decorators, signals, and authoring helpers |
+| **Transforms** | `@lit-core/css-fuse` | `packages/transforms/css-fuse` | Rust (`oxc`, `lightningcss`), NAPI-RS | Cross-component CSS deduplication into shared constructable sheets |
+| **Transforms** | `@lit-core/html-fuse` | `packages/transforms/html-fuse` | Rust (`oxc`), NAPI-RS | Cross-component static HTML and SVG fragment clustering |
+| **Transforms** | `@lit-core/props-lower` | `packages/transforms/props-lower` | Rust (`oxc`), NAPI-RS | AOT Lit decorator and property lowering |
+| **Transforms** | `@lit-core/event-hoist` | `packages/transforms/event-hoist` | Rust (`oxc`), NAPI-RS | Ahead-of-time ShadowRoot event delegation |
+| **Transforms** | `@lit-core/dom-paths` | `packages/transforms/dom-paths` | Rust (`oxc`), NAPI-RS | Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal |
+| **Transforms** | `@lit-core/dirty-mask` | `packages/transforms/dirty-mask` | Rust (`oxc`), NAPI-RS | Ahead-of-time property-to-part dependency bitmasking |
+| **Transforms** | `@lit-core/memoize` | `packages/transforms/memoize` | Rust (`oxc`), NAPI-RS | Ahead-of-time reactive expression auto-memoization |
+| **Transforms** | `@lit-core/elem-proxy` | `packages/transforms/elem-proxy` | Rust (`oxc`), NAPI-RS | AOT Custom Element proxy stubs for deferred registration |
+| **Transforms** | `@lit-core/directives` | `packages/transforms/directives` | Rust (`oxc`), NAPI-RS | Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations and pruning dead imports |
+| **Transforms** | `@lit-core/css-minifier` | `packages/transforms/css-minifier` | Rust (`lightningcss`), NAPI-RS | High-speed CSS template literal minifier |
+| **Transforms** | `@lit-core/html-minifier` | `packages/transforms/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML template literal minifier |
+| **Transforms** | `@lit-core/html-aot` | `packages/transforms/html-aot` | Rust (`oxc`), TypeScript | Ahead-of-time Lit template compilation eliminating runtime prepare phase |
+| **Transforms** | `@lit-core/tag-shake` | `packages/transforms/tag-shake` | Rust (`oxc`), NAPI-RS | Ahead-of-time Web Component dead code elimination and registration tag shaking |
+| **Targets** | `@lit-core/native` | `packages/targets/native` | Rust (`oxc`), NAPI-RS | AOT vanilla Web Component and micro-runtime compiler |
+| **Targets** | `@lit-core/morph-to-react` | `packages/targets/morph-to-react` | Rust (`oxc`, `lightningcss`), NAPI-RS, TypeScript | AOT compiler and native React 19 runtime lowering Lit components into React |
+| **Rendering** | `@lit-core/ssr` | `packages/rendering/ssr` | Rust (`oxc`), TypeScript | Universal streaming Declarative Shadow DOM server-side rendering engine |
+| **Rendering** | `@lit-core/resumable` | `packages/rendering/resumable` | Rust (`oxc`), TypeScript, Lit | Zero-JavaScript SSR and interaction-driven runtime resumption |
+| **Bundlers** | `@lit-core/vite-plugin` | `packages/bundlers/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
+| **Bundlers** | `@lit-core/webpack-plugin` | `packages/bundlers/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack |
+| **Crates** | `lit_analysis` | `crates/lit-analysis` | Rust (`oxc`, `html5ever`) | Shared semantic analysis engine for Lit components, decorators, and templates |
+| **Internal** | `@lit-core/benchmarks` | `packages/internal/benchmarks` | Node.js, Vite | Multi-library bundle size and deduplication benchmark harness |
+| **Internal** | `@lit-core/showcase` | `packages/internal/showcase` | TypeScript, Vite | Multi-framework component visualization showcase with isolated compiler passes |
+| **Internal** | `@lit-core/tests` | `packages/internal/tests` | TypeScript, Vitest, Playwright | Real component multi-framework Playwright test suite |
+| **Internal** | `@lit-core/test-kit` | `packages/internal/test-kit` | TypeScript, Playwright | Sandboxed Playwright Chromium runner and Shadow DOM test helpers |
 
 ---
 

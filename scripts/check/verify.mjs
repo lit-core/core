@@ -2,11 +2,11 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { closeSharedBrowser, createTestPage, getSharedBrowser, mapStackTrace, mountElement } from '@lit-core/test-kit';
-import { CANONICAL_SUITE_DEFINITIONS } from '../../packages/benchmarks/src/suites/canonical-components.js';
-import { createBenchmarkVendorResolverPlugin } from '../../packages/benchmarks/src/vendor-resolver.js';
+import { CANONICAL_SUITE_DEFINITIONS } from '../../packages/internal/benchmarks/src/suites/canonical-components.js';
+import { createBenchmarkVendorResolverPlugin } from '../../packages/internal/benchmarks/src/vendor-resolver.js';
 
 const ROOT = process.cwd();
-const benchmarksReq = createRequire(path.join(ROOT, 'packages', 'benchmarks', 'package.json'));
+const benchmarksReq = createRequire(path.join(ROOT, 'packages', 'internal', 'benchmarks', 'package.json'));
 const { build } = await import(benchmarksReq.resolve('vite'));
 const ARGS = process.argv.slice(2);
 

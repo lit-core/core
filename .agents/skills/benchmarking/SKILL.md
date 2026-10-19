@@ -19,7 +19,7 @@ To guarantee fair, consistent benchmarks, each suite evaluates an identical set 
 - `material`: `@material/web` (Google Material Web, 20 canonical components)
 - `momentum`: `@momentum-design/components` (Cisco Momentum Design, 20 canonical components)
 
-Canonical component mapping is defined in `packages/benchmarks/src/suites/canonical-components.js`.
+Canonical component mapping is defined in `packages/internal/benchmarks/src/suites/canonical-components.js`.
 
 ---
 
@@ -48,9 +48,9 @@ Every feature and baseline has standalone execution support:
 
 ```bash
 # Run standalone benchmark for a specific library and tool
-node packages/benchmarks/src/index.js --suite=carbon --tool=baseline
-node packages/benchmarks/src/index.js --suite=carbon --tool=css-fuse
-node packages/benchmarks/src/index.js --suite=carbon --tool=html-aot
+node packages/internal/benchmarks/src/index.js --suite=carbon --tool=baseline
+node packages/internal/benchmarks/src/index.js --suite=carbon --tool=css-fuse
+node packages/internal/benchmarks/src/index.js --suite=carbon --tool=html-aot
 
 # Run all features for a single design system
 pnpm run benchmark:carbon
@@ -60,9 +60,9 @@ pnpm run benchmark:material
 pnpm run benchmark:momentum
 
 # Run a specific feature across all design systems
-node packages/benchmarks/src/index.js --tool=css-fuse
-node packages/benchmarks/src/index.js --tool=props-lower
-node packages/benchmarks/src/index.js --tool=all
+node packages/internal/benchmarks/src/index.js --tool=css-fuse
+node packages/internal/benchmarks/src/index.js --tool=props-lower
+node packages/internal/benchmarks/src/index.js --tool=all
 
 # Run all suites in sequence
 pnpm run benchmark:all
@@ -75,19 +75,19 @@ pnpm run benchmark:scenario:bundle  # Design system bundle (css-fuse, css-minifi
 pnpm run benchmark:scenarios        # Run all 4 scenarios across design systems
 
 # Run a specific scenario and variant
-node packages/benchmarks/src/index.js --scenario=data-grid --suite=carbon --variant=dom-paths
-node packages/benchmarks/src/index.js --scenario=interactive-form --suite=carbon --variant=event-hoist
+node packages/internal/benchmarks/src/index.js --scenario=data-grid --suite=carbon --variant=dom-paths
+node packages/internal/benchmarks/src/index.js --scenario=interactive-form --suite=carbon --variant=event-hoist
 
 # Run standalone feature microbenchmarks
-node packages/benchmarks/src/features/directives.js
-node packages/benchmarks/src/features/dirty-mask.js
-node packages/benchmarks/src/features/dom-paths.js
-node packages/benchmarks/src/features/elem-proxy.js
-node packages/benchmarks/src/features/event-hoist.js
-node packages/benchmarks/src/features/memoize.js
-node packages/benchmarks/src/features/native.js
-node packages/benchmarks/src/features/resumable.js
-node packages/benchmarks/src/features/tag-shake.js
+node packages/internal/benchmarks/src/features/directives.js
+node packages/internal/benchmarks/src/features/dirty-mask.js
+node packages/internal/benchmarks/src/features/dom-paths.js
+node packages/internal/benchmarks/src/features/elem-proxy.js
+node packages/internal/benchmarks/src/features/event-hoist.js
+node packages/internal/benchmarks/src/features/memoize.js
+node packages/internal/benchmarks/src/features/native.js
+node packages/internal/benchmarks/src/features/resumable.js
+node packages/internal/benchmarks/src/features/tag-shake.js
 ```
 
 ---
@@ -117,7 +117,7 @@ Each compiler optimization is evaluated in its genuine production use case:
 
 ## Scenario JSON artifacts (schema 3.0.0)
 
-Scenario results are persisted to `packages/benchmarks/results/scenarios/<scenario>/<suite>/<variant>.json`:
+Scenario results are persisted to `packages/internal/benchmarks/results/scenarios/<scenario>/<suite>/<variant>.json`:
 - `schemaVersion`: `3.0.0`
 - `scenario`: identifier and metadata
 - `metrics`: raw build sizes, timings, DOM counters, and observer metrics
@@ -128,7 +128,7 @@ Scenario results are persisted to `packages/benchmarks/results/scenarios/<scenar
 
 ## Standalone JSON artifacts
 
-Every benchmark run produces decoupled standalone outputs in `packages/benchmarks/results/`:
+Every benchmark run produces decoupled standalone outputs in `packages/internal/benchmarks/results/`:
 - `results/manifest.json`: Index manifest recording all libraries, features, and executed run metrics.
 - `results/<suite>/<feature>.json`: Pure quantitative metrics and AST diagnostics (schema 2.0.0).
 
@@ -149,7 +149,7 @@ When running in headless or sandboxed environments where browser APIs or Chromiu
 
 ## Interactive React benchmark viewer dashboard
 
-The React application in `packages/benchmarks/viewer` provides visual exploration with strictly zero bundled or hardcoded data:
+The React application in `packages/internal/benchmarks/viewer` provides visual exploration with strictly zero bundled or hardcoded data:
 
 ```bash
 # Launch development viewer server

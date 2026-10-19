@@ -5,25 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'packages/benchmarks/**'
-      - 'packages/showcase/**'
-      - 'packages/tests/**'
-      - 'packages/css-fuse/**'
-      - 'packages/html-fuse/**'
-      - 'packages/props-lower/**'
-      - 'packages/html-aot/**'
-      - 'packages/dom-paths/**'
-      - 'packages/dirty-mask/**'
-      - 'packages/event-hoist/**'
-      - 'packages/memoize/**'
-      - 'packages/elem-proxy/**'
-      - 'packages/native/**'
-      - 'packages/resumable/**'
-      - 'packages/css-minifier/**'
-      - 'packages/html-minifier/**'
-      - 'packages/tag-shake/**'
-      - 'packages/directives/**'
-      - 'packages/vite-plugin/**'
+      - 'packages/**'
+      - 'crates/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -79,7 +62,7 @@ jobs:
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: packages/benchmarks/viewer/dist
+          path: packages/internal/benchmarks/viewer/dist
 
   deploy:
     name: Deploy to GitHub Pages

@@ -1,0 +1,48 @@
+{
+  "name": "@lit-core/native",
+  "version": "0.1.0",
+  "description": "Ahead-of-time vanilla Web Component and micro-runtime compiler for Lit",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./runtime": {
+      "types": "./src/runtime/index.d.ts",
+      "import": "./src/runtime/index.js"
+    },
+    "./runtime/reconciler": {
+      "types": "./src/runtime/reconciler.d.ts",
+      "import": "./src/runtime/reconciler.js"
+    }
+  },
+  "files": [
+    "src",
+    "*.node"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "napi": {
+    "binaryName": "native",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "node ../../../scripts/build-native.mjs native --release --tsc",
+    "build:debug": "node ../../../scripts/build-native.mjs native --tsc",
+    "test": "vitest run tests"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.8",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

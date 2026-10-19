@@ -46,62 +46,62 @@ importers:
         specifier: ^5.112.0
         version: 5.112.0
 
-  packages/benchmarks:
+  packages/internal/benchmarks:
     dependencies:
       '@lit-core/css-fuse':
         specifier: workspace:*
-        version: link:../css-fuse
+        version: link:../../transforms/css-fuse
       '@lit-core/css-minifier':
         specifier: workspace:*
-        version: link:../css-minifier
+        version: link:../../transforms/css-minifier
       '@lit-core/directives':
         specifier: workspace:*
-        version: link:../directives
+        version: link:../../transforms/directives
       '@lit-core/dirty-mask':
         specifier: workspace:*
-        version: link:../dirty-mask
+        version: link:../../transforms/dirty-mask
       '@lit-core/dom-paths':
         specifier: workspace:*
-        version: link:../dom-paths
+        version: link:../../transforms/dom-paths
       '@lit-core/elem-proxy':
         specifier: workspace:*
-        version: link:../elem-proxy
+        version: link:../../transforms/elem-proxy
       '@lit-core/event-hoist':
         specifier: workspace:*
-        version: link:../event-hoist
+        version: link:../../transforms/event-hoist
       '@lit-core/html-aot':
         specifier: workspace:*
-        version: link:../html-aot
+        version: link:../../transforms/html-aot
       '@lit-core/html-fuse':
         specifier: workspace:*
-        version: link:../html-fuse
+        version: link:../../transforms/html-fuse
       '@lit-core/html-minifier':
         specifier: workspace:*
-        version: link:../html-minifier
+        version: link:../../transforms/html-minifier
       '@lit-core/memoize':
         specifier: workspace:*
-        version: link:../memoize
+        version: link:../../transforms/memoize
       '@lit-core/morph-to-react':
         specifier: workspace:*
-        version: link:../morph-to-react
+        version: link:../../targets/morph-to-react
       '@lit-core/props-lower':
         specifier: workspace:*
-        version: link:../props-lower
+        version: link:../../transforms/props-lower
       '@lit-core/resumable':
         specifier: workspace:*
-        version: link:../resumable
+        version: link:../../rendering/resumable
       '@lit-core/ssr':
         specifier: workspace:*
-        version: link:../ssr
+        version: link:../../rendering/ssr
       '@lit-core/tag-shake':
         specifier: workspace:*
-        version: link:../tag-shake
+        version: link:../../transforms/tag-shake
       '@lit-core/test-kit':
         specifier: workspace:*
         version: link:../test-kit
       '@lit-core/vite-plugin':
         specifier: workspace:*
-        version: link:../vite-plugin
+        version: link:../../bundlers/vite-plugin
       lucide-react:
         specifier: ^1.59.0
         version: 1.59.0(@types/react@19.3.0)(react@19.3.1)
@@ -161,28 +161,19 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/css-fuse:
+  packages/transforms/css-fuse:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
         version: 3.10.8(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)
 
-  packages/css-minifier:
+  packages/transforms/css-minifier:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
         version: 3.10.8(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)
 
-  packages/directives:
-    devDependencies:
-      '@napi-rs/cli':
-        specifier: ^3.10.8
-        version: 3.10.8(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)
-      vitest:
-        specifier: ^5.0.5
-        version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
-
-  packages/dirty-mask:
+  packages/transforms/directives:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
@@ -191,7 +182,16 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/dom-paths:
+  packages/transforms/dirty-mask:
+    devDependencies:
+      '@napi-rs/cli':
+        specifier: ^3.10.8
+        version: 3.10.8(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
+
+  packages/transforms/dom-paths:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
@@ -203,7 +203,7 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/elem-proxy:
+  packages/transforms/elem-proxy:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
@@ -215,7 +215,7 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/event-hoist:
+  packages/transforms/event-hoist:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
@@ -224,7 +224,7 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/html-aot:
+  packages/transforms/html-aot:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
@@ -239,19 +239,19 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/html-fuse:
+  packages/transforms/html-fuse:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
         version: 3.10.8(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)
 
-  packages/html-minifier:
+  packages/transforms/html-minifier:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
         version: 3.10.8(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)
 
-  packages/memoize:
+  packages/transforms/memoize:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
@@ -260,7 +260,7 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/morph-to-react:
+  packages/targets/morph-to-react:
     dependencies:
       '@carbon/web-components':
         specifier: ^2.65.0
@@ -291,7 +291,7 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/native:
+  packages/targets/native:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
@@ -306,13 +306,13 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/props-lower:
+  packages/transforms/props-lower:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
         version: 3.10.8(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)
 
-  packages/resumable:
+  packages/rendering/resumable:
     dependencies:
       lit:
         specifier: ^3.3.3
@@ -320,7 +320,7 @@ importers:
     devDependencies:
       '@lit-core/test-kit':
         specifier: workspace:*
-        version: link:../test-kit
+        version: link:../../internal/test-kit
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
@@ -337,7 +337,7 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/showcase:
+  packages/internal/showcase:
     dependencies:
       '@awesome.me/webawesome':
         specifier: ^3.14.0
@@ -350,49 +350,49 @@ importers:
         version: 2.65.0
       '@lit-core/css-fuse':
         specifier: workspace:*
-        version: link:../css-fuse
+        version: link:../../transforms/css-fuse
       '@lit-core/css-minifier':
         specifier: workspace:*
-        version: link:../css-minifier
+        version: link:../../transforms/css-minifier
       '@lit-core/dirty-mask':
         specifier: workspace:*
-        version: link:../dirty-mask
+        version: link:../../transforms/dirty-mask
       '@lit-core/dom-paths':
         specifier: workspace:*
-        version: link:../dom-paths
+        version: link:../../transforms/dom-paths
       '@lit-core/elem-proxy':
         specifier: workspace:*
-        version: link:../elem-proxy
+        version: link:../../transforms/elem-proxy
       '@lit-core/event-hoist':
         specifier: workspace:*
-        version: link:../event-hoist
+        version: link:../../transforms/event-hoist
       '@lit-core/html-aot':
         specifier: workspace:*
-        version: link:../html-aot
+        version: link:../../transforms/html-aot
       '@lit-core/html-fuse':
         specifier: workspace:*
-        version: link:../html-fuse
+        version: link:../../transforms/html-fuse
       '@lit-core/html-minifier':
         specifier: workspace:*
-        version: link:../html-minifier
+        version: link:../../transforms/html-minifier
       '@lit-core/memoize':
         specifier: workspace:*
-        version: link:../memoize
+        version: link:../../transforms/memoize
       '@lit-core/native':
         specifier: workspace:*
-        version: link:../native
+        version: link:../../targets/native
       '@lit-core/props-lower':
         specifier: workspace:*
-        version: link:../props-lower
+        version: link:../../transforms/props-lower
       '@lit-core/resumable':
         specifier: workspace:*
-        version: link:../resumable
+        version: link:../../rendering/resumable
       '@lit-core/ssr':
         specifier: workspace:*
-        version: link:../ssr
+        version: link:../../rendering/ssr
       '@lit-core/vite-plugin':
         specifier: workspace:*
-        version: link:../vite-plugin
+        version: link:../../bundlers/vite-plugin
       '@material/web':
         specifier: ^2.5.0
         version: 2.5.0
@@ -437,7 +437,7 @@ importers:
         specifier: ^8.3.4
         version: 8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2)
 
-  packages/ssr:
+  packages/rendering/ssr:
     dependencies:
       '@lit-core/resumable':
         specifier: workspace:*
@@ -445,10 +445,10 @@ importers:
     devDependencies:
       '@lit-core/html-aot':
         specifier: workspace:*
-        version: link:../html-aot
+        version: link:../../transforms/html-aot
       '@lit-core/test-kit':
         specifier: workspace:*
-        version: link:../test-kit
+        version: link:../../internal/test-kit
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
@@ -462,7 +462,7 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/tag-shake:
+  packages/transforms/tag-shake:
     devDependencies:
       '@napi-rs/cli':
         specifier: ^3.10.8
@@ -471,7 +471,7 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/test-kit:
+  packages/internal/test-kit:
     devDependencies:
       '@types/node':
         specifier: ^26.6.5
@@ -483,7 +483,7 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
-  packages/tests:
+  packages/internal/tests:
     dependencies:
       '@awesome.me/webawesome':
         specifier: ^3.14.0
@@ -496,67 +496,67 @@ importers:
         version: link:../benchmarks
       '@lit-core/css-fuse':
         specifier: workspace:*
-        version: link:../css-fuse
+        version: link:../../transforms/css-fuse
       '@lit-core/css-minifier':
         specifier: workspace:*
-        version: link:../css-minifier
+        version: link:../../transforms/css-minifier
       '@lit-core/directives':
         specifier: workspace:*
-        version: link:../directives
+        version: link:../../transforms/directives
       '@lit-core/dirty-mask':
         specifier: workspace:*
-        version: link:../dirty-mask
+        version: link:../../transforms/dirty-mask
       '@lit-core/dom-paths':
         specifier: workspace:*
-        version: link:../dom-paths
+        version: link:../../transforms/dom-paths
       '@lit-core/elem-proxy':
         specifier: workspace:*
-        version: link:../elem-proxy
+        version: link:../../transforms/elem-proxy
       '@lit-core/event-hoist':
         specifier: workspace:*
-        version: link:../event-hoist
+        version: link:../../transforms/event-hoist
       '@lit-core/html-aot':
         specifier: workspace:*
-        version: link:../html-aot
+        version: link:../../transforms/html-aot
       '@lit-core/html-fuse':
         specifier: workspace:*
-        version: link:../html-fuse
+        version: link:../../transforms/html-fuse
       '@lit-core/html-minifier':
         specifier: workspace:*
-        version: link:../html-minifier
+        version: link:../../transforms/html-minifier
       '@lit-core/memoize':
         specifier: workspace:*
-        version: link:../memoize
+        version: link:../../transforms/memoize
       '@lit-core/morph-to-react':
         specifier: workspace:*
-        version: link:../morph-to-react
+        version: link:../../targets/morph-to-react
       '@lit-core/native':
         specifier: workspace:*
-        version: link:../native
+        version: link:../../targets/native
       '@lit-core/props-lower':
         specifier: workspace:*
-        version: link:../props-lower
+        version: link:../../transforms/props-lower
       '@lit-core/resumable':
         specifier: workspace:*
-        version: link:../resumable
+        version: link:../../rendering/resumable
       '@lit-core/showcase':
         specifier: workspace:*
         version: link:../showcase
       '@lit-core/ssr':
         specifier: workspace:*
-        version: link:../ssr
+        version: link:../../rendering/ssr
       '@lit-core/tag-shake':
         specifier: workspace:*
-        version: link:../tag-shake
+        version: link:../../transforms/tag-shake
       '@lit-core/test-kit':
         specifier: workspace:*
         version: link:../test-kit
       '@lit-core/vite-plugin':
         specifier: workspace:*
-        version: link:../vite-plugin
+        version: link:../../bundlers/vite-plugin
       '@lit-core/webpack-plugin':
         specifier: workspace:*
-        version: link:../webpack-plugin
+        version: link:../../bundlers/webpack-plugin
       '@material/web':
         specifier: ^2.5.0
         version: 2.5.0
@@ -598,56 +598,56 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2))
 
-  packages/vite-plugin:
+  packages/bundlers/vite-plugin:
     dependencies:
       '@lit-core/css-fuse':
         specifier: workspace:*
-        version: link:../css-fuse
+        version: link:../../transforms/css-fuse
       '@lit-core/css-minifier':
         specifier: workspace:*
-        version: link:../css-minifier
+        version: link:../../transforms/css-minifier
       '@lit-core/directives':
         specifier: workspace:*
-        version: link:../directives
+        version: link:../../transforms/directives
       '@lit-core/dirty-mask':
         specifier: workspace:*
-        version: link:../dirty-mask
+        version: link:../../transforms/dirty-mask
       '@lit-core/dom-paths':
         specifier: workspace:*
-        version: link:../dom-paths
+        version: link:../../transforms/dom-paths
       '@lit-core/elem-proxy':
         specifier: workspace:*
-        version: link:../elem-proxy
+        version: link:../../transforms/elem-proxy
       '@lit-core/event-hoist':
         specifier: workspace:*
-        version: link:../event-hoist
+        version: link:../../transforms/event-hoist
       '@lit-core/html-aot':
         specifier: workspace:*
-        version: link:../html-aot
+        version: link:../../transforms/html-aot
       '@lit-core/html-fuse':
         specifier: workspace:*
-        version: link:../html-fuse
+        version: link:../../transforms/html-fuse
       '@lit-core/html-minifier':
         specifier: workspace:*
-        version: link:../html-minifier
+        version: link:../../transforms/html-minifier
       '@lit-core/memoize':
         specifier: workspace:*
-        version: link:../memoize
+        version: link:../../transforms/memoize
       '@lit-core/native':
         specifier: workspace:*
-        version: link:../native
+        version: link:../../targets/native
       '@lit-core/props-lower':
         specifier: workspace:*
-        version: link:../props-lower
+        version: link:../../transforms/props-lower
       '@lit-core/resumable':
         specifier: workspace:*
-        version: link:../resumable
+        version: link:../../rendering/resumable
       '@lit-core/ssr':
         specifier: workspace:*
-        version: link:../ssr
+        version: link:../../rendering/ssr
       '@lit-core/tag-shake':
         specifier: workspace:*
-        version: link:../tag-shake
+        version: link:../../transforms/tag-shake
     devDependencies:
       '@types/node':
         specifier: ^26.6.5
@@ -662,56 +662,56 @@ importers:
         specifier: ^8.3.4
         version: 8.3.4(@types/node@26.6.5)(jiti@2.7.0)(terser@5.51.2)
 
-  packages/webpack-plugin:
+  packages/bundlers/webpack-plugin:
     dependencies:
       '@lit-core/css-fuse':
         specifier: workspace:*
-        version: link:../css-fuse
+        version: link:../../transforms/css-fuse
       '@lit-core/css-minifier':
         specifier: workspace:*
-        version: link:../css-minifier
+        version: link:../../transforms/css-minifier
       '@lit-core/directives':
         specifier: workspace:*
-        version: link:../directives
+        version: link:../../transforms/directives
       '@lit-core/dirty-mask':
         specifier: workspace:*
-        version: link:../dirty-mask
+        version: link:../../transforms/dirty-mask
       '@lit-core/dom-paths':
         specifier: workspace:*
-        version: link:../dom-paths
+        version: link:../../transforms/dom-paths
       '@lit-core/elem-proxy':
         specifier: workspace:*
-        version: link:../elem-proxy
+        version: link:../../transforms/elem-proxy
       '@lit-core/event-hoist':
         specifier: workspace:*
-        version: link:../event-hoist
+        version: link:../../transforms/event-hoist
       '@lit-core/html-aot':
         specifier: workspace:*
-        version: link:../html-aot
+        version: link:../../transforms/html-aot
       '@lit-core/html-fuse':
         specifier: workspace:*
-        version: link:../html-fuse
+        version: link:../../transforms/html-fuse
       '@lit-core/html-minifier':
         specifier: workspace:*
-        version: link:../html-minifier
+        version: link:../../transforms/html-minifier
       '@lit-core/memoize':
         specifier: workspace:*
-        version: link:../memoize
+        version: link:../../transforms/memoize
       '@lit-core/native':
         specifier: workspace:*
-        version: link:../native
+        version: link:../../targets/native
       '@lit-core/props-lower':
         specifier: workspace:*
-        version: link:../props-lower
+        version: link:../../transforms/props-lower
       '@lit-core/resumable':
         specifier: workspace:*
-        version: link:../resumable
+        version: link:../../rendering/resumable
       '@lit-core/ssr':
         specifier: workspace:*
-        version: link:../ssr
+        version: link:../../rendering/ssr
       '@lit-core/tag-shake':
         specifier: workspace:*
-        version: link:../tag-shake
+        version: link:../../transforms/tag-shake
     devDependencies:
       '@types/node':
         specifier: ^26.6.5

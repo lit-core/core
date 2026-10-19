@@ -15,7 +15,7 @@ This skill outlines the technical architecture, invariants, and verification wor
 
 The system consists of three architectural layers:
 1. `crates/lit-analysis`: Shared Rust analysis crate providing semantic Lit import proof, decorator extraction, property modeling, and template intermediate representations.
-2. `packages/morph-to-react`: Rust NAPI compiler crate (`morph_to_react`), command line tool (`morph-to-react build`), Vite / Rollup plugin (`morphLit`), and content-hashed incremental build cache.
+2. `packages/targets/morph-to-react`: Rust NAPI compiler crate (`morph_to_react`), command line tool (`morph-to-react build`), Vite / Rollup plugin (`morphLit`), and content-hashed incremental build cache.
 3. `@lit-core/morph-to-react/runtime`: Micro-runtime providing `MorphHost`, `useMorphHost`, slot partitioning, and `ElementInternals` form controls proxying.
 
 ## Classification tiers
@@ -56,7 +56,7 @@ Reactive properties synchronize to `MorphHost` instances only when incoming prop
 
 ### CLI usage (`morph-to-react build`)
 ```bash
-node packages/morph-to-react/src/cli.js build <input-glob> [options]
+node packages/targets/morph-to-react/src/cli.js build <input-glob> [options]
 
 Options:
   -o, --out-dir <dir>      Output directory (default: dist/react)
@@ -107,5 +107,5 @@ export default {
    ```
 6. Run benchmark suite:
    ```bash
-   node packages/benchmarks/src/features/morph-to-react.js
+   node packages/internal/benchmarks/src/features/morph-to-react.js
    ```

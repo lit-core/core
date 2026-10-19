@@ -11,18 +11,18 @@ description: >-
 This skill guides you through developing and building native Rust packages with Node.js NAPI-RS bindings in the `@lit-core` monorepo.
 
 ## Affected packages
-- `packages/native`
-- `packages/dom-paths`
-- `packages/dirty-mask`
-- `packages/event-hoist`
-- `packages/memoize`
-- `packages/elem-proxy`
-- `packages/css-minifier`
-- `packages/html-minifier`
-- `packages/css-fuse`
-- `packages/html-fuse`
-- `packages/props-lower`
-- `packages/resumable`
+- `packages/targets/native`
+- `packages/transforms/dom-paths`
+- `packages/transforms/dirty-mask`
+- `packages/transforms/event-hoist`
+- `packages/transforms/memoize`
+- `packages/transforms/elem-proxy`
+- `packages/transforms/css-minifier`
+- `packages/transforms/html-minifier`
+- `packages/transforms/css-fuse`
+- `packages/transforms/html-fuse`
+- `packages/transforms/props-lower`
+- `packages/rendering/resumable`
 
 ## Architectural principles for transforms
 
@@ -44,10 +44,10 @@ Whenever you modify `.rs` files or Cargo dependencies, you must compile the nati
    ```
 
 2. Verify the `.node` binary is present in the package root:
-   - For `css-fuse`: `packages/css-fuse/css-fuse.<target>.node`
-   - For `props-lower`: `packages/props-lower/props-lower.<target>.node`
-   - For `css-minifier`: `packages/css-minifier/css-minifier.<target>.node`
-   - For `html-minifier`: `packages/html-minifier/html-minifier.<target>.node`
+   - For `css-fuse`: `packages/transforms/css-fuse/css-fuse.<target>.node`
+   - For `props-lower`: `packages/transforms/props-lower/props-lower.<target>.node`
+   - For `css-minifier`: `packages/transforms/css-minifier/css-minifier.<target>.node`
+   - For `html-minifier`: `packages/transforms/html-minifier/html-minifier.<target>.node`
 
 3. If running via npm scripts:
    ```bash

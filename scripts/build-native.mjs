@@ -8,25 +8,40 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 
-const ALL_CRATES = [
-  'css-fuse',
-  'props-lower',
-  'css-minifier',
-  'html-minifier',
-  'html-fuse',
-  'native',
-  'event-hoist',
-  'memoize',
-  'elem-proxy',
-  'dom-paths',
-  'dirty-mask',
-  'directives',
-  'html-aot',
-  'tag-shake',
-  'resumable',
-  'ssr',
-  'morph-to-react',
-];
+const CRATE_PATHS = {
+  'css-fuse': 'packages/transforms/css-fuse',
+  'props-lower': 'packages/transforms/props-lower',
+  'css-minifier': 'packages/transforms/css-minifier',
+  'html-minifier': 'packages/transforms/html-minifier',
+  'html-fuse': 'packages/transforms/html-fuse',
+  native: 'packages/targets/native',
+  'event-hoist': 'packages/transforms/event-hoist',
+  memoize: 'packages/transforms/memoize',
+  'elem-proxy': 'packages/transforms/elem-proxy',
+  'dom-paths': 'packages/transforms/dom-paths',
+  'dirty-mask': 'packages/transforms/dirty-mask',
+  directives: 'packages/transforms/directives',
+  'html-aot': 'packages/transforms/html-aot',
+  'tag-shake': 'packages/transforms/tag-shake',
+  resumable: 'packages/rendering/resumable',
+  ssr: 'packages/rendering/ssr',
+  'morph-to-react': 'packages/targets/morph-to-react',
+};
+
+const ALL_CRATES = Object.keys(CRATE_PATHS);
+
+export function resolvePackageDir(root, crate) {
+  if (CRATE_PATHS[crate]) {
+    const mapped = path.resolve(root, CRATE_PATHS[crate]);
+    if (fs.existsSync(mapped)) return mapped;
+  }
+  const categories = ['transforms', 'targets', 'rendering', 'bundlers', 'primitives', 'internal'];
+  for (const cat of categories) {
+    const candidate = path.resolve(root, 'packages', cat, crate);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return path.resolve(root, 'packages', crate);
+}
 
 const args = process.argv.slice(2);
 const isRelease = args.includes('--release');
@@ -145,7 +160,7 @@ if (isAll) {
   execSync(cargoCmd, { cwd: rootDir, stdio: 'inherit' });
 
   for (const crate of ALL_CRATES) {
-    const pkgDir = path.resolve(rootDir, 'packages', crate);
+    const pkgDir = resolvePackageDir(rootDir, crate);
     if (fs.existsSync(pkgDir)) {
       copyCrateArtifacts(crate, pkgDir);
     }
@@ -169,7 +184,7 @@ if (!crateName) {
   process.exit(1);
 }
 
-const pkgDir = cwd.endsWith(crateName) ? cwd : path.resolve(rootDir, 'packages', crateName);
+const pkgDir = cwd.endsWith(crateName) ? cwd : resolvePackageDir(rootDir, crateName);
 const destNode = path.resolve(pkgDir, `${crateName}.${platformId}.node`);
 
 if (!forceRebuild && checkCrateFresh(pkgDir, destNode)) {

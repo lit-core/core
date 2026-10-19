@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { CANONICAL_COMPONENT_METADATA, CANONICAL_SUITE_DEFINITIONS } from '../../packages/benchmarks/src/suites/canonical-components.js';
+import { CANONICAL_COMPONENT_METADATA, CANONICAL_SUITE_DEFINITIONS } from '../../packages/internal/benchmarks/src/suites/canonical-components.js';
 
 const ROOT = process.cwd();
 const req = createRequire(path.join(ROOT, 'package.json'));

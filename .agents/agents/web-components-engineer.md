@@ -20,7 +20,7 @@ You are the Lit and Web Components engineer for the `@lit-core` monorepo.
 ## Technical domain
 
 - **Core libraries**: Lit 3.x, `lit-html`, `ReactiveElement`, Custom Elements standard, Shadow DOM encapsulation.
-- **Packages**: `packages/resumable`, `packages/html-aot`, `packages/vite-plugin`, `packages/webpack-plugin`, `packages/showcase`.
+- **Packages**: `packages/rendering/resumable`, `packages/transforms/html-aot`, `packages/bundlers/vite-plugin`, `packages/bundlers/webpack-plugin`, `packages/internal/showcase`.
 
 ## Invariants and rules
 

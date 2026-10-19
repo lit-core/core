@@ -63,10 +63,10 @@ jobs:
         run: pnpm run build
 
       - name: Run benchmark matrix
-        run: node packages/benchmarks/src/index.js --suite=${{ inputs.suite || 'all' }}
+        run: node packages/internal/benchmarks/src/index.js --suite=${{ inputs.suite || 'all' }}
 
       - name: Upload benchmark artifacts
         uses: actions/upload-artifact@v7
         with:
           name: benchmark-results
-          path: packages/benchmarks/results/
+          path: packages/internal/benchmarks/results/

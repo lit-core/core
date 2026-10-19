@@ -8,18 +8,18 @@ description: >-
 
 # Real component testing guide
 
-This skill guides you through executing and expanding the Playwright Chromium test suite in `packages/tests`.
+This skill guides you through executing and expanding the Playwright Chromium test suite in `packages/internal/tests`.
 
 ## Philosophy and architecture
 
-All tests in `packages/tests` evaluate real production component source and stylesheet files directly from `node_modules`. Synthetic or hand-rolled toy strings are never used in test assertions.
+All tests in `packages/internal/tests` evaluate real production component source and stylesheet files directly from `node_modules`. Synthetic or hand-rolled toy strings are never used in test assertions.
 
 **Strictly forbidden**:
 - Mock component definitions (e.g. `elem-${i}`, `test-card`, or synthetic HTML classes).
 - Toy strings or hand-rolled snippets substituting for actual production components.
 
 **Mandatory requirements**:
-- Always resolve and test real component definitions directly from the 5 enterprise libraries via `packages/tests/src/components.ts` and `packages/tests/src/fixtures.ts`.
+- Always resolve and test real component definitions directly from the 5 enterprise libraries via `packages/internal/tests/src/components.ts` and `packages/internal/tests/src/fixtures.ts`.
 - Verify behavior against minified and mangled code: real bundles often undergo minification. Transforms must successfully parse and process minified component sources without relying on unminified names.
 - Validate safe bailouts: when a component uses advanced or unsupported constructs, assert that the transform leaves the component safely untransformed and produces a diagnostic, rather than injecting fake stubs to force a pass.
 - Every test:
@@ -48,17 +48,17 @@ pnpm run verify --suite=spectrum
 pnpm --filter @lit-core/tests test
 
 # Run a specific design system suite
-npx vitest run packages/tests/src/suites/carbon.test.ts
-npx vitest run packages/tests/src/suites/spectrum.test.ts
-npx vitest run packages/tests/src/suites/webawesome.test.ts
-npx vitest run packages/tests/src/suites/material.test.ts
-npx vitest run packages/tests/src/suites/momentum.test.ts
-npx vitest run packages/tests/src/suites/native.test.ts
-npx vitest run packages/tests/src/suites/plugins.test.ts
+npx vitest run packages/internal/tests/src/suites/carbon.test.ts
+npx vitest run packages/internal/tests/src/suites/spectrum.test.ts
+npx vitest run packages/internal/tests/src/suites/webawesome.test.ts
+npx vitest run packages/internal/tests/src/suites/material.test.ts
+npx vitest run packages/internal/tests/src/suites/momentum.test.ts
+npx vitest run packages/internal/tests/src/suites/native.test.ts
+npx vitest run packages/internal/tests/src/suites/plugins.test.ts
 ```
 
 ## Test registry structure
 
-- `packages/tests/src/components.ts`: Central component registry containing exact file paths for all 5 frameworks
-- `packages/tests/src/fixtures.ts`: File resolution, stylesheet discovery, and template extraction utilities
-- `packages/tests/src/harness.ts`: Shared Playwright Chromium browser lifecycle and DOM helpers
+- `packages/internal/tests/src/components.ts`: Central component registry containing exact file paths for all 5 frameworks
+- `packages/internal/tests/src/fixtures.ts`: File resolution, stylesheet discovery, and template extraction utilities
+- `packages/internal/tests/src/harness.ts`: Shared Playwright Chromium browser lifecycle and DOM helpers

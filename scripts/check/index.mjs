@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { ALL_CRATES, getAffected } from './affected.mjs';
+import { ALL_CRATES, findPackageDir, getAffected } from './affected.mjs';
 
 const ROOT = process.cwd();
 const ARGS = process.argv.slice(2);
@@ -75,10 +75,10 @@ async function main() {
   // Tier 0: Format & lint check (skipped if only rust or only js)
   if (!ONLY_RUST && !ONLY_JS && affected.changedFiles.length > 0) {
     const filesToCheck = affected.changedFiles
-      .filter((f) => (f.endsWith('.js') || f.endsWith('.ts') || f.endsWith('.mjs')) && !f.includes('results/'))
+      .filter((f) => (f.endsWith('.js') || f.endsWith('.ts') || f.endsWith('.mjs')) && !f.includes('results/') && fs.existsSync(path.join(ROOT, f)))
       .slice(0, 30)
       .join(' ');
-    const cmd = filesToCheck ? `pnpm exec biome check ${filesToCheck} --no-errors-on-unmatched` : 'pnpm exec biome check scripts packages/test-kit';
+    const cmd = filesToCheck ? `pnpm exec biome check ${filesToCheck} --no-errors-on-unmatched` : 'pnpm exec biome check scripts packages/internal/test-kit';
     const passed = runStep('tier 0: biome format & lint check', cmd);
     if (!passed) allPassed = false;
   }
@@ -90,7 +90,12 @@ async function main() {
       if (!passed) allPassed = false;
     } else {
       for (const crate of affected.affectedCrates) {
-        const manifestPath = fs.existsSync(path.join(ROOT, 'crates', crate, 'Cargo.toml')) ? path.join(ROOT, 'crates', crate, 'Cargo.toml') : path.join(ROOT, 'packages', crate, 'Cargo.toml');
+        const pkgDir = findPackageDir(ROOT, crate);
+        const manifestPath = fs.existsSync(path.join(ROOT, 'crates', crate, 'Cargo.toml'))
+          ? path.join(ROOT, 'crates', crate, 'Cargo.toml')
+          : pkgDir
+            ? path.join(pkgDir, 'Cargo.toml')
+            : path.join(ROOT, 'packages', crate, 'Cargo.toml');
         if (fs.existsSync(manifestPath)) {
           const passed = runStep(`tier 1: cargo test for ${crate}`, `cargo test --manifest-path ${manifestPath}`);
           if (!passed) allPassed = false;
@@ -111,7 +116,8 @@ async function main() {
         // Benchmarks run during tier 4 or on demand, not in the fast unit loop
         continue;
       }
-      const pkgJsonPath = path.join(ROOT, 'packages', pkg, 'package.json');
+      const pkgDir = findPackageDir(ROOT, pkg);
+      const pkgJsonPath = pkgDir ? path.join(pkgDir, 'package.json') : path.join(ROOT, 'packages', pkg, 'package.json');
       if (fs.existsSync(pkgJsonPath)) {
         try {
           const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));

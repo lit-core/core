@@ -34,23 +34,25 @@ Ensure you have the following installed:
 ## Development workflow
 
 ### Building native Rust packages
-Rust crates (`css-fuse`, `props-lower`, `css-minifier`, `html-minifier`) compile native `.node` addons. When editing Rust code in any package under `packages/`:
+Rust crates (`css-fuse`, `props-lower`, `css-minifier`, `html-minifier`, etc.) compile native `.node` addons. When editing Rust code in any package under `packages/<category>/<name>`:
 ```bash
-# Rebuild native addons
+# Rebuild all native addons and TypeScript packages
 pnpm run build
 
-# Or build a specific package inside its directory
-cd packages/css-fuse
-cargo build --release
+# Or build a specific native crate by name
+node scripts/build-native.mjs css-fuse --release
 ```
 
 ### Running tests
 ```bash
+# Fast affected validation loop
+pnpm run check
+
 # Run all workspace test suites
 pnpm run test
 
 # Run bundler integration tests
-node packages/vite-plugin/test/integration.test.js
+node packages/bundlers/vite-plugin/tests/integration.test.js
 ```
 
 ### Formatting and linting
@@ -63,8 +65,8 @@ pnpm run lint
 pnpm run format
 
 # Check Rust code
-cargo fmt --check --manifest-path packages/css-fuse/Cargo.toml
-cargo clippy --manifest-path packages/css-fuse/Cargo.toml
+cargo fmt --check --all
+cargo clippy --workspace --all-targets
 ```
 
 ---

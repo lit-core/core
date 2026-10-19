@@ -1,18 +1,18 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/benchmarks" },
-    { "path": "./packages/dirty-mask" },
-    { "path": "./packages/dom-paths" },
-    { "path": "./packages/elem-proxy" },
-    { "path": "./packages/event-hoist" },
-    { "path": "./packages/html-aot" },
-    { "path": "./packages/memoize" },
-    { "path": "./packages/native" },
-    { "path": "./packages/resumable" },
-    { "path": "./packages/ssr" },
-    { "path": "./packages/tests" },
-    { "path": "./packages/vite-plugin" },
-    { "path": "./packages/webpack-plugin" }
+    { "path": "./packages/internal/benchmarks" },
+    { "path": "./packages/transforms/dirty-mask" },
+    { "path": "./packages/transforms/dom-paths" },
+    { "path": "./packages/transforms/elem-proxy" },
+    { "path": "./packages/transforms/event-hoist" },
+    { "path": "./packages/transforms/html-aot" },
+    { "path": "./packages/transforms/memoize" },
+    { "path": "./packages/targets/native" },
+    { "path": "./packages/rendering/resumable" },
+    { "path": "./packages/rendering/ssr" },
+    { "path": "./packages/internal/tests" },
+    { "path": "./packages/bundlers/vite-plugin" },
+    { "path": "./packages/bundlers/webpack-plugin" }
   ]
 }

@@ -23,7 +23,7 @@ You are the test automation and verification engineer for the `@lit-core` monore
 
 - **Test frameworks**: Vitest, Playwright Chromium.
 - **Component verification**: Real component multi-framework suites across Carbon, Spectrum, Web Awesome, Material Web, and Cisco Momentum.
-- **Packages**: `packages/tests`, `packages/benchmarks`.
+- **Packages**: `packages/internal/tests`, `packages/internal/benchmarks`.
 
 ## Invariants and rules
 

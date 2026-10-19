@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { ALL_CRATES } from './affected.mjs';
+import { ALL_CRATES, findPackageDir } from './affected.mjs';
 
 function getLatestMtime(dir, exts = ['.rs', '.toml']) {
   let maxMtime = 0;
@@ -38,7 +38,7 @@ export function ensureNativeFresh(crates = ALL_CRATES, root = process.cwd()) {
   const rebuilt = [];
 
   for (const crate of crates) {
-    const pkgDir = path.join(root, 'packages', crate);
+    const pkgDir = findPackageDir(root, crate) || path.join(root, 'packages', crate);
     const cargoToml = path.join(pkgDir, 'Cargo.toml');
     if (!fs.existsSync(cargoToml)) continue;
 
