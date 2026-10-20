@@ -30,13 +30,13 @@
     "name": "Lit directive lowering (directives)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T19:54:43.446Z",
+  "timestamp": "2026-10-20T19:24:40.755Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -51,15 +51,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 59176,
-    "gzipBytes": 17369,
-    "brotliBytes": 15540,
-    "buildTimeMs": 18.172625000000153,
-    "firstRenderMs": 22,
-    "updateMs": 3.6,
-    "scriptEvalMs": 2.2,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 2949536,
+    "rawBytes": 58416,
+    "gzipBytes": 17130,
+    "brotliBytes": 15327,
+    "buildTimeMs": 15.206874999999854,
+    "firstRenderMs": 26.3,
+    "updateMs": 2.8,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 1498745,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -72,53 +72,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 59287,
-    "gzipBytes": 17397,
-    "brotliBytes": 15562,
-    "buildTimeMs": 23.391749999998865,
-    "firstRenderMs": 31,
-    "updateMs": 3.3,
-    "scriptEvalMs": 1.9,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 2341860,
-    "scenarioSpecific": {
-      "totalItems": 50,
-      "directivesUsed": [
-        "repeat",
-        "classMap",
-        "styleMap",
-        "ifDefined"
-      ],
-      "renderedCards": 50
-    }
+    "rawBytes": 59176,
+    "gzipBytes": 17369,
+    "brotliBytes": 15540,
+    "buildTimeMs": 17.873000000000047,
+    "firstRenderMs": 26.7,
+    "updateMs": 3.1,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 1537098
   },
   "deltas": {
-    "rawBytes": -111,
-    "rawPercent": -0.19,
-    "gzipBytes": -28,
-    "gzipPercent": -0.16,
-    "brotliBytes": -22,
-    "brotliPercent": -0.14,
-    "buildTimeMs": -5.2,
-    "firstRenderMs": -9,
-    "speedupPercent": 29.03,
-    "updateMs": 0.3,
-    "updateSpeedupPercent": -9.09,
-    "evalSpeedupPercent": -15.79,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -25.95
+    "rawBytes": -760,
+    "rawPercent": -1.28,
+    "gzipBytes": -239,
+    "gzipPercent": -1.38,
+    "brotliBytes": -213,
+    "brotliPercent": -1.37,
+    "buildTimeMs": -2.7,
+    "firstRenderMs": -0.4,
+    "speedupPercent": 1.5,
+    "updateMs": -0.3,
+    "updateSpeedupPercent": 9.68,
+    "evalSpeedupPercent": 10,
+    "registrationSpeedupPercent": 83.33,
+    "memorySavingsPercent": 2.5
   },
   "runtime": {
-    "firstRenderMs": 22,
-    "updateMs": 3.6,
-    "scriptEvalMs": 2.2,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 2949536,
-    "speedupPercent": 29.03,
-    "updateSpeedupPercent": -9.09,
-    "evalSpeedupPercent": -15.79,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -25.95
+    "firstRenderMs": 26.3,
+    "updateMs": 2.8,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 1498745,
+    "speedupPercent": 1.5,
+    "updateSpeedupPercent": 9.68,
+    "evalSpeedupPercent": 10,
+    "registrationSpeedupPercent": 83.33,
+    "memorySavingsPercent": 2.5
   },
   "domSnapshot": {
     "mount": {
@@ -187,8 +177,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -260,7 +250,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -406,7 +396,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -489,8 +479,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -562,7 +552,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -708,7 +698,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -791,8 +781,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -864,7 +854,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -1010,7 +1000,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -1093,8 +1083,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -1166,7 +1156,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -1312,7 +1302,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -1395,8 +1385,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -1468,7 +1458,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -1614,7 +1604,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -1697,8 +1687,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -1770,7 +1760,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -1916,7 +1906,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -1999,8 +1989,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -2072,7 +2062,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -2218,7 +2208,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -2301,8 +2291,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -2374,7 +2364,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -2520,7 +2510,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -2603,8 +2593,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -2676,7 +2666,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -2822,7 +2812,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -2905,8 +2895,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-pinned is-featured ",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -2978,7 +2968,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -3125,7 +3115,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -3209,8 +3199,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -3282,7 +3272,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -3428,7 +3418,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -3511,8 +3501,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -3584,7 +3574,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -3730,7 +3720,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -3813,8 +3803,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -3886,7 +3876,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -4032,7 +4022,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -4115,8 +4105,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -4188,7 +4178,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -4334,7 +4324,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -4417,8 +4407,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -4490,7 +4480,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -4636,7 +4626,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -4719,8 +4709,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -4792,7 +4782,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -4938,7 +4928,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -5021,8 +5011,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -5094,7 +5084,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -5240,7 +5230,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -5323,8 +5313,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -5396,7 +5386,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -5542,7 +5532,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -5625,8 +5615,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -5698,7 +5688,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -5844,7 +5834,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -5927,8 +5917,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-pinned is-featured ",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -6000,7 +5990,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -6147,7 +6137,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -6231,8 +6221,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -6304,7 +6294,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -6450,7 +6440,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -6533,8 +6523,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -6606,7 +6596,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -6752,7 +6742,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -6835,8 +6825,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -6908,7 +6898,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -7054,7 +7044,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -7137,8 +7127,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -7210,7 +7200,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -7356,7 +7346,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -7439,8 +7429,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -7512,7 +7502,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -7658,7 +7648,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -7741,8 +7731,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -7814,7 +7804,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -7960,7 +7950,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -8043,8 +8033,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -8116,7 +8106,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -8262,7 +8252,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -8345,8 +8335,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -8418,7 +8408,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -8564,7 +8554,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -8647,8 +8637,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -8720,7 +8710,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -8866,7 +8856,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -8949,8 +8939,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-pinned is-featured ",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -9022,7 +9012,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -9169,7 +9159,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -9253,8 +9243,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -9326,7 +9316,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -9472,7 +9462,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -9555,8 +9545,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -9628,7 +9618,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -9774,7 +9764,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -9857,8 +9847,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -9930,7 +9920,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -10076,7 +10066,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -10159,8 +10149,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10232,7 +10222,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -10378,7 +10368,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -10461,8 +10451,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10534,7 +10524,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -10680,7 +10670,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -10763,8 +10753,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10836,7 +10826,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -10982,7 +10972,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -11065,8 +11055,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -11138,7 +11128,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -11284,7 +11274,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -11367,8 +11357,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -11440,7 +11430,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -11586,7 +11576,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -11669,8 +11659,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -11742,7 +11732,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -11888,7 +11878,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -11971,8 +11961,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-pinned ",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "class": "feed-card is-pinned",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -12044,7 +12034,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -12191,7 +12181,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -12275,8 +12265,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -12348,7 +12338,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -12494,7 +12484,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -12577,8 +12567,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -12650,7 +12640,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -12796,7 +12786,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -12879,8 +12869,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -12952,7 +12942,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -13098,7 +13088,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -13181,8 +13171,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13254,7 +13244,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -13400,7 +13390,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -13483,8 +13473,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13556,7 +13546,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -13702,7 +13692,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -13785,8 +13775,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13858,7 +13848,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -14004,7 +13994,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -14087,8 +14077,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -14160,7 +14150,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -14306,7 +14296,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -14389,8 +14379,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -14462,7 +14452,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -14608,7 +14598,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -14691,8 +14681,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -14764,7 +14754,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -14910,7 +14900,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -14993,8 +14983,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-pinned ",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "class": "feed-card is-pinned",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -15066,7 +15056,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -15213,7 +15203,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -15364,8 +15354,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -15437,7 +15427,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -15584,7 +15574,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -15668,8 +15658,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -15741,7 +15731,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -15888,7 +15878,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -15972,8 +15962,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -16045,7 +16035,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -16191,7 +16181,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -16274,8 +16264,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -16347,7 +16337,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -16494,7 +16484,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -16578,8 +16568,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -16651,7 +16641,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -16797,7 +16787,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -16880,8 +16870,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -16953,7 +16943,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -17100,7 +17090,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -17184,8 +17174,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -17257,7 +17247,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -17403,7 +17393,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -17487,7 +17477,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-featured",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -17559,7 +17549,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -17705,7 +17695,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -17788,8 +17778,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -17861,7 +17851,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -18007,7 +17997,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -18090,8 +18080,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -18163,7 +18153,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -18310,7 +18300,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -18394,8 +18384,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -18467,7 +18457,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -18613,7 +18603,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -18696,8 +18686,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -18769,7 +18759,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -18916,7 +18906,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -19000,8 +18990,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -19073,7 +19063,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -19219,7 +19209,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -19302,8 +19292,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -19375,7 +19365,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -19522,7 +19512,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -19606,8 +19596,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -19679,7 +19669,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -19825,7 +19815,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -19908,8 +19898,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -19981,7 +19971,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -20128,7 +20118,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -20212,8 +20202,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -20285,7 +20275,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -20431,7 +20421,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -20515,7 +20505,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-featured",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -20587,7 +20577,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -20733,7 +20723,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -20816,8 +20806,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -20889,7 +20879,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -21035,7 +21025,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -21118,8 +21108,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -21191,7 +21181,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -21338,7 +21328,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -21422,8 +21412,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -21495,7 +21485,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -21641,7 +21631,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -21724,8 +21714,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -21797,7 +21787,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -21944,7 +21934,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -22028,8 +22018,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -22101,7 +22091,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -22247,7 +22237,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -22330,8 +22320,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -22403,7 +22393,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -22550,7 +22540,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -22634,8 +22624,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -22707,7 +22697,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -22853,7 +22843,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -22936,8 +22926,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -23009,7 +22999,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -23156,7 +23146,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -23240,8 +23230,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -23313,7 +23303,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -23459,7 +23449,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -23543,7 +23533,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-featured",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -23615,7 +23605,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -23761,7 +23751,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -23844,8 +23834,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -23917,7 +23907,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -24063,7 +24053,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -24146,8 +24136,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -24219,7 +24209,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -24366,7 +24356,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -24450,8 +24440,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -24523,7 +24513,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -24669,7 +24659,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -24753,7 +24743,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-pinned is-featured",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -24825,7 +24815,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -24972,7 +24962,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -25056,8 +25046,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -25129,7 +25119,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -25275,7 +25265,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -25359,7 +25349,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-pinned is-featured",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -25431,7 +25421,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -25578,7 +25568,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -25662,8 +25652,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -25735,7 +25725,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -25881,7 +25871,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -25965,7 +25955,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -26037,7 +26027,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -26184,7 +26174,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -26268,8 +26258,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -26341,7 +26331,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -26487,7 +26477,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -26571,7 +26561,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -26643,7 +26633,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -26789,7 +26779,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -26872,8 +26862,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -26945,7 +26935,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -27091,7 +27081,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -27175,7 +27165,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -27247,7 +27237,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -27394,7 +27384,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -27478,8 +27468,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -27551,7 +27541,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -27697,7 +27687,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -27781,7 +27771,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -27853,7 +27843,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -28000,7 +27990,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -28084,8 +28074,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -28157,7 +28147,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -28303,7 +28293,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -28387,7 +28377,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -28459,7 +28449,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -28606,7 +28596,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -28690,8 +28680,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -28763,7 +28753,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -28909,7 +28899,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -28993,7 +28983,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -29065,7 +29055,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -29212,7 +29202,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -29296,8 +29286,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -29369,7 +29359,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -29515,7 +29505,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -29599,7 +29589,7 @@
                   "attributes": {
                     "aria-hidden": "true",
                     "class": "feed-card",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -29671,7 +29661,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -29817,7 +29807,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -29900,8 +29890,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -29973,7 +29963,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -30119,7 +30109,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -30202,8 +30192,8 @@
                   "tag": "md-elevation",
                   "attributes": {
                     "aria-hidden": "true",
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -30275,7 +30265,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": "md3-badge   "
+                                  "class": "md3-badge"
                                 },
                                 "children": [
                                   {
@@ -30421,7 +30411,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -30510,12 +30500,13 @@
     "shadowRootsCount": 251
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 555,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Style attribute mismatch at mount-root > [0] > [1] > [0] (<md-elevation>): baseline=\"padding:12px;border-left:1px solid #e4e4e7;\", variant=\"padding: 12px;border-left: 1px solid #e4e4e7;\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

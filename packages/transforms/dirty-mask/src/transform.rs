@@ -130,25 +130,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         .build(&parsed.program)
         .semantic
         .into_scoping();
-    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
-    let symbol_ctx = SymbolProofContext {
-        scoping: &scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
+    let symbol_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
     let root_scope = scoping.root_scope_id();
 
     let existing_no_change = symbol_ctx.lit_symbols.iter().find_map(|(&sym_id, sym)| {
@@ -210,15 +192,13 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                             }
                         }
                     }
-                    let callee_name = match &call.callee {
-                        Expression::Identifier(id) => Some(id.name.as_str()),
-                        _ => None,
+                    let is_decorate_helper = match &call.callee {
+                        Expression::Identifier(id) => {
+                            symbol_ctx.resolve_helper_symbol(id).is_some()
+                        }
+                        _ => false,
                     };
-                    if (callee_name == Some("__decorate")
-                        || callee_name == Some("__decorateClass")
-                        || callee_name == Some("_ts_decorate"))
-                        && call.arguments.len() >= 3
-                    {
+                    if is_decorate_helper && call.arguments.len() >= 3 {
                         if let Some(Expression::StaticMemberExpression(mem)) =
                             call.arguments[1].as_expression()
                         {

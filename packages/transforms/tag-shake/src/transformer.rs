@@ -31,7 +31,7 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
 
     let mut program = parsed.program;
 
-    let used_tags_set: HashSet<String> =
+    let mut used_tags_set: HashSet<String> =
         options.used_tags.unwrap_or_default().into_iter().collect();
 
     // Semantic analysis and registration detection
@@ -42,8 +42,8 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
         preserved_tags,
         stmts_to_remove,
         class_decorators_to_remove,
-        specifiers_to_remove,
-        pruned_imports_count,
+        shaken_local_classes,
+        originally_referenced_imports,
     ) = {
         let semantic_ret = SemanticBuilder::new().build(&program);
         let resolver = SymbolResolver::new(&semantic_ret.semantic, &program, source);
@@ -66,74 +66,174 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
         let mut preserved_tags = Vec::new();
         let mut stmts_to_remove = HashSet::new();
         let mut class_decorators_to_remove: Vec<(usize, usize)> = Vec::new();
-        let mut candidate_names_to_prune = Vec::new();
+        let mut preserved_component_names = HashSet::new();
+        let mut candidate_shaken_classes = Vec::new();
 
         if !has_dynamic && !detections_empty {
+            let mut visited_class_stmts = HashSet::new();
+            loop {
+                let mut added_any = false;
+                for reg in &detections {
+                    if used_tags_set.contains(&reg.tag) {
+                        let cls_name_opt = match &reg.kind {
+                            RegistrationKind::CustomElementsDefine { component_name, .. }
+                            | RegistrationKind::StaticMethodDefine { component_name, .. }
+                            | RegistrationKind::TranspiledDecorate { component_name, .. } => {
+                                if !component_name.is_empty() {
+                                    Some(component_name.clone())
+                                } else {
+                                    None
+                                }
+                            }
+                            RegistrationKind::ClassDecorator { .. } => None,
+                        };
+                        let mut stmt_indices = Vec::new();
+                        if matches!(reg.kind, RegistrationKind::ClassDecorator { .. }) {
+                            stmt_indices.push(reg.statement_index);
+                        }
+                        if let Some(mut cur_cls) = cls_name_opt {
+                            let mut depth = 0;
+                            while let Some(idx) = find_local_class_stmt_index(&program, &cur_cls) {
+                                stmt_indices.push(idx);
+                                depth += 1;
+                                if depth > 16 {
+                                    break;
+                                }
+                                if let Some(super_name) =
+                                    get_local_super_class_name(&program.body[idx])
+                                {
+                                    cur_cls = super_name;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        for idx in stmt_indices {
+                            if visited_class_stmts.insert(idx) {
+                                let mut visitor = crate::scanner::CustomElementAstVisitor::new();
+                                oxc_ast_visit::Visit::visit_statement(
+                                    &mut visitor,
+                                    &program.body[idx],
+                                );
+                                for t in visitor.tags {
+                                    if used_tags_set.insert(t) {
+                                        added_any = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if !added_any {
+                    break;
+                }
+            }
+
             for reg in &detections {
                 if used_tags_set.contains(&reg.tag) {
                     preserved_tags.push(reg.tag.clone());
+                    match &reg.kind {
+                        RegistrationKind::CustomElementsDefine { component_name, .. }
+                        | RegistrationKind::StaticMethodDefine { component_name, .. }
+                        | RegistrationKind::TranspiledDecorate { component_name, .. } => {
+                            if !component_name.is_empty() {
+                                preserved_component_names.insert(component_name.clone());
+                            }
+                        }
+                        RegistrationKind::ClassDecorator { .. } => {}
+                    }
                 } else {
                     removed_tags.push(reg.tag.clone());
                     match &reg.kind {
-                        RegistrationKind::CustomElementsDefine { component_name, .. }
-                        | RegistrationKind::StaticMethodDefine { component_name, .. } => {
+                        RegistrationKind::CustomElementsDefine { .. }
+                        | RegistrationKind::StaticMethodDefine { .. } => {
                             stmts_to_remove.insert(reg.statement_index);
-                            if !component_name.is_empty() {
-                                candidate_names_to_prune.push(component_name.clone());
-                            }
                         }
-                        RegistrationKind::TranspiledDecorate {
-                            component_name,
-                            decorator_name,
-                            ..
-                        } => {
+                        RegistrationKind::TranspiledDecorate { component_name, .. } => {
                             stmts_to_remove.insert(reg.statement_index);
                             if !component_name.is_empty() {
-                                candidate_names_to_prune.push(component_name.clone());
-                            }
-                            if !decorator_name.is_empty() {
-                                candidate_names_to_prune.push(decorator_name.clone());
+                                candidate_shaken_classes.push(component_name.clone());
                             }
                         }
                         RegistrationKind::ClassDecorator {
-                            decorator_index,
-                            decorator_name,
+                            decorator_index, ..
                         } => {
                             class_decorators_to_remove
                                 .push((reg.statement_index, *decorator_index));
-                            if !decorator_name.is_empty() {
-                                candidate_names_to_prune.push(decorator_name.clone());
-                            }
                         }
                     }
                 }
             }
         }
 
-        let mut specifiers_to_remove: HashSet<(usize, usize)> = HashSet::new();
-        let mut pruned_count = 0;
-
+        let mut shaken_local_classes = HashSet::new();
+        let mut originally_referenced_imports: HashSet<(usize, usize)> = HashSet::new();
         if !removed_tags.is_empty() {
-            for name in &candidate_names_to_prune {
-                if SymbolResolver::is_identifier_exported(&program, name) {
-                    continue;
-                }
+            let scoping = resolver.semantic.scoping();
+            let root = scoping.root_scope_id();
 
-                if let Some(import_loc) = SymbolResolver::find_import_location(&program, name) {
-                    let scoping = resolver.semantic.scoping();
-                    let root = scoping.root_scope_id();
-                    if let Some(symbol_id) = scoping.get_binding(root, name.as_str().into()) {
-                        if !resolver.is_symbol_referenced_outside_removals(
-                            symbol_id,
-                            &stmts_to_remove,
-                            &class_decorators_to_remove,
-                            &program,
-                        ) && specifiers_to_remove
-                            .insert((import_loc.import_stmt_index, import_loc.specifier_index))
-                        {
-                            pruned_count += 1;
+            for (stmt_idx, stmt) in program.body.iter().enumerate() {
+                if let Statement::ImportDeclaration(import_decl) = stmt {
+                    if let Some(specifiers) = &import_decl.specifiers {
+                        for (spec_idx, spec) in specifiers.iter().enumerate() {
+                            let local_name = match spec {
+                                ImportDeclarationSpecifier::ImportSpecifier(s) => {
+                                    s.local.name.as_str()
+                                }
+                                ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
+                                    s.local.name.as_str()
+                                }
+                                ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
+                                    s.local.name.as_str()
+                                }
+                            };
+                            if let Some(sym_id) = scoping.get_binding(root, local_name.into()) {
+                                if scoping.get_resolved_references(sym_id).count() > 0 {
+                                    originally_referenced_imports.insert((stmt_idx, spec_idx));
+                                }
+                            }
                         }
                     }
+                }
+            }
+
+            for cls_name in candidate_shaken_classes {
+                if preserved_component_names.contains(&cls_name) {
+                    continue;
+                }
+                let Some(cls_stmt_idx) = find_local_class_stmt_index(&program, &cls_name) else {
+                    continue;
+                };
+                let mut aux_stmts = HashSet::new();
+                for (idx, stmt) in program.body.iter().enumerate() {
+                    if idx == cls_stmt_idx || stmts_to_remove.contains(&idx) {
+                        continue;
+                    }
+                    if is_auxiliary_class_stmt(stmt, &cls_name, &resolver) {
+                        aux_stmts.insert(idx);
+                    }
+                }
+
+                // Ensure the class is not referenced by any other active class or function in the module
+                let is_used_by_other_code =
+                    if let Some(sym_id) = scoping.get_binding(root, cls_name.as_str().into()) {
+                        program.body.iter().enumerate().any(|(idx, stmt)| {
+                            if idx == cls_stmt_idx
+                                || stmts_to_remove.contains(&idx)
+                                || aux_stmts.contains(&idx)
+                                || is_export_or_alias_of_class(stmt, &cls_name)
+                            {
+                                return false;
+                            }
+                            resolver.count_symbol_references_in_statement(stmt, sym_id) > 0
+                        })
+                    } else {
+                        false
+                    };
+
+                if !is_used_by_other_code {
+                    stmts_to_remove.extend(aux_stmts);
+                    shaken_local_classes.insert(cls_name);
                 }
             }
         }
@@ -145,8 +245,8 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
             preserved_tags,
             stmts_to_remove,
             class_decorators_to_remove,
-            specifiers_to_remove,
-            pruned_count,
+            shaken_local_classes,
+            originally_referenced_imports,
         )
     };
 
@@ -166,27 +266,46 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
     let ast = AstBuilder::new(&allocator);
 
     // 1. Remove class decorators
-    for (stmt_idx, dec_idx) in class_decorators_to_remove {
-        if let Some(stmt) = program.body.get_mut(stmt_idx) {
+    for (stmt_idx, dec_idx) in &class_decorators_to_remove {
+        if let Some(stmt) = program.body.get_mut(*stmt_idx) {
             match stmt {
                 Statement::ClassDeclaration(class) => {
-                    if dec_idx < class.decorators.len() {
-                        class.decorators.remove(dec_idx);
+                    if *dec_idx < class.decorators.len() {
+                        class.decorators.remove(*dec_idx);
                     }
                 }
-                Statement::ExportDeclaration(export_decl) => {
-                    if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
-                        if dec_idx < class.decorators.len() {
-                            class.decorators.remove(dec_idx);
+                Statement::VariableDeclaration(var_decl) => {
+                    for decl in &mut var_decl.declarations {
+                        if let Some(Expression::ClassExpression(class)) = &mut decl.init {
+                            if *dec_idx < class.decorators.len() {
+                                class.decorators.remove(*dec_idx);
+                            }
                         }
                     }
                 }
+                Statement::ExportDeclaration(export_decl) => match &mut export_decl.declaration {
+                    Declaration::ClassDeclaration(class) => {
+                        if *dec_idx < class.decorators.len() {
+                            class.decorators.remove(*dec_idx);
+                        }
+                    }
+                    Declaration::VariableDeclaration(var_decl) => {
+                        for decl in &mut var_decl.declarations {
+                            if let Some(Expression::ClassExpression(class)) = &mut decl.init {
+                                if *dec_idx < class.decorators.len() {
+                                    class.decorators.remove(*dec_idx);
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                },
                 Statement::ExportDefaultDeclaration(export_decl) => {
                     if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                         &mut export_decl.declaration
                     {
-                        if dec_idx < class.decorators.len() {
-                            class.decorators.remove(dec_idx);
+                        if *dec_idx < class.decorators.len() {
+                            class.decorators.remove(*dec_idx);
                         }
                     }
                 }
@@ -195,7 +314,65 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
         }
     }
 
-    // 2. Remove specifiers from import declarations deterministically without index shift
+    // 2. Empty class body and heritage for shaken local transpiled classes so dead style/base imports are freed
+    if !shaken_local_classes.is_empty() {
+        for stmt in &mut program.body {
+            clear_shaken_class_in_stmt(stmt, &shaken_local_classes);
+        }
+    }
+
+    // 3. Determine which import specifiers now have 0 remaining references outside removed statements
+    let (specifiers_to_remove, pruned_imports_count) = {
+        let semantic_ret = SemanticBuilder::new().build(&program);
+        let resolver = SymbolResolver::new(&semantic_ret.semantic, &program, source);
+        let scoping = resolver.semantic.scoping();
+        let root = scoping.root_scope_id();
+
+        let mut specs_to_remove: HashSet<(usize, usize)> = HashSet::new();
+        let mut pruned_count = 0;
+
+        for &(stmt_idx, spec_idx) in &originally_referenced_imports {
+            if let Some(Statement::ImportDeclaration(import_decl)) = program.body.get(stmt_idx) {
+                if let Some(specifiers) = &import_decl.specifiers {
+                    if let Some(spec) = specifiers.get(spec_idx) {
+                        let local_name = match spec {
+                            ImportDeclarationSpecifier::ImportSpecifier(s) => s.local.name.as_str(),
+                            ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
+                                s.local.name.as_str()
+                            }
+                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
+                                s.local.name.as_str()
+                            }
+                        };
+
+                        if SymbolResolver::is_identifier_exported(&program, local_name) {
+                            continue;
+                        }
+
+                        if let Some(symbol_id) = scoping.get_binding(root, local_name.into()) {
+                            let remaining_refs: usize = program
+                                .body
+                                .iter()
+                                .enumerate()
+                                .filter(|(idx, _)| !stmts_to_remove.contains(idx))
+                                .map(|(_, s)| {
+                                    resolver.count_symbol_references_in_statement(s, symbol_id)
+                                })
+                                .sum();
+
+                            if remaining_refs == 0 && specs_to_remove.insert((stmt_idx, spec_idx)) {
+                                pruned_count += 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        (specs_to_remove, pruned_count)
+    };
+
+    // 4. Remove specifiers from import declarations deterministically without index shift
     if !specifiers_to_remove.is_empty() {
         for (stmt_idx, stmt) in program.body.iter_mut().enumerate() {
             if let Statement::ImportDeclaration(import_decl) = stmt {
@@ -211,8 +388,8 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
         }
     }
 
-    // 3. Filter out statements:
-    // - Explicitly marked registration statements
+    // 5. Filter out statements:
+    // - Explicitly marked registration and auxiliary statements
     // - Import declarations whose specifiers were completely pruned
     let mut new_body = ArenaVec::new_in(&ast);
     for (idx, stmt) in program.body.into_iter().enumerate() {
@@ -249,6 +426,246 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
         preserved_tags,
         pruned_imports_count,
         is_empty,
+    }
+}
+
+fn find_local_class_stmt_index(program: &Program, cls_name: &str) -> Option<usize> {
+    for (idx, stmt) in program.body.iter().enumerate() {
+        let matched = match stmt {
+            Statement::ClassDeclaration(cls) => {
+                cls.id.as_ref().map(|i| i.name.as_str()) == Some(cls_name)
+            }
+            Statement::VariableDeclaration(var_decl) => var_decl.declarations.iter().any(|d| {
+                if let BindingPattern::BindingIdentifier(id) = &d.id {
+                    if id.name == cls_name {
+                        if let Some(init) = &d.init {
+                            return matches!(
+                                init.without_parentheses(),
+                                Expression::ClassExpression(_)
+                            );
+                        }
+                    }
+                }
+                false
+            }),
+            Statement::ExportDeclaration(exp) => match &exp.declaration {
+                Declaration::ClassDeclaration(cls) => {
+                    cls.id.as_ref().map(|i| i.name.as_str()) == Some(cls_name)
+                }
+                Declaration::VariableDeclaration(var_decl) => {
+                    var_decl.declarations.iter().any(|d| {
+                        if let BindingPattern::BindingIdentifier(id) = &d.id {
+                            if id.name == cls_name {
+                                if let Some(init) = &d.init {
+                                    return matches!(
+                                        init.without_parentheses(),
+                                        Expression::ClassExpression(_)
+                                    );
+                                }
+                            }
+                        }
+                        false
+                    })
+                }
+                _ => false,
+            },
+            Statement::ExportDefaultDeclaration(exp) => {
+                if let ExportDefaultDeclarationKind::ClassDeclaration(cls) = &exp.declaration {
+                    cls.id.as_ref().map(|i| i.name.as_str()) == Some(cls_name)
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        };
+        if matched {
+            return Some(idx);
+        }
+    }
+    None
+}
+
+fn get_local_super_class_name(stmt: &Statement) -> Option<String> {
+    let cls_opt = match stmt {
+        Statement::ClassDeclaration(cls) => Some(cls.as_ref()),
+        Statement::VariableDeclaration(var_decl) => var_decl.declarations.iter().find_map(|d| {
+            if let Some(Expression::ClassExpression(cls)) =
+                d.init.as_ref().map(|e| e.without_parentheses())
+            {
+                Some(cls.as_ref())
+            } else {
+                None
+            }
+        }),
+        Statement::ExportDeclaration(exp) => match &exp.declaration {
+            Declaration::ClassDeclaration(cls) => Some(cls.as_ref()),
+            Declaration::VariableDeclaration(var_decl) => {
+                var_decl.declarations.iter().find_map(|d| {
+                    if let Some(Expression::ClassExpression(cls)) =
+                        d.init.as_ref().map(|e| e.without_parentheses())
+                    {
+                        Some(cls.as_ref())
+                    } else {
+                        None
+                    }
+                })
+            }
+            _ => None,
+        },
+        Statement::ExportDefaultDeclaration(exp) => {
+            if let ExportDefaultDeclarationKind::ClassDeclaration(cls) = &exp.declaration {
+                Some(cls.as_ref())
+            } else {
+                None
+            }
+        }
+        _ => None,
+    };
+    let cls = cls_opt?;
+    let heritage = cls.heritage.as_ref()?;
+    if let Expression::Identifier(id) = heritage.expression.without_parentheses() {
+        Some(id.name.as_str().to_string())
+    } else {
+        None
+    }
+}
+
+fn is_auxiliary_class_stmt(stmt: &Statement, cls_name: &str, resolver: &SymbolResolver) -> bool {
+    let Statement::ExpressionStatement(expr_stmt) = stmt else {
+        return false;
+    };
+    let expr = expr_stmt.expression.without_parentheses();
+    match expr {
+        Expression::CallExpression(call) => {
+            if resolver.is_decorator_helper_callee(&call.callee) {
+                if let Some(arg1) = call.arguments.get(1).and_then(|a| a.as_expression()) {
+                    match arg1.without_parentheses() {
+                        Expression::Identifier(id) if id.name == cls_name => return true,
+                        Expression::StaticMemberExpression(mem)
+                            if mem.property.name == "prototype" =>
+                        {
+                            if let Expression::Identifier(id) = mem.object.without_parentheses() {
+                                if id.name == cls_name {
+                                    return true;
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            if let Expression::StaticMemberExpression(mem) = call.callee.without_parentheses() {
+                if let Expression::Identifier(id) = mem.object.without_parentheses() {
+                    if id.name == cls_name
+                        && mem.property.name != "define"
+                        && mem.property.name != "register"
+                    {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+        Expression::ChainExpression(chain) => {
+            if let ChainElement::CallExpression(call) = &chain.expression {
+                match call.callee.without_parentheses() {
+                    Expression::StaticMemberExpression(mem) => {
+                        if let Expression::Identifier(id) = mem.object.without_parentheses() {
+                            if id.name == cls_name {
+                                return true;
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            false
+        }
+        Expression::AssignmentExpression(assign) => match &assign.left {
+            AssignmentTarget::StaticMemberExpression(mem) => {
+                if let Expression::Identifier(id) = mem.object.without_parentheses() {
+                    id.name == cls_name
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        },
+        _ => false,
+    }
+}
+
+fn is_export_or_alias_of_class(stmt: &Statement, cls_name: &str) -> bool {
+    match stmt {
+        Statement::ExportNamedDeclaration(_) | Statement::ExportDefaultDeclaration(_) => true,
+        Statement::VariableDeclaration(var_decl) => var_decl.declarations.iter().all(|d| {
+            if let Some(init) = &d.init {
+                if let Expression::Identifier(id) = init.without_parentheses() {
+                    return id.name == cls_name;
+                }
+            }
+            false
+        }),
+        _ => false,
+    }
+}
+
+fn clear_shaken_class_in_stmt(stmt: &mut Statement, shaken_classes: &HashSet<String>) {
+    match stmt {
+        Statement::ClassDeclaration(cls) => {
+            if let Some(id) = &cls.id {
+                if shaken_classes.contains(id.name.as_str()) {
+                    cls.heritage = None;
+                    cls.body.body.clear();
+                }
+            }
+        }
+        Statement::VariableDeclaration(var_decl) => {
+            for decl in &mut var_decl.declarations {
+                if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                    if shaken_classes.contains(id.name.as_str()) {
+                        if let Some(Expression::ClassExpression(cls)) = &mut decl.init {
+                            cls.heritage = None;
+                            cls.body.body.clear();
+                        }
+                    }
+                }
+            }
+        }
+        Statement::ExportDeclaration(exp) => match &mut exp.declaration {
+            Declaration::ClassDeclaration(cls) => {
+                if let Some(id) = &cls.id {
+                    if shaken_classes.contains(id.name.as_str()) {
+                        cls.heritage = None;
+                        cls.body.body.clear();
+                    }
+                }
+            }
+            Declaration::VariableDeclaration(var_decl) => {
+                for decl in &mut var_decl.declarations {
+                    if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                        if shaken_classes.contains(id.name.as_str()) {
+                            if let Some(Expression::ClassExpression(cls)) = &mut decl.init {
+                                cls.heritage = None;
+                                cls.body.body.clear();
+                            }
+                        }
+                    }
+                }
+            }
+            _ => {}
+        },
+        Statement::ExportDefaultDeclaration(exp) => {
+            if let ExportDefaultDeclarationKind::ClassDeclaration(cls) = &mut exp.declaration {
+                if let Some(id) = &cls.id {
+                    if shaken_classes.contains(id.name.as_str()) {
+                        cls.heritage = None;
+                        cls.body.body.clear();
+                    }
+                }
+            }
+        }
+        _ => {}
     }
 }
 

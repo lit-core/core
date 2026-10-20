@@ -47,13 +47,13 @@
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-17T16:29:54.089Z",
+  "timestamp": "2026-10-20T18:48:32.872Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -68,15 +68,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 272239,
-    "gzipBytes": 57949,
-    "brotliBytes": 46846,
-    "buildTimeMs": 31.24595799999952,
-    "firstRenderMs": 25,
-    "updateMs": 6.5,
-    "scriptEvalMs": 5.3,
-    "registrationMs": 1.5,
-    "heapUsedBytes": 3450302,
+    "rawBytes": 277337,
+    "gzipBytes": 58440,
+    "brotliBytes": 46942,
+    "buildTimeMs": 39.244500000000244,
+    "firstRenderMs": 31.4,
+    "updateMs": 7.2,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 1660899,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -105,69 +105,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 271249,
-    "gzipBytes": 57655,
-    "brotliBytes": 46630,
-    "buildTimeMs": 27.877166999998735,
-    "firstRenderMs": 31.7,
-    "updateMs": 7.9,
-    "scriptEvalMs": 5.9,
-    "registrationMs": 1.9,
-    "heapUsedBytes": 3327627,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "md-filled-button",
-        "md-checkbox",
-        "md-radio",
-        "md-switch",
-        "md-filled-text-field",
-        "md-filled-select",
-        "md-dialog",
-        "md-badge",
-        "md-tabs",
-        "md-linear-progress",
-        "md-circular-progress",
-        "md-slider",
-        "md-menu",
-        "md-divider",
-        "md-icon",
-        "md-icon-button",
-        "md-elevation",
-        "md-focus-ring",
-        "md-list",
-        "md-chip-set"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 271009,
+    "gzipBytes": 57599,
+    "brotliBytes": 46520,
+    "buildTimeMs": 51.46391599999998,
+    "firstRenderMs": 30,
+    "updateMs": 7.4,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 1655253
   },
   "deltas": {
-    "rawBytes": 990,
-    "rawPercent": 0.36,
-    "gzipBytes": 294,
-    "gzipPercent": 0.51,
-    "brotliBytes": 216,
-    "brotliPercent": 0.46,
-    "buildTimeMs": 3.4,
-    "firstRenderMs": -6.7,
-    "speedupPercent": 21.14,
-    "updateMs": -1.4,
-    "updateSpeedupPercent": 17.72,
-    "evalSpeedupPercent": 10.17,
-    "registrationSpeedupPercent": 21.05,
-    "memorySavingsPercent": -3.69
+    "rawBytes": 6328,
+    "rawPercent": 2.33,
+    "gzipBytes": 841,
+    "gzipPercent": 1.46,
+    "brotliBytes": 422,
+    "brotliPercent": 0.91,
+    "buildTimeMs": -12.2,
+    "firstRenderMs": 1.4,
+    "speedupPercent": -4.67,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 2.7,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -0.34
   },
   "runtime": {
-    "firstRenderMs": 25,
-    "updateMs": 6.5,
-    "scriptEvalMs": 5.3,
-    "registrationMs": 1.5,
-    "heapUsedBytes": 3450302,
-    "speedupPercent": 21.14,
-    "updateSpeedupPercent": 17.72,
-    "evalSpeedupPercent": 10.17,
-    "registrationSpeedupPercent": 21.05,
-    "memorySavingsPercent": -3.69
+    "firstRenderMs": 31.4,
+    "updateMs": 7.2,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 1660899,
+    "speedupPercent": -4.67,
+    "updateSpeedupPercent": 2.7,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -0.34
   },
   "domSnapshot": {
     "mount": {
@@ -433,6 +407,8 @@
                                     "type": "element",
                                     "tag": "input",
                                     "attributes": {
+                                      "data-lh-change": "1",
+                                      "data-lh-input": "0",
                                       "id": "input",
                                       "type": "checkbox"
                                     },
@@ -598,7 +574,7 @@
                                         "type": "element",
                                         "tag": "mask",
                                         "attributes": {
-                                          "id": "cutout1"
+                                          "id": "cutout3"
                                         },
                                         "children": [
                                           {
@@ -631,7 +607,7 @@
                                           "class": "outer circle",
                                           "cx": "10",
                                           "cy": "10",
-                                          "mask": "url(#cutout1)",
+                                          "mask": "url(#cutout3)",
                                           "r": "10"
                                         },
                                         "children": []
@@ -694,6 +670,8 @@
                                     "tag": "input",
                                     "attributes": {
                                       "class": "touch",
+                                      "data-lh-change": "1",
+                                      "data-lh-input": "0",
                                       "id": "switch",
                                       "role": "switch",
                                       "type": "checkbox"
@@ -1426,14 +1404,17 @@
                                 "type": "element",
                                 "tag": "dialog",
                                 "attributes": {
-                                  "class": "  "
+                                  "class": "  ",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": "container"
+                                      "class": "container",
+                                      "data-lh-click": "2"
                                     },
                                     "children": [
                                       {
@@ -2585,6 +2566,8 @@
                                     "type": "element",
                                     "tag": "input",
                                     "attributes": {
+                                      "data-lh-change": "1",
+                                      "data-lh-input": "0",
                                       "id": "input",
                                       "type": "checkbox"
                                     },
@@ -2846,6 +2829,8 @@
                                     "tag": "input",
                                     "attributes": {
                                       "class": "touch",
+                                      "data-lh-change": "1",
+                                      "data-lh-input": "0",
                                       "id": "switch",
                                       "role": "switch",
                                       "type": "checkbox"
@@ -3578,14 +3563,17 @@
                                 "type": "element",
                                 "tag": "dialog",
                                 "attributes": {
-                                  "class": "  "
+                                  "class": "  ",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": "container"
+                                      "class": "container",
+                                      "data-lh-click": "2"
                                     },
                                     "children": [
                                       {
@@ -4479,12 +4467,13 @@
     "shadowRootsCount": 20
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 49,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Unexpected attribute \"data-lh-change\" in variant at mount-root > [0] > [1] > [0] > [1] > [0] > shadowRoot > [0] > [0] (<input>): value=\"1\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

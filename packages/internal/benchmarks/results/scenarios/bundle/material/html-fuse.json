@@ -47,13 +47,13 @@
     "name": "HTML fragment clustering (html-fuse)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-17T16:29:51.176Z",
+  "timestamp": "2026-10-20T18:48:32.048Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -68,15 +68,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 270946,
-    "gzipBytes": 57588,
-    "brotliBytes": 46568,
-    "buildTimeMs": 59.28008399999817,
-    "firstRenderMs": 23.8,
-    "updateMs": 6.3,
-    "scriptEvalMs": 6.8,
-    "registrationMs": 1.4,
-    "heapUsedBytes": 3443548,
+    "rawBytes": 270968,
+    "gzipBytes": 57592,
+    "brotliBytes": 46560,
+    "buildTimeMs": 76.33004199999982,
+    "firstRenderMs": 22.7,
+    "updateMs": 6.2,
+    "scriptEvalMs": 6.4,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 1656429,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -105,69 +105,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 271249,
-    "gzipBytes": 57655,
-    "brotliBytes": 46630,
-    "buildTimeMs": 27.877166999998735,
-    "firstRenderMs": 31.7,
-    "updateMs": 7.9,
-    "scriptEvalMs": 5.9,
-    "registrationMs": 1.9,
-    "heapUsedBytes": 3327627,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "md-filled-button",
-        "md-checkbox",
-        "md-radio",
-        "md-switch",
-        "md-filled-text-field",
-        "md-filled-select",
-        "md-dialog",
-        "md-badge",
-        "md-tabs",
-        "md-linear-progress",
-        "md-circular-progress",
-        "md-slider",
-        "md-menu",
-        "md-divider",
-        "md-icon",
-        "md-icon-button",
-        "md-elevation",
-        "md-focus-ring",
-        "md-list",
-        "md-chip-set"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 271009,
+    "gzipBytes": 57599,
+    "brotliBytes": 46520,
+    "buildTimeMs": 51.46391599999998,
+    "firstRenderMs": 30,
+    "updateMs": 7.4,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 1655253
   },
   "deltas": {
-    "rawBytes": -303,
-    "rawPercent": -0.11,
-    "gzipBytes": -67,
-    "gzipPercent": -0.12,
-    "brotliBytes": -62,
-    "brotliPercent": -0.13,
-    "buildTimeMs": 31.4,
-    "firstRenderMs": -7.9,
-    "speedupPercent": 24.92,
-    "updateMs": -1.6,
-    "updateSpeedupPercent": 20.25,
-    "evalSpeedupPercent": -15.25,
-    "registrationSpeedupPercent": 26.32,
-    "memorySavingsPercent": -3.48
+    "rawBytes": -41,
+    "rawPercent": -0.02,
+    "gzipBytes": -7,
+    "gzipPercent": -0.01,
+    "brotliBytes": 40,
+    "brotliPercent": 0.09,
+    "buildTimeMs": 24.9,
+    "firstRenderMs": -7.3,
+    "speedupPercent": 24.33,
+    "updateMs": -1.2,
+    "updateSpeedupPercent": 16.22,
+    "evalSpeedupPercent": 1.54,
+    "registrationSpeedupPercent": -50,
+    "memorySavingsPercent": -0.07
   },
   "runtime": {
-    "firstRenderMs": 23.8,
-    "updateMs": 6.3,
-    "scriptEvalMs": 6.8,
-    "registrationMs": 1.4,
-    "heapUsedBytes": 3443548,
-    "speedupPercent": 24.92,
-    "updateSpeedupPercent": 20.25,
-    "evalSpeedupPercent": -15.25,
-    "registrationSpeedupPercent": 26.32,
-    "memorySavingsPercent": -3.48
+    "firstRenderMs": 22.7,
+    "updateMs": 6.2,
+    "scriptEvalMs": 6.4,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 1656429,
+    "speedupPercent": 24.33,
+    "updateSpeedupPercent": 16.22,
+    "evalSpeedupPercent": 1.54,
+    "registrationSpeedupPercent": -50,
+    "memorySavingsPercent": -0.07
   },
   "domSnapshot": {
     "mount": {
@@ -598,7 +572,7 @@
                                         "type": "element",
                                         "tag": "mask",
                                         "attributes": {
-                                          "id": "cutout1"
+                                          "id": "cutout3"
                                         },
                                         "children": [
                                           {
@@ -631,7 +605,7 @@
                                           "class": "outer circle",
                                           "cx": "10",
                                           "cy": "10",
-                                          "mask": "url(#cutout1)",
+                                          "mask": "url(#cutout3)",
                                           "r": "10"
                                         },
                                         "children": []

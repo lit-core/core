@@ -147,6 +147,7 @@ pub enum CanonicalLitSymbol {
     LitElement,
     ReactiveElement,
     HtmlTag,
+    StaticHtmlTag,
     SvgTag,
     CssTag,
     CustomElementDecorator,
@@ -248,18 +249,22 @@ pub struct SymbolProofContext<'a> {
     pub helper_symbols: HashMap<SymbolId, CanonicalHelperSymbol>,
     pub imported_classes: HashMap<SymbolId, ImportedClassInfo>,
     pub local_classes: HashMap<SymbolId, String>,
+    pub local_heritage_proofs: HashMap<SymbolId, HeritageProof>,
+    pub class_span_names: HashMap<(u32, u32), String>,
+    pub transpiled_decorated_classes: std::collections::HashSet<String>,
+    pub external_styled_classes: std::collections::HashSet<String>,
     pub has_lit_imports: bool,
 }
 
 impl<'a> SymbolProofContext<'a> {
-    pub fn is_canonical_lit_specifier(src: &str) -> bool {
-        if src == "lit/static-html.js"
+    pub fn is_static_html_specifier(src: &str) -> bool {
+        src == "lit/static-html.js"
             || src == "lit/static-html"
             || src == "lit-html/static.js"
             || src == "lit-html/static"
-        {
-            return false;
-        }
+    }
+
+    pub fn is_canonical_lit_specifier(src: &str) -> bool {
         src == "lit"
             || src.starts_with("lit/")
             || src == "lit-html"
@@ -282,6 +287,43 @@ impl<'a> SymbolProofContext<'a> {
             || src.starts_with("@babel/runtime/helpers/")
     }
 
+    pub fn extract_static_string(expr: &Expression) -> Option<String> {
+        match expr.without_parentheses() {
+            Expression::StringLiteral(s) => Some(s.value.as_str().to_string()),
+            Expression::TemplateLiteral(t) if t.expressions.is_empty() && t.quasis.len() == 1 => {
+                Some(t.quasis[0].value.raw.as_str().to_string())
+            }
+            _ => None,
+        }
+    }
+
+    pub fn is_valid_custom_element_tag(name: &str) -> bool {
+        let bytes = name.as_bytes();
+        if bytes.is_empty() || !bytes[0].is_ascii_lowercase() {
+            return false;
+        }
+        let mut has_hyphen = false;
+        for &b in bytes {
+            if b == b'-' {
+                has_hyphen = true;
+            } else if !(b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'.' || b == b'_') {
+                return false;
+            }
+        }
+        has_hyphen
+            && !matches!(
+                name,
+                "annotation-xml"
+                    | "color-profile"
+                    | "font-face"
+                    | "font-face-src"
+                    | "font-face-uri"
+                    | "font-face-format"
+                    | "font-face-name"
+                    | "missing-glyph"
+            )
+    }
+
     pub fn extract_directive_slug(specifier: &str) -> Option<&str> {
         if let Some(rest) = specifier.strip_prefix("lit/directives/") {
             Some(rest)
@@ -293,6 +335,13 @@ impl<'a> SymbolProofContext<'a> {
     }
 
     pub fn map_lit_named_import(source: &str, imported_name: &str) -> Option<CanonicalLitSymbol> {
+        if Self::is_static_html_specifier(source) {
+            return match imported_name {
+                "html" => Some(CanonicalLitSymbol::StaticHtmlTag),
+                "svg" => Some(CanonicalLitSymbol::SvgTag),
+                _ => None,
+            };
+        }
         match imported_name {
             "LitElement" => Some(CanonicalLitSymbol::LitElement),
             "ReactiveElement" => Some(CanonicalLitSymbol::ReactiveElement),
@@ -375,16 +424,35 @@ impl<'a> SymbolProofContext<'a> {
         }
     }
 
-    pub fn scan(program: &'a Program<'a>, scoping: &'a Scoping, source_text: &'a str) -> Self {
+    fn find_class_expr<'b, 'p>(expr: &'b Expression<'p>) -> Option<&'b Class<'p>> {
+        match expr.without_parentheses() {
+            Expression::ClassExpression(cls) => Some(cls),
+            Expression::CallExpression(call) => {
+                for arg in &call.arguments {
+                    if let Some(cls) = arg.as_expression().and_then(|e| Self::find_class_expr(e)) {
+                        return Some(cls);
+                    }
+                }
+                None
+            }
+            _ => None,
+        }
+    }
+
+    pub fn scan<'p>(program: &'p Program<'p>, scoping: &'a Scoping, source_text: &'a str) -> Self {
         let mut lit_symbols = HashMap::new();
         let mut helper_symbols = HashMap::new();
         let mut imported_classes = HashMap::new();
         let mut local_classes = HashMap::new();
+        let mut local_heritage_exprs = HashMap::new();
+        let mut class_span_names = HashMap::new();
+        let mut transpiled_decorated_classes = std::collections::HashSet::new();
+        let mut external_styled_classes = std::collections::HashSet::new();
         let mut has_lit_imports = false;
 
         let root_scope = scoping.root_scope_id();
 
-        // 1. Scan imports
+        // 1. Scan imports and declarations
         for stmt in &program.body {
             match stmt {
                 Statement::ImportDeclaration(import_decl) => {
@@ -428,6 +496,9 @@ impl<'a> SymbolProofContext<'a> {
                                         }
                                     }
                                     ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                                        if Self::is_static_html_specifier(source) {
+                                            continue;
+                                        }
                                         if let Some(sym_id) =
                                             ns.local.symbol_id.get().or_else(|| {
                                                 scoping.get_binding(
@@ -461,50 +532,11 @@ impl<'a> SymbolProofContext<'a> {
                                 }
                             }
                         }
-                    } else if Self::is_decorator_helper_source(source) {
-                        if let Some(specifiers) = &import_decl.specifiers {
-                            for spec in specifiers {
-                                match spec {
-                                    ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                                        let imported_name = named.imported.name();
-                                        if let Some(sym_id) =
-                                            named.local.symbol_id.get().or_else(|| {
-                                                scoping.get_binding(
-                                                    root_scope,
-                                                    named.local.name.as_str().into(),
-                                                )
-                                            })
-                                        {
-                                            if let Some(h) = Self::map_helper_named_import(
-                                                imported_name.as_str(),
-                                            ) {
-                                                helper_symbols.insert(sym_id, h);
-                                            }
-                                        }
-                                    }
-                                    ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => {
-                                        if let Some(sym_id) =
-                                            def.local.symbol_id.get().or_else(|| {
-                                                scoping.get_binding(
-                                                    root_scope,
-                                                    def.local.name.as_str().into(),
-                                                )
-                                            })
-                                        {
-                                            if let Some(h) = Self::map_helper_default_import(source)
-                                            {
-                                                helper_symbols.insert(sym_id, h);
-                                            }
-                                        }
-                                    }
-                                    _ => {}
-                                }
-                            }
-                        }
                     } else if let Some(specifiers) = &import_decl.specifiers {
                         for spec in specifiers {
                             match spec {
                                 ImportDeclarationSpecifier::ImportSpecifier(named) => {
+                                    let imported_name = named.imported.name();
                                     if let Some(sym_id) =
                                         named.local.symbol_id.get().or_else(|| {
                                             scoping.get_binding(
@@ -513,13 +545,24 @@ impl<'a> SymbolProofContext<'a> {
                                             )
                                         })
                                     {
-                                        imported_classes.insert(
-                                            sym_id,
-                                            ImportedClassInfo {
-                                                module_source: source.to_string(),
-                                                imported_name: named.imported.name().to_string(),
-                                            },
-                                        );
+                                        if let Some(h) =
+                                            Self::map_helper_named_import(imported_name.as_str())
+                                                .or_else(|| {
+                                                    Self::map_helper_named_import(
+                                                        named.local.name.as_str(),
+                                                    )
+                                                })
+                                        {
+                                            helper_symbols.insert(sym_id, h);
+                                        } else {
+                                            imported_classes.insert(
+                                                sym_id,
+                                                ImportedClassInfo {
+                                                    module_source: source.to_string(),
+                                                    imported_name: imported_name.to_string(),
+                                                },
+                                            );
+                                        }
                                     }
                                 }
                                 ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => {
@@ -527,13 +570,23 @@ impl<'a> SymbolProofContext<'a> {
                                         scoping
                                             .get_binding(root_scope, def.local.name.as_str().into())
                                     }) {
-                                        imported_classes.insert(
-                                            sym_id,
-                                            ImportedClassInfo {
-                                                module_source: source.to_string(),
-                                                imported_name: "default".to_string(),
-                                            },
-                                        );
+                                        if let Some(h) = Self::map_helper_default_import(source)
+                                            .or_else(|| {
+                                                Self::map_helper_named_import(
+                                                    def.local.name.as_str(),
+                                                )
+                                            })
+                                        {
+                                            helper_symbols.insert(sym_id, h);
+                                        } else {
+                                            imported_classes.insert(
+                                                sym_id,
+                                                ImportedClassInfo {
+                                                    module_source: source.to_string(),
+                                                    imported_name: "default".to_string(),
+                                                },
+                                            );
+                                        }
                                     }
                                 }
                                 _ => {}
@@ -543,6 +596,8 @@ impl<'a> SymbolProofContext<'a> {
                 }
                 Statement::ClassDeclaration(cls) => {
                     if let Some(id) = &cls.id {
+                        class_span_names
+                            .insert((cls.span.start, cls.span.end), id.name.as_str().to_string());
                         if let Some(sym_id) = id
                             .symbol_id
                             .get()
@@ -552,13 +607,81 @@ impl<'a> SymbolProofContext<'a> {
                         }
                     }
                 }
-                Statement::ExportDeclaration(export) => {
-                    if let Declaration::ClassDeclaration(cls) = &export.declaration {
+                Statement::ExportDeclaration(export) => match &export.declaration {
+                    Declaration::ClassDeclaration(cls) => {
                         if let Some(id) = &cls.id {
+                            class_span_names.insert(
+                                (cls.span.start, cls.span.end),
+                                id.name.as_str().to_string(),
+                            );
                             if let Some(sym_id) = id.symbol_id.get().or_else(|| {
                                 scoping.get_binding(root_scope, id.name.as_str().into())
                             }) {
                                 local_classes.insert(sym_id, id.name.as_str().to_string());
+                            }
+                        }
+                    }
+                    Declaration::VariableDeclaration(var_decl) => {
+                        for decl in &var_decl.declarations {
+                            if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                                let sym_id = id.symbol_id.get().or_else(|| {
+                                    scoping.get_binding(root_scope, id.name.as_str().into())
+                                });
+                                if let Some(sym_id) = sym_id {
+                                    if let Some(h) = Self::map_helper_named_import(id.name.as_str())
+                                    {
+                                        helper_symbols.insert(sym_id, h);
+                                    }
+                                }
+                                if let Some(init) = &decl.init {
+                                    if let Some(cls) = Self::find_class_expr(init) {
+                                        class_span_names.insert(
+                                            (cls.span.start, cls.span.end),
+                                            id.name.as_str().to_string(),
+                                        );
+                                        if let Some(sym_id) = sym_id {
+                                            local_classes
+                                                .insert(sym_id, id.name.as_str().to_string());
+                                        }
+                                    } else if let Some(sym_id) = sym_id {
+                                        local_heritage_exprs.insert(sym_id, init);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                },
+                Statement::VariableDeclaration(var_decl) => {
+                    for decl in &var_decl.declarations {
+                        if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                            let sym_id = id.symbol_id.get().or_else(|| {
+                                scoping.get_binding(root_scope, id.name.as_str().into())
+                            });
+                            if let Some(init) = &decl.init {
+                                if let Some(sym_id) = sym_id {
+                                    if matches!(
+                                        init.without_parentheses(),
+                                        Expression::LogicalExpression(_)
+                                    ) {
+                                        if let Some(h) =
+                                            Self::map_helper_named_import(id.name.as_str())
+                                        {
+                                            helper_symbols.insert(sym_id, h);
+                                        }
+                                    }
+                                }
+                                if let Some(cls) = Self::find_class_expr(init) {
+                                    class_span_names.insert(
+                                        (cls.span.start, cls.span.end),
+                                        id.name.as_str().to_string(),
+                                    );
+                                    if let Some(sym_id) = sym_id {
+                                        local_classes.insert(sym_id, id.name.as_str().to_string());
+                                    }
+                                } else if let Some(sym_id) = sym_id {
+                                    local_heritage_exprs.insert(sym_id, init);
+                                }
                             }
                         }
                     }
@@ -567,14 +690,194 @@ impl<'a> SymbolProofContext<'a> {
             }
         }
 
-        Self {
+        let mut ctx = Self {
             scoping,
             source_text,
             lit_symbols,
             helper_symbols,
             imported_classes,
             local_classes,
+            local_heritage_proofs: HashMap::new(),
+            class_span_names,
+            transpiled_decorated_classes: std::collections::HashSet::new(),
+            external_styled_classes: std::collections::HashSet::new(),
             has_lit_imports,
+        };
+
+        let mut local_heritage_proofs = HashMap::new();
+        for (&sym_id, &init_expr) in &local_heritage_exprs {
+            let mut mixins = Vec::new();
+            let proof = ctx.trace_heritage_expr_with_map(
+                init_expr,
+                Some(&local_heritage_exprs),
+                &mut mixins,
+                0,
+            );
+            if !matches!(
+                proof,
+                HeritageProof::Unresolved | HeritageProof::UnrelatedClass | HeritageProof::None
+            ) {
+                local_heritage_proofs.insert(sym_id, proof);
+            }
+        }
+        ctx.local_heritage_proofs = local_heritage_proofs;
+
+        // 2. Scan top-level statements for transpiled decorators and external static styles
+        for stmt in &program.body {
+            if let Statement::ExpressionStatement(expr_stmt) = stmt {
+                ctx.scan_top_level_expr(
+                    &expr_stmt.expression,
+                    &mut transpiled_decorated_classes,
+                    &mut external_styled_classes,
+                );
+            }
+        }
+        ctx.transpiled_decorated_classes = transpiled_decorated_classes;
+        ctx.external_styled_classes = external_styled_classes;
+
+        ctx
+    }
+
+    fn scan_top_level_expr<'p>(
+        &self,
+        expr: &Expression<'p>,
+        decorated_classes: &mut std::collections::HashSet<String>,
+        styled_classes: &mut std::collections::HashSet<String>,
+    ) {
+        match expr.without_parentheses() {
+            Expression::CallExpression(call) => {
+                self.scan_helper_call(call, decorated_classes);
+            }
+            Expression::AssignmentExpression(assign) => {
+                if let AssignmentTarget::StaticMemberExpression(mem) = &assign.left {
+                    if mem.property.name == "styles" || mem.property.name == "css" {
+                        if let Expression::Identifier(target_id) = mem.object.without_parentheses()
+                        {
+                            styled_classes.insert(target_id.name.as_str().to_string());
+                        }
+                    }
+                }
+                if let Expression::CallExpression(call) = assign.right.without_parentheses() {
+                    self.scan_helper_call(call, decorated_classes);
+                }
+            }
+            Expression::SequenceExpression(seq) => {
+                for e in &seq.expressions {
+                    self.scan_top_level_expr(e, decorated_classes, styled_classes);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn scan_helper_call<'p>(
+        &self,
+        call: &CallExpression<'p>,
+        decorated_classes: &mut std::collections::HashSet<String>,
+    ) {
+        if call.arguments.len() < 2 {
+            return;
+        }
+        let is_helper = match call.callee.without_parentheses() {
+            Expression::Identifier(id) => matches!(
+                self.resolve_helper_symbol(id),
+                Some(
+                    CanonicalHelperSymbol::Decorate
+                        | CanonicalHelperSymbol::DecorateClass
+                        | CanonicalHelperSymbol::ApplyDecoratedDescriptor
+                )
+            ),
+            _ => false,
+        };
+        if !is_helper {
+            return;
+        }
+
+        // Form A: __decorate([decorators], TargetClass.prototype, "prop", ...)
+        if call.arguments.len() >= 3 {
+            if let Some(Expression::StaticMemberExpression(mem)) = call.arguments[1].as_expression()
+            {
+                if mem.property.name == "prototype" {
+                    if let Expression::Identifier(target_id) = mem.object.without_parentheses() {
+                        if let Some(Expression::ArrayExpression(arr)) =
+                            call.arguments[0].as_expression()
+                        {
+                            if arr.elements.iter().any(|el| {
+                                el.as_expression()
+                                    .and_then(|e| self.is_proven_decorator(e))
+                                    .is_some()
+                            }) {
+                                decorated_classes.insert(target_id.name.as_str().to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Form B: TargetClass = __decorate([decorators], TargetClass)
+        if let Some(Expression::Identifier(target_id)) = call.arguments[1].as_expression() {
+            if let Some(Expression::ArrayExpression(arr)) = call.arguments[0].as_expression() {
+                if arr.elements.iter().any(|el| {
+                    el.as_expression()
+                        .map(|e| {
+                            self.is_proven_decorator(e).is_some()
+                                || self.is_class_custom_element_decorator_call(e).is_some()
+                        })
+                        .unwrap_or(false)
+                }) {
+                    decorated_classes.insert(target_id.name.as_str().to_string());
+                }
+            }
+        }
+    }
+
+    pub fn is_class_custom_element_decorator_call(&self, expr: &Expression) -> Option<String> {
+        if !self.has_lit_imports() {
+            return None;
+        }
+        let Expression::CallExpression(call) = expr.without_parentheses() else {
+            return None;
+        };
+        if self.resolve_decorator_call(call) == Some(CanonicalLitSymbol::CustomElementDecorator) {
+            return call
+                .arguments
+                .first()
+                .and_then(|a| a.as_expression())
+                .and_then(Self::extract_static_string);
+        }
+        if call.arguments.len() != 1 {
+            return None;
+        }
+        let arg_expr = call.arguments[0].as_expression()?;
+        let tag = Self::extract_static_string(arg_expr)?;
+        if !Self::is_valid_custom_element_tag(&tag) {
+            return None;
+        }
+        match call.callee.without_parentheses() {
+            Expression::Identifier(id) => {
+                if let Some(ref_id) = id.reference_id.get() {
+                    if let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id() {
+                        if self.imported_classes.contains_key(&sym_id)
+                            || self.lit_symbols.contains_key(&sym_id)
+                        {
+                            return Some(tag);
+                        }
+                    }
+                }
+                None
+            }
+            _ => None,
+        }
+    }
+
+    pub fn get_class_name<'b, 'p>(&'b self, class: &'b Class<'p>) -> Option<&'b str> {
+        if let Some(id) = &class.id {
+            Some(id.name.as_str())
+        } else {
+            self.class_span_names
+                .get(&(class.span.start, class.span.end))
+                .map(|s| s.as_str())
         }
     }
 
@@ -683,6 +986,25 @@ impl<'a> SymbolProofContext<'a> {
             Expression::Identifier(ident) => {
                 self.resolve_symbol(ident) == Some(CanonicalLitSymbol::HtmlTag)
             }
+            Expression::StaticMemberExpression(mem) => {
+                if mem.property.name == "html" {
+                    if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
+                        return self.resolve_symbol(obj_id)
+                            == Some(CanonicalLitSymbol::LitNamespace);
+                    }
+                }
+                false
+            }
+            _ => false,
+        }
+    }
+
+    pub fn is_lit_html_or_static_tag(&self, expr: &Expression) -> bool {
+        match expr.without_parentheses() {
+            Expression::Identifier(ident) => matches!(
+                self.resolve_symbol(ident),
+                Some(CanonicalLitSymbol::HtmlTag | CanonicalLitSymbol::StaticHtmlTag)
+            ),
             Expression::StaticMemberExpression(mem) => {
                 if mem.property.name == "html" {
                     if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
@@ -907,6 +1229,19 @@ impl<'a> SymbolProofContext<'a> {
         mixins: &mut Vec<String>,
         depth: usize,
     ) -> HeritageProof {
+        self.trace_heritage_expr_with_map(expr, None, mixins, depth)
+    }
+
+    fn trace_heritage_expr_with_map<'p>(
+        &self,
+        expr: &Expression<'p>,
+        expr_map: Option<&HashMap<SymbolId, &'p Expression<'p>>>,
+        mixins: &mut Vec<String>,
+        depth: usize,
+    ) -> HeritageProof {
+        if depth > 12 {
+            return HeritageProof::Unresolved;
+        }
         match expr.without_parentheses() {
             Expression::Identifier(ident) => {
                 let sym = self.resolve_symbol(ident);
@@ -925,6 +1260,64 @@ impl<'a> SymbolProofContext<'a> {
 
                 if let Some(ref_id) = ident.reference_id.get() {
                     if let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id() {
+                        if let Some(proof) = self.local_heritage_proofs.get(&sym_id) {
+                            return match proof {
+                                HeritageProof::ProvenLitElement {
+                                    depth: d,
+                                    mixins: m,
+                                } => {
+                                    mixins.extend(m.iter().cloned());
+                                    HeritageProof::ProvenLitElement {
+                                        depth: depth + d,
+                                        mixins: mixins.clone(),
+                                    }
+                                }
+                                HeritageProof::ProvenReactiveElement {
+                                    depth: d,
+                                    mixins: m,
+                                } => {
+                                    mixins.extend(m.iter().cloned());
+                                    HeritageProof::ProvenReactiveElement {
+                                        depth: depth + d,
+                                        mixins: mixins.clone(),
+                                    }
+                                }
+                                HeritageProof::LocalSubclass {
+                                    base_class_name,
+                                    mixins: m,
+                                } => {
+                                    mixins.extend(m.iter().cloned());
+                                    HeritageProof::LocalSubclass {
+                                        base_class_name: base_class_name.clone(),
+                                        mixins: mixins.clone(),
+                                    }
+                                }
+                                HeritageProof::CrossModuleSubclass {
+                                    module_source,
+                                    imported_name,
+                                    mixins: m,
+                                } => {
+                                    mixins.extend(m.iter().cloned());
+                                    HeritageProof::CrossModuleSubclass {
+                                        module_source: module_source.clone(),
+                                        imported_name: imported_name.clone(),
+                                        mixins: mixins.clone(),
+                                    }
+                                }
+                                other => other.clone(),
+                            };
+                        }
+                        if let Some(map) = expr_map {
+                            if let Some(init_expr) = map.get(&sym_id) {
+                                return self.trace_heritage_expr_with_map(
+                                    init_expr,
+                                    expr_map,
+                                    mixins,
+                                    depth + 1,
+                                );
+                            }
+                        }
+
                         if let Some(imported) = self.imported_classes.get(&sym_id) {
                             if Self::is_canonical_lit_specifier(&imported.module_source) {
                                 return HeritageProof::ProvenLitElement {
@@ -962,7 +1355,12 @@ impl<'a> SymbolProofContext<'a> {
                 // Examine arguments to locate base class
                 for arg in &call.arguments {
                     if let Some(arg_expr) = arg.as_expression() {
-                        let res = self.trace_heritage_expr(arg_expr, mixins, depth + 1);
+                        let res = self.trace_heritage_expr_with_map(
+                            arg_expr,
+                            expr_map,
+                            mixins,
+                            depth + 1,
+                        );
                         if !matches!(
                             res,
                             HeritageProof::Unresolved
@@ -1038,6 +1436,11 @@ impl<'a> SymbolProofContext<'a> {
     }
 
     pub fn has_lit_styles(&self, class: &Class) -> bool {
+        if let Some(name) = self.get_class_name(class) {
+            if self.external_styled_classes.contains(name) {
+                return true;
+            }
+        }
         for element in &class.body.body {
             match element {
                 ClassElement::PropertyDefinition(prop)
@@ -1059,6 +1462,21 @@ impl<'a> SymbolProofContext<'a> {
                             if let Statement::ReturnStatement(ret) = stmt {
                                 if let Some(arg) = &ret.argument {
                                     if self.expr_contains_lit_css(arg) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                ClassElement::StaticBlock(block) => {
+                    for stmt in &block.body {
+                        if let Statement::ExpressionStatement(expr_stmt) = stmt {
+                            if let Expression::AssignmentExpression(assign) = &expr_stmt.expression
+                            {
+                                if let AssignmentTarget::StaticMemberExpression(mem) = &assign.left
+                                {
+                                    if mem.property.name == "styles" || mem.property.name == "css" {
                                         return true;
                                     }
                                 }
@@ -1156,11 +1574,18 @@ impl<'a> SymbolProofContext<'a> {
     }
 
     pub fn has_proven_lit_decorators(&self, class: &Class) -> bool {
+        if let Some(name) = self.get_class_name(class) {
+            if self.transpiled_decorated_classes.contains(name) {
+                return true;
+            }
+        }
         if class.decorators.iter().any(|d| {
             matches!(
                 self.is_proven_decorator(&d.expression),
                 Some(CanonicalLitSymbol::CustomElementDecorator)
-            )
+            ) || self
+                .is_class_custom_element_decorator_call(&d.expression)
+                .is_some()
         }) {
             return true;
         }
@@ -1249,6 +1674,23 @@ impl<'a> SymbolProofContext<'a> {
         true
     }
 
+    fn expr_contains_lit_template(&self, expr: &Expression) -> bool {
+        match expr.without_parentheses() {
+            Expression::TaggedTemplateExpression(tagged) => {
+                self.is_lit_html_or_static_tag(&tagged.tag) || self.is_lit_svg_tag(&tagged.tag)
+            }
+            Expression::ConditionalExpression(cond) => {
+                self.expr_contains_lit_template(&cond.consequent)
+                    || self.expr_contains_lit_template(&cond.alternate)
+            }
+            Expression::LogicalExpression(log) => {
+                self.expr_contains_lit_template(&log.left)
+                    || self.expr_contains_lit_template(&log.right)
+            }
+            _ => false,
+        }
+    }
+
     pub fn has_lit_render_method(&self, class: &Class) -> bool {
         for element in &class.body.body {
             if let ClassElement::MethodDefinition(method) = element {
@@ -1257,16 +1699,8 @@ impl<'a> SymbolProofContext<'a> {
                         for stmt in &body.statements {
                             if let Statement::ReturnStatement(ret) = stmt {
                                 if let Some(arg) = &ret.argument {
-                                    let mut curr = arg;
-                                    while let Expression::ParenthesizedExpression(p) = curr {
-                                        curr = &p.expression;
-                                    }
-                                    if let Expression::TaggedTemplateExpression(tagged) = curr {
-                                        if self.is_lit_html_tag(&tagged.tag)
-                                            || self.is_lit_svg_tag(&tagged.tag)
-                                        {
-                                            return true;
-                                        }
+                                    if self.expr_contains_lit_template(arg) {
+                                        return true;
                                     }
                                 }
                             }

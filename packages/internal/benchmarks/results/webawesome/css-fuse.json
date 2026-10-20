@@ -142,13 +142,13 @@
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
     "componentCount": 20
   },
-  "timestamp": "2026-10-17T16:29:35.089Z",
+  "timestamp": "2026-10-20T19:24:26.895Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,83 +163,53 @@
     }
   },
   "metrics": {
-    "rawBytes": 367815,
-    "gzipBytes": 86797,
-    "brotliBytes": 69768,
-    "buildTimeMs": 233.94216599999993
+    "rawBytes": 366699,
+    "gzipBytes": 86628,
+    "brotliBytes": 69728,
+    "buildTimeMs": 196.99304099999972
   },
   "baseline": {
-    "rawBytes": 372874,
-    "gzipBytes": 87593,
-    "brotliBytes": 70118,
-    "buildTimeMs": 52.691709,
-    "firstRenderMs": 35,
-    "updateMs": 6.9,
-    "scriptEvalMs": 3.3,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 3664726,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "wa-button",
-        "wa-checkbox",
-        "wa-radio",
-        "wa-switch",
-        "wa-input",
-        "wa-select",
-        "wa-dialog",
-        "wa-badge",
-        "wa-tab-group",
-        "wa-progress-bar",
-        "wa-spinner",
-        "wa-slider",
-        "wa-dropdown",
-        "wa-divider",
-        "wa-icon",
-        "wa-copy-button",
-        "wa-card",
-        "wa-popover",
-        "wa-details",
-        "wa-breadcrumb"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 375776,
+    "gzipBytes": 87837,
+    "brotliBytes": 70320,
+    "buildTimeMs": 126.41633300000012
   },
   "deltas": {
-    "rawBytes": -5059,
-    "rawPercent": -1.36,
-    "gzipBytes": -796,
-    "gzipPercent": -0.91,
-    "brotliBytes": -350,
-    "brotliPercent": -0.5,
-    "buildTimeMs": 181.3,
-    "firstRenderMs": 11,
-    "speedupPercent": -31.43,
-    "updateMs": -0.4,
-    "updateSpeedupPercent": 5.8,
-    "evalSpeedupPercent": -836.36,
-    "registrationSpeedupPercent": -2033.33,
-    "memorySavingsPercent": -3.53
+    "rawBytes": -9077,
+    "rawPercent": -2.42,
+    "gzipBytes": -1209,
+    "gzipPercent": -1.38,
+    "brotliBytes": -592,
+    "brotliPercent": -0.84,
+    "buildTimeMs": 70.6,
+    "firstRenderMs": -44.3,
+    "speedupPercent": 54.02,
+    "updateMs": -0.3,
+    "updateSpeedupPercent": 75,
+    "evalSpeedupPercent": 76.19,
+    "registrationSpeedupPercent": 80.43,
+    "memorySavingsPercent": 0.15
   },
   "runtime": {
-    "firstRenderMs": 46,
-    "updateMs": 6.5,
-    "scriptEvalMs": 30.9,
-    "registrationMs": 25.6,
-    "heapUsedBytes": 3793916,
-    "speedupPercent": -31.43,
-    "updateSpeedupPercent": 5.8,
-    "evalSpeedupPercent": -836.36,
-    "registrationSpeedupPercent": -2033.33,
-    "memorySavingsPercent": -3.53
+    "firstRenderMs": 37.7,
+    "updateMs": 0.1,
+    "scriptEvalMs": 3.5,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 1400405,
+    "speedupPercent": 54.02,
+    "updateSpeedupPercent": 75,
+    "evalSpeedupPercent": 76.19,
+    "registrationSpeedupPercent": 80.43,
+    "memorySavingsPercent": 0.15
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 49,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Attribute \"aria-labelledby\" mismatch at mount-root > [0] > [1] > [0] > [15] > [0] > shadowRoot > [0] > [1] (<button>): baseline=\"wa-tooltip-IE76reXP3XUPhsBVwVOl1\", variant=\"wa-tooltip-T73pCbgbYzq0KE8Ie8jtq\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

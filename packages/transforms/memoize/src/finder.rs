@@ -88,7 +88,7 @@ pub struct TemplateCandidateFinder<'a, 's> {
 
 impl<'a, 's> Visit<'a> for TemplateCandidateFinder<'a, 's> {
     fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
-        let is_lit = self.symbol_ctx.is_lit_html_tag(&tagged.tag)
+        let is_lit = self.symbol_ctx.is_lit_html_or_static_tag(&tagged.tag)
             || self.symbol_ctx.is_lit_svg_tag(&tagged.tag);
 
         if is_lit {

@@ -37,6 +37,7 @@ export const cssFuseTool = {
       include,
       exclude: [],
       threshold: 2,
+      minSavings: 80,
       outputDir: '.fused',
       write: false,
       virtualImports: true,

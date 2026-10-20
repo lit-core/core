@@ -5,8 +5,14 @@
     "id": "selective-app",
     "name": "Selective application",
     "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination",
-    "relevantFeatures": ["tag-shake"],
-    "componentConcepts": ["button", "badge", "card"]
+    "relevantFeatures": [
+      "tag-shake"
+    ],
+    "componentConcepts": [
+      "button",
+      "badge",
+      "card"
+    ]
   },
   "suite": {
     "id": "webawesome",
@@ -19,13 +25,13 @@
     "name": "Baseline (Standard Vite)",
     "isBaseline": true
   },
-  "timestamp": "2026-10-10T10:01:11.813Z",
+  "timestamp": "2026-10-20T19:02:46.303Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "f947067",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -40,32 +46,639 @@
     }
   },
   "metrics": {
-    "rawBytes": 372339,
-    "gzipBytes": 87399,
-    "brotliBytes": 69953,
-    "buildTimeMs": 32.82854100000077,
-    "firstRenderMs": 14.9,
-    "updateMs": 0.5,
-    "scriptEvalMs": 4.2,
-    "registrationMs": 1.5,
-    "heapUsedBytes": 3172036,
+    "rawBytes": 372191,
+    "gzipBytes": 87384,
+    "brotliBytes": 69916,
+    "buildTimeMs": 61.638458000000014,
+    "firstRenderMs": 12.4,
+    "updateMs": 0.6,
+    "scriptEvalMs": 3.2,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 1049434,
     "scenarioSpecific": {
       "importedCustomElementsCount": 20,
       "referencedCustomElementsCount": 3,
-      "referencedTags": ["wa-button", "wa-badge", "wa-card"],
+      "referencedTags": [
+        "wa-button",
+        "wa-badge",
+        "wa-card"
+      ],
       "actionDispatches": 1
     }
   },
   "runtime": {
-    "firstRenderMs": 14.9,
-    "updateMs": 0.5,
-    "scriptEvalMs": 4.2,
-    "registrationMs": 1.5,
-    "heapUsedBytes": 3172036
+    "firstRenderMs": 12.4,
+    "updateMs": 0.6,
+    "scriptEvalMs": 3.2,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 1049434
+  },
+  "domSnapshot": {
+    "mount": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "selective-app-root",
+            "style": "padding:20px; display:flex; flex-direction:column; gap:16px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "wa-card",
+              "attributes": {
+                "appearance": "outlined",
+                "class": "overview-card",
+                "orientation": "vertical"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "style": "padding:16px; display:flex; flex-direction:column; gap:12px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "style": "display:flex; justify-content:space-between; align-items:center;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "h2",
+                          "attributes": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Selective component application"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-badge",
+                          "attributes": {
+                            "appearance": "accent",
+                            "attention": "none",
+                            "type": "success",
+                            "variant": "brand"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Active"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "part": "start"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "start"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "part": "base badge",
+                                  "role": "status"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "part": "end"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "end"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "p",
+                      "attributes": {
+                        "style": "color:#71717a;"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "This application only references 3 custom elements in its template out of the 20 imported from the suite."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {},
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "wa-button",
+                          "attributes": {
+                            "appearance": "accent",
+                            "size": "m",
+                            "variant": "neutral"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Trigger action"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-busy": "false",
+                                  "class": "button has-label",
+                                  "part": "base button",
+                                  "role": "button",
+                                  "tabindex": "0",
+                                  "title": "",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "class": "start",
+                                      "name": "start",
+                                      "part": "start"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "class": "label",
+                                      "part": "label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "class": "end",
+                                      "name": "end",
+                                      "part": "end"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "shadowRoot": {
+                "mode": "open",
+                "children": [
+                  {
+                    "type": "element",
+                    "tag": "slot",
+                    "attributes": {
+                      "class": "media",
+                      "name": "media",
+                      "part": "media"
+                    },
+                    "children": []
+                  },
+                  {
+                    "type": "element",
+                    "tag": "div",
+                    "attributes": {
+                      "class": "header",
+                      "part": "header"
+                    },
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "header"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "header-actions"
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "element",
+                    "tag": "div",
+                    "attributes": {
+                      "class": "body",
+                      "part": "body"
+                    },
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "element",
+                    "tag": "div",
+                    "attributes": {
+                      "class": "footer",
+                      "part": "footer"
+                    },
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "footer"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "footer-actions"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "selective-app-root",
+            "style": "padding:20px; display:flex; flex-direction:column; gap:16px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "wa-card",
+              "attributes": {
+                "appearance": "outlined",
+                "class": "overview-card",
+                "orientation": "vertical"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "style": "padding:16px; display:flex; flex-direction:column; gap:12px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "style": "display:flex; justify-content:space-between; align-items:center;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "h2",
+                          "attributes": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Selective component application"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-badge",
+                          "attributes": {
+                            "appearance": "accent",
+                            "attention": "none",
+                            "type": "success",
+                            "variant": "brand"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Active"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "part": "start"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "start"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "part": "base badge",
+                                  "role": "status"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "part": "end"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "end"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "p",
+                      "attributes": {
+                        "style": "color:#71717a;"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "This application only references 3 custom elements in its template out of the 20 imported from the suite."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {},
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "wa-button",
+                          "attributes": {
+                            "appearance": "accent",
+                            "size": "m",
+                            "variant": "neutral"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Trigger action"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "aria-busy": "false",
+                                  "class": "button has-label",
+                                  "part": "base button",
+                                  "role": "button",
+                                  "tabindex": "0",
+                                  "title": "",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "class": "start",
+                                      "name": "start",
+                                      "part": "start"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "class": "label",
+                                      "part": "label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "class": "end",
+                                      "name": "end",
+                                      "part": "end"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "shadowRoot": {
+                "mode": "open",
+                "children": [
+                  {
+                    "type": "element",
+                    "tag": "slot",
+                    "attributes": {
+                      "class": "media",
+                      "name": "media",
+                      "part": "media"
+                    },
+                    "children": []
+                  },
+                  {
+                    "type": "element",
+                    "tag": "div",
+                    "attributes": {
+                      "class": "header",
+                      "part": "header"
+                    },
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "header"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "header-actions"
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "element",
+                    "tag": "div",
+                    "attributes": {
+                      "class": "body",
+                      "part": "body"
+                    },
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "element",
+                    "tag": "div",
+                    "attributes": {
+                      "class": "footer",
+                      "part": "footer"
+                    },
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "footer"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "footer-actions"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "elementsCount": 9,
+    "customElementsCount": 3,
+    "shadowRootsCount": 3
   },
   "equivalence": {
     "domStructureMatch": true,
     "elementsCount": 9,
-    "verified": true
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

@@ -243,6 +243,21 @@ pub struct CustomElementAstVisitor<'a> {
     _marker: std::marker::PhantomData<&'a ()>,
 }
 
+impl<'a> CustomElementAstVisitor<'a> {
+    pub fn new() -> Self {
+        Self {
+            tags: HashSet::new(),
+            _marker: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<'a> Default for CustomElementAstVisitor<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> Visit<'a> for CustomElementAstVisitor<'a> {
     fn visit_jsx_opening_element(&mut self, elem: &JSXOpeningElement<'a>) {
         match &elem.name {

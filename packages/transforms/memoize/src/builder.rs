@@ -472,11 +472,19 @@ pub fn collect_classes_mut<'a, 'b>(
             Statement::ClassDeclaration(class) => {
                 out.push(class);
             }
-            Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
+            Statement::ExportDeclaration(export_decl) => match &mut export_decl.declaration {
+                Declaration::ClassDeclaration(class) => {
                     out.push(class);
                 }
-            }
+                Declaration::VariableDeclaration(var_decl) => {
+                    for decl in &mut var_decl.declarations {
+                        if let Some(Expression::ClassExpression(class)) = &mut decl.init {
+                            out.push(class);
+                        }
+                    }
+                }
+                _ => {}
+            },
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                     &mut export_decl.declaration

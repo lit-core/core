@@ -9,7 +9,7 @@ export const bundleScenario = {
   id: 'bundle',
   name: 'Multi-component bundle',
   description: 'Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering',
-  relevantFeatures: ['css-fuse', 'props-lower', 'css-minifier', 'html-minifier', 'all', 'baseline'],
+  relevantFeatures: ['css-fuse', 'props-lower', 'css-minifier', 'html-minifier', 'all'],
   componentConcepts: [
     'button',
     'checkbox',
@@ -64,11 +64,7 @@ function renderApp(container, route) {
 
       <main class="app-body">
         <div class="components-showcase-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;">
-          \${CANONICAL_TAGS.map(tag => {
-            const el = document.createElement(tag);
-            el.setAttribute('data-canonical-tag', tag);
-            return html\`<div class="component-cell" style="padding:12px; background:#fafafa; border-radius:8px;">\${el}</div>\`;
-          })}
+          ${comps.map((c) => `<div class="component-cell" style="padding:12px; background:#fafafa; border-radius:8px;"><${c.tag} data-canonical-tag="${c.tag}"></${c.tag}></div>`).join('\n          ')}
         </div>
       </main>
     </div>

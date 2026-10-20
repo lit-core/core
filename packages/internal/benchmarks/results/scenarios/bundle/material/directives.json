@@ -47,13 +47,13 @@
     "name": "Lit directive lowering (directives)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-17T16:29:59.436Z",
+  "timestamp": "2026-10-20T18:48:36.958Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -71,12 +71,12 @@
     "rawBytes": 271150,
     "gzipBytes": 57632,
     "brotliBytes": 46607,
-    "buildTimeMs": 73.28312500000175,
-    "firstRenderMs": 29.1,
-    "updateMs": 6.4,
-    "scriptEvalMs": 6.3,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 3440670,
+    "buildTimeMs": 35.67362499999945,
+    "firstRenderMs": 30.8,
+    "updateMs": 7.2,
+    "scriptEvalMs": 6.7,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 1651689,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -105,69 +105,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 271249,
-    "gzipBytes": 57655,
-    "brotliBytes": 46630,
-    "buildTimeMs": 27.877166999998735,
-    "firstRenderMs": 31.7,
-    "updateMs": 7.9,
-    "scriptEvalMs": 5.9,
-    "registrationMs": 1.9,
-    "heapUsedBytes": 3327627,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "md-filled-button",
-        "md-checkbox",
-        "md-radio",
-        "md-switch",
-        "md-filled-text-field",
-        "md-filled-select",
-        "md-dialog",
-        "md-badge",
-        "md-tabs",
-        "md-linear-progress",
-        "md-circular-progress",
-        "md-slider",
-        "md-menu",
-        "md-divider",
-        "md-icon",
-        "md-icon-button",
-        "md-elevation",
-        "md-focus-ring",
-        "md-list",
-        "md-chip-set"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 271009,
+    "gzipBytes": 57599,
+    "brotliBytes": 46520,
+    "buildTimeMs": 51.46391599999998,
+    "firstRenderMs": 30,
+    "updateMs": 7.4,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 1655253
   },
   "deltas": {
-    "rawBytes": -99,
-    "rawPercent": -0.04,
-    "gzipBytes": -23,
-    "gzipPercent": -0.04,
-    "brotliBytes": -23,
-    "brotliPercent": -0.05,
-    "buildTimeMs": 45.4,
-    "firstRenderMs": -2.6,
-    "speedupPercent": 8.2,
-    "updateMs": -1.5,
-    "updateSpeedupPercent": 18.99,
-    "evalSpeedupPercent": -6.78,
-    "registrationSpeedupPercent": 36.84,
-    "memorySavingsPercent": -3.4
+    "rawBytes": 141,
+    "rawPercent": 0.05,
+    "gzipBytes": 33,
+    "gzipPercent": 0.06,
+    "brotliBytes": 87,
+    "brotliPercent": 0.19,
+    "buildTimeMs": -15.8,
+    "firstRenderMs": 0.8,
+    "speedupPercent": -2.67,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 2.7,
+    "evalSpeedupPercent": -3.08,
+    "registrationSpeedupPercent": -37.5,
+    "memorySavingsPercent": 0.22
   },
   "runtime": {
-    "firstRenderMs": 29.1,
-    "updateMs": 6.4,
-    "scriptEvalMs": 6.3,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 3440670,
-    "speedupPercent": 8.2,
-    "updateSpeedupPercent": 18.99,
-    "evalSpeedupPercent": -6.78,
-    "registrationSpeedupPercent": 36.84,
-    "memorySavingsPercent": -3.4
+    "firstRenderMs": 30.8,
+    "updateMs": 7.2,
+    "scriptEvalMs": 6.7,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 1651689,
+    "speedupPercent": -2.67,
+    "updateSpeedupPercent": 2.7,
+    "evalSpeedupPercent": -3.08,
+    "registrationSpeedupPercent": -37.5,
+    "memorySavingsPercent": 0.22
   },
   "domSnapshot": {
     "mount": {
@@ -598,7 +572,7 @@
                                         "type": "element",
                                         "tag": "mask",
                                         "attributes": {
-                                          "id": "cutout1"
+                                          "id": "cutout3"
                                         },
                                         "children": [
                                           {
@@ -631,7 +605,7 @@
                                           "class": "outer circle",
                                           "cx": "10",
                                           "cy": "10",
-                                          "mask": "url(#cutout1)",
+                                          "mask": "url(#cutout3)",
                                           "r": "10"
                                         },
                                         "children": []
@@ -4475,12 +4449,13 @@
     "shadowRootsCount": 20
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 49,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Attribute \"class\" mismatch at mount-root > [0] > [1] > [0] > [1] > [0] > shadowRoot > [0] (<div>): baseline=\"container  unselected prev-unselected \", variant=\"container  unselected prev-unselected\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

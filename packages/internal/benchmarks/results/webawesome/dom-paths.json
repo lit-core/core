@@ -46,13 +46,13 @@
     "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
     "componentCount": 4
   },
-  "timestamp": "2026-10-19T20:05:43.449Z",
+  "timestamp": "2026-10-20T18:42:33.701Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -67,63 +67,53 @@
     }
   },
   "metrics": {
-    "rawBytes": 199373,
-    "gzipBytes": 52254,
-    "brotliBytes": 43939,
-    "buildTimeMs": 27.626624999999876
+    "rawBytes": 198398,
+    "gzipBytes": 52154,
+    "brotliBytes": 43849,
+    "buildTimeMs": 33.161583000000064
   },
   "baseline": {
-    "rawBytes": 198164,
-    "gzipBytes": 52039,
-    "brotliBytes": 43865,
-    "buildTimeMs": 26.994583999999122,
-    "firstRenderMs": 73.2,
-    "updateMs": 4.4,
-    "scriptEvalMs": 3.7,
-    "registrationMs": 1.3,
-    "heapUsedBytes": 4445712,
-    "scenarioSpecific": {
-      "rowCount": 100,
-      "customElementsPerCell": 4,
-      "totalCustomElements": 400,
-      "renderedNodes": 801
-    }
+    "rawBytes": 198116,
+    "gzipBytes": 52030,
+    "brotliBytes": 43871,
+    "buildTimeMs": 57.36779100000001
   },
   "deltas": {
-    "rawBytes": 1209,
-    "rawPercent": 0.61,
-    "gzipBytes": 215,
-    "gzipPercent": 0.41,
-    "brotliBytes": 74,
-    "brotliPercent": 0.17,
-    "buildTimeMs": 0.6,
-    "firstRenderMs": 8,
-    "speedupPercent": -10.93,
-    "updateMs": 0.8,
-    "updateSpeedupPercent": -18.18,
-    "evalSpeedupPercent": 16.22,
-    "registrationSpeedupPercent": -30.77,
-    "memorySavingsPercent": -38.92
+    "rawBytes": 282,
+    "rawPercent": 0.14,
+    "gzipBytes": 124,
+    "gzipPercent": 0.24,
+    "brotliBytes": -22,
+    "brotliPercent": -0.05,
+    "buildTimeMs": -24.2,
+    "firstRenderMs": -0.6,
+    "speedupPercent": 0.73,
+    "updateMs": 0.3,
+    "updateSpeedupPercent": -5.88,
+    "evalSpeedupPercent": -26.09,
+    "registrationSpeedupPercent": -20,
+    "memorySavingsPercent": -0.03
   },
   "runtime": {
-    "firstRenderMs": 81.2,
-    "updateMs": 5.2,
-    "scriptEvalMs": 3.1,
-    "registrationMs": 1.7,
-    "heapUsedBytes": 6175997,
-    "speedupPercent": -10.93,
-    "updateSpeedupPercent": -18.18,
-    "evalSpeedupPercent": 16.22,
-    "registrationSpeedupPercent": -30.77,
-    "memorySavingsPercent": -38.92
+    "firstRenderMs": 81.6,
+    "updateMs": 5.4,
+    "scriptEvalMs": 2.9,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 2998152,
+    "speedupPercent": 0.73,
+    "updateSpeedupPercent": -5.88,
+    "evalSpeedupPercent": -26.09,
+    "registrationSpeedupPercent": -20,
+    "memorySavingsPercent": -0.03
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 801,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Attribute \"aria-labelledby\" mismatch at mount-root > [0] > [0] > [6] > shadowRoot > [0] > [1] (<button>): baseline=\"wa-tooltip-f3p1SLfDZ7fi07mhHOaFz\", variant=\"wa-tooltip-iviMY6N7UVSFZrkkguMTU\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

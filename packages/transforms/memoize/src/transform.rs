@@ -63,27 +63,7 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
 
     let semantic_ret = SemanticBuilder::new().build(&parsed.program);
     let scoping = semantic_ret.semantic.into_scoping();
-
-    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
-
-    let symbol_ctx = SymbolProofContext {
-        scoping: &scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
+    let symbol_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
 
     let existing_bindings = {
         let mut collector = BindingCollector {

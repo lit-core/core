@@ -1,11 +1,11 @@
 use lit_analysis::symbol::{CanonicalHelperSymbol, CanonicalLitSymbol, SymbolProofContext};
 use napi_derive::napi;
-use oxc_allocator::{Allocator, ArenaVec};
+use oxc_allocator::{Allocator, ArenaVec, CloneIn, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_span::SourceType;
+use oxc_span::{SourceType, SPAN};
 
 use crate::clean_imports::clean_lit_import;
 use crate::constructor::{can_safely_lower_constructor, inject_constructor_statements};
@@ -23,7 +23,8 @@ use crate::decorators::query_assigned::try_transform_query_assigned;
 use crate::decorators::query_async::try_transform_query_async;
 use crate::decorators::state::try_transform_state;
 use crate::static_properties::{
-    can_merge_static_properties, class_has_reactive_properties, inject_or_merge_static_properties,
+    can_merge_static_properties, class_has_reactive_properties, create_property_key,
+    inject_or_merge_static_properties, ReactiveProp,
 };
 
 #[napi(object)]
@@ -64,20 +65,11 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     // 1. Scan for Lit decorator imports and decorator helpers semantically
     let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&program);
     let scoping = semantic_ret.semantic.into_scoping();
-    let (lit_symbols, mut helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = SymbolProofContext::scan(&program, &scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
+    let mut symbol_ctx = SymbolProofContext::scan(&program, &scoping, source);
 
     let mut helper_bindings = std::collections::HashSet::new();
     let mut metadata_bindings = std::collections::HashSet::new();
-    for (&sym_id, sym) in &helper_symbols {
+    for (&sym_id, sym) in &symbol_ctx.helper_symbols {
         let name = scoping.symbol_name(sym_id).to_string();
         match sym {
             CanonicalHelperSymbol::Decorate | CanonicalHelperSymbol::DecorateClass
@@ -108,7 +100,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
                                 if let Some(sym_id) = id.symbol_id.get().or_else(|| {
                                     scoping.get_binding(scoping.root_scope_id(), name.into())
                                 }) {
-                                    helper_symbols.insert(sym_id, helper_kind);
+                                    symbol_ctx.helper_symbols.insert(sym_id, helper_kind);
                                 }
                             }
                             CanonicalHelperSymbol::Metadata => {
@@ -118,7 +110,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
                                 if let Some(sym_id) = id.symbol_id.get().or_else(|| {
                                     scoping.get_binding(scoping.root_scope_id(), name.into())
                                 }) {
-                                    helper_symbols.insert(sym_id, helper_kind);
+                                    symbol_ctx.helper_symbols.insert(sym_id, helper_kind);
                                 }
                             }
                             _ => {}
@@ -135,7 +127,9 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
                             if let Some(sym_id) = id.symbol_id.get().or_else(|| {
                                 scoping.get_binding(scoping.root_scope_id(), name.into())
                             }) {
-                                helper_symbols.insert(sym_id, CanonicalHelperSymbol::Decorate);
+                                symbol_ctx
+                                    .helper_symbols
+                                    .insert(sym_id, CanonicalHelperSymbol::Decorate);
                             }
                         } else if metadata_bindings.contains(init_name) || init_name == "__metadata"
                         {
@@ -145,7 +139,9 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
                             if let Some(sym_id) = id.symbol_id.get().or_else(|| {
                                 scoping.get_binding(scoping.root_scope_id(), name.into())
                             }) {
-                                helper_symbols.insert(sym_id, CanonicalHelperSymbol::Metadata);
+                                symbol_ctx
+                                    .helper_symbols
+                                    .insert(sym_id, CanonicalHelperSymbol::Metadata);
                             }
                         }
                     }
@@ -153,16 +149,6 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
             }
         }
     }
-
-    let symbol_ctx = SymbolProofContext {
-        scoping: &scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
 
     let has_any_decorators = symbol_ctx.lit_symbols.values().any(|s| {
         matches!(
@@ -243,6 +229,8 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
             }
         }
     }
+
+    fold_lowered_decorators_into_local_classes(&mut intermediate_statements, &ast);
 
     program.body = intermediate_statements;
     let (referenced_names, decorate_used, metadata_used, helper_bindings, metadata_bindings) = {
@@ -508,6 +496,296 @@ pub fn transform_class<'a>(
     }
 
     post_class_statements
+}
+
+fn get_local_class_ref<'a, 'b>(stmt: &'b Statement<'a>) -> Option<(&'b str, &'b Class<'a>)> {
+    match stmt {
+        Statement::ClassDeclaration(cls) => {
+            cls.id.as_ref().map(|i| (i.name.as_str(), cls.as_ref()))
+        }
+        Statement::VariableDeclaration(var_decl) => {
+            if var_decl.declarations.len() == 1 {
+                let d = &var_decl.declarations[0];
+                if let BindingPattern::BindingIdentifier(id) = &d.id {
+                    if let Some(Expression::ClassExpression(cls)) =
+                        d.init.as_ref().map(|e| e.without_parentheses())
+                    {
+                        return Some((id.name.as_str(), cls.as_ref()));
+                    }
+                }
+            }
+            None
+        }
+        Statement::ExportDeclaration(exp) => match &exp.declaration {
+            Declaration::ClassDeclaration(cls) => {
+                cls.id.as_ref().map(|i| (i.name.as_str(), cls.as_ref()))
+            }
+            Declaration::VariableDeclaration(var_decl) => {
+                if var_decl.declarations.len() == 1 {
+                    let d = &var_decl.declarations[0];
+                    if let BindingPattern::BindingIdentifier(id) = &d.id {
+                        if let Some(Expression::ClassExpression(cls)) =
+                            d.init.as_ref().map(|e| e.without_parentheses())
+                        {
+                            return Some((id.name.as_str(), cls.as_ref()));
+                        }
+                    }
+                }
+                None
+            }
+            _ => None,
+        },
+        Statement::ExportDefaultDeclaration(exp) => {
+            if let ExportDefaultDeclarationKind::ClassDeclaration(cls) = &exp.declaration {
+                cls.id.as_ref().map(|i| (i.name.as_str(), cls.as_ref()))
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
+fn get_local_class_mut<'a, 'b>(stmt: &'b mut Statement<'a>) -> Option<&'b mut Class<'a>> {
+    match stmt {
+        Statement::ClassDeclaration(cls) => Some(cls.as_mut()),
+        Statement::VariableDeclaration(var_decl) => {
+            if var_decl.declarations.len() == 1 {
+                if let Some(Expression::ClassExpression(cls)) = &mut var_decl.declarations[0].init {
+                    return Some(cls.as_mut());
+                }
+            }
+            None
+        }
+        Statement::ExportDeclaration(exp) => match &mut exp.declaration {
+            Declaration::ClassDeclaration(cls) => Some(cls.as_mut()),
+            Declaration::VariableDeclaration(var_decl) => {
+                if var_decl.declarations.len() == 1 {
+                    if let Some(Expression::ClassExpression(cls)) =
+                        &mut var_decl.declarations[0].init
+                    {
+                        return Some(cls.as_mut());
+                    }
+                }
+                None
+            }
+            _ => None,
+        },
+        Statement::ExportDefaultDeclaration(exp) => {
+            if let ExportDefaultDeclarationKind::ClassDeclaration(cls) = &mut exp.declaration {
+                Some(cls.as_mut())
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
+fn extract_create_property_call<'a>(
+    stmt: &Statement<'a>,
+    ast: &AstBuilder<'a>,
+) -> Option<(String, ReactiveProp<'a>)> {
+    let Statement::ExpressionStatement(expr_stmt) = stmt else {
+        return None;
+    };
+    let Expression::CallExpression(call) = &expr_stmt.expression else {
+        return None;
+    };
+    let Expression::StaticMemberExpression(mem) = &call.callee else {
+        return None;
+    };
+    if mem.property.name != "createProperty" {
+        return None;
+    }
+    let Expression::Identifier(cls_id) = mem.object.without_parentheses() else {
+        return None;
+    };
+    let Expression::StringLiteral(prop_lit) = call.arguments.first()?.as_expression()? else {
+        return None;
+    };
+    let opt = call
+        .arguments
+        .get(1)
+        .and_then(|a| a.as_expression())
+        .map(|e| e.clone_in(ast.allocator()));
+
+    Some((
+        cls_id.name.as_str().to_string(),
+        ReactiveProp {
+            name: prop_lit.value.as_str().to_string(),
+            options: opt,
+        },
+    ))
+}
+
+fn extract_define_getter_call<'a>(
+    stmt: &Statement<'a>,
+    ast: &AstBuilder<'a>,
+) -> Option<(String, String, oxc_allocator::Box<'a, Function<'a>>)> {
+    let Statement::ExpressionStatement(expr_stmt) = stmt else {
+        return None;
+    };
+    let Expression::CallExpression(call) = &expr_stmt.expression else {
+        return None;
+    };
+    let Expression::StaticMemberExpression(mem) = &call.callee else {
+        return None;
+    };
+    if mem.property.name != "defineProperty" {
+        return None;
+    }
+    let Expression::Identifier(obj_id) = mem.object.without_parentheses() else {
+        return None;
+    };
+    if obj_id.name != "Object" {
+        return None;
+    }
+    let Expression::StaticMemberExpression(target_mem) = call.arguments.first()?.as_expression()?
+    else {
+        return None;
+    };
+    if target_mem.property.name != "prototype" {
+        return None;
+    }
+    let Expression::Identifier(cls_id) = target_mem.object.without_parentheses() else {
+        return None;
+    };
+    let Expression::StringLiteral(prop_lit) = call.arguments.get(1)?.as_expression()? else {
+        return None;
+    };
+    let Expression::ObjectExpression(desc_obj) = call.arguments.get(2)?.as_expression()? else {
+        return None;
+    };
+    for prop in &desc_obj.properties {
+        if let ObjectPropertyKind::ObjectProperty(p) = prop {
+            if p.key.is_specific_static_name("get") {
+                if let Expression::FunctionExpression(func) = &p.value {
+                    return Some((
+                        cls_id.name.as_str().to_string(),
+                        prop_lit.value.as_str().to_string(),
+                        func.clone_in(ast.allocator()),
+                    ));
+                }
+            }
+        }
+    }
+    None
+}
+
+fn fold_lowered_decorators_into_local_classes<'a>(
+    stmts: &mut ArenaVec<'a, Statement<'a>>,
+    ast: &AstBuilder<'a>,
+) {
+    let mut local_class_indices = std::collections::HashMap::new();
+    for (idx, stmt) in stmts.iter().enumerate() {
+        if let Some((name, cls)) = get_local_class_ref(stmt) {
+            if cls.decorators.is_empty() && can_merge_static_properties(cls) {
+                local_class_indices.insert(name.to_string(), idx);
+            }
+        }
+    }
+    if local_class_indices.is_empty() {
+        return;
+    }
+
+    let mut class_props: std::collections::HashMap<String, Vec<(usize, ReactiveProp<'a>)>> =
+        std::collections::HashMap::new();
+    let mut class_getters: std::collections::HashMap<
+        String,
+        Vec<(usize, String, oxc_allocator::Box<'a, Function<'a>>)>,
+    > = std::collections::HashMap::new();
+
+    for (idx, stmt) in stmts.iter().enumerate() {
+        if let Some((cls_name, prop)) = extract_create_property_call(stmt, ast) {
+            if local_class_indices.contains_key(&cls_name) {
+                class_props.entry(cls_name).or_default().push((idx, prop));
+            }
+        } else if let Some((cls_name, prop_name, func)) = extract_define_getter_call(stmt, ast) {
+            if local_class_indices.contains_key(&cls_name) {
+                class_getters
+                    .entry(cls_name)
+                    .or_default()
+                    .push((idx, prop_name, func));
+            }
+        }
+    }
+
+    let mut stmts_to_remove = std::collections::HashSet::new();
+
+    for (cls_name, &cls_stmt_idx) in &local_class_indices {
+        let props_count = class_props.get(cls_name).map(|v| v.len()).unwrap_or(0);
+        let getters_count = class_getters.get(cls_name).map(|v| v.len()).unwrap_or(0);
+        if props_count + getters_count < 2 {
+            continue;
+        }
+
+        if let Some(cls) = stmts.get_mut(cls_stmt_idx).and_then(get_local_class_mut) {
+            if let Some(props_list) = class_props.remove(cls_name) {
+                let mut reactive_props = Vec::with_capacity(props_list.len());
+                for (stmt_idx, prop) in props_list {
+                    stmts_to_remove.insert(stmt_idx);
+                    reactive_props.push(prop);
+                }
+                inject_or_merge_static_properties(cls, reactive_props, ast);
+            }
+
+            if let Some(getters_list) = class_getters.remove(cls_name) {
+                for (stmt_idx, prop_name, func) in getters_list {
+                    let has_conflicting_member = cls.body.body.iter().any(|elem| match elem {
+                        ClassElement::MethodDefinition(m) => {
+                            !m.r#static && m.key.is_specific_static_name(&prop_name)
+                        }
+                        ClassElement::PropertyDefinition(p) => {
+                            !p.r#static
+                                && p.key.is_specific_static_name(&prop_name)
+                                && p.value.is_some()
+                        }
+                        _ => false,
+                    });
+                    if !has_conflicting_member {
+                        cls.body.body.retain(|elem| {
+                            if let ClassElement::PropertyDefinition(p) = elem {
+                                if !p.r#static
+                                    && p.key.is_specific_static_name(&prop_name)
+                                    && p.value.is_none()
+                                {
+                                    return false;
+                                }
+                            }
+                            true
+                        });
+                        let key = create_property_key(&prop_name, ast);
+                        let getter_elem = ClassElement::new_method_definition(
+                            SPAN,
+                            MethodDefinitionType::MethodDefinition,
+                            ArenaVec::new_in(ast),
+                            key,
+                            func,
+                            MethodDefinitionKind::Get,
+                            false,
+                            false,
+                            false,
+                            false,
+                            None,
+                            ast,
+                        );
+                        cls.body.body.push(getter_elem);
+                        stmts_to_remove.insert(stmt_idx);
+                    }
+                }
+            }
+        }
+    }
+
+    if !stmts_to_remove.is_empty() {
+        let old = std::mem::replace(stmts, ArenaVec::new_in(ast));
+        for (idx, stmt) in old.into_iter().enumerate() {
+            if !stmts_to_remove.contains(&idx) {
+                stmts.push(stmt);
+            }
+        }
+    }
 }
 
 #[cfg(test)]

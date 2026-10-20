@@ -7,7 +7,8 @@ import { LitCoreVitePlugin } from '@lit-core/vite-plugin';
  */
 export function normalizeInclude(pattern) {
   if (!pattern) return undefined;
-  return Array.isArray(pattern) ? pattern : [pattern];
+  const arr = Array.isArray(pattern) ? pattern : [pattern];
+  return [...arr, 'packages/internal/benchmarks/.temp-scenario-*/scenario-entry.js'];
 }
 
 /**

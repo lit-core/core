@@ -43,13 +43,33 @@ impl ClusterEngine {
 
         let mut candidate_rules = Vec::new();
 
+        let compute_rule_savings = |rule: &NormalizedRule, files: &BTreeSet<String>| -> usize {
+            if min_savings == 0 {
+                return files.len().saturating_sub(1) * rule.full_canonical_css.len();
+            }
+            let mut bytes_removed = 0usize;
+            for f in files {
+                let total_in_file = frequency_index
+                    .file_selector_decl_counts
+                    .get(&(f.clone(), rule.at_rule.clone(), rule.selector.clone()))
+                    .copied()
+                    .unwrap_or(rule.declarations.len());
+                if rule.declarations.len() >= total_in_file {
+                    bytes_removed += rule.full_canonical_css.len();
+                } else {
+                    bytes_removed += rule.canonical_body.len() + 1;
+                }
+            }
+            bytes_removed.saturating_sub(rule.full_canonical_css.len())
+        };
+
         for ((sorted_files, at_rule, selector), decls) in profile_selector_decls {
             let decl_vec: Vec<String> = decls.into_iter().collect();
             let canonical_body = decl_vec.join(";");
             let full_css = if let Some(at) = &at_rule {
-                format!("{} {{\n  {} {{{}}}\n}}", at, selector, canonical_body)
+                format!("{}{{{}{{{}}}}}", at, selector, canonical_body)
             } else {
-                format!("{} {{{}}}", selector, canonical_body)
+                format!("{}{{{}}}", selector, canonical_body)
             };
 
             let hash_key = if let Some(at) = &at_rule {
@@ -80,6 +100,9 @@ impl ClusterEngine {
             };
 
             let files_set: BTreeSet<String> = sorted_files.into_iter().collect();
+            if min_savings > 0 && compute_rule_savings(&rule, &files_set) == 0 {
+                continue;
+            }
             candidate_rules.push(CandidateRule {
                 rule,
                 files: files_set,
@@ -121,7 +144,6 @@ impl ClusterEngine {
                     let mut rules = Vec::new();
                     for &idx in indices {
                         rules.push(candidate_rules[idx].rule.clone());
-                        clustered_rule_indices.insert(idx);
                     }
 
                     rules.sort_by(|a, b| {
@@ -132,17 +154,22 @@ impl ClusterEngine {
                         a.selector.cmp(&b.selector)
                     });
 
-                    let total_css_len: usize =
-                        rules.iter().map(|r| r.full_canonical_css.len()).sum();
-                    let gross_savings = (common_files.len().saturating_sub(1)) * total_css_len;
+                    let gross_savings: usize = rules
+                        .iter()
+                        .map(|r| compute_rule_savings(r, &common_files))
+                        .sum();
                     let net_bytes_saved = if min_savings > 0 {
-                        let module_overhead = 48 + common_files.len() * 45;
+                        let module_overhead = 64 + common_files.len() * 52;
                         gross_savings.saturating_sub(module_overhead)
                     } else {
                         gross_savings
                     };
                     if net_bytes_saved < min_savings || gross_savings == 0 {
                         continue;
+                    }
+
+                    for &idx in indices {
+                        clustered_rule_indices.insert(idx);
                     }
 
                     let rule_hashes: Vec<RuleHash> = rules.iter().map(|r| r.hash.clone()).collect();
@@ -188,7 +215,6 @@ impl ClusterEngine {
                     let mut rules = Vec::new();
                     for &idx in indices {
                         rules.push(candidate_rules[idx].rule.clone());
-                        clustered_rule_indices.insert(idx);
                     }
 
                     rules.sort_by(|a, b| {
@@ -199,17 +225,22 @@ impl ClusterEngine {
                         a.selector.cmp(&b.selector)
                     });
 
-                    let total_css_len: usize =
-                        rules.iter().map(|r| r.full_canonical_css.len()).sum();
-                    let gross_savings = (common_files.len().saturating_sub(1)) * total_css_len;
+                    let gross_savings: usize = rules
+                        .iter()
+                        .map(|r| compute_rule_savings(r, &common_files))
+                        .sum();
                     let net_bytes_saved = if min_savings > 0 {
-                        let module_overhead = 48 + common_files.len() * 45;
+                        let module_overhead = 64 + common_files.len() * 52;
                         gross_savings.saturating_sub(module_overhead)
                     } else {
                         gross_savings
                     };
                     if net_bytes_saved < min_savings || gross_savings == 0 {
                         continue;
+                    }
+
+                    for &idx in indices {
+                        clustered_rule_indices.insert(idx);
                     }
 
                     let rule_hashes: Vec<RuleHash> = rules.iter().map(|r| r.hash.clone()).collect();
@@ -259,10 +290,13 @@ impl ClusterEngine {
                 a.selector.cmp(&b.selector)
             });
 
-            let total_css_len: usize = rules.iter().map(|r| r.full_canonical_css.len()).sum();
-            let gross_savings = (files.len().saturating_sub(1)) * total_css_len;
+            let files_set: BTreeSet<String> = files.iter().cloned().collect();
+            let gross_savings: usize = rules
+                .iter()
+                .map(|r| compute_rule_savings(r, &files_set))
+                .sum();
             let net_bytes_saved = if min_savings > 0 {
-                let module_overhead = 48 + files.len() * 45;
+                let module_overhead = 64 + files.len() * 52;
                 gross_savings.saturating_sub(module_overhead)
             } else {
                 gross_savings

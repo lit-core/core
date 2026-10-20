@@ -4,7 +4,7 @@ import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
 import { getFileSizes } from '../../metrics.js';
-import { getBrowser } from '../../runtime.js';
+import { closeBrowser, getBrowser } from '../../runtime.js';
 import { CANONICAL_COMPONENT_IDS, CANONICAL_SUITE_DEFINITIONS } from '../../suites/canonical-components.js';
 import { createBenchmarkVendorResolverPlugin } from '../../vendor-resolver.js';
 
@@ -224,7 +224,9 @@ export function compareDomSnapshots(baselineSnapshot, variantSnapshot) {
 
   const mountComparison = compareDomTrees(baselineSnapshot.mount, variantSnapshot.mount, 'mount-root');
   const updateComparison = compareDomTrees(baselineSnapshot.update, variantSnapshot.update, 'update-root');
-  const domStructureMatch = mountComparison.match && updateComparison.match;
+  const shadowCountMatch = (baselineSnapshot.shadowRootsCount ?? 0) === (variantSnapshot.shadowRootsCount ?? 0);
+  const customElementCountMatch = (baselineSnapshot.customElementsCount ?? 0) === (variantSnapshot.customElementsCount ?? 0);
+  const domStructureMatch = mountComparison.match && updateComparison.match && shadowCountMatch && customElementCountMatch;
   const elementsCount = variantSnapshot.elementsCount || 0;
   const verified = domStructureMatch && elementsCount > 0;
 
@@ -233,6 +235,10 @@ export function compareDomSnapshots(baselineSnapshot, variantSnapshot) {
     divergenceReason = `Mount phase divergence: ${mountComparison.reason}`;
   } else if (!updateComparison.match) {
     divergenceReason = `Update phase divergence: ${updateComparison.reason}`;
+  } else if (!shadowCountMatch) {
+    divergenceReason = `ShadowRoot count mismatch: baseline=${baselineSnapshot.shadowRootsCount}, variant=${variantSnapshot.shadowRootsCount}`;
+  } else if (!customElementCountMatch) {
+    divergenceReason = `Custom element count mismatch: baseline=${baselineSnapshot.customElementsCount}, variant=${variantSnapshot.customElementsCount}`;
   }
 
   return {
@@ -269,6 +275,7 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
   let context = null;
   let page = null;
   try {
+    await closeBrowser();
     const browser = await getBrowser();
     if (!browser || (typeof browser.isConnected === 'function' && !browser.isConnected())) {
       throw new Error(`[Scenario benchmark error] Chromium browser is not available or disconnected for ${scenarioName} (${variantName})`);
@@ -314,6 +321,8 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
       return result;
     };
 
+    if (typeof window.gc === 'function') window.gc();
+    window.__heapBeforeEval = window.performance?.memory?.usedJSHeapSize || 0;
     window.__evalStart = performance.now();
     try {
       ${bundleCode}
@@ -375,11 +384,12 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         const attributes = {};
         const attrNames = Array.from(el.attributes || [])
           .map((a) => a.name)
-          .filter((n) => !n.startsWith('__'))
+          .filter((n) => !n.startsWith('__') && !n.startsWith('data-lh-') && !n.startsWith('data-lit-'))
           .sort();
 
         for (const name of attrNames) {
-          attributes[name] = el.getAttribute(name) || '';
+          const rawVal = el.getAttribute(name) || '';
+          attributes[name] = name === 'class' ? rawVal.trim().split(/\s+/).join(' ') : rawVal;
         }
 
         const children = [];
@@ -409,18 +419,14 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
       let scenarioSpecific = {};
       let mountSnapshot = null;
       let updateSnapshot = null;
+      let heapUsed = 0;
 
       if (win.__scenario && typeof win.__scenario.mount === 'function') {
-        // 1. Measure scenario mount
-        container.innerHTML = '';
         const t0 = performance.now();
         await win.__scenario.mount(container);
         void container.offsetHeight;
         firstRenderMs = Math.max(0.1, performance.now() - t0);
 
-        mountSnapshot = serializeDomTree(container);
-
-        // 2. Measure scenario update
         if (typeof win.__scenario.update === 'function') {
           const t1 = performance.now();
           await win.__scenario.update(container);
@@ -428,17 +434,26 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
           updateMs = Math.max(0.1, performance.now() - t1);
         }
 
-        updateSnapshot = serializeDomTree(container);
+        // Measure memory footprint BEFORE serializing DOM snapshots
+        if (typeof win.gc === 'function') win.gc();
+        const heapAfter = win.performance?.memory?.usedJSHeapSize || 0;
+        heapUsed = Math.max(1024, heapAfter - (win.__heapBeforeEval || 0));
 
         if (typeof win.__scenario.getMetrics === 'function') {
           scenarioSpecific = await win.__scenario.getMetrics(container);
         }
-      } else {
-        // Fallback generic mount if no custom scenario mount was provided
+
+        updateSnapshot = serializeDomTree(container);
+
+        delete (/** @type {any} */ (container)._$litPart$);
         container.innerHTML = '';
+        await win.__scenario.mount(container);
+        void container.offsetHeight;
+        mountSnapshot = serializeDomTree(container);
+      } else {
         const tags = (win.__registeredTags || []).filter((/** @type {any} */ t) => typeof t === 'string' && t.includes('-'));
-        const t0 = performance.now();
         const mounted = [];
+        const t0 = performance.now();
         for (const tag of tags) {
           const el = document.createElement(tag);
           container.appendChild(el);
@@ -447,8 +462,6 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         await Promise.all(mounted.map(safeUpdateComplete));
         void container.offsetHeight;
         firstRenderMs = Math.max(0.1, performance.now() - t0);
-
-        mountSnapshot = serializeDomTree(container);
 
         const t1 = performance.now();
         for (let i = 0; i < mounted.length; i++) {
@@ -460,7 +473,22 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         void container.offsetHeight;
         updateMs = Math.max(0.1, performance.now() - t1);
 
+        if (typeof win.gc === 'function') win.gc();
+        const heapAfter = win.performance?.memory?.usedJSHeapSize || 0;
+        heapUsed = Math.max(1024, heapAfter - (win.__heapBeforeEval || 0));
+
         updateSnapshot = serializeDomTree(container);
+
+        container.innerHTML = '';
+        const remounted = [];
+        for (const tag of tags) {
+          const el = document.createElement(tag);
+          container.appendChild(el);
+          remounted.push(el);
+        }
+        await Promise.all(remounted.map(safeUpdateComplete));
+        void container.offsetHeight;
+        mountSnapshot = serializeDomTree(container);
       }
 
       // Collect overall element and shadow root counters
@@ -470,10 +498,6 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         if (el.shadowRoot) shadowRootsCount++;
       }
       const customElements = allElements.filter((el) => el.tagName.includes('-'));
-
-      // Memory footprint
-      if (typeof win.gc === 'function') win.gc();
-      const heapUsed = win.performance?.memory?.usedJSHeapSize || 0;
 
       return {
         runtime: {
@@ -520,6 +544,7 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         await context.close();
       } catch {}
     }
+    await closeBrowser();
   }
 }
 

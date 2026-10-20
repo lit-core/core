@@ -5,8 +5,18 @@
     "id": "ssr-dashboard",
     "name": "SSR dashboard",
     "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
-    "relevantFeatures": ["resumable", "html-aot"],
-    "componentConcepts": ["card", "badge", "progress-bar", "button", "tabs"]
+    "relevantFeatures": [
+      "resumable",
+      "html-aot",
+      "ssr"
+    ],
+    "componentConcepts": [
+      "card",
+      "badge",
+      "progress-bar",
+      "button",
+      "tabs"
+    ]
   },
   "suite": {
     "id": "webawesome",
@@ -19,13 +29,13 @@
     "name": "AOT template compilation (html-aot)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-10T10:11:44.510Z",
+  "timestamp": "2026-10-20T19:30:15.264Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -40,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 164688,
-    "gzipBytes": 40361,
-    "brotliBytes": 33882,
-    "buildTimeMs": 16.893875000000662,
-    "firstRenderMs": 17.8,
-    "updateMs": 0.7,
-    "scriptEvalMs": 1.4,
-    "registrationMs": 0,
-    "heapUsedBytes": 2408262,
+    "rawBytes": 172893,
+    "gzipBytes": 41814,
+    "brotliBytes": 34871,
+    "buildTimeMs": 30.37395800000013,
+    "firstRenderMs": 14.1,
+    "updateMs": 0.6,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1103339,
     "scenarioSpecific": {
       "cardsCount": 4,
       "progressBarsCount": 4,
@@ -57,53 +67,3042 @@
     }
   },
   "baseline": {
-    "rawBytes": 164688,
-    "gzipBytes": 40361,
-    "brotliBytes": 33882,
-    "buildTimeMs": 20.454125000000204,
-    "firstRenderMs": 15.6,
-    "updateMs": 0.7,
-    "scriptEvalMs": 1.5,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 2408101,
-    "scenarioSpecific": {
-      "cardsCount": 4,
-      "progressBarsCount": 4,
-      "resumedInteractions": 4,
-      "renderedNodes": 41
-    }
-  },
-  "deltas": {
-    "rawBytes": 0,
-    "rawPercent": 0,
-    "gzipBytes": 0,
-    "gzipPercent": 0,
-    "brotliBytes": 0,
-    "brotliPercent": 0,
-    "buildTimeMs": -3.6,
-    "firstRenderMs": 2.2,
-    "speedupPercent": -14.1,
-    "updateMs": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 6.67,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -0.01
-  },
-  "runtime": {
-    "firstRenderMs": 17.8,
+    "rawBytes": 164668,
+    "gzipBytes": 40362,
+    "brotliBytes": 33872,
+    "buildTimeMs": 40.61212499999999,
+    "firstRenderMs": 13.9,
     "updateMs": 0.7,
     "scriptEvalMs": 1.4,
-    "registrationMs": 0,
-    "heapUsedBytes": 2408262,
-    "speedupPercent": -14.1,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 6.67,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1091849
+  },
+  "deltas": {
+    "rawBytes": 8225,
+    "rawPercent": 4.99,
+    "gzipBytes": 1452,
+    "gzipPercent": 3.6,
+    "brotliBytes": 999,
+    "brotliPercent": 2.95,
+    "buildTimeMs": -10.2,
+    "firstRenderMs": 0.2,
+    "speedupPercent": -1.44,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 14.29,
+    "evalSpeedupPercent": -35.71,
     "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -0.01
+    "memorySavingsPercent": -1.05
+  },
+  "runtime": {
+    "firstRenderMs": 14.1,
+    "updateMs": 0.6,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1103339,
+    "speedupPercent": -1.44,
+    "updateSpeedupPercent": 14.29,
+    "evalSpeedupPercent": -35.71,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -1.05
+  },
+  "domSnapshot": {
+    "mount": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "ssr-dashboard-root",
+            "style": "display:flex; flex-direction:column; gap:20px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "dashboard-header",
+                "style": "display:flex; justify-content:space-between; align-items:center;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h3",
+                  "attributes": {
+                    "class": "dashboard-title"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "System telemetry overview"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "wa-tab-group",
+                  "attributes": {
+                    "active": ""
+                  },
+                  "children": [],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "tab-group tab-group-top",
+                          "part": "base tab-group"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "nav-container",
+                              "part": "nav"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "nav"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "tabs",
+                                      "part": "tabs",
+                                      "role": "tablist"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "nav"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "body",
+                              "part": "body"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "div",
+              "attributes": {
+                "class": "metrics-grid",
+                "style": "display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "wa-card",
+                  "attributes": {
+                    "appearance": "outlined",
+                    "class": "metric-card",
+                    "data-metric": "cpu",
+                    "orientation": "vertical"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "CPU utilization"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "wa-badge",
+                              "attributes": {
+                                "appearance": "accent",
+                                "attention": "none",
+                                "type": "success",
+                                "variant": "brand"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Healthy"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "start"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "start"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "base badge",
+                                      "role": "status"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "end"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "42%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.42"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "Progress",
+                                  "aria-valuemax": "100",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.42",
+                                  "class": "progress-bar",
+                                  "part": "base progress-bar",
+                                  "role": "progressbar",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "indicator",
+                                      "part": "indicator"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "wa-button",
+                              "attributes": {
+                                "appearance": "accent",
+                                "size": "sm",
+                                "variant": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "cpu"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-busy": "false",
+                                      "class": "button has-label",
+                                      "part": "base button",
+                                      "role": "button",
+                                      "tabindex": "0",
+                                      "title": "",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "start",
+                                          "name": "start",
+                                          "part": "start"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "end",
+                                          "name": "end",
+                                          "part": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "class": "media",
+                          "name": "media",
+                          "part": "media"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "header",
+                          "part": "header"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body",
+                          "part": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "footer",
+                          "part": "footer"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "wa-card",
+                  "attributes": {
+                    "appearance": "outlined",
+                    "class": "metric-card",
+                    "data-metric": "memory",
+                    "orientation": "vertical"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Memory allocation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "wa-badge",
+                              "attributes": {
+                                "appearance": "accent",
+                                "attention": "none",
+                                "type": "warning",
+                                "variant": "brand"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Elevated"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "start"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "start"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "base badge",
+                                      "role": "status"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "end"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "78%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.78"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "Progress",
+                                  "aria-valuemax": "100",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.78",
+                                  "class": "progress-bar",
+                                  "part": "base progress-bar",
+                                  "role": "progressbar",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "indicator",
+                                      "part": "indicator"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "wa-button",
+                              "attributes": {
+                                "appearance": "accent",
+                                "size": "sm",
+                                "variant": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "memory"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-busy": "false",
+                                      "class": "button has-label",
+                                      "part": "base button",
+                                      "role": "button",
+                                      "tabindex": "0",
+                                      "title": "",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "start",
+                                          "name": "start",
+                                          "part": "start"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "end",
+                                          "name": "end",
+                                          "part": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "class": "media",
+                          "name": "media",
+                          "part": "media"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "header",
+                          "part": "header"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body",
+                          "part": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "footer",
+                          "part": "footer"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "wa-card",
+                  "attributes": {
+                    "appearance": "outlined",
+                    "class": "metric-card",
+                    "data-metric": "io",
+                    "orientation": "vertical"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Disk throughput"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "wa-badge",
+                              "attributes": {
+                                "appearance": "accent",
+                                "attention": "none",
+                                "type": "neutral",
+                                "variant": "brand"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Normal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "start"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "start"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "base badge",
+                                      "role": "status"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "end"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "1.2 GB/s"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.6"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "Progress",
+                                  "aria-valuemax": "100",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.6",
+                                  "class": "progress-bar",
+                                  "part": "base progress-bar",
+                                  "role": "progressbar",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "indicator",
+                                      "part": "indicator"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "wa-button",
+                              "attributes": {
+                                "appearance": "accent",
+                                "size": "sm",
+                                "variant": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "io"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-busy": "false",
+                                      "class": "button has-label",
+                                      "part": "base button",
+                                      "role": "button",
+                                      "tabindex": "0",
+                                      "title": "",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "start",
+                                          "name": "start",
+                                          "part": "start"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "end",
+                                          "name": "end",
+                                          "part": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "class": "media",
+                          "name": "media",
+                          "part": "media"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "header",
+                          "part": "header"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body",
+                          "part": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "footer",
+                          "part": "footer"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "wa-card",
+                  "attributes": {
+                    "appearance": "outlined",
+                    "class": "metric-card",
+                    "data-metric": "network",
+                    "orientation": "vertical"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Bandwidth saturation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "wa-badge",
+                              "attributes": {
+                                "appearance": "accent",
+                                "attention": "none",
+                                "type": "success",
+                                "variant": "brand"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Optimal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "start"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "start"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "base badge",
+                                      "role": "status"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "end"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "25%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.25"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "Progress",
+                                  "aria-valuemax": "100",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.25",
+                                  "class": "progress-bar",
+                                  "part": "base progress-bar",
+                                  "role": "progressbar",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "indicator",
+                                      "part": "indicator"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "wa-button",
+                              "attributes": {
+                                "appearance": "accent",
+                                "size": "sm",
+                                "variant": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "network"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-busy": "false",
+                                      "class": "button has-label",
+                                      "part": "base button",
+                                      "role": "button",
+                                      "tabindex": "0",
+                                      "title": "",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "start",
+                                          "name": "start",
+                                          "part": "start"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "end",
+                                          "name": "end",
+                                          "part": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "class": "media",
+                          "name": "media",
+                          "part": "media"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "header",
+                          "part": "header"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body",
+                          "part": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "footer",
+                          "part": "footer"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "ssr-dashboard-root",
+            "style": "display:flex; flex-direction:column; gap:20px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "dashboard-header",
+                "style": "display:flex; justify-content:space-between; align-items:center;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h3",
+                  "attributes": {
+                    "class": "dashboard-title"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "System telemetry overview"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "wa-tab-group",
+                  "attributes": {
+                    "active": ""
+                  },
+                  "children": [],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "tab-group tab-group-top",
+                          "part": "base tab-group"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "nav-container",
+                              "part": "nav"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "nav"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "tabs",
+                                      "part": "tabs",
+                                      "role": "tablist"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "nav"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "body",
+                              "part": "body"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "div",
+              "attributes": {
+                "class": "metrics-grid",
+                "style": "display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "wa-card",
+                  "attributes": {
+                    "appearance": "outlined",
+                    "class": "metric-card",
+                    "data-metric": "cpu",
+                    "orientation": "vertical"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "CPU utilization"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "wa-badge",
+                              "attributes": {
+                                "appearance": "accent",
+                                "attention": "none",
+                                "type": "success",
+                                "variant": "brand"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Healthy"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "start"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "start"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "base badge",
+                                      "role": "status"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "end"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "42%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.52"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "Progress",
+                                  "aria-valuemax": "100",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.52",
+                                  "class": "progress-bar",
+                                  "part": "base progress-bar",
+                                  "role": "progressbar",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "indicator",
+                                      "part": "indicator"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "wa-button",
+                              "attributes": {
+                                "appearance": "accent",
+                                "size": "sm",
+                                "variant": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "cpu"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-busy": "false",
+                                      "class": "button has-label",
+                                      "part": "base button",
+                                      "role": "button",
+                                      "tabindex": "0",
+                                      "title": "",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "start",
+                                          "name": "start",
+                                          "part": "start"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "end",
+                                          "name": "end",
+                                          "part": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "class": "media",
+                          "name": "media",
+                          "part": "media"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "header",
+                          "part": "header"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body",
+                          "part": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "footer",
+                          "part": "footer"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "wa-card",
+                  "attributes": {
+                    "appearance": "outlined",
+                    "class": "metric-card",
+                    "data-metric": "memory",
+                    "orientation": "vertical"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Memory allocation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "wa-badge",
+                              "attributes": {
+                                "appearance": "accent",
+                                "attention": "none",
+                                "type": "warning",
+                                "variant": "brand"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Elevated"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "start"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "start"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "base badge",
+                                      "role": "status"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "end"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "78%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.88"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "Progress",
+                                  "aria-valuemax": "100",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.88",
+                                  "class": "progress-bar",
+                                  "part": "base progress-bar",
+                                  "role": "progressbar",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "indicator",
+                                      "part": "indicator"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "wa-button",
+                              "attributes": {
+                                "appearance": "accent",
+                                "size": "sm",
+                                "variant": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "memory"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-busy": "false",
+                                      "class": "button has-label",
+                                      "part": "base button",
+                                      "role": "button",
+                                      "tabindex": "0",
+                                      "title": "",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "start",
+                                          "name": "start",
+                                          "part": "start"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "end",
+                                          "name": "end",
+                                          "part": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "class": "media",
+                          "name": "media",
+                          "part": "media"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "header",
+                          "part": "header"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body",
+                          "part": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "footer",
+                          "part": "footer"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "wa-card",
+                  "attributes": {
+                    "appearance": "outlined",
+                    "class": "metric-card",
+                    "data-metric": "io",
+                    "orientation": "vertical"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Disk throughput"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "wa-badge",
+                              "attributes": {
+                                "appearance": "accent",
+                                "attention": "none",
+                                "type": "neutral",
+                                "variant": "brand"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Normal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "start"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "start"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "base badge",
+                                      "role": "status"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "end"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "1.2 GB/s"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.7"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "Progress",
+                                  "aria-valuemax": "100",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.7",
+                                  "class": "progress-bar",
+                                  "part": "base progress-bar",
+                                  "role": "progressbar",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "indicator",
+                                      "part": "indicator"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "wa-button",
+                              "attributes": {
+                                "appearance": "accent",
+                                "size": "sm",
+                                "variant": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "io"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-busy": "false",
+                                      "class": "button has-label",
+                                      "part": "base button",
+                                      "role": "button",
+                                      "tabindex": "0",
+                                      "title": "",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "start",
+                                          "name": "start",
+                                          "part": "start"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "end",
+                                          "name": "end",
+                                          "part": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "class": "media",
+                          "name": "media",
+                          "part": "media"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "header",
+                          "part": "header"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body",
+                          "part": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "footer",
+                          "part": "footer"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "wa-card",
+                  "attributes": {
+                    "appearance": "outlined",
+                    "class": "metric-card",
+                    "data-metric": "network",
+                    "orientation": "vertical"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Bandwidth saturation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "wa-badge",
+                              "attributes": {
+                                "appearance": "accent",
+                                "attention": "none",
+                                "type": "success",
+                                "variant": "brand"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Optimal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "start"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "start"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "base badge",
+                                      "role": "status"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "part": "end"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "25%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "wa-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.35"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-label": "Progress",
+                                  "aria-valuemax": "100",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.35",
+                                  "class": "progress-bar",
+                                  "part": "base progress-bar",
+                                  "role": "progressbar",
+                                  "title": ""
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "indicator",
+                                      "part": "indicator"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "wa-button",
+                              "attributes": {
+                                "appearance": "accent",
+                                "size": "sm",
+                                "variant": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "network"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "aria-busy": "false",
+                                      "class": "button has-label",
+                                      "part": "base button",
+                                      "role": "button",
+                                      "tabindex": "0",
+                                      "title": "",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "start",
+                                          "name": "start",
+                                          "part": "start"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "label",
+                                          "part": "label"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "class": "end",
+                                          "name": "end",
+                                          "part": "end"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "class": "media",
+                          "name": "media",
+                          "part": "media"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "header",
+                          "part": "header"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "header-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body",
+                          "part": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "footer",
+                          "part": "footer"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer"
+                            },
+                            "children": []
+                          },
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {
+                              "name": "footer-actions"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "elementsCount": 41,
+    "customElementsCount": 17,
+    "shadowRootsCount": 17
   },
   "equivalence": {
     "domStructureMatch": true,
     "elementsCount": 41,
-    "verified": true
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

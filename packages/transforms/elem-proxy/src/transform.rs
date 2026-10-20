@@ -58,25 +58,7 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
 
     let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
     let scoping = semantic_ret.semantic.into_scoping();
-    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = lit_analysis::SymbolProofContext::scan(&parsed.program, &scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
-    let symbol_ctx = lit_analysis::SymbolProofContext {
-        scoping: &scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
+    let symbol_ctx = lit_analysis::SymbolProofContext::scan(&parsed.program, &scoping, source);
 
     // Scan for customElements.define calls
     let mut define_calls: HashMap<String, String> = HashMap::new(); // class_name -> tag_name

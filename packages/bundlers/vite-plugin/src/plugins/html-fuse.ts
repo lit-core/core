@@ -18,6 +18,7 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
     exclude = ['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**'],
     threshold = 2,
     minFragmentLength = 15,
+    minSavings = 80,
     outputDir = '.fused-html',
     applyInDev = false,
   } = options;
@@ -28,6 +29,7 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
       exclude,
       threshold,
       minFragmentLength,
+      minSavings,
       outputDir,
       write,
       virtualImports,

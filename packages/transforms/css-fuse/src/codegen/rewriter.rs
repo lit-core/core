@@ -332,7 +332,7 @@ fn create_tagged_template_expr<'a>(
 ) -> Expression<'a> {
     let tag_ident = Expression::new_identifier(SPAN, allocator.alloc_str(tag), ast);
     let mut quasis = ArenaVec::new_in(ast);
-    let raw_css = allocator.alloc_str(&format!("\n{}\n  ", remaining_css));
+    let raw_css = allocator.alloc_str(remaining_css);
     let val = TemplateElementValue {
         raw: raw_css.into(),
         cooked: Some(raw_css.into()),

@@ -5,8 +5,14 @@
     "id": "selective-app",
     "name": "Selective application",
     "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination",
-    "relevantFeatures": ["tag-shake"],
-    "componentConcepts": ["button", "badge", "card"]
+    "relevantFeatures": [
+      "tag-shake"
+    ],
+    "componentConcepts": [
+      "button",
+      "badge",
+      "card"
+    ]
   },
   "suite": {
     "id": "material",
@@ -19,13 +25,13 @@
     "name": "Baseline (Standard Vite)",
     "isBaseline": true
   },
-  "timestamp": "2026-10-10T10:12:02.202Z",
+  "timestamp": "2026-10-20T19:02:47.667Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -40,32 +46,549 @@
     }
   },
   "metrics": {
-    "rawBytes": 270724,
-    "gzipBytes": 57448,
-    "brotliBytes": 46477,
-    "buildTimeMs": 28.697167000002082,
-    "firstRenderMs": 11.5,
-    "updateMs": 1.8,
-    "scriptEvalMs": 6.3,
-    "registrationMs": 1,
-    "heapUsedBytes": 2936906,
+    "rawBytes": 270484,
+    "gzipBytes": 57394,
+    "brotliBytes": 46446,
+    "buildTimeMs": 30.322750000000042,
+    "firstRenderMs": 9.7,
+    "updateMs": 1.6,
+    "scriptEvalMs": 6.4,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 1265878,
     "scenarioSpecific": {
       "importedCustomElementsCount": 20,
       "referencedCustomElementsCount": 3,
-      "referencedTags": ["md-filled-button", "md-badge", "md-elevation"],
+      "referencedTags": [
+        "md-filled-button",
+        "md-badge",
+        "md-elevation"
+      ],
       "actionDispatches": 1
     }
   },
   "runtime": {
-    "firstRenderMs": 11.5,
-    "updateMs": 1.8,
-    "scriptEvalMs": 6.3,
-    "registrationMs": 1,
-    "heapUsedBytes": 2936906
+    "firstRenderMs": 9.7,
+    "updateMs": 1.6,
+    "scriptEvalMs": 6.4,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 1265878
+  },
+  "domSnapshot": {
+    "mount": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "selective-app-root",
+            "style": "padding:20px; display:flex; flex-direction:column; gap:16px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "md-elevation",
+              "attributes": {
+                "aria-hidden": "true",
+                "class": "overview-card"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "style": "padding:16px; display:flex; flex-direction:column; gap:12px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "style": "display:flex; justify-content:space-between; align-items:center;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "h2",
+                          "attributes": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Selective component application"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-badge",
+                          "attributes": {
+                            "type": "success"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Active"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "md3-badge"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "p",
+                                    "attributes": {
+                                      "class": "md3-badge__value"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "p",
+                      "attributes": {
+                        "style": "color:#71717a;"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "This application only references 3 custom elements in its template out of the 20 imported from the suite."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {},
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-filled-button",
+                          "attributes": {
+                            "value": ""
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Trigger action"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "md-elevation",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "part": "elevation"
+                                },
+                                "children": [],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "span",
+                                      "attributes": {
+                                        "class": "shadow"
+                                      },
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "background"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "md-focus-ring",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "for": "button",
+                                  "part": "focus-ring"
+                                },
+                                "children": [],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": []
+                                }
+                              },
+                              {
+                                "type": "element",
+                                "tag": "md-ripple",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "for": "button",
+                                  "part": "ripple"
+                                },
+                                "children": [],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "div",
+                                      "attributes": {
+                                        "class": "surface"
+                                      },
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "button",
+                                  "id": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "touch"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "shadowRoot": {
+                "mode": "open",
+                "children": [
+                  {
+                    "type": "element",
+                    "tag": "span",
+                    "attributes": {
+                      "class": "shadow"
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "selective-app-root",
+            "style": "padding:20px; display:flex; flex-direction:column; gap:16px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "md-elevation",
+              "attributes": {
+                "aria-hidden": "true",
+                "class": "overview-card"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "style": "padding:16px; display:flex; flex-direction:column; gap:12px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "style": "display:flex; justify-content:space-between; align-items:center;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "h2",
+                          "attributes": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Selective component application"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-badge",
+                          "attributes": {
+                            "type": "success"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Active"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "md3-badge"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "p",
+                                    "attributes": {
+                                      "class": "md3-badge__value"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "p",
+                      "attributes": {
+                        "style": "color:#71717a;"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "This application only references 3 custom elements in its template out of the 20 imported from the suite."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {},
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "md-filled-button",
+                          "attributes": {
+                            "value": ""
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Trigger action"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "md-elevation",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "part": "elevation"
+                                },
+                                "children": [],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "span",
+                                      "attributes": {
+                                        "class": "shadow"
+                                      },
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "background"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "md-focus-ring",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "for": "button",
+                                  "part": "focus-ring"
+                                },
+                                "children": [],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": []
+                                }
+                              },
+                              {
+                                "type": "element",
+                                "tag": "md-ripple",
+                                "attributes": {
+                                  "aria-hidden": "true",
+                                  "for": "button",
+                                  "part": "ripple"
+                                },
+                                "children": [],
+                                "shadowRoot": {
+                                  "mode": "open",
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "tag": "div",
+                                      "attributes": {
+                                        "class": "surface pressed"
+                                      },
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "button",
+                                  "id": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "touch"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "shadowRoot": {
+                "mode": "open",
+                "children": [
+                  {
+                    "type": "element",
+                    "tag": "span",
+                    "attributes": {
+                      "class": "shadow"
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "elementsCount": 9,
+    "customElementsCount": 3,
+    "shadowRootsCount": 3
   },
   "equivalence": {
     "domStructureMatch": true,
     "elementsCount": 9,
-    "verified": true
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

@@ -93,10 +93,8 @@ function checkCrateFresh(pkgDir, destNode) {
   }
 
   if (hasNewer(pkgDir)) return false;
-  if (pkgDir.endsWith('morph-to-react')) {
-    const litAnalysisDir = path.resolve(rootDir, 'crates', 'lit-analysis');
-    if (hasNewer(litAnalysisDir)) return false;
-  }
+  const litAnalysisDir = path.resolve(rootDir, 'crates', 'lit-analysis');
+  if (hasNewer(litAnalysisDir)) return false;
   return true;
 }
 

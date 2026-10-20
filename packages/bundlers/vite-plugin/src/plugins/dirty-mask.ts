@@ -4,7 +4,7 @@ import { reportTransformError } from '../errors.js';
 import type { DirtyMaskOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
-const LIT_DIRTY_MASK_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
+const LIT_DIRTY_MASK_FAST_CHECK = /`[\s\S]*?\$\{/;
 
 export function dirtyMask(options: DirtyMaskOptions = {}): Plugin {
   const { sourcemap = true } = options;

@@ -28,13 +28,13 @@
     "name": "Dependency bitmasking (dirty-mask)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T20:04:11.514Z",
+  "timestamp": "2026-10-20T18:42:39.173Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -49,15 +49,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 72710,
-    "gzipBytes": 18829,
-    "brotliBytes": 16702,
-    "buildTimeMs": 19.133082999999715,
-    "firstRenderMs": 64.1,
-    "updateMs": 8.2,
-    "scriptEvalMs": 2.6,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 4864965,
+    "rawBytes": 72946,
+    "gzipBytes": 18873,
+    "brotliBytes": 16739,
+    "buildTimeMs": 20.361291999999594,
+    "firstRenderMs": 65.1,
+    "updateMs": 5.7,
+    "scriptEvalMs": 2.4,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 2666566,
     "scenarioSpecific": {
       "rowCount": 100,
       "customElementsPerCell": 4,
@@ -66,49 +66,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 71634,
-    "gzipBytes": 18623,
-    "brotliBytes": 16513,
-    "buildTimeMs": 14.497707999998966,
-    "firstRenderMs": 62.2,
-    "updateMs": 5.5,
+    "rawBytes": 71556,
+    "gzipBytes": 18605,
+    "brotliBytes": 16487,
+    "buildTimeMs": 19.75720799999999,
+    "firstRenderMs": 66.4,
+    "updateMs": 5.7,
     "scriptEvalMs": 2.4,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 3448682,
-    "scenarioSpecific": {
-      "rowCount": 100,
-      "customElementsPerCell": 4,
-      "totalCustomElements": 400,
-      "renderedNodes": 801
-    }
+    "registrationMs": 0.4,
+    "heapUsedBytes": 2589854
   },
   "deltas": {
-    "rawBytes": 1076,
-    "rawPercent": 1.5,
-    "gzipBytes": 206,
-    "gzipPercent": 1.11,
-    "brotliBytes": 189,
-    "brotliPercent": 1.14,
-    "buildTimeMs": 4.6,
-    "firstRenderMs": 1.9,
-    "speedupPercent": -3.05,
-    "updateMs": 2.7,
-    "updateSpeedupPercent": -49.09,
-    "evalSpeedupPercent": -8.33,
-    "registrationSpeedupPercent": -150,
-    "memorySavingsPercent": -41.07
+    "rawBytes": 1390,
+    "rawPercent": 1.94,
+    "gzipBytes": 268,
+    "gzipPercent": 1.44,
+    "brotliBytes": 252,
+    "brotliPercent": 1.53,
+    "buildTimeMs": 0.6,
+    "firstRenderMs": -1.3,
+    "speedupPercent": 1.96,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 75,
+    "memorySavingsPercent": -2.96
   },
   "runtime": {
-    "firstRenderMs": 64.1,
-    "updateMs": 8.2,
-    "scriptEvalMs": 2.6,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 4864965,
-    "speedupPercent": -3.05,
-    "updateSpeedupPercent": -49.09,
-    "evalSpeedupPercent": -8.33,
-    "registrationSpeedupPercent": -150,
-    "memorySavingsPercent": -41.07
+    "firstRenderMs": 65.1,
+    "updateMs": 5.7,
+    "scriptEvalMs": 2.4,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 2666566,
+    "speedupPercent": 1.96,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 75,
+    "memorySavingsPercent": -2.96
   },
   "domSnapshot": {
     "mount": {
@@ -40984,7 +40978,6 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
-                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -41008,7 +41001,6 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
-                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -42202,6 +42194,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -42225,6 +42218,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -43418,6 +43412,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -43441,6 +43436,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -44637,6 +44633,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -44660,6 +44657,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -45853,6 +45851,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -45876,6 +45875,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -47072,6 +47072,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -47095,6 +47096,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -48288,6 +48290,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -48311,6 +48314,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -49503,7 +49507,6 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
-                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -49527,7 +49530,6 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
-                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -50721,6 +50723,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -50744,6 +50747,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -51937,6 +51941,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -51960,6 +51965,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -53156,6 +53162,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -53179,6 +53186,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -54372,6 +54380,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -54395,6 +54404,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -55591,6 +55601,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -55614,6 +55625,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -56807,6 +56819,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -56830,6 +56843,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -58022,7 +58036,6 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
-                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -58046,7 +58059,6 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
-                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -59240,6 +59252,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -59263,6 +59276,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -60456,6 +60470,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -60479,6 +60494,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -61675,6 +61691,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -61698,6 +61715,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -62891,6 +62909,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -62914,6 +62933,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -64110,6 +64130,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -64133,6 +64154,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -65326,6 +65348,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -65349,6 +65372,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -66541,7 +66565,6 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
-                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -66565,7 +66588,6 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
-                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -67759,6 +67781,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -67782,6 +67805,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -68975,6 +68999,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -68998,6 +69023,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -70194,6 +70220,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -70217,6 +70244,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -71410,6 +71438,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -71433,6 +71462,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -72629,6 +72659,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -72652,6 +72683,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -73845,6 +73877,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -73868,6 +73901,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -75060,7 +75094,6 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
-                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -75084,7 +75117,6 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
-                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -76278,6 +76310,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -76301,6 +76334,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -77494,6 +77528,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -77517,6 +77552,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -78713,6 +78749,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -78736,6 +78773,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -79929,6 +79967,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -79952,6 +79991,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [
@@ -81148,6 +81188,7 @@
                         "tag": "md-ripple",
                         "attributes": {
                           "aria-hidden": "true",
+                          "disabled": "",
                           "for": "button",
                           "part": "ripple"
                         },
@@ -81171,6 +81212,7 @@
                         "tag": "button",
                         "attributes": {
                           "class": "button",
+                          "disabled": "",
                           "id": "button"
                         },
                         "children": [

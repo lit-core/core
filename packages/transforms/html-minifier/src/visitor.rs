@@ -35,7 +35,7 @@ struct HtmlMinifierMutVisitor<'a> {
 
 impl<'a> VisitMut<'a> for HtmlMinifierMutVisitor<'a> {
     fn visit_tagged_template_expression(&mut self, tagged: &mut TaggedTemplateExpression<'a>) {
-        let is_target = self.symbol_ctx.is_lit_html_tag(&tagged.tag)
+        let is_target = self.symbol_ctx.is_lit_html_or_static_tag(&tagged.tag)
             || self.symbol_ctx.is_lit_svg_tag(&tagged.tag);
 
         if is_target && !tagged.quasi.quasis.is_empty() {
@@ -97,27 +97,7 @@ pub fn collapse_code(source: &str, options: CollapseOptions) -> CollapseResult {
 
     let semantic_ret = SemanticBuilder::new().build(&parsed.program);
     let scoping = semantic_ret.semantic.into_scoping();
-
-    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
-
-    let symbol_ctx = SymbolProofContext {
-        scoping: &scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
+    let symbol_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
 
     if !symbol_ctx.has_lit_imports() {
         return CollapseResult {

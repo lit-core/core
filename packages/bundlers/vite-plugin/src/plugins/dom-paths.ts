@@ -4,7 +4,7 @@ import { reportTransformError } from '../errors.js';
 import type { DomPathsOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
-const LIT_DOM_PATHS_FAST_CHECK = /(?:html|svg)\s*`[\s\S]*?\${/;
+const LIT_DOM_PATHS_FAST_CHECK = /`[\s\S]*?\$\{/;
 
 export function domPaths(options: DomPathsOptions = {}): Plugin {
   const { sourcemap = true } = options;

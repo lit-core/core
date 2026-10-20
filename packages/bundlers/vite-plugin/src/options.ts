@@ -82,6 +82,12 @@ export interface HtmlFuseOptions {
    * @default false
    */
   applyInDev?: boolean;
+
+  /**
+   * Minimum net byte savings threshold for extracting a shared HTML fragment.
+   * @default 80
+   */
+  minSavings?: number;
 }
 
 export type LitHtmlFuseOptions = HtmlFuseOptions;

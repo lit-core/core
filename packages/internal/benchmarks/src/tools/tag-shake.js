@@ -18,12 +18,10 @@ export const tagShakeTool = {
    */
   getPlugins(suite) {
     const include = normalizeInclude(suite.includePattern);
-    const keepTags = suite.metadata?.components ? Object.values(suite.metadata.components).map((c) => c.tag) : [];
 
     return createIsolatedToolPlugin('tagShake', {
       include,
       exclude: [],
-      keepTags,
     });
   },
 };

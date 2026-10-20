@@ -34,6 +34,7 @@ pub struct DomPathsResult {
 struct TemplateCollector<'s> {
     symbol_ctx: &'s SymbolProofContext<'s>,
     templates: Vec<(Vec<String>, bool)>, // (quasis, is_render)
+    compiled_templates_count: usize,
     in_render: bool,
 }
 
@@ -51,6 +52,17 @@ impl<'a, 's> Visit<'a> for TemplateCollector<'s> {
 
         oxc_ast_visit::walk::walk_method_definition(self, method);
         self.in_render = prev_in_render;
+    }
+
+    fn visit_object_expression(&mut self, obj: &ObjectExpression<'a>) {
+        let is_compiled_lit_template = obj.properties.iter().any(|prop| match prop {
+            ObjectPropertyKind::ObjectProperty(p) => p.key.is_specific_static_name("_$litType$"),
+            _ => false,
+        });
+        if is_compiled_lit_template {
+            self.compiled_templates_count += 1;
+        }
+        oxc_ast_visit::walk::walk_object_expression(self, obj);
     }
 
     fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
@@ -76,11 +88,19 @@ fn collect_classes_mut<'a, 'b>(stmts: &'b mut [Statement<'a>], out: &mut Vec<&'b
             Statement::ClassDeclaration(class) => {
                 out.push(class);
             }
-            Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
+            Statement::ExportDeclaration(export_decl) => match &mut export_decl.declaration {
+                Declaration::ClassDeclaration(class) => {
                     out.push(class);
                 }
-            }
+                Declaration::VariableDeclaration(var_decl) => {
+                    for decl in &mut var_decl.declarations {
+                        if let Some(Expression::ClassExpression(class)) = &mut decl.init {
+                            out.push(class);
+                        }
+                    }
+                }
+                _ => {}
+            },
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                     &mut export_decl.declaration
@@ -120,25 +140,7 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         .build(&parsed.program)
         .semantic
         .into_scoping();
-    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
-    let symbol_ctx = SymbolProofContext {
-        scoping: &scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
+    let symbol_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
 
     let ast = AstBuilder::new(&allocator);
     let normalize_whitespace = options.normalize_whitespace.unwrap_or(true);
@@ -180,6 +182,7 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         let mut collector = TemplateCollector {
             symbol_ctx: &symbol_ctx,
             templates: Vec::new(),
+            compiled_templates_count: 0,
             in_render: false,
         };
 
@@ -199,8 +202,8 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         }
 
         // Multi-template safety: exactly 1 template with expressions is supported for class-level part paths.
-        // If there are multiple templates with expressions, class-level paths would collide. Bail out cleanly.
-        if collector.templates.len() != 1 {
+        // If there are multiple templates with expressions (or templates already lowered by html-aot), bail out cleanly.
+        if collector.compiled_templates_count > 0 || collector.templates.len() != 1 {
             continue;
         }
 
@@ -259,89 +262,6 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
             &ast,
         );
 
-        // Construct AST node for `static __litPartNodes(root) { return [ ... ]; }`
-        let mut node_elements = ArenaVec::new_in(&ast);
-        for part in &part_descriptors {
-            let mut cur_expr = Expression::new_identifier(SPAN, "root", &ast);
-            for idx in &part.path {
-                let child_nodes_member = Expression::new_static_member_expression(
-                    SPAN,
-                    cur_expr,
-                    IdentifierName::new(SPAN, "childNodes", &ast),
-                    false,
-                    &ast,
-                );
-                let num_expr = Expression::new_numeric_literal(
-                    SPAN,
-                    *idx as f64,
-                    None,
-                    NumberBase::Decimal,
-                    &ast,
-                );
-                cur_expr = Expression::new_computed_member_expression(
-                    SPAN,
-                    child_nodes_member,
-                    num_expr,
-                    false,
-                    &ast,
-                );
-            }
-            node_elements.push(ArrayExpressionElement::from(cur_expr));
-        }
-
-        let return_array = Expression::new_array_expression(SPAN, node_elements, &ast);
-        let mut ret_stmts = ArenaVec::new_in(&ast);
-        ret_stmts.push(Statement::new_return_statement(
-            SPAN,
-            Some(return_array),
-            &ast,
-        ));
-        let func_body = FunctionBody::boxed(SPAN, ArenaVec::new_in(&ast), ret_stmts, &ast);
-
-        let param_pat = BindingPattern::new_binding_identifier(SPAN, "root", &ast);
-        let formal_param = FormalParameter::new_plain(SPAN, param_pat, &ast);
-        let mut params_vec = ArenaVec::new_in(&ast);
-        params_vec.push(formal_param);
-        let params = FormalParameters::boxed(
-            SPAN,
-            FormalParameterKind::FormalParameter,
-            params_vec,
-            None,
-            &ast,
-        );
-
-        let func = Function::boxed(
-            SPAN,
-            FunctionType::FunctionExpression,
-            None,
-            false,
-            false,
-            false,
-            None,
-            None,
-            params,
-            None,
-            Some(func_body),
-            &ast,
-        );
-
-        let method_key = PropertyKey::new_static_identifier(SPAN, "__litPartNodes", &ast);
-        let method_def = ClassElement::new_method_definition(
-            SPAN,
-            MethodDefinitionType::MethodDefinition,
-            ArenaVec::new_in(&ast),
-            method_key,
-            func,
-            MethodDefinitionKind::Method,
-            false,
-            true, // static = true
-            false,
-            false,
-            None,
-            &ast,
-        );
-
-        class.body.body.insert(0, method_def);
         class.body.body.insert(0, prop_def);
     }
 

@@ -58,18 +58,9 @@ pub fn transform_code(source: &str, options: DirectivesOptions) -> DirectivesRes
     let scoping = semantic_ret.semantic.into_scoping();
 
     // Scan for Lit directive imports
-    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = SymbolProofContext::scan(&program, &scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
+    let symbol_ctx = SymbolProofContext::scan(&program, &scoping, source);
 
-    let has_directives = lit_symbols.values().any(|sym| {
+    let has_directives = symbol_ctx.lit_symbols.values().any(|sym| {
         matches!(
             sym,
             CanonicalLitSymbol::Directive(_) | CanonicalLitSymbol::DirectiveNamespace(_)
@@ -84,16 +75,6 @@ pub fn transform_code(source: &str, options: DirectivesOptions) -> DirectivesRes
             directives_used: vec![],
         };
     }
-
-    let symbol_ctx = SymbolProofContext {
-        scoping: &scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
 
     let ast = AstBuilder::new(&allocator);
     let mut lowerer = DirectiveLowerer::new(&ast, &symbol_ctx, &scoping);

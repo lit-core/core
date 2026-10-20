@@ -10,8 +10,7 @@
       "props-lower",
       "css-minifier",
       "html-minifier",
-      "all",
-      "baseline"
+      "all"
     ],
     "componentConcepts": [
       "button",
@@ -47,13 +46,13 @@
     "name": "HTML template minification (html-minifier)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-17T16:29:42.511Z",
+  "timestamp": "2026-10-20T19:24:29.755Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -68,15 +67,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 362780,
-    "gzipBytes": 86285,
-    "brotliBytes": 69231,
-    "buildTimeMs": 87.01633299999958,
-    "firstRenderMs": 40,
-    "updateMs": 6.3,
-    "scriptEvalMs": 2.7,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 3764600,
+    "rawBytes": 365830,
+    "gzipBytes": 86537,
+    "brotliBytes": 69361,
+    "buildTimeMs": 44.77741599999899,
+    "firstRenderMs": 37.4,
+    "updateMs": 0.3,
+    "scriptEvalMs": 3.3,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 1388819,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -105,69 +104,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 372874,
-    "gzipBytes": 87593,
-    "brotliBytes": 70118,
-    "buildTimeMs": 52.691709,
-    "firstRenderMs": 35,
-    "updateMs": 6.9,
-    "scriptEvalMs": 3.3,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 3664726,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "wa-button",
-        "wa-checkbox",
-        "wa-radio",
-        "wa-switch",
-        "wa-input",
-        "wa-select",
-        "wa-dialog",
-        "wa-badge",
-        "wa-tab-group",
-        "wa-progress-bar",
-        "wa-spinner",
-        "wa-slider",
-        "wa-dropdown",
-        "wa-divider",
-        "wa-icon",
-        "wa-copy-button",
-        "wa-card",
-        "wa-popover",
-        "wa-details",
-        "wa-breadcrumb"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 375776,
+    "gzipBytes": 87837,
+    "brotliBytes": 70320,
+    "buildTimeMs": 126.41633300000012,
+    "firstRenderMs": 82,
+    "updateMs": 0.4,
+    "scriptEvalMs": 14.7,
+    "registrationMs": 4.6,
+    "heapUsedBytes": 1402517
   },
   "deltas": {
-    "rawBytes": -10094,
-    "rawPercent": -2.71,
-    "gzipBytes": -1308,
-    "gzipPercent": -1.49,
-    "brotliBytes": -887,
-    "brotliPercent": -1.27,
-    "buildTimeMs": 34.3,
-    "firstRenderMs": 5,
-    "speedupPercent": -14.29,
-    "updateMs": -0.6,
-    "updateSpeedupPercent": 8.7,
-    "evalSpeedupPercent": 18.18,
-    "registrationSpeedupPercent": 8.33,
-    "memorySavingsPercent": -2.73
+    "rawBytes": -9946,
+    "rawPercent": -2.65,
+    "gzipBytes": -1300,
+    "gzipPercent": -1.48,
+    "brotliBytes": -959,
+    "brotliPercent": -1.36,
+    "buildTimeMs": -81.6,
+    "firstRenderMs": -44.6,
+    "speedupPercent": 54.39,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 25,
+    "evalSpeedupPercent": 77.55,
+    "registrationSpeedupPercent": 80.43,
+    "memorySavingsPercent": 0.98
   },
   "runtime": {
-    "firstRenderMs": 40,
-    "updateMs": 6.3,
-    "scriptEvalMs": 2.7,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 3764600,
-    "speedupPercent": -14.29,
-    "updateSpeedupPercent": 8.7,
-    "evalSpeedupPercent": 18.18,
-    "registrationSpeedupPercent": 8.33,
-    "memorySavingsPercent": -2.73
+    "firstRenderMs": 37.4,
+    "updateMs": 0.3,
+    "scriptEvalMs": 3.3,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 1388819,
+    "speedupPercent": 54.39,
+    "updateSpeedupPercent": 25,
+    "evalSpeedupPercent": 77.55,
+    "registrationSpeedupPercent": 80.43,
+    "memorySavingsPercent": 0.98
   },
   "domSnapshot": {
     "mount": {
@@ -298,7 +271,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button ",
+                                  "class": "button",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -436,7 +409,7 @@
                                 "tag": "slot",
                                 "attributes": {
                                   "aria-hidden": "true",
-                                  "class": "  ",
+                                  "class": "",
                                   "id": "hint",
                                   "name": "hint",
                                   "part": "hint"
@@ -518,7 +491,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": "  ",
+                                  "class": "",
                                   "part": "base switch"
                                 },
                                 "children": [
@@ -571,7 +544,7 @@
                                 "tag": "slot",
                                 "attributes": {
                                   "aria-hidden": "true",
-                                  "class": "  ",
+                                  "class": "",
                                   "id": "hint",
                                   "name": "hint",
                                   "part": "hint"
@@ -609,7 +582,7 @@
                                 "tag": "label",
                                 "attributes": {
                                   "aria-hidden": "true",
-                                  "class": " label ",
+                                  "class": "label",
                                   "for": "input",
                                   "part": "form-control-label label"
                                 },
@@ -675,7 +648,7 @@
                                 "tag": "slot",
                                 "attributes": {
                                   "aria-hidden": "true",
-                                  "class": "  ",
+                                  "class": "",
                                   "id": "hint",
                                   "name": "hint",
                                   "part": "hint"
@@ -713,7 +686,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " form-control ",
+                                  "class": "form-control",
                                   "part": "form-control"
                                 },
                                 "children": [
@@ -722,7 +695,7 @@
                                     "tag": "label",
                                     "attributes": {
                                       "aria-hidden": "true",
-                                      "class": " label ",
+                                      "class": "label",
                                       "id": "label",
                                       "part": "form-control-label label"
                                     },
@@ -751,7 +724,7 @@
                                         "attributes": {
                                           "auto-size": "vertical",
                                           "auto-size-padding": "10",
-                                          "class": " select enabled ",
+                                          "class": "select enabled",
                                           "flip": "",
                                           "placement": "bottom",
                                           "shift": "",
@@ -903,7 +876,7 @@
                                               "type": "element",
                                               "tag": "span",
                                               "attributes": {
-                                                "class": " popup-hover-bridge ",
+                                                "class": "popup-hover-bridge",
                                                 "part": "hover-bridge"
                                               },
                                               "children": []
@@ -935,7 +908,7 @@
                                     "tag": "slot",
                                     "attributes": {
                                       "aria-hidden": "true",
-                                      "class": "  ",
+                                      "class": "",
                                       "id": "hint",
                                       "name": "hint",
                                       "part": "hint"
@@ -972,7 +945,7 @@
                                 "type": "element",
                                 "tag": "dialog",
                                 "attributes": {
-                                  "class": " dialog ",
+                                  "class": "dialog",
                                   "part": "dialog"
                                 },
                                 "children": [
@@ -1264,7 +1237,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " tab-group tab-group-top ",
+                                  "class": "tab-group tab-group-top",
                                   "part": "base tab-group"
                                 },
                                 "children": [
@@ -1466,7 +1439,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": " vh ",
+                                  "class": "vh",
                                   "for": "text-box",
                                   "id": "label",
                                   "part": "label"
@@ -1495,7 +1468,7 @@
                                   "aria-valuemin": "0",
                                   "aria-valuenow": "0",
                                   "aria-valuetext": "0",
-                                  "class": " m medium horizontal ",
+                                  "class": "m medium horizontal",
                                   "id": "slider",
                                   "part": "slider",
                                   "role": "slider",
@@ -1536,7 +1509,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": "  ",
+                                      "class": "",
                                       "id": "hint",
                                       "part": "hint"
                                     },
@@ -1637,7 +1610,7 @@
                                       "type": "element",
                                       "tag": "span",
                                       "attributes": {
-                                        "class": " popup-hover-bridge ",
+                                        "class": "popup-hover-bridge",
                                         "part": "hover-bridge"
                                       },
                                       "children": []
@@ -1787,7 +1760,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "Copy",
-                                      "aria-labelledby": "wa-tooltip-6ghZUj1DbsW3iJ3ecdULZ",
+                                      "aria-labelledby": "wa-tooltip-0imfWTUFe3FuviIgJFO1z",
                                       "class": "button",
                                       "id": "copy-button",
                                       "part": "button",
@@ -1922,9 +1895,9 @@
                                     "type": "element",
                                     "tag": "wa-tooltip",
                                     "attributes": {
-                                      "class": " copy-button-tooltip ",
+                                      "class": "copy-button-tooltip",
                                       "for": "copy-button",
-                                      "id": "wa-tooltip-6ghZUj1DbsW3iJ3ecdULZ",
+                                      "id": "wa-tooltip-0imfWTUFe3FuviIgJFO1z",
                                       "part": "feedback",
                                       "placement": "top",
                                       "trigger": "hover focus"
@@ -1943,7 +1916,7 @@
                                           "tag": "wa-popup",
                                           "attributes": {
                                             "arrow": "",
-                                            "class": " tooltip ",
+                                            "class": "tooltip",
                                             "distance": "8",
                                             "exportparts": "\n          popup:base__popup,\n          arrow:base__arrow\n        ",
                                             "flip": "",
@@ -1987,7 +1960,7 @@
                                                 "type": "element",
                                                 "tag": "span",
                                                 "attributes": {
-                                                  "class": " popup-hover-bridge ",
+                                                  "class": "popup-hover-bridge",
                                                   "part": "hover-bridge"
                                                 },
                                                 "children": []
@@ -1996,7 +1969,7 @@
                                                 "type": "element",
                                                 "tag": "div",
                                                 "attributes": {
-                                                  "class": " popup popup-fixed popup-has-arrow ",
+                                                  "class": "popup popup-fixed popup-has-arrow",
                                                   "part": "popup",
                                                   "popover": "manual"
                                                 },
@@ -2074,7 +2047,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " header ",
+                                  "class": "header",
                                   "part": "header"
                                 },
                                 "children": [
@@ -2116,7 +2089,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " footer ",
+                                  "class": "footer",
                                   "part": "footer"
                                 },
                                 "children": [
@@ -2156,7 +2129,7 @@
                           "tag": "wa-popover",
                           "attributes": {
                             "data-canonical-tag": "wa-popover",
-                            "id": "wa-popover-BZWmDMo0mx6liS0jXslki"
+                            "id": "wa-popover-a1E5nSNEr-nYPNwCVBQRi"
                           },
                           "children": [],
                           "shadowRoot": {
@@ -2175,7 +2148,7 @@
                                     "tag": "wa-popup",
                                     "attributes": {
                                       "arrow": "",
-                                      "class": " popover ",
+                                      "class": "popover",
                                       "distance": "8",
                                       "exportparts": "\n            popup:popup__popup,\n            arrow:popup__arrow\n          ",
                                       "flip": "",
@@ -2218,7 +2191,7 @@
                                           "type": "element",
                                           "tag": "span",
                                           "attributes": {
-                                            "class": " popup-hover-bridge ",
+                                            "class": "popup-hover-bridge",
                                             "part": "hover-bridge"
                                           },
                                           "children": []
@@ -2402,7 +2375,7 @@
                                     "tag": "div",
                                     "attributes": {
                                       "aria-labelledby": "header",
-                                      "class": " body ",
+                                      "class": "body",
                                       "role": "region",
                                       "style": "height: 0px;"
                                     },
@@ -2651,7 +2624,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button ",
+                                  "class": "button",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -2789,7 +2762,7 @@
                                 "tag": "slot",
                                 "attributes": {
                                   "aria-hidden": "true",
-                                  "class": "  ",
+                                  "class": "",
                                   "id": "hint",
                                   "name": "hint",
                                   "part": "hint"
@@ -2871,7 +2844,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": "  ",
+                                  "class": "",
                                   "part": "base switch"
                                 },
                                 "children": [
@@ -2924,7 +2897,7 @@
                                 "tag": "slot",
                                 "attributes": {
                                   "aria-hidden": "true",
-                                  "class": "  ",
+                                  "class": "",
                                   "id": "hint",
                                   "name": "hint",
                                   "part": "hint"
@@ -2962,7 +2935,7 @@
                                 "tag": "label",
                                 "attributes": {
                                   "aria-hidden": "true",
-                                  "class": " label ",
+                                  "class": "label",
                                   "for": "input",
                                   "part": "form-control-label label"
                                 },
@@ -3028,7 +3001,7 @@
                                 "tag": "slot",
                                 "attributes": {
                                   "aria-hidden": "true",
-                                  "class": "  ",
+                                  "class": "",
                                   "id": "hint",
                                   "name": "hint",
                                   "part": "hint"
@@ -3066,7 +3039,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " form-control ",
+                                  "class": "form-control",
                                   "part": "form-control"
                                 },
                                 "children": [
@@ -3075,7 +3048,7 @@
                                     "tag": "label",
                                     "attributes": {
                                       "aria-hidden": "true",
-                                      "class": " label ",
+                                      "class": "label",
                                       "id": "label",
                                       "part": "form-control-label label"
                                     },
@@ -3104,7 +3077,7 @@
                                         "attributes": {
                                           "auto-size": "vertical",
                                           "auto-size-padding": "10",
-                                          "class": " select enabled ",
+                                          "class": "select enabled",
                                           "flip": "",
                                           "placement": "bottom",
                                           "shift": "",
@@ -3256,7 +3229,7 @@
                                               "type": "element",
                                               "tag": "span",
                                               "attributes": {
-                                                "class": " popup-hover-bridge ",
+                                                "class": "popup-hover-bridge",
                                                 "part": "hover-bridge"
                                               },
                                               "children": []
@@ -3288,7 +3261,7 @@
                                     "tag": "slot",
                                     "attributes": {
                                       "aria-hidden": "true",
-                                      "class": "  ",
+                                      "class": "",
                                       "id": "hint",
                                       "name": "hint",
                                       "part": "hint"
@@ -3325,7 +3298,7 @@
                                 "type": "element",
                                 "tag": "dialog",
                                 "attributes": {
-                                  "class": " dialog ",
+                                  "class": "dialog",
                                   "part": "dialog"
                                 },
                                 "children": [
@@ -3617,7 +3590,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " tab-group tab-group-top ",
+                                  "class": "tab-group tab-group-top",
                                   "part": "base tab-group"
                                 },
                                 "children": [
@@ -3819,7 +3792,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": " vh ",
+                                  "class": "vh",
                                   "for": "text-box",
                                   "id": "label",
                                   "part": "label"
@@ -3848,7 +3821,7 @@
                                   "aria-valuemin": "0",
                                   "aria-valuenow": "0",
                                   "aria-valuetext": "0",
-                                  "class": " m medium horizontal ",
+                                  "class": "m medium horizontal",
                                   "id": "slider",
                                   "part": "slider",
                                   "role": "slider",
@@ -3889,7 +3862,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": "  ",
+                                      "class": "",
                                       "id": "hint",
                                       "part": "hint"
                                     },
@@ -3990,7 +3963,7 @@
                                       "type": "element",
                                       "tag": "span",
                                       "attributes": {
-                                        "class": " popup-hover-bridge ",
+                                        "class": "popup-hover-bridge",
                                         "part": "hover-bridge"
                                       },
                                       "children": []
@@ -4140,7 +4113,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "Copy",
-                                      "aria-labelledby": "wa-tooltip-H8kE4_pD6k4jMS159KYAe",
+                                      "aria-labelledby": "wa-tooltip--Zp3dMiAnFB4mPDXE5k3q",
                                       "class": "button",
                                       "id": "copy-button",
                                       "part": "button",
@@ -4275,9 +4248,9 @@
                                     "type": "element",
                                     "tag": "wa-tooltip",
                                     "attributes": {
-                                      "class": " copy-button-tooltip ",
+                                      "class": "copy-button-tooltip",
                                       "for": "copy-button",
-                                      "id": "wa-tooltip-H8kE4_pD6k4jMS159KYAe",
+                                      "id": "wa-tooltip--Zp3dMiAnFB4mPDXE5k3q",
                                       "part": "feedback",
                                       "placement": "top",
                                       "trigger": "hover focus"
@@ -4296,7 +4269,7 @@
                                           "tag": "wa-popup",
                                           "attributes": {
                                             "arrow": "",
-                                            "class": " tooltip ",
+                                            "class": "tooltip",
                                             "distance": "8",
                                             "exportparts": "\n          popup:base__popup,\n          arrow:base__arrow\n        ",
                                             "flip": "",
@@ -4340,7 +4313,7 @@
                                                 "type": "element",
                                                 "tag": "span",
                                                 "attributes": {
-                                                  "class": " popup-hover-bridge ",
+                                                  "class": "popup-hover-bridge",
                                                   "part": "hover-bridge"
                                                 },
                                                 "children": []
@@ -4349,7 +4322,7 @@
                                                 "type": "element",
                                                 "tag": "div",
                                                 "attributes": {
-                                                  "class": " popup popup-fixed popup-has-arrow ",
+                                                  "class": "popup popup-has-arrow",
                                                   "part": "popup",
                                                   "popover": "manual"
                                                 },
@@ -4427,7 +4400,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " header ",
+                                  "class": "header",
                                   "part": "header"
                                 },
                                 "children": [
@@ -4469,7 +4442,7 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " footer ",
+                                  "class": "footer",
                                   "part": "footer"
                                 },
                                 "children": [
@@ -4509,7 +4482,7 @@
                           "tag": "wa-popover",
                           "attributes": {
                             "data-canonical-tag": "wa-popover",
-                            "id": "wa-popover-FfXKev9s0wIzF0kpCj6ee"
+                            "id": "wa-popover-QX7PWnzMjU3AZcC7Mvl0l"
                           },
                           "children": [],
                           "shadowRoot": {
@@ -4528,7 +4501,7 @@
                                     "tag": "wa-popup",
                                     "attributes": {
                                       "arrow": "",
-                                      "class": " popover ",
+                                      "class": "popover",
                                       "distance": "8",
                                       "exportparts": "\n            popup:popup__popup,\n            arrow:popup__arrow\n          ",
                                       "flip": "",
@@ -4571,7 +4544,7 @@
                                           "type": "element",
                                           "tag": "span",
                                           "attributes": {
-                                            "class": " popup-hover-bridge ",
+                                            "class": "popup-hover-bridge",
                                             "part": "hover-bridge"
                                           },
                                           "children": []
@@ -4755,7 +4728,7 @@
                                     "tag": "div",
                                     "attributes": {
                                       "aria-labelledby": "header",
-                                      "class": " body ",
+                                      "class": "body",
                                       "role": "region",
                                       "style": "height: 0px;"
                                     },
@@ -4881,12 +4854,13 @@
     "shadowRootsCount": 20
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 49,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Attribute \"aria-labelledby\" mismatch at mount-root > [0] > [1] > [0] > [15] > [0] > shadowRoot > [0] > [1] (<button>): baseline=\"wa-tooltip-IE76reXP3XUPhsBVwVOl1\", variant=\"wa-tooltip-0imfWTUFe3FuviIgJFO1z\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

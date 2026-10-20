@@ -47,13 +47,13 @@
     "name": "Zero-JS resumption (resumable)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-17T16:30:00.219Z",
+  "timestamp": "2026-10-20T18:48:37.810Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -71,12 +71,12 @@
     "rawBytes": 271009,
     "gzipBytes": 57599,
     "brotliBytes": 46520,
-    "buildTimeMs": 33.86537500000122,
-    "firstRenderMs": 25.1,
-    "updateMs": 6.2,
-    "scriptEvalMs": 5.9,
-    "registrationMs": 1.5,
-    "heapUsedBytes": 3443580,
+    "buildTimeMs": 84.03433300000052,
+    "firstRenderMs": 31.3,
+    "updateMs": 6.9,
+    "scriptEvalMs": 6.6,
+    "registrationMs": 1,
+    "heapUsedBytes": 1654957,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -105,69 +105,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 271249,
-    "gzipBytes": 57655,
-    "brotliBytes": 46630,
-    "buildTimeMs": 27.877166999998735,
-    "firstRenderMs": 31.7,
-    "updateMs": 7.9,
-    "scriptEvalMs": 5.9,
-    "registrationMs": 1.9,
-    "heapUsedBytes": 3327627,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "md-filled-button",
-        "md-checkbox",
-        "md-radio",
-        "md-switch",
-        "md-filled-text-field",
-        "md-filled-select",
-        "md-dialog",
-        "md-badge",
-        "md-tabs",
-        "md-linear-progress",
-        "md-circular-progress",
-        "md-slider",
-        "md-menu",
-        "md-divider",
-        "md-icon",
-        "md-icon-button",
-        "md-elevation",
-        "md-focus-ring",
-        "md-list",
-        "md-chip-set"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 271009,
+    "gzipBytes": 57599,
+    "brotliBytes": 46520,
+    "buildTimeMs": 51.46391599999998,
+    "firstRenderMs": 30,
+    "updateMs": 7.4,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 1655253
   },
   "deltas": {
-    "rawBytes": -240,
-    "rawPercent": -0.09,
-    "gzipBytes": -56,
-    "gzipPercent": -0.1,
-    "brotliBytes": -110,
-    "brotliPercent": -0.24,
-    "buildTimeMs": 6,
-    "firstRenderMs": -6.6,
-    "speedupPercent": 20.82,
-    "updateMs": -1.7,
-    "updateSpeedupPercent": 21.52,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 21.05,
-    "memorySavingsPercent": -3.48
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": 32.6,
+    "firstRenderMs": 1.3,
+    "speedupPercent": -4.33,
+    "updateMs": -0.5,
+    "updateSpeedupPercent": 6.76,
+    "evalSpeedupPercent": -1.54,
+    "registrationSpeedupPercent": -25,
+    "memorySavingsPercent": 0.02
   },
   "runtime": {
-    "firstRenderMs": 25.1,
-    "updateMs": 6.2,
-    "scriptEvalMs": 5.9,
-    "registrationMs": 1.5,
-    "heapUsedBytes": 3443580,
-    "speedupPercent": 20.82,
-    "updateSpeedupPercent": 21.52,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 21.05,
-    "memorySavingsPercent": -3.48
+    "firstRenderMs": 31.3,
+    "updateMs": 6.9,
+    "scriptEvalMs": 6.6,
+    "registrationMs": 1,
+    "heapUsedBytes": 1654957,
+    "speedupPercent": -4.33,
+    "updateSpeedupPercent": 6.76,
+    "evalSpeedupPercent": -1.54,
+    "registrationSpeedupPercent": -25,
+    "memorySavingsPercent": 0.02
   },
   "domSnapshot": {
     "mount": {
@@ -598,7 +572,7 @@
                                         "type": "element",
                                         "tag": "mask",
                                         "attributes": {
-                                          "id": "cutout1"
+                                          "id": "cutout3"
                                         },
                                         "children": [
                                           {
@@ -631,7 +605,7 @@
                                           "class": "outer circle",
                                           "cx": "10",
                                           "cy": "10",
-                                          "mask": "url(#cutout1)",
+                                          "mask": "url(#cutout3)",
                                           "r": "10"
                                         },
                                         "children": []

@@ -29,13 +29,13 @@
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T19:54:39.030Z",
+  "timestamp": "2026-10-20T19:29:33.003Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -50,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 198881,
-    "gzipBytes": 42111,
-    "brotliBytes": 34723,
-    "buildTimeMs": 29.587375000000065,
-    "firstRenderMs": 32.4,
-    "updateMs": 4.2,
-    "scriptEvalMs": 3.6,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 3297552,
+    "rawBytes": 197995,
+    "gzipBytes": 42063,
+    "brotliBytes": 34701,
+    "buildTimeMs": 28.79020799999944,
+    "firstRenderMs": 31.2,
+    "updateMs": 1.9,
+    "scriptEvalMs": 3.8,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 1662024,
     "scenarioSpecific": {
       "sectionsCount": 5,
       "controlsPerSection": 6,
@@ -67,49 +67,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 196352,
-    "gzipBytes": 41777,
-    "brotliBytes": 34460,
-    "buildTimeMs": 24.302708999999595,
-    "firstRenderMs": 37.8,
-    "updateMs": 2.3,
-    "scriptEvalMs": 3.8,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 3013699,
-    "scenarioSpecific": {
-      "sectionsCount": 5,
-      "controlsPerSection": 6,
-      "totalControls": 30,
-      "eventsDispatched": 11
-    }
+    "rawBytes": 196219,
+    "gzipBytes": 41739,
+    "brotliBytes": 34427,
+    "buildTimeMs": 27.74420800000007,
+    "firstRenderMs": 41.8,
+    "updateMs": 13.2,
+    "scriptEvalMs": 6.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 1656788
   },
   "deltas": {
-    "rawBytes": 2529,
-    "rawPercent": 1.29,
-    "gzipBytes": 334,
-    "gzipPercent": 0.8,
-    "brotliBytes": 263,
-    "brotliPercent": 0.76,
-    "buildTimeMs": 5.3,
-    "firstRenderMs": -5.4,
-    "speedupPercent": 14.29,
-    "updateMs": 1.9,
-    "updateSpeedupPercent": -82.61,
-    "evalSpeedupPercent": 5.26,
-    "registrationSpeedupPercent": 14.29,
-    "memorySavingsPercent": -9.42
+    "rawBytes": 1776,
+    "rawPercent": 0.91,
+    "gzipBytes": 324,
+    "gzipPercent": 0.78,
+    "brotliBytes": 274,
+    "brotliPercent": 0.8,
+    "buildTimeMs": 1,
+    "firstRenderMs": -10.6,
+    "speedupPercent": 25.36,
+    "updateMs": -11.3,
+    "updateSpeedupPercent": 85.61,
+    "evalSpeedupPercent": 41.54,
+    "registrationSpeedupPercent": 12.5,
+    "memorySavingsPercent": -0.32
   },
   "runtime": {
-    "firstRenderMs": 32.4,
-    "updateMs": 4.2,
-    "scriptEvalMs": 3.6,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 3297552,
-    "speedupPercent": 14.29,
-    "updateSpeedupPercent": -82.61,
-    "evalSpeedupPercent": 5.26,
-    "registrationSpeedupPercent": 14.29,
-    "memorySavingsPercent": -9.42
+    "firstRenderMs": 31.2,
+    "updateMs": 1.9,
+    "scriptEvalMs": 3.8,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 1662024,
+    "speedupPercent": 25.36,
+    "updateSpeedupPercent": 85.61,
+    "evalSpeedupPercent": 41.54,
+    "registrationSpeedupPercent": 12.5,
+    "memorySavingsPercent": -0.32
   },
   "domSnapshot": {
     "mount": {
@@ -175,7 +169,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -275,7 +269,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -360,7 +354,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -374,7 +368,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -447,7 +441,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -455,8 +449,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -514,7 +506,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -525,7 +517,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -550,15 +542,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  unselected prev-unselected "
+                              "class": "container unselected prev-unselected"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -609,7 +599,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -665,7 +655,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container  checked "
+                              "class": "container checked"
                             },
                             "children": [
                               {
@@ -683,7 +673,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -715,7 +705,7 @@
                                     "type": "element",
                                     "tag": "mask",
                                     "attributes": {
-                                      "id": "cutout1"
+                                      "id": "cutout6"
                                     },
                                     "children": [
                                       {
@@ -748,7 +738,7 @@
                                       "class": "outer circle",
                                       "cx": "10",
                                       "cy": "10",
-                                      "mask": "url(#cutout1)",
+                                      "mask": "url(#cutout6)",
                                       "r": "10"
                                     },
                                     "children": []
@@ -793,7 +783,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -910,7 +900,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -1071,7 +1061,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -1213,7 +1203,7 @@
                                   "type": "element",
                                   "tag": "div",
                                   "attributes": {
-                                    "class": "surface   "
+                                    "class": "surface"
                                   },
                                   "children": []
                                 }
@@ -1316,7 +1306,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -1416,7 +1406,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -1501,7 +1491,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -1515,7 +1505,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -1586,7 +1576,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -1594,8 +1584,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -1653,7 +1641,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -1664,7 +1652,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -1691,15 +1679,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  selected checked prev-checked "
+                              "class": "container selected checked prev-checked"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -1750,7 +1736,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -1805,7 +1791,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container   "
+                              "class": "container"
                             },
                             "children": [
                               {
@@ -1823,7 +1809,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -1855,7 +1841,7 @@
                                     "type": "element",
                                     "tag": "mask",
                                     "attributes": {
-                                      "id": "cutout2"
+                                      "id": "cutout7"
                                     },
                                     "children": [
                                       {
@@ -1888,7 +1874,7 @@
                                       "class": "outer circle",
                                       "cx": "10",
                                       "cy": "10",
-                                      "mask": "url(#cutout2)",
+                                      "mask": "url(#cutout7)",
                                       "r": "10"
                                     },
                                     "children": []
@@ -1933,7 +1919,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -2050,7 +2036,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -2211,7 +2197,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -2353,7 +2339,7 @@
                                   "type": "element",
                                   "tag": "div",
                                   "attributes": {
-                                    "class": "surface   "
+                                    "class": "surface"
                                   },
                                   "children": []
                                 }
@@ -2456,7 +2442,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -2556,7 +2542,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -2641,7 +2627,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -2655,7 +2641,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -2728,7 +2714,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -2736,8 +2722,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -2795,7 +2779,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -2806,7 +2790,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -2831,15 +2815,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  unselected prev-unselected "
+                              "class": "container unselected prev-unselected"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -2890,7 +2872,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -2945,7 +2927,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container   "
+                              "class": "container"
                             },
                             "children": [
                               {
@@ -2963,7 +2945,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -2995,7 +2977,7 @@
                                     "type": "element",
                                     "tag": "mask",
                                     "attributes": {
-                                      "id": "cutout3"
+                                      "id": "cutout8"
                                     },
                                     "children": [
                                       {
@@ -3028,7 +3010,7 @@
                                       "class": "outer circle",
                                       "cx": "10",
                                       "cy": "10",
-                                      "mask": "url(#cutout3)",
+                                      "mask": "url(#cutout8)",
                                       "r": "10"
                                     },
                                     "children": []
@@ -3073,7 +3055,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -3190,7 +3172,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -3351,7 +3333,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -3493,7 +3475,7 @@
                                   "type": "element",
                                   "tag": "div",
                                   "attributes": {
-                                    "class": "surface   "
+                                    "class": "surface"
                                   },
                                   "children": []
                                 }
@@ -3596,7 +3578,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -3696,7 +3678,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -3781,7 +3763,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -3795,7 +3777,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -3868,7 +3850,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -3876,8 +3858,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -3935,7 +3915,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -3946,7 +3926,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -3971,15 +3951,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  unselected prev-unselected "
+                              "class": "container unselected prev-unselected"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -4030,7 +4008,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -4086,7 +4064,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container  checked "
+                              "class": "container checked"
                             },
                             "children": [
                               {
@@ -4104,7 +4082,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -4136,7 +4114,7 @@
                                     "type": "element",
                                     "tag": "mask",
                                     "attributes": {
-                                      "id": "cutout4"
+                                      "id": "cutout9"
                                     },
                                     "children": [
                                       {
@@ -4169,7 +4147,7 @@
                                       "class": "outer circle",
                                       "cx": "10",
                                       "cy": "10",
-                                      "mask": "url(#cutout4)",
+                                      "mask": "url(#cutout9)",
                                       "r": "10"
                                     },
                                     "children": []
@@ -4214,7 +4192,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -4331,7 +4309,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -4492,7 +4470,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -4634,7 +4612,7 @@
                                   "type": "element",
                                   "tag": "div",
                                   "attributes": {
-                                    "class": "surface   "
+                                    "class": "surface"
                                   },
                                   "children": []
                                 }
@@ -4737,7 +4715,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -4837,7 +4815,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -4922,7 +4900,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -4936,7 +4914,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -5007,7 +4985,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -5015,8 +4993,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -5074,7 +5050,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -5085,7 +5061,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -5112,15 +5088,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  selected checked prev-checked "
+                              "class": "container selected checked prev-checked"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -5171,7 +5145,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -5226,7 +5200,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container   "
+                              "class": "container"
                             },
                             "children": [
                               {
@@ -5244,7 +5218,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -5276,7 +5250,7 @@
                                     "type": "element",
                                     "tag": "mask",
                                     "attributes": {
-                                      "id": "cutout5"
+                                      "id": "cutout10"
                                     },
                                     "children": [
                                       {
@@ -5309,7 +5283,7 @@
                                       "class": "outer circle",
                                       "cx": "10",
                                       "cy": "10",
-                                      "mask": "url(#cutout5)",
+                                      "mask": "url(#cutout10)",
                                       "r": "10"
                                     },
                                     "children": []
@@ -5354,7 +5328,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -5471,7 +5445,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -5632,7 +5606,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -5774,7 +5748,7 @@
                                   "type": "element",
                                   "tag": "div",
                                   "attributes": {
-                                    "class": "surface   "
+                                    "class": "surface"
                                   },
                                   "children": []
                                 }
@@ -5896,7 +5870,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -5996,7 +5970,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -6081,7 +6055,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -6095,7 +6069,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -6168,7 +6142,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -6176,8 +6150,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -6235,7 +6207,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -6246,7 +6218,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -6271,15 +6243,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  unselected prev-unselected "
+                              "class": "container unselected prev-unselected"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -6330,7 +6300,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -6386,7 +6356,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container  checked "
+                              "class": "container checked"
                             },
                             "children": [
                               {
@@ -6404,7 +6374,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -6514,7 +6484,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -6631,7 +6601,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -6792,7 +6762,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -7038,7 +7008,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -7138,7 +7108,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -7223,7 +7193,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -7237,7 +7207,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -7308,7 +7278,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -7316,8 +7286,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -7375,7 +7343,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -7386,7 +7354,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -7413,15 +7381,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  selected checked prev-checked "
+                              "class": "container selected checked prev-checked"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -7472,7 +7438,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -7527,7 +7493,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container   "
+                              "class": "container"
                             },
                             "children": [
                               {
@@ -7545,7 +7511,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -7655,7 +7621,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -7772,7 +7738,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -7933,7 +7899,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -8075,7 +8041,7 @@
                                   "type": "element",
                                   "tag": "div",
                                   "attributes": {
-                                    "class": "surface   "
+                                    "class": "surface"
                                   },
                                   "children": []
                                 }
@@ -8178,7 +8144,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -8278,7 +8244,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -8363,7 +8329,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -8377,7 +8343,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -8450,7 +8416,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -8458,8 +8424,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -8517,7 +8481,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -8528,7 +8492,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -8553,15 +8517,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  unselected prev-unselected "
+                              "class": "container unselected prev-unselected"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -8612,7 +8574,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -8667,7 +8629,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container   "
+                              "class": "container"
                             },
                             "children": [
                               {
@@ -8685,7 +8647,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -8795,7 +8757,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -8912,7 +8874,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -9073,7 +9035,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -9215,7 +9177,7 @@
                                   "type": "element",
                                   "tag": "div",
                                   "attributes": {
-                                    "class": "surface   "
+                                    "class": "surface"
                                   },
                                   "children": []
                                 }
@@ -9318,7 +9280,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -9418,7 +9380,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -9503,7 +9465,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -9517,7 +9479,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -9590,7 +9552,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -9598,8 +9560,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -9657,7 +9617,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -9668,7 +9628,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -9693,15 +9653,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  unselected prev-unselected "
+                              "class": "container unselected prev-unselected"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -9752,7 +9710,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -9808,7 +9766,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container  checked "
+                              "class": "container checked"
                             },
                             "children": [
                               {
@@ -9826,7 +9784,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -9936,7 +9894,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -10053,7 +10011,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -10214,7 +10172,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -10356,7 +10314,7 @@
                                   "type": "element",
                                   "tag": "div",
                                   "attributes": {
-                                    "class": "surface   "
+                                    "class": "surface"
                                   },
                                   "children": []
                                 }
@@ -10459,7 +10417,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "text-field   "
+                              "class": "text-field"
                             },
                             "children": [
                               {
@@ -10559,7 +10517,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  populated "
+                                        "class": "field populated"
                                       },
                                       "children": [
                                         {
@@ -10644,7 +10602,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "true",
-                                                            "class": "label  hidden resting "
+                                                            "class": "label hidden resting"
                                                           },
                                                           "children": [
                                                             {
@@ -10658,7 +10616,7 @@
                                                           "tag": "span",
                                                           "attributes": {
                                                             "aria-hidden": "false",
-                                                            "class": "label  floating "
+                                                            "class": "label floating"
                                                           },
                                                           "children": [
                                                             {
@@ -10729,7 +10687,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "switch  unselected "
+                              "class": "switch unselected"
                             },
                             "children": [
                               {
@@ -10737,8 +10695,6 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -10796,7 +10752,7 @@
                                               "type": "element",
                                               "tag": "div",
                                               "attributes": {
-                                                "class": "surface   "
+                                                "class": "surface"
                                               },
                                               "children": []
                                             }
@@ -10807,7 +10763,7 @@
                                         "type": "element",
                                         "tag": "span",
                                         "attributes": {
-                                          "class": "handle   "
+                                          "class": "handle"
                                         },
                                         "children": []
                                       }
@@ -10834,15 +10790,13 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": "container  selected checked prev-checked "
+                              "class": "container selected checked prev-checked"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "data-lh-change": "1",
-                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -10893,7 +10847,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -10948,7 +10902,7 @@
                             "tag": "div",
                             "attributes": {
                               "aria-hidden": "true",
-                              "class": "container   "
+                              "class": "container"
                             },
                             "children": [
                               {
@@ -10966,7 +10920,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "surface   "
+                                        "class": "surface"
                                       },
                                       "children": []
                                     }
@@ -11076,7 +11030,7 @@
                             "type": "element",
                             "tag": "span",
                             "attributes": {
-                              "class": "select   "
+                              "class": "select"
                             },
                             "children": [
                               {
@@ -11193,7 +11147,7 @@
                                       "type": "element",
                                       "tag": "div",
                                       "attributes": {
-                                        "class": "field  with-end no-label "
+                                        "class": "field with-end no-label"
                                       },
                                       "children": [
                                         {
@@ -11354,7 +11308,7 @@
                                           "type": "element",
                                           "tag": "div",
                                           "attributes": {
-                                            "class": "menu   ",
+                                            "class": "menu",
                                             "popover": "manual",
                                             "style": "display:none;"
                                           },
@@ -11496,7 +11450,7 @@
                                   "type": "element",
                                   "tag": "div",
                                   "attributes": {
-                                    "class": "surface   "
+                                    "class": "surface"
                                   },
                                   "children": []
                                 }

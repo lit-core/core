@@ -5,8 +5,18 @@
     "id": "ssr-dashboard",
     "name": "SSR dashboard",
     "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
-    "relevantFeatures": ["resumable", "html-aot"],
-    "componentConcepts": ["card", "badge", "progress-bar", "button", "tabs"]
+    "relevantFeatures": [
+      "resumable",
+      "html-aot",
+      "ssr"
+    ],
+    "componentConcepts": [
+      "card",
+      "badge",
+      "progress-bar",
+      "button",
+      "tabs"
+    ]
   },
   "suite": {
     "id": "material",
@@ -19,13 +29,13 @@
     "name": "Zero-JS resumption (resumable)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-10T10:12:01.470Z",
+  "timestamp": "2026-10-20T19:30:16.841Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -40,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 67032,
-    "gzipBytes": 19123,
-    "brotliBytes": 16992,
-    "buildTimeMs": 16.223541999999725,
-    "firstRenderMs": 15,
-    "updateMs": 2.2,
-    "scriptEvalMs": 2.1,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 1944827,
+    "rawBytes": 66921,
+    "gzipBytes": 19092,
+    "brotliBytes": 16969,
+    "buildTimeMs": 18.51083400000016,
+    "firstRenderMs": 12.4,
+    "updateMs": 1.8,
+    "scriptEvalMs": 2.2,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1109213,
     "scenarioSpecific": {
       "cardsCount": 4,
       "progressBarsCount": 4,
@@ -57,21 +67,15 @@
     }
   },
   "baseline": {
-    "rawBytes": 67032,
-    "gzipBytes": 19123,
-    "brotliBytes": 16992,
-    "buildTimeMs": 16.981958000000304,
-    "firstRenderMs": 8.3,
-    "updateMs": 1.3,
-    "scriptEvalMs": 2.2,
+    "rawBytes": 66921,
+    "gzipBytes": 19092,
+    "brotliBytes": 16969,
+    "buildTimeMs": 25.135917000000063,
+    "firstRenderMs": 11.4,
+    "updateMs": 1.7,
+    "scriptEvalMs": 2.1,
     "registrationMs": 0.5,
-    "heapUsedBytes": 1944717,
-    "scenarioSpecific": {
-      "cardsCount": 4,
-      "progressBarsCount": 4,
-      "resumedInteractions": 1,
-      "renderedNodes": 41
-    }
+    "heapUsedBytes": 1109213
   },
   "deltas": {
     "rawBytes": 0,
@@ -80,30 +84,2843 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -0.8,
-    "firstRenderMs": 6.7,
-    "speedupPercent": -80.72,
-    "updateMs": 0.9,
-    "updateSpeedupPercent": -69.23,
-    "evalSpeedupPercent": 4.55,
-    "registrationSpeedupPercent": 40,
-    "memorySavingsPercent": -0.01
+    "buildTimeMs": -6.6,
+    "firstRenderMs": 1,
+    "speedupPercent": -8.77,
+    "updateMs": 0.1,
+    "updateSpeedupPercent": -5.88,
+    "evalSpeedupPercent": -4.76,
+    "registrationSpeedupPercent": 60,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 15,
-    "updateMs": 2.2,
-    "scriptEvalMs": 2.1,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 1944827,
-    "speedupPercent": -80.72,
-    "updateSpeedupPercent": -69.23,
-    "evalSpeedupPercent": 4.55,
-    "registrationSpeedupPercent": 40,
-    "memorySavingsPercent": -0.01
+    "firstRenderMs": 12.4,
+    "updateMs": 1.8,
+    "scriptEvalMs": 2.2,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1109213,
+    "speedupPercent": -8.77,
+    "updateSpeedupPercent": -5.88,
+    "evalSpeedupPercent": -4.76,
+    "registrationSpeedupPercent": 60,
+    "memorySavingsPercent": 0
+  },
+  "domSnapshot": {
+    "mount": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "ssr-dashboard-root",
+            "style": "display:flex; flex-direction:column; gap:20px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "dashboard-header",
+                "style": "display:flex; justify-content:space-between; align-items:center;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h3",
+                  "attributes": {
+                    "class": "dashboard-title"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "System telemetry overview"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "md-tabs",
+                  "attributes": {},
+                  "children": [],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "tabs"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "md-divider",
+                        "attributes": {
+                          "part": "divider"
+                        },
+                        "children": [],
+                        "shadowRoot": {
+                          "mode": "open",
+                          "children": []
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "div",
+              "attributes": {
+                "class": "metrics-grid",
+                "style": "display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "md-elevation",
+                  "attributes": {
+                    "aria-hidden": "true",
+                    "class": "metric-card",
+                    "data-metric": "cpu"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "CPU utilization"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "md-badge",
+                              "attributes": {
+                                "type": "success"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Healthy"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "md3-badge"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "p",
+                                        "attributes": {
+                                          "class": "md3-badge__value"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "42%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.42"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-valuemax": "1",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.42",
+                                  "class": "progress",
+                                  "role": "progressbar"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "dots",
+                                      "hidden": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "inactive-track",
+                                      "style": "transform:scaleX(100%);"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar primary-bar",
+                                      "style": "transform:scaleX(42%);"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar secondary-bar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "md-filled-button",
+                              "attributes": {
+                                "size": "sm",
+                                "value": ""
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "cpu"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "md-elevation",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "part": "elevation"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "shadow"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "background"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-focus-ring",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "focus-ring"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-ripple",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "ripple"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "div",
+                                          "attributes": {
+                                            "class": "surface"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "button",
+                                      "id": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "touch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {},
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "span",
+                        "attributes": {
+                          "class": "shadow"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "md-elevation",
+                  "attributes": {
+                    "aria-hidden": "true",
+                    "class": "metric-card",
+                    "data-metric": "memory"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Memory allocation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "md-badge",
+                              "attributes": {
+                                "type": "warning"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Elevated"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "md3-badge"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "p",
+                                        "attributes": {
+                                          "class": "md3-badge__value"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "78%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.78"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-valuemax": "1",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.78",
+                                  "class": "progress",
+                                  "role": "progressbar"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "dots",
+                                      "hidden": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "inactive-track",
+                                      "style": "transform:scaleX(100%);"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar primary-bar",
+                                      "style": "transform:scaleX(78%);"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar secondary-bar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "md-filled-button",
+                              "attributes": {
+                                "size": "sm",
+                                "value": ""
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "memory"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "md-elevation",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "part": "elevation"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "shadow"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "background"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-focus-ring",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "focus-ring"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-ripple",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "ripple"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "div",
+                                          "attributes": {
+                                            "class": "surface"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "button",
+                                      "id": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "touch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {},
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "span",
+                        "attributes": {
+                          "class": "shadow"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "md-elevation",
+                  "attributes": {
+                    "aria-hidden": "true",
+                    "class": "metric-card",
+                    "data-metric": "io"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Disk throughput"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "md-badge",
+                              "attributes": {
+                                "type": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Normal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "md3-badge"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "p",
+                                        "attributes": {
+                                          "class": "md3-badge__value"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "1.2 GB/s"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.6"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-valuemax": "1",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.6",
+                                  "class": "progress",
+                                  "role": "progressbar"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "dots",
+                                      "hidden": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "inactive-track",
+                                      "style": "transform:scaleX(100%);"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar primary-bar",
+                                      "style": "transform:scaleX(60%);"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar secondary-bar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "md-filled-button",
+                              "attributes": {
+                                "size": "sm",
+                                "value": ""
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "io"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "md-elevation",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "part": "elevation"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "shadow"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "background"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-focus-ring",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "focus-ring"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-ripple",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "ripple"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "div",
+                                          "attributes": {
+                                            "class": "surface"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "button",
+                                      "id": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "touch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {},
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "span",
+                        "attributes": {
+                          "class": "shadow"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "md-elevation",
+                  "attributes": {
+                    "aria-hidden": "true",
+                    "class": "metric-card",
+                    "data-metric": "network"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Bandwidth saturation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "md-badge",
+                              "attributes": {
+                                "type": "success"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Optimal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "md3-badge"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "p",
+                                        "attributes": {
+                                          "class": "md3-badge__value"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "25%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.25"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-valuemax": "1",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.25",
+                                  "class": "progress",
+                                  "role": "progressbar"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "dots",
+                                      "hidden": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "inactive-track",
+                                      "style": "transform:scaleX(100%);"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar primary-bar",
+                                      "style": "transform:scaleX(25%);"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar secondary-bar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "md-filled-button",
+                              "attributes": {
+                                "size": "sm",
+                                "value": ""
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "network"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "md-elevation",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "part": "elevation"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "shadow"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "background"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-focus-ring",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "focus-ring"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-ripple",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "ripple"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "div",
+                                          "attributes": {
+                                            "class": "surface"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "button",
+                                      "id": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "touch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {},
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "span",
+                        "attributes": {
+                          "class": "shadow"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "ssr-dashboard-root",
+            "style": "display:flex; flex-direction:column; gap:20px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "dashboard-header",
+                "style": "display:flex; justify-content:space-between; align-items:center;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h3",
+                  "attributes": {
+                    "class": "dashboard-title"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "System telemetry overview"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "md-tabs",
+                  "attributes": {},
+                  "children": [],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "tabs"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "slot",
+                            "attributes": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "md-divider",
+                        "attributes": {
+                          "part": "divider"
+                        },
+                        "children": [],
+                        "shadowRoot": {
+                          "mode": "open",
+                          "children": []
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "div",
+              "attributes": {
+                "class": "metrics-grid",
+                "style": "display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "md-elevation",
+                  "attributes": {
+                    "aria-hidden": "true",
+                    "class": "metric-card",
+                    "data-metric": "cpu"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "CPU utilization"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "md-badge",
+                              "attributes": {
+                                "type": "success"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Healthy"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "md3-badge"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "p",
+                                        "attributes": {
+                                          "class": "md3-badge__value"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "42%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.52"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-valuemax": "1",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.52",
+                                  "class": "progress",
+                                  "role": "progressbar"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "dots",
+                                      "hidden": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "inactive-track",
+                                      "style": "transform:scaleX(100%);"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar primary-bar",
+                                      "style": "transform: scaleX(0.52);"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar secondary-bar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "md-filled-button",
+                              "attributes": {
+                                "size": "sm",
+                                "value": ""
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "cpu"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "md-elevation",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "part": "elevation"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "shadow"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "background"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-focus-ring",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "focus-ring"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-ripple",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "ripple"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "div",
+                                          "attributes": {
+                                            "class": "surface pressed"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "button",
+                                      "id": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "touch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {},
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "span",
+                        "attributes": {
+                          "class": "shadow"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "md-elevation",
+                  "attributes": {
+                    "aria-hidden": "true",
+                    "class": "metric-card",
+                    "data-metric": "memory"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Memory allocation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "md-badge",
+                              "attributes": {
+                                "type": "warning"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Elevated"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "md3-badge"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "p",
+                                        "attributes": {
+                                          "class": "md3-badge__value"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "78%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.88"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-valuemax": "1",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.88",
+                                  "class": "progress",
+                                  "role": "progressbar"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "dots",
+                                      "hidden": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "inactive-track",
+                                      "style": "transform:scaleX(100%);"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar primary-bar",
+                                      "style": "transform: scaleX(0.88);"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar secondary-bar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "md-filled-button",
+                              "attributes": {
+                                "size": "sm",
+                                "value": ""
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "memory"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "md-elevation",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "part": "elevation"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "shadow"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "background"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-focus-ring",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "focus-ring"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-ripple",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "ripple"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "div",
+                                          "attributes": {
+                                            "class": "surface"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "button",
+                                      "id": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "touch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {},
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "span",
+                        "attributes": {
+                          "class": "shadow"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "md-elevation",
+                  "attributes": {
+                    "aria-hidden": "true",
+                    "class": "metric-card",
+                    "data-metric": "io"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Disk throughput"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "md-badge",
+                              "attributes": {
+                                "type": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Normal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "md3-badge"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "p",
+                                        "attributes": {
+                                          "class": "md3-badge__value"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "1.2 GB/s"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.7"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-valuemax": "1",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.7",
+                                  "class": "progress",
+                                  "role": "progressbar"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "dots",
+                                      "hidden": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "inactive-track",
+                                      "style": "transform:scaleX(100%);"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar primary-bar",
+                                      "style": "transform: scaleX(0.7);"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar secondary-bar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "md-filled-button",
+                              "attributes": {
+                                "size": "sm",
+                                "value": ""
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "io"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "md-elevation",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "part": "elevation"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "shadow"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "background"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-focus-ring",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "focus-ring"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-ripple",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "ripple"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "div",
+                                          "attributes": {
+                                            "class": "surface"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "button",
+                                      "id": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "touch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {},
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "span",
+                        "attributes": {
+                          "class": "shadow"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "md-elevation",
+                  "attributes": {
+                    "aria-hidden": "true",
+                    "class": "metric-card",
+                    "data-metric": "network"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Bandwidth saturation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "md-badge",
+                              "attributes": {
+                                "type": "success"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Optimal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "md3-badge"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "p",
+                                        "attributes": {
+                                          "class": "md3-badge__value"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "25%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "md-linear-progress",
+                          "attributes": {
+                            "max": "1",
+                            "value": "0.35"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "aria-valuemax": "1",
+                                  "aria-valuemin": "0",
+                                  "aria-valuenow": "0.35",
+                                  "class": "progress",
+                                  "role": "progressbar"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "dots",
+                                      "hidden": ""
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "inactive-track",
+                                      "style": "transform:scaleX(100%);"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar primary-bar",
+                                      "style": "transform: scaleX(0.35);"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "bar secondary-bar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "bar-inner"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "md-filled-button",
+                              "attributes": {
+                                "size": "sm",
+                                "value": ""
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "network"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "md-elevation",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "part": "elevation"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "span",
+                                          "attributes": {
+                                            "class": "shadow"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "background"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-focus-ring",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "focus-ring"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": []
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "md-ripple",
+                                    "attributes": {
+                                      "aria-hidden": "true",
+                                      "for": "button",
+                                      "part": "ripple"
+                                    },
+                                    "children": [],
+                                    "shadowRoot": {
+                                      "mode": "open",
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "div",
+                                          "attributes": {
+                                            "class": "surface"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "button",
+                                      "id": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "touch"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "label"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "element",
+                                            "tag": "slot",
+                                            "attributes": {},
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "span",
+                        "attributes": {
+                          "class": "shadow"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "elementsCount": 41,
+    "customElementsCount": 17,
+    "shadowRootsCount": 17
   },
   "equivalence": {
     "domStructureMatch": true,
     "elementsCount": 41,
-    "verified": true
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

@@ -29,13 +29,13 @@
     "name": "Universal SSR engine (ssr)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-13T22:03:18.793Z",
+  "timestamp": "2026-10-20T19:30:15.890Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "664d821",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -53,12 +53,12 @@
     "rawBytes": 164668,
     "gzipBytes": 40362,
     "brotliBytes": 33872,
-    "buildTimeMs": 62.81579199999999,
-    "firstRenderMs": 10,
-    "updateMs": 0.4,
-    "scriptEvalMs": 1.5,
+    "buildTimeMs": 24.70054200000004,
+    "firstRenderMs": 14.4,
+    "updateMs": 0.7,
+    "scriptEvalMs": 1.4,
     "registrationMs": 0.2,
-    "heapUsedBytes": 2485534,
+    "heapUsedBytes": 1091861,
     "scenarioSpecific": {
       "cardsCount": 4,
       "progressBarsCount": 4,
@@ -67,49 +67,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 164688,
-    "gzipBytes": 40361,
-    "brotliBytes": 33882,
-    "buildTimeMs": 20.454125000000204,
-    "firstRenderMs": 15.6,
+    "rawBytes": 164668,
+    "gzipBytes": 40362,
+    "brotliBytes": 33872,
+    "buildTimeMs": 40.61212499999999,
+    "firstRenderMs": 13.9,
     "updateMs": 0.7,
-    "scriptEvalMs": 1.5,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 2408101,
-    "scenarioSpecific": {
-      "cardsCount": 4,
-      "progressBarsCount": 4,
-      "resumedInteractions": 4,
-      "renderedNodes": 41
-    }
+    "scriptEvalMs": 1.4,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1091849
   },
   "deltas": {
-    "rawBytes": -20,
-    "rawPercent": -0.01,
-    "gzipBytes": 1,
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
     "gzipPercent": 0,
-    "brotliBytes": -10,
-    "brotliPercent": -0.03,
-    "buildTimeMs": 42.4,
-    "firstRenderMs": -5.6,
-    "speedupPercent": 35.9,
-    "updateMs": -0.3,
-    "updateSpeedupPercent": 42.86,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": -15.9,
+    "firstRenderMs": 0.5,
+    "speedupPercent": -3.6,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
     "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 50,
-    "memorySavingsPercent": -3.22
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 10,
-    "updateMs": 0.4,
-    "scriptEvalMs": 1.5,
+    "firstRenderMs": 14.4,
+    "updateMs": 0.7,
+    "scriptEvalMs": 1.4,
     "registrationMs": 0.2,
-    "heapUsedBytes": 2485534,
-    "speedupPercent": 35.9,
-    "updateSpeedupPercent": 42.86,
+    "heapUsedBytes": 1091861,
+    "speedupPercent": -3.6,
+    "updateSpeedupPercent": 0,
     "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 50,
-    "memorySavingsPercent": -3.22
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "domSnapshot": {
     "mount": {
@@ -162,7 +156,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " tab-group tab-group-top ",
+                          "class": "tab-group tab-group-top",
                           "part": "base tab-group"
                         },
                         "children": [
@@ -445,7 +439,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-busy": "false",
-                                      "class": " button has-label ",
+                                      "class": "button has-label",
                                       "part": "base button",
                                       "role": "button",
                                       "tabindex": "0",
@@ -509,7 +503,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -551,7 +545,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -786,7 +780,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-busy": "false",
-                                      "class": " button has-label ",
+                                      "class": "button has-label",
                                       "part": "base button",
                                       "role": "button",
                                       "tabindex": "0",
@@ -850,7 +844,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -892,7 +886,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -1127,7 +1121,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-busy": "false",
-                                      "class": " button has-label ",
+                                      "class": "button has-label",
                                       "part": "base button",
                                       "role": "button",
                                       "tabindex": "0",
@@ -1191,7 +1185,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -1233,7 +1227,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -1468,7 +1462,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-busy": "false",
-                                      "class": " button has-label ",
+                                      "class": "button has-label",
                                       "part": "base button",
                                       "role": "button",
                                       "tabindex": "0",
@@ -1532,7 +1526,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -1574,7 +1568,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -1655,7 +1649,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " tab-group tab-group-top ",
+                          "class": "tab-group tab-group-top",
                           "part": "base tab-group"
                         },
                         "children": [
@@ -1938,7 +1932,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-busy": "false",
-                                      "class": " button has-label ",
+                                      "class": "button has-label",
                                       "part": "base button",
                                       "role": "button",
                                       "tabindex": "0",
@@ -2002,7 +1996,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -2044,7 +2038,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -2279,7 +2273,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-busy": "false",
-                                      "class": " button has-label ",
+                                      "class": "button has-label",
                                       "part": "base button",
                                       "role": "button",
                                       "tabindex": "0",
@@ -2343,7 +2337,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -2385,7 +2379,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -2620,7 +2614,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-busy": "false",
-                                      "class": " button has-label ",
+                                      "class": "button has-label",
                                       "part": "base button",
                                       "role": "button",
                                       "tabindex": "0",
@@ -2684,7 +2678,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -2726,7 +2720,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -2961,7 +2955,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-busy": "false",
-                                      "class": " button has-label ",
+                                      "class": "button has-label",
                                       "part": "base button",
                                       "role": "button",
                                       "tabindex": "0",
@@ -3025,7 +3019,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -3067,7 +3061,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [

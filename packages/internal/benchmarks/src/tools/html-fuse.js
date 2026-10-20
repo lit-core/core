@@ -38,6 +38,7 @@ export const htmlFuseTool = {
       exclude: [],
       threshold: 2,
       minFragmentLength: 15,
+      minSavings: 80,
       outputDir: '.fused-html',
       write: false,
       virtualImports: true,

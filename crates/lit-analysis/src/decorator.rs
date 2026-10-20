@@ -66,6 +66,12 @@ impl DecoratorExtractor {
                     target_member: None,
                     span: (dec.span.start, dec.span.end),
                 });
+            } else if let Some(tag) = ctx.is_class_custom_element_decorator_call(&dec.expression) {
+                extracted.push(ExtractedDecorator {
+                    kind: LitDecoratorKind::CustomElement { tag },
+                    target_member: None,
+                    span: (dec.span.start, dec.span.end),
+                });
             }
         }
 
@@ -357,6 +363,14 @@ impl DecoratorExtractor {
                                         target_member: None,
                                         span: (call.span.start, call.span.end),
                                     });
+                                } else if let Some(tag) =
+                                    ctx.is_class_custom_element_decorator_call(dec_expr)
+                                {
+                                    extracted.push(ExtractedDecorator {
+                                        kind: LitDecoratorKind::CustomElement { tag },
+                                        target_member: None,
+                                        span: (call.span.start, call.span.end),
+                                    });
                                 }
                             }
                         }
@@ -413,10 +427,7 @@ impl DecoratorExtractor {
                             .arguments
                             .first()
                             .and_then(|a| a.as_expression())
-                            .and_then(|e| match e {
-                                Expression::StringLiteral(s) => Some(s.value.to_string()),
-                                _ => None,
-                            })
+                            .and_then(SymbolProofContext::extract_static_string)
                             .unwrap_or_default();
                         Some(LitDecoratorKind::CustomElement { tag })
                     }

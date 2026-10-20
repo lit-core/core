@@ -1,7 +1,7 @@
 import assert from 'node:assert';
-import { transformSsrComponent } from '../../packages/rendering/ssr/dist/compiler.js';
 import { transformResumableComponent } from '../../packages/rendering/resumable/lib/compiler/index.js';
-import { compileModule, analyzeLitModule } from '../../packages/targets/morph-to-react/src/index.js';
+import { transformSsrComponent } from '../../packages/rendering/ssr/dist/compiler.js';
+import { analyzeLitModule, compileModule } from '../../packages/targets/morph-to-react/src/index.js';
 
 console.log('================================================================');
 console.log('EMPIRICAL CHALLENGER TEST SUITE: ssr, resumable, morph-to-react');

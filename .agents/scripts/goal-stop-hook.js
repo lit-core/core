@@ -9,6 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const agentsDir = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(agentsDir, '..');
 const goalFile = path.resolve(agentsDir, '.goal_active.json');
+const biomeBin = path.join(repoRoot, 'node_modules', '.bin', 'biome');
 
 // Read stdin payload from Antigravity lifecycle hook
 let inputData = '';
@@ -20,13 +21,48 @@ process.stdin.on('data', (chunk) => {
 
 process.stdin.on('end', () => {
   try {
-    let _payload = {};
+    let payload = {};
     if (inputData.trim()) {
-      _payload = JSON.parse(inputData);
+      payload = JSON.parse(inputData);
     }
 
-    // If no active goal file, allow normal termination immediately
+    // Do not block non-model terminations (e.g., max_steps_exceeded or error)
+    if (payload.terminationReason && payload.terminationReason !== 'model_stop') {
+      outputResult({ decision: 'allow' });
+      return;
+    }
+
+    // Always auto-format and apply safe lint/import fixes first
+    try {
+      execSync('node .agents/scripts/auto-format.js', {
+        cwd: repoRoot,
+        stdio: 'pipe',
+        timeout: 10000,
+      });
+    } catch {
+      // Continue to verification
+    }
+
+    // If no active goal file, still enforce the fast (<1s) repo-wide lint & format gate
     if (!fs.existsSync(goalFile)) {
+      const executionNum = payload.executionNum || 1;
+      if (executionNum <= 3 && fs.existsSync(biomeBin)) {
+        try {
+          execSync(`${JSON.stringify(biomeBin)} check --write .`, {
+            cwd: repoRoot,
+            stdio: 'pipe',
+            timeout: 10000,
+          });
+        } catch (lintErr) {
+          const errorOutput = (lintErr.stdout?.toString() || lintErr.stderr?.toString() || lintErr.message).slice(-1500).trim();
+          outputResult({
+            decision: 'continue',
+            reason: `Fast pre-stop lint check (\`biome check\`) failed:\n${errorOutput}\n\nPlease fix the remaining lint or syntax errors before finishing.`,
+          });
+          return;
+        }
+      }
+
       outputResult({ decision: 'allow' });
       return;
     }
@@ -57,18 +93,7 @@ process.stdin.on('end', () => {
     // Persist updated cycle count
     fs.writeFileSync(goalFile, JSON.stringify(goalState, null, 2), 'utf8');
 
-    // Step 1: Pre-verification auto-format so trivial whitespace does not fail linting
-    try {
-      execSync('node .agents/scripts/auto-format.js', {
-        cwd: repoRoot,
-        stdio: 'pipe',
-        timeout: 10000,
-      });
-    } catch {
-      // Continue to verification even if auto-format has a minor issue
-    }
-
-    // Step 2: Run CI verification command (defaulting to pnpm run check)
+    // Run CI verification command (defaulting to pnpm run check)
     const verifyCommand = goalState.verifyCommand || 'pnpm run check';
     try {
       execSync(verifyCommand, {
@@ -103,3 +128,4 @@ function outputResult(result) {
   process.stdout.write(JSON.stringify(result));
   process.exit(0);
 }
+

@@ -45,18 +45,50 @@ impl<'a> SymbolResolver<'a> {
 
         // 2. Check if declared as a class in the current program extending a component base class
         for stmt in &self.program.body {
-            let class_opt = match stmt {
-                Statement::ClassDeclaration(cls) => Some(cls.as_ref()),
-                Statement::ExportDeclaration(exp) => {
-                    if let Declaration::ClassDeclaration(cls) = &exp.declaration {
-                        Some(cls.as_ref())
-                    } else {
-                        None
-                    }
+            let class_opt: Option<(&Class, Option<&str>)> = match stmt {
+                Statement::ClassDeclaration(cls) => {
+                    Some((cls.as_ref(), cls.id.as_ref().map(|i| i.name.as_str())))
                 }
+                Statement::VariableDeclaration(var_decl) => {
+                    let mut found = None;
+                    for decl in &var_decl.declarations {
+                        if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                            if let Some(init) = &decl.init {
+                                if let Expression::ClassExpression(cls) = init.without_parentheses()
+                                {
+                                    found = Some((cls.as_ref(), Some(id.name.as_str())));
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    found
+                }
+                Statement::ExportDeclaration(exp) => match &exp.declaration {
+                    Declaration::ClassDeclaration(cls) => {
+                        Some((cls.as_ref(), cls.id.as_ref().map(|i| i.name.as_str())))
+                    }
+                    Declaration::VariableDeclaration(var_decl) => {
+                        let mut found = None;
+                        for decl in &var_decl.declarations {
+                            if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                                if let Some(init) = &decl.init {
+                                    if let Expression::ClassExpression(cls) =
+                                        init.without_parentheses()
+                                    {
+                                        found = Some((cls.as_ref(), Some(id.name.as_str())));
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        found
+                    }
+                    _ => None,
+                },
                 Statement::ExportDefaultDeclaration(exp) => {
                     if let ExportDefaultDeclarationKind::ClassDeclaration(cls) = &exp.declaration {
-                        Some(cls.as_ref())
+                        Some((cls.as_ref(), cls.id.as_ref().map(|i| i.name.as_str())))
                     } else {
                         None
                     }
@@ -64,13 +96,11 @@ impl<'a> SymbolResolver<'a> {
                 _ => None,
             };
 
-            if let Some(cls) = class_opt {
-                if let Some(cls_id) = &cls.id {
-                    if cls_id.name == ident.name {
-                        let proof = self.symbol_ctx.prove_heritage(cls);
-                        if proof.is_reactive() || self.is_extends_html_element(cls) {
-                            return true;
-                        }
+            if let Some((cls, cls_name)) = class_opt {
+                if cls_name == Some(ident.name.as_str()) {
+                    let proof = self.symbol_ctx.prove_heritage(cls);
+                    if proof.is_reactive() || self.is_extends_html_element(cls) {
+                        return true;
                     }
                 }
             }
@@ -352,14 +382,36 @@ impl<'a> SymbolResolver<'a> {
             if let Statement::ImportDeclaration(import_decl) = stmt {
                 if let Some(specifiers) = &import_decl.specifiers {
                     for (spec_idx, spec) in specifiers.iter().enumerate() {
-                        if let ImportDeclarationSpecifier::ImportSpecifier(named) = spec {
-                            if named.local.name.as_str() == name {
-                                return Some(ImportLocation {
-                                    import_stmt_index: stmt_idx,
-                                    specifier_index: spec_idx,
-                                    specifier_name: named.imported.name().as_str().to_string(),
-                                    source: import_decl.source.value.as_str().to_string(),
-                                });
+                        match spec {
+                            ImportDeclarationSpecifier::ImportSpecifier(named) => {
+                                if named.local.name.as_str() == name {
+                                    return Some(ImportLocation {
+                                        import_stmt_index: stmt_idx,
+                                        specifier_index: spec_idx,
+                                        specifier_name: named.imported.name().as_str().to_string(),
+                                        source: import_decl.source.value.as_str().to_string(),
+                                    });
+                                }
+                            }
+                            ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => {
+                                if def.local.name.as_str() == name {
+                                    return Some(ImportLocation {
+                                        import_stmt_index: stmt_idx,
+                                        specifier_index: spec_idx,
+                                        specifier_name: "default".to_string(),
+                                        source: import_decl.source.value.as_str().to_string(),
+                                    });
+                                }
+                            }
+                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                                if ns.local.name.as_str() == name {
+                                    return Some(ImportLocation {
+                                        import_stmt_index: stmt_idx,
+                                        specifier_index: spec_idx,
+                                        specifier_name: "*".to_string(),
+                                        source: import_decl.source.value.as_str().to_string(),
+                                    });
+                                }
                             }
                         }
                     }

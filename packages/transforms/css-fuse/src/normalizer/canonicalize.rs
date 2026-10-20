@@ -225,10 +225,10 @@ pub fn subtract_rules_from_css(
         return None;
     }
 
-    // Format remaining rules into clean CSS
+    // Format remaining rules into compact CSS without multi-line indentation bloat
+    let has_colon_space = extracted_style.css_text.contains(": ");
     let mut out = String::new();
 
-    // Group by at_rule
     let mut current_at: Option<String> = None;
     let mut at_buffer = Vec::new();
 
@@ -238,19 +238,14 @@ pub fn subtract_rules_from_css(
         }
         if let Some(at_str) = at {
             out.push_str(at_str);
-            out.push_str(" {\n");
+            out.push('{');
             for rule_str in buffer.drain(..) {
-                for line in rule_str.lines() {
-                    out.push_str("  ");
-                    out.push_str(line);
-                    out.push('\n');
-                }
+                out.push_str(&rule_str);
             }
-            out.push_str("}\n\n");
+            out.push('}');
         } else {
             for rule_str in buffer.drain(..) {
                 out.push_str(&rule_str);
-                out.push_str("\n\n");
             }
         }
     };
@@ -261,17 +256,23 @@ pub fn subtract_rules_from_css(
             current_at = at_rule;
         }
 
-        let mut rule_str = format!("{} {{\n", selector);
-        for d in decls {
-            rule_str.push_str("  ");
-            if let Some((prop, val)) = d.split_once(':') {
-                rule_str.push_str(prop.trim());
-                rule_str.push_str(": ");
-                rule_str.push_str(val.trim());
-            } else {
-                rule_str.push_str(&d);
+        let mut rule_str = format!("{}{{", selector);
+        if has_colon_space {
+            for (idx, d) in decls.iter().enumerate() {
+                if idx > 0 {
+                    rule_str.push(' ');
+                }
+                if let Some((prop, val)) = d.split_once(':') {
+                    rule_str.push_str(prop.trim());
+                    rule_str.push_str(": ");
+                    rule_str.push_str(val.trim());
+                } else {
+                    rule_str.push_str(d);
+                }
+                rule_str.push(';');
             }
-            rule_str.push_str(";\n");
+        } else {
+            rule_str.push_str(&decls.join(";"));
         }
         rule_str.push('}');
         at_buffer.push(rule_str);
@@ -281,7 +282,6 @@ pub fn subtract_rules_from_css(
 
     for kf in remaining_keyframes {
         out.push_str(&kf);
-        out.push_str("\n\n");
     }
 
     let trimmed = out.trim();

@@ -121,7 +121,7 @@ export class CardElement extends LitElement {
     expectMasked(res.code, 2, 'this.rating');
   });
 
-  it('assigns mask -1 fallback to non-reactive fields on this', () => {
+  it('leaves non-reactive fields on this unmasked so untracked updates always evaluate', () => {
     const input = `
 import { LitElement, html } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -137,13 +137,14 @@ export class HeaderView extends LitElement {
 `;
     const res = fn(input);
     expect(res.componentsCount).toBe(1);
-    expect(res.maskedPartsCount).toBe(2);
+    expect(res.maskedPartsCount).toBe(1);
 
     expectMasked(res.code, 1, 'this.title');
-    expectMasked(res.code, -1, 'this.internalId');
+    expect(res.code).not.toContain('this.__litDirtyMask & -1');
+    expect(res.code).toContain('${this.internalId}');
   });
 
-  it('assigns mask -1 fallback to external variables and functions with potential side effects', () => {
+  it('leaves external variables and functions with potential side effects unmasked', () => {
     const input = `
 import { LitElement, html } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -170,11 +171,12 @@ export class ComplexComponent extends LitElement {
 `;
     const res = fn(input);
     expect(res.componentsCount).toBe(1);
-    expect(res.maskedPartsCount).toBe(3);
+    expect(res.maskedPartsCount).toBe(1);
 
     expectMasked(res.code, 1, 'this.count');
-    expectMasked(res.code, -1, 'EXTERNAL_CONFIG');
-    expectMasked(res.code, -1, 'this.formatCount(this.count)');
+    expect(res.code).not.toContain('this.__litDirtyMask & -1');
+    expect(res.code).toContain('${EXTERNAL_CONFIG}');
+    expect(res.code).toContain('${this.formatCount(this.count)}');
   });
 
   it('injects mask computation into existing update lifecycle method', () => {

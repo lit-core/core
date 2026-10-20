@@ -30,13 +30,13 @@
     "name": "Lit directive lowering (directives)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T19:54:42.165Z",
+  "timestamp": "2026-10-20T19:24:38.000Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -51,15 +51,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 152726,
-    "gzipBytes": 38799,
-    "brotliBytes": 32349,
-    "buildTimeMs": 23.846875000000182,
-    "firstRenderMs": 31.4,
-    "updateMs": 4.1,
-    "scriptEvalMs": 1.5,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 3483726,
+    "rawBytes": 151234,
+    "gzipBytes": 38317,
+    "brotliBytes": 31884,
+    "buildTimeMs": 21.112750000000005,
+    "firstRenderMs": 31.3,
+    "updateMs": 4.8,
+    "scriptEvalMs": 1.4,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1560998,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -72,53 +72,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 152679,
-    "gzipBytes": 38781,
-    "brotliBytes": 32333,
-    "buildTimeMs": 19.63916700000027,
-    "firstRenderMs": 30.5,
-    "updateMs": 4.7,
-    "scriptEvalMs": 1.6,
+    "rawBytes": 152662,
+    "gzipBytes": 38788,
+    "brotliBytes": 32363,
+    "buildTimeMs": 37.80737499999998,
+    "firstRenderMs": 34.1,
+    "updateMs": 5.7,
+    "scriptEvalMs": 1.4,
     "registrationMs": 0.1,
-    "heapUsedBytes": 2928856,
-    "scenarioSpecific": {
-      "totalItems": 50,
-      "directivesUsed": [
-        "repeat",
-        "classMap",
-        "styleMap",
-        "ifDefined"
-      ],
-      "renderedCards": 50
-    }
+    "heapUsedBytes": 1659357
   },
   "deltas": {
-    "rawBytes": 47,
-    "rawPercent": 0.03,
-    "gzipBytes": 18,
-    "gzipPercent": 0.05,
-    "brotliBytes": 16,
-    "brotliPercent": 0.05,
-    "buildTimeMs": 4.2,
-    "firstRenderMs": 0.9,
-    "speedupPercent": -2.95,
-    "updateMs": -0.6,
-    "updateSpeedupPercent": 12.77,
-    "evalSpeedupPercent": 6.25,
-    "registrationSpeedupPercent": -200,
-    "memorySavingsPercent": -18.94
+    "rawBytes": -1428,
+    "rawPercent": -0.94,
+    "gzipBytes": -471,
+    "gzipPercent": -1.21,
+    "brotliBytes": -479,
+    "brotliPercent": -1.48,
+    "buildTimeMs": -16.7,
+    "firstRenderMs": -2.8,
+    "speedupPercent": 8.21,
+    "updateMs": -0.9,
+    "updateSpeedupPercent": 15.79,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": 5.93
   },
   "runtime": {
-    "firstRenderMs": 31.4,
-    "updateMs": 4.1,
-    "scriptEvalMs": 1.5,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 3483726,
-    "speedupPercent": -2.95,
-    "updateSpeedupPercent": 12.77,
-    "evalSpeedupPercent": 6.25,
-    "registrationSpeedupPercent": -200,
-    "memorySavingsPercent": -18.94
+    "firstRenderMs": 31.3,
+    "updateMs": 4.8,
+    "scriptEvalMs": 1.4,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1560998,
+    "speedupPercent": 8.21,
+    "updateSpeedupPercent": 15.79,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": 5.93
   },
   "domSnapshot": {
     "mount": {
@@ -247,9 +237,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -624,9 +614,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -1001,9 +991,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -1378,9 +1368,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -1755,9 +1745,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -2132,9 +2122,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -2509,9 +2499,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -2886,9 +2876,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -3263,9 +3253,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -3640,9 +3630,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -4018,9 +4008,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -4395,9 +4385,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -4772,9 +4762,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -5149,9 +5139,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -5526,9 +5516,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -5903,9 +5893,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -6280,9 +6270,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -6657,9 +6647,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -7034,9 +7024,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -7411,9 +7401,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -7789,9 +7779,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -8166,9 +8156,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -8543,9 +8533,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -8920,9 +8910,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -9297,9 +9287,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -9674,9 +9664,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10051,9 +10041,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10428,9 +10418,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10805,9 +10795,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -11182,9 +11172,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -11560,9 +11550,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -11937,9 +11927,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -12314,9 +12304,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -12691,9 +12681,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13068,9 +13058,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13445,9 +13435,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13822,9 +13812,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -14199,9 +14189,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -14576,9 +14566,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -14953,9 +14943,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned ",
+                    "class": "feed-card is-pinned",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -15331,9 +15321,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -15708,9 +15698,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -16085,9 +16075,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -16462,9 +16452,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -16839,9 +16829,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -17216,9 +17206,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -17593,9 +17583,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -17970,9 +17960,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -18347,9 +18337,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -18724,9 +18714,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned ",
+                    "class": "feed-card is-pinned",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -19229,9 +19219,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -19607,9 +19597,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -19985,9 +19975,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -20362,9 +20352,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -20740,9 +20730,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -21117,9 +21107,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -21495,9 +21485,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -21874,7 +21864,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -22249,9 +22239,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -22626,9 +22616,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -23004,9 +22994,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -23381,9 +23371,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -23759,9 +23749,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -24136,9 +24126,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -24514,9 +24504,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -24891,9 +24881,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -25269,9 +25259,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -25648,7 +25638,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -26023,9 +26013,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -26400,9 +26390,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -26778,9 +26768,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -27155,9 +27145,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -27533,9 +27523,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -27910,9 +27900,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -28288,9 +28278,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -28665,9 +28655,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -29043,9 +29033,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -29422,7 +29412,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -29797,9 +29787,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -30174,9 +30164,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -30552,9 +30542,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -30931,7 +30921,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -31307,9 +31297,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -31686,7 +31676,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -32062,9 +32052,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -32441,7 +32431,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-pinned",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -32817,9 +32807,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -33196,7 +33186,7 @@
                     "appearance": "outlined",
                     "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -33571,9 +33561,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -33950,7 +33940,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-pinned",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -34326,9 +34316,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -34705,7 +34695,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-pinned",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -35081,9 +35071,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -35460,7 +35450,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-pinned",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -35836,9 +35826,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -36215,7 +36205,7 @@
                     "appearance": "outlined",
                     "class": "feed-card is-pinned",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -36591,9 +36581,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -36970,7 +36960,7 @@
                     "appearance": "outlined",
                     "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -37345,9 +37335,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -37722,9 +37712,9 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -38105,12 +38095,13 @@
     "shadowRootsCount": 251
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 555,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Style attribute mismatch at mount-root > [0] > [1] > [0] (<wa-card>): baseline=\"padding:12px;border-left:1px solid #e4e4e7;\", variant=\"padding: 12px;border-left: 1px solid #e4e4e7;\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

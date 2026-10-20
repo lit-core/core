@@ -109,6 +109,8 @@ export function loadScenarioResult(scenarioId, suiteId, variantId, outDir = defa
   }
 }
 
+const inMemoryBaselineCache = new Map();
+
 /**
  * Execute a scenario benchmark run for a suite and variant.
  * Measures both baseline and optimized variant under the scenario application workload.
@@ -142,9 +144,10 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
     const entryPath = path.join(tempBaseDir, 'scenario-entry.js');
     fs.writeFileSync(entryPath, entryContent, 'utf-8');
 
-    // 2. Build or load Scenario Baseline
-    const cachedBaseline = loadScenarioResult(scenario.id, suite.id, 'baseline', options.outDir);
-    let baselineSize = cachedBaseline?.metrics;
+    // 2. Build or reuse fresh in-memory scenario baseline from this process run
+    const cacheKey = `${scenario.id}:${suite.id}:${options.outDir || defaultResultsDir}`;
+    const cachedBaseline = isBaseline ? null : inMemoryBaselineCache.get(cacheKey);
+    let baselineSize = cachedBaseline?.size;
     let baselineRuntime = cachedBaseline?.runtime;
     let baselineEquivalence = cachedBaseline?.equivalence;
     let baselineDomSnapshot = cachedBaseline?.domSnapshot || null;
@@ -209,6 +212,13 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
         variantId: 'baseline',
         result: baselineResult,
         outDir: options.outDir,
+      });
+
+      inMemoryBaselineCache.set(cacheKey, {
+        size: baselineSize,
+        runtime: baselineRuntime,
+        equivalence: baselineEquivalence,
+        domSnapshot: baselineDomSnapshot,
       });
     }
 

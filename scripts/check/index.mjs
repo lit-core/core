@@ -72,14 +72,9 @@ async function main() {
 
   let allPassed = true;
 
-  // Tier 0: Format & lint check (skipped if only rust or only js)
-  if (!ONLY_RUST && !ONLY_JS && affected.changedFiles.length > 0) {
-    const filesToCheck = affected.changedFiles
-      .filter((f) => (f.endsWith('.js') || f.endsWith('.ts') || f.endsWith('.mjs')) && !f.includes('results/') && fs.existsSync(path.join(ROOT, f)))
-      .slice(0, 30)
-      .join(' ');
-    const cmd = filesToCheck ? `pnpm exec biome check ${filesToCheck} --no-errors-on-unmatched` : 'pnpm exec biome check scripts packages/internal/test-kit';
-    const passed = runStep('tier 0: biome format & lint check', cmd);
+  // Tier 0: Format & lint check (skipped if only rust)
+  if (!ONLY_RUST) {
+    const passed = runStep('tier 0: biome format & lint check', './node_modules/.bin/biome check .');
     if (!passed) allPassed = false;
   }
 

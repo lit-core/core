@@ -76,26 +76,7 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let semantic_ret = SemanticBuilder::new().build(&parsed.program);
     let scoping = semantic_ret.semantic.into_scoping();
 
-    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
-
-    let symbol_ctx = SymbolProofContext {
-        scoping: &scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
+    let symbol_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
 
     if !symbol_ctx.has_lit_imports() {
         return HtmlAotResult {
@@ -794,6 +775,49 @@ fn strip_ts_in_stmt<'a>(stmt: &mut Statement<'a>) {
 
 fn strip_ts_in_expr<'a>(expr: &mut Expression<'a>) {
     match expr {
+        Expression::ClassExpression(c) => {
+            for elem in &mut c.body.body {
+                match elem {
+                    ClassElement::PropertyDefinition(p) => {
+                        p.type_annotation = None;
+                        if let Some(init) = &mut p.value {
+                            strip_ts_in_expr(init);
+                        }
+                    }
+                    ClassElement::MethodDefinition(m) => {
+                        m.value.return_type = None;
+                        for p in &mut m.value.params.items {
+                            p.type_annotation = None;
+                        }
+                        if let Some(b) = &mut m.value.body {
+                            strip_ts_in_stmts(&mut b.statements);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        Expression::ConditionalExpression(cond) => {
+            strip_ts_in_expr(&mut cond.test);
+            strip_ts_in_expr(&mut cond.consequent);
+            strip_ts_in_expr(&mut cond.alternate);
+        }
+        Expression::LogicalExpression(log) => {
+            strip_ts_in_expr(&mut log.left);
+            strip_ts_in_expr(&mut log.right);
+        }
+        Expression::BinaryExpression(bin) => {
+            strip_ts_in_expr(&mut bin.left);
+            strip_ts_in_expr(&mut bin.right);
+        }
+        Expression::AssignmentExpression(assign) => {
+            strip_ts_in_expr(&mut assign.right);
+        }
+        Expression::SequenceExpression(seq) => {
+            for e in &mut seq.expressions {
+                strip_ts_in_expr(e);
+            }
+        }
         Expression::ArrowFunctionExpression(arrow) => {
             arrow.return_type = None;
             for p in &mut arrow.params.items {
@@ -859,6 +883,31 @@ fn walk_and_collect_templates<'a>(
     }
 }
 
+fn walk_class_for_templates<'a>(
+    class: &Class<'a>,
+    symbol_ctx: &SymbolProofContext<'a>,
+    out: &mut Vec<(Span, CompiledTemplateData)>,
+    counter: &mut usize,
+) {
+    for elem in &class.body.body {
+        match elem {
+            ClassElement::MethodDefinition(m) => {
+                if let Some(body) = &m.value.body {
+                    for s in &body.statements {
+                        walk_stmt_for_templates(s, symbol_ctx, out, counter);
+                    }
+                }
+            }
+            ClassElement::PropertyDefinition(p) => {
+                if let Some(init) = &p.value {
+                    walk_expr_for_templates(init, symbol_ctx, out, counter);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
 fn walk_stmt_for_templates<'a>(
     stmt: &Statement<'a>,
     symbol_ctx: &SymbolProofContext<'a>,
@@ -882,23 +931,7 @@ fn walk_stmt_for_templates<'a>(
             }
         }
         Statement::ClassDeclaration(class) => {
-            for elem in &class.body.body {
-                match elem {
-                    ClassElement::MethodDefinition(m) => {
-                        if let Some(body) = &m.value.body {
-                            for s in &body.statements {
-                                walk_stmt_for_templates(s, symbol_ctx, out, counter);
-                            }
-                        }
-                    }
-                    ClassElement::PropertyDefinition(p) => {
-                        if let Some(init) = &p.value {
-                            walk_expr_for_templates(init, symbol_ctx, out, counter);
-                        }
-                    }
-                    _ => {}
-                }
-            }
+            walk_class_for_templates(class, symbol_ctx, out, counter);
         }
         Statement::ExportDeclaration(export_decl) => match &export_decl.declaration {
             Declaration::VariableDeclaration(v) => {
@@ -916,15 +949,7 @@ fn walk_stmt_for_templates<'a>(
                 }
             }
             Declaration::ClassDeclaration(class) => {
-                for elem in &class.body.body {
-                    if let ClassElement::MethodDefinition(m) = elem {
-                        if let Some(body) = &m.value.body {
-                            for s in &body.statements {
-                                walk_stmt_for_templates(s, symbol_ctx, out, counter);
-                            }
-                        }
-                    }
-                }
+                walk_class_for_templates(class, symbol_ctx, out, counter);
             }
             _ => {}
         },
@@ -934,15 +959,7 @@ fn walk_stmt_for_templates<'a>(
             } else if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                 &export_decl.declaration
             {
-                for elem in &class.body.body {
-                    if let ClassElement::MethodDefinition(m) = elem {
-                        if let Some(body) = &m.value.body {
-                            for s in &body.statements {
-                                walk_stmt_for_templates(s, symbol_ctx, out, counter);
-                            }
-                        }
-                    }
-                }
+                walk_class_for_templates(class, symbol_ctx, out, counter);
             }
         }
         Statement::BlockStatement(b) => {
@@ -989,6 +1006,30 @@ fn walk_expr_for_templates<'a>(
 
             for quasi_expr in &tagged.quasi.expressions {
                 walk_expr_for_templates(quasi_expr, symbol_ctx, out, counter);
+            }
+        }
+        Expression::ClassExpression(class) => {
+            walk_class_for_templates(class, symbol_ctx, out, counter);
+        }
+        Expression::ConditionalExpression(cond) => {
+            walk_expr_for_templates(&cond.test, symbol_ctx, out, counter);
+            walk_expr_for_templates(&cond.consequent, symbol_ctx, out, counter);
+            walk_expr_for_templates(&cond.alternate, symbol_ctx, out, counter);
+        }
+        Expression::LogicalExpression(log) => {
+            walk_expr_for_templates(&log.left, symbol_ctx, out, counter);
+            walk_expr_for_templates(&log.right, symbol_ctx, out, counter);
+        }
+        Expression::BinaryExpression(bin) => {
+            walk_expr_for_templates(&bin.left, symbol_ctx, out, counter);
+            walk_expr_for_templates(&bin.right, symbol_ctx, out, counter);
+        }
+        Expression::AssignmentExpression(assign) => {
+            walk_expr_for_templates(&assign.right, symbol_ctx, out, counter);
+        }
+        Expression::SequenceExpression(seq) => {
+            for e in &seq.expressions {
+                walk_expr_for_templates(e, symbol_ctx, out, counter);
             }
         }
         Expression::ArrowFunctionExpression(arrow) => match &arrow.body {
@@ -1051,6 +1092,32 @@ fn replace_templates_in_program<'a>(
     }
 }
 
+fn replace_in_class<'a>(
+    class: &mut Class<'a>,
+    template_matches: &[(Span, CompiledTemplateData)],
+    source: &str,
+    allocator: &'a Allocator,
+    source_type: SourceType,
+) {
+    for elem in &mut class.body.body {
+        match elem {
+            ClassElement::MethodDefinition(m) => {
+                if let Some(body) = &mut m.value.body {
+                    for s in &mut body.statements {
+                        replace_in_stmt(s, template_matches, source, allocator, source_type);
+                    }
+                }
+            }
+            ClassElement::PropertyDefinition(p) => {
+                if let Some(init) = &mut p.value {
+                    replace_in_expr(init, template_matches, source, allocator, source_type);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
 fn replace_in_stmt<'a>(
     stmt: &mut Statement<'a>,
     template_matches: &[(Span, CompiledTemplateData)],
@@ -1081,29 +1148,7 @@ fn replace_in_stmt<'a>(
             }
         }
         Statement::ClassDeclaration(class) => {
-            for elem in &mut class.body.body {
-                match elem {
-                    ClassElement::MethodDefinition(m) => {
-                        if let Some(body) = &mut m.value.body {
-                            for s in &mut body.statements {
-                                replace_in_stmt(
-                                    s,
-                                    template_matches,
-                                    source,
-                                    allocator,
-                                    source_type,
-                                );
-                            }
-                        }
-                    }
-                    ClassElement::PropertyDefinition(p) => {
-                        if let Some(init) = &mut p.value {
-                            replace_in_expr(init, template_matches, source, allocator, source_type);
-                        }
-                    }
-                    _ => {}
-                }
-            }
+            replace_in_class(class, template_matches, source, allocator, source_type);
         }
         Statement::ExportDeclaration(export_decl) => match &mut export_decl.declaration {
             Declaration::VariableDeclaration(v) => {
@@ -1121,21 +1166,7 @@ fn replace_in_stmt<'a>(
                 }
             }
             Declaration::ClassDeclaration(class) => {
-                for elem in &mut class.body.body {
-                    if let ClassElement::MethodDefinition(m) = elem {
-                        if let Some(body) = &mut m.value.body {
-                            for s in &mut body.statements {
-                                replace_in_stmt(
-                                    s,
-                                    template_matches,
-                                    source,
-                                    allocator,
-                                    source_type,
-                                );
-                            }
-                        }
-                    }
-                }
+                replace_in_class(class, template_matches, source, allocator, source_type);
             }
             _ => {}
         },
@@ -1143,21 +1174,7 @@ fn replace_in_stmt<'a>(
             if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                 &mut export_decl.declaration
             {
-                for elem in &mut class.body.body {
-                    if let ClassElement::MethodDefinition(m) = elem {
-                        if let Some(body) = &mut m.value.body {
-                            for s in &mut body.statements {
-                                replace_in_stmt(
-                                    s,
-                                    template_matches,
-                                    source,
-                                    allocator,
-                                    source_type,
-                                );
-                            }
-                        }
-                    }
-                }
+                replace_in_class(class, template_matches, source, allocator, source_type);
             } else if let Some(expr) = export_decl.declaration.as_expression_mut() {
                 replace_in_expr(expr, template_matches, source, allocator, source_type);
             }
@@ -1220,7 +1237,8 @@ fn replace_in_expr<'a>(
 
             let mut elements = ArenaVec::new_in(&ast);
             if let Expression::TaggedTemplateExpression(ref mut tagged) = expr {
-                for e in tagged.quasi.expressions.drain(..) {
+                for mut e in tagged.quasi.expressions.drain(..) {
+                    replace_in_expr(&mut e, template_matches, source, allocator, source_type);
                     elements.push(ArrayExpressionElement::from(e));
                 }
             }
@@ -1246,6 +1264,78 @@ fn replace_in_expr<'a>(
         Expression::TaggedTemplateExpression(tagged) => {
             for quasi_expr in &mut tagged.quasi.expressions {
                 replace_in_expr(quasi_expr, template_matches, source, allocator, source_type);
+            }
+        }
+        Expression::ClassExpression(class) => {
+            replace_in_class(class, template_matches, source, allocator, source_type);
+        }
+        Expression::ConditionalExpression(cond) => {
+            replace_in_expr(
+                &mut cond.test,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            replace_in_expr(
+                &mut cond.consequent,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            replace_in_expr(
+                &mut cond.alternate,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::LogicalExpression(log) => {
+            replace_in_expr(
+                &mut log.left,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            replace_in_expr(
+                &mut log.right,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::BinaryExpression(bin) => {
+            replace_in_expr(
+                &mut bin.left,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            replace_in_expr(
+                &mut bin.right,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::AssignmentExpression(assign) => {
+            replace_in_expr(
+                &mut assign.right,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::SequenceExpression(seq) => {
+            for e in &mut seq.expressions {
+                replace_in_expr(e, template_matches, source, allocator, source_type);
             }
         }
         Expression::ArrowFunctionExpression(arrow) => match &mut arrow.body {

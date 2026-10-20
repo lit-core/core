@@ -187,25 +187,7 @@ fn build_ssr_analysis<'a, 'p>(
     scoping: &'a Scoping,
     source: &'a str,
 ) -> SsrAnalysis<'a> {
-    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = SymbolProofContext::scan(program, scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
-    let symbol_ctx = SymbolProofContext {
-        scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
+    let symbol_ctx = SymbolProofContext::scan(program, scoping, source);
 
     let mut class_to_tag = HashMap::new();
     let mut discovered_tags = Vec::new();

@@ -1,5 +1,6 @@
 import { createRequire } from 'node:module';
 import { compileHtmlAot } from '@lit-core/html-aot';
+import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import type { Plugin } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { HtmlAotOptions } from '../options.js';
@@ -56,7 +57,18 @@ export function htmlAot(options: HtmlAotOptions = {}): Plugin {
       }
 
       try {
-        const result = compileHtmlAot(code, {
+        let inputCode = code;
+        try {
+          const minified = minifyHtmlTemplates(code, {
+            sourcemap: false,
+            filename: cleanId,
+          });
+          if (minified.templatesCount > 0) {
+            inputCode = minified.code;
+          }
+        } catch {}
+
+        const result = compileHtmlAot(inputCode, {
           filename: cleanId,
           sourcemap,
         });

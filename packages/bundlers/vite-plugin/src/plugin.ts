@@ -103,12 +103,6 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(directives(directivesOpts));
   }
 
-  const htmlAotOpt = options.htmlAot ?? options['html-aot'];
-  if (htmlAotOpt) {
-    const aotOpts = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
-    plugins.push(htmlAot(aotOpts));
-  }
-
   const cssMinifierOpt = options.cssMinifier ?? options['css-minifier'];
   if (cssMinifierOpt) {
     const minifierOpts = typeof cssMinifierOpt === 'object' ? cssMinifierOpt : {};
@@ -119,6 +113,12 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
   if (minifierOpt) {
     const minifierOpts = typeof minifierOpt === 'object' ? minifierOpt : {};
     plugins.push(htmlMinifier(minifierOpts));
+  }
+
+  const htmlAotOpt = options.htmlAot ?? options['html-aot'];
+  if (htmlAotOpt) {
+    const aotOpts = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
+    plugins.push(htmlAot(aotOpts));
   }
 
   const ssrOpt = options.ssr ?? options['lit-ssr'];

@@ -4,7 +4,7 @@ import { reportTransformError } from '../errors.js';
 import type { ElemProxyOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
-const LIT_ELEM_PROXY_FAST_CHECK = /@customElement\b|customElements\.define\b/;
+const LIT_ELEM_PROXY_FAST_CHECK = /customElement|customElements\.define\b|decorate/;
 
 export function elemProxy(options: ElemProxyOptions = {}): Plugin {
   const { sourcemap = true } = options;

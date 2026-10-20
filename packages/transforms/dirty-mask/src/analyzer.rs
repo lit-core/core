@@ -97,12 +97,32 @@ pub fn analyze_expr_dependencies(
     accessed_bits: &mut u32,
     has_unknown: &mut bool,
 ) {
+    analyze_expr_dependencies_with_locals(expr, reactive_props, None, accessed_bits, has_unknown);
+}
+
+pub fn analyze_expr_dependencies_with_locals(
+    expr: &Expression,
+    reactive_props: &HashMap<String, usize>,
+    local_var_masks: Option<&HashMap<String, i32>>,
+    accessed_bits: &mut u32,
+    has_unknown: &mut bool,
+) {
     if *has_unknown {
         return;
     }
     match expr {
         Expression::Identifier(ident) => {
             let name = ident.name.as_str();
+            if let Some(locals) = local_var_masks {
+                if let Some(&mask) = locals.get(name) {
+                    if mask > 0 {
+                        *accessed_bits |= mask as u32;
+                    } else {
+                        *has_unknown = true;
+                    }
+                    return;
+                }
+            }
             let is_safe_global = matches!(
                 name,
                 "undefined"
@@ -111,6 +131,7 @@ pub fn analyze_expr_dependencies(
                     | "null"
                     | "true"
                     | "false"
+                    | "nothing"
                     | "Math"
                     | "Number"
                     | "String"
@@ -153,6 +174,16 @@ pub fn analyze_expr_dependencies(
                 }
             } else if let Expression::Identifier(ident) = &mem.object {
                 let name = ident.name.as_str();
+                if let Some(locals) = local_var_masks {
+                    if let Some(&mask) = locals.get(name) {
+                        if mask > 0 {
+                            *accessed_bits |= mask as u32;
+                        } else {
+                            *has_unknown = true;
+                        }
+                        return;
+                    }
+                }
                 if !matches!(name, "Math" | "Number" | "JSON" | "Intl") {
                     *has_unknown = true;
                 }
@@ -174,41 +205,140 @@ pub fn analyze_expr_dependencies(
             } else {
                 *has_unknown = true;
             }
-            analyze_expr_dependencies(&comp.expression, reactive_props, accessed_bits, has_unknown);
+            analyze_expr_dependencies_with_locals(
+                &comp.expression,
+                reactive_props,
+                local_var_masks,
+                accessed_bits,
+                has_unknown,
+            );
+        }
+        Expression::CallExpression(call) => {
+            let is_pure_builtin = match &call.callee {
+                Expression::Identifier(id) => {
+                    matches!(id.name.as_str(), "Boolean" | "String" | "Number")
+                }
+                Expression::StaticMemberExpression(mem) => {
+                    if let Expression::Identifier(obj) = &mem.object {
+                        obj.name == "Math" && mem.property.name != "random"
+                    } else {
+                        false
+                    }
+                }
+                _ => false,
+            };
+            if is_pure_builtin {
+                for arg in &call.arguments {
+                    if let Some(arg_expr) = arg.as_expression() {
+                        analyze_expr_dependencies_with_locals(
+                            arg_expr,
+                            reactive_props,
+                            local_var_masks,
+                            accessed_bits,
+                            has_unknown,
+                        );
+                    } else {
+                        *has_unknown = true;
+                    }
+                }
+            } else {
+                *has_unknown = true;
+            }
         }
         Expression::BinaryExpression(bin) => {
-            analyze_expr_dependencies(&bin.left, reactive_props, accessed_bits, has_unknown);
-            analyze_expr_dependencies(&bin.right, reactive_props, accessed_bits, has_unknown);
+            analyze_expr_dependencies_with_locals(
+                &bin.left,
+                reactive_props,
+                local_var_masks,
+                accessed_bits,
+                has_unknown,
+            );
+            analyze_expr_dependencies_with_locals(
+                &bin.right,
+                reactive_props,
+                local_var_masks,
+                accessed_bits,
+                has_unknown,
+            );
         }
         Expression::UnaryExpression(un) => {
-            analyze_expr_dependencies(&un.argument, reactive_props, accessed_bits, has_unknown);
+            analyze_expr_dependencies_with_locals(
+                &un.argument,
+                reactive_props,
+                local_var_masks,
+                accessed_bits,
+                has_unknown,
+            );
         }
         Expression::LogicalExpression(log) => {
-            analyze_expr_dependencies(&log.left, reactive_props, accessed_bits, has_unknown);
-            analyze_expr_dependencies(&log.right, reactive_props, accessed_bits, has_unknown);
+            analyze_expr_dependencies_with_locals(
+                &log.left,
+                reactive_props,
+                local_var_masks,
+                accessed_bits,
+                has_unknown,
+            );
+            analyze_expr_dependencies_with_locals(
+                &log.right,
+                reactive_props,
+                local_var_masks,
+                accessed_bits,
+                has_unknown,
+            );
         }
         Expression::ConditionalExpression(cond) => {
-            analyze_expr_dependencies(&cond.test, reactive_props, accessed_bits, has_unknown);
-            analyze_expr_dependencies(&cond.consequent, reactive_props, accessed_bits, has_unknown);
-            analyze_expr_dependencies(&cond.alternate, reactive_props, accessed_bits, has_unknown);
+            analyze_expr_dependencies_with_locals(
+                &cond.test,
+                reactive_props,
+                local_var_masks,
+                accessed_bits,
+                has_unknown,
+            );
+            analyze_expr_dependencies_with_locals(
+                &cond.consequent,
+                reactive_props,
+                local_var_masks,
+                accessed_bits,
+                has_unknown,
+            );
+            analyze_expr_dependencies_with_locals(
+                &cond.alternate,
+                reactive_props,
+                local_var_masks,
+                accessed_bits,
+                has_unknown,
+            );
         }
         Expression::ParenthesizedExpression(paren) => {
-            analyze_expr_dependencies(
+            analyze_expr_dependencies_with_locals(
                 &paren.expression,
                 reactive_props,
+                local_var_masks,
                 accessed_bits,
                 has_unknown,
             );
         }
         Expression::TemplateLiteral(temp) => {
             for sub_expr in &temp.expressions {
-                analyze_expr_dependencies(sub_expr, reactive_props, accessed_bits, has_unknown);
+                analyze_expr_dependencies_with_locals(
+                    sub_expr,
+                    reactive_props,
+                    local_var_masks,
+                    accessed_bits,
+                    has_unknown,
+                );
             }
         }
         Expression::ArrayExpression(arr) => {
             for elem in &arr.elements {
                 if let Some(el_expr) = elem.as_expression() {
-                    analyze_expr_dependencies(el_expr, reactive_props, accessed_bits, has_unknown);
+                    analyze_expr_dependencies_with_locals(
+                        el_expr,
+                        reactive_props,
+                        local_var_masks,
+                        accessed_bits,
+                        has_unknown,
+                    );
                 } else {
                     *has_unknown = true;
                 }
@@ -226,9 +356,23 @@ pub fn analyze_expr_dependencies(
 }
 
 pub fn compute_part_mask(expr: &Expression, reactive_props: &HashMap<String, usize>) -> i32 {
+    compute_part_mask_with_locals(expr, reactive_props, None)
+}
+
+pub fn compute_part_mask_with_locals(
+    expr: &Expression,
+    reactive_props: &HashMap<String, usize>,
+    local_var_masks: Option<&HashMap<String, i32>>,
+) -> i32 {
     let mut accessed_bits = 0u32;
     let mut has_unknown = false;
-    analyze_expr_dependencies(expr, reactive_props, &mut accessed_bits, &mut has_unknown);
+    analyze_expr_dependencies_with_locals(
+        expr,
+        reactive_props,
+        local_var_masks,
+        &mut accessed_bits,
+        &mut has_unknown,
+    );
     if has_unknown || accessed_bits == 0 {
         -1
     } else {

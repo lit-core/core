@@ -30,13 +30,13 @@
     "name": "Expression memoization (memoize)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T20:05:49.041Z",
+  "timestamp": "2026-10-20T19:24:38.826Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "a289933",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -54,12 +54,12 @@
     "rawBytes": 152662,
     "gzipBytes": 38788,
     "brotliBytes": 32363,
-    "buildTimeMs": 26.71433399999978,
-    "firstRenderMs": 34.7,
-    "updateMs": 4.4,
-    "scriptEvalMs": 1.4,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 3534559,
+    "buildTimeMs": 22.576999999999998,
+    "firstRenderMs": 30.6,
+    "updateMs": 4.6,
+    "scriptEvalMs": 1.6,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1654589,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -72,53 +72,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 152679,
-    "gzipBytes": 38781,
-    "brotliBytes": 32333,
-    "buildTimeMs": 19.63916700000027,
-    "firstRenderMs": 30.5,
-    "updateMs": 4.7,
-    "scriptEvalMs": 1.6,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 2928856,
-    "scenarioSpecific": {
-      "totalItems": 50,
-      "directivesUsed": [
-        "repeat",
-        "classMap",
-        "styleMap",
-        "ifDefined"
-      ],
-      "renderedCards": 50
-    }
-  },
-  "deltas": {
-    "rawBytes": -17,
-    "rawPercent": -0.01,
-    "gzipBytes": 7,
-    "gzipPercent": 0.02,
-    "brotliBytes": 30,
-    "brotliPercent": 0.09,
-    "buildTimeMs": 7.1,
-    "firstRenderMs": 4.2,
-    "speedupPercent": -13.77,
-    "updateMs": -0.3,
-    "updateSpeedupPercent": 6.38,
-    "evalSpeedupPercent": 12.5,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -20.68
-  },
-  "runtime": {
-    "firstRenderMs": 34.7,
-    "updateMs": 4.4,
+    "rawBytes": 152662,
+    "gzipBytes": 38788,
+    "brotliBytes": 32363,
+    "buildTimeMs": 37.80737499999998,
+    "firstRenderMs": 34.1,
+    "updateMs": 5.7,
     "scriptEvalMs": 1.4,
     "registrationMs": 0.1,
-    "heapUsedBytes": 3534559,
-    "speedupPercent": -13.77,
-    "updateSpeedupPercent": 6.38,
-    "evalSpeedupPercent": 12.5,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -20.68
+    "heapUsedBytes": 1659357
+  },
+  "deltas": {
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": -15.2,
+    "firstRenderMs": -3.5,
+    "speedupPercent": 10.26,
+    "updateMs": -1.1,
+    "updateSpeedupPercent": 19.3,
+    "evalSpeedupPercent": -14.29,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": 0.29
+  },
+  "runtime": {
+    "firstRenderMs": 30.6,
+    "updateMs": 4.6,
+    "scriptEvalMs": 1.6,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1654589,
+    "speedupPercent": 10.26,
+    "updateSpeedupPercent": 19.3,
+    "evalSpeedupPercent": -14.29,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": 0.29
   },
   "domSnapshot": {
     "mount": {
@@ -247,7 +237,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -458,7 +448,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -552,7 +542,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -594,7 +584,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -624,7 +614,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -835,7 +825,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -929,7 +919,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -971,7 +961,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -1001,7 +991,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -1212,7 +1202,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -1306,7 +1296,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -1348,7 +1338,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -1378,7 +1368,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -1589,7 +1579,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -1683,7 +1673,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -1725,7 +1715,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -1755,7 +1745,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -1966,7 +1956,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -2060,7 +2050,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -2102,7 +2092,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -2132,7 +2122,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -2343,7 +2333,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -2437,7 +2427,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -2479,7 +2469,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -2509,7 +2499,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -2720,7 +2710,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -2814,7 +2804,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -2856,7 +2846,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -2886,7 +2876,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -3097,7 +3087,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -3191,7 +3181,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -3233,7 +3223,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -3263,7 +3253,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -3474,7 +3464,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -3568,7 +3558,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -3610,7 +3600,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -3640,7 +3630,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:3px solid #059669;"
                   },
@@ -3852,7 +3842,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -3946,7 +3936,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -3988,7 +3978,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -4018,7 +4008,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -4229,7 +4219,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -4323,7 +4313,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -4365,7 +4355,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -4395,7 +4385,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -4606,7 +4596,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -4700,7 +4690,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -4742,7 +4732,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -4772,7 +4762,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -4983,7 +4973,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -5077,7 +5067,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -5119,7 +5109,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -5149,7 +5139,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -5360,7 +5350,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -5454,7 +5444,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -5496,7 +5486,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -5526,7 +5516,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -5737,7 +5727,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -5831,7 +5821,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -5873,7 +5863,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -5903,7 +5893,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -6114,7 +6104,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -6208,7 +6198,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -6250,7 +6240,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -6280,7 +6270,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -6491,7 +6481,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -6585,7 +6575,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -6627,7 +6617,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -6657,7 +6647,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -6868,7 +6858,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -6962,7 +6952,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -7004,7 +6994,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -7034,7 +7024,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -7245,7 +7235,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -7339,7 +7329,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -7381,7 +7371,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -7411,7 +7401,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:3px solid #059669;"
                   },
@@ -7623,7 +7613,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -7717,7 +7707,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -7759,7 +7749,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -7789,7 +7779,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -8000,7 +7990,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -8094,7 +8084,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -8136,7 +8126,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -8166,7 +8156,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -8377,7 +8367,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -8471,7 +8461,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -8513,7 +8503,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -8543,7 +8533,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -8754,7 +8744,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -8848,7 +8838,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -8890,7 +8880,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -8920,7 +8910,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -9131,7 +9121,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -9225,7 +9215,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -9267,7 +9257,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -9297,7 +9287,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -9508,7 +9498,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -9602,7 +9592,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -9644,7 +9634,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -9674,7 +9664,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -9885,7 +9875,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -9979,7 +9969,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -10021,7 +10011,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -10051,7 +10041,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -10262,7 +10252,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -10356,7 +10346,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -10398,7 +10388,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -10428,7 +10418,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -10639,7 +10629,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -10733,7 +10723,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -10775,7 +10765,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -10805,7 +10795,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -11016,7 +11006,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -11110,7 +11100,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -11152,7 +11142,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -11182,7 +11172,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:3px solid #059669;"
                   },
@@ -11394,7 +11384,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -11488,7 +11478,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -11530,7 +11520,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -11560,7 +11550,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -11771,7 +11761,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -11865,7 +11855,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -11907,7 +11897,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -11937,7 +11927,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -12148,7 +12138,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -12242,7 +12232,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -12284,7 +12274,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -12314,7 +12304,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -12525,7 +12515,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -12619,7 +12609,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -12661,7 +12651,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -12691,7 +12681,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -12902,7 +12892,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -12996,7 +12986,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -13038,7 +13028,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -13068,7 +13058,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -13279,7 +13269,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -13373,7 +13363,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -13415,7 +13405,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -13445,7 +13435,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -13656,7 +13646,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -13750,7 +13740,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -13792,7 +13782,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -13822,7 +13812,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -14033,7 +14023,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -14127,7 +14117,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -14169,7 +14159,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -14199,7 +14189,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -14410,7 +14400,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -14504,7 +14494,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -14546,7 +14536,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -14576,7 +14566,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -14787,7 +14777,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -14881,7 +14871,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -14923,7 +14913,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -14953,7 +14943,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned ",
+                    "class": "feed-card is-pinned",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:3px solid #059669;"
                   },
@@ -15165,7 +15155,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -15259,7 +15249,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -15301,7 +15291,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -15331,7 +15321,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -15542,7 +15532,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -15636,7 +15626,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -15678,7 +15668,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -15708,7 +15698,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -15919,7 +15909,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -16013,7 +16003,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -16055,7 +16045,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -16085,7 +16075,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -16296,7 +16286,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -16390,7 +16380,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -16432,7 +16422,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -16462,7 +16452,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -16673,7 +16663,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -16767,7 +16757,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -16809,7 +16799,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -16839,7 +16829,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -17050,7 +17040,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -17144,7 +17134,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -17186,7 +17176,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -17216,7 +17206,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -17427,7 +17417,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -17521,7 +17511,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -17563,7 +17553,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -17593,7 +17583,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -17804,7 +17794,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -17898,7 +17888,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -17940,7 +17930,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -17970,7 +17960,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -18181,7 +18171,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -18275,7 +18265,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -18317,7 +18307,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -18347,7 +18337,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -18558,7 +18548,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -18652,7 +18642,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -18694,7 +18684,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -18724,7 +18714,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-pinned ",
+                    "class": "feed-card is-pinned",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:3px solid #059669;"
                   },
@@ -18936,7 +18926,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -19030,7 +19020,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -19072,7 +19062,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -19441,7 +19431,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -19535,7 +19525,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -19577,7 +19567,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -19819,7 +19809,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -19913,7 +19903,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -19955,7 +19945,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -19985,7 +19975,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -20196,7 +20186,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -20290,7 +20280,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -20332,7 +20322,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -20574,7 +20564,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -20668,7 +20658,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -20710,7 +20700,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -20740,7 +20730,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -20951,7 +20941,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -21045,7 +21035,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -21087,7 +21077,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -21329,7 +21319,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -21423,7 +21413,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -21465,7 +21455,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -21495,7 +21485,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -21706,7 +21696,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -21800,7 +21790,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -21842,7 +21832,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -22083,7 +22073,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -22177,7 +22167,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -22219,7 +22209,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -22249,7 +22239,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -22460,7 +22450,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -22554,7 +22544,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -22596,7 +22586,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -22838,7 +22828,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -22932,7 +22922,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -22974,7 +22964,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -23004,7 +22994,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -23215,7 +23205,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -23309,7 +23299,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -23351,7 +23341,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -23593,7 +23583,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -23687,7 +23677,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -23729,7 +23719,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -23759,7 +23749,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -23970,7 +23960,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -24064,7 +24054,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -24106,7 +24096,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -24348,7 +24338,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -24442,7 +24432,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -24484,7 +24474,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -24514,7 +24504,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -24725,7 +24715,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -24819,7 +24809,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -24861,7 +24851,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -25103,7 +25093,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -25197,7 +25187,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -25239,7 +25229,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -25269,7 +25259,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -25480,7 +25470,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -25574,7 +25564,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -25616,7 +25606,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -25857,7 +25847,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -25951,7 +25941,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -25993,7 +25983,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -26023,7 +26013,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -26234,7 +26224,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -26328,7 +26318,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -26370,7 +26360,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -26612,7 +26602,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -26706,7 +26696,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -26748,7 +26738,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -26778,7 +26768,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -26989,7 +26979,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -27083,7 +27073,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -27125,7 +27115,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -27367,7 +27357,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -27461,7 +27451,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -27503,7 +27493,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -27533,7 +27523,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -27744,7 +27734,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -27838,7 +27828,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -27880,7 +27870,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -28122,7 +28112,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -28216,7 +28206,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -28258,7 +28248,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -28288,7 +28278,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -28499,7 +28489,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -28593,7 +28583,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -28635,7 +28625,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -28877,7 +28867,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -28971,7 +28961,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -29013,7 +29003,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -29043,7 +29033,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -29254,7 +29244,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -29348,7 +29338,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -29390,7 +29380,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -29631,7 +29621,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -29725,7 +29715,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -29767,7 +29757,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -29797,7 +29787,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -30008,7 +29998,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -30102,7 +30092,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -30144,7 +30134,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -30386,7 +30376,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -30480,7 +30470,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -30522,7 +30512,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -30552,7 +30542,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -30763,7 +30753,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -30857,7 +30847,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -30899,7 +30889,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -31141,7 +31131,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -31235,7 +31225,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -31277,7 +31267,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -31307,7 +31297,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -31518,7 +31508,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -31612,7 +31602,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -31654,7 +31644,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -31896,7 +31886,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -31990,7 +31980,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -32032,7 +32022,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -32062,7 +32052,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -32273,7 +32263,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -32367,7 +32357,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -32409,7 +32399,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -32651,7 +32641,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -32745,7 +32735,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -32787,7 +32777,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -32817,7 +32807,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -33028,7 +33018,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -33122,7 +33112,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -33164,7 +33154,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -33405,7 +33395,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -33499,7 +33489,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -33541,7 +33531,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -33571,7 +33561,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -33782,7 +33772,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -33876,7 +33866,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -33918,7 +33908,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -34160,7 +34150,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -34254,7 +34244,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -34296,7 +34286,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -34326,7 +34316,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -34537,7 +34527,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -34631,7 +34621,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -34673,7 +34663,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -34915,7 +34905,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -35009,7 +34999,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -35051,7 +35041,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -35081,7 +35071,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -35292,7 +35282,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -35386,7 +35376,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -35428,7 +35418,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -35670,7 +35660,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -35764,7 +35754,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -35806,7 +35796,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -35836,7 +35826,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -36047,7 +36037,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -36141,7 +36131,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -36183,7 +36173,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -36425,7 +36415,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -36519,7 +36509,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -36561,7 +36551,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -36591,7 +36581,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -36802,7 +36792,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -36896,7 +36886,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -36938,7 +36928,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -37179,7 +37169,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -37273,7 +37263,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -37315,7 +37305,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -37345,7 +37335,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -37556,7 +37546,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -37650,7 +37640,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -37692,7 +37682,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [
@@ -37722,7 +37712,7 @@
                   "tag": "wa-card",
                   "attributes": {
                     "appearance": "outlined",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "orientation": "vertical",
                     "style": "padding:12px;border-left:1px solid #e4e4e7;"
                   },
@@ -37933,7 +37923,7 @@
                                 "tag": "button",
                                 "attributes": {
                                   "aria-busy": "false",
-                                  "class": " button has-label ",
+                                  "class": "button has-label",
                                   "part": "base button",
                                   "role": "button",
                                   "tabindex": "0",
@@ -38027,7 +38017,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " header ",
+                          "class": "header",
                           "part": "header"
                         },
                         "children": [
@@ -38069,7 +38059,7 @@
                         "type": "element",
                         "tag": "div",
                         "attributes": {
-                          "class": " footer ",
+                          "class": "footer",
                           "part": "footer"
                         },
                         "children": [

@@ -4,7 +4,7 @@ import { reportTransformError } from '../errors.js';
 import type { EventHoistOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
-const LIT_EVENT_HOIST_FAST_CHECK = /html\s*`[\s\S]*?@[a-zA-Z]/;
+const LIT_EVENT_HOIST_FAST_CHECK = /`[\s\S]*?@[a-zA-Z]/;
 
 export function eventHoist(options: EventHoistOptions = {}): Plugin {
   const { sourcemap = true } = options;

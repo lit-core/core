@@ -63,27 +63,7 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
 
     let semantic_ret = SemanticBuilder::new().build(&parsed.program);
     let scoping = semantic_ret.semantic.into_scoping();
-
-    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
-        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
-        (
-            temp_ctx.lit_symbols,
-            temp_ctx.helper_symbols,
-            temp_ctx.imported_classes,
-            temp_ctx.local_classes,
-            temp_ctx.has_lit_imports,
-        )
-    };
-
-    let symbol_ctx = SymbolProofContext {
-        scoping: &scoping,
-        source_text: source,
-        lit_symbols,
-        helper_symbols,
-        imported_classes,
-        local_classes,
-        has_lit_imports,
-    };
+    let symbol_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
 
     let mut classes = Vec::new();
     collect_classes_mut(&mut parsed.program.body, &mut classes);
@@ -111,8 +91,6 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
         let mut class_hoisted_count = 0u32;
 
         let mut has_connected = false;
-        let mut has_first_updated = false;
-        let mut has_will_update = false;
 
         for elem in class.body.body.iter_mut() {
             if let ClassElement::MethodDefinition(method) = elem {
@@ -135,10 +113,6 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
                         }
                     } else if method_name == Some("connectedCallback") {
                         has_connected = true;
-                    } else if method_name == Some("firstUpdated") {
-                        has_first_updated = true;
-                    } else if method_name == Some("willUpdate") {
-                        has_will_update = true;
                     }
                 }
             }
@@ -165,7 +139,7 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
                 };
 
                 if let Some(ref mut body) = method.value.body {
-                    if method_name == Some("render") || method_name == Some("willUpdate") {
+                    if method_name == Some("render") {
                         body.statements.insert(0, build_reset_lh_actions(&ast));
                     } else if method_name == Some("connectedCallback")
                         || method_name == Some("firstUpdated")
@@ -180,18 +154,10 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
         if !has_connected {
             class.body.body.push(build_connected_callback_method(&ast));
         }
-        if !has_first_updated {
-            class.body.body.push(build_first_updated_method(&ast));
-        }
-        if !has_will_update {
-            class.body.body.push(build_will_update_method(&ast));
-        }
 
         let mut sorted_class_events: Vec<String> = class_hoisted_events.into_iter().collect();
         sorted_class_events.sort();
 
-        class.body.body.push(build_lh_actions_property(&ast));
-        class.body.body.push(build_lh_initialized_property(&ast));
         class.body.body.push(build_init_lit_event_hoist_method(
             &ast,
             &sorted_class_events,

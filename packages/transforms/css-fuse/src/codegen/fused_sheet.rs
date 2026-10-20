@@ -21,13 +21,11 @@ pub fn generate_fused_sheet(cluster: &ClusterGroup) -> FusedSheetInfo {
     let mut css_rules = String::new();
     for ((at_rule, selector), decls) in grouped {
         let body = decls.join(";");
-        css_rules.push_str("  ");
         if let Some(at) = at_rule {
-            css_rules.push_str(&format!("{} {{\n    {} {{{}}}\n  }}", at, selector, body));
+            css_rules.push_str(&format!("{}{{{}{{{}}}}}", at, selector, body));
         } else {
-            css_rules.push_str(&format!("{} {{{}}}", selector, body));
+            css_rules.push_str(&format!("{}{{{}}}", selector, body));
         }
-        css_rules.push('\n');
     }
 
     let allocator = Allocator::default();
@@ -53,10 +51,10 @@ pub fn generate_fused_sheet(cluster: &ClusterGroup) -> FusedSheetInfo {
         &ast,
     );
 
-    // 2. export const <cluster_id> = css`\n<css_rules>`;
+    // 2. export const <cluster_id> = css`<css_rules>`;
     let tag_ident = Expression::new_identifier(SPAN, allocator.alloc_str("css"), &ast);
     let mut quasis = ArenaVec::new_in(&ast);
-    let raw_css = allocator.alloc_str(&format!("\n{}", css_rules));
+    let raw_css = allocator.alloc_str(&css_rules);
     let val = TemplateElementValue {
         raw: raw_css.into(),
         cooked: Some(raw_css.into()),

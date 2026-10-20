@@ -4,7 +4,7 @@ import { reportTransformError } from '../errors.js';
 import type { NativeOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
-const LIT_NATIVE_FAST_CHECK = /\bLitElement\b|@customElement\b|extends\s+(?:LitElement|ReactiveElement)\b/;
+const LIT_NATIVE_FAST_CHECK = /\bclass\b[\s\S]*?\bextends\b|@customElement\b/;
 
 export function native(options: NativeOptions = {}): Plugin {
   const { sourcemap = true } = options;

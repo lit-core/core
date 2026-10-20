@@ -108,12 +108,13 @@ export async function getCombinedPlugins(tools, suite) {
           exclude: [],
         }
       : false,
-    htmlAot: hasTool('html-aot')
-      ? {
-          include,
-          exclude: [],
-        }
-      : false,
+    htmlAot:
+      hasTool('html-aot') && !isAll
+        ? {
+            include,
+            exclude: [],
+          }
+        : false,
     cssMinifier: hasTool('css-minifier')
       ? {
           include,
@@ -151,27 +152,30 @@ export async function getCombinedPlugins(tools, suite) {
           exclude: [],
         }
       : false,
-    resumable: hasTool('resumable')
-      ? {
-          include,
-          exclude: [],
-          preloadOnHover: true,
-          injectAdapter: !isAll,
-        }
-      : false,
-    ssr: hasTool('ssr')
-      ? {
-          include,
-          exclude: [],
-          streaming: true,
-        }
-      : false,
-    tagShake: hasTool('tag-shake')
-      ? {
-          include,
-          exclude: [],
-        }
-      : false,
+    resumable:
+      hasTool('resumable') && !isAll
+        ? {
+            include,
+            exclude: [],
+            preloadOnHover: true,
+            injectAdapter: true,
+          }
+        : false,
+    ssr:
+      hasTool('ssr') && !isAll
+        ? {
+            include,
+            exclude: [],
+            streaming: true,
+          }
+        : false,
+    tagShake:
+      hasTool('tag-shake') && !isAll
+        ? {
+            include,
+            exclude: [],
+          }
+        : false,
   });
 }
 

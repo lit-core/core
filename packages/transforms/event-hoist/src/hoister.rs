@@ -30,7 +30,7 @@ pub fn has_event_options(expr: &Expression, symbol_ctx: &SymbolProofContext) -> 
 pub fn hoist_events_in_expr<'a>(expr: &mut Expression<'a>, ctx: &mut HoistContext<'a, '_>) {
     match expr {
         Expression::TaggedTemplateExpression(tagged) => {
-            if ctx.symbol_ctx.is_lit_html_tag(&tagged.tag)
+            if ctx.symbol_ctx.is_lit_html_or_static_tag(&tagged.tag)
                 || ctx.symbol_ctx.is_lit_svg_tag(&tagged.tag)
             {
                 let num_exprs = tagged.quasi.expressions.len();
@@ -196,6 +196,10 @@ pub fn hoist_events_in_expr<'a>(expr: &mut Expression<'a>, ctx: &mut HoistContex
             hoist_events_in_expr(&mut c.test, ctx);
             hoist_events_in_expr(&mut c.consequent, ctx);
             hoist_events_in_expr(&mut c.alternate, ctx);
+        }
+        Expression::LogicalExpression(l) => {
+            hoist_events_in_expr(&mut l.left, ctx);
+            hoist_events_in_expr(&mut l.right, ctx);
         }
         _ => {}
     }
