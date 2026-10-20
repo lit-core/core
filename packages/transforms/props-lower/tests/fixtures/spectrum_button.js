@@ -1,5 +1,5 @@
 /**
- * Verbatim excerpt from @spectrum-web-components action-button pattern
+ * Action-button pattern
  */
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

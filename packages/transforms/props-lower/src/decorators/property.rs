@@ -1,9 +1,9 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use oxc_allocator::{CloneIn, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 
 use crate::ast_helpers::AstHelper;
-use crate::lit_import_scanner::{ImportContext, LitDecoratorKind};
 use crate::static_properties::ReactiveProp;
 
 pub struct PropertyTransformResult<'a> {
@@ -14,7 +14,7 @@ pub struct PropertyTransformResult<'a> {
 
 pub fn try_transform_property<'a>(
     element: &mut ClassElement<'a>,
-    import_ctx: &ImportContext,
+    symbol_ctx: &SymbolProofContext<'_>,
     ast: &AstBuilder<'a>,
 ) -> Option<PropertyTransformResult<'a>> {
     match element {
@@ -29,12 +29,11 @@ pub fn try_transform_property<'a>(
             let mut options = None;
 
             for (i, dec) in prop_def.decorators.iter().enumerate() {
-                if let Some(kind) = get_lit_decorator_kind(&dec.expression, import_ctx) {
-                    if kind == LitDecoratorKind::Property {
-                        decorator_idx = Some(i);
-                        options = extract_options(&dec.expression, ast);
-                        break;
-                    }
+                if symbol_ctx.resolve_decorator(dec) == Some(CanonicalLitSymbol::PropertyDecorator)
+                {
+                    decorator_idx = Some(i);
+                    options = extract_options(&dec.expression, ast);
+                    break;
                 }
             }
 
@@ -74,12 +73,11 @@ pub fn try_transform_property<'a>(
             let mut options = None;
 
             for (i, dec) in method_def.decorators.iter().enumerate() {
-                if let Some(kind) = get_lit_decorator_kind(&dec.expression, import_ctx) {
-                    if kind == LitDecoratorKind::Property {
-                        decorator_idx = Some(i);
-                        options = extract_options(&dec.expression, ast);
-                        break;
-                    }
+                if symbol_ctx.resolve_decorator(dec) == Some(CanonicalLitSymbol::PropertyDecorator)
+                {
+                    decorator_idx = Some(i);
+                    options = extract_options(&dec.expression, ast);
+                    break;
                 }
             }
 
@@ -94,35 +92,6 @@ pub fn try_transform_property<'a>(
                 constructor_init: None,
                 remove_member: false,
             })
-        }
-        _ => None,
-    }
-}
-
-pub fn get_lit_decorator_kind<'a>(
-    expr: &Expression<'a>,
-    import_ctx: &ImportContext,
-) -> Option<LitDecoratorKind> {
-    match expr {
-        Expression::CallExpression(call) => match &call.callee {
-            Expression::Identifier(ident) => import_ctx.get_decorator_kind(ident.name.as_str()),
-            Expression::StaticMemberExpression(mem) => {
-                if let Expression::Identifier(obj) = &mem.object {
-                    import_ctx
-                        .get_member_decorator_kind(obj.name.as_str(), mem.property.name.as_str())
-                } else {
-                    None
-                }
-            }
-            _ => None,
-        },
-        Expression::Identifier(ident) => import_ctx.get_decorator_kind(ident.name.as_str()),
-        Expression::StaticMemberExpression(mem) => {
-            if let Expression::Identifier(obj) = &mem.object {
-                import_ctx.get_member_decorator_kind(obj.name.as_str(), mem.property.name.as_str())
-            } else {
-                None
-            }
         }
         _ => None,
     }

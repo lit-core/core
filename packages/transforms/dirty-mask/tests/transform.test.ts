@@ -222,7 +222,10 @@ export class SimpleEl extends LitElement {
     expect(resWithLit.code).toMatch(/import\s*\{[^}]*noChange[^}]*\}\s*from\s*['"]lit['"]/);
 
     const inputWithoutLit = `
-export class BareEl {
+import { ReactiveElement } from '@lit/reactive-element';
+import { html } from 'lit/html.js';
+
+export class BareEl extends ReactiveElement {
   static properties = { label: { type: String } };
   render() { return html\`<div>\${this.label}</div>\`; }
 }

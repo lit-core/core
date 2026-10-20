@@ -1,18 +1,17 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use oxc_allocator::ArenaVec;
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
-
-use crate::lit_import_scanner::{is_lit_import, ImportContext};
+use std::collections::HashSet;
 
 pub fn clean_lit_import<'a>(
     import_decl: &mut ImportDeclaration<'a>,
-    import_ctx: &ImportContext,
-    referenced_names: &std::collections::HashSet<String>,
+    referenced_names: &HashSet<String>,
     ast: &AstBuilder<'a>,
 ) -> bool {
     let specifier = import_decl.source.value.as_str();
-    if !is_lit_import(specifier) {
+    if !SymbolProofContext::is_canonical_lit_specifier(specifier) {
         return true;
     }
 
@@ -38,7 +37,7 @@ pub fn clean_lit_import<'a>(
                         named.local = BindingIdentifier::new(SPAN, "updateWhenLocaleChanges", ast);
                     }
                     new_specs.push(spec);
-                } else if import_ctx.get_decorator_kind(local_name).is_some() {
+                } else if is_lit_decorator_name(specifier, imported_name.as_str()) {
                     // Only strip if NO references remain in the program!
                     if referenced_names.contains(local_name) {
                         new_specs.push(spec);
@@ -59,4 +58,22 @@ pub fn clean_lit_import<'a>(
         *specifiers = new_specs;
         true
     }
+}
+
+fn is_lit_decorator_name(specifier: &str, imported_name: &str) -> bool {
+    matches!(
+        SymbolProofContext::map_lit_named_import(specifier, imported_name),
+        Some(
+            CanonicalLitSymbol::PropertyDecorator
+                | CanonicalLitSymbol::StateDecorator
+                | CanonicalLitSymbol::CustomElementDecorator
+                | CanonicalLitSymbol::QueryDecorator
+                | CanonicalLitSymbol::QueryAllDecorator
+                | CanonicalLitSymbol::QueryAsyncDecorator
+                | CanonicalLitSymbol::QueryAssignedElementsDecorator
+                | CanonicalLitSymbol::QueryAssignedNodesDecorator
+                | CanonicalLitSymbol::EventOptionsDecorator
+                | CanonicalLitSymbol::LocalizedDecorator
+        )
+    )
 }

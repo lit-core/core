@@ -4,7 +4,9 @@ use oxc_ast_visit::Visit;
 use oxc_span::GetSpan;
 use std::collections::HashSet;
 
-use crate::analyzer::{analyze_candidate, is_lit_html_tag, LitSemanticAnalysis};
+use lit_analysis::symbol::SymbolProofContext;
+
+use crate::analyzer::analyze_candidate;
 
 pub fn make_memo_slot(base_prop: &str, counter: usize) -> String {
     let mut s = String::with_capacity(base_prop.len() + 1 + 8);
@@ -77,7 +79,7 @@ pub struct StmtCandidateGroup<'a> {
 /// Visitor that walks tagged templates inside statements to find candidate expressions
 pub struct TemplateCandidateFinder<'a, 's> {
     pub allocator: &'a Allocator,
-    pub lit_analysis: Option<&'s LitSemanticAnalysis>,
+    pub symbol_ctx: &'s SymbolProofContext<'s>,
     pub existing_bindings: &'s HashSet<String>,
     pub candidates: Vec<CandidateItem<'a>>,
     pub used_slots: HashSet<String>,
@@ -86,10 +88,8 @@ pub struct TemplateCandidateFinder<'a, 's> {
 
 impl<'a, 's> Visit<'a> for TemplateCandidateFinder<'a, 's> {
     fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
-        let is_lit = match self.lit_analysis {
-            Some(analysis) => analysis.is_lit_tag(&tagged.tag),
-            None => is_lit_html_tag(&tagged.tag),
-        };
+        let is_lit = self.symbol_ctx.is_lit_html_tag(&tagged.tag)
+            || self.symbol_ctx.is_lit_svg_tag(&tagged.tag);
 
         if is_lit {
             for expr in &tagged.quasi.expressions {
@@ -158,7 +158,7 @@ impl<'a, 's> Visit<'a> for TemplateCandidateFinder<'a, 's> {
 pub fn collect_stmt_candidates<'a, 's>(
     stmt: &Statement<'a>,
     allocator: &'a Allocator,
-    lit_analysis: Option<&'s LitSemanticAnalysis>,
+    symbol_ctx: &'s SymbolProofContext<'s>,
     existing_bindings: &'s HashSet<String>,
     out: &mut Vec<StmtCandidateGroup<'a>>,
     used_slots: &mut HashSet<String>,
@@ -214,7 +214,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                     // Otherwise, scan init for inline template candidates
                     let mut finder = TemplateCandidateFinder {
                         allocator,
-                        lit_analysis,
+                        symbol_ctx,
                         existing_bindings,
                         candidates: Vec::new(),
                         used_slots: used_slots.clone(),
@@ -281,7 +281,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                 // Scan return argument for inline template candidates
                 let mut finder = TemplateCandidateFinder {
                     allocator,
-                    lit_analysis,
+                    symbol_ctx,
                     existing_bindings,
                     candidates: Vec::new(),
                     used_slots: used_slots.clone(),
@@ -307,7 +307,7 @@ pub fn collect_stmt_candidates<'a, 's>(
         Statement::ExpressionStatement(expr_stmt) => {
             let mut finder = TemplateCandidateFinder {
                 allocator,
-                lit_analysis,
+                symbol_ctx,
                 existing_bindings,
                 candidates: Vec::new(),
                 used_slots: used_slots.clone(),
@@ -333,7 +333,7 @@ pub fn collect_stmt_candidates<'a, 's>(
             collect_stmt_candidates(
                 &if_stmt.consequent,
                 allocator,
-                lit_analysis,
+                symbol_ctx,
                 existing_bindings,
                 out,
                 used_slots,
@@ -343,7 +343,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                 collect_stmt_candidates(
                     alt,
                     allocator,
-                    lit_analysis,
+                    symbol_ctx,
                     existing_bindings,
                     out,
                     used_slots,
@@ -356,7 +356,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                 collect_stmt_candidates(
                     s,
                     allocator,
-                    lit_analysis,
+                    symbol_ctx,
                     existing_bindings,
                     out,
                     used_slots,
@@ -369,7 +369,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                 collect_stmt_candidates(
                     s,
                     allocator,
-                    lit_analysis,
+                    symbol_ctx,
                     existing_bindings,
                     out,
                     used_slots,
@@ -381,7 +381,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                     collect_stmt_candidates(
                         s,
                         allocator,
-                        lit_analysis,
+                        symbol_ctx,
                         existing_bindings,
                         out,
                         used_slots,
@@ -394,7 +394,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                     collect_stmt_candidates(
                         s,
                         allocator,
-                        lit_analysis,
+                        symbol_ctx,
                         existing_bindings,
                         out,
                         used_slots,
@@ -409,7 +409,7 @@ pub fn collect_stmt_candidates<'a, 's>(
                     collect_stmt_candidates(
                         s,
                         allocator,
-                        lit_analysis,
+                        symbol_ctx,
                         existing_bindings,
                         out,
                         used_slots,

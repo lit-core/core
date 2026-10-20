@@ -1,3 +1,5 @@
+#![cfg(feature = "template-ir")]
+
 use lit_analysis::template_ir::{
     AttributePrefix, AttributeValue, ElementNamespace, TemplateNode, TemplateParser,
 };

@@ -247,6 +247,7 @@ fn extract_render_info<'a>(
     allocator: &'a Allocator,
     program: &'a oxc_ast::ast::Program<'a>,
     class_name: &str,
+    symbol_ctx: &lit_analysis::SymbolProofContext,
 ) -> (
     Vec<oxc_ast::ast::Expression<'a>>,
     Vec<oxc_ast::ast::Statement<'a>>,
@@ -296,15 +297,19 @@ fn extract_render_info<'a>(
                                             if let Expression::TaggedTemplateExpression(tagged) =
                                                 curr
                                             {
-                                                let mut exprs = Vec::new();
-                                                for e in &tagged.quasi.expressions {
-                                                    exprs.push(e.clone_in(allocator));
+                                                if symbol_ctx.is_lit_html_tag(&tagged.tag)
+                                                    || symbol_ctx.is_lit_svg_tag(&tagged.tag)
+                                                {
+                                                    let mut exprs = Vec::new();
+                                                    for e in &tagged.quasi.expressions {
+                                                        exprs.push(e.clone_in(allocator));
+                                                    }
+                                                    let mut pre = Vec::new();
+                                                    for s in preceding {
+                                                        pre.push(s.clone_in(allocator));
+                                                    }
+                                                    return (exprs, pre);
                                                 }
-                                                let mut pre = Vec::new();
-                                                for s in preceding {
-                                                    pre.push(s.clone_in(allocator));
-                                                }
-                                                return (exprs, pre);
                                             }
                                         }
                                     } else {
@@ -418,6 +423,12 @@ pub fn compile_module(
             .with_jsx(true)
     });
     let parsed = oxc_parser::Parser::new(&allocator, &source_text, source_type).parse();
+    let scoping = oxc_semantic::SemanticBuilder::new()
+        .build(&parsed.program)
+        .semantic
+        .into_scoping();
+    let symbol_ctx =
+        lit_analysis::SymbolProofContext::scan(&parsed.program, &scoping, &source_text);
 
     let emit_css_flag = opts.emit_css.unwrap_or(false);
     let mut component_programs = Vec::new();
@@ -473,7 +484,7 @@ pub fn compile_module(
         }
 
         let (expressions, preceding_statements) =
-            extract_render_info(&allocator, &parsed.program, &comp.class_name);
+            extract_render_info(&allocator, &parsed.program, &comp.class_name, &symbol_ctx);
 
         let prog = if comp_effective_tier == "Bailout" {
             emit_bailout::emit_bailout_component(
@@ -499,6 +510,7 @@ pub fn compile_module(
                 &comp_tag,
                 &opts,
                 Some(tag_registry.clone()),
+                Some(&symbol_ctx),
             )
             .map_err(napi::Error::from_reason)?
         } else {
@@ -511,6 +523,7 @@ pub fn compile_module(
                 &expressions,
                 &preceding_statements,
                 Some(tag_registry.clone()),
+                Some(&symbol_ctx),
             )
             .map_err(napi::Error::from_reason)?
         };

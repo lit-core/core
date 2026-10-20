@@ -1,3 +1,5 @@
+#![cfg(feature = "template-ir")]
+
 use html5ever::driver::ParseOpts;
 use html5ever::tendril::TendrilSink;
 use html5ever::{local_name, namespace_url, ns, parse_fragment, QualName};

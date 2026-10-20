@@ -1,21 +1,51 @@
+use lit_analysis::symbol::{CanonicalHelperSymbol, CanonicalLitSymbol, SymbolProofContext};
 use oxc_allocator::{ArenaVec, CloneIn, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
 use crate::ast_helpers::AstHelper;
-use crate::lit_import_scanner::{ImportContext, LitDecoratorKind};
+
+fn is_decorator_helper(callee: &Expression, symbol_ctx: &SymbolProofContext) -> bool {
+    match callee.without_parentheses() {
+        Expression::Identifier(ident) => {
+            matches!(
+                symbol_ctx.resolve_helper_symbol(ident),
+                Some(CanonicalHelperSymbol::Decorate | CanonicalHelperSymbol::DecorateClass)
+            ) || matches!(
+                SymbolProofContext::map_helper_named_import(ident.name.as_str()),
+                Some(CanonicalHelperSymbol::Decorate | CanonicalHelperSymbol::DecorateClass)
+            )
+        }
+        _ => false,
+    }
+}
+
+fn is_metadata_helper(callee: &Expression, symbol_ctx: &SymbolProofContext) -> bool {
+    match callee.without_parentheses() {
+        Expression::Identifier(ident) => {
+            matches!(
+                symbol_ctx.resolve_helper_symbol(ident),
+                Some(CanonicalHelperSymbol::Metadata)
+            ) || matches!(
+                SymbolProofContext::map_helper_named_import(ident.name.as_str()),
+                Some(CanonicalHelperSymbol::Metadata)
+            )
+        }
+        _ => false,
+    }
+}
 
 pub fn try_transform_expression_statement<'a>(
     expr_stmt: &mut ExpressionStatement<'a>,
-    import_ctx: &ImportContext,
+    symbol_ctx: &SymbolProofContext<'_>,
     ast: &AstBuilder<'a>,
 ) -> Option<Vec<Statement<'a>>> {
     match &mut expr_stmt.expression {
-        Expression::CallExpression(call) => try_transform_decorate_call(call, import_ctx, ast),
+        Expression::CallExpression(call) => try_transform_decorate_call(call, symbol_ctx, ast),
         Expression::AssignmentExpression(assign) => {
             if let Expression::CallExpression(call) = &assign.right {
-                try_transform_decorate_call(call, import_ctx, ast)
+                try_transform_decorate_call(call, symbol_ctx, ast)
             } else {
                 None
             }
@@ -25,7 +55,7 @@ pub fn try_transform_expression_statement<'a>(
             let mut any_transformed = false;
             for expr in &seq.expressions {
                 if let Expression::CallExpression(call) = expr {
-                    if let Some(stmts) = try_transform_decorate_call(call, import_ctx, ast) {
+                    if let Some(stmts) = try_transform_decorate_call(call, symbol_ctx, ast) {
                         out_stmts.extend(stmts);
                         any_transformed = true;
                         continue;
@@ -49,7 +79,7 @@ pub fn try_transform_expression_statement<'a>(
 
 pub fn try_transform_decorate_call<'a>(
     call: &CallExpression<'a>,
-    import_ctx: &ImportContext,
+    symbol_ctx: &SymbolProofContext<'_>,
     ast: &AstBuilder<'a>,
 ) -> Option<Vec<Statement<'a>>> {
     if call.arguments.len() < 2 {
@@ -64,7 +94,7 @@ pub fn try_transform_decorate_call<'a>(
         return None;
     }
 
-    if !import_ctx.is_decorator_helper(&call.callee) {
+    if !is_decorator_helper(&call.callee, symbol_ctx) {
         return None;
     }
 
@@ -97,19 +127,16 @@ pub fn try_transform_decorate_call<'a>(
                 return None; // Non-call decorator or unlowered -> bail all-or-nothing
             };
 
-            if import_ctx.is_metadata_helper(&dec_call.callee) {
+            if is_metadata_helper(&dec_call.callee, symbol_ctx) {
                 continue;
             }
 
-            let Some(kind) = crate::decorators::property::get_lit_decorator_kind(
-                elem.as_expression().unwrap(),
-                import_ctx,
-            ) else {
+            let Some(kind) = symbol_ctx.resolve_decorator_call(dec_call) else {
                 return None; // Unknown or unimported decorator -> bail all-or-nothing
             };
 
             match kind {
-                LitDecoratorKind::Property => {
+                CanonicalLitSymbol::PropertyDecorator => {
                     let opt_arg = dec_call
                         .arguments
                         .first()
@@ -123,7 +150,7 @@ pub fn try_transform_decorate_call<'a>(
                     );
                     lowered_stmts.push(stmt);
                 }
-                LitDecoratorKind::State => {
+                CanonicalLitSymbol::StateDecorator => {
                     let state_key = PropertyKey::new_static_identifier(SPAN, "state", ast);
                     let true_val = Expression::new_boolean_literal(SPAN, true, ast);
                     let obj_prop = ObjectPropertyKind::new_object_property(
@@ -147,7 +174,7 @@ pub fn try_transform_decorate_call<'a>(
                     );
                     lowered_stmts.push(stmt);
                 }
-                LitDecoratorKind::Query => {
+                CanonicalLitSymbol::QueryDecorator => {
                     let selector_arg = dec_call.arguments.first()?;
                     let selector_str = match selector_arg.as_expression()? {
                         Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
@@ -183,7 +210,7 @@ pub fn try_transform_decorate_call<'a>(
                     );
                     lowered_stmts.push(stmt);
                 }
-                LitDecoratorKind::QueryAll => {
+                CanonicalLitSymbol::QueryAllDecorator => {
                     let selector_arg = dec_call.arguments.first()?;
                     let selector_str = match selector_arg.as_expression()? {
                         Expression::StringLiteral(str_lit) => str_lit.value.as_str(),
@@ -219,12 +246,13 @@ pub fn try_transform_decorate_call<'a>(
                     );
                     lowered_stmts.push(stmt);
                 }
-                LitDecoratorKind::QueryAssignedElements | LitDecoratorKind::QueryAssignedNodes => {
+                CanonicalLitSymbol::QueryAssignedElementsDecorator
+                | CanonicalLitSymbol::QueryAssignedNodesDecorator => {
                     let (slot_name, flatten, selector) =
                         crate::decorators::query_assigned::extract_query_assigned_options(
                             &Expression::CallExpression(dec_call.clone_in(ast.allocator())),
                         );
-                    let method = if kind == LitDecoratorKind::QueryAssignedElements {
+                    let method = if kind == CanonicalLitSymbol::QueryAssignedElementsDecorator {
                         "assignedElements"
                     } else {
                         "assignedNodes"
@@ -263,19 +291,16 @@ pub fn try_transform_decorate_call<'a>(
                 return None; // Non-call or unknown -> bail all-or-nothing
             };
 
-            if import_ctx.is_metadata_helper(&dec_call.callee) {
+            if is_metadata_helper(&dec_call.callee, symbol_ctx) {
                 continue;
             }
 
-            let Some(kind) = crate::decorators::property::get_lit_decorator_kind(
-                elem.as_expression().unwrap(),
-                import_ctx,
-            ) else {
+            let Some(kind) = symbol_ctx.resolve_decorator_call(dec_call) else {
                 return None; // Unknown or unimported decorator -> bail all-or-nothing (N8)
             };
 
             match kind {
-                LitDecoratorKind::CustomElement => {
+                CanonicalLitSymbol::CustomElementDecorator => {
                     let tag_arg = dec_call.arguments.first()?;
                     let tag_str = match tag_arg.as_expression()? {
                         Expression::StringLiteral(str_lit) => str_lit.value.as_str(),

@@ -3,13 +3,13 @@
   "benchmarkId": "directives",
   "title": "`@lit-core/directives` empirical benchmark results",
   "description": "Ahead-of-time Lit built-in directive compiler evaluated across 255 production Web Components to eliminate runtime directive object allocations and prune dead imports.",
-  "timestamp": "2026-10-12T23:47:41.973Z",
+  "timestamp": "2026-10-19T19:54:43.528Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "3856fa7",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -49,15 +49,15 @@
         }
       },
       "optimized": {
-        "rawBytes": 635410,
-        "gzipBytes": 83472,
-        "brotliBytes": 51163,
-        "buildTimeMs": 55.78375,
-        "firstRenderMs": 42.1,
-        "updateMs": 5.7,
-        "scriptEvalMs": 1.7,
+        "rawBytes": 635304,
+        "gzipBytes": 83400,
+        "brotliBytes": 51165,
+        "buildTimeMs": 60.70120800000001,
+        "firstRenderMs": 31.1,
+        "updateMs": 5.2,
+        "scriptEvalMs": 1.9,
         "registrationMs": 0.4,
-        "heapUsedBytes": 5208132,
+        "heapUsedBytes": 5234737,
         "scenarioSpecific": {
           "totalItems": 50,
           "directivesUsed": [
@@ -70,32 +70,32 @@
         }
       },
       "deltas": {
-        "rawBytes": -256,
-        "rawPercent": -0.04,
-        "gzipBytes": -49,
-        "gzipPercent": -0.06,
-        "brotliBytes": 14,
+        "rawBytes": -362,
+        "rawPercent": -0.06,
+        "gzipBytes": -121,
+        "gzipPercent": -0.14,
+        "brotliBytes": 16,
         "brotliPercent": 0.03,
-        "buildTimeMs": 6,
-        "firstRenderMs": 0.3,
-        "speedupPercent": -0.72,
-        "updateMs": 0,
-        "updateSpeedupPercent": 0,
-        "evalSpeedupPercent": -6.25,
+        "buildTimeMs": 10.9,
+        "firstRenderMs": -10.7,
+        "speedupPercent": 25.6,
+        "updateMs": -0.5,
+        "updateSpeedupPercent": 8.77,
+        "evalSpeedupPercent": -18.75,
         "registrationSpeedupPercent": -100,
-        "memorySavingsPercent": -12.19
+        "memorySavingsPercent": -12.76
       },
       "runtime": {
-        "firstRenderMs": 42.1,
-        "updateMs": 5.7,
-        "scriptEvalMs": 1.7,
+        "firstRenderMs": 31.1,
+        "updateMs": 5.2,
+        "scriptEvalMs": 1.9,
         "registrationMs": 0.4,
-        "heapUsedBytes": 5208132,
-        "speedupPercent": -0.72,
-        "updateSpeedupPercent": 0,
-        "evalSpeedupPercent": -6.25,
+        "heapUsedBytes": 5234737,
+        "speedupPercent": 25.6,
+        "updateSpeedupPercent": 8.77,
+        "evalSpeedupPercent": -18.75,
         "registrationSpeedupPercent": -100,
-        "memorySavingsPercent": -12.19
+        "memorySavingsPercent": -12.76
       },
       "equivalence": {
         "domStructureMatch": true,
@@ -108,8 +108,8 @@
       },
       "diagnostics": {
         "scenario": "Dynamic feed",
-        "speedupPercent": -0.72,
-        "updateSpeedupPercent": 0,
+        "speedupPercent": 25.6,
+        "updateSpeedupPercent": 8.77,
         "buildOverhead": "Fast native pass"
       }
     },
@@ -140,13 +140,13 @@
       "optimized": {
         "rawBytes": 252127,
         "gzipBytes": 44660,
-        "brotliBytes": 36192,
-        "buildTimeMs": 38.734083000000055,
-        "firstRenderMs": 27.8,
-        "updateMs": 3.7,
+        "brotliBytes": 36206,
+        "buildTimeMs": 46.03837500000009,
+        "firstRenderMs": 24.8,
+        "updateMs": 2.9,
         "scriptEvalMs": 1.9,
-        "registrationMs": 0.3,
-        "heapUsedBytes": 3896091,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 3750803,
         "scenarioSpecific": {
           "totalItems": 50,
           "directivesUsed": [
@@ -163,28 +163,28 @@
         "rawPercent": 0.51,
         "gzipBytes": 419,
         "gzipPercent": 0.95,
-        "brotliBytes": 369,
-        "brotliPercent": 1.03,
-        "buildTimeMs": 12,
-        "firstRenderMs": -0.2,
-        "speedupPercent": 0.71,
-        "updateMs": 0.4,
-        "updateSpeedupPercent": -12.12,
+        "brotliBytes": 383,
+        "brotliPercent": 1.07,
+        "buildTimeMs": 19.3,
+        "firstRenderMs": -3.2,
+        "speedupPercent": 11.43,
+        "updateMs": -0.4,
+        "updateSpeedupPercent": 12.12,
         "evalSpeedupPercent": 5,
-        "registrationSpeedupPercent": -200,
-        "memorySavingsPercent": -20.96
+        "registrationSpeedupPercent": -100,
+        "memorySavingsPercent": -16.45
       },
       "runtime": {
-        "firstRenderMs": 27.8,
-        "updateMs": 3.7,
+        "firstRenderMs": 24.8,
+        "updateMs": 2.9,
         "scriptEvalMs": 1.9,
-        "registrationMs": 0.3,
-        "heapUsedBytes": 3896091,
-        "speedupPercent": 0.71,
-        "updateSpeedupPercent": -12.12,
+        "registrationMs": 0.2,
+        "heapUsedBytes": 3750803,
+        "speedupPercent": 11.43,
+        "updateSpeedupPercent": 12.12,
         "evalSpeedupPercent": 5,
-        "registrationSpeedupPercent": -200,
-        "memorySavingsPercent": -20.96
+        "registrationSpeedupPercent": -100,
+        "memorySavingsPercent": -16.45
       },
       "equivalence": {
         "domStructureMatch": true,
@@ -197,8 +197,8 @@
       },
       "diagnostics": {
         "scenario": "Dynamic feed",
-        "speedupPercent": 0.71,
-        "updateSpeedupPercent": -12.12,
+        "speedupPercent": 11.43,
+        "updateSpeedupPercent": 12.12,
         "buildOverhead": "Fast native pass"
       }
     },
@@ -230,12 +230,12 @@
         "rawBytes": 152726,
         "gzipBytes": 38799,
         "brotliBytes": 32349,
-        "buildTimeMs": 19.411458999999923,
-        "firstRenderMs": 35.5,
-        "updateMs": 4.6,
+        "buildTimeMs": 23.846875000000182,
+        "firstRenderMs": 31.4,
+        "updateMs": 4.1,
         "scriptEvalMs": 1.5,
-        "registrationMs": 0.2,
-        "heapUsedBytes": 3480498,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3483726,
         "scenarioSpecific": {
           "totalItems": 50,
           "directivesUsed": [
@@ -254,26 +254,26 @@
         "gzipPercent": 0.05,
         "brotliBytes": 16,
         "brotliPercent": 0.05,
-        "buildTimeMs": -0.2,
-        "firstRenderMs": 5,
-        "speedupPercent": -16.39,
-        "updateMs": -0.1,
-        "updateSpeedupPercent": 2.13,
+        "buildTimeMs": 4.2,
+        "firstRenderMs": 0.9,
+        "speedupPercent": -2.95,
+        "updateMs": -0.6,
+        "updateSpeedupPercent": 12.77,
         "evalSpeedupPercent": 6.25,
-        "registrationSpeedupPercent": -100,
-        "memorySavingsPercent": -18.83
+        "registrationSpeedupPercent": -200,
+        "memorySavingsPercent": -18.94
       },
       "runtime": {
-        "firstRenderMs": 35.5,
-        "updateMs": 4.6,
+        "firstRenderMs": 31.4,
+        "updateMs": 4.1,
         "scriptEvalMs": 1.5,
-        "registrationMs": 0.2,
-        "heapUsedBytes": 3480498,
-        "speedupPercent": -16.39,
-        "updateSpeedupPercent": 2.13,
+        "registrationMs": 0.3,
+        "heapUsedBytes": 3483726,
+        "speedupPercent": -2.95,
+        "updateSpeedupPercent": 12.77,
         "evalSpeedupPercent": 6.25,
-        "registrationSpeedupPercent": -100,
-        "memorySavingsPercent": -18.83
+        "registrationSpeedupPercent": -200,
+        "memorySavingsPercent": -18.94
       },
       "equivalence": {
         "domStructureMatch": true,
@@ -286,8 +286,8 @@
       },
       "diagnostics": {
         "scenario": "Dynamic feed",
-        "speedupPercent": -16.39,
-        "updateSpeedupPercent": 2.13,
+        "speedupPercent": -2.95,
+        "updateSpeedupPercent": 12.77,
         "buildOverhead": "Fast native pass"
       }
     },
@@ -319,12 +319,12 @@
         "rawBytes": 129614,
         "gzipBytes": 28630,
         "brotliBytes": 24326,
-        "buildTimeMs": 28.354333000000224,
-        "firstRenderMs": 28.1,
-        "updateMs": 4.3,
+        "buildTimeMs": 26.72287499999993,
+        "firstRenderMs": 25,
+        "updateMs": 3.7,
         "scriptEvalMs": 1.9,
-        "registrationMs": 0.1,
-        "heapUsedBytes": 3364712,
+        "registrationMs": 0,
+        "heapUsedBytes": 3364732,
         "scenarioSpecific": {
           "totalItems": 50,
           "directivesUsed": [
@@ -343,25 +343,25 @@
         "gzipPercent": 0.25,
         "brotliBytes": 97,
         "brotliPercent": 0.4,
-        "buildTimeMs": -18.7,
-        "firstRenderMs": -4.6,
-        "speedupPercent": 14.07,
-        "updateMs": -0.6,
-        "updateSpeedupPercent": 12.24,
+        "buildTimeMs": -20.4,
+        "firstRenderMs": -7.7,
+        "speedupPercent": 23.55,
+        "updateMs": -1.2,
+        "updateSpeedupPercent": 24.49,
         "evalSpeedupPercent": -5.56,
-        "registrationSpeedupPercent": 50,
+        "registrationSpeedupPercent": 0,
         "memorySavingsPercent": -28.12
       },
       "runtime": {
-        "firstRenderMs": 28.1,
-        "updateMs": 4.3,
+        "firstRenderMs": 25,
+        "updateMs": 3.7,
         "scriptEvalMs": 1.9,
-        "registrationMs": 0.1,
-        "heapUsedBytes": 3364712,
-        "speedupPercent": 14.07,
-        "updateSpeedupPercent": 12.24,
+        "registrationMs": 0,
+        "heapUsedBytes": 3364732,
+        "speedupPercent": 23.55,
+        "updateSpeedupPercent": 24.49,
         "evalSpeedupPercent": -5.56,
-        "registrationSpeedupPercent": 50,
+        "registrationSpeedupPercent": 0,
         "memorySavingsPercent": -28.12
       },
       "equivalence": {
@@ -375,8 +375,8 @@
       },
       "diagnostics": {
         "scenario": "Dynamic feed",
-        "speedupPercent": 14.07,
-        "updateSpeedupPercent": 12.24,
+        "speedupPercent": 23.55,
+        "updateSpeedupPercent": 24.49,
         "buildOverhead": "Fast native pass"
       }
     },
@@ -405,15 +405,15 @@
         }
       },
       "optimized": {
-        "rawBytes": 59352,
-        "gzipBytes": 17390,
-        "brotliBytes": 15593,
-        "buildTimeMs": 17.799041999999645,
-        "firstRenderMs": 25.2,
-        "updateMs": 2.6,
-        "scriptEvalMs": 1.9,
+        "rawBytes": 59176,
+        "gzipBytes": 17369,
+        "brotliBytes": 15540,
+        "buildTimeMs": 18.172625000000153,
+        "firstRenderMs": 22,
+        "updateMs": 3.6,
+        "scriptEvalMs": 2.2,
         "registrationMs": 0.3,
-        "heapUsedBytes": 2901390,
+        "heapUsedBytes": 2949536,
         "scenarioSpecific": {
           "totalItems": 50,
           "directivesUsed": [
@@ -426,32 +426,32 @@
         }
       },
       "deltas": {
-        "rawBytes": 65,
-        "rawPercent": 0.11,
-        "gzipBytes": -7,
-        "gzipPercent": -0.04,
-        "brotliBytes": 31,
-        "brotliPercent": 0.2,
-        "buildTimeMs": -5.6,
-        "firstRenderMs": -5.8,
-        "speedupPercent": 18.71,
-        "updateMs": -0.7,
-        "updateSpeedupPercent": 21.21,
-        "evalSpeedupPercent": 0,
+        "rawBytes": -111,
+        "rawPercent": -0.19,
+        "gzipBytes": -28,
+        "gzipPercent": -0.16,
+        "brotliBytes": -22,
+        "brotliPercent": -0.14,
+        "buildTimeMs": -5.2,
+        "firstRenderMs": -9,
+        "speedupPercent": 29.03,
+        "updateMs": 0.3,
+        "updateSpeedupPercent": -9.09,
+        "evalSpeedupPercent": -15.79,
         "registrationSpeedupPercent": 0,
-        "memorySavingsPercent": -23.89
+        "memorySavingsPercent": -25.95
       },
       "runtime": {
-        "firstRenderMs": 25.2,
-        "updateMs": 2.6,
-        "scriptEvalMs": 1.9,
+        "firstRenderMs": 22,
+        "updateMs": 3.6,
+        "scriptEvalMs": 2.2,
         "registrationMs": 0.3,
-        "heapUsedBytes": 2901390,
-        "speedupPercent": 18.71,
-        "updateSpeedupPercent": 21.21,
-        "evalSpeedupPercent": 0,
+        "heapUsedBytes": 2949536,
+        "speedupPercent": 29.03,
+        "updateSpeedupPercent": -9.09,
+        "evalSpeedupPercent": -15.79,
         "registrationSpeedupPercent": 0,
-        "memorySavingsPercent": -23.89
+        "memorySavingsPercent": -25.95
       },
       "equivalence": {
         "domStructureMatch": true,
@@ -464,8 +464,8 @@
       },
       "diagnostics": {
         "scenario": "Dynamic feed",
-        "speedupPercent": 18.71,
-        "updateSpeedupPercent": 21.21,
+        "speedupPercent": 29.03,
+        "updateSpeedupPercent": -9.09,
         "buildOverhead": "Fast native pass"
       }
     }

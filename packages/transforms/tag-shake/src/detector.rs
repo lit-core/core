@@ -86,22 +86,15 @@ impl RegistrationDetector {
             _ => return None,
         };
 
-        // 1. Check customElements.define(...) or window.customElements.define(...) or globalThis.customElements.define(...)
-        if Self::is_custom_elements_define(&call.callee, resolver) {
-            let first_arg = call.arguments.first()?;
-            let second_arg = call.arguments.get(1)?;
-
-            let (tag, is_dynamic) = match first_arg.as_expression() {
-                Some(Expression::StringLiteral(str_lit)) => {
-                    (str_lit.value.as_str().to_string(), false)
-                }
-                _ => ("".to_string(), true),
+        // 1. Check customElements.define(...) via SymbolProofContext
+        if let Some(reg) = resolver.symbol_ctx.is_custom_elements_define(call) {
+            let (tag, is_dynamic) = match reg.tag {
+                Some(t) => (t, false),
+                None => ("".to_string(), true),
             };
 
-            let (comp_name, comp_span) = match second_arg.as_expression() {
-                Some(Expression::Identifier(ident)) => {
-                    (ident.name.as_str().to_string(), ident.span)
-                }
+            let (comp_name, comp_span) = match reg.class_expr.without_parentheses() {
+                Expression::Identifier(ident) => (ident.name.as_str().to_string(), ident.span),
                 _ => ("".to_string(), Span::default()),
             };
 
@@ -199,33 +192,6 @@ impl RegistrationDetector {
         }
 
         None
-    }
-
-    fn is_custom_elements_define(callee: &Expression, resolver: &SymbolResolver) -> bool {
-        let Expression::StaticMemberExpression(mem) = callee else {
-            return false;
-        };
-        if mem.property.name != "define" {
-            return false;
-        }
-
-        match &mem.object {
-            Expression::Identifier(id) => {
-                id.name == "customElements" && resolver.is_global_reference(id)
-            }
-            Expression::StaticMemberExpression(inner)
-                if inner.property.name == "customElements" =>
-            {
-                match &inner.object {
-                    Expression::Identifier(global_id) => {
-                        (global_id.name == "window" || global_id.name == "globalThis")
-                            && resolver.is_global_reference(global_id)
-                    }
-                    _ => false,
-                }
-            }
-            _ => false,
-        }
     }
 
     fn detect_class_decorators<'a>(

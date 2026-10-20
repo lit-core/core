@@ -1,15 +1,14 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use oxc_allocator::{ArenaVec, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
 use crate::ast_helpers::AstHelper;
-use crate::decorators::property::get_lit_decorator_kind;
-use crate::lit_import_scanner::{ImportContext, LitDecoratorKind};
 
 pub fn try_transform_query_all<'a>(
     element: &mut ClassElement<'a>,
-    import_ctx: &ImportContext,
+    symbol_ctx: &SymbolProofContext<'_>,
     ast: &AstBuilder<'a>,
 ) -> Option<ClassElement<'a>> {
     let ClassElement::PropertyDefinition(prop_def) = element else {
@@ -20,18 +19,16 @@ pub fn try_transform_query_all<'a>(
     let mut has_query_all = false;
 
     for dec in &prop_def.decorators {
-        if let Some(kind) = get_lit_decorator_kind(&dec.expression, import_ctx) {
-            if kind == LitDecoratorKind::QueryAll {
-                has_query_all = true;
-                if let Expression::CallExpression(call) = &dec.expression {
-                    if let Some(arg0) = call.arguments.first() {
-                        if let Some(Expression::StringLiteral(lit)) = arg0.as_expression() {
-                            selector = Some(lit.value.as_str().to_string());
-                        }
+        if symbol_ctx.resolve_decorator(dec) == Some(CanonicalLitSymbol::QueryAllDecorator) {
+            has_query_all = true;
+            if let Expression::CallExpression(call) = &dec.expression {
+                if let Some(arg0) = call.arguments.first() {
+                    if let Some(Expression::StringLiteral(lit)) = arg0.as_expression() {
+                        selector = Some(lit.value.as_str().to_string());
                     }
                 }
-                break;
             }
+            break;
         }
     }
 

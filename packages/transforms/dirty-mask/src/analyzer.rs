@@ -1,56 +1,6 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use oxc_ast::ast::*;
-use oxc_semantic::Scoping;
 use std::collections::{HashMap, HashSet};
-
-pub fn is_canonical_lit_specifier(src: &str) -> bool {
-    src == "lit"
-        || src.starts_with("lit/")
-        || src == "lit-html"
-        || src.starts_with("lit-html/")
-        || src == "lit-element"
-        || src.starts_with("lit-element/")
-        || src == "@lit/reactive-element"
-        || src.starts_with("@lit/reactive-element/")
-        || src.starts_with("@lit/")
-}
-
-#[derive(Clone, Debug)]
-pub struct LitSemanticAnalysis {
-    pub has_imports: bool,
-    pub lit_tag_names: HashSet<String>,
-    pub lit_decorator_names: HashSet<String>,
-    pub lit_class_names: HashSet<String>,
-    pub lit_namespaces: HashSet<String>,
-    pub lit_no_change_name: Option<String>,
-    pub lit_directive_names: HashSet<String>,
-}
-
-pub fn is_directive_name(name: &str) -> bool {
-    matches!(
-        name,
-        "classMap"
-            | "styleMap"
-            | "ifDefined"
-            | "when"
-            | "choose"
-            | "map"
-            | "join"
-            | "range"
-            | "guard"
-            | "live"
-            | "keyed"
-            | "cache"
-            | "repeat"
-            | "templateContent"
-            | "unsafeHTML"
-            | "unsafeSVG"
-            | "unsafeMathML"
-            | "until"
-            | "asyncAppend"
-            | "asyncReplace"
-            | "ref"
-    )
-}
 
 pub fn get_class_name<'a>(class: &Class<'a>) -> Option<&'a str> {
     class.id.as_ref().map(|id| id.name.as_str())
@@ -119,234 +69,6 @@ pub fn collect_named_classes<'a, 'b>(stmts: &'b [Statement<'a>]) -> Vec<(&'a str
         }
     }
     out
-}
-
-impl LitSemanticAnalysis {
-    pub fn new(program: &Program, scoping: &Scoping) -> Self {
-        let mut analysis = Self {
-            has_imports: false,
-            lit_tag_names: HashSet::new(),
-            lit_decorator_names: HashSet::new(),
-            lit_class_names: HashSet::new(),
-            lit_namespaces: HashSet::new(),
-            lit_no_change_name: None,
-            lit_directive_names: HashSet::new(),
-        };
-
-        let root = scoping.root_scope_id();
-
-        for stmt in &program.body {
-            if let Statement::ImportDeclaration(import_decl) = stmt {
-                analysis.has_imports = true;
-                let src = import_decl.source.value.as_str();
-                if is_canonical_lit_specifier(src) {
-                    if let Some(specifiers) = &import_decl.specifiers {
-                        for spec in specifiers {
-                            match spec {
-                                ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                                    let imported_name = named.imported.name();
-                                    let local_name = named.local.name.as_str().to_string();
-                                    let sym_id = named.local.symbol_id.get().or_else(|| {
-                                        scoping.get_binding(root, named.local.name.as_str().into())
-                                    });
-                                    if sym_id.is_some() {
-                                        if imported_name == "html" || imported_name == "svg" {
-                                            analysis.lit_tag_names.insert(local_name.clone());
-                                        } else if imported_name == "property"
-                                            || imported_name == "state"
-                                        {
-                                            analysis.lit_decorator_names.insert(local_name.clone());
-                                        } else if imported_name == "LitElement"
-                                            || imported_name == "ReactiveElement"
-                                        {
-                                            analysis.lit_class_names.insert(local_name.clone());
-                                        } else if imported_name == "noChange" {
-                                            analysis.lit_no_change_name = Some(local_name.clone());
-                                        }
-
-                                        if is_directive_name(imported_name.as_str())
-                                            || src.contains("directive")
-                                        {
-                                            analysis.lit_directive_names.insert(local_name);
-                                        }
-                                    }
-                                }
-                                ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                                    let sym_id = ns.local.symbol_id.get().or_else(|| {
-                                        scoping.get_binding(root, ns.local.name.as_str().into())
-                                    });
-                                    if sym_id.is_some() {
-                                        analysis
-                                            .lit_namespaces
-                                            .insert(ns.local.name.as_str().to_string());
-                                    }
-                                }
-                                _ => {}
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if !analysis.has_imports {
-            analysis.lit_class_names.insert("LitElement".to_string());
-            analysis
-                .lit_class_names
-                .insert("ReactiveElement".to_string());
-        }
-
-        let named_classes = collect_named_classes(&program.body);
-        let mut changed = true;
-        while changed {
-            changed = false;
-            for (name, class) in &named_classes {
-                if !analysis.lit_class_names.contains(*name) {
-                    let (is_reactive, _) = analysis.is_reactive_class(class);
-                    if is_reactive {
-                        analysis.lit_class_names.insert((*name).to_string());
-                        changed = true;
-                    }
-                }
-            }
-        }
-
-        analysis
-    }
-
-    pub fn is_lit_tag(&self, expr: &Expression) -> bool {
-        match expr {
-            Expression::Identifier(ident) => {
-                if self.has_imports {
-                    self.lit_tag_names.contains(ident.name.as_str())
-                } else {
-                    ident.name == "html" || ident.name == "svg"
-                }
-            }
-            Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "html" || mem.property.name == "svg" {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        if self.has_imports {
-                            return self.lit_namespaces.contains(obj.name.as_str());
-                        } else {
-                            return true;
-                        }
-                    }
-                }
-                false
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_reactive_decorator(&self, expr: &Expression) -> bool {
-        match expr {
-            Expression::Identifier(ident) => {
-                if self.has_imports {
-                    self.lit_decorator_names.contains(ident.name.as_str())
-                } else {
-                    ident.name == "property" || ident.name == "state"
-                }
-            }
-            Expression::CallExpression(call) => self.is_reactive_decorator(&call.callee),
-            Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "property" || mem.property.name == "state" {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        if self.has_imports {
-                            return self.lit_namespaces.contains(obj.name.as_str());
-                        } else {
-                            return true;
-                        }
-                    }
-                }
-                false
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_reactive_class(&self, class: &Class) -> (bool, bool) {
-        if let Some(ref heritage) = class.heritage {
-            let extends_reactive = match &heritage.expression {
-                Expression::Identifier(ident) => {
-                    self.lit_class_names.contains(ident.name.as_str())
-                        || (!self.has_imports
-                            && (ident.name == "LitElement" || ident.name == "ReactiveElement"))
-                }
-                Expression::StaticMemberExpression(mem)
-                    if mem.property.name == "LitElement"
-                        || mem.property.name == "ReactiveElement" =>
-                {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        if self.has_imports {
-                            self.lit_namespaces.contains(obj.name.as_str())
-                        } else {
-                            true
-                        }
-                    } else {
-                        false
-                    }
-                }
-                _ => false,
-            };
-            (extends_reactive, extends_reactive)
-        } else {
-            (!self.has_imports, false)
-        }
-    }
-
-    pub fn is_directive_call(&self, call: &CallExpression) -> bool {
-        match &call.callee {
-            Expression::Identifier(ident) => {
-                if self.has_imports {
-                    self.lit_directive_names.contains(ident.name.as_str())
-                } else {
-                    is_directive_name(ident.name.as_str())
-                }
-            }
-            Expression::StaticMemberExpression(mem) => {
-                if is_directive_name(mem.property.name.as_str()) {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        if self.has_imports {
-                            return self.lit_namespaces.contains(obj.name.as_str())
-                                || self.lit_directive_names.contains(obj.name.as_str());
-                        } else {
-                            return true;
-                        }
-                    }
-                }
-                false
-            }
-            _ => false,
-        }
-    }
-}
-
-pub fn is_lit_html_tag(tag: &Expression) -> bool {
-    match tag {
-        Expression::Identifier(ident) => ident.name == "html" || ident.name == "svg",
-        Expression::StaticMemberExpression(mem) => {
-            mem.property.name == "html" || mem.property.name == "svg"
-        }
-        _ => false,
-    }
-}
-
-pub fn is_reactive_decorator(expr: &Expression) -> bool {
-    match expr {
-        Expression::Identifier(ident) => ident.name == "property" || ident.name == "state",
-        Expression::CallExpression(call) => match &call.callee {
-            Expression::Identifier(ident) => ident.name == "property" || ident.name == "state",
-            Expression::StaticMemberExpression(mem) => {
-                mem.property.name == "property" || mem.property.name == "state"
-            }
-            _ => false,
-        },
-        Expression::StaticMemberExpression(mem) => {
-            mem.property.name == "property" || mem.property.name == "state"
-        }
-        _ => false,
-    }
 }
 
 pub fn get_root_this_prop(expr: &Expression) -> Option<String> {
@@ -576,16 +298,21 @@ pub type ReactiveProps = (HashMap<String, usize>, Vec<(String, usize)>);
 
 pub fn collect_reactive_properties(
     class: &Class,
-    ctx: Option<&LitSemanticAnalysis>,
+    ctx: Option<&SymbolProofContext>,
 ) -> ReactiveProps {
     let mut prop_indices: HashMap<String, usize> = HashMap::new();
     let mut sorted_props: Vec<(String, usize)> = Vec::new();
 
     let check_decorator = |d: &Expression| -> bool {
         if let Some(c) = ctx {
-            c.is_reactive_decorator(d)
+            c.is_proven_decorator(d).is_some_and(|sym| {
+                matches!(
+                    sym,
+                    CanonicalLitSymbol::PropertyDecorator | CanonicalLitSymbol::StateDecorator
+                )
+            })
         } else {
-            is_reactive_decorator(d)
+            false
         }
     };
 
@@ -691,7 +418,7 @@ pub fn collect_reactive_properties_with_inheritance<'a>(
     class: &Class<'a>,
     classes_by_name: &HashMap<&str, &Class<'a>>,
     external_props: Option<&HashMap<String, Vec<String>>>,
-    ctx: Option<&LitSemanticAnalysis>,
+    ctx: Option<&SymbolProofContext>,
 ) -> ReactiveProps {
     collect_reactive_properties_with_inheritance_named(
         class,
@@ -706,7 +433,7 @@ pub fn collect_reactive_properties_with_inheritance_named<'a>(
     class: &Class<'a>,
     classes_by_name: &HashMap<&str, &Class<'a>>,
     external_props: Option<&HashMap<String, Vec<String>>>,
-    ctx: Option<&LitSemanticAnalysis>,
+    ctx: Option<&SymbolProofContext>,
     class_name: Option<&str>,
 ) -> ReactiveProps {
     let mut ancestors = Vec::new();

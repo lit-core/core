@@ -50,34 +50,30 @@ pub fn can_merge_static_properties(class: &Class<'_>) -> bool {
 /// Checks if a class has reactive property decorators (@property or @state).
 pub fn class_has_reactive_properties(
     class: &Class<'_>,
-    import_ctx: &crate::lit_import_scanner::ImportContext,
+    symbol_ctx: &lit_analysis::symbol::SymbolProofContext<'_>,
 ) -> bool {
     for element in &class.body.body {
         if let ClassElement::PropertyDefinition(prop_def) = element {
             if !prop_def.r#static {
                 for dec in &prop_def.decorators {
-                    if let Some(kind) = crate::decorators::property::get_lit_decorator_kind(
-                        &dec.expression,
-                        import_ctx,
+                    if matches!(
+                        symbol_ctx.resolve_decorator(dec),
+                        Some(
+                            lit_analysis::symbol::CanonicalLitSymbol::PropertyDecorator
+                                | lit_analysis::symbol::CanonicalLitSymbol::StateDecorator
+                        )
                     ) {
-                        if kind == crate::lit_import_scanner::LitDecoratorKind::Property
-                            || kind == crate::lit_import_scanner::LitDecoratorKind::State
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
         } else if let ClassElement::MethodDefinition(method_def) = element {
             if method_def.kind == MethodDefinitionKind::Get && !method_def.r#static {
                 for dec in &method_def.decorators {
-                    if let Some(kind) = crate::decorators::property::get_lit_decorator_kind(
-                        &dec.expression,
-                        import_ctx,
-                    ) {
-                        if kind == crate::lit_import_scanner::LitDecoratorKind::Property {
-                            return true;
-                        }
+                    if symbol_ctx.resolve_decorator(dec)
+                        == Some(lit_analysis::symbol::CanonicalLitSymbol::PropertyDecorator)
+                    {
+                        return true;
                     }
                 }
             }

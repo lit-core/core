@@ -2,6 +2,7 @@ use crate::classify::ClassificationTier;
 use crate::decorator::ExtractedDecorator;
 use crate::property::PropertyInfo;
 use crate::symbol::SymbolProofContext;
+#[cfg(feature = "template-ir")]
 use crate::template_ir::{AttributePrefix, TemplateIR, TemplateNode};
 use oxc_ast::ast::*;
 use serde::{Deserialize, Serialize};
@@ -48,7 +49,11 @@ pub struct LitComponentInfo {
     pub slots: Vec<SlotInfo>,
     pub styles: Vec<StyleInfo>,
     pub shadow_root_options: Option<ShadowRootOptions>,
+    #[cfg(feature = "template-ir")]
     pub template: Option<TemplateIR>,
+    #[cfg(not(feature = "template-ir"))]
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub template: Option<()>,
     pub super_class: Option<String>,
     pub mixins: Vec<String>,
 }
@@ -137,10 +142,12 @@ impl ManifestScanner {
 
     pub fn extract_slots<'a>(
         class: Option<&'a Class<'a>>,
-        template: Option<&TemplateIR>,
+        #[cfg(feature = "template-ir")] template: Option<&TemplateIR>,
+        #[cfg(not(feature = "template-ir"))] _template: Option<()>,
         ctx: Option<&SymbolProofContext<'a>>,
     ) -> Vec<SlotInfo> {
         let mut slots = Vec::new();
+        #[cfg(feature = "template-ir")]
         if let Some(tmpl) = template {
             Self::collect_slots_from_nodes(&tmpl.roots, &mut slots);
         }
@@ -166,16 +173,6 @@ impl ManifestScanner {
         }
 
         slots
-    }
-
-    fn is_html_or_svg_tag_fallback(expr: &Expression) -> bool {
-        match expr {
-            Expression::Identifier(id) => id.name == "html" || id.name == "svg",
-            Expression::StaticMemberExpression(mem) => {
-                mem.property.name == "html" || mem.property.name == "svg"
-            }
-            _ => false,
-        }
     }
 
     fn collect_slots_from_stmt<'a>(
@@ -222,21 +219,21 @@ impl ManifestScanner {
     ) {
         match expr {
             Expression::TaggedTemplateExpression(tagged) => {
-                if ctx.is_lit_html_tag(&tagged.tag)
-                    || ctx.is_lit_svg_tag(&tagged.tag)
-                    || Self::is_html_or_svg_tag_fallback(&tagged.tag)
-                {
-                    let quasis: Vec<&str> = tagged
-                        .quasi
-                        .quasis
-                        .iter()
-                        .map(|q| q.value.raw.as_str())
-                        .collect();
-                    let expr_count = tagged.quasi.expressions.len();
-                    if let Ok(inner_ir) =
-                        crate::template_ir::TemplateParser::parse_lit_template(&quasis, expr_count)
+                if ctx.is_lit_html_tag(&tagged.tag) || ctx.is_lit_svg_tag(&tagged.tag) {
+                    #[cfg(feature = "template-ir")]
                     {
-                        Self::collect_slots_from_nodes(&inner_ir.roots, slots);
+                        let quasis: Vec<&str> = tagged
+                            .quasi
+                            .quasis
+                            .iter()
+                            .map(|q| q.value.raw.as_str())
+                            .collect();
+                        let expr_count = tagged.quasi.expressions.len();
+                        if let Ok(inner_ir) = crate::template_ir::TemplateParser::parse_lit_template(
+                            &quasis, expr_count,
+                        ) {
+                            Self::collect_slots_from_nodes(&inner_ir.roots, slots);
+                        }
                     }
                 }
                 for e in &tagged.quasi.expressions {
@@ -295,6 +292,7 @@ impl ManifestScanner {
         }
     }
 
+    #[cfg(feature = "template-ir")]
     fn collect_slots_from_nodes(nodes: &[TemplateNode], slots: &mut Vec<SlotInfo>) {
         for node in nodes {
             match node {
@@ -321,12 +319,14 @@ impl ManifestScanner {
 
     pub fn extract_events<'a>(
         class: &'a Class<'a>,
-        template: Option<&TemplateIR>,
+        #[cfg(feature = "template-ir")] template: Option<&TemplateIR>,
+        #[cfg(not(feature = "template-ir"))] _template: Option<()>,
         _decorators: &[ExtractedDecorator],
     ) -> Vec<EventInfo> {
         let mut events_map: HashMap<String, EventInfo> = HashMap::new();
 
         // 1. From template event bindings (@eventName)
+        #[cfg(feature = "template-ir")]
         if let Some(tmpl) = template {
             Self::collect_events_from_nodes(&tmpl.roots, &mut events_map);
         }
@@ -347,6 +347,7 @@ impl ManifestScanner {
         events
     }
 
+    #[cfg(feature = "template-ir")]
     fn collect_events_from_nodes(
         nodes: &[TemplateNode],
         events_map: &mut HashMap<String, EventInfo>,
@@ -483,7 +484,7 @@ impl ManifestScanner {
     ) {
         match expr {
             Expression::TaggedTemplateExpression(tagged) => {
-                if ctx.is_lit_css_tag(&tagged.tag) || Self::is_css_tag_name(&tagged.tag) {
+                if ctx.is_lit_css_tag(&tagged.tag) {
                     let mut css = String::new();
                     for quasi in &tagged.quasi.quasis {
                         css.push_str(&quasi.value.raw);
@@ -538,13 +539,6 @@ impl ManifestScanner {
                 }
             }
             _ => {}
-        }
-    }
-
-    fn is_css_tag_name<'a>(expr: &'a Expression<'a>) -> bool {
-        match expr {
-            Expression::Identifier(id) => id.name == "css",
-            _ => false,
         }
     }
 

@@ -94,6 +94,12 @@ fn test_transpiled_decorate_helpers() {
         Some("hasMainContent")
     );
 
-    let tag = DecoratorExtractor::extract_custom_element_tag(&parsed.program, "CDSButton", &[]);
+    let tag = DecoratorExtractor::extract_custom_element_tag(
+        &parsed.program,
+        "CDSButton",
+        None,
+        &[],
+        &ctx,
+    );
     assert_eq!(tag, Some("cds-button".to_string()));
 }

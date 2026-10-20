@@ -21,20 +21,20 @@
     "id": "carbon",
     "name": "Carbon Web Components (@carbon/web-components)",
     "packageName": "@carbon/web-components",
-    "version": "2.64.0"
+    "version": "2.65.0"
   },
   "variant": {
     "id": "dom-paths",
     "name": "Structural DOM paths (dom-paths)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-12T23:47:24.048Z",
+  "timestamp": "2026-10-19T20:05:41.262Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "3856fa7",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -49,15 +49,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 473547,
-    "gzipBytes": 65463,
-    "brotliBytes": 42721,
-    "buildTimeMs": 43.25062499999996,
-    "firstRenderMs": 290.2,
+    "rawBytes": 473757,
+    "gzipBytes": 65551,
+    "brotliBytes": 42766,
+    "buildTimeMs": 77.90520900000001,
+    "firstRenderMs": 295.4,
     "updateMs": 5,
-    "scriptEvalMs": 1.5,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 6518935,
+    "scriptEvalMs": 4.1,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 6516731,
     "scenarioSpecific": {
       "rowCount": 100,
       "customElementsPerCell": 4,
@@ -83,32 +83,32 @@
     }
   },
   "deltas": {
-    "rawBytes": 1398,
-    "rawPercent": 0.3,
-    "gzipBytes": 223,
-    "gzipPercent": 0.34,
-    "brotliBytes": 143,
-    "brotliPercent": 0.34,
-    "buildTimeMs": -28.5,
-    "firstRenderMs": 10.2,
-    "speedupPercent": -3.64,
+    "rawBytes": 1608,
+    "rawPercent": 0.34,
+    "gzipBytes": 311,
+    "gzipPercent": 0.48,
+    "brotliBytes": 188,
+    "brotliPercent": 0.44,
+    "buildTimeMs": 6.2,
+    "firstRenderMs": 15.4,
+    "speedupPercent": -5.5,
     "updateMs": -0.4,
     "updateSpeedupPercent": 7.41,
-    "evalSpeedupPercent": 75.81,
-    "registrationSpeedupPercent": 50,
-    "memorySavingsPercent": -32.91
+    "evalSpeedupPercent": 33.87,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -32.86
   },
   "runtime": {
-    "firstRenderMs": 290.2,
+    "firstRenderMs": 295.4,
     "updateMs": 5,
-    "scriptEvalMs": 1.5,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 6518935,
-    "speedupPercent": -3.64,
+    "scriptEvalMs": 4.1,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 6516731,
+    "speedupPercent": -5.5,
     "updateSpeedupPercent": 7.41,
-    "evalSpeedupPercent": 75.81,
-    "registrationSpeedupPercent": 50,
-    "memorySavingsPercent": -32.91
+    "evalSpeedupPercent": 33.87,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -32.86
   },
   "domSnapshot": {
     "mount": {

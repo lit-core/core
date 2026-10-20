@@ -1,12 +1,13 @@
+use lit_analysis::symbol::SymbolProofContext;
 use napi_derive::napi;
 use oxc_allocator::{Allocator, Vec as ArenaVec};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
+use oxc_semantic::SemanticBuilder;
 use oxc_span::{GetSpan, SourceType, Span, SPAN};
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 
 use crate::parser::{parse_lit_template, PartKind, PreparedTemplate};
 
@@ -54,19 +55,6 @@ fn contains_octal_escape(quasis: &[TemplateElement]) -> bool {
     false
 }
 
-fn is_known_lit_module(specifier: &str) -> bool {
-    if specifier.contains("static-html")
-        || specifier.ends_with("/static.js")
-        || specifier.ends_with("/static")
-    {
-        return false;
-    }
-    specifier == "lit"
-        || specifier == "lit-html"
-        || specifier.starts_with("lit/")
-        || specifier.starts_with("lit-html/")
-}
-
 pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let allocator = Allocator::default();
     let filename = options.filename.as_deref().unwrap_or("source.ts");
@@ -84,24 +72,37 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
         };
     }
 
-    // 1. Scan import declarations to find local names for 'html'
-    let mut html_idents = HashSet::new();
-    html_idents.insert("html".to_string());
+    // 1. Build semantic model and scan Lit symbol proofs
+    let semantic_ret = SemanticBuilder::new().build(&parsed.program);
+    let scoping = semantic_ret.semantic.into_scoping();
 
-    for stmt in &parsed.program.body {
-        if let Statement::ImportDeclaration(import_decl) = stmt {
-            if is_known_lit_module(&import_decl.source.value) {
-                if let Some(specifiers) = &import_decl.specifiers {
-                    for spec in specifiers {
-                        if let ImportDeclarationSpecifier::ImportSpecifier(named) = spec {
-                            if named.imported.name() == "html" {
-                                html_idents.insert(named.local.name.as_str().to_string());
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+
+    let symbol_ctx = SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
+    };
+
+    if !symbol_ctx.has_lit_imports() {
+        return HtmlAotResult {
+            code: source.to_string(),
+            map: None,
+            templates_count: 0,
+        };
     }
 
     // 2. Walk AST to find lit template expressions
@@ -110,7 +111,7 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
 
     walk_and_collect_templates(
         &parsed.program.body,
-        &html_idents,
+        &symbol_ctx,
         &mut template_matches,
         &mut template_counter,
     );
@@ -849,34 +850,34 @@ fn strip_ts_in_expr<'a>(expr: &mut Expression<'a>) {
 
 fn walk_and_collect_templates<'a>(
     stmts: &[Statement<'a>],
-    html_idents: &HashSet<String>,
+    symbol_ctx: &SymbolProofContext<'a>,
     out: &mut Vec<(Span, CompiledTemplateData)>,
     counter: &mut usize,
 ) {
     for stmt in stmts {
-        walk_stmt_for_templates(stmt, html_idents, out, counter);
+        walk_stmt_for_templates(stmt, symbol_ctx, out, counter);
     }
 }
 
 fn walk_stmt_for_templates<'a>(
     stmt: &Statement<'a>,
-    html_idents: &HashSet<String>,
+    symbol_ctx: &SymbolProofContext<'a>,
     out: &mut Vec<(Span, CompiledTemplateData)>,
     counter: &mut usize,
 ) {
     match stmt {
         Statement::ExpressionStatement(s) => {
-            walk_expr_for_templates(&s.expression, html_idents, out, counter);
+            walk_expr_for_templates(&s.expression, symbol_ctx, out, counter);
         }
         Statement::ReturnStatement(s) => {
             if let Some(arg) = &s.argument {
-                walk_expr_for_templates(arg, html_idents, out, counter);
+                walk_expr_for_templates(arg, symbol_ctx, out, counter);
             }
         }
         Statement::VariableDeclaration(s) => {
             for decl in &s.declarations {
                 if let Some(init) = &decl.init {
-                    walk_expr_for_templates(init, html_idents, out, counter);
+                    walk_expr_for_templates(init, symbol_ctx, out, counter);
                 }
             }
         }
@@ -886,13 +887,13 @@ fn walk_stmt_for_templates<'a>(
                     ClassElement::MethodDefinition(m) => {
                         if let Some(body) = &m.value.body {
                             for s in &body.statements {
-                                walk_stmt_for_templates(s, html_idents, out, counter);
+                                walk_stmt_for_templates(s, symbol_ctx, out, counter);
                             }
                         }
                     }
                     ClassElement::PropertyDefinition(p) => {
                         if let Some(init) = &p.value {
-                            walk_expr_for_templates(init, html_idents, out, counter);
+                            walk_expr_for_templates(init, symbol_ctx, out, counter);
                         }
                     }
                     _ => {}
@@ -903,14 +904,14 @@ fn walk_stmt_for_templates<'a>(
             Declaration::VariableDeclaration(v) => {
                 for decl in &v.declarations {
                     if let Some(init) = &decl.init {
-                        walk_expr_for_templates(init, html_idents, out, counter);
+                        walk_expr_for_templates(init, symbol_ctx, out, counter);
                     }
                 }
             }
             Declaration::FunctionDeclaration(f) => {
                 if let Some(body) = &f.body {
                     for s in &body.statements {
-                        walk_stmt_for_templates(s, html_idents, out, counter);
+                        walk_stmt_for_templates(s, symbol_ctx, out, counter);
                     }
                 }
             }
@@ -919,7 +920,7 @@ fn walk_stmt_for_templates<'a>(
                     if let ClassElement::MethodDefinition(m) = elem {
                         if let Some(body) = &m.value.body {
                             for s in &body.statements {
-                                walk_stmt_for_templates(s, html_idents, out, counter);
+                                walk_stmt_for_templates(s, symbol_ctx, out, counter);
                             }
                         }
                     }
@@ -929,7 +930,7 @@ fn walk_stmt_for_templates<'a>(
         },
         Statement::ExportDefaultDeclaration(export_decl) => {
             if let Some(expr) = export_decl.declaration.as_expression() {
-                walk_expr_for_templates(expr, html_idents, out, counter);
+                walk_expr_for_templates(expr, symbol_ctx, out, counter);
             } else if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                 &export_decl.declaration
             {
@@ -937,7 +938,7 @@ fn walk_stmt_for_templates<'a>(
                     if let ClassElement::MethodDefinition(m) = elem {
                         if let Some(body) = &m.value.body {
                             for s in &body.statements {
-                                walk_stmt_for_templates(s, html_idents, out, counter);
+                                walk_stmt_for_templates(s, symbol_ctx, out, counter);
                             }
                         }
                     }
@@ -946,14 +947,14 @@ fn walk_stmt_for_templates<'a>(
         }
         Statement::BlockStatement(b) => {
             for s in &b.body {
-                walk_stmt_for_templates(s, html_idents, out, counter);
+                walk_stmt_for_templates(s, symbol_ctx, out, counter);
             }
         }
         Statement::IfStatement(if_stmt) => {
-            walk_expr_for_templates(&if_stmt.test, html_idents, out, counter);
-            walk_stmt_for_templates(&if_stmt.consequent, html_idents, out, counter);
+            walk_expr_for_templates(&if_stmt.test, symbol_ctx, out, counter);
+            walk_stmt_for_templates(&if_stmt.consequent, symbol_ctx, out, counter);
             if let Some(alt) = &if_stmt.alternate {
-                walk_stmt_for_templates(alt, html_idents, out, counter);
+                walk_stmt_for_templates(alt, symbol_ctx, out, counter);
             }
         }
         _ => {}
@@ -962,19 +963,13 @@ fn walk_stmt_for_templates<'a>(
 
 fn walk_expr_for_templates<'a>(
     expr: &Expression<'a>,
-    html_idents: &HashSet<String>,
+    symbol_ctx: &SymbolProofContext<'a>,
     out: &mut Vec<(Span, CompiledTemplateData)>,
     counter: &mut usize,
 ) {
     match expr {
         Expression::TaggedTemplateExpression(tagged) => {
-            let is_html_tag = match &tagged.tag {
-                Expression::Identifier(id) => html_idents.contains(id.name.as_str()),
-                Expression::StaticMemberExpression(mem) => {
-                    html_idents.contains(mem.property.name.as_str())
-                }
-                _ => false,
-            };
+            let is_html_tag = symbol_ctx.is_lit_html_tag(&tagged.tag);
 
             if is_html_tag && !contains_octal_escape(&tagged.quasi.quasis) {
                 let quasis: Vec<String> = tagged
@@ -993,52 +988,52 @@ fn walk_expr_for_templates<'a>(
             }
 
             for quasi_expr in &tagged.quasi.expressions {
-                walk_expr_for_templates(quasi_expr, html_idents, out, counter);
+                walk_expr_for_templates(quasi_expr, symbol_ctx, out, counter);
             }
         }
         Expression::ArrowFunctionExpression(arrow) => match &arrow.body {
             ArrowFunctionBody::FunctionBody(body) => {
                 for s in &body.statements {
-                    walk_stmt_for_templates(s, html_idents, out, counter);
+                    walk_stmt_for_templates(s, symbol_ctx, out, counter);
                 }
             }
             _ => {
                 if let Some(e) = arrow.body.as_expression() {
-                    walk_expr_for_templates(e, html_idents, out, counter);
+                    walk_expr_for_templates(e, symbol_ctx, out, counter);
                 }
             }
         },
         Expression::FunctionExpression(func) => {
             if let Some(body) = &func.body {
                 for s in &body.statements {
-                    walk_stmt_for_templates(s, html_idents, out, counter);
+                    walk_stmt_for_templates(s, symbol_ctx, out, counter);
                 }
             }
         }
         Expression::CallExpression(call) => {
-            walk_expr_for_templates(&call.callee, html_idents, out, counter);
+            walk_expr_for_templates(&call.callee, symbol_ctx, out, counter);
             for arg in &call.arguments {
                 if let Some(e) = arg.as_expression() {
-                    walk_expr_for_templates(e, html_idents, out, counter);
+                    walk_expr_for_templates(e, symbol_ctx, out, counter);
                 }
             }
         }
         Expression::ArrayExpression(arr) => {
             for elem in &arr.elements {
                 if let Some(e) = elem.as_expression() {
-                    walk_expr_for_templates(e, html_idents, out, counter);
+                    walk_expr_for_templates(e, symbol_ctx, out, counter);
                 }
             }
         }
         Expression::ObjectExpression(obj) => {
             for prop in &obj.properties {
                 if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                    walk_expr_for_templates(&p.value, html_idents, out, counter);
+                    walk_expr_for_templates(&p.value, symbol_ctx, out, counter);
                 }
             }
         }
         Expression::ParenthesizedExpression(p) => {
-            walk_expr_for_templates(&p.expression, html_idents, out, counter);
+            walk_expr_for_templates(&p.expression, symbol_ctx, out, counter);
         }
         _ => {}
     }

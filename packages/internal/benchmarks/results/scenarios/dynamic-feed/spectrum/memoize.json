@@ -23,20 +23,20 @@
     "id": "spectrum",
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
-    "version": "1.12.4"
+    "version": "1.12.5"
   },
   "variant": {
     "id": "memoize",
     "name": "Expression memoization (memoize)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-12T23:47:32.936Z",
+  "timestamp": "2026-10-19T20:05:47.957Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "3856fa7",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -53,13 +53,13 @@
   "metrics": {
     "rawBytes": 252127,
     "gzipBytes": 44660,
-    "brotliBytes": 36192,
-    "buildTimeMs": 40.64979100000005,
-    "firstRenderMs": 26.6,
-    "updateMs": 3.1,
+    "brotliBytes": 36206,
+    "buildTimeMs": 39.20745899999997,
+    "firstRenderMs": 28.4,
+    "updateMs": 3,
     "scriptEvalMs": 1.8,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 3749910,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 3896018,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -97,28 +97,28 @@
     "rawPercent": 0.51,
     "gzipBytes": 419,
     "gzipPercent": 0.95,
-    "brotliBytes": 369,
-    "brotliPercent": 1.03,
-    "buildTimeMs": 13.9,
-    "firstRenderMs": -1.4,
-    "speedupPercent": 5,
-    "updateMs": -0.2,
-    "updateSpeedupPercent": 6.06,
+    "brotliBytes": 383,
+    "brotliPercent": 1.07,
+    "buildTimeMs": 12.5,
+    "firstRenderMs": 0.4,
+    "speedupPercent": -1.43,
+    "updateMs": -0.3,
+    "updateSpeedupPercent": 9.09,
     "evalSpeedupPercent": 10,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -16.42
+    "registrationSpeedupPercent": -300,
+    "memorySavingsPercent": -20.95
   },
   "runtime": {
-    "firstRenderMs": 26.6,
-    "updateMs": 3.1,
+    "firstRenderMs": 28.4,
+    "updateMs": 3,
     "scriptEvalMs": 1.8,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 3749910,
-    "speedupPercent": 5,
-    "updateSpeedupPercent": 6.06,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 3896018,
+    "speedupPercent": -1.43,
+    "updateSpeedupPercent": 9.09,
     "evalSpeedupPercent": 10,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -16.42
+    "registrationSpeedupPercent": -300,
+    "memorySavingsPercent": -20.95
   },
   "domSnapshot": {
     "mount": {

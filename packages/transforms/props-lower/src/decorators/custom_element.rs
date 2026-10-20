@@ -1,33 +1,27 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use oxc_allocator::{ArenaVec, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
-use crate::lit_import_scanner::ImportContext;
-
 /// Checks if class has `@customElement('tag-name')`.
 /// If found, removes the decorator and returns `customElements.define('tag-name', ClassName);` statement.
 pub fn transform_custom_element<'a>(
     class: &mut Class<'a>,
-    import_ctx: &ImportContext,
+    symbol_ctx: &SymbolProofContext<'_>,
     ast: &AstBuilder<'a>,
 ) -> Option<Statement<'a>> {
     let mut tag_name: Option<String> = None;
     let mut remove_index: Option<usize> = None;
 
     for (i, dec) in class.decorators.iter().enumerate() {
-        if let Some(kind) =
-            crate::decorators::property::get_lit_decorator_kind(&dec.expression, import_ctx)
-        {
-            if kind == crate::lit_import_scanner::LitDecoratorKind::CustomElement {
-                if let Expression::CallExpression(call) = &dec.expression {
-                    if let Some(first_arg) = call.arguments.first() {
-                        if let Some(Expression::StringLiteral(str_lit)) = first_arg.as_expression()
-                        {
-                            tag_name = Some(str_lit.value.as_str().to_string());
-                            remove_index = Some(i);
-                            break;
-                        }
+        if symbol_ctx.resolve_decorator(dec) == Some(CanonicalLitSymbol::CustomElementDecorator) {
+            if let Expression::CallExpression(call) = &dec.expression {
+                if let Some(first_arg) = call.arguments.first() {
+                    if let Some(Expression::StringLiteral(str_lit)) = first_arg.as_expression() {
+                        tag_name = Some(str_lit.value.as_str().to_string());
+                        remove_index = Some(i);
+                        break;
                     }
                 }
             }

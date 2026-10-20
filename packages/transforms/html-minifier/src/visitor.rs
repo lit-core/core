@@ -1,12 +1,12 @@
+use lit_analysis::symbol::SymbolProofContext;
 use napi_derive::napi;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
+use oxc_ast_visit::{walk_mut::*, VisitMut};
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_semantic::{Scoping, SemanticBuilder, SymbolId};
+use oxc_semantic::SemanticBuilder;
 use oxc_span::SourceType;
-use oxc_traverse::{traverse_mut, Traverse, TraverseCtx};
-use std::collections::HashSet;
 
 use crate::collapser::collapse_template_quasis;
 
@@ -26,145 +26,49 @@ pub struct CollapseResult {
     pub bytes_saved: u32,
 }
 
-pub fn is_lit_html_source(src: &str) -> bool {
-    src == "lit"
-        || src.starts_with("lit/")
-        || src == "lit-html"
-        || src.starts_with("lit-html/")
-        || src == "lit-element"
-        || src.starts_with("lit-element/")
-        || src.starts_with("@lit/")
-}
-
-#[derive(Debug, Default)]
-pub struct HtmlImportContext {
-    pub html_svg_symbols: HashSet<SymbolId>,
-    pub html_svg_namespaces: HashSet<SymbolId>,
-    pub has_imports: bool,
-}
-
-pub fn scan_html_svg_imports<'a>(program: &Program<'a>, scoping: &Scoping) -> HtmlImportContext {
-    let mut ctx = HtmlImportContext::default();
-    let root = scoping.root_scope_id();
-
-    for stmt in &program.body {
-        if let Statement::ImportDeclaration(import_decl) = stmt {
-            ctx.has_imports = true;
-            let src = import_decl.source.value.as_str();
-            if !is_lit_html_source(src) {
-                continue;
-            }
-
-            if let Some(specifiers) = &import_decl.specifiers {
-                for spec in specifiers {
-                    match spec {
-                        ImportDeclarationSpecifier::ImportSpecifier(named_spec) => {
-                            let imported_name = named_spec.imported.name();
-                            let imp = imported_name.as_str();
-                            if imp == "html" || imp == "svg" || imp == "litHtml" || imp == "litSvg"
-                            {
-                                let sym_id = named_spec.local.symbol_id.get().or_else(|| {
-                                    scoping.get_binding(root, named_spec.local.name.as_str().into())
-                                });
-                                if let Some(sym) = sym_id {
-                                    ctx.html_svg_symbols.insert(sym);
-                                }
-                            }
-                        }
-                        ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                            let sym_id = ns.local.symbol_id.get().or_else(|| {
-                                scoping.get_binding(root, ns.local.name.as_str().into())
-                            });
-                            if let Some(sym) = sym_id {
-                                ctx.html_svg_namespaces.insert(sym);
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-            }
-        }
-    }
-
-    ctx
-}
-
-struct HtmlMinifierTraverser<'a> {
+struct HtmlMinifierMutVisitor<'a> {
     allocator: &'a Allocator,
-    import_ctx: HtmlImportContext,
+    symbol_ctx: &'a SymbolProofContext<'a>,
     templates_count: u32,
     bytes_saved: u32,
 }
 
-impl<'a> HtmlMinifierTraverser<'a> {
-    fn is_target_tag(&self, expr: &Expression<'a>, ctx: &TraverseCtx<'a, ()>) -> bool {
-        match expr {
-            Expression::Identifier(ident) => {
-                if let Some(ref_id) = ident.reference_id.get() {
-                    let reference = ctx.scoping().get_reference(ref_id);
-                    if let Some(sym_id) = reference.symbol_id() {
-                        return self.import_ctx.html_svg_symbols.contains(&sym_id);
+impl<'a> VisitMut<'a> for HtmlMinifierMutVisitor<'a> {
+    fn visit_tagged_template_expression(&mut self, tagged: &mut TaggedTemplateExpression<'a>) {
+        let is_target = self.symbol_ctx.is_lit_html_tag(&tagged.tag)
+            || self.symbol_ctx.is_lit_svg_tag(&tagged.tag);
+
+        if is_target && !tagged.quasi.quasis.is_empty() {
+            let raw_quasis: Vec<&str> = tagged
+                .quasi
+                .quasis
+                .iter()
+                .map(|q| q.value.raw.as_str())
+                .collect();
+
+            let collapsed_quasis = collapse_template_quasis(&raw_quasis);
+            let mut modified = false;
+
+            for (quasi, new_raw) in tagged.quasi.quasis.iter_mut().zip(collapsed_quasis) {
+                let old_raw = quasi.value.raw.as_str();
+                if old_raw != new_raw {
+                    let old_len = old_raw.len();
+                    if old_len >= new_raw.len() {
+                        self.bytes_saved += (old_len - new_raw.len()) as u32;
                     }
+                    let str_arena = Str::from_str_in(&new_raw, &self.allocator);
+                    quasi.value.raw = str_arena;
+                    quasi.value.cooked = Some(str_arena);
+                    modified = true;
                 }
-                false
             }
 
-            Expression::StaticMemberExpression(member) => {
-                let prop = member.property.name.as_str();
-                if prop == "html" || prop == "svg" || prop == "litHtml" || prop == "litSvg" {
-                    if let Expression::Identifier(obj) = &member.object {
-                        if let Some(ref_id) = obj.reference_id.get() {
-                            let reference = ctx.scoping().get_reference(ref_id);
-                            if let Some(sym_id) = reference.symbol_id() {
-                                return self.import_ctx.html_svg_namespaces.contains(&sym_id);
-                            }
-                        }
-                    }
-                }
-                false
-            }
-            _ => false,
-        }
-    }
-}
-
-impl<'a> Traverse<'a, ()> for HtmlMinifierTraverser<'a> {
-    fn enter_tagged_template_expression(
-        &mut self,
-        tagged: &mut TaggedTemplateExpression<'a>,
-        ctx: &mut TraverseCtx<'a, ()>,
-    ) {
-        if !self.is_target_tag(&tagged.tag, ctx) || tagged.quasi.quasis.is_empty() {
-            return;
-        }
-
-        let raw_quasis: Vec<&str> = tagged
-            .quasi
-            .quasis
-            .iter()
-            .map(|q| q.value.raw.as_str())
-            .collect();
-
-        let collapsed_quasis = collapse_template_quasis(&raw_quasis);
-        let mut modified = false;
-
-        for (quasi, new_raw) in tagged.quasi.quasis.iter_mut().zip(collapsed_quasis) {
-            let old_raw = quasi.value.raw.as_str();
-            if old_raw != new_raw {
-                let old_len = old_raw.len();
-                if old_len >= new_raw.len() {
-                    self.bytes_saved += (old_len - new_raw.len()) as u32;
-                }
-                let str_arena = Str::from_str_in(&new_raw, &self.allocator);
-                quasi.value.raw = str_arena;
-                quasi.value.cooked = Some(str_arena);
-                modified = true;
+            if modified {
+                self.templates_count += 1;
             }
         }
 
-        if modified {
-            self.templates_count += 1;
-        }
+        walk_tagged_template_expression(self, tagged);
     }
 }
 
@@ -193,18 +97,47 @@ pub fn collapse_code(source: &str, options: CollapseOptions) -> CollapseResult {
 
     let semantic_ret = SemanticBuilder::new().build(&parsed.program);
     let scoping = semantic_ret.semantic.into_scoping();
-    let import_ctx = scan_html_svg_imports(&parsed.program, &scoping);
 
-    let mut traverser = HtmlMinifierTraverser {
+    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+
+    let symbol_ctx = SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
+    };
+
+    if !symbol_ctx.has_lit_imports() {
+        return CollapseResult {
+            code: source.to_string(),
+            map: None,
+            templates_count: 0,
+            bytes_saved: 0,
+        };
+    }
+
+    let mut visitor = HtmlMinifierMutVisitor {
         allocator: &allocator,
-        import_ctx,
+        symbol_ctx: &symbol_ctx,
         templates_count: 0,
         bytes_saved: 0,
     };
 
-    traverse_mut(&mut traverser, &allocator, &mut parsed.program, scoping, ());
+    visitor.visit_program(&mut parsed.program);
 
-    if traverser.templates_count == 0 {
+    if visitor.templates_count == 0 {
         return CollapseResult {
             code: source.to_string(),
             map: None,
@@ -227,8 +160,8 @@ pub fn collapse_code(source: &str, options: CollapseOptions) -> CollapseResult {
     CollapseResult {
         code: codegen_result.code,
         map: codegen_result.map.map(|m| m.to_json_string()),
-        templates_count: traverser.templates_count,
-        bytes_saved: traverser.bytes_saved,
+        templates_count: visitor.templates_count,
+        bytes_saved: visitor.bytes_saved,
     }
 }
 
@@ -238,16 +171,28 @@ mod tests {
 
     #[test]
     fn test_is_lit_html_source_canonical() {
-        assert!(is_lit_html_source("lit"));
-        assert!(is_lit_html_source("lit/html.js"));
-        assert!(is_lit_html_source("lit-html"));
-        assert!(is_lit_html_source("lit-html/lit-html.js"));
-        assert!(is_lit_html_source("lit-element"));
-        assert!(is_lit_html_source("lit-element/lit-element.js"));
-        assert!(is_lit_html_source("@lit/reactive-element"));
-        assert!(!is_lit_html_source("@other/web-components"));
-        assert!(!is_lit_html_source("react"));
-        assert!(!is_lit_html_source("vue"));
+        assert!(SymbolProofContext::is_canonical_lit_specifier("lit"));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "lit/html.js"
+        ));
+        assert!(SymbolProofContext::is_canonical_lit_specifier("lit-html"));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "lit-html/lit-html.js"
+        ));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "lit-element"
+        ));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "lit-element/lit-element.js"
+        ));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "@lit/reactive-element"
+        ));
+        assert!(!SymbolProofContext::is_canonical_lit_specifier(
+            "@other/web-components"
+        ));
+        assert!(!SymbolProofContext::is_canonical_lit_specifier("react"));
+        assert!(!SymbolProofContext::is_canonical_lit_specifier("vue"));
     }
 
     #[test]

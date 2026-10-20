@@ -5,14 +5,14 @@
     "id": "spectrum",
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
-    "version": "1.12.4",
-    "componentCount": 20,
+    "version": "1.12.5",
+    "componentCount": 6,
     "components": [
       {
-        "concept": "button",
-        "tag": "sp-button",
-        "path": "button/sp-button.js",
-        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
+        "concept": "text-input",
+        "tag": "sp-textfield",
+        "path": "textfield/sp-textfield.js",
+        "importStatement": "import '@spectrum-web-components/textfield/sp-textfield.js';"
       },
       {
         "concept": "checkbox",
@@ -21,22 +21,16 @@
         "importStatement": "import '@spectrum-web-components/checkbox/sp-checkbox.js';"
       },
       {
-        "concept": "radio",
-        "tag": "sp-radio",
-        "path": "radio/sp-radio.js",
-        "importStatement": "import '@spectrum-web-components/radio/sp-radio.js';"
-      },
-      {
         "concept": "switch",
         "tag": "sp-switch",
         "path": "switch/sp-switch.js",
         "importStatement": "import '@spectrum-web-components/switch/sp-switch.js';"
       },
       {
-        "concept": "text-input",
-        "tag": "sp-textfield",
-        "path": "textfield/sp-textfield.js",
-        "importStatement": "import '@spectrum-web-components/textfield/sp-textfield.js';"
+        "concept": "radio",
+        "tag": "sp-radio",
+        "path": "radio/sp-radio.js",
+        "importStatement": "import '@spectrum-web-components/radio/sp-radio.js';"
       },
       {
         "concept": "select",
@@ -45,88 +39,10 @@
         "importStatement": "import '@spectrum-web-components/picker/sp-picker.js';"
       },
       {
-        "concept": "dialog",
-        "tag": "sp-dialog",
-        "path": "dialog/sp-dialog.js",
-        "importStatement": "import '@spectrum-web-components/dialog/sp-dialog.js';"
-      },
-      {
-        "concept": "badge",
-        "tag": "sp-badge",
-        "path": "badge/sp-badge.js",
-        "importStatement": "import '@spectrum-web-components/badge/sp-badge.js';"
-      },
-      {
-        "concept": "tabs",
-        "tag": "sp-tabs",
-        "path": "tabs/sp-tabs.js",
-        "importStatement": "import '@spectrum-web-components/tabs/sp-tabs.js';"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "sp-progress-bar",
-        "path": "progress-bar/sp-progress-bar.js",
-        "importStatement": "import '@spectrum-web-components/progress-bar/sp-progress-bar.js';"
-      },
-      {
-        "concept": "spinner",
-        "tag": "sp-progress-circle",
-        "path": "progress-circle/sp-progress-circle.js",
-        "importStatement": "import '@spectrum-web-components/progress-circle/sp-progress-circle.js';"
-      },
-      {
-        "concept": "slider",
-        "tag": "sp-slider",
-        "path": "slider/sp-slider.js",
-        "importStatement": "import '@spectrum-web-components/slider/sp-slider.js';"
-      },
-      {
-        "concept": "menu",
-        "tag": "sp-menu",
-        "path": "menu/sp-menu.js",
-        "importStatement": "import '@spectrum-web-components/menu/sp-menu.js';"
-      },
-      {
-        "concept": "divider",
-        "tag": "sp-divider",
-        "path": "divider/sp-divider.js",
-        "importStatement": "import '@spectrum-web-components/divider/sp-divider.js';"
-      },
-      {
-        "concept": "icon",
-        "tag": "sp-icon",
-        "path": "icon/sp-icon.js",
-        "importStatement": "import '@spectrum-web-components/icon/sp-icon.js';"
-      },
-      {
-        "concept": "icon-button",
-        "tag": "sp-action-button",
-        "path": "action-button/sp-action-button.js",
-        "importStatement": "import '@spectrum-web-components/action-button/sp-action-button.js';"
-      },
-      {
-        "concept": "card",
-        "tag": "sp-card",
-        "path": "card/sp-card.js",
-        "importStatement": "import '@spectrum-web-components/card/sp-card.js';"
-      },
-      {
-        "concept": "elevation",
-        "tag": "sp-popover",
-        "path": "popover/sp-popover.js",
-        "importStatement": "import '@spectrum-web-components/popover/sp-popover.js';"
-      },
-      {
-        "concept": "list",
-        "tag": "sp-sidenav",
-        "path": "sidenav/sp-sidenav.js",
-        "importStatement": "import '@spectrum-web-components/sidenav/sp-sidenav.js';"
-      },
-      {
-        "concept": "chips",
-        "tag": "sp-action-group",
-        "path": "action-group/sp-action-group.js",
-        "importStatement": "import '@spectrum-web-components/action-group/sp-action-group.js';"
+        "concept": "button",
+        "tag": "sp-button",
+        "path": "button/sp-button.js",
+        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
       }
     ]
   },
@@ -137,18 +53,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "bundle",
-    "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "componentCount": 20
+    "id": "interactive-form",
+    "name": "Interactive form",
+    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration",
+    "componentCount": 6
   },
-  "timestamp": "2026-10-17T16:31:12.394Z",
+  "timestamp": "2026-10-19T20:05:53.185Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,79 +79,59 @@
     }
   },
   "metrics": {
-    "rawBytes": 824913,
-    "gzipBytes": 148530,
-    "brotliBytes": 112781,
-    "buildTimeMs": 89.90770899999188
+    "rawBytes": 504647,
+    "gzipBytes": 95572,
+    "brotliBytes": 75381,
+    "buildTimeMs": 59.42645799999991
   },
   "baseline": {
-    "rawBytes": 823644,
-    "gzipBytes": 148106,
-    "brotliBytes": 112517,
-    "buildTimeMs": 65.20704200000182,
-    "firstRenderMs": 35.9,
-    "updateMs": 5.9,
-    "scriptEvalMs": 10.2,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 5427853,
+    "rawBytes": 504793,
+    "gzipBytes": 95567,
+    "brotliBytes": 75438,
+    "buildTimeMs": 43.29183299999568,
+    "firstRenderMs": 22.5,
+    "updateMs": 0.2,
+    "scriptEvalMs": 2.2,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 3843541,
     "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "sp-button",
-        "sp-checkbox",
-        "sp-radio",
-        "sp-switch",
-        "sp-textfield",
-        "sp-picker",
-        "sp-dialog",
-        "sp-badge",
-        "sp-tabs",
-        "sp-progress-bar",
-        "sp-progress-circle",
-        "sp-slider",
-        "sp-menu",
-        "sp-divider",
-        "sp-icon",
-        "sp-action-button",
-        "sp-card",
-        "sp-popover",
-        "sp-sidenav",
-        "sp-action-group"
-      ],
-      "renderedCells": 20
+      "sectionsCount": 5,
+      "controlsPerSection": 6,
+      "totalControls": 30,
+      "eventsDispatched": 15
     }
   },
   "deltas": {
-    "rawBytes": 1269,
-    "rawPercent": 0.15,
-    "gzipBytes": 424,
-    "gzipPercent": 0.29,
-    "brotliBytes": 264,
-    "brotliPercent": 0.23,
-    "buildTimeMs": 24.7,
-    "firstRenderMs": -8.5,
-    "speedupPercent": 23.68,
-    "updateMs": -0.4,
-    "updateSpeedupPercent": 6.78,
-    "evalSpeedupPercent": -2.94,
-    "registrationSpeedupPercent": 11.11,
-    "memorySavingsPercent": -2.05
+    "rawBytes": -146,
+    "rawPercent": -0.03,
+    "gzipBytes": 5,
+    "gzipPercent": 0.01,
+    "brotliBytes": -57,
+    "brotliPercent": -0.08,
+    "buildTimeMs": 16.1,
+    "firstRenderMs": 8.3,
+    "speedupPercent": -36.89,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -4.55,
+    "registrationSpeedupPercent": 20,
+    "memorySavingsPercent": -3.54
   },
   "runtime": {
-    "firstRenderMs": 27.4,
-    "updateMs": 5.5,
-    "scriptEvalMs": 10.5,
-    "registrationMs": 0.8,
-    "heapUsedBytes": 5539284,
-    "speedupPercent": 23.68,
-    "updateSpeedupPercent": 6.78,
-    "evalSpeedupPercent": -2.94,
-    "registrationSpeedupPercent": 11.11,
-    "memorySavingsPercent": -2.05
+    "firstRenderMs": 30.8,
+    "updateMs": 0.2,
+    "scriptEvalMs": 2.3,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 3979555,
+    "speedupPercent": -36.89,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -4.55,
+    "registrationSpeedupPercent": 20,
+    "memorySavingsPercent": -3.54
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 49,
+    "elementsCount": 46,
     "verified": true,
     "phasesMatched": {
       "mount": true,

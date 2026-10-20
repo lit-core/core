@@ -1,15 +1,14 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use oxc_allocator::{ArenaVec, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
 use crate::ast_helpers::AstHelper;
-use crate::decorators::property::get_lit_decorator_kind;
-use crate::lit_import_scanner::{ImportContext, LitDecoratorKind};
 
 pub fn try_transform_query_assigned<'a>(
     element: &mut ClassElement<'a>,
-    import_ctx: &ImportContext,
+    symbol_ctx: &SymbolProofContext<'_>,
     ast: &AstBuilder<'a>,
 ) -> Option<ClassElement<'a>> {
     let ClassElement::PropertyDefinition(prop_def) = element else {
@@ -22,24 +21,22 @@ pub fn try_transform_query_assigned<'a>(
     let mut selector = None;
 
     for dec in &prop_def.decorators {
-        if let Some(kind) = get_lit_decorator_kind(&dec.expression, import_ctx) {
-            match kind {
-                LitDecoratorKind::QueryAssignedElements => {
-                    method_name = Some("assignedElements");
-                }
-                LitDecoratorKind::QueryAssignedNodes => {
-                    method_name = Some("assignedNodes");
-                }
-                _ => {}
+        match symbol_ctx.resolve_decorator(dec) {
+            Some(CanonicalLitSymbol::QueryAssignedElementsDecorator) => {
+                method_name = Some("assignedElements");
             }
+            Some(CanonicalLitSymbol::QueryAssignedNodesDecorator) => {
+                method_name = Some("assignedNodes");
+            }
+            _ => {}
+        }
 
-            if method_name.is_some() {
-                let (s_name, flat, sel) = extract_query_assigned_options(&dec.expression);
-                slot_name = s_name;
-                flatten = flat;
-                selector = sel;
-                break;
-            }
+        if method_name.is_some() {
+            let (s_name, flat, sel) = extract_query_assigned_options(&dec.expression);
+            slot_name = s_name;
+            flatten = flat;
+            selector = sel;
+            break;
         }
     }
 

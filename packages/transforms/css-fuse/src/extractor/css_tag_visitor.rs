@@ -1,49 +1,37 @@
 use crate::models::{ExtractedStyle, SourceSpan};
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use oxc_ast::ast::{
     CallExpression, Class, ClassElement, Expression, MethodDefinitionKind, PropertyKey, Statement,
     TaggedTemplateExpression, VariableDeclaration,
 };
 use oxc_ast_visit::Visit;
-use oxc_semantic::{Scoping, SymbolId};
 use oxc_span::Span;
-use std::collections::{HashMap, HashSet};
-
-pub fn is_lit_css_source(src: &str) -> bool {
-    src == "lit"
-        || src.starts_with("lit/")
-        || src == "lit-element"
-        || src.starts_with("lit-element/")
-        || src == "lit-html"
-        || src.starts_with("lit-html/")
-        || src.starts_with("@lit/")
-}
+use std::collections::HashMap;
 
 pub struct CssTagVisitor<'a> {
     pub source_code: &'a str,
     pub file_path: &'a str,
     pub extracted_styles: Vec<ExtractedStyle>,
     pub imported_styles_identifiers: HashMap<String, String>, // ident -> import_specifier
-    pub css_identifiers: HashSet<String>,
-    pub lit_css_symbols: HashSet<SymbolId>,
-    pub lit_css_namespaces: HashSet<SymbolId>,
     pub has_imports: bool,
-    pub scoping: &'a Scoping,
+    pub symbol_ctx: &'a SymbolProofContext<'a>,
     current_class_name: Option<String>,
     current_tag_name: Option<String>,
 }
 
 impl<'a> CssTagVisitor<'a> {
-    pub fn new(source_code: &'a str, file_path: &'a str, scoping: &'a Scoping) -> Self {
+    pub fn new(
+        source_code: &'a str,
+        file_path: &'a str,
+        symbol_ctx: &'a SymbolProofContext<'a>,
+    ) -> Self {
         Self {
             source_code,
             file_path,
             extracted_styles: Vec::new(),
             imported_styles_identifiers: HashMap::new(),
-            css_identifiers: HashSet::new(),
-            lit_css_symbols: HashSet::new(),
-            lit_css_namespaces: HashSet::new(),
             has_imports: false,
-            scoping,
+            symbol_ctx,
             current_class_name: None,
             current_tag_name: None,
         }
@@ -77,35 +65,13 @@ impl<'a> CssTagVisitor<'a> {
     }
 
     fn get_css_tag_name(&self, expr: &Expression<'a>) -> Option<String> {
-        match expr {
-            Expression::Identifier(ident) => {
-                if let Some(ref_id) = ident.reference_id.get() {
-                    let reference = self.scoping.get_reference(ref_id);
-                    if let Some(sym_id) = reference.symbol_id() {
-                        if self.lit_css_symbols.contains(&sym_id) {
-                            return Some(ident.name.to_string());
-                        }
-                    }
-                }
-                None
-            }
-            Expression::StaticMemberExpression(member) => {
-                if member.property.name == "css" {
-                    if let Expression::Identifier(obj) = &member.object {
-                        if let Some(ref_id) = obj.reference_id.get() {
-                            let reference = self.scoping.get_reference(ref_id);
-                            if let Some(sym_id) = reference.symbol_id() {
-                                if self.lit_css_namespaces.contains(&sym_id) {
-                                    return Some("css".to_string());
-                                }
-                            }
-                        }
-                    }
-                }
-                None
-            }
-
-            _ => None,
+        if !self.symbol_ctx.is_lit_css_tag(expr) {
+            return None;
+        }
+        match expr.without_parentheses() {
+            Expression::Identifier(ident) => Some(ident.name.to_string()),
+            Expression::StaticMemberExpression(member) => Some(member.property.name.to_string()),
+            _ => Some("css".to_string()),
         }
     }
 
@@ -290,14 +256,13 @@ impl<'a> CssTagVisitor<'a> {
     fn get_decorator_tag_name(&self, class: &Class<'a>) -> Option<String> {
         for decorator in &class.decorators {
             if let Expression::CallExpression(call) = &decorator.expression {
-                if let Expression::Identifier(ident) = &call.callee {
-                    if ident.name == "customElement" {
-                        if let Some(first_arg) = call.arguments.first() {
-                            if let Some(Expression::StringLiteral(str_lit)) =
-                                first_arg.as_expression()
-                            {
-                                return Some(str_lit.value.to_string());
-                            }
+                if self.symbol_ctx.is_proven_decorator(&call.callee)
+                    == Some(CanonicalLitSymbol::CustomElementDecorator)
+                {
+                    if let Some(first_arg) = call.arguments.first() {
+                        if let Some(Expression::StringLiteral(str_lit)) = first_arg.as_expression()
+                        {
+                            return Some(str_lit.value.to_string());
                         }
                     }
                 }
@@ -311,7 +276,6 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
     fn visit_import_declaration(&mut self, import_decl: &oxc_ast::ast::ImportDeclaration<'a>) {
         self.has_imports = true;
         let source_str = import_decl.source.value.to_string();
-        let is_lit = is_lit_css_source(&source_str);
 
         if let Some(specifiers) = &import_decl.specifiers {
             for spec in specifiers {
@@ -324,17 +288,7 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
                             || imported_name == "default"
                         {
                             self.imported_styles_identifiers
-                                .insert(local_name.clone(), source_str.clone());
-                        }
-                        if is_lit && imported_name == "css" {
-                            let root = self.scoping.root_scope_id();
-                            let sym_id = s.local.symbol_id.get().or_else(|| {
-                                self.scoping.get_binding(root, s.local.name.as_str().into())
-                            });
-                            if let Some(sym) = sym_id {
-                                self.lit_css_symbols.insert(sym);
-                            }
-                            self.css_identifiers.insert(local_name);
+                                .insert(local_name, source_str.clone());
                         }
                     }
                     oxc_ast::ast::ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
@@ -342,18 +296,7 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
                         self.imported_styles_identifiers
                             .insert(local_name, source_str.clone());
                     }
-                    oxc_ast::ast::ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                        if is_lit {
-                            let root = self.scoping.root_scope_id();
-                            let sym_id = ns.local.symbol_id.get().or_else(|| {
-                                self.scoping
-                                    .get_binding(root, ns.local.name.as_str().into())
-                            });
-                            if let Some(sym) = sym_id {
-                                self.lit_css_namespaces.insert(sym);
-                            }
-                        }
-                    }
+                    _ => {}
                 }
             }
         }
@@ -531,7 +474,8 @@ mod tests {
         let parsed = Parser::new(&allocator, source, SourceType::ts()).parse();
         let semantic_ret = SemanticBuilder::new().build(&parsed.program);
         let scoping = semantic_ret.semantic.into_scoping();
-        let mut visitor = CssTagVisitor::new(source, "test.ts", &scoping);
+        let symbol_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
+        let mut visitor = CssTagVisitor::new(source, "test.ts", &symbol_ctx);
         visitor.visit_program(&parsed.program);
 
         assert_eq!(visitor.extracted_styles.len(), 1);
@@ -553,7 +497,8 @@ mod tests {
         let parsed = Parser::new(&allocator, source, SourceType::ts()).parse();
         let semantic_ret = SemanticBuilder::new().build(&parsed.program);
         let scoping = semantic_ret.semantic.into_scoping();
-        let mut visitor = CssTagVisitor::new(source, "test.ts", &scoping);
+        let symbol_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
+        let mut visitor = CssTagVisitor::new(source, "test.ts", &symbol_ctx);
         visitor.visit_program(&parsed.program);
 
         assert_eq!(visitor.extracted_styles.len(), 1);

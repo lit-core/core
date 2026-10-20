@@ -4,7 +4,8 @@ use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 use std::collections::HashMap;
 
-use crate::analyzer::{compute_part_mask, is_directive_name, is_lit_html_tag, LitSemanticAnalysis};
+use crate::analyzer::compute_part_mask;
+use lit_analysis::symbol::SymbolProofContext;
 
 fn is_event_binding_quasi(quasi_raw: &str) -> bool {
     let trimmed = quasi_raw.trim_end();
@@ -54,22 +55,16 @@ fn is_lh_action_call(call: &CallExpression) -> bool {
     }
 }
 
-fn is_directive_expression(expr: &Expression, ctx: Option<&LitSemanticAnalysis>) -> bool {
+fn is_directive_expression(expr: &Expression, ctx: Option<&SymbolProofContext>) -> bool {
     match expr {
         Expression::CallExpression(call) => {
             if is_lh_action_call(call) {
                 return true;
             }
             if let Some(c) = ctx {
-                c.is_directive_call(call)
+                c.resolve_directive(call).is_some()
             } else {
-                match &call.callee {
-                    Expression::Identifier(id) => is_directive_name(id.name.as_str()),
-                    Expression::StaticMemberExpression(mem) => {
-                        is_directive_name(mem.property.name.as_str())
-                    }
-                    _ => false,
-                }
+                false
             }
         }
         _ => false,
@@ -81,14 +76,14 @@ pub fn mask_expressions_in_expr<'a>(
     reactive_props: &HashMap<String, usize>,
     allocator: &'a Allocator,
     masked_count: &mut u32,
-    ctx: Option<&LitSemanticAnalysis>,
+    ctx: Option<&SymbolProofContext>,
     no_change_ident: &str,
 ) {
     let is_tag = |tag: &Expression| -> bool {
         if let Some(c) = ctx {
-            c.is_lit_tag(tag)
+            c.is_lit_html_tag(tag) || c.is_lit_svg_tag(tag)
         } else {
-            is_lit_html_tag(tag)
+            false
         }
     };
 
@@ -224,7 +219,7 @@ pub fn mask_expressions_in_stmt<'a>(
     reactive_props: &HashMap<String, usize>,
     allocator: &'a Allocator,
     masked_count: &mut u32,
-    ctx: Option<&LitSemanticAnalysis>,
+    ctx: Option<&SymbolProofContext>,
     no_change_ident: &str,
 ) {
     match stmt {
@@ -313,7 +308,7 @@ pub fn mask_expressions_in_body<'a>(
     reactive_props: &HashMap<String, usize>,
     allocator: &'a Allocator,
     masked_count: &mut u32,
-    ctx: Option<&LitSemanticAnalysis>,
+    ctx: Option<&SymbolProofContext>,
     no_change_ident: &str,
 ) {
     for stmt in &mut body.statements {

@@ -1,3 +1,5 @@
+#![cfg(feature = "template-ir")]
+
 use lit_analysis::analyze_lit_module;
 use lit_analysis::classify::ClassificationTier;
 use oxc_allocator::Allocator;

@@ -30,24 +30,31 @@ fn test_canonical_lit_symbols_and_minified_aliasing() {
     let scoping = semantic.semantic.into_scoping();
     let ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
 
+    let root_scope = scoping.root_scope_id();
+    let sym_le = scoping.get_binding(root_scope, "LE".into()).unwrap();
+    let sym_h = scoping.get_binding(root_scope, "H".into()).unwrap();
+    let sym_c = scoping.get_binding(root_scope, "C".into()).unwrap();
+    let sym_p = scoping.get_binding(root_scope, "P".into()).unwrap();
+    let sym_ce = scoping.get_binding(root_scope, "CE".into()).unwrap();
+
     assert_eq!(
-        ctx.local_name_to_lit.get("LE"),
+        ctx.lit_symbols.get(&sym_le),
         Some(&CanonicalLitSymbol::LitElement)
     );
     assert_eq!(
-        ctx.local_name_to_lit.get("H"),
+        ctx.lit_symbols.get(&sym_h),
         Some(&CanonicalLitSymbol::HtmlTag)
     );
     assert_eq!(
-        ctx.local_name_to_lit.get("C"),
+        ctx.lit_symbols.get(&sym_c),
         Some(&CanonicalLitSymbol::CssTag)
     );
     assert_eq!(
-        ctx.local_name_to_lit.get("P"),
+        ctx.lit_symbols.get(&sym_p),
         Some(&CanonicalLitSymbol::PropertyDecorator)
     );
     assert_eq!(
-        ctx.local_name_to_lit.get("CE"),
+        ctx.lit_symbols.get(&sym_ce),
         Some(&CanonicalLitSymbol::CustomElementDecorator)
     );
 }

@@ -9,17 +9,17 @@ use oxc_span::SourceType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-pub use crate::analyzer::{
-    collect_classes_mut, has_event_options, is_canonical_lit_specifier, is_lit_html_tag,
-    match_event_attr, LitSemanticAnalysis, SAFE_BUBBLING_EVENTS,
-};
+pub use crate::analyzer::{collect_classes_mut, match_event_attr, SAFE_BUBBLING_EVENTS};
 pub use crate::builder::{
     build_add_listener_statement, build_call_init_event_hoist, build_connected_callback_method,
     build_first_updated_method, build_init_lit_event_hoist_method, build_lh_action_method,
     build_lh_actions_property, build_lh_dispatch_method, build_lh_initialized_property,
     build_reset_lh_actions, build_will_update_method,
 };
-pub use crate::hoister::{hoist_events_in_expr, hoist_events_in_stmt, HoistContext};
+pub use crate::hoister::{
+    has_event_options, hoist_events_in_expr, hoist_events_in_stmt, HoistContext,
+};
+use lit_analysis::symbol::SymbolProofContext;
 
 #[napi(object)]
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
@@ -61,9 +61,28 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
         };
     }
 
-    let lit_analysis = {
-        let semantic_ret = SemanticBuilder::new().build(&parsed.program);
-        LitSemanticAnalysis::new(&parsed.program, semantic_ret.semantic.scoping())
+    let semantic_ret = SemanticBuilder::new().build(&parsed.program);
+    let scoping = semantic_ret.semantic.into_scoping();
+
+    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+
+    let symbol_ctx = SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
     };
 
     let mut classes = Vec::new();
@@ -84,7 +103,7 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
     let mut all_unique_events = HashSet::new();
 
     for class in classes {
-        if !lit_analysis.is_lit_class(class) {
+        if !symbol_ctx.prove_heritage(class).is_reactive() {
             continue;
         }
 
@@ -107,7 +126,7 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
                         let mut ctx = HoistContext {
                             safe_events: &safe_event_set,
                             allocator: &allocator,
-                            lit_analysis: &lit_analysis,
+                            symbol_ctx: &symbol_ctx,
                             hoisted_events: &mut class_hoisted_events,
                             hoisted_count: &mut class_hoisted_count,
                         };

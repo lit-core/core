@@ -13,6 +13,9 @@ napi-derive = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
+# Shared Lit analysis
+lit_analysis = { workspace = true }
+
 # OXC stack
 oxc_allocator = { workspace = true }
 oxc_parser = { workspace = true }

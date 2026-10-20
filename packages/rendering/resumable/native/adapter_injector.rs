@@ -1,3 +1,4 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use napi_derive::napi;
 use oxc_allocator::{Allocator, ArenaVec};
 use oxc_ast::ast::*;
@@ -5,10 +6,9 @@ use oxc_ast::builder::AstBuilder;
 use oxc_ast_visit::{walk, Visit};
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_semantic::{Scoping, SemanticBuilder, SymbolId};
+use oxc_semantic::SemanticBuilder;
 use oxc_span::{SourceType, SPAN};
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 
 const DEFAULT_VIRTUAL_MODULE: &str = "virtual:lit-core/resumable-adapter";
 
@@ -28,151 +28,72 @@ pub struct TransformResumableResult {
     pub transformed: bool,
 }
 
-/// Canonical export names (stable under aliasing and minification) that identify
-/// a custom element definition through a resolved import binding.
-const CUSTOM_ELEMENT_DECORATOR_EXPORT: &str = "customElement";
-const ELEMENT_BASE_EXPORTS: [&str; 2] = ["LitElement", "ReactiveElement"];
 const ADAPTER_EXPORT: &str = "installResumableAdapter";
-const GLOBAL_THIS_ALIASES: [&str; 3] = ["window", "globalThis", "self"];
 
-/// Finds custom element definitions anywhere in the program using semantic bindings:
-/// - calls to `customElements.define` on the global registry,
-/// - calls to an imported `customElement` decorator factory (decorator or lowered form),
-/// - classes extending an imported `LitElement` / `ReactiveElement` or the global `HTMLElement`.
-struct ElementDetector<'s> {
-    scoping: &'s Scoping,
-    decorator_symbols: HashSet<SymbolId>,
-    base_symbols: HashSet<SymbolId>,
-    namespace_symbols: HashSet<SymbolId>,
+fn extends_unshadowed_html_element(expr: &Expression<'_>, ctx: &SymbolProofContext<'_>) -> bool {
+    match expr.without_parentheses() {
+        Expression::Identifier(ident) => {
+            ident.name == "HTMLElement" && ctx.is_unresolved_global(ident)
+        }
+        Expression::CallExpression(call) => call
+            .arguments
+            .iter()
+            .filter_map(|arg| arg.as_expression())
+            .any(|arg| extends_unshadowed_html_element(arg, ctx)),
+        _ => false,
+    }
+}
+
+struct ResumableElementDetector<'a, 's> {
+    symbol_ctx: &'a SymbolProofContext<'s>,
     found: bool,
 }
 
-impl<'s> ElementDetector<'s> {
-    fn new(program: &Program, scoping: &'s Scoping) -> Self {
-        let mut detector = Self {
-            scoping,
-            decorator_symbols: HashSet::new(),
-            base_symbols: HashSet::new(),
-            namespace_symbols: HashSet::new(),
-            found: false,
-        };
-        for stmt in &program.body {
-            let Statement::ImportDeclaration(import_decl) = stmt else {
-                continue;
-            };
-            let Some(specifiers) = &import_decl.specifiers else {
-                continue;
-            };
-            for spec in specifiers {
-                match spec {
-                    ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                        let Some(symbol) = named.local.symbol_id.get() else {
-                            continue;
-                        };
-                        let imported = named.imported.name();
-                        if imported == CUSTOM_ELEMENT_DECORATOR_EXPORT {
-                            detector.decorator_symbols.insert(symbol);
-                        } else if ELEMENT_BASE_EXPORTS.contains(&imported.as_str()) {
-                            detector.base_symbols.insert(symbol);
-                        }
-                    }
-                    ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                        if let Some(symbol) = ns.local.symbol_id.get() {
-                            detector.namespace_symbols.insert(symbol);
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
-        detector
-    }
-
-    fn symbol_of(&self, ident: &IdentifierReference) -> Option<SymbolId> {
-        ident
-            .reference_id
-            .get()
-            .and_then(|reference_id| self.scoping.get_reference(reference_id).symbol_id())
-    }
-
-    fn is_unresolved_global(&self, ident: &IdentifierReference, name: &str) -> bool {
-        ident.name == name && self.symbol_of(ident).is_none()
-    }
-
-    /// `customElements`, `window.customElements`, `globalThis.customElements`, `self.customElements`
-    fn is_global_registry(&self, expr: &Expression) -> bool {
-        match expr {
-            Expression::Identifier(ident) => self.is_unresolved_global(ident, "customElements"),
-            Expression::StaticMemberExpression(mem) if mem.property.name == "customElements" => {
-                matches!(
-                    &mem.object,
-                    Expression::Identifier(root)
-                        if GLOBAL_THIS_ALIASES.iter().any(|alias| self.is_unresolved_global(root, alias))
-                )
-            }
-            _ => false,
-        }
-    }
-
-    fn is_decorator_factory(&self, callee: &Expression) -> bool {
-        match callee {
-            Expression::Identifier(ident) => self
-                .symbol_of(ident)
-                .is_some_and(|symbol| self.decorator_symbols.contains(&symbol)),
-            Expression::StaticMemberExpression(mem)
-                if mem.property.name == CUSTOM_ELEMENT_DECORATOR_EXPORT =>
-            {
-                matches!(
-                    &mem.object,
-                    Expression::Identifier(obj)
-                        if self.symbol_of(obj).is_some_and(|symbol| self.namespace_symbols.contains(&symbol))
-                )
-            }
-            _ => false,
-        }
-    }
-
-    /// Resolves `extends X`, including mixin wrappers such as `extends Mixin(X)`.
-    fn extends_element(&self, expr: &Expression) -> bool {
-        match expr {
-            Expression::Identifier(ident) => match self.symbol_of(ident) {
-                Some(symbol) => self.base_symbols.contains(&symbol),
-                None => ident.name == "HTMLElement",
-            },
-            Expression::CallExpression(call) => call
-                .arguments
-                .iter()
-                .filter_map(|arg| arg.as_expression())
-                .any(|arg| self.extends_element(arg)),
-            Expression::ParenthesizedExpression(paren) => self.extends_element(&paren.expression),
-            _ => false,
-        }
-    }
-}
-
-impl<'a> Visit<'a> for ElementDetector<'_> {
-    fn visit_call_expression(&mut self, call: &CallExpression<'a>) {
+impl<'a, 's, 'ast> Visit<'ast> for ResumableElementDetector<'a, 's> {
+    fn visit_call_expression(&mut self, call: &CallExpression<'ast>) {
         if self.found {
             return;
         }
-        let is_define = matches!(
-            &call.callee,
-            Expression::StaticMemberExpression(mem)
-                if mem.property.name == "define" && self.is_global_registry(&mem.object)
-        );
-        if is_define || self.is_decorator_factory(&call.callee) {
+        if self
+            .symbol_ctx
+            .is_custom_elements_define_callee(&call.callee)
+        {
+            self.found = true;
+            return;
+        }
+        if self.symbol_ctx.is_proven_decorator(&call.callee)
+            == Some(CanonicalLitSymbol::CustomElementDecorator)
+        {
             self.found = true;
             return;
         }
         walk::walk_call_expression(self, call);
     }
 
-    fn visit_class(&mut self, class: &Class<'a>) {
+    fn visit_class(&mut self, class: &Class<'ast>) {
         if self.found {
             return;
         }
+        if self.symbol_ctx.prove_heritage(class).is_reactive() {
+            self.found = true;
+            return;
+        }
+        if class.decorators.iter().any(|d| {
+            self.symbol_ctx.is_proven_decorator(&d.expression)
+                == Some(CanonicalLitSymbol::CustomElementDecorator)
+                || match &d.expression {
+                    Expression::CallExpression(call) => {
+                        self.symbol_ctx.is_proven_decorator(&call.callee)
+                            == Some(CanonicalLitSymbol::CustomElementDecorator)
+                    }
+                    _ => false,
+                }
+        }) {
+            self.found = true;
+            return;
+        }
         if let Some(heritage) = &class.heritage {
-            if self.extends_element(&heritage.expression) {
+            if extends_unshadowed_html_element(&heritage.expression, self.symbol_ctx) {
                 self.found = true;
                 return;
             }
@@ -181,9 +102,14 @@ impl<'a> Visit<'a> for ElementDetector<'_> {
     }
 }
 
-fn has_custom_element_definition(program: &Program) -> bool {
+fn has_custom_element_definition(program: &Program, source: &str) -> bool {
     let semantic = SemanticBuilder::new().build(program).semantic;
-    let mut detector = ElementDetector::new(program, semantic.scoping());
+    let scoping = semantic.scoping();
+    let symbol_ctx = SymbolProofContext::scan(program, scoping, source);
+    let mut detector = ResumableElementDetector {
+        symbol_ctx: &symbol_ctx,
+        found: false,
+    };
     detector.visit_program(program);
     detector.found
 }
@@ -245,7 +171,7 @@ pub fn transform_resumable_component(
         .unwrap_or(DEFAULT_VIRTUAL_MODULE);
 
     if has_adapter_import(&parsed.program, virtual_module)
-        || !has_custom_element_definition(&parsed.program)
+        || !has_custom_element_definition(&parsed.program, &source)
     {
         return TransformResumableResult {
             code: source,

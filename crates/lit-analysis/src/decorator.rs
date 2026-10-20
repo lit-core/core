@@ -1,5 +1,6 @@
-use crate::symbol::{CanonicalLitSymbol, SymbolProofContext};
+use crate::symbol::{CanonicalHelperSymbol, CanonicalLitSymbol, SymbolProofContext};
 use oxc_ast::ast::*;
+use oxc_semantic::SymbolId;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -164,7 +165,9 @@ impl DecoratorExtractor {
     pub fn extract_custom_element_tag<'a>(
         program: &'a Program<'a>,
         class_name: &str,
+        class_sym_id: Option<SymbolId>,
         class_decorators: &[ExtractedDecorator],
+        ctx: &SymbolProofContext<'a>,
     ) -> Option<String> {
         // 1. From class decorators
         for dec in class_decorators {
@@ -177,52 +180,32 @@ impl DecoratorExtractor {
         for stmt in &program.body {
             if let Statement::ExpressionStatement(expr_stmt) = stmt {
                 if let Expression::CallExpression(call) = &expr_stmt.expression {
-                    if let Some(tag) = Self::match_custom_elements_define(call, class_name) {
-                        return Some(tag);
+                    if let Some(reg) = ctx.is_custom_elements_define(call) {
+                        let targets_class = match reg.class_expr {
+                            Expression::Identifier(id) => {
+                                if let Some(target_sym) = class_sym_id {
+                                    id.reference_id
+                                        .get()
+                                        .and_then(|r| ctx.scoping.get_reference(r).symbol_id())
+                                        == Some(target_sym)
+                                } else {
+                                    id.name == class_name
+                                }
+                            }
+                            _ => false,
+                        };
+
+                        if targets_class {
+                            if let Some(tag) = reg.tag {
+                                return Some(tag);
+                            }
+                        }
                     }
                 }
             }
         }
 
         None
-    }
-
-    fn match_custom_elements_define<'a>(
-        call: &'a CallExpression<'a>,
-        class_name: &str,
-    ) -> Option<String> {
-        if call.arguments.len() < 2 {
-            return None;
-        }
-
-        // Check callee: customElements.define or defineElement or define
-        let is_define_call = match &call.callee {
-            Expression::StaticMemberExpression(mem) => mem.property.name == "define",
-            Expression::Identifier(id) => {
-                id.name == "defineElement" || id.name == "customElementsDefine"
-            }
-            _ => false,
-        };
-
-        if !is_define_call {
-            return None;
-        }
-
-        // Arg 1 must target class_name
-        let targets_class = match call.arguments[1].as_expression() {
-            Some(Expression::Identifier(id)) => id.name == class_name,
-            _ => false,
-        };
-
-        if !targets_class {
-            return None;
-        }
-
-        // Arg 0 is tag name string literal
-        match call.arguments[0].as_expression() {
-            Some(Expression::StringLiteral(lit)) => Some(lit.value.to_string()),
-            _ => None,
-        }
     }
 
     fn inspect_expression_for_helpers<'a>(
@@ -256,73 +239,141 @@ impl DecoratorExtractor {
         ctx: &SymbolProofContext<'a>,
         extracted: &mut Vec<ExtractedDecorator>,
     ) {
-        // Must have at least 2 arguments: decorators array and target
         if call.arguments.len() < 2 {
             return;
         }
 
-        let decorators_arr = match call.arguments[0].as_expression() {
-            Some(Expression::ArrayExpression(arr)) => arr,
-            _ => return,
+        let helper_kind = match call.callee.without_parentheses() {
+            Expression::Identifier(id) => ctx.resolve_helper_symbol(id),
+            _ => None,
+        };
+        let Some(helper_kind) = helper_kind else {
+            return;
         };
 
-        // Form A: Member decorator call
-        // helper([dec1, dec2], TargetClass.prototype, "propName", descriptor)
-        if call.arguments.len() >= 3 {
-            if let Some(Expression::StaticMemberExpression(mem)) = call.arguments[1].as_expression()
-            {
-                if mem.property.name == "prototype" {
-                    if let Expression::Identifier(target_id) = &mem.object {
-                        if target_id.name == class_name {
-                            let prop_name = match call.arguments[2].as_expression() {
-                                Some(Expression::StringLiteral(s)) => Some(s.value.to_string()),
-                                Some(Expression::Identifier(id)) => Some(id.name.to_string()),
-                                _ => None,
-                            };
+        match helper_kind {
+            CanonicalHelperSymbol::ApplyDecoratedDescriptor => {
+                // Babel: applyDecoratedDescriptor(Target.prototype, "propName", [decorators], descriptor, target)
+                if call.arguments.len() >= 3 {
+                    if let Some(Expression::StaticMemberExpression(mem)) =
+                        call.arguments[0].as_expression()
+                    {
+                        if mem.property.name == "prototype" {
+                            if let Expression::Identifier(target_id) = &mem.object {
+                                if target_id.name == class_name {
+                                    let prop_name = match call.arguments[1].as_expression() {
+                                        Some(Expression::StringLiteral(s)) => {
+                                            Some(s.value.to_string())
+                                        }
+                                        Some(Expression::Identifier(id)) => {
+                                            Some(id.name.to_string())
+                                        }
+                                        _ => None,
+                                    };
 
-                            for elem in &decorators_arr.elements {
-                                if let Some(dec_expr) = elem.as_expression() {
-                                    if Self::is_metadata_helper(dec_expr) {
-                                        continue;
-                                    }
-                                    if let Some(kind) = Self::parse_decorator_expr(dec_expr, ctx) {
-                                        extracted.push(ExtractedDecorator {
-                                            kind,
-                                            target_member: prop_name.clone(),
-                                            span: (call.span.start, call.span.end),
-                                        });
+                                    if let Some(Expression::ArrayExpression(decorators_arr)) =
+                                        call.arguments[2].as_expression()
+                                    {
+                                        for elem in &decorators_arr.elements {
+                                            if let Some(dec_expr) = elem.as_expression() {
+                                                if Self::is_metadata_helper(dec_expr, ctx) {
+                                                    continue;
+                                                }
+                                                if let Some(kind) =
+                                                    Self::parse_decorator_expr(dec_expr, ctx)
+                                                {
+                                                    extracted.push(ExtractedDecorator {
+                                                        kind,
+                                                        target_member: prop_name.clone(),
+                                                        span: (call.span.start, call.span.end),
+                                                    });
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
-                            return;
                         }
                     }
                 }
             }
-        }
+            CanonicalHelperSymbol::Decorate | CanonicalHelperSymbol::DecorateClass => {
+                let decorators_arr = match call.arguments[0].as_expression() {
+                    Some(Expression::ArrayExpression(arr)) => arr,
+                    _ => return,
+                };
 
-        // Form B: Class decorator call
-        // helper([customElement("my-tag")], TargetClass)
-        if let Some(Expression::Identifier(target_id)) = call.arguments[1].as_expression() {
-            if target_id.name == class_name {
-                for elem in &decorators_arr.elements {
-                    if let Some(dec_expr) = elem.as_expression() {
-                        if let Some(kind) = Self::parse_decorator_expr(dec_expr, ctx) {
-                            extracted.push(ExtractedDecorator {
-                                kind,
-                                target_member: None,
-                                span: (call.span.start, call.span.end),
-                            });
+                // Form A: Member decorator call
+                // helper([dec1, dec2], TargetClass.prototype, "propName", descriptor)
+                if call.arguments.len() >= 3 {
+                    if let Some(Expression::StaticMemberExpression(mem)) =
+                        call.arguments[1].as_expression()
+                    {
+                        if mem.property.name == "prototype" {
+                            if let Expression::Identifier(target_id) = &mem.object {
+                                if target_id.name == class_name {
+                                    let prop_name = match call.arguments[2].as_expression() {
+                                        Some(Expression::StringLiteral(s)) => {
+                                            Some(s.value.to_string())
+                                        }
+                                        Some(Expression::Identifier(id)) => {
+                                            Some(id.name.to_string())
+                                        }
+                                        _ => None,
+                                    };
+
+                                    for elem in &decorators_arr.elements {
+                                        if let Some(dec_expr) = elem.as_expression() {
+                                            if Self::is_metadata_helper(dec_expr, ctx) {
+                                                continue;
+                                            }
+                                            if let Some(kind) =
+                                                Self::parse_decorator_expr(dec_expr, ctx)
+                                            {
+                                                extracted.push(ExtractedDecorator {
+                                                    kind,
+                                                    target_member: prop_name.clone(),
+                                                    span: (call.span.start, call.span.end),
+                                                });
+                                            }
+                                        }
+                                    }
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Form B: Class decorator call
+                // helper([customElement("my-tag")], TargetClass)
+                if let Some(Expression::Identifier(target_id)) = call.arguments[1].as_expression() {
+                    if target_id.name == class_name {
+                        for elem in &decorators_arr.elements {
+                            if let Some(dec_expr) = elem.as_expression() {
+                                if let Some(kind) = Self::parse_decorator_expr(dec_expr, ctx) {
+                                    extracted.push(ExtractedDecorator {
+                                        kind,
+                                        target_member: None,
+                                        span: (call.span.start, call.span.end),
+                                    });
+                                }
+                            }
                         }
                     }
                 }
             }
+            CanonicalHelperSymbol::Metadata => {}
         }
     }
 
-    fn is_metadata_helper<'a>(expr: &'a Expression<'a>) -> bool {
+    fn is_metadata_helper<'a>(expr: &'a Expression<'a>, ctx: &SymbolProofContext<'a>) -> bool {
         if let Expression::CallExpression(call) = expr {
-            matches!(&call.callee, Expression::Identifier(id) if id.name == "__metadata" || id.name == "metadata")
+            if let Expression::Identifier(id) = &call.callee {
+                ctx.resolve_helper_symbol(id) == Some(CanonicalHelperSymbol::Metadata)
+            } else {
+                false
+            }
         } else {
             false
         }
@@ -350,49 +401,11 @@ impl DecoratorExtractor {
                         options_json: None,
                         has_changed: None,
                     }),
-                    _ => {
-                        // Fallback by name if semantic binding is unproven
-                        match ident.name.as_str() {
-                            "property" => Some(LitDecoratorKind::Property {
-                                options_json: None,
-                                prop_type: None,
-                                reflect: false,
-                                attribute: None,
-                                has_changed: None,
-                                no_accessor: false,
-                            }),
-                            "state" => Some(LitDecoratorKind::State {
-                                options_json: None,
-                                has_changed: None,
-                            }),
-                            _ => None,
-                        }
-                    }
+                    _ => None,
                 }
             }
             Expression::CallExpression(call) => {
-                let canonical_kind = ctx.is_proven_decorator(expr).or_else(|| {
-                    // Fallback to callee symbol or name
-                    match &call.callee {
-                        Expression::Identifier(id) => match id.name.as_str() {
-                            "customElement" => Some(CanonicalLitSymbol::CustomElementDecorator),
-                            "property" => Some(CanonicalLitSymbol::PropertyDecorator),
-                            "state" => Some(CanonicalLitSymbol::StateDecorator),
-                            "query" => Some(CanonicalLitSymbol::QueryDecorator),
-                            "queryAll" => Some(CanonicalLitSymbol::QueryAllDecorator),
-                            "queryAsync" => Some(CanonicalLitSymbol::QueryAsyncDecorator),
-                            "queryAssignedElements" => {
-                                Some(CanonicalLitSymbol::QueryAssignedElementsDecorator)
-                            }
-                            "queryAssignedNodes" => {
-                                Some(CanonicalLitSymbol::QueryAssignedNodesDecorator)
-                            }
-                            "eventOptions" => Some(CanonicalLitSymbol::EventOptionsDecorator),
-                            _ => None,
-                        },
-                        _ => None,
-                    }
-                });
+                let canonical_kind = ctx.is_proven_decorator(expr);
 
                 match canonical_kind {
                     Some(CanonicalLitSymbol::CustomElementDecorator) => {

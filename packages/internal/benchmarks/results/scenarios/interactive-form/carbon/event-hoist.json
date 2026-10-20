@@ -22,20 +22,20 @@
     "id": "carbon",
     "name": "Carbon Web Components (@carbon/web-components)",
     "packageName": "@carbon/web-components",
-    "version": "2.64.0"
+    "version": "2.65.0"
   },
   "variant": {
     "id": "event-hoist",
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-12T23:47:16.427Z",
+  "timestamp": "2026-10-19T19:54:35.709Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "3856fa7",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -50,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 315576,
-    "gzipBytes": 49965,
-    "brotliBytes": 35033,
-    "buildTimeMs": 36.408957999999984,
-    "firstRenderMs": 18.2,
-    "updateMs": 0.2,
-    "scriptEvalMs": 1.5,
+    "rawBytes": 320628,
+    "gzipBytes": 51265,
+    "brotliBytes": 35403,
+    "buildTimeMs": 72.00625000000002,
+    "firstRenderMs": 31.7,
+    "updateMs": 0.4,
+    "scriptEvalMs": 3.6,
     "registrationMs": 0.5,
-    "heapUsedBytes": 3164390,
+    "heapUsedBytes": 3201383,
     "scenarioSpecific": {
       "sectionsCount": 5,
       "controlsPerSection": 6,
@@ -84,32 +84,32 @@
     }
   },
   "deltas": {
-    "rawBytes": 4905,
-    "rawPercent": 1.58,
-    "gzipBytes": 565,
-    "gzipPercent": 1.14,
-    "brotliBytes": 204,
-    "brotliPercent": 0.59,
-    "buildTimeMs": 3.1,
-    "firstRenderMs": -15,
-    "speedupPercent": 45.18,
-    "updateMs": -0.2,
-    "updateSpeedupPercent": 50,
-    "evalSpeedupPercent": 16.67,
+    "rawBytes": 9957,
+    "rawPercent": 3.2,
+    "gzipBytes": 1865,
+    "gzipPercent": 3.78,
+    "brotliBytes": 574,
+    "brotliPercent": 1.65,
+    "buildTimeMs": 38.7,
+    "firstRenderMs": -1.5,
+    "speedupPercent": 4.52,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -100,
     "registrationSpeedupPercent": -400,
-    "memorySavingsPercent": -5.43
+    "memorySavingsPercent": -6.66
   },
   "runtime": {
-    "firstRenderMs": 18.2,
-    "updateMs": 0.2,
-    "scriptEvalMs": 1.5,
+    "firstRenderMs": 31.7,
+    "updateMs": 0.4,
+    "scriptEvalMs": 3.6,
     "registrationMs": 0.5,
-    "heapUsedBytes": 3164390,
-    "speedupPercent": 45.18,
-    "updateSpeedupPercent": 50,
-    "evalSpeedupPercent": 16.67,
+    "heapUsedBytes": 3201383,
+    "speedupPercent": 4.52,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -100,
     "registrationSpeedupPercent": -400,
-    "memorySavingsPercent": -5.43
+    "memorySavingsPercent": -6.66
   },
   "domSnapshot": {
     "mount": {
@@ -229,6 +229,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -299,6 +301,7 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -365,6 +368,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -554,6 +559,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "admin"
                                 },
@@ -778,6 +784,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -846,6 +854,7 @@
                               "aria-checked": "false",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -913,6 +922,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -1101,6 +1112,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "viewer"
                                 },
@@ -1325,6 +1337,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -1395,6 +1409,7 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -1461,6 +1476,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -1649,6 +1666,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "editor"
                                 },
@@ -1873,6 +1891,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -1943,6 +1963,7 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -2009,6 +2030,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -2198,6 +2221,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "admin"
                                 },
@@ -2422,6 +2446,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -2490,6 +2516,7 @@
                               "aria-checked": "false",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -2557,6 +2584,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -2745,6 +2774,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "editor"
                                 },
@@ -2988,6 +3018,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -3058,6 +3090,7 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -3124,6 +3157,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -3313,6 +3348,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "admin"
                                 },
@@ -3537,6 +3573,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -3605,6 +3643,7 @@
                               "aria-checked": "false",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -3672,6 +3711,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -3860,6 +3901,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "viewer"
                                 },
@@ -4084,6 +4126,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -4154,6 +4198,7 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -4220,6 +4265,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -4408,6 +4455,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "editor"
                                 },
@@ -4632,6 +4680,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -4702,6 +4752,7 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -4768,6 +4819,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -4957,6 +5010,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "admin"
                                 },
@@ -5181,6 +5235,8 @@
                                         "attributes": {
                                           "autocomplete": "",
                                           "class": " cds--text-input ",
+                                          "data-lh-change": "1",
+                                          "data-lh-input": "0",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -5249,6 +5305,7 @@
                               "aria-checked": "false",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
+                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -5316,6 +5373,8 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
+                              "data-lh-change": "0",
+                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -5504,6 +5563,7 @@
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
                                   "class": " cds--select-input ",
+                                  "data-lh-input": "0",
                                   "id": "select",
                                   "title": "editor"
                                 },

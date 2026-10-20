@@ -13,6 +13,9 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 glob = { workspace = true }
 
+# Shared Lit analysis
+lit_analysis = { workspace = true, default-features = false }
+
 # JS/TS parsing
 oxc_parser = { workspace = true }
 oxc_ast = { workspace = true }

@@ -29,13 +29,13 @@
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-12T23:47:19.657Z",
+  "timestamp": "2026-10-19T19:54:39.030Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "3856fa7",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -50,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 196219,
-    "gzipBytes": 41739,
-    "brotliBytes": 34427,
-    "buildTimeMs": 23.401374999999916,
-    "firstRenderMs": 23.6,
-    "updateMs": 1.6,
-    "scriptEvalMs": 3.5,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 3267376,
+    "rawBytes": 198881,
+    "gzipBytes": 42111,
+    "brotliBytes": 34723,
+    "buildTimeMs": 29.587375000000065,
+    "firstRenderMs": 32.4,
+    "updateMs": 4.2,
+    "scriptEvalMs": 3.6,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 3297552,
     "scenarioSpecific": {
       "sectionsCount": 5,
       "controlsPerSection": 6,
@@ -84,32 +84,32 @@
     }
   },
   "deltas": {
-    "rawBytes": -133,
-    "rawPercent": -0.07,
-    "gzipBytes": -38,
-    "gzipPercent": -0.09,
-    "brotliBytes": -33,
-    "brotliPercent": -0.1,
-    "buildTimeMs": -0.9,
-    "firstRenderMs": -14.2,
-    "speedupPercent": 37.57,
-    "updateMs": -0.7,
-    "updateSpeedupPercent": 30.43,
-    "evalSpeedupPercent": 7.89,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -8.42
+    "rawBytes": 2529,
+    "rawPercent": 1.29,
+    "gzipBytes": 334,
+    "gzipPercent": 0.8,
+    "brotliBytes": 263,
+    "brotliPercent": 0.76,
+    "buildTimeMs": 5.3,
+    "firstRenderMs": -5.4,
+    "speedupPercent": 14.29,
+    "updateMs": 1.9,
+    "updateSpeedupPercent": -82.61,
+    "evalSpeedupPercent": 5.26,
+    "registrationSpeedupPercent": 14.29,
+    "memorySavingsPercent": -9.42
   },
   "runtime": {
-    "firstRenderMs": 23.6,
-    "updateMs": 1.6,
-    "scriptEvalMs": 3.5,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 3267376,
-    "speedupPercent": 37.57,
-    "updateSpeedupPercent": 30.43,
-    "evalSpeedupPercent": 7.89,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -8.42
+    "firstRenderMs": 32.4,
+    "updateMs": 4.2,
+    "scriptEvalMs": 3.6,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 3297552,
+    "speedupPercent": 14.29,
+    "updateSpeedupPercent": -82.61,
+    "evalSpeedupPercent": 5.26,
+    "registrationSpeedupPercent": 14.29,
+    "memorySavingsPercent": -9.42
   },
   "domSnapshot": {
     "mount": {
@@ -455,6 +455,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -555,6 +557,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -1590,6 +1594,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -1692,6 +1698,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -2728,6 +2736,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -2828,6 +2838,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -3864,6 +3876,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -3964,6 +3978,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -4999,6 +5015,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -5101,6 +5119,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -6156,6 +6176,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -6256,6 +6278,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -7292,6 +7316,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -7394,6 +7420,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -8430,6 +8458,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -8530,6 +8560,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -9566,6 +9598,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -9666,6 +9700,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },
@@ -10701,6 +10737,8 @@
                                 "tag": "input",
                                 "attributes": {
                                   "class": "touch",
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "switch",
                                   "role": "switch",
                                   "type": "checkbox"
@@ -10803,6 +10841,8 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
+                                  "data-lh-change": "1",
+                                  "data-lh-input": "0",
                                   "id": "input",
                                   "type": "checkbox"
                                 },

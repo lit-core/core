@@ -8,8 +8,8 @@ use oxc_parser::Parser;
 use oxc_span::{SourceType, SPAN};
 use serde::{Deserialize, Serialize};
 
-use oxc_semantic::{Scoping, SemanticBuilder};
-use std::collections::HashSet;
+use lit_analysis::symbol::SymbolProofContext;
+use oxc_semantic::SemanticBuilder;
 
 use crate::parser::{compute_template_parts, PartDescriptor};
 
@@ -31,130 +31,8 @@ pub struct DomPathsResult {
     pub paths: Vec<Vec<Vec<u32>>>,
 }
 
-pub fn is_canonical_lit_specifier(src: &str) -> bool {
-    src == "lit"
-        || src.starts_with("lit/")
-        || src == "lit-html"
-        || src.starts_with("lit-html/")
-        || src == "lit-element"
-        || src.starts_with("lit-element/")
-        || src == "@lit/reactive-element"
-        || src.starts_with("@lit/reactive-element/")
-        || src.starts_with("@lit/")
-}
-
-#[derive(Clone, Debug)]
-pub struct LitSemanticAnalysis {
-    pub has_lit_imports: bool,
-    pub has_any_imports: bool,
-    pub lit_tag_names: HashSet<String>,
-    pub lit_class_names: HashSet<String>,
-    pub lit_namespaces: HashSet<String>,
-}
-
-impl LitSemanticAnalysis {
-    pub fn new(program: &Program, scoping: &Scoping) -> Self {
-        let mut analysis = Self {
-            has_lit_imports: false,
-            has_any_imports: false,
-            lit_tag_names: HashSet::new(),
-            lit_class_names: HashSet::new(),
-            lit_namespaces: HashSet::new(),
-        };
-
-        let root = scoping.root_scope_id();
-
-        for stmt in &program.body {
-            if let Statement::ImportDeclaration(import_decl) = stmt {
-                analysis.has_any_imports = true;
-                let src = import_decl.source.value.as_str();
-                if is_canonical_lit_specifier(src) {
-                    analysis.has_lit_imports = true;
-                    if let Some(specifiers) = &import_decl.specifiers {
-                        for spec in specifiers {
-                            match spec {
-                                ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                                    let imported_name = named.imported.name();
-                                    let local_name = named.local.name.as_str().to_string();
-                                    let sym_id = named.local.symbol_id.get().or_else(|| {
-                                        scoping.get_binding(root, named.local.name.as_str().into())
-                                    });
-                                    if sym_id.is_some() {
-                                        if imported_name == "html" || imported_name == "svg" {
-                                            analysis.lit_tag_names.insert(local_name);
-                                        } else if imported_name == "LitElement"
-                                            || imported_name == "ReactiveElement"
-                                        {
-                                            analysis.lit_class_names.insert(local_name);
-                                        }
-                                    }
-                                }
-                                ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                                    let sym_id = ns.local.symbol_id.get().or_else(|| {
-                                        scoping.get_binding(root, ns.local.name.as_str().into())
-                                    });
-                                    if sym_id.is_some() {
-                                        analysis
-                                            .lit_namespaces
-                                            .insert(ns.local.name.as_str().to_string());
-                                    }
-                                }
-                                _ => {}
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        analysis
-    }
-
-    pub fn is_lit_tag(&self, expr: &Expression) -> bool {
-        if !self.has_lit_imports {
-            return false;
-        }
-        match expr {
-            Expression::Identifier(ident) => self.lit_tag_names.contains(ident.name.as_str()),
-            Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "html" || mem.property.name == "svg" {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        return self.lit_namespaces.contains(obj.name.as_str());
-                    }
-                }
-                false
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_lit_class(&self, class: &Class) -> bool {
-        if !self.has_lit_imports {
-            return false;
-        }
-        if let Some(ref heritage) = class.heritage {
-            match &heritage.expression {
-                Expression::Identifier(ident) => self.lit_class_names.contains(ident.name.as_str()),
-                Expression::StaticMemberExpression(mem)
-                    if mem.property.name == "LitElement"
-                        || mem.property.name == "ReactiveElement" =>
-                {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        self.lit_namespaces.contains(obj.name.as_str())
-                    } else {
-                        false
-                    }
-                }
-                _ => false,
-            }
-        } else {
-            false
-        }
-    }
-}
-
 struct TemplateCollector<'s> {
-    lit_analysis: &'s LitSemanticAnalysis,
+    symbol_ctx: &'s SymbolProofContext<'s>,
     templates: Vec<(Vec<String>, bool)>, // (quasis, is_render)
     in_render: bool,
 }
@@ -176,7 +54,10 @@ impl<'a, 's> Visit<'a> for TemplateCollector<'s> {
     }
 
     fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
-        if self.lit_analysis.is_lit_tag(&tagged.tag) && !tagged.quasi.expressions.is_empty() {
+        if (self.symbol_ctx.is_lit_html_tag(&tagged.tag)
+            || self.symbol_ctx.is_lit_svg_tag(&tagged.tag))
+            && !tagged.quasi.expressions.is_empty()
+        {
             let quasis = tagged
                 .quasi
                 .quasis
@@ -235,9 +116,28 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         };
     }
 
-    let lit_analysis = {
-        let semantic_ret = SemanticBuilder::new().build(&parsed.program);
-        LitSemanticAnalysis::new(&parsed.program, semantic_ret.semantic.scoping())
+    let scoping = SemanticBuilder::new()
+        .build(&parsed.program)
+        .semantic
+        .into_scoping();
+    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+    let symbol_ctx = SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
     };
 
     let ast = AstBuilder::new(&allocator);
@@ -261,7 +161,7 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
 
     for class in classes {
         // Skip if class does not extend LitElement / ReactiveElement
-        if !lit_analysis.is_lit_class(class) {
+        if !symbol_ctx.prove_heritage(class).is_reactive() {
             continue;
         }
 
@@ -278,7 +178,7 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         }
 
         let mut collector = TemplateCollector {
-            lit_analysis: &lit_analysis,
+            symbol_ctx: &symbol_ctx,
             templates: Vec::new(),
             in_render: false,
         };

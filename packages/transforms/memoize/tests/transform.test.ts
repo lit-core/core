@@ -5,6 +5,7 @@ describe('memoize transform', () => {
   const fn = transformMemoize;
   it('memoizes single-input array mapping', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class UserList extends LitElement {
   render() {
     return html\`
@@ -28,6 +29,7 @@ export class UserList extends LitElement {
 
   it('memoizes multi-input array mapping with filterText dependency', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class FilteredList extends LitElement {
   render() {
     return html\`
@@ -53,6 +55,7 @@ export class FilteredList extends LitElement {
 
   it('memoizes chained array operations as a single pipeline', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class SortedTable extends LitElement {
   render() {
     return html\`
@@ -76,6 +79,7 @@ export class SortedTable extends LitElement {
 
   it('memoizes variable declarations inside render()', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class TableView extends LitElement {
   render() {
     const rows = this.items.filter(x => x.active).map(x => html\`<tr><td>\${x.name}</td></tr>\`);
@@ -96,6 +100,7 @@ export class TableView extends LitElement {
 
   it('memoizes multiple independent expressions in the same template without collision', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class DashboardView extends LitElement {
   render() {
     return html\`
@@ -125,6 +130,7 @@ export class DashboardView extends LitElement {
 
   it('memoizes .slice(), .reduce(), and .flatMap() array transformations', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class AdvancedList extends LitElement {
   render() {
     return html\`
@@ -150,6 +156,7 @@ export class AdvancedList extends LitElement {
 
   it('does not memoize expressions calling mutating array methods', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class ImpureComponent extends LitElement {
   render() {
     return html\`
@@ -168,6 +175,7 @@ export class ImpureComponent extends LitElement {
 
   it('does not memoize expressions calling Date.now(), Math.random(), or DOM queries', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class NonDeterministicComponent extends LitElement {
   render() {
     return html\`
@@ -187,6 +195,7 @@ export class NonDeterministicComponent extends LitElement {
 
   it('does not memoize expressions with method calls on this', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class CustomMethodComponent extends LitElement {
   render() {
     return html\`
@@ -218,8 +227,10 @@ export class DataService {
 
   it('verifies runtime reference caching and reactive cache invalidation', () => {
     const input = `
-class TestComponent {
+import { LitElement } from 'lit';
+class TestComponent extends LitElement {
   constructor() {
+    super();
     this.items = ['apple', 'banana', 'cherry'];
     this.filterText = 'a';
     this.open = false;
@@ -236,7 +247,8 @@ class TestComponent {
     expect(res.memoizedCount).toBe(1);
 
     // Execute transformed class code in sandbox
-    const factory = new Function(`${res.code}; return TestComponent;`);
+    const cleanCode = res.code.replace(/import\s*\{[^}]*\}\s*from\s*["\x27][^"\x27]+["\x27];?/g, '');
+    const factory = new Function(`class LitElement {}; ${cleanCode}; return TestComponent;`);
     const ComponentClass = factory();
     const instance = new ComponentClass();
 
@@ -272,6 +284,7 @@ class TestComponent {
 
   it('does not memoize direct in-place sort on this.items', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class InPlaceSortComponent extends LitElement {
   render() {
     return html\`
@@ -289,6 +302,7 @@ export class InPlaceSortComponent extends LitElement {
 
   it('memoizes sort on fresh array copies (slice or array spread)', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class FreshSortComponent extends LitElement {
   render() {
     return html\`
@@ -308,6 +322,7 @@ export class FreshSortComponent extends LitElement {
 
   it('avoids identifier collision when _memoized_items already exists in scope', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class CollisionComponent extends LitElement {
   render() {
     const _memoized_items = 'existing';
@@ -356,6 +371,7 @@ export class NonLitComponent extends OtherBase {
 
   it('declares memoization properties on class body to prevent undeclared mutations', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class UserList extends LitElement {
   render() {
     return html\`
@@ -374,6 +390,7 @@ export class UserList extends LitElement {
 
   it('harmonizes with dirty-mask by memoizing expressions inside dirty-mask conditionals', () => {
     const input = `
+import { LitElement, html, noChange } from 'lit';
 export class MaskedList extends LitElement {
   render() {
     return html\`

@@ -6,49 +6,13 @@
     "name": "Web Awesome (20 Canonical Components)",
     "packageName": "@awesome.me/webawesome",
     "version": "3.14.0",
-    "componentCount": 20,
+    "componentCount": 4,
     "components": [
-      {
-        "concept": "button",
-        "tag": "wa-button",
-        "path": "dist/components/button/button.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/button/button.js';"
-      },
       {
         "concept": "checkbox",
         "tag": "wa-checkbox",
         "path": "dist/components/checkbox/checkbox.js",
         "importStatement": "import '@awesome.me/webawesome/dist/components/checkbox/checkbox.js';"
-      },
-      {
-        "concept": "radio",
-        "tag": "wa-radio",
-        "path": "dist/components/radio/radio.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/radio/radio.js';"
-      },
-      {
-        "concept": "switch",
-        "tag": "wa-switch",
-        "path": "dist/components/switch/switch.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/switch/switch.js';"
-      },
-      {
-        "concept": "text-input",
-        "tag": "wa-input",
-        "path": "dist/components/input/input.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/input/input.js';"
-      },
-      {
-        "concept": "select",
-        "tag": "wa-select",
-        "path": "dist/components/select/select.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/select/select.js';"
-      },
-      {
-        "concept": "dialog",
-        "tag": "wa-dialog",
-        "path": "dist/components/dialog/dialog.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/dialog/dialog.js';"
       },
       {
         "concept": "badge",
@@ -57,76 +21,16 @@
         "importStatement": "import '@awesome.me/webawesome/dist/components/badge/badge.js';"
       },
       {
-        "concept": "tabs",
-        "tag": "wa-tab-group",
-        "path": "dist/components/tab-group/tab-group.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/tab-group/tab-group.js';"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "wa-progress-bar",
-        "path": "dist/components/progress-bar/progress-bar.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/progress-bar/progress-bar.js';"
-      },
-      {
-        "concept": "spinner",
-        "tag": "wa-spinner",
-        "path": "dist/components/spinner/spinner.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/spinner/spinner.js';"
-      },
-      {
-        "concept": "slider",
-        "tag": "wa-slider",
-        "path": "dist/components/slider/slider.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/slider/slider.js';"
-      },
-      {
-        "concept": "menu",
-        "tag": "wa-dropdown",
-        "path": "dist/components/dropdown/dropdown.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';"
-      },
-      {
-        "concept": "divider",
-        "tag": "wa-divider",
-        "path": "dist/components/divider/divider.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/divider/divider.js';"
-      },
-      {
-        "concept": "icon",
-        "tag": "wa-icon",
-        "path": "dist/components/icon/icon.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/icon/icon.js';"
+        "concept": "button",
+        "tag": "wa-button",
+        "path": "dist/components/button/button.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/button/button.js';"
       },
       {
         "concept": "icon-button",
         "tag": "wa-copy-button",
         "path": "dist/components/copy-button/copy-button.js",
         "importStatement": "import '@awesome.me/webawesome/dist/components/copy-button/copy-button.js';"
-      },
-      {
-        "concept": "card",
-        "tag": "wa-card",
-        "path": "dist/components/card/card.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/card/card.js';"
-      },
-      {
-        "concept": "elevation",
-        "tag": "wa-popover",
-        "path": "dist/components/popover/popover.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/popover/popover.js';"
-      },
-      {
-        "concept": "list",
-        "tag": "wa-details",
-        "path": "dist/components/details/details.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/details/details.js';"
-      },
-      {
-        "concept": "chips",
-        "tag": "wa-breadcrumb",
-        "path": "dist/components/breadcrumb/breadcrumb.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/breadcrumb/breadcrumb.js';"
       }
     ]
   },
@@ -137,18 +41,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "bundle",
-    "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "componentCount": 20
+    "id": "data-grid",
+    "name": "Data grid",
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
+    "componentCount": 4
   },
-  "timestamp": "2026-10-17T16:29:43.459Z",
+  "timestamp": "2026-10-19T20:04:09.778Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,79 +67,59 @@
     }
   },
   "metrics": {
-    "rawBytes": 372726,
-    "gzipBytes": 87580,
-    "brotliBytes": 70112,
-    "buildTimeMs": 42.22841700000026
+    "rawBytes": 200772,
+    "gzipBytes": 52663,
+    "brotliBytes": 44252,
+    "buildTimeMs": 28.907584000000043
   },
   "baseline": {
-    "rawBytes": 372874,
-    "gzipBytes": 87593,
-    "brotliBytes": 70118,
-    "buildTimeMs": 52.691709,
-    "firstRenderMs": 35,
-    "updateMs": 6.9,
-    "scriptEvalMs": 3.3,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 3664726,
+    "rawBytes": 198164,
+    "gzipBytes": 52039,
+    "brotliBytes": 43865,
+    "buildTimeMs": 26.994583999999122,
+    "firstRenderMs": 73.2,
+    "updateMs": 4.4,
+    "scriptEvalMs": 3.7,
+    "registrationMs": 1.3,
+    "heapUsedBytes": 4445712,
     "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "wa-button",
-        "wa-checkbox",
-        "wa-radio",
-        "wa-switch",
-        "wa-input",
-        "wa-select",
-        "wa-dialog",
-        "wa-badge",
-        "wa-tab-group",
-        "wa-progress-bar",
-        "wa-spinner",
-        "wa-slider",
-        "wa-dropdown",
-        "wa-divider",
-        "wa-icon",
-        "wa-copy-button",
-        "wa-card",
-        "wa-popover",
-        "wa-details",
-        "wa-breadcrumb"
-      ],
-      "renderedCells": 20
+      "rowCount": 100,
+      "customElementsPerCell": 4,
+      "totalCustomElements": 400,
+      "renderedNodes": 801
     }
   },
   "deltas": {
-    "rawBytes": -148,
-    "rawPercent": -0.04,
-    "gzipBytes": -13,
-    "gzipPercent": -0.01,
-    "brotliBytes": -6,
-    "brotliPercent": -0.01,
-    "buildTimeMs": -10.5,
-    "firstRenderMs": -0.9,
-    "speedupPercent": 2.57,
-    "updateMs": -0.9,
-    "updateSpeedupPercent": 13.04,
-    "evalSpeedupPercent": -6.06,
-    "registrationSpeedupPercent": 16.67,
-    "memorySavingsPercent": -4.14
+    "rawBytes": 2608,
+    "rawPercent": 1.32,
+    "gzipBytes": 624,
+    "gzipPercent": 1.2,
+    "brotliBytes": 387,
+    "brotliPercent": 0.88,
+    "buildTimeMs": 1.9,
+    "firstRenderMs": 6,
+    "speedupPercent": -8.2,
+    "updateMs": 0.1,
+    "updateSpeedupPercent": -2.27,
+    "evalSpeedupPercent": -18.92,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -41.33
   },
   "runtime": {
-    "firstRenderMs": 34.1,
-    "updateMs": 6,
-    "scriptEvalMs": 3.5,
-    "registrationMs": 1,
-    "heapUsedBytes": 3816478,
-    "speedupPercent": 2.57,
-    "updateSpeedupPercent": 13.04,
-    "evalSpeedupPercent": -6.06,
-    "registrationSpeedupPercent": 16.67,
-    "memorySavingsPercent": -4.14
+    "firstRenderMs": 79.2,
+    "updateMs": 4.5,
+    "scriptEvalMs": 4.4,
+    "registrationMs": 2.6,
+    "heapUsedBytes": 6283117,
+    "speedupPercent": -8.2,
+    "updateSpeedupPercent": -2.27,
+    "evalSpeedupPercent": -18.92,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -41.33
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 49,
+    "elementsCount": 801,
     "verified": true,
     "phasesMatched": {
       "mount": true,

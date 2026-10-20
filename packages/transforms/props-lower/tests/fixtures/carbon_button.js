@@ -3,7 +3,7 @@
  */
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
-import __decorate from './decorate.js';
+import { __decorate } from 'tslib';
 
 const CDSButton = class CDSButton extends LitElement {
   constructor(..._args) {

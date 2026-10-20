@@ -1,3 +1,4 @@
+use lit_analysis::{CanonicalHelperSymbol, CanonicalLitSymbol, SymbolProofContext};
 use oxc_ast::ast::*;
 use oxc_semantic::{Semantic, SymbolId};
 use std::collections::HashSet;
@@ -5,9 +6,7 @@ use std::collections::HashSet;
 pub struct SymbolResolver<'a> {
     pub semantic: &'a Semantic<'a>,
     pub program: &'a Program<'a>,
-    pub custom_element_decorator_names: HashSet<String>,
-    pub decorator_namespaces: HashSet<String>,
-    pub decorator_helper_names: HashSet<String>,
+    pub symbol_ctx: SymbolProofContext<'a>,
 }
 
 #[derive(Debug, Clone)]
@@ -18,153 +17,30 @@ pub struct ImportLocation {
     pub source: String,
 }
 
-pub fn is_lit_decorator_source(source: &str) -> bool {
-    source == "lit/decorators.js"
-        || source == "lit/decorators"
-        || source == "lit"
-        || source == "lit-element"
-        || source == "lit-element/decorators.js"
-        || source == "lit-element/decorators"
-        || source.starts_with("lit/decorators/")
-        || source.starts_with("@lit/reactive-element/decorators")
-}
-
-pub fn is_decorator_helper_source(source: &str) -> bool {
-    source == "tslib"
-        || source.starts_with("tslib/")
-        || source == "@swc/helpers"
-        || source.starts_with("@swc/helpers/")
-        || source.starts_with("@babel/runtime/helpers/")
-        || source == "./decorate.js"
-        || source == "../decorate.js"
-        || source.ends_with("/decorate.js")
-        || source.ends_with("/decorate")
-}
-
-pub fn is_decorator_helper_name(name: &str) -> bool {
-    name == "__decorate"
-        || name == "_ts_decorate"
-        || name == "__decorateClass"
-        || name == "decorate"
-        || name == "applyDecoratedDescriptor"
-}
-
 impl<'a> SymbolResolver<'a> {
-    pub fn new(semantic: &'a Semantic<'a>, program: &'a Program<'a>) -> Self {
-        let mut custom_element_decorator_names = HashSet::new();
-        let mut decorator_namespaces = HashSet::new();
-        let mut decorator_helper_names = HashSet::new();
-
-        for stmt in &program.body {
-            if let Statement::ImportDeclaration(import_decl) = stmt {
-                let source = import_decl.source.value.as_str();
-                if is_lit_decorator_source(source) {
-                    if let Some(specifiers) = &import_decl.specifiers {
-                        for spec in specifiers {
-                            match spec {
-                                ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                                    if named.imported.name().as_str() == "customElement" {
-                                        custom_element_decorator_names
-                                            .insert(named.local.name.as_str().to_string());
-                                    }
-                                }
-                                ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                                    decorator_namespaces.insert(ns.local.name.as_str().to_string());
-                                }
-                                _ => {}
-                            }
-                        }
-                    }
-                } else if is_decorator_helper_source(source) {
-                    if let Some(specifiers) = &import_decl.specifiers {
-                        for spec in specifiers {
-                            match spec {
-                                ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                                    let imported = named.imported.name().as_str();
-                                    if is_decorator_helper_name(imported) {
-                                        decorator_helper_names
-                                            .insert(named.local.name.as_str().to_string());
-                                    }
-                                }
-                                ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => {
-                                    decorator_helper_names
-                                        .insert(def.local.name.as_str().to_string());
-                                }
-                                _ => {}
-                            }
-                        }
-                    }
-                } else if let Some(specifiers) = &import_decl.specifiers {
-                    for spec in specifiers {
-                        if let ImportDeclarationSpecifier::ImportSpecifier(named) = spec {
-                            let imported = named.imported.name().as_str();
-                            if is_decorator_helper_name(imported) {
-                                decorator_helper_names
-                                    .insert(named.local.name.as_str().to_string());
-                            }
-                        }
-                    }
-                }
-            } else if let Statement::VariableDeclaration(var_decl) = stmt {
-                for decl in &var_decl.declarations {
-                    if let BindingPattern::BindingIdentifier(id) = &decl.id {
-                        if let Some(Expression::Identifier(init_id)) = &decl.init {
-                            if is_decorator_helper_name(init_id.name.as_str())
-                                || decorator_helper_names.contains(init_id.name.as_str())
-                            {
-                                decorator_helper_names.insert(id.name.as_str().to_string());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
+    pub fn new(semantic: &'a Semantic<'a>, program: &'a Program<'a>, source_text: &'a str) -> Self {
+        let scoping = semantic.scoping();
+        let symbol_ctx = SymbolProofContext::scan(program, scoping, source_text);
         Self {
             semantic,
             program,
-            custom_element_decorator_names,
-            decorator_namespaces,
-            decorator_helper_names,
+            symbol_ctx,
         }
-    }
-
-    /// Check whether a module specifier source is a known component module.
-    pub fn is_component_module_source(src: &str) -> bool {
-        let s = src.to_lowercase();
-        s == "lit"
-            || s == "lit-element"
-            || s == "@lit/reactive-element"
-            || s.starts_with("lit/")
-            || s.contains("web-component")
-            || s.contains("custom-element")
-            || ((s.contains("component") || s.contains("element"))
-                && !s.contains("schema")
-                && !s.contains("model")
-                && !s.contains("validator"))
-    }
-
-    /// Check whether a class name represents a custom element or component class.
-    pub fn is_element_class_name(name: &str) -> bool {
-        name == "HTMLElement"
-            || name == "LitElement"
-            || name == "ReactiveElement"
-            || name.ends_with("Element")
-            || name.ends_with("Component")
     }
 
     /// Check whether an identifier reference refers to a class declaration extending
     /// a component base class or imported from a component module.
     pub fn is_component_reference(&self, ident: &IdentifierReference) -> bool {
-        let name = ident.name.as_str();
-
-        // 1. Check if imported from an external component module
-        if let Some(loc) = Self::find_import_location(self.program, name) {
-            let src = loc.source.to_lowercase();
-            let imported = loc.specifier_name.as_str();
-            if Self::is_component_module_source(&src) || Self::is_element_class_name(imported) {
-                return true;
+        // 1. Check if imported from an external module
+        if let Some(ref_id) = ident.reference_id.get() {
+            if let Some(sym_id) = self.semantic.scoping().get_reference(ref_id).symbol_id() {
+                if self.symbol_ctx.imported_classes.contains_key(&sym_id) {
+                    return true;
+                }
             }
+        }
+        if Self::find_import_location(self.program, ident.name.as_str()).is_some() {
+            return true;
         }
 
         // 2. Check if declared as a class in the current program extending a component base class
@@ -190,11 +66,10 @@ impl<'a> SymbolResolver<'a> {
 
             if let Some(cls) = class_opt {
                 if let Some(cls_id) = &cls.id {
-                    if cls_id.name.as_str() == name {
-                        if let Some(ref heritage) = cls.heritage {
-                            if self.is_component_heritage(&heritage.expression) {
-                                return true;
-                            }
+                    if cls_id.name == ident.name {
+                        let proof = self.symbol_ctx.prove_heritage(cls);
+                        if proof.is_reactive() || self.is_extends_html_element(cls) {
+                            return true;
                         }
                     }
                 }
@@ -204,52 +79,27 @@ impl<'a> SymbolResolver<'a> {
         false
     }
 
-    /// Check whether a class heritage expression refers semantically to a component base class.
-    pub fn is_component_heritage(&self, expr: &Expression) -> bool {
-        match expr {
-            Expression::Identifier(super_id) => {
-                let s_name = super_id.name.as_str();
-                // 1. Global unshadowed HTMLElement
-                if s_name == "HTMLElement" && self.is_global_reference(super_id) {
-                    return true;
+    /// Check if a class explicitly extends global unshadowed HTMLElement.
+    pub fn is_extends_html_element(&self, cls: &Class) -> bool {
+        if let Some(ref heritage) = cls.heritage {
+            match heritage.expression.without_parentheses() {
+                Expression::Identifier(super_id) => {
+                    super_id.name == "HTMLElement" && self.symbol_ctx.is_unresolved_global(super_id)
                 }
-                // 2. Resolve import semantically
-                if let Some(loc) = Self::find_import_location(self.program, s_name) {
-                    let src = loc.source.to_lowercase();
-                    let imported = loc.specifier_name.as_str();
-                    if Self::is_element_class_name(imported)
-                        || Self::is_component_module_source(&src)
-                    {
-                        return true;
+                Expression::StaticMemberExpression(mem) if mem.property.name == "HTMLElement" => {
+                    if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
+                        (obj_id.name == "window"
+                            || obj_id.name == "globalThis"
+                            || obj_id.name == "self")
+                            && self.symbol_ctx.is_unresolved_global(obj_id)
+                    } else {
+                        false
                     }
                 }
-                // 3. Fallback for unminified identifier spelling
-                Self::is_element_class_name(s_name)
+                _ => false,
             }
-            Expression::StaticMemberExpression(mem) => {
-                let prop = mem.property.name.as_str();
-                if prop == "HTMLElement" {
-                    if let Expression::Identifier(obj_id) = &mem.object {
-                        if obj_id.name == "window" || obj_id.name == "globalThis" {
-                            return true;
-                        }
-                    }
-                }
-                if let Expression::Identifier(obj_id) = &mem.object {
-                    if let Some(loc) =
-                        Self::find_import_location(self.program, obj_id.name.as_str())
-                    {
-                        let src = loc.source.to_lowercase();
-                        if Self::is_component_module_source(&src)
-                            && Self::is_element_class_name(prop)
-                        {
-                            return true;
-                        }
-                    }
-                }
-                Self::is_element_class_name(prop)
-            }
-            _ => false,
+        } else {
+            false
         }
     }
 
@@ -262,12 +112,7 @@ impl<'a> SymbolResolver<'a> {
 
     /// Check if an identifier reference refers to a global (not bound to any local symbol).
     pub fn is_global_reference(&self, ident: &IdentifierReference) -> bool {
-        if let Some(ref_id) = ident.reference_id.get() {
-            let reference = self.semantic.scoping().get_reference(ref_id);
-            reference.symbol_id().is_none()
-        } else {
-            self.is_global_symbol(ident.name.as_str())
-        }
+        self.symbol_ctx.is_unresolved_global(ident)
     }
 
     /// Check if customElements refers to the global scope (not shadowed by local variable).
@@ -277,24 +122,25 @@ impl<'a> SymbolResolver<'a> {
 
     /// Check if an expression is a customElement decorator callee (supporting aliases and namespaces).
     pub fn is_custom_element_decorator(&self, callee: &Expression) -> bool {
-        match callee {
+        match callee.without_parentheses() {
             Expression::Identifier(id) => {
-                if self
-                    .custom_element_decorator_names
-                    .contains(id.name.as_str())
+                if self.symbol_ctx.resolve_symbol(id)
+                    == Some(CanonicalLitSymbol::CustomElementDecorator)
                 {
                     true
-                } else if self.custom_element_decorator_names.is_empty()
-                    && id.name == "customElement"
-                {
-                    self.is_global_reference(id)
+                } else if id.name == "customElement" && self.symbol_ctx.is_unresolved_global(id) {
+                    !self
+                        .symbol_ctx
+                        .lit_symbols
+                        .values()
+                        .any(|s| *s == CanonicalLitSymbol::CustomElementDecorator)
                 } else {
                     false
                 }
             }
             Expression::StaticMemberExpression(mem) if mem.property.name == "customElement" => {
-                if let Expression::Identifier(obj_id) = &mem.object {
-                    self.decorator_namespaces.contains(obj_id.name.as_str())
+                if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
+                    self.symbol_ctx.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace)
                 } else {
                     false
                 }
@@ -305,41 +151,21 @@ impl<'a> SymbolResolver<'a> {
 
     /// Check if an identifier reference resolves to a decorator helper (__decorate, _ts_decorate, etc.).
     pub fn is_decorator_helper(&self, ident: &IdentifierReference) -> bool {
-        let name = ident.name.as_str();
-
-        // 1. Direct match with tracked helper bindings
-        if self.decorator_helper_names.contains(name) {
-            return true;
-        }
-
-        // 2. Resolve reference via oxc_semantic symbol resolution
-        if let Some(ref_id) = ident.reference_id.get() {
-            let scoping = self.semantic.scoping();
-            let reference = scoping.get_reference(ref_id);
-            if let Some(symbol_id) = reference.symbol_id() {
-                let symbol_name = scoping.symbol_name(symbol_id);
-                if self.decorator_helper_names.contains(symbol_name)
-                    || is_decorator_helper_name(symbol_name)
-                {
-                    return true;
-                }
-            }
-        }
-
-        // 3. Unresolved/global canonical helper names
-        if is_decorator_helper_name(name) {
-            return self.is_global_reference(ident);
-        }
-
-        false
+        matches!(
+            self.symbol_ctx.resolve_helper_symbol(ident),
+            Some(CanonicalHelperSymbol::Decorate | CanonicalHelperSymbol::DecorateClass)
+        )
     }
 
     /// Check if an expression is a decorator helper callee (supporting aliases and member expressions).
     pub fn is_decorator_helper_callee(&self, callee: &Expression) -> bool {
-        match callee {
+        match callee.without_parentheses() {
             Expression::Identifier(ident) => self.is_decorator_helper(ident),
             Expression::StaticMemberExpression(mem) => {
-                is_decorator_helper_name(mem.property.name.as_str())
+                matches!(
+                    SymbolProofContext::map_helper_named_import(mem.property.name.as_str()),
+                    Some(CanonicalHelperSymbol::Decorate | CanonicalHelperSymbol::DecorateClass)
+                )
             }
             _ => false,
         }

@@ -1,14 +1,14 @@
 use lightningcss::printer::PrinterOptions;
 use lightningcss::stylesheet::{MinifyOptions, ParserOptions, StyleSheet};
+use lit_analysis::symbol::SymbolProofContext;
 use napi_derive::napi;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
+use oxc_ast_visit::{walk_mut::*, VisitMut};
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_semantic::{Scoping, SemanticBuilder, SymbolId};
+use oxc_semantic::SemanticBuilder;
 use oxc_span::SourceType;
-use oxc_traverse::{traverse_mut, Traverse, TraverseCtx};
-use std::collections::HashSet;
 
 #[napi(object)]
 #[derive(Default, Clone, Debug)]
@@ -109,180 +109,81 @@ fn quasis_end_at_rule_boundaries(quasis: &[TemplateElement<'_>]) -> bool {
     })
 }
 
-struct CssMinifierTraverser<'a> {
+struct CssMinifierMutVisitor<'a> {
     allocator: &'a Allocator,
-    import_ctx: CssImportContext,
+    symbol_ctx: &'a SymbolProofContext<'a>,
     minified_templates: u32,
     bytes_saved: u32,
 }
 
-impl<'a> CssMinifierTraverser<'a> {
-    fn is_css_tag(&self, expr: &Expression, ctx: &TraverseCtx<'a, ()>) -> bool {
-        match expr {
-            Expression::Identifier(ident) => {
-                if let Some(ref_id) = ident.reference_id.get() {
-                    let reference = ctx.scoping().get_reference(ref_id);
-                    if let Some(sym_id) = reference.symbol_id() {
-                        return self.import_ctx.css_symbols.contains(&sym_id);
-                    }
-                }
-                false
-            }
-
-            Expression::StaticMemberExpression(member) => {
-                if member.property.name.as_str() == "css" {
-                    if let Expression::Identifier(obj) = &member.object {
-                        if let Some(ref_id) = obj.reference_id.get() {
-                            let reference = ctx.scoping().get_reference(ref_id);
-                            if let Some(sym_id) = reference.symbol_id() {
-                                return self.import_ctx.css_namespaces.contains(&sym_id);
-                            }
+impl<'a> VisitMut<'a> for CssMinifierMutVisitor<'a> {
+    fn visit_tagged_template_expression(&mut self, node: &mut TaggedTemplateExpression<'a>) {
+        if self.symbol_ctx.is_lit_css_tag(&node.tag) {
+            if node.quasi.expressions.is_empty() {
+                // Common case: template literal with no expressions (pure CSS)
+                if let Some(quasi) = node.quasi.quasis.first_mut() {
+                    let raw_css = quasi.value.raw.as_str();
+                    if let Some(minified) = minify_css_string(raw_css) {
+                        if minified.len() < raw_css.len() {
+                            self.bytes_saved += (raw_css.len() - minified.len()) as u32;
+                            self.minified_templates += 1;
+                            let str_arena = Str::from_str_in(&minified, &self.allocator);
+                            quasi.value.raw = str_arena;
+                            quasi.value.cooked = Some(str_arena);
                         }
                     }
                 }
-                false
-            }
-            _ => false,
-        }
-    }
-}
-
-impl<'a> Traverse<'a, ()> for CssMinifierTraverser<'a> {
-    fn enter_tagged_template_expression(
-        &mut self,
-        node: &mut TaggedTemplateExpression<'a>,
-        ctx: &mut TraverseCtx<'a, ()>,
-    ) {
-        if !self.is_css_tag(&node.tag, ctx) {
-            return;
-        }
-
-        if node.quasi.expressions.is_empty() {
-            // Common case: template literal with no expressions (pure CSS)
-            if let Some(quasi) = node.quasi.quasis.first_mut() {
-                let raw_css = quasi.value.raw.as_str();
-                if let Some(minified) = minify_css_string(raw_css) {
-                    if minified.len() < raw_css.len() {
-                        self.bytes_saved += (raw_css.len() - minified.len()) as u32;
-                        self.minified_templates += 1;
-                        let str_arena = Str::from_str_in(&minified, &self.allocator);
-                        quasi.value.raw = str_arena;
-                        quasi.value.cooked = Some(str_arena);
-                    }
-                }
-            }
-        } else if quasis_end_at_rule_boundaries(&node.quasi.quasis) {
-            // Every expression sits between complete rules, so each quasi slice is a standalone
-            // stylesheet and can be minified without touching the expressions.
-            for quasi in node.quasi.quasis.iter_mut() {
-                let raw_css = quasi.value.raw.as_str();
-                if let Some(minified) = minify_css_string(raw_css) {
-                    if minified.len() < raw_css.len() {
-                        self.bytes_saved += (raw_css.len() - minified.len()) as u32;
-                        self.minified_templates += 1;
-                        let str_arena = Str::from_str_in(&minified, &self.allocator);
-                        quasi.value.raw = str_arena;
-                        quasi.value.cooked = Some(str_arena);
-                    }
-                }
-            }
-        }
-        // Any other interpolated template is left untouched: an expression inside a rule, selector
-        // or value means a slice is not a standalone stylesheet, and minifying it in isolation
-        // reorders or drops tokens around the expression.
-    }
-
-    fn enter_call_expression(
-        &mut self,
-        node: &mut CallExpression<'a>,
-        ctx: &mut TraverseCtx<'a, ()>,
-    ) {
-        if !self.is_css_tag(&node.callee, ctx) {
-            return;
-        }
-
-        for arg in node.arguments.iter_mut() {
-            if let Some(expr) = arg.as_expression_mut() {
-                match expr {
-                    Expression::StringLiteral(lit) => {
-                        let raw_css = lit.value.as_str();
-                        if let Some(minified) = minify_css_string(raw_css) {
-                            if minified.len() < raw_css.len() {
-                                self.bytes_saved += (raw_css.len() - minified.len()) as u32;
-                                self.minified_templates += 1;
-                                lit.value = Str::from_str_in(&minified, &self.allocator);
-                            }
+            } else if quasis_end_at_rule_boundaries(&node.quasi.quasis) {
+                // Every expression sits between complete rules, so each quasi slice is a standalone
+                // stylesheet and can be minified without touching the expressions.
+                for quasi in node.quasi.quasis.iter_mut() {
+                    let raw_css = quasi.value.raw.as_str();
+                    if let Some(minified) = minify_css_string(raw_css) {
+                        if minified.len() < raw_css.len() {
+                            self.bytes_saved += (raw_css.len() - minified.len()) as u32;
+                            self.minified_templates += 1;
+                            let str_arena = Str::from_str_in(&minified, &self.allocator);
+                            quasi.value.raw = str_arena;
+                            quasi.value.cooked = Some(str_arena);
                         }
                     }
-                    Expression::ArrayExpression(arr) => {
-                        for elem in arr.elements.iter_mut() {
-                            if let Some(Expression::StringLiteral(lit)) = elem.as_expression_mut() {
-                                let raw_css = lit.value.as_str();
-                                if let Some(minified) = minify_css_string(raw_css) {
-                                    if minified.len() < raw_css.len() {
-                                        self.bytes_saved += (raw_css.len() - minified.len()) as u32;
-                                        self.minified_templates += 1;
-                                        lit.value = Str::from_str_in(&minified, &self.allocator);
+                }
+            }
+        }
+        walk_tagged_template_expression(self, node);
+    }
+
+    fn visit_call_expression(&mut self, node: &mut CallExpression<'a>) {
+        if self.symbol_ctx.is_lit_css_tag(&node.callee) {
+            for arg in node.arguments.iter_mut() {
+                if let Some(expr) = arg.as_expression_mut() {
+                    match expr {
+                        Expression::StringLiteral(lit) => {
+                            let raw_css = lit.value.as_str();
+                            if let Some(minified) = minify_css_string(raw_css) {
+                                if minified.len() < raw_css.len() {
+                                    self.bytes_saved += (raw_css.len() - minified.len()) as u32;
+                                    self.minified_templates += 1;
+                                    lit.value = Str::from_str_in(&minified, &self.allocator);
+                                }
+                            }
+                        }
+                        Expression::ArrayExpression(arr) => {
+                            for elem in arr.elements.iter_mut() {
+                                if let Some(Expression::StringLiteral(lit)) =
+                                    elem.as_expression_mut()
+                                {
+                                    let raw_css = lit.value.as_str();
+                                    if let Some(minified) = minify_css_string(raw_css) {
+                                        if minified.len() < raw_css.len() {
+                                            self.bytes_saved +=
+                                                (raw_css.len() - minified.len()) as u32;
+                                            self.minified_templates += 1;
+                                            lit.value =
+                                                Str::from_str_in(&minified, &self.allocator);
+                                        }
                                     }
                                 }
-                            }
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
-    }
-}
-
-pub fn is_lit_css_source(src: &str) -> bool {
-    src == "lit"
-        || src.starts_with("lit/")
-        || src == "lit-element"
-        || src.starts_with("lit-element/")
-        || src == "lit-html"
-        || src.starts_with("lit-html/")
-        || src.starts_with("@lit/")
-}
-
-#[derive(Debug, Default)]
-pub struct CssImportContext {
-    pub css_symbols: HashSet<SymbolId>,
-    pub css_namespaces: HashSet<SymbolId>,
-    pub has_imports: bool,
-}
-
-pub fn scan_css_imports(program: &Program, scoping: &Scoping) -> CssImportContext {
-    let mut ctx = CssImportContext::default();
-    let root = scoping.root_scope_id();
-
-    for stmt in &program.body {
-        if let Statement::ImportDeclaration(import_decl) = stmt {
-            ctx.has_imports = true;
-            let src = import_decl.source.value.as_str();
-            if !is_lit_css_source(src) {
-                continue;
-            }
-
-            if let Some(specifiers) = &import_decl.specifiers {
-                for spec in specifiers {
-                    match spec {
-                        ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                            if named.imported.name().as_str() == "css" {
-                                let sym_id = named.local.symbol_id.get().or_else(|| {
-                                    scoping.get_binding(root, named.local.name.as_str().into())
-                                });
-                                if let Some(sym) = sym_id {
-                                    ctx.css_symbols.insert(sym);
-                                }
-                            }
-                        }
-                        ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                            let sym_id = ns.local.symbol_id.get().or_else(|| {
-                                scoping.get_binding(root, ns.local.name.as_str().into())
-                            });
-                            if let Some(sym) = sym_id {
-                                ctx.css_namespaces.insert(sym);
                             }
                         }
                         _ => {}
@@ -290,9 +191,8 @@ pub fn scan_css_imports(program: &Program, scoping: &Scoping) -> CssImportContex
                 }
             }
         }
+        walk_call_expression(self, node);
     }
-
-    ctx
 }
 
 pub fn transform_embedded_css(source: &str, options: MinifyCssOptions) -> MinifyCssResult {
@@ -314,18 +214,47 @@ pub fn transform_embedded_css(source: &str, options: MinifyCssOptions) -> Minify
 
     let semantic_ret = SemanticBuilder::new().build(&program);
     let scoping = semantic_ret.semantic.into_scoping();
-    let import_ctx = scan_css_imports(&program, &scoping);
 
-    let mut traverser = CssMinifierTraverser {
+    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = SymbolProofContext::scan(&program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+
+    let symbol_ctx = SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
+    };
+
+    if !symbol_ctx.has_lit_imports() {
+        return MinifyCssResult {
+            code: source.to_string(),
+            map: None,
+            minified_templates: 0,
+            bytes_saved: 0,
+        };
+    }
+
+    let mut visitor = CssMinifierMutVisitor {
         allocator: &allocator,
-        import_ctx,
+        symbol_ctx: &symbol_ctx,
         minified_templates: 0,
         bytes_saved: 0,
     };
 
-    traverse_mut(&mut traverser, &allocator, &mut program, scoping, ());
+    visitor.visit_program(&mut program);
 
-    if traverser.minified_templates == 0 {
+    if visitor.minified_templates == 0 {
         return MinifyCssResult {
             code: source.to_string(),
             map: None,
@@ -348,8 +277,8 @@ pub fn transform_embedded_css(source: &str, options: MinifyCssOptions) -> Minify
     MinifyCssResult {
         code: codegen_result.code,
         map: map_json,
-        minified_templates: traverser.minified_templates,
-        bytes_saved: traverser.bytes_saved,
+        minified_templates: visitor.minified_templates,
+        bytes_saved: visitor.bytes_saved,
     }
 }
 
@@ -550,16 +479,28 @@ mod tests {
 
     #[test]
     fn test_is_lit_css_source_canonical() {
-        assert!(is_lit_css_source("lit"));
-        assert!(is_lit_css_source("lit/index.js"));
-        assert!(is_lit_css_source("lit-element"));
-        assert!(is_lit_css_source("lit-element/index.js"));
-        assert!(is_lit_css_source("lit-html"));
-        assert!(is_lit_css_source("lit-html/index.js"));
-        assert!(is_lit_css_source("@lit/reactive-element"));
-        assert!(!is_lit_css_source("@other/web-components"));
-        assert!(!is_lit_css_source("react"));
-        assert!(!is_lit_css_source("vue"));
+        assert!(SymbolProofContext::is_canonical_lit_specifier("lit"));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "lit/index.js"
+        ));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "lit-element"
+        ));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "lit-element/index.js"
+        ));
+        assert!(SymbolProofContext::is_canonical_lit_specifier("lit-html"));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "lit-html/index.js"
+        ));
+        assert!(SymbolProofContext::is_canonical_lit_specifier(
+            "@lit/reactive-element"
+        ));
+        assert!(!SymbolProofContext::is_canonical_lit_specifier(
+            "@other/web-components"
+        ));
+        assert!(!SymbolProofContext::is_canonical_lit_specifier("react"));
+        assert!(!SymbolProofContext::is_canonical_lit_specifier("vue"));
     }
 
     #[test]

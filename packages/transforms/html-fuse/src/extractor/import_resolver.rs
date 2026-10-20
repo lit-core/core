@@ -1,15 +1,10 @@
+use lit_analysis::symbol::SymbolProofContext;
 use oxc_ast::ast::{ImportDeclaration, ImportDeclarationSpecifier};
 use oxc_semantic::{Scoping, SymbolId};
 use std::collections::HashSet;
 
 pub fn is_canonical_lit_specifier(src: &str) -> bool {
-    src == "lit"
-        || src.starts_with("lit/")
-        || src == "lit-html"
-        || src.starts_with("lit-html/")
-        || src == "lit-element"
-        || src.starts_with("lit-element/")
-        || src.starts_with("@lit/")
+    SymbolProofContext::is_canonical_lit_specifier(src)
 }
 
 pub struct ImportResolver {

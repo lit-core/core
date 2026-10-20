@@ -1,16 +1,16 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use oxc_allocator::{ArenaVec, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
 use crate::ast_helpers::AstHelper;
-use crate::lit_import_scanner::{ImportContext, LitDecoratorKind};
 
 /// Checks if class has `@localized()`.
 /// If found, removes the decorator and returns `updateWhenLocaleChanges(this);` constructor statement.
 pub fn transform_localized<'a>(
     class: &mut Class<'a>,
-    import_ctx: &ImportContext,
+    symbol_ctx: &SymbolProofContext<'_>,
     ast: &AstBuilder<'a>,
 ) -> Option<Statement<'a>> {
     let mut remove_index = None;
@@ -18,25 +18,10 @@ pub fn transform_localized<'a>(
     let mut namespace_name: Option<String> = None;
 
     for (i, dec) in class.decorators.iter().enumerate() {
-        if let Some(kind) =
-            crate::decorators::property::get_lit_decorator_kind(&dec.expression, import_ctx)
-        {
-            if kind == LitDecoratorKind::Localized {
-                remove_index = Some(i);
-                match &dec.expression {
-                    Expression::CallExpression(call) => match &call.callee {
-                        Expression::Identifier(id) => {
-                            if id.name != "localized" {
-                                binding_name = ast.allocator().alloc_str(id.name.as_str());
-                            }
-                        }
-                        Expression::StaticMemberExpression(mem) => {
-                            if let Expression::Identifier(obj) = &mem.object {
-                                namespace_name = Some(obj.name.as_str().to_string());
-                            }
-                        }
-                        _ => {}
-                    },
+        if symbol_ctx.resolve_decorator(dec) == Some(CanonicalLitSymbol::LocalizedDecorator) {
+            remove_index = Some(i);
+            match &dec.expression {
+                Expression::CallExpression(call) => match &call.callee {
                     Expression::Identifier(id) => {
                         if id.name != "localized" {
                             binding_name = ast.allocator().alloc_str(id.name.as_str());
@@ -48,9 +33,20 @@ pub fn transform_localized<'a>(
                         }
                     }
                     _ => {}
+                },
+                Expression::Identifier(id) => {
+                    if id.name != "localized" {
+                        binding_name = ast.allocator().alloc_str(id.name.as_str());
+                    }
                 }
-                break;
+                Expression::StaticMemberExpression(mem) => {
+                    if let Expression::Identifier(obj) = &mem.object {
+                        namespace_name = Some(obj.name.as_str().to_string());
+                    }
+                }
+                _ => {}
             }
+            break;
         }
     }
 

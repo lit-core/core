@@ -515,6 +515,7 @@ pub struct JsxEmitter<'a, 'b> {
     pub required_runtime_imports: RefCell<BTreeSet<String>>,
     pub required_component_imports: RefCell<BTreeMap<String, String>>,
     pub seen_slots: RefCell<HashSet<Option<String>>>,
+    pub symbol_ctx: Option<&'b lit_analysis::SymbolProofContext<'a>>,
 }
 
 impl<'a, 'b> JsxEmitter<'a, 'b> {
@@ -534,6 +535,7 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
             required_runtime_imports: RefCell::new(BTreeSet::new()),
             required_component_imports: RefCell::new(BTreeMap::new()),
             seen_slots: RefCell::new(HashSet::new()),
+            symbol_ctx: None,
         }
     }
 
@@ -3902,13 +3904,20 @@ pub enum TemplateLoweringScope {
     ComponentFunction,
 }
 
-pub fn is_lit_html_or_svg_tag(tag: &Expression) -> bool {
-    match tag {
-        Expression::Identifier(id) => id.name == "html" || id.name == "svg",
-        Expression::StaticMemberExpression(mem) => {
-            mem.property.name == "html" || mem.property.name == "svg"
+pub fn is_lit_html_or_svg_tag(
+    tag: &Expression,
+    symbol_ctx: Option<&lit_analysis::SymbolProofContext>,
+) -> bool {
+    if let Some(ctx) = symbol_ctx {
+        ctx.is_lit_html_tag(tag) || ctx.is_lit_svg_tag(tag)
+    } else {
+        match tag {
+            Expression::Identifier(id) => id.name == "html" || id.name == "svg",
+            Expression::StaticMemberExpression(mem) => {
+                mem.property.name == "html" || mem.property.name == "svg"
+            }
+            _ => false,
         }
-        _ => false,
     }
 }
 
@@ -3921,7 +3930,7 @@ pub fn lower_expression_lit_templates<'a>(
 ) {
     match expr {
         Expression::TaggedTemplateExpression(tagged) => {
-            if is_lit_html_or_svg_tag(&tagged.tag) {
+            if is_lit_html_or_svg_tag(&tagged.tag, emitter.symbol_ctx) {
                 for e in &mut tagged.quasi.expressions {
                     lower_expression_lit_templates(e, ast, allocator, emitter, scope);
                 }
@@ -3959,6 +3968,7 @@ pub fn lower_expression_lit_templates<'a>(
                         sub_options,
                         None,
                     );
+                    sub_emitter.symbol_ctx = emitter.symbol_ctx;
                     *sub_emitter.seen_slots.borrow_mut() = emitter.seen_slots.borrow().clone();
 
                     let mut lowered_jsx = sub_emitter.lower_template(&inner_ir);
@@ -4249,6 +4259,7 @@ pub fn emit_tier0_component<'a>(
     expressions: &[Expression<'a>],
     preceding_statements: &[Statement<'a>],
     tag_registry: Option<ComponentTagRegistry>,
+    symbol_ctx: Option<&lit_analysis::SymbolProofContext<'a>>,
 ) -> Result<Program<'a>, String> {
     let ast = AstBuilder::new(allocator);
 
@@ -4304,6 +4315,7 @@ pub fn emit_tier0_component<'a>(
     };
 
     let mut emitter = JsxEmitter::new(&ast, allocator, expressions, emitter_options, style_element);
+    emitter.symbol_ctx = symbol_ctx;
 
     let template_ir = component
         .template
@@ -4581,6 +4593,7 @@ mod tests {
             &expressions,
             &[],
             None,
+            None,
         )
         .unwrap();
         let code = Codegen::new().build(&program).code;
@@ -4618,7 +4631,8 @@ mod tests {
         };
 
         let program =
-            emit_tier0_component(&allocator, &comp, None, None, false, &[], &[], None).unwrap();
+            emit_tier0_component(&allocator, &comp, None, None, false, &[], &[], None, None)
+                .unwrap();
         let code = Codegen::new().build(&program).code;
         println!("Emitted SVG code:\n{}", code);
 
@@ -4664,6 +4678,7 @@ mod tests {
             &expressions,
             &[],
             None,
+            None,
         )
         .unwrap();
         let code = Codegen::new().build(&program).code;
@@ -4705,6 +4720,7 @@ mod tests {
             false,
             &[],
             &[],
+            None,
             None,
         )
         .unwrap();
@@ -4789,6 +4805,7 @@ mod tests {
             &expressions,
             &[],
             None,
+            None,
         )
         .unwrap();
         let code = Codegen::new().build(&program).code;
@@ -4835,6 +4852,7 @@ mod tests {
             false,
             &expressions,
             &[],
+            None,
             None,
         )
         .unwrap();

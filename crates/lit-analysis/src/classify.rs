@@ -1,7 +1,8 @@
 use crate::decorator::{ExtractedDecorator, LitDecoratorKind};
 use crate::manifest::{EventInfo, ShadowRootOptions, SlotInfo};
 use crate::property::PropertyInfo;
-use crate::symbol::{CanonicalLitSymbol, SymbolProofContext};
+use crate::symbol::{CanonicalDirective, SymbolProofContext};
+#[cfg(feature = "template-ir")]
 use crate::template_ir::TemplateIR;
 use oxc_ast::ast::*;
 use serde::{Deserialize, Serialize};
@@ -45,9 +46,6 @@ pub enum ClassificationTier {
 pub struct ComponentClassifier;
 
 impl ComponentClassifier {
-    const UNSUPPORTED_DIRECTIVES: &'static [&'static str] =
-        &["until", "asyncAppend", "asyncReplace"];
-
     const LIFECYCLE_METHODS: &'static [&'static str] = &[
         "connectedCallback",
         "disconnectedCallback",
@@ -72,7 +70,8 @@ impl ComponentClassifier {
         events: &[EventInfo],
         slots: &[SlotInfo],
         shadow_root_options: Option<&ShadowRootOptions>,
-        _template: Option<&TemplateIR>,
+        #[cfg(feature = "template-ir")] _template: Option<&TemplateIR>,
+        #[cfg(not(feature = "template-ir"))] _template: Option<()>,
         decorators: &[ExtractedDecorator],
         ctx: &SymbolProofContext<'a>,
     ) -> ClassificationTier {
@@ -129,29 +128,16 @@ impl ComponentClassifier {
         reasons: &mut Vec<BailoutReason>,
     ) {
         if let Some(canonical) = ctx.resolve_directive_call(&call.callee) {
-            let name = match canonical {
-                CanonicalLitSymbol::DirectiveUntil => "until",
-                CanonicalLitSymbol::DirectiveAsyncAppend => "asyncAppend",
-                CanonicalLitSymbol::DirectiveAsyncReplace => "asyncReplace",
-                _ => "unsupportedDirective",
-            };
-            reasons.push(BailoutReason::UnsupportedDirective {
-                name: name.to_string(),
-                span: (call.span.start, call.span.end),
-            });
-        } else {
-            let callee_name = match &call.callee {
-                Expression::Identifier(id) => Some(id.name.as_str()),
-                Expression::StaticMemberExpression(mem) => Some(mem.property.name.as_str()),
-                _ => None,
-            };
-            if let Some(name) = callee_name {
-                if Self::UNSUPPORTED_DIRECTIVES.contains(&name) {
+            match canonical {
+                CanonicalDirective::Until
+                | CanonicalDirective::AsyncAppend
+                | CanonicalDirective::AsyncReplace => {
                     reasons.push(BailoutReason::UnsupportedDirective {
-                        name: name.to_string(),
+                        name: canonical.name().to_string(),
                         span: (call.span.start, call.span.end),
                     });
                 }
+                _ => {}
             }
         }
         Self::check_expr_for_directives(&call.callee, ctx, reasons);

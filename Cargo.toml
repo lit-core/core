@@ -42,7 +42,7 @@ miette = { version = "7.6", features = ["fancy"] }
 insta = { version = "1.41", features = ["json", "redactions"] }
 
 # Internal shared analysis crate
-lit_analysis = { path = "crates/lit-analysis" }
+lit_analysis = { path = "crates/lit-analysis", default-features = false }
 
 # Spec-compliant HTML5 parser
 html5ever = "0.27"

@@ -11,13 +11,14 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 pub use crate::analyzer::{
-    analyze_candidate, CandidateInfo, LitSemanticAnalysis, DOM_QUERY_METHODS, IMPURE_GLOBALS,
-    MUTATING_ARRAY_METHODS, PURE_ARRAY_METHODS,
+    analyze_candidate, CandidateInfo, DOM_QUERY_METHODS, IMPURE_GLOBALS, MUTATING_ARRAY_METHODS,
+    PURE_ARRAY_METHODS,
 };
 pub use crate::builder::{
     build_memo_block, collect_classes_mut, replace_candidate_exprs, replace_candidates_in_stmt,
 };
 pub use crate::finder::{collect_stmt_candidates, CandidateItem, StmtCandidateGroup};
+use lit_analysis::symbol::SymbolProofContext;
 
 struct BindingCollector {
     bindings: HashSet<String>,
@@ -60,15 +61,36 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
         };
     }
 
-    let (lit_analysis, existing_bindings) = {
-        let semantic_ret = SemanticBuilder::new().build(&parsed.program);
-        let lit_analysis =
-            LitSemanticAnalysis::new(&parsed.program, semantic_ret.semantic.scoping());
+    let semantic_ret = SemanticBuilder::new().build(&parsed.program);
+    let scoping = semantic_ret.semantic.into_scoping();
+
+    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+
+    let symbol_ctx = SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
+    };
+
+    let existing_bindings = {
         let mut collector = BindingCollector {
             bindings: HashSet::new(),
         };
         collector.visit_program(&parsed.program);
-        (lit_analysis, collector.bindings)
+        collector.bindings
     };
 
     let mut classes = Vec::new();
@@ -87,7 +109,7 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
     let mut transformed_components_count: u32 = 0;
 
     for class in classes {
-        if !lit_analysis.is_lit_class(class) {
+        if !symbol_ctx.prove_heritage(class).is_reactive() {
             continue;
         }
 
@@ -128,7 +150,7 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
             collect_stmt_candidates(
                 &stmt,
                 &allocator,
-                Some(&lit_analysis),
+                &symbol_ctx,
                 &existing_bindings,
                 &mut groups,
                 &mut used_slots,

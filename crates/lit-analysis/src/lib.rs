@@ -11,6 +11,7 @@ pub mod diagnostics;
 pub mod manifest;
 pub mod property;
 pub mod symbol;
+#[cfg(feature = "template-ir")]
 pub mod template_ir;
 
 pub use classify::{BailoutReason, ClassificationTier, ComponentClassifier};
@@ -21,7 +22,11 @@ pub use manifest::{
     ShadowRootOptions, SlotInfo, StyleInfo,
 };
 pub use property::{PropertyInfo, PropertyModelExtractor, PropertyType};
-pub use symbol::{CanonicalLitSymbol, HeritageProof, SymbolProofContext};
+pub use symbol::{
+    CanonicalDirective, CanonicalHelperSymbol, CanonicalLitSymbol, CustomElementRegistration,
+    HeritageProof, ImportedClassInfo, SymbolProofContext,
+};
+#[cfg(feature = "template-ir")]
 pub use template_ir::{
     AttributePart, AttributePrefix, AttributeValue, ElementNamespace, TemplateAttribute,
     TemplateElement, TemplateIR, TemplateNode, TemplateParser, TemplateSlot,
@@ -63,43 +68,121 @@ pub fn analyze_lit_module(
 
     let symbol_ctx = SymbolProofContext::scan(&program, &scoping, source_text);
 
-    let mut components = Vec::new();
     let mut diagnostics = Vec::new();
 
-    // Scan for class declarations and export declarations
+    if !symbol_ctx.has_lit_imports() {
+        return Ok(LitModuleAnalysis {
+            components: Vec::new(),
+            manifest: ModuleManifest {
+                file_path: file_path.to_string(),
+                components: Vec::new(),
+            },
+            diagnostics,
+        });
+    }
+
+    let mut components = Vec::new();
+
+    // Scan for class declarations, export declarations, and variable declarations
     for stmt in &program.body {
         match stmt {
             oxc_ast::ast::Statement::ClassDeclaration(cls) => {
                 analyze_class_node(
                     &program,
                     cls,
+                    None,
+                    None,
                     &symbol_ctx,
                     &mut components,
                     &mut diagnostics,
                 );
             }
-            oxc_ast::ast::Statement::ExportDefaultDeclaration(exp) => {
-                if let oxc_ast::ast::ExportDefaultDeclarationKind::ClassDeclaration(cls) =
-                    &exp.declaration
-                {
+            oxc_ast::ast::Statement::ExportDefaultDeclaration(exp) => match &exp.declaration {
+                oxc_ast::ast::ExportDefaultDeclarationKind::ClassDeclaration(cls) => {
                     analyze_class_node(
                         &program,
                         cls,
+                        None,
+                        None,
                         &symbol_ctx,
                         &mut components,
                         &mut diagnostics,
                     );
                 }
-            }
-            oxc_ast::ast::Statement::ExportDeclaration(exp) => {
-                if let oxc_ast::ast::Declaration::ClassDeclaration(cls) = &exp.declaration {
+                _ => {
+                    if let Some(oxc_ast::ast::Expression::ClassExpression(cls)) =
+                        exp.declaration.as_expression()
+                    {
+                        analyze_class_node(
+                            &program,
+                            cls,
+                            None,
+                            None,
+                            &symbol_ctx,
+                            &mut components,
+                            &mut diagnostics,
+                        );
+                    }
+                }
+            },
+            oxc_ast::ast::Statement::ExportDeclaration(exp) => match &exp.declaration {
+                oxc_ast::ast::Declaration::ClassDeclaration(cls) => {
                     analyze_class_node(
                         &program,
                         cls,
+                        None,
+                        None,
                         &symbol_ctx,
                         &mut components,
                         &mut diagnostics,
                     );
+                }
+                oxc_ast::ast::Declaration::VariableDeclaration(decl) => {
+                    for decl_entry in &decl.declarations {
+                        let (name_hint, sym_id) = match &decl_entry.id {
+                            oxc_ast::ast::BindingPattern::BindingIdentifier(id) => {
+                                (Some(id.name.as_str()), id.symbol_id.get())
+                            }
+                            _ => (None, None),
+                        };
+                        if let Some(init) = &decl_entry.init {
+                            if let Some(cls) = find_class_in_expr(init) {
+                                analyze_class_node(
+                                    &program,
+                                    cls,
+                                    name_hint,
+                                    sym_id,
+                                    &symbol_ctx,
+                                    &mut components,
+                                    &mut diagnostics,
+                                );
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            },
+            oxc_ast::ast::Statement::VariableDeclaration(decl) => {
+                for decl_entry in &decl.declarations {
+                    let (name_hint, sym_id) = match &decl_entry.id {
+                        oxc_ast::ast::BindingPattern::BindingIdentifier(id) => {
+                            (Some(id.name.as_str()), id.symbol_id.get())
+                        }
+                        _ => (None, None),
+                    };
+                    if let Some(init) = &decl_entry.init {
+                        if let Some(cls) = find_class_in_expr(init) {
+                            analyze_class_node(
+                                &program,
+                                cls,
+                                name_hint,
+                                sym_id,
+                                &symbol_ctx,
+                                &mut components,
+                                &mut diagnostics,
+                            );
+                        }
+                    }
                 }
             }
             _ => {}
@@ -118,9 +201,28 @@ pub fn analyze_lit_module(
     })
 }
 
+fn find_class_in_expr<'a>(
+    expr: &'a oxc_ast::ast::Expression<'a>,
+) -> Option<&'a oxc_ast::ast::Class<'a>> {
+    match expr.without_parentheses() {
+        oxc_ast::ast::Expression::ClassExpression(cls) => Some(cls),
+        oxc_ast::ast::Expression::CallExpression(call) => {
+            for arg in &call.arguments {
+                if let Some(cls) = arg.as_expression().and_then(|e| find_class_in_expr(e)) {
+                    return Some(cls);
+                }
+            }
+            None
+        }
+        _ => None,
+    }
+}
+
 fn analyze_class_node<'a>(
     program: &'a oxc_ast::ast::Program<'a>,
     class: &'a oxc_ast::ast::Class<'a>,
+    name_hint: Option<&str>,
+    var_sym_id: Option<oxc_syntax::symbol::SymbolId>,
     ctx: &SymbolProofContext<'a>,
     components: &mut Vec<LitComponentInfo>,
     diagnostics: &mut Vec<Diagnostic>,
@@ -129,6 +231,7 @@ fn analyze_class_node<'a>(
         .id
         .as_ref()
         .map(|id| id.name.as_str().to_string())
+        .or_else(|| name_hint.map(|s| s.to_string()))
         .unwrap_or_else(|| "AnonymousComponent".to_string());
 
     let heritage = ctx.prove_heritage(class);
@@ -148,23 +251,11 @@ fn analyze_class_node<'a>(
             imported_name,
             mixins,
             ..
-        } => {
-            let is_known_element = imported_name == "LitElement"
-                || imported_name == "ReactiveElement"
-                || imported_name == "MorphHost"
-                || imported_name.ends_with("Element")
-                || imported_name.ends_with("Host");
-            if !is_known_element {
-                diagnostics.push(Diagnostic::unresolvable_inheritance(
-                    &class_name,
-                    &imported_name,
-                    class.span,
-                ));
-            }
-            (true, Some(imported_name), mixins)
-        }
+        } => (true, Some(imported_name), mixins),
         HeritageProof::ContractualLitElement { mixins, .. } => (true, None, mixins),
-        HeritageProof::UnrelatedClass | HeritageProof::Unresolved => (false, None, Vec::new()),
+        HeritageProof::UnrelatedClass | HeritageProof::Unresolved | HeritageProof::None => {
+            (false, None, Vec::new())
+        }
     };
 
     if !is_lit {
@@ -189,8 +280,18 @@ fn analyze_class_node<'a>(
     all_decorators.extend(member_decorators.clone());
 
     // 2. Custom element tag name
-    let tag_name =
-        DecoratorExtractor::extract_custom_element_tag(program, &class_name, &class_decorators);
+    let class_sym_id = class
+        .id
+        .as_ref()
+        .and_then(|id| id.symbol_id.get())
+        .or(var_sym_id);
+    let tag_name = DecoratorExtractor::extract_custom_element_tag(
+        program,
+        &class_name,
+        class_sym_id,
+        &class_decorators,
+        ctx,
+    );
     let component_name = ManifestScanner::derive_component_name(tag_name.as_deref(), &class_name);
 
     // 3. Properties extraction
@@ -203,13 +304,22 @@ fn analyze_class_node<'a>(
     );
 
     // 4. Template IR extraction from render() method
+    #[cfg(feature = "template-ir")]
     let template = extract_component_template(class, ctx);
+    #[cfg(not(feature = "template-ir"))]
+    let template: Option<()> = None;
 
     // 5. Slots extraction
+    #[cfg(feature = "template-ir")]
     let slots = ManifestScanner::extract_slots(Some(class), template.as_ref(), Some(ctx));
+    #[cfg(not(feature = "template-ir"))]
+    let slots = ManifestScanner::extract_slots(Some(class), None, Some(ctx));
 
     // 6. Events extraction
+    #[cfg(feature = "template-ir")]
     let events = ManifestScanner::extract_events(class, template.as_ref(), &all_decorators);
+    #[cfg(not(feature = "template-ir"))]
+    let events = ManifestScanner::extract_events(class, None, &all_decorators);
 
     // 7. Styles extraction
     let styles = ManifestScanner::extract_styles(class, ctx);
@@ -224,7 +334,10 @@ fn analyze_class_node<'a>(
         &events,
         &slots,
         shadow_root_options.as_ref(),
+        #[cfg(feature = "template-ir")]
         template.as_ref(),
+        #[cfg(not(feature = "template-ir"))]
+        None,
         &all_decorators,
         ctx,
     );
@@ -288,6 +401,7 @@ fn analyze_class_node<'a>(
     });
 }
 
+#[cfg(feature = "template-ir")]
 fn extract_component_template<'a>(
     class: &'a oxc_ast::ast::Class<'a>,
     ctx: &SymbolProofContext<'a>,
@@ -310,7 +424,6 @@ fn extract_component_template<'a>(
                                 {
                                     if ctx.is_lit_html_tag(&tagged.tag)
                                         || ctx.is_lit_svg_tag(&tagged.tag)
-                                        || is_html_or_svg_tag_fallback(&tagged.tag)
                                     {
                                         let quasis: Vec<&str> = tagged
                                             .quasi
@@ -333,14 +446,4 @@ fn extract_component_template<'a>(
         }
     }
     None
-}
-
-fn is_html_or_svg_tag_fallback(expr: &oxc_ast::ast::Expression) -> bool {
-    match expr {
-        oxc_ast::ast::Expression::Identifier(id) => id.name == "html" || id.name == "svg",
-        oxc_ast::ast::Expression::StaticMemberExpression(mem) => {
-            mem.property.name == "html" || mem.property.name == "svg"
-        }
-        _ => false,
-    }
 }

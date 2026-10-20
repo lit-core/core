@@ -3,8 +3,8 @@ use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
-use crate::import_scanner::{extract_directive_slug, is_directive_export_module};
 use crate::transform::DirectiveLowerer;
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 
 pub fn prune_and_update_imports<'a>(
     program: &mut Program<'a>,
@@ -16,12 +16,18 @@ pub fn prune_and_update_imports<'a>(
     let mut new_body = ArenaVec::new_in(ast);
     let mut injected_nothing = false;
 
+    let has_nothing_imported = lowerer
+        .symbol_ctx
+        .lit_symbols
+        .values()
+        .any(|s| matches!(s, CanonicalLitSymbol::Nothing));
+
     for mut stmt in std::mem::replace(&mut program.body, ArenaVec::new_in(ast)) {
         if let Statement::ImportDeclaration(import_decl) = &mut stmt {
             let specifier = import_decl.source.value.as_str();
 
             // If it's a directive module: lit/directives/* or lit-html/directives/*
-            if extract_directive_slug(specifier).is_some() {
+            if SymbolProofContext::extract_directive_slug(specifier).is_some() {
                 if let Some(specifiers) = &mut import_decl.specifiers {
                     // Filter out lowered specifiers
                     specifiers.retain(|spec| match spec {
@@ -30,7 +36,10 @@ pub fn prune_and_update_imports<'a>(
                                 scoping.get_binding(root, named.local.name.as_str().into())
                             });
                             if let Some(sym_id) = sym {
-                                if lowerer.import_ctx.directive_symbols.contains_key(&sym_id) {
+                                if matches!(
+                                    lowerer.symbol_ctx.lit_symbols.get(&sym_id),
+                                    Some(CanonicalLitSymbol::Directive(_))
+                                ) {
                                     let total_refs =
                                         scoping.get_resolved_references(sym_id).count();
                                     let lowered_refs = lowerer
@@ -41,11 +50,6 @@ pub fn prune_and_update_imports<'a>(
                                     return !(lowered_refs > 0 && lowered_refs >= total_refs);
                                 }
                             }
-                            let local = named.local.name.as_str();
-                            if let Some(kind) = lowerer.import_ctx.directive_bindings.get(local) {
-                                let was_lowered = lowerer.directives_used.contains(kind.name());
-                                return !was_lowered;
-                            }
                             true
                         }
                         ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
@@ -53,7 +57,10 @@ pub fn prune_and_update_imports<'a>(
                                 scoping.get_binding(root, ns.local.name.as_str().into())
                             });
                             if let Some(sym_id) = sym {
-                                if lowerer.import_ctx.namespace_symbols.contains_key(&sym_id) {
+                                if matches!(
+                                    lowerer.symbol_ctx.lit_symbols.get(&sym_id),
+                                    Some(CanonicalLitSymbol::DirectiveNamespace(_))
+                                ) {
                                     let total_refs =
                                         scoping.get_resolved_references(sym_id).count();
                                     let lowered_refs = lowerer
@@ -63,11 +70,6 @@ pub fn prune_and_update_imports<'a>(
                                         .unwrap_or(0);
                                     return !(lowered_refs > 0 && lowered_refs >= total_refs);
                                 }
-                            }
-                            let local = ns.local.name.as_str();
-                            if let Some(kind) = lowerer.import_ctx.namespace_bindings.get(local) {
-                                let was_lowered = lowerer.directives_used.contains(kind.name());
-                                return !was_lowered;
                             }
                             true
                         }
@@ -79,7 +81,7 @@ pub fn prune_and_update_imports<'a>(
                         continue;
                     }
                 }
-            } else if is_directive_export_module(specifier) {
+            } else if SymbolProofContext::is_canonical_lit_specifier(specifier) {
                 if let Some(specifiers) = &mut import_decl.specifiers {
                     specifiers.retain(|spec| match spec {
                         ImportDeclarationSpecifier::ImportSpecifier(named) => {
@@ -87,7 +89,10 @@ pub fn prune_and_update_imports<'a>(
                                 scoping.get_binding(root, named.local.name.as_str().into())
                             });
                             if let Some(sym_id) = sym {
-                                if lowerer.import_ctx.directive_symbols.contains_key(&sym_id) {
+                                if matches!(
+                                    lowerer.symbol_ctx.lit_symbols.get(&sym_id),
+                                    Some(CanonicalLitSymbol::Directive(_))
+                                ) {
                                     let total_refs =
                                         scoping.get_resolved_references(sym_id).count();
                                     let lowered_refs = lowerer
@@ -105,7 +110,7 @@ pub fn prune_and_update_imports<'a>(
                 }
 
                 if lowerer.used_nothing
-                    && !lowerer.import_ctx.has_nothing_imported
+                    && !has_nothing_imported
                     && !injected_nothing
                     && (specifier == "lit" || specifier == "lit-html")
                 {
@@ -141,7 +146,7 @@ pub fn prune_and_update_imports<'a>(
 
     // If `nothing` was used, not originally imported, and no existing `lit` import was found,
     // prepend `import { nothing } from 'lit';`
-    if lowerer.used_nothing && !lowerer.import_ctx.has_nothing_imported && !injected_nothing {
+    if lowerer.used_nothing && !has_nothing_imported && !injected_nothing {
         let imported = ModuleExportName::new_identifier_name(SPAN, "nothing", ast);
         let local = BindingIdentifier::new(SPAN, "nothing", ast);
         let specifier = ImportDeclarationSpecifier::ImportSpecifier(ArenaBox::new_in(

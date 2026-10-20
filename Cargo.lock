@@ -397,6 +397,7 @@ dependencies = [
  "glob",
  "insta",
  "lightningcss",
+ "lit_analysis",
  "miette",
  "napi",
  "napi-build",
@@ -418,16 +419,17 @@ name = "css_minifier"
 version = "0.1.0"
 dependencies = [
  "lightningcss",
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
  "oxc_allocator",
  "oxc_ast",
+ "oxc_ast_visit",
  "oxc_codegen",
  "oxc_parser",
  "oxc_semantic",
  "oxc_span",
- "oxc_traverse",
  "serde",
  "serde_json",
 ]
@@ -502,6 +504,7 @@ dependencies = [
 name = "directives"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -522,6 +525,7 @@ dependencies = [
 name = "dirty_mask"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -552,6 +556,7 @@ dependencies = [
 name = "dom_paths"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -598,6 +603,7 @@ checksum = "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34"
 name = "elem_proxy"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -644,6 +650,7 @@ checksum = "120339709b24832c07464b0838828361b735d793c409b8ca3147db0dae601542"
 name = "event_hoist"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -869,6 +876,7 @@ dependencies = [
 name = "html_aot"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -877,6 +885,7 @@ dependencies = [
  "oxc_ast_visit",
  "oxc_codegen",
  "oxc_parser",
+ "oxc_semantic",
  "oxc_span",
  "serde",
  "serde_json",
@@ -890,6 +899,7 @@ dependencies = [
  "blake3",
  "clap",
  "glob",
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -908,16 +918,17 @@ dependencies = [
 name = "html_minifier"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
  "oxc_allocator",
  "oxc_ast",
+ "oxc_ast_visit",
  "oxc_codegen",
  "oxc_parser",
  "oxc_semantic",
  "oxc_span",
- "oxc_traverse",
  "serde",
  "serde_json",
  "thiserror",
@@ -1167,7 +1178,6 @@ version = "0.1.0"
 dependencies = [
  "html5ever",
  "insta",
- "lightningcss",
  "markup5ever_rcdom",
  "oxc_allocator",
  "oxc_ast",
@@ -1249,6 +1259,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 name = "memoize"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -2037,6 +2048,7 @@ name = "props_lower"
 version = "0.1.0"
 dependencies = [
  "insta",
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -2157,6 +2169,7 @@ dependencies = [
 name = "resumable"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -2372,6 +2385,7 @@ checksum = "e8e2fb0f499abb4d162f2bedad68f5ef91a1682b5a03596ddb67efd37768d100"
 name = "ssr"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",
@@ -2499,6 +2513,7 @@ dependencies = [
 name = "tag-shake"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",

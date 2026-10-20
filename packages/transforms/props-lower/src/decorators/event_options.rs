@@ -1,16 +1,16 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use oxc_allocator::{ArenaVec, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
 use crate::ast_helpers::AstHelper;
-use crate::decorators::property::{extract_options, get_lit_decorator_kind};
-use crate::lit_import_scanner::{ImportContext, LitDecoratorKind};
+use crate::decorators::property::extract_options;
 
 pub fn try_transform_event_options<'a>(
     element: &mut ClassElement<'a>,
     class_name: &str,
-    import_ctx: &ImportContext,
+    symbol_ctx: &SymbolProofContext<'_>,
     ast: &AstBuilder<'a>,
 ) -> Option<Statement<'a>> {
     let ClassElement::MethodDefinition(method_def) = element else {
@@ -21,12 +21,10 @@ pub fn try_transform_event_options<'a>(
     let mut options = None;
 
     for (i, dec) in method_def.decorators.iter().enumerate() {
-        if let Some(kind) = get_lit_decorator_kind(&dec.expression, import_ctx) {
-            if kind == LitDecoratorKind::EventOptions {
-                decorator_idx = Some(i);
-                options = extract_options(&dec.expression, ast);
-                break;
-            }
+        if symbol_ctx.resolve_decorator(dec) == Some(CanonicalLitSymbol::EventOptionsDecorator) {
+            decorator_idx = Some(i);
+            options = extract_options(&dec.expression, ast);
+            break;
         }
     }
 

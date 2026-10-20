@@ -4,20 +4,35 @@ use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 use std::collections::HashSet;
 
-use crate::analyzer::{match_event_attr, LitSemanticAnalysis};
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
+
+use crate::analyzer::match_event_attr;
 
 pub struct HoistContext<'a, 's> {
     pub safe_events: &'s HashSet<String>,
     pub allocator: &'a Allocator,
-    pub lit_analysis: &'s LitSemanticAnalysis,
+    pub symbol_ctx: &'s SymbolProofContext<'s>,
     pub hoisted_events: &'s mut HashSet<String>,
     pub hoisted_count: &'s mut u32,
+}
+
+pub fn has_event_options(expr: &Expression, symbol_ctx: &SymbolProofContext) -> bool {
+    let mut curr = expr.without_parentheses();
+    while let Expression::CallExpression(call) = curr {
+        if symbol_ctx.is_proven_decorator(curr) == Some(CanonicalLitSymbol::EventOptionsDecorator) {
+            return true;
+        }
+        curr = call.callee.without_parentheses();
+    }
+    symbol_ctx.is_proven_decorator(curr) == Some(CanonicalLitSymbol::EventOptionsDecorator)
 }
 
 pub fn hoist_events_in_expr<'a>(expr: &mut Expression<'a>, ctx: &mut HoistContext<'a, '_>) {
     match expr {
         Expression::TaggedTemplateExpression(tagged) => {
-            if ctx.lit_analysis.is_lit_tag(&tagged.tag) {
+            if ctx.symbol_ctx.is_lit_html_tag(&tagged.tag)
+                || ctx.symbol_ctx.is_lit_svg_tag(&tagged.tag)
+            {
                 let num_exprs = tagged.quasi.expressions.len();
                 for i in 0..num_exprs {
                     let at_info = {
@@ -30,10 +45,7 @@ pub fn hoist_events_in_expr<'a>(expr: &mut Expression<'a>, ctx: &mut HoistContex
                             continue;
                         }
 
-                        if ctx
-                            .lit_analysis
-                            .has_event_options(&tagged.quasi.expressions[i])
-                        {
+                        if has_event_options(&tagged.quasi.expressions[i], ctx.symbol_ctx) {
                             continue;
                         }
 

@@ -25,6 +25,9 @@ oxc_syntax = { workspace = true }
 # Diagnostics
 thiserror = { workspace = true }
 
+# Lit semantic analysis
+lit_analysis = { workspace = true, default-features = false }
+
 [dev-dependencies]
 insta = { workspace = true }
 

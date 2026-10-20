@@ -21,6 +21,7 @@ mod tests {
     #[test]
     fn test_transform_event_hoist_ast_builder() {
         let code = r#"
+import { LitElement, html } from 'lit';
 export class MyButton extends LitElement {
     render() {
         return html`<button @click=${this._handleClick}>Click</button>`;

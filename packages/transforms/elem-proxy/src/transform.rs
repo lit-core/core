@@ -10,7 +10,7 @@ use std::collections::HashMap;
 pub use crate::builder::{build_external_proxy_wrapper, build_proxy_wrapper};
 pub use crate::extractor::{
     check_and_extract_target, extract_class_properties, extract_decorator_tag, get_ce_define_call,
-    inspect_properties_object, CustomElementTarget,
+    CustomElementTarget,
 };
 use oxc_ast::builder::AstBuilder;
 
@@ -56,40 +56,43 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
         };
     }
 
+    let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
+    let scoping = semantic_ret.semantic.into_scoping();
+    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = lit_analysis::SymbolProofContext::scan(&parsed.program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+    let symbol_ctx = lit_analysis::SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
+    };
+
     // Scan for customElements.define calls
     let mut define_calls: HashMap<String, String> = HashMap::new(); // class_name -> tag_name
     for stmt in &parsed.program.body {
         if let Statement::ExpressionStatement(expr_stmt) = stmt {
             if let Expression::CallExpression(call) = &expr_stmt.expression {
-                let is_ce_define = match &call.callee {
-                    Expression::StaticMemberExpression(mem) => {
-                        mem.property.name == "define"
-                            && match &mem.object {
-                                Expression::Identifier(id) => id.name == "customElements",
-                                Expression::StaticMemberExpression(inner) => {
-                                    inner.property.name == "customElements"
-                                }
-                                _ => false,
-                            }
-                    }
-                    _ => false,
-                };
-                if is_ce_define && call.arguments.len() >= 2 {
-                    if let (Some(Expression::StringLiteral(s)), Some(Expression::Identifier(id))) = (
-                        call.arguments[0].as_expression(),
-                        call.arguments[1].as_expression(),
-                    ) {
-                        define_calls
-                            .insert(id.name.as_str().to_string(), s.value.as_str().to_string());
+                if let Some(reg) = symbol_ctx.is_custom_elements_define(call) {
+                    if let (Some(tag), Expression::Identifier(id)) =
+                        (&reg.tag, reg.class_expr.without_parentheses())
+                    {
+                        define_calls.insert(id.name.as_str().to_string(), tag.clone());
                     }
                 }
             }
         }
     }
-
-    let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
-    let scoping = semantic_ret.semantic.into_scoping();
-    let decorator_ctx = crate::extractor::LitDecoratorContext::scan(&parsed.program, &scoping);
 
     let mut targets: HashMap<String, CustomElementTarget> = HashMap::new();
 
@@ -98,12 +101,12 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
         match stmt {
             Statement::ClassDeclaration(class) => {
                 if let Some(target) = check_and_extract_target(
+                    &parsed.program,
                     class,
                     false,
                     false,
                     &define_calls,
-                    &decorator_ctx,
-                    &scoping,
+                    &symbol_ctx,
                 ) {
                     targets.insert(target.class_name.clone(), target);
                 }
@@ -111,12 +114,12 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
             Statement::ExportDeclaration(export_decl) => {
                 if let Declaration::ClassDeclaration(class) = &export_decl.declaration {
                     if let Some(target) = check_and_extract_target(
+                        &parsed.program,
                         class,
                         true,
                         false,
                         &define_calls,
-                        &decorator_ctx,
-                        &scoping,
+                        &symbol_ctx,
                     ) {
                         targets.insert(target.class_name.clone(), target);
                     }
@@ -127,12 +130,12 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                     &export_decl.declaration
                 {
                     if let Some(target) = check_and_extract_target(
+                        &parsed.program,
                         class,
                         true,
                         true,
                         &define_calls,
-                        &decorator_ctx,
-                        &scoping,
+                        &symbol_ctx,
                     ) {
                         targets.insert(target.class_name.clone(), target);
                     }
@@ -157,7 +160,7 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
     let mut external_elements_info = Vec::new();
 
     for stmt in old_body {
-        if let Some((tag, cls)) = get_ce_define_call(&stmt) {
+        if let Some((tag, cls)) = get_ce_define_call(&stmt, &symbol_ctx) {
             if targets.contains_key(&cls) {
                 continue;
             } else {
@@ -193,7 +196,7 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                     matched_target = Some(target);
                     class
                         .decorators
-                        .retain(|d| extract_decorator_tag(d, &decorator_ctx, &scoping).is_none());
+                        .retain(|d| extract_decorator_tag(d, &symbol_ctx).is_none());
                     class_to_wrap = Some(Statement::ClassDeclaration(class));
                 } else {
                     new_body.push(Statement::ClassDeclaration(class));
@@ -216,9 +219,9 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                             .unwrap()
                             .clone();
                         matched_target = Some(target);
-                        class.decorators.retain(|d| {
-                            extract_decorator_tag(d, &decorator_ctx, &scoping).is_none()
-                        });
+                        class
+                            .decorators
+                            .retain(|d| extract_decorator_tag(d, &symbol_ctx).is_none());
                         class_to_wrap = Some(Statement::ClassDeclaration(class));
                     }
                 } else {
@@ -247,9 +250,9 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                             .unwrap()
                             .clone();
                         matched_target = Some(target);
-                        class.decorators.retain(|d| {
-                            extract_decorator_tag(d, &decorator_ctx, &scoping).is_none()
-                        });
+                        class
+                            .decorators
+                            .retain(|d| extract_decorator_tag(d, &symbol_ctx).is_none());
                         class_to_wrap = Some(Statement::ClassDeclaration(class));
                     }
                 } else {

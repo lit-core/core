@@ -29,13 +29,13 @@
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-12T23:47:18.261Z",
+  "timestamp": "2026-10-19T19:54:37.597Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "3856fa7",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -50,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 242892,
-    "gzipBytes": 61213,
-    "brotliBytes": 49949,
-    "buildTimeMs": 31.605290999999852,
-    "firstRenderMs": 29.6,
-    "updateMs": 0.6,
-    "scriptEvalMs": 2.2,
-    "registrationMs": 0.8,
-    "heapUsedBytes": 3138592,
+    "rawBytes": 250875,
+    "gzipBytes": 62764,
+    "brotliBytes": 50363,
+    "buildTimeMs": 35.19487500000014,
+    "firstRenderMs": 26.4,
+    "updateMs": 0.5,
+    "scriptEvalMs": 3.2,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 3194984,
     "scenarioSpecific": {
       "sectionsCount": 5,
       "controlsPerSection": 6,
@@ -84,32 +84,32 @@
     }
   },
   "deltas": {
-    "rawBytes": -76,
-    "rawPercent": -0.03,
-    "gzipBytes": 3,
-    "gzipPercent": 0,
-    "brotliBytes": -33,
-    "brotliPercent": -0.07,
-    "buildTimeMs": -1.3,
-    "firstRenderMs": 4.7,
-    "speedupPercent": -18.88,
-    "updateMs": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 15.38,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -5.47
+    "rawBytes": 7907,
+    "rawPercent": 3.25,
+    "gzipBytes": 1554,
+    "gzipPercent": 2.54,
+    "brotliBytes": 381,
+    "brotliPercent": 0.76,
+    "buildTimeMs": 2.3,
+    "firstRenderMs": 1.5,
+    "speedupPercent": -6.02,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 16.67,
+    "evalSpeedupPercent": -23.08,
+    "registrationSpeedupPercent": -37.5,
+    "memorySavingsPercent": -7.36
   },
   "runtime": {
-    "firstRenderMs": 29.6,
-    "updateMs": 0.6,
-    "scriptEvalMs": 2.2,
-    "registrationMs": 0.8,
-    "heapUsedBytes": 3138592,
-    "speedupPercent": -18.88,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 15.38,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -5.47
+    "firstRenderMs": 26.4,
+    "updateMs": 0.5,
+    "scriptEvalMs": 3.2,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 3194984,
+    "speedupPercent": -6.02,
+    "updateSpeedupPercent": 16.67,
+    "evalSpeedupPercent": -23.08,
+    "registrationSpeedupPercent": -37.5,
+    "memorySavingsPercent": -7.36
   },
   "domSnapshot": {
     "mount": {
@@ -221,6 +221,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -285,6 +288,8 @@
                                   "aria-describedby": "hint",
                                   "checked": "",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -369,6 +374,7 @@
                                       "aria-checked": "false",
                                       "aria-describedby": "hint",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -497,6 +503,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -537,6 +544,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -647,6 +657,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -748,6 +759,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",
@@ -887,6 +899,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -949,6 +964,8 @@
                                   "aria-checked": "false",
                                   "aria-describedby": "hint",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -1035,6 +1052,7 @@
                                       "aria-describedby": "hint",
                                       "checked": "",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -1162,6 +1180,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -1202,6 +1221,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -1312,6 +1334,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -1413,6 +1436,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",
@@ -1552,6 +1576,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -1616,6 +1643,8 @@
                                   "aria-describedby": "hint",
                                   "checked": "",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -1700,6 +1729,7 @@
                                       "aria-checked": "false",
                                       "aria-describedby": "hint",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -1827,6 +1857,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -1867,6 +1898,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -1977,6 +2011,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -2078,6 +2113,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",
@@ -2217,6 +2253,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -2281,6 +2320,8 @@
                                   "aria-describedby": "hint",
                                   "checked": "",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -2365,6 +2406,7 @@
                                       "aria-checked": "false",
                                       "aria-describedby": "hint",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -2493,6 +2535,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -2533,6 +2576,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -2643,6 +2689,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -2744,6 +2791,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",
@@ -2883,6 +2931,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -2945,6 +2996,8 @@
                                   "aria-checked": "false",
                                   "aria-describedby": "hint",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -3031,6 +3084,7 @@
                                       "aria-describedby": "hint",
                                       "checked": "",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -3158,6 +3212,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -3198,6 +3253,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -3308,6 +3366,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -3409,6 +3468,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",
@@ -3567,6 +3627,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -3631,6 +3694,8 @@
                                   "aria-describedby": "hint",
                                   "checked": "",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -3715,6 +3780,7 @@
                                       "aria-checked": "false",
                                       "aria-describedby": "hint",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -3843,6 +3909,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -3883,6 +3950,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -3993,6 +4063,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -4094,6 +4165,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",
@@ -4233,6 +4305,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -4295,6 +4370,8 @@
                                   "aria-checked": "false",
                                   "aria-describedby": "hint",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -4381,6 +4458,7 @@
                                       "aria-describedby": "hint",
                                       "checked": "",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -4508,6 +4586,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -4548,6 +4627,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -4658,6 +4740,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -4759,6 +4842,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",
@@ -4898,6 +4982,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -4962,6 +5049,8 @@
                                   "aria-describedby": "hint",
                                   "checked": "",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -5046,6 +5135,7 @@
                                       "aria-checked": "false",
                                       "aria-describedby": "hint",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -5173,6 +5263,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -5213,6 +5304,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -5323,6 +5417,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -5424,6 +5519,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",
@@ -5563,6 +5659,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -5627,6 +5726,8 @@
                                   "aria-describedby": "hint",
                                   "checked": "",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -5711,6 +5812,7 @@
                                       "aria-checked": "false",
                                       "aria-describedby": "hint",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -5839,6 +5941,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -5879,6 +5982,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -5989,6 +6095,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -6090,6 +6197,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",
@@ -6229,6 +6337,9 @@
                                   "aria-describedby": "hint",
                                   "autocorrect": "off",
                                   "class": "control",
+                                  "data-lh-change": "0",
+                                  "data-lh-input": "1",
+                                  "data-lh-keydown": "2",
                                   "id": "input",
                                   "part": "input",
                                   "placeholder": "",
@@ -6291,6 +6402,8 @@
                                   "aria-checked": "false",
                                   "aria-describedby": "hint",
                                   "class": "input",
+                                  "data-lh-click": "0",
+                                  "data-lh-keydown": "1",
                                   "role": "switch",
                                   "title": "",
                                   "type": "checkbox",
@@ -6377,6 +6490,7 @@
                                       "aria-describedby": "hint",
                                       "checked": "",
                                       "class": "input",
+                                      "data-lh-click": "0",
                                       "title": "",
                                       "type": "checkbox",
                                       "value": "on"
@@ -6504,6 +6618,7 @@
                                 "attributes": {
                                   "aria-hidden": "true",
                                   "class": " label ",
+                                  "data-lh-click": "0",
                                   "id": "label",
                                   "part": "form-control-label label"
                                 },
@@ -6544,6 +6659,9 @@
                                         "tag": "div",
                                         "attributes": {
                                           "class": "combobox",
+                                          "data-lh-click": "3",
+                                          "data-lh-keydown": "1",
+                                          "data-lh-mousedown": "2",
                                           "part": "combobox",
                                           "slot": "anchor"
                                         },
@@ -6654,6 +6772,7 @@
                                           "aria-labelledby": "label",
                                           "aria-multiselectable": "false",
                                           "class": "listbox",
+                                          "data-lh-mouseup": "4",
                                           "id": "listbox",
                                           "part": "listbox",
                                           "role": "listbox",
@@ -6755,6 +6874,7 @@
                             "attributes": {
                               "aria-busy": "false",
                               "class": " button has-label ",
+                              "data-lh-click": "0",
                               "part": "base button",
                               "role": "button",
                               "tabindex": "0",

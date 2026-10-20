@@ -1,3 +1,5 @@
+#![cfg(feature = "template-ir")]
+
 use lit_analysis::analyze_lit_module;
 use lit_analysis::property::PropertyType;
 use lit_analysis::symbol::{HeritageProof, SymbolProofContext};

@@ -5,14 +5,14 @@
     "id": "carbon",
     "name": "Carbon Web Components (@carbon/web-components)",
     "packageName": "@carbon/web-components",
-    "version": "2.64.0",
-    "componentCount": 20,
+    "version": "2.65.0",
+    "componentCount": 6,
     "components": [
       {
-        "concept": "button",
-        "tag": "cds-button",
-        "path": "es/components/button/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/button/index.js';"
+        "concept": "text-input",
+        "tag": "cds-text-input",
+        "path": "es/components/text-input/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/text-input/index.js';"
       },
       {
         "concept": "checkbox",
@@ -21,22 +21,16 @@
         "importStatement": "import '@carbon/web-components/es/components/checkbox/index.js';"
       },
       {
-        "concept": "radio",
-        "tag": "cds-radio-button",
-        "path": "es/components/radio-button/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/radio-button/index.js';"
-      },
-      {
         "concept": "switch",
         "tag": "cds-toggle",
         "path": "es/components/toggle/index.js",
         "importStatement": "import '@carbon/web-components/es/components/toggle/index.js';"
       },
       {
-        "concept": "text-input",
-        "tag": "cds-text-input",
-        "path": "es/components/text-input/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/text-input/index.js';"
+        "concept": "radio",
+        "tag": "cds-radio-button",
+        "path": "es/components/radio-button/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/radio-button/index.js';"
       },
       {
         "concept": "select",
@@ -45,88 +39,10 @@
         "importStatement": "import '@carbon/web-components/es/components/select/index.js';"
       },
       {
-        "concept": "dialog",
-        "tag": "cds-modal",
-        "path": "es/components/modal/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/modal/index.js';"
-      },
-      {
-        "concept": "badge",
-        "tag": "cds-tag",
-        "path": "es/components/tag/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/tag/index.js';"
-      },
-      {
-        "concept": "tabs",
-        "tag": "cds-tabs",
-        "path": "es/components/tabs/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/tabs/index.js';"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "cds-progress-bar",
-        "path": "es/components/progress-bar/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/progress-bar/index.js';"
-      },
-      {
-        "concept": "spinner",
-        "tag": "cds-loading",
-        "path": "es/components/loading/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/loading/index.js';"
-      },
-      {
-        "concept": "slider",
-        "tag": "cds-slider",
-        "path": "es/components/slider/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/slider/index.js';"
-      },
-      {
-        "concept": "menu",
-        "tag": "cds-overflow-menu",
-        "path": "es/components/overflow-menu/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/overflow-menu/index.js';"
-      },
-      {
-        "concept": "divider",
-        "tag": "cds-skeleton-text",
-        "path": "es/components/skeleton-text/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/skeleton-text/index.js';"
-      },
-      {
-        "concept": "icon",
-        "tag": "cds-icon",
-        "path": "es/components/icon/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/icon/index.js';"
-      },
-      {
-        "concept": "icon-button",
-        "tag": "cds-icon-button",
-        "path": "es/components/icon-button/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/icon-button/index.js';"
-      },
-      {
-        "concept": "card",
-        "tag": "cds-tile",
-        "path": "es/components/tile/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/tile/index.js';"
-      },
-      {
-        "concept": "elevation",
-        "tag": "cds-popover",
-        "path": "es/components/popover/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/popover/index.js';"
-      },
-      {
-        "concept": "list",
-        "tag": "cds-structured-list",
-        "path": "es/components/structured-list/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/structured-list/index.js';"
-      },
-      {
-        "concept": "chips",
-        "tag": "cds-content-switcher",
-        "path": "es/components/content-switcher/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/content-switcher/index.js';"
+        "concept": "button",
+        "tag": "cds-button",
+        "path": "es/components/button/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/button/index.js';"
       }
     ]
   },
@@ -137,18 +53,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "bundle",
-    "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "componentCount": 20
+    "id": "interactive-form",
+    "name": "Interactive form",
+    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration",
+    "componentCount": 6
   },
-  "timestamp": "2026-10-17T16:30:13.844Z",
+  "timestamp": "2026-10-19T19:54:35.743Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,79 +79,59 @@
     }
   },
   "metrics": {
-    "rawBytes": 1451732,
-    "gzipBytes": 189102,
-    "brotliBytes": 99225,
-    "buildTimeMs": 64.06179200000042
+    "rawBytes": 320628,
+    "gzipBytes": 51265,
+    "brotliBytes": 35403,
+    "buildTimeMs": 72.00625000000002
   },
   "baseline": {
-    "rawBytes": 1440814,
-    "gzipBytes": 187054,
-    "brotliBytes": 98661,
-    "buildTimeMs": 70.33916699999997,
-    "firstRenderMs": 49.1,
-    "updateMs": 5.4,
-    "scriptEvalMs": 4.1,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 7892588,
+    "rawBytes": 310671,
+    "gzipBytes": 49400,
+    "brotliBytes": 34829,
+    "buildTimeMs": 33.34837500000003,
+    "firstRenderMs": 33.2,
+    "updateMs": 0.4,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 3001534,
     "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "cds-button",
-        "cds-checkbox",
-        "cds-radio-button",
-        "cds-toggle",
-        "cds-text-input",
-        "cds-select",
-        "cds-modal",
-        "cds-tag",
-        "cds-tabs",
-        "cds-progress-bar",
-        "cds-loading",
-        "cds-slider",
-        "cds-overflow-menu",
-        "cds-skeleton-text",
-        "cds-icon",
-        "cds-icon-button",
-        "cds-tile",
-        "cds-popover",
-        "cds-structured-list",
-        "cds-content-switcher"
-      ],
-      "renderedCells": 20
+      "sectionsCount": 5,
+      "controlsPerSection": 6,
+      "totalControls": 30,
+      "eventsDispatched": 15
     }
   },
   "deltas": {
-    "rawBytes": 10918,
-    "rawPercent": 0.76,
-    "gzipBytes": 2048,
-    "gzipPercent": 1.09,
-    "brotliBytes": 564,
-    "brotliPercent": 0.57,
-    "buildTimeMs": -6.3,
-    "firstRenderMs": -7.3,
-    "speedupPercent": 14.87,
-    "updateMs": -0.4,
-    "updateSpeedupPercent": 7.41,
-    "evalSpeedupPercent": 2.44,
-    "registrationSpeedupPercent": -40,
-    "memorySavingsPercent": -2.16
+    "rawBytes": 9957,
+    "rawPercent": 3.2,
+    "gzipBytes": 1865,
+    "gzipPercent": 3.78,
+    "brotliBytes": 574,
+    "brotliPercent": 1.65,
+    "buildTimeMs": 38.7,
+    "firstRenderMs": -1.5,
+    "speedupPercent": 4.52,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -100,
+    "registrationSpeedupPercent": -400,
+    "memorySavingsPercent": -6.66
   },
   "runtime": {
-    "firstRenderMs": 41.8,
-    "updateMs": 5,
-    "scriptEvalMs": 4,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 8063229,
-    "speedupPercent": 14.87,
-    "updateSpeedupPercent": 7.41,
-    "evalSpeedupPercent": 2.44,
-    "registrationSpeedupPercent": -40,
-    "memorySavingsPercent": -2.16
+    "firstRenderMs": 31.7,
+    "updateMs": 0.4,
+    "scriptEvalMs": 3.6,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 3201383,
+    "speedupPercent": 4.52,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -100,
+    "registrationSpeedupPercent": -400,
+    "memorySavingsPercent": -6.66
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 50,
+    "elementsCount": 46,
     "verified": true,
     "phasesMatched": {
       "mount": true,

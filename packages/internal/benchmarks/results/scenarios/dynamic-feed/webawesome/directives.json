@@ -30,13 +30,13 @@
     "name": "Lit directive lowering (directives)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-12T23:47:40.646Z",
+  "timestamp": "2026-10-19T19:54:42.165Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "3856fa7",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -54,12 +54,12 @@
     "rawBytes": 152726,
     "gzipBytes": 38799,
     "brotliBytes": 32349,
-    "buildTimeMs": 19.411458999999923,
-    "firstRenderMs": 35.5,
-    "updateMs": 4.6,
+    "buildTimeMs": 23.846875000000182,
+    "firstRenderMs": 31.4,
+    "updateMs": 4.1,
     "scriptEvalMs": 1.5,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 3480498,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 3483726,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -99,26 +99,26 @@
     "gzipPercent": 0.05,
     "brotliBytes": 16,
     "brotliPercent": 0.05,
-    "buildTimeMs": -0.2,
-    "firstRenderMs": 5,
-    "speedupPercent": -16.39,
-    "updateMs": -0.1,
-    "updateSpeedupPercent": 2.13,
+    "buildTimeMs": 4.2,
+    "firstRenderMs": 0.9,
+    "speedupPercent": -2.95,
+    "updateMs": -0.6,
+    "updateSpeedupPercent": 12.77,
     "evalSpeedupPercent": 6.25,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -18.83
+    "registrationSpeedupPercent": -200,
+    "memorySavingsPercent": -18.94
   },
   "runtime": {
-    "firstRenderMs": 35.5,
-    "updateMs": 4.6,
+    "firstRenderMs": 31.4,
+    "updateMs": 4.1,
     "scriptEvalMs": 1.5,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 3480498,
-    "speedupPercent": -16.39,
-    "updateSpeedupPercent": 2.13,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 3483726,
+    "speedupPercent": -2.95,
+    "updateSpeedupPercent": 12.77,
     "evalSpeedupPercent": 6.25,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -18.83
+    "registrationSpeedupPercent": -200,
+    "memorySavingsPercent": -18.94
   },
   "domSnapshot": {
     "mount": {

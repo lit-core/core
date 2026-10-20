@@ -5,6 +5,7 @@ describe('event-hoist transform', () => {
   const fn = transformEventHoist;
   it('hoists method bindings like @click=${this._handleClick}', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class MyButton extends LitElement {
   render() {
     return html\`<button @click=\${this._handleClick}>Click me</button>\`;
@@ -25,6 +26,7 @@ export class MyButton extends LitElement {
 
   it('hoists inline closures like @click=${(e) => this._handleClick(e, id)}', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class TableView extends LitElement {
   render() {
     return html\`
@@ -47,6 +49,7 @@ export class TableView extends LitElement {
 
   it('preserves non-bubbling events like @focus, @blur, @scroll', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class InputField extends LitElement {
   render() {
     return html\`
@@ -71,6 +74,8 @@ export class InputField extends LitElement {
 
   it('preserves events with custom options like eventOptions({ capture: true })', () => {
     const input = `
+import { LitElement, html } from 'lit';
+import { eventOptions } from 'lit/decorators.js';
 export class CustomOptElem extends LitElement {
   render() {
     return html\`
@@ -93,6 +98,7 @@ export class CustomOptElem extends LitElement {
 
   it('hoists multiple bubbling events on elements', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class MultiEventElem extends LitElement {
   render() {
     return html\`
@@ -115,6 +121,7 @@ export class MultiEventElem extends LitElement {
 
   it('handles quoted attribute expressions', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class QuotedAttrElem extends LitElement {
   render() {
     return html\`
@@ -132,6 +139,7 @@ export class QuotedAttrElem extends LitElement {
 
   it('integrates with existing connectedCallback and firstUpdated methods', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class LifecycleElem extends LitElement {
   connectedCallback() {
     super.connectedCallback();
@@ -156,6 +164,7 @@ export class LifecycleElem extends LitElement {
 
   it('does not monkey patch event.stopPropagation or mutate Event prototype', () => {
     const input = `
+import { LitElement, html } from 'lit';
 export class CleanEventElem extends LitElement {
   render() {
     return html\`<button @click=\${this._onClick}>Click</button>\`;

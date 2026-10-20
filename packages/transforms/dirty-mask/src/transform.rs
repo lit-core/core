@@ -1,3 +1,4 @@
+use lit_analysis::symbol::{CanonicalLitSymbol, SymbolProofContext};
 use napi_derive::napi;
 use oxc_allocator::{Allocator, ArenaVec};
 use oxc_ast::ast::*;
@@ -13,8 +14,7 @@ pub use crate::analyzer::{
     analyze_expr_dependencies, collect_classes_mut, collect_named_classes,
     collect_reactive_properties, collect_reactive_properties_with_inheritance,
     collect_reactive_properties_with_inheritance_named, compute_part_mask, get_class_name,
-    get_root_this_prop, get_super_class_name, is_lit_html_tag, is_reactive_decorator,
-    LitSemanticAnalysis, ReactiveProps,
+    get_root_this_prop, get_super_class_name, ReactiveProps,
 };
 pub use crate::builder::{
     build_alias_statement, build_mask_calc_statements, build_super_update_statement,
@@ -69,7 +69,7 @@ fn compute_props_with_cache(
     class: &Class,
     inherited_cache: &HashMap<String, Vec<(String, usize)>>,
     external_props: Option<&HashMap<String, Vec<String>>>,
-    ctx: Option<&LitSemanticAnalysis>,
+    ctx: Option<&SymbolProofContext>,
     class_name: Option<&str>,
 ) -> ReactiveProps {
     let mut prop_indices: HashMap<String, usize> = HashMap::new();
@@ -126,41 +126,67 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         };
     }
 
-    let (lit_analysis, no_change_ident, needs_no_change_import) = {
-        let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
-        let scoping = semantic_ret.semantic.scoping();
-        let lit_ctx = LitSemanticAnalysis::new(&parsed.program, scoping);
-        let root_scope = scoping.root_scope_id();
-        let (ident, needs_import) = match &lit_ctx.lit_no_change_name {
-            Some(name) => (name.clone(), false),
-            None => {
-                if scoping.get_binding(root_scope, "noChange".into()).is_some() {
-                    let mut alias = "_litNoChange".to_string();
-                    let mut counter: usize = 1;
-                    while scoping
-                        .get_binding(root_scope, alias.as_str().into())
-                        .is_some()
-                    {
-                        alias.clear();
-                        alias.push_str("_litNoChange_");
-                        let mut num = counter;
-                        let mut digits = Vec::new();
-                        while num > 0 {
-                            digits.push((b'0' + (num % 10) as u8) as char);
-                            num /= 10;
-                        }
-                        for d in digits.into_iter().rev() {
-                            alias.push(d);
-                        }
-                        counter += 1;
+    let scoping = oxc_semantic::SemanticBuilder::new()
+        .build(&parsed.program)
+        .semantic
+        .into_scoping();
+    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+    let symbol_ctx = SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
+    };
+    let root_scope = scoping.root_scope_id();
+
+    let existing_no_change = symbol_ctx.lit_symbols.iter().find_map(|(&sym_id, sym)| {
+        if *sym == CanonicalLitSymbol::NoChange {
+            Some(scoping.symbol_name(sym_id).to_string())
+        } else {
+            None
+        }
+    });
+
+    let (no_change_ident, needs_no_change_import) = match existing_no_change {
+        Some(name) => (name, false),
+        None => {
+            if scoping.get_binding(root_scope, "noChange".into()).is_some() {
+                let mut alias = "_litNoChange".to_string();
+                let mut counter: usize = 1;
+                while scoping
+                    .get_binding(root_scope, alias.as_str().into())
+                    .is_some()
+                {
+                    alias.clear();
+                    alias.push_str("_litNoChange_");
+                    let mut num = counter;
+                    let mut digits = Vec::new();
+                    while num > 0 {
+                        digits.push((b'0' + (num % 10) as u8) as char);
+                        num /= 10;
                     }
-                    (alias, true)
-                } else {
-                    ("noChange".to_string(), true)
+                    for d in digits.into_iter().rev() {
+                        alias.push(d);
+                    }
+                    counter += 1;
                 }
+                (alias, true)
+            } else {
+                ("noChange".to_string(), true)
             }
-        };
-        (lit_ctx, ident, needs_import)
+        }
     };
 
     let mut external_props: HashMap<String, Vec<String>> = HashMap::new();
@@ -203,7 +229,15 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                                         Some(Expression::ArrayExpression(arr)) => {
                                             arr.elements.iter().any(|elem| {
                                                 elem.as_expression().is_some_and(|e| {
-                                                    lit_analysis.is_reactive_decorator(e)
+                                                    symbol_ctx.is_proven_decorator(e).is_some_and(
+                                                        |sym| {
+                                                            matches!(
+                                                            sym,
+                                                            CanonicalLitSymbol::PropertyDecorator
+                                                                | CanonicalLitSymbol::StateDecorator
+                                                        )
+                                                        },
+                                                    )
                                                 })
                                             })
                                         }
@@ -262,7 +296,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                 class,
                 &classes_by_name,
                 Some(&external_props),
-                Some(&lit_analysis),
+                Some(&symbol_ctx),
                 Some(name),
             );
             inherited_props_cache.insert((*name).to_string(), props.1.clone());
@@ -288,10 +322,11 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
     let mut total_properties_count: u32 = 0;
 
     for (class_name_from_decl, class) in classes {
-        let (qualifies, has_reactive_super) = lit_analysis.is_reactive_class(class);
+        let qualifies = symbol_ctx.prove_heritage(class).is_reactive();
         if !qualifies {
             continue;
         }
+        let has_reactive_super = class.heritage.is_some();
 
         let resolved_class_name = get_class_name(class).or(class_name_from_decl);
 
@@ -303,7 +338,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                     class,
                     &inherited_props_cache,
                     Some(&external_props),
-                    Some(&lit_analysis),
+                    Some(&symbol_ctx),
                     resolved_class_name,
                 )
             }
@@ -312,7 +347,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                 class,
                 &inherited_props_cache,
                 Some(&external_props),
-                Some(&lit_analysis),
+                Some(&symbol_ctx),
                 None,
             )
         };
@@ -335,7 +370,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                                 &reactive_props,
                                 &allocator,
                                 &mut class_masked_count,
-                                Some(&lit_analysis),
+                                Some(&symbol_ctx),
                                 &no_change_ident,
                             );
                         }

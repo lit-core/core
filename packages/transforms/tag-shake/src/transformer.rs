@@ -46,7 +46,7 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
         pruned_imports_count,
     ) = {
         let semantic_ret = SemanticBuilder::new().build(&program);
-        let resolver = SymbolResolver::new(&semantic_ret.semantic, &program);
+        let resolver = SymbolResolver::new(&semantic_ret.semantic, &program, source);
 
         let mut detections = Vec::new();
         let mut has_dynamic = false;

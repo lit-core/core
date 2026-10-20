@@ -1,3 +1,4 @@
+use lit_analysis::symbol::{CanonicalHelperSymbol, CanonicalLitSymbol, SymbolProofContext};
 use napi_derive::napi;
 use oxc_allocator::{Allocator, ArenaVec};
 use oxc_ast::ast::*;
@@ -21,7 +22,6 @@ use crate::decorators::query_all::try_transform_query_all;
 use crate::decorators::query_assigned::try_transform_query_assigned;
 use crate::decorators::query_async::try_transform_query_async;
 use crate::decorators::state::try_transform_state;
-use crate::lit_import_scanner::ImportContext;
 use crate::static_properties::{
     can_merge_static_properties, class_has_reactive_properties, inject_or_merge_static_properties,
 };
@@ -40,6 +40,11 @@ pub struct TransformResult {
     pub map: Option<String>,
 }
 
+#[inline]
+fn is_canonical_helper_name(name: &str) -> bool {
+    matches!(name, "__decorate" | "__decorateClass" | "_ts_decorate")
+}
+
 pub fn transform_code(source: &str, options: TransformOptions) -> TransformResult {
     let allocator = Allocator::default();
     let source_type = SourceType::from_path(options.filename.as_deref().unwrap_or("file.ts"))
@@ -56,9 +61,127 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
 
     let mut program = parsed.program;
 
-    // 1. Scan for Lit decorator imports
-    let import_ctx = ImportContext::scan(&program);
-    if !import_ctx.has_lit_decorators() {
+    // 1. Scan for Lit decorator imports and decorator helpers semantically
+    let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&program);
+    let scoping = semantic_ret.semantic.into_scoping();
+    let (lit_symbols, mut helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = SymbolProofContext::scan(&program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+
+    let mut helper_bindings = std::collections::HashSet::new();
+    let mut metadata_bindings = std::collections::HashSet::new();
+    for (&sym_id, sym) in &helper_symbols {
+        let name = scoping.symbol_name(sym_id).to_string();
+        match sym {
+            CanonicalHelperSymbol::Decorate | CanonicalHelperSymbol::DecorateClass
+                if !is_canonical_helper_name(&name) =>
+            {
+                helper_bindings.insert(name);
+            }
+            CanonicalHelperSymbol::Metadata if name != "__metadata" => {
+                metadata_bindings.insert(name);
+            }
+            _ => {}
+        }
+    }
+
+    // Also scan local variable declarations that alias helpers (e.g. `var dec = __decorate;` or `var __decorate = ...`)
+    for stmt in &program.body {
+        if let Statement::VariableDeclaration(var_decl) = stmt {
+            for decl in &var_decl.declarations {
+                if let BindingPattern::BindingIdentifier(id) = &decl.id {
+                    let name = id.name.as_str();
+                    if let Some(helper_kind) = SymbolProofContext::map_helper_named_import(name) {
+                        match helper_kind {
+                            CanonicalHelperSymbol::Decorate
+                            | CanonicalHelperSymbol::DecorateClass => {
+                                if !is_canonical_helper_name(name) {
+                                    helper_bindings.insert(name.to_string());
+                                }
+                                if let Some(sym_id) = id.symbol_id.get().or_else(|| {
+                                    scoping.get_binding(scoping.root_scope_id(), name.into())
+                                }) {
+                                    helper_symbols.insert(sym_id, helper_kind);
+                                }
+                            }
+                            CanonicalHelperSymbol::Metadata => {
+                                if name != "__metadata" {
+                                    metadata_bindings.insert(name.to_string());
+                                }
+                                if let Some(sym_id) = id.symbol_id.get().or_else(|| {
+                                    scoping.get_binding(scoping.root_scope_id(), name.into())
+                                }) {
+                                    helper_symbols.insert(sym_id, helper_kind);
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                    if let Some(Expression::Identifier(init_id)) = &decl.init {
+                        let init_name = init_id.name.as_str();
+                        if helper_bindings.contains(init_name)
+                            || is_canonical_helper_name(init_name)
+                        {
+                            if !is_canonical_helper_name(name) {
+                                helper_bindings.insert(name.to_string());
+                            }
+                            if let Some(sym_id) = id.symbol_id.get().or_else(|| {
+                                scoping.get_binding(scoping.root_scope_id(), name.into())
+                            }) {
+                                helper_symbols.insert(sym_id, CanonicalHelperSymbol::Decorate);
+                            }
+                        } else if metadata_bindings.contains(init_name) || init_name == "__metadata"
+                        {
+                            if name != "__metadata" {
+                                metadata_bindings.insert(name.to_string());
+                            }
+                            if let Some(sym_id) = id.symbol_id.get().or_else(|| {
+                                scoping.get_binding(scoping.root_scope_id(), name.into())
+                            }) {
+                                helper_symbols.insert(sym_id, CanonicalHelperSymbol::Metadata);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let symbol_ctx = SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
+    };
+
+    let has_any_decorators = symbol_ctx.lit_symbols.values().any(|s| {
+        matches!(
+            s,
+            CanonicalLitSymbol::PropertyDecorator
+                | CanonicalLitSymbol::StateDecorator
+                | CanonicalLitSymbol::CustomElementDecorator
+                | CanonicalLitSymbol::QueryDecorator
+                | CanonicalLitSymbol::QueryAllDecorator
+                | CanonicalLitSymbol::QueryAsyncDecorator
+                | CanonicalLitSymbol::QueryAssignedElementsDecorator
+                | CanonicalLitSymbol::QueryAssignedNodesDecorator
+                | CanonicalLitSymbol::EventOptionsDecorator
+                | CanonicalLitSymbol::LocalizedDecorator
+                | CanonicalLitSymbol::LitNamespace
+        )
+    }) || !symbol_ctx.helper_symbols.is_empty();
+
+    if !has_any_decorators {
         return TransformResult {
             code: source.to_string(),
             map: None,
@@ -74,7 +197,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     for mut stmt in old_statements {
         match &mut stmt {
             Statement::ClassDeclaration(class) => {
-                let post_stmts = transform_class(class, &import_ctx, &ast);
+                let post_stmts = transform_class(class, &symbol_ctx, &ast);
                 intermediate_statements.push(stmt);
                 for s in post_stmts {
                     intermediate_statements.push(s);
@@ -82,7 +205,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
             }
             Statement::ExportDeclaration(export_decl) => {
                 if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
-                    let post_stmts = transform_class(class, &import_ctx, &ast);
+                    let post_stmts = transform_class(class, &symbol_ctx, &ast);
                     intermediate_statements.push(stmt);
                     for s in post_stmts {
                         intermediate_statements.push(s);
@@ -95,7 +218,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                     &mut export_decl.declaration
                 {
-                    let post_stmts = transform_class(class, &import_ctx, &ast);
+                    let post_stmts = transform_class(class, &symbol_ctx, &ast);
                     intermediate_statements.push(stmt);
                     for s in post_stmts {
                         intermediate_statements.push(s);
@@ -106,7 +229,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
             }
             Statement::ExpressionStatement(expr_stmt) => {
                 if let Some(lowered_stmts) =
-                    try_transform_expression_statement(expr_stmt, &import_ctx, &ast)
+                    try_transform_expression_statement(expr_stmt, &symbol_ctx, &ast)
                 {
                     for s in lowered_stmts {
                         intermediate_statements.push(s);
@@ -122,20 +245,35 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     }
 
     program.body = intermediate_statements;
-    let (referenced_names, decorate_used, metadata_used) = {
+    let (referenced_names, decorate_used, metadata_used, helper_bindings, metadata_bindings) = {
         let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&program);
         let semantic = &semantic_ret.semantic;
 
         let mut referenced = std::collections::HashSet::new();
-        for name in import_ctx.decorator_bindings.keys() {
-            if is_identifier_referenced_semantically(semantic, name) {
-                referenced.insert(name.clone());
+        for (&sym_id, sym) in &symbol_ctx.lit_symbols {
+            if matches!(
+                sym,
+                CanonicalLitSymbol::PropertyDecorator
+                    | CanonicalLitSymbol::StateDecorator
+                    | CanonicalLitSymbol::CustomElementDecorator
+                    | CanonicalLitSymbol::QueryDecorator
+                    | CanonicalLitSymbol::QueryAllDecorator
+                    | CanonicalLitSymbol::QueryAsyncDecorator
+                    | CanonicalLitSymbol::QueryAssignedElementsDecorator
+                    | CanonicalLitSymbol::QueryAssignedNodesDecorator
+                    | CanonicalLitSymbol::EventOptionsDecorator
+                    | CanonicalLitSymbol::LocalizedDecorator
+            ) {
+                let name = scoping.symbol_name(sym_id);
+                if is_identifier_referenced_semantically(semantic, name) {
+                    referenced.insert(name.to_string());
+                }
             }
         }
 
         // Check which helper aliases are unused
         let mut unused_helper_aliases = std::collections::HashSet::new();
-        for helper_name in &import_ctx.helper_bindings {
+        for helper_name in &helper_bindings {
             if !is_identifier_referenced_semantically(semantic, helper_name) {
                 unused_helper_aliases.insert(helper_name.as_str());
             }
@@ -177,7 +315,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
             || is_canonical_used("__decorateClass")
             || is_canonical_used("_ts_decorate");
         if !dec_used {
-            for helper_name in &import_ctx.helper_bindings {
+            for helper_name in &helper_bindings {
                 if !unused_helper_aliases.contains(helper_name.as_str()) {
                     dec_used = true;
                     break;
@@ -185,21 +323,27 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
             }
         }
         let mut meta_used = is_identifier_referenced_semantically(semantic, "__metadata");
-        for meta_name in &import_ctx.metadata_bindings {
+        for meta_name in &metadata_bindings {
             if is_identifier_referenced_semantically(semantic, meta_name) {
                 meta_used = true;
                 break;
             }
         }
 
-        (referenced, dec_used, meta_used)
+        (
+            referenced,
+            dec_used,
+            meta_used,
+            helper_bindings,
+            metadata_bindings,
+        )
     };
 
     let intermediate = std::mem::replace(&mut program.body, ArenaVec::new_in(&ast));
     let mut new_statements = ArenaVec::new_in(&ast);
     for mut stmt in intermediate {
         if let Statement::ImportDeclaration(import_decl) = &mut stmt {
-            if clean_lit_import(import_decl, &import_ctx, &referenced_names, &ast) {
+            if clean_lit_import(import_decl, &referenced_names, &ast) {
                 new_statements.push(stmt);
             }
         } else {
@@ -212,8 +356,8 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
         &mut new_statements,
         decorate_used,
         metadata_used,
-        &import_ctx.helper_bindings,
-        &import_ctx.metadata_bindings,
+        &helper_bindings,
+        &metadata_bindings,
     );
 
     program.body = new_statements;
@@ -237,12 +381,12 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
 
 pub fn transform_class<'a>(
     class: &mut Class<'a>,
-    import_ctx: &ImportContext,
+    symbol_ctx: &SymbolProofContext<'_>,
     ast: &AstBuilder<'a>,
 ) -> Vec<Statement<'a>> {
     // 0. All-or-nothing bailout:
     // a. Verify static properties are mergeable BEFORE stripping decorators
-    if class_has_reactive_properties(class, import_ctx) && !can_merge_static_properties(class) {
+    if class_has_reactive_properties(class, symbol_ctx) && !can_merge_static_properties(class) {
         return Vec::new();
     }
     // b. In derived classes, verify that constructor can safely accept injected statements
@@ -255,11 +399,11 @@ pub fn transform_class<'a>(
     let mut reactive_props = Vec::new();
 
     // 1. Transform class decorators
-    if let Some(custom_elem_stmt) = transform_custom_element(class, import_ctx, ast) {
+    if let Some(custom_elem_stmt) = transform_custom_element(class, symbol_ctx, ast) {
         post_class_statements.push(custom_elem_stmt);
     }
 
-    if let Some(localized_stmt) = transform_localized(class, import_ctx, ast) {
+    if let Some(localized_stmt) = transform_localized(class, symbol_ctx, ast) {
         constructor_statements.push(localized_stmt);
     }
 
@@ -290,7 +434,7 @@ pub fn transform_class<'a>(
 
     for mut element in old_elements {
         // @property
-        if let Some(res) = try_transform_property(&mut element, import_ctx, ast) {
+        if let Some(res) = try_transform_property(&mut element, symbol_ctx, ast) {
             reactive_props.push(res.reactive_prop);
             if let Some(init_stmt) = res.constructor_init {
                 constructor_statements.push(init_stmt);
@@ -302,7 +446,7 @@ pub fn transform_class<'a>(
         }
 
         // @state
-        if let Some(res) = try_transform_state(&mut element, import_ctx, ast) {
+        if let Some(res) = try_transform_state(&mut element, symbol_ctx, ast) {
             reactive_props.push(res.reactive_prop);
             if let Some(init_stmt) = res.constructor_init {
                 constructor_statements.push(init_stmt);
@@ -315,33 +459,33 @@ pub fn transform_class<'a>(
 
         // @query
         if let Some(getter) =
-            try_transform_query(&mut element, import_ctx, &mut existing_members, ast)
+            try_transform_query(&mut element, symbol_ctx, &mut existing_members, ast)
         {
             new_elements.push(getter);
             continue;
         }
 
         // @queryAll
-        if let Some(getter) = try_transform_query_all(&mut element, import_ctx, ast) {
+        if let Some(getter) = try_transform_query_all(&mut element, symbol_ctx, ast) {
             new_elements.push(getter);
             continue;
         }
 
         // @queryAsync
-        if let Some(getter) = try_transform_query_async(&mut element, import_ctx, ast) {
+        if let Some(getter) = try_transform_query_async(&mut element, symbol_ctx, ast) {
             new_elements.push(getter);
             continue;
         }
 
         // @queryAssignedElements / @queryAssignedNodes
-        if let Some(getter) = try_transform_query_assigned(&mut element, import_ctx, ast) {
+        if let Some(getter) = try_transform_query_assigned(&mut element, symbol_ctx, ast) {
             new_elements.push(getter);
             continue;
         }
 
         // @eventOptions
         if let Some(event_opt_stmt) =
-            try_transform_event_options(&mut element, &class_name, import_ctx, ast)
+            try_transform_event_options(&mut element, &class_name, symbol_ctx, ast)
         {
             post_class_statements.push(event_opt_stmt);
             new_elements.push(element);

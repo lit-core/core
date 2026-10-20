@@ -4,7 +4,6 @@ pub mod constructor;
 pub mod dead_helpers;
 pub mod decorate_call;
 pub mod decorators;
-pub mod lit_import_scanner;
 pub mod static_properties;
 pub mod transform;
 

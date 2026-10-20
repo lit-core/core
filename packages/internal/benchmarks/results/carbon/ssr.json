@@ -20,13 +20,13 @@
     "description": "Server-side rendering performance comparison against @lit-labs/ssr",
     "componentCount": 4
   },
-  "timestamp": "2026-10-14T00:59:22.430Z",
+  "timestamp": "2026-10-19T20:05:56.685Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "664d821",
+    "gitCommit": "d6c28b6",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -44,26 +44,26 @@
     "rawBytes": 5007,
     "gzipBytes": 1156,
     "brotliBytes": 952,
-    "buildTimeMs": 52.78912500000001,
-    "rps": 9471.6,
-    "requestsPerSec": 7515.7,
-    "memoryBytes": 20619776,
-    "retainedMemoryBytes": 3504,
-    "ttfbMs": 0.005,
-    "ttlbMs": 0.1304,
+    "buildTimeMs": 46.531375,
+    "rps": 10745.4,
+    "requestsPerSec": 8060,
+    "memoryBytes": 20358456,
+    "retainedMemoryBytes": 19840,
+    "ttfbMs": 0.0054,
+    "ttlbMs": 0.1203,
     "commentMarkersCount": 0
   },
   "baseline": {
     "rawBytes": 374743,
     "gzipBytes": 35983,
     "brotliBytes": 17238,
-    "buildTimeMs": 42.712582999999995,
-    "rps": 11706.2,
-    "requestsPerSec": 2509.7,
-    "memoryBytes": 37413280,
+    "buildTimeMs": 43.36129199999996,
+    "rps": 11531,
+    "requestsPerSec": 2468.4,
+    "memoryBytes": 36896272,
     "retainedMemoryBytes": 0,
-    "ttfbMs": 0.1933,
-    "ttlbMs": 0.4792,
+    "ttfbMs": 0.1903,
+    "ttlbMs": 0.4522,
     "commentMarkersCount": 49
   },
   "deltas": {
@@ -73,17 +73,17 @@
     "gzipPercent": -96.78737181446795,
     "brotliBytes": -16286,
     "brotliPercent": -94.47731755424064,
-    "rpsSpeedupPercent": -19.1,
-    "requestsSpeedupPercent": 199.5,
-    "ttfbSpeedupPercent": 97.4,
-    "memorySavingsPercent": 44.9,
+    "rpsSpeedupPercent": -6.8,
+    "requestsSpeedupPercent": 226.5,
+    "ttfbSpeedupPercent": 97.2,
+    "memorySavingsPercent": 44.8,
     "commentMarkerReductionPercent": 100
   },
   "runtime": {
-    "firstRenderMs": 0.005,
-    "speedupPercent": 97.4,
-    "heapUsedBytes": 20619776,
-    "memorySavingsPercent": 44.9
+    "firstRenderMs": 0.0054,
+    "speedupPercent": 97.2,
+    "heapUsedBytes": 20358456,
+    "memorySavingsPercent": 44.8
   },
   "equivalence": {
     "domStructureMatch": true,
@@ -96,9 +96,9 @@
     "commentMarkersLabs": 49,
     "rawPayloadSavedBytes": 369736,
     "gzipPayloadSavedBytes": 34827,
-    "ttfbCoreMs": 0.005,
-    "ttfbLabsMs": 0.1933,
-    "requestsPerSecCore": 7515.7,
-    "requestsPerSecLabs": 2509.7
+    "ttfbCoreMs": 0.0054,
+    "ttfbLabsMs": 0.1903,
+    "requestsPerSecCore": 8060,
+    "requestsPerSecLabs": 2468.4
   }
 }

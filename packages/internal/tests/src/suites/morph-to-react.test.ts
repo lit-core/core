@@ -279,8 +279,8 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
 
         const crateCargoTomlPath = path.resolve(rootDir, 'crates/lit-analysis/Cargo.toml');
         const crateContent = fs.readFileSync(crateCargoTomlPath, 'utf-8');
-        expect(crateContent).toContain('html5ever = { workspace = true }');
-        expect(crateContent).toContain('markup5ever_rcdom = { workspace = true }');
+        expect(crateContent).toContain('html5ever = { workspace = true, optional = true }');
+        expect(crateContent).toContain('markup5ever_rcdom = { workspace = true, optional = true }');
 
         const templateIrPath = path.resolve(rootDir, 'crates/lit-analysis/src/template_ir.rs');
         expect(fs.existsSync(templateIrPath)).toBe(true);

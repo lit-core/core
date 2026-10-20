@@ -16,75 +16,105 @@ use oxc_span::SPAN;
 pub fn scan_queries<'a>(
     class: Option<&Class<'a>>,
     _component: &LitComponentInfo,
+    symbol_ctx: Option<&lit_analysis::SymbolProofContext<'a>>,
 ) -> Vec<QueryLoweringInfo> {
     let mut queries = Vec::new();
 
     if let Some(c) = class {
-        for element in &c.body.body {
-            match element {
-                ClassElement::PropertyDefinition(prop) => {
-                    let prop_name = prop.key.static_name().unwrap_or_default();
-                    for dec in &prop.decorators {
-                        if let Expression::CallExpression(call) = &dec.expression {
-                            let callee_name = match &call.callee {
-                                Expression::Identifier(id) => Some(id.name.as_str()),
-                                Expression::StaticMemberExpression(mem) => {
-                                    Some(mem.property.name.as_str())
-                                }
-                                _ => None,
-                            };
-                            if let Some(name) = callee_name {
-                                if name == "query" || name == "queryAll" {
-                                    let is_all = name == "queryAll";
-                                    if let Some(arg0) = call.arguments.first() {
-                                        if let Some(Expression::StringLiteral(lit)) =
-                                            arg0.as_expression()
-                                        {
-                                            queries.push(QueryLoweringInfo {
-                                                property_name: prop_name.to_string(),
-                                                selector: lit.value.as_str().to_string(),
-                                                ref_var_name: format!("{}Ref", prop_name),
-                                                is_all,
-                                            });
+        if let Some(ctx) = symbol_ctx {
+            let member_decs = lit_analysis::DecoratorExtractor::extract_member_decorators(c, ctx);
+            for dec in member_decs {
+                let prop_name = match dec.target_member {
+                    Some(name) => name,
+                    None => continue,
+                };
+                match dec.kind {
+                    lit_analysis::LitDecoratorKind::Query { selector } => {
+                        queries.push(QueryLoweringInfo {
+                            ref_var_name: format!("{}Ref", prop_name),
+                            property_name: prop_name,
+                            selector,
+                            is_all: false,
+                        });
+                    }
+                    lit_analysis::LitDecoratorKind::QueryAll { selector } => {
+                        queries.push(QueryLoweringInfo {
+                            ref_var_name: format!("{}Ref", prop_name),
+                            property_name: prop_name,
+                            selector,
+                            is_all: true,
+                        });
+                    }
+                    _ => {}
+                }
+            }
+        } else {
+            for element in &c.body.body {
+                match element {
+                    ClassElement::PropertyDefinition(prop) => {
+                        let prop_name = prop.key.static_name().unwrap_or_default();
+                        for dec in &prop.decorators {
+                            if let Expression::CallExpression(call) = &dec.expression {
+                                let callee_name = match &call.callee {
+                                    Expression::Identifier(id) => Some(id.name.as_str()),
+                                    Expression::StaticMemberExpression(mem) => {
+                                        Some(mem.property.name.as_str())
+                                    }
+                                    _ => None,
+                                };
+                                if let Some(name) = callee_name {
+                                    if name == "query" || name == "queryAll" {
+                                        let is_all = name == "queryAll";
+                                        if let Some(arg0) = call.arguments.first() {
+                                            if let Some(Expression::StringLiteral(lit)) =
+                                                arg0.as_expression()
+                                            {
+                                                queries.push(QueryLoweringInfo {
+                                                    property_name: prop_name.to_string(),
+                                                    selector: lit.value.as_str().to_string(),
+                                                    ref_var_name: format!("{}Ref", prop_name),
+                                                    is_all,
+                                                });
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                ClassElement::AccessorProperty(prop) => {
-                    let prop_name = prop.key.static_name().unwrap_or_default();
-                    for dec in &prop.decorators {
-                        if let Expression::CallExpression(call) = &dec.expression {
-                            let callee_name = match &call.callee {
-                                Expression::Identifier(id) => Some(id.name.as_str()),
-                                Expression::StaticMemberExpression(mem) => {
-                                    Some(mem.property.name.as_str())
-                                }
-                                _ => None,
-                            };
-                            if let Some(name) = callee_name {
-                                if name == "query" || name == "queryAll" {
-                                    let is_all = name == "queryAll";
-                                    if let Some(arg0) = call.arguments.first() {
-                                        if let Some(Expression::StringLiteral(lit)) =
-                                            arg0.as_expression()
-                                        {
-                                            queries.push(QueryLoweringInfo {
-                                                property_name: prop_name.to_string(),
-                                                selector: lit.value.as_str().to_string(),
-                                                ref_var_name: format!("{}Ref", prop_name),
-                                                is_all,
-                                            });
+                    ClassElement::AccessorProperty(prop) => {
+                        let prop_name = prop.key.static_name().unwrap_or_default();
+                        for dec in &prop.decorators {
+                            if let Expression::CallExpression(call) = &dec.expression {
+                                let callee_name = match &call.callee {
+                                    Expression::Identifier(id) => Some(id.name.as_str()),
+                                    Expression::StaticMemberExpression(mem) => {
+                                        Some(mem.property.name.as_str())
+                                    }
+                                    _ => None,
+                                };
+                                if let Some(name) = callee_name {
+                                    if name == "query" || name == "queryAll" {
+                                        let is_all = name == "queryAll";
+                                        if let Some(arg0) = call.arguments.first() {
+                                            if let Some(Expression::StringLiteral(lit)) =
+                                                arg0.as_expression()
+                                            {
+                                                queries.push(QueryLoweringInfo {
+                                                    property_name: prop_name.to_string(),
+                                                    selector: lit.value.as_str().to_string(),
+                                                    ref_var_name: format!("{}Ref", prop_name),
+                                                    is_all,
+                                                });
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -349,14 +379,25 @@ pub fn lower_heritage_expression<'a>(
     ast: &AstBuilder<'a>,
     allocator: &'a Allocator,
     base_class_mapping: Option<(&str, &str)>, // (original_name, host_name)
+    symbol_ctx: Option<&lit_analysis::SymbolProofContext<'a>>,
 ) -> Expression<'a> {
     match expr {
         Expression::Identifier(ident) => {
-            let name = ident.name.as_str();
-            if name == "LitElement" || name == "ReactiveElement" {
+            let is_lit_base = if let Some(ctx) = symbol_ctx {
+                matches!(
+                    ctx.resolve_symbol(ident),
+                    Some(lit_analysis::CanonicalLitSymbol::LitElement)
+                        | Some(lit_analysis::CanonicalLitSymbol::ReactiveElement)
+                ) || ident.name == "LitElement"
+                    || ident.name == "ReactiveElement"
+            } else {
+                ident.name == "LitElement" || ident.name == "ReactiveElement"
+            };
+
+            if is_lit_base {
                 Expression::new_identifier(SPAN, allocator.alloc_str("MorphHost"), ast)
             } else if let Some((orig, host)) = base_class_mapping {
-                if name == orig {
+                if ident.name == orig {
                     Expression::new_identifier(SPAN, allocator.alloc_str(host), ast)
                 } else {
                     expr.clone_in(allocator)
@@ -381,6 +422,7 @@ pub fn lower_heritage_expression<'a>(
                                 ast,
                                 allocator,
                                 base_class_mapping,
+                                symbol_ctx,
                             );
                             new_args.push(Argument::from(lowered_arg));
                         } else {
@@ -430,6 +472,7 @@ pub fn build_host_class<'a>(
                 ast,
                 allocator,
                 base_mapping,
+                emitter.symbol_ctx,
             ))
         } else if let Some(ref host) = host_base_name {
             Some(Expression::new_identifier(
@@ -1160,11 +1203,12 @@ pub fn emit_tier1_component<'a>(
     tag_name: &str,
     _options: &CompileOptionsDto,
     tag_registry: Option<ComponentTagRegistry>,
+    symbol_ctx: Option<&lit_analysis::SymbolProofContext<'a>>,
 ) -> Result<Program<'a>, String> {
     let ast = AstBuilder::new(allocator);
 
     // 1. Scan query decorators (@query and @queryAll)
-    let queries = scan_queries(original_class, component);
+    let queries = scan_queries(original_class, component, symbol_ctx);
 
     // 2. Scan template for static IDs for React.useId() rewriting
     let static_ids = if let Some(tmpl) = &component.template {
@@ -1228,6 +1272,7 @@ pub fn emit_tier1_component<'a>(
         emitter_options,
         None, // styles are attached to the root host tag directly
     );
+    emitter.symbol_ctx = symbol_ctx;
 
     if needs_slot_partitioning {
         emitter

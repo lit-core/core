@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 napi = { workspace = true }
 napi-derive = { workspace = true }
 
-lit_analysis = { workspace = true }
+lit_analysis = { workspace = true, features = ["template-ir"] }
 
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -31,7 +31,9 @@ impl StyleExtractor {
 
         let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&parsed.program);
         let scoping = semantic_ret.semantic.into_scoping();
-        let mut visitor = CssTagVisitor::new(source_code, &norm_path_str, &scoping);
+        let symbol_ctx =
+            lit_analysis::symbol::SymbolProofContext::scan(&parsed.program, &scoping, source_code);
+        let mut visitor = CssTagVisitor::new(source_code, &norm_path_str, &symbol_ctx);
         visitor.visit_program(&parsed.program);
 
         let related_imports = visitor

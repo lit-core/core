@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
 use crate::ast_helpers::AstHelper;
-use crate::import_scanner::{DirectiveKind, ImportContext};
+use lit_analysis::symbol::{CanonicalDirective, CanonicalLitSymbol, SymbolProofContext};
 
 #[napi(object)]
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
@@ -58,8 +58,25 @@ pub fn transform_code(source: &str, options: DirectivesOptions) -> DirectivesRes
     let scoping = semantic_ret.semantic.into_scoping();
 
     // Scan for Lit directive imports
-    let import_ctx = ImportContext::scan(&program, &scoping);
-    if !import_ctx.has_directives() {
+    let (lit_symbols, helper_symbols, imported_classes, local_classes, has_lit_imports) = {
+        let temp_ctx = SymbolProofContext::scan(&program, &scoping, source);
+        (
+            temp_ctx.lit_symbols,
+            temp_ctx.helper_symbols,
+            temp_ctx.imported_classes,
+            temp_ctx.local_classes,
+            temp_ctx.has_lit_imports,
+        )
+    };
+
+    let has_directives = lit_symbols.values().any(|sym| {
+        matches!(
+            sym,
+            CanonicalLitSymbol::Directive(_) | CanonicalLitSymbol::DirectiveNamespace(_)
+        )
+    });
+
+    if !has_directives {
         return DirectivesResult {
             code: source.to_string(),
             map: None,
@@ -68,8 +85,18 @@ pub fn transform_code(source: &str, options: DirectivesOptions) -> DirectivesRes
         };
     }
 
+    let symbol_ctx = SymbolProofContext {
+        scoping: &scoping,
+        source_text: source,
+        lit_symbols,
+        helper_symbols,
+        imported_classes,
+        local_classes,
+        has_lit_imports,
+    };
+
     let ast = AstBuilder::new(&allocator);
-    let mut lowerer = DirectiveLowerer::new(&ast, &import_ctx, &scoping);
+    let mut lowerer = DirectiveLowerer::new(&ast, &symbol_ctx, &scoping);
 
     // Transform full AST program via VisitMut
     lowerer.visit_program(&mut program);
@@ -110,7 +137,7 @@ pub fn transform_code(source: &str, options: DirectivesOptions) -> DirectivesRes
 pub struct DirectiveLowerer<'a, 'b> {
     pub ast: &'b AstBuilder<'a>,
     pub helper: AstHelper<'a, 'b>,
-    pub import_ctx: &'b ImportContext,
+    pub symbol_ctx: &'b SymbolProofContext<'b>,
     pub scoping: &'b Scoping,
     pub used_nothing: bool,
     pub lowered_count: u32,
@@ -122,13 +149,13 @@ pub struct DirectiveLowerer<'a, 'b> {
 impl<'a, 'b> DirectiveLowerer<'a, 'b> {
     pub fn new(
         ast: &'b AstBuilder<'a>,
-        import_ctx: &'b ImportContext,
+        symbol_ctx: &'b SymbolProofContext<'b>,
         scoping: &'b Scoping,
     ) -> Self {
         Self {
             ast,
             helper: AstHelper::new(ast),
-            import_ctx,
+            symbol_ctx,
             scoping,
             used_nothing: false,
             lowered_count: 0,
@@ -140,31 +167,32 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
 
     fn lower_call(
         &mut self,
-        kind: DirectiveKind,
+        kind: CanonicalDirective,
         call: &CallExpression<'a>,
     ) -> Option<Expression<'a>> {
         match kind {
-            DirectiveKind::ClassMap => self.lower_class_map(call),
-            DirectiveKind::StyleMap => self.lower_style_map(call),
-            DirectiveKind::IfDefined => self.lower_if_defined(call),
-            DirectiveKind::When => self.lower_when(call),
-            DirectiveKind::Choose => self.lower_choose(call),
-            DirectiveKind::Map => self.lower_map(call),
-            DirectiveKind::Join => self.lower_join(call),
-            DirectiveKind::Range => self.lower_range(call),
-            DirectiveKind::Guard => self.lower_guard(call),
-            DirectiveKind::Live => self.lower_live(call),
-            DirectiveKind::Keyed => self.lower_keyed(call),
-            DirectiveKind::Cache => self.lower_cache(call),
-            DirectiveKind::Repeat => self.lower_repeat(call),
-            DirectiveKind::TemplateContent => self.lower_template_content(call),
-            DirectiveKind::UnsafeHTML => self.lower_unsafe_html(call),
-            DirectiveKind::UnsafeSVG => self.lower_unsafe_svg(call),
-            DirectiveKind::UnsafeMathML => self.lower_unsafe_mathml(call),
-            DirectiveKind::Until => self.lower_until(call),
-            DirectiveKind::AsyncAppend => self.lower_async_append(call),
-            DirectiveKind::AsyncReplace => self.lower_async_replace(call),
-            DirectiveKind::Ref => self.lower_ref(call),
+            CanonicalDirective::ClassMap => self.lower_class_map(call),
+            CanonicalDirective::StyleMap => self.lower_style_map(call),
+            CanonicalDirective::IfDefined => self.lower_if_defined(call),
+            CanonicalDirective::When => self.lower_when(call),
+            CanonicalDirective::Choose => self.lower_choose(call),
+            CanonicalDirective::Map => self.lower_map(call),
+            CanonicalDirective::Join => self.lower_join(call),
+            CanonicalDirective::Range => self.lower_range(call),
+            CanonicalDirective::Guard => self.lower_guard(call),
+            CanonicalDirective::Live => self.lower_live(call),
+            CanonicalDirective::Keyed => self.lower_keyed(call),
+            CanonicalDirective::Cache => self.lower_cache(call),
+            CanonicalDirective::Repeat => self.lower_repeat(call),
+            CanonicalDirective::TemplateContent => self.lower_template_content(call),
+            CanonicalDirective::UnsafeHTML => self.lower_unsafe_html(call),
+            CanonicalDirective::UnsafeSVG => self.lower_unsafe_svg(call),
+            CanonicalDirective::UnsafeMathML => self.lower_unsafe_mathml(call),
+            CanonicalDirective::Until => self.lower_until(call),
+            CanonicalDirective::AsyncAppend => self.lower_async_append(call),
+            CanonicalDirective::AsyncReplace => self.lower_async_replace(call),
+            CanonicalDirective::Ref => self.lower_ref(call),
+            CanonicalDirective::Slice => None,
         }
     }
 
@@ -778,10 +806,9 @@ impl<'a, 'b> VisitMut<'a> for DirectiveLowerer<'a, 'b> {
                         self.scoping.get_binding(root, ident.name.as_str().into())
                     };
 
-                    sym_id.and_then(|sym| {
-                        self.import_ctx
-                            .get_directive_kind_by_symbol(sym)
-                            .map(|kind| (kind, Some(sym), None))
+                    sym_id.and_then(|sym| match self.symbol_ctx.lit_symbols.get(&sym) {
+                        Some(CanonicalLitSymbol::Directive(d)) => Some((*d, Some(sym), None)),
+                        _ => None,
                     })
                 }
                 Expression::StaticMemberExpression(mem) => {
@@ -793,16 +820,22 @@ impl<'a, 'b> VisitMut<'a> for DirectiveLowerer<'a, 'b> {
                             self.scoping.get_binding(root, ns.name.as_str().into())
                         };
 
-                        ns_sym.and_then(|sym| {
-                            let kind = self.import_ctx.get_namespace_kind_by_symbol(sym)?;
-                            if mem.property.name == kind.name()
-                                || DirectiveKind::from_canonical_name(&mem.property.name)
-                                    == Some(kind)
-                            {
-                                Some((kind, None, Some(sym)))
-                            } else {
-                                None
+                        ns_sym.and_then(|sym| match self.symbol_ctx.lit_symbols.get(&sym) {
+                            Some(CanonicalLitSymbol::DirectiveNamespace(d)) => {
+                                if mem.property.name == d.name()
+                                    || CanonicalDirective::from_canonical_name(&mem.property.name)
+                                        == Some(*d)
+                                {
+                                    Some((*d, None, Some(sym)))
+                                } else {
+                                    None
+                                }
                             }
+                            Some(CanonicalLitSymbol::LitNamespace) => {
+                                CanonicalDirective::from_canonical_name(&mem.property.name)
+                                    .map(|d| (d, None, Some(sym)))
+                            }
+                            _ => None,
                         })
                     } else {
                         None
