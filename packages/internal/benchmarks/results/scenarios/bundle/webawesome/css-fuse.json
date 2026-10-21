@@ -46,13 +46,13 @@
     "name": "CSS AST deduplication (css-fuse)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-20T19:24:26.860Z",
+  "timestamp": "2026-10-20T20:27:49.389Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a289933",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -70,12 +70,12 @@
     "rawBytes": 366699,
     "gzipBytes": 86628,
     "brotliBytes": 69728,
-    "buildTimeMs": 196.99304099999972,
-    "firstRenderMs": 37.7,
+    "buildTimeMs": 167.49583299999995,
+    "firstRenderMs": 31.6,
     "updateMs": 0.1,
-    "scriptEvalMs": 3.5,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 1400405,
+    "scriptEvalMs": 3.1,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 57365,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -107,12 +107,12 @@
     "rawBytes": 375776,
     "gzipBytes": 87837,
     "brotliBytes": 70320,
-    "buildTimeMs": 126.41633300000012,
-    "firstRenderMs": 82,
-    "updateMs": 0.4,
-    "scriptEvalMs": 14.7,
+    "buildTimeMs": 99.84724999999997,
+    "firstRenderMs": 75.9,
+    "updateMs": 0.2,
+    "scriptEvalMs": 12,
     "registrationMs": 4.6,
-    "heapUsedBytes": 1402517
+    "heapUsedBytes": 57365
   },
   "deltas": {
     "rawBytes": -9077,
@@ -121,26 +121,26 @@
     "gzipPercent": -1.38,
     "brotliBytes": -592,
     "brotliPercent": -0.84,
-    "buildTimeMs": 70.6,
+    "buildTimeMs": 67.6,
     "firstRenderMs": -44.3,
-    "speedupPercent": 54.02,
-    "updateMs": -0.3,
-    "updateSpeedupPercent": 75,
-    "evalSpeedupPercent": 76.19,
-    "registrationSpeedupPercent": 80.43,
-    "memorySavingsPercent": 0.15
+    "speedupPercent": 58.37,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 74.17,
+    "registrationSpeedupPercent": 86.96,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 37.7,
+    "firstRenderMs": 31.6,
     "updateMs": 0.1,
-    "scriptEvalMs": 3.5,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 1400405,
-    "speedupPercent": 54.02,
-    "updateSpeedupPercent": 75,
-    "evalSpeedupPercent": 76.19,
-    "registrationSpeedupPercent": 80.43,
-    "memorySavingsPercent": 0.15
+    "scriptEvalMs": 3.1,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 57365,
+    "speedupPercent": 58.37,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 74.17,
+    "registrationSpeedupPercent": 86.96,
+    "memorySavingsPercent": 0
   },
   "domSnapshot": {
     "mount": {
@@ -1760,7 +1760,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "Copy",
-                                      "aria-labelledby": "wa-tooltip-T73pCbgbYzq0KE8Ie8jtq",
+                                      "aria-labelledby": "wa-tooltip-0Ze696jWLRY6DWOaXvh-G",
                                       "class": "button",
                                       "id": "copy-button",
                                       "part": "button",
@@ -1897,7 +1897,7 @@
                                     "attributes": {
                                       "class": "copy-button-tooltip",
                                       "for": "copy-button",
-                                      "id": "wa-tooltip-T73pCbgbYzq0KE8Ie8jtq",
+                                      "id": "wa-tooltip-0Ze696jWLRY6DWOaXvh-G",
                                       "part": "feedback",
                                       "placement": "top",
                                       "trigger": "hover focus"
@@ -2129,7 +2129,7 @@
                           "tag": "wa-popover",
                           "attributes": {
                             "data-canonical-tag": "wa-popover",
-                            "id": "wa-popover-_vA7wH3JZFXpXVWLyIdME"
+                            "id": "wa-popover-2X0AashSiKJN05EUMAFgP"
                           },
                           "children": [],
                           "shadowRoot": {
@@ -4113,7 +4113,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "Copy",
-                                      "aria-labelledby": "wa-tooltip-tUoLGcBu_93iSLRqP-QKC",
+                                      "aria-labelledby": "wa-tooltip-6TeHUIdBo9gQhkR35Oras",
                                       "class": "button",
                                       "id": "copy-button",
                                       "part": "button",
@@ -4250,7 +4250,7 @@
                                     "attributes": {
                                       "class": "copy-button-tooltip",
                                       "for": "copy-button",
-                                      "id": "wa-tooltip-tUoLGcBu_93iSLRqP-QKC",
+                                      "id": "wa-tooltip-6TeHUIdBo9gQhkR35Oras",
                                       "part": "feedback",
                                       "placement": "top",
                                       "trigger": "hover focus"
@@ -4482,7 +4482,7 @@
                           "tag": "wa-popover",
                           "attributes": {
                             "data-canonical-tag": "wa-popover",
-                            "id": "wa-popover-5XN9ADCdSGyhMd3QO8iPa"
+                            "id": "wa-popover-oOpEZzIdvq0zDgjCdN_WS"
                           },
                           "children": [],
                           "shadowRoot": {
@@ -4857,7 +4857,7 @@
     "domStructureMatch": false,
     "elementsCount": 49,
     "verified": false,
-    "divergenceReason": "Mount phase divergence: Attribute \"aria-labelledby\" mismatch at mount-root > [0] > [1] > [0] > [15] > [0] > shadowRoot > [0] > [1] (<button>): baseline=\"wa-tooltip-IE76reXP3XUPhsBVwVOl1\", variant=\"wa-tooltip-T73pCbgbYzq0KE8Ie8jtq\"",
+    "divergenceReason": "Mount phase divergence: Attribute \"aria-labelledby\" mismatch at mount-root > [0] > [1] > [0] > [15] > [0] > shadowRoot > [0] > [1] (<button>): baseline=\"wa-tooltip-Svr67EbZa0mmSYW64QM6W\", variant=\"wa-tooltip-0Ze696jWLRY6DWOaXvh-G\"",
     "phasesMatched": {
       "mount": false,
       "update": false

@@ -5,27 +5,33 @@
     "id": "selective-app",
     "name": "Selective application",
     "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination",
-    "relevantFeatures": ["tag-shake"],
-    "componentConcepts": ["button", "badge", "card"]
+    "relevantFeatures": [
+      "tag-shake"
+    ],
+    "componentConcepts": [
+      "button",
+      "badge",
+      "card"
+    ]
   },
   "suite": {
     "id": "spectrum",
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
-    "version": "1.12.4"
+    "version": "1.12.5"
   },
   "variant": {
     "id": "baseline",
     "name": "Baseline (Standard Vite)",
     "isBaseline": true
   },
-  "timestamp": "2026-10-10T10:13:23.309Z",
+  "timestamp": "2026-10-20T20:34:50.860Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -40,32 +46,577 @@
     }
   },
   "metrics": {
-    "rawBytes": 823102,
-    "gzipBytes": 147894,
-    "brotliBytes": 112239,
-    "buildTimeMs": 72.71308300000965,
-    "firstRenderMs": 14,
+    "rawBytes": 822896,
+    "gzipBytes": 147875,
+    "brotliBytes": 112250,
+    "buildTimeMs": 70.6762920000001,
+    "firstRenderMs": 10.3,
     "updateMs": 0.3,
-    "scriptEvalMs": 10.7,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 4972272,
+    "scriptEvalMs": 10.2,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 39012,
     "scenarioSpecific": {
       "importedCustomElementsCount": 20,
       "referencedCustomElementsCount": 3,
-      "referencedTags": ["sp-button", "sp-badge", "sp-card"],
+      "referencedTags": [
+        "sp-button",
+        "sp-badge",
+        "sp-card"
+      ],
       "actionDispatches": 1
     }
   },
   "runtime": {
-    "firstRenderMs": 14,
+    "firstRenderMs": 10.3,
     "updateMs": 0.3,
-    "scriptEvalMs": 10.7,
-    "registrationMs": 0.9,
-    "heapUsedBytes": 4972272
+    "scriptEvalMs": 10.2,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 39012
+  },
+  "domSnapshot": {
+    "mount": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "selective-app-root",
+            "style": "padding:20px; display:flex; flex-direction:column; gap:16px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "sp-card",
+              "attributes": {
+                "class": "overview-card",
+                "variant": "standard"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "style": "padding:16px; display:flex; flex-direction:column; gap:12px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "style": "display:flex; justify-content:space-between; align-items:center;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "h2",
+                          "attributes": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Selective component application"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "sp-badge",
+                          "attributes": {
+                            "type": "success",
+                            "variant": "informative"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Active"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "p",
+                      "attributes": {
+                        "style": "color:#71717a;"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "This application only references 3 custom elements in its template out of the 20 imported from the suite."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {},
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-button",
+                          "attributes": {
+                            "focusable": "",
+                            "role": "button",
+                            "tabindex": "0",
+                            "treatment": "fill",
+                            "variant": "accent"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Trigger action"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "icon"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "shadowRoot": {
+                "mode": "open",
+                "children": [
+                  {
+                    "type": "element",
+                    "tag": "div",
+                    "attributes": {
+                      "class": "wrapper"
+                    },
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "header"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "title",
+                                  "id": "heading"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "heading"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "action-button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "actions"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "content"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "subtitle"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "subheading"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "description"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "footer"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "selective-app-root",
+            "style": "padding:20px; display:flex; flex-direction:column; gap:16px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "sp-card",
+              "attributes": {
+                "class": "overview-card",
+                "variant": "standard"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "div",
+                  "attributes": {
+                    "style": "padding:16px; display:flex; flex-direction:column; gap:12px;"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "style": "display:flex; justify-content:space-between; align-items:center;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "h2",
+                          "attributes": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Selective component application"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "sp-badge",
+                          "attributes": {
+                            "type": "success",
+                            "variant": "informative"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Active"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "p",
+                      "attributes": {
+                        "style": "color:#71717a;"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "This application only references 3 custom elements in its template out of the 20 imported from the suite."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {},
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "sp-button",
+                          "attributes": {
+                            "focusable": "",
+                            "role": "button",
+                            "tabindex": "0",
+                            "treatment": "fill",
+                            "variant": "accent"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Trigger action"
+                            }
+                          ],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "icon"
+                                },
+                                "children": []
+                              },
+                              {
+                                "type": "element",
+                                "tag": "span",
+                                "attributes": {
+                                  "id": "label"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "shadowRoot": {
+                "mode": "open",
+                "children": [
+                  {
+                    "type": "element",
+                    "tag": "div",
+                    "attributes": {
+                      "class": "wrapper"
+                    },
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "body"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "header"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "title",
+                                  "id": "heading"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "heading"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "action-button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "actions"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "content"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "subtitle"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "subheading"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "slot",
+                                "attributes": {
+                                  "name": "description"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "footer"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "elementsCount": 9,
+    "customElementsCount": 3,
+    "shadowRootsCount": 3
   },
   "equivalence": {
     "domStructureMatch": true,
     "elementsCount": 9,
-    "verified": true
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

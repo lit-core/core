@@ -29,13 +29,13 @@
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T19:54:35.709Z",
+  "timestamp": "2026-10-20T20:36:56.144Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -50,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 320628,
-    "gzipBytes": 51265,
-    "brotliBytes": 35403,
-    "buildTimeMs": 72.00625000000002,
-    "firstRenderMs": 31.7,
-    "updateMs": 0.4,
-    "scriptEvalMs": 3.6,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 3201383,
+    "rawBytes": 319641,
+    "gzipBytes": 51373,
+    "brotliBytes": 35423,
+    "buildTimeMs": 23.664416999999958,
+    "firstRenderMs": 24,
+    "updateMs": 2.1,
+    "scriptEvalMs": 1.4,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 152368,
     "scenarioSpecific": {
       "sectionsCount": 5,
       "controlsPerSection": 6,
@@ -67,49 +67,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 310671,
-    "gzipBytes": 49400,
-    "brotliBytes": 34829,
-    "buildTimeMs": 33.34837500000003,
-    "firstRenderMs": 33.2,
-    "updateMs": 0.4,
+    "rawBytes": 315576,
+    "gzipBytes": 49965,
+    "brotliBytes": 35033,
+    "buildTimeMs": 34.43629100000004,
+    "firstRenderMs": 23.1,
+    "updateMs": 0.3,
     "scriptEvalMs": 1.8,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 3001534,
-    "scenarioSpecific": {
-      "sectionsCount": 5,
-      "controlsPerSection": 6,
-      "totalControls": 30,
-      "eventsDispatched": 15
-    }
+    "registrationMs": 0.2,
+    "heapUsedBytes": 135676
   },
   "deltas": {
-    "rawBytes": 9957,
-    "rawPercent": 3.2,
-    "gzipBytes": 1865,
-    "gzipPercent": 3.78,
-    "brotliBytes": 574,
-    "brotliPercent": 1.65,
-    "buildTimeMs": 38.7,
-    "firstRenderMs": -1.5,
-    "speedupPercent": 4.52,
-    "updateMs": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": -100,
-    "registrationSpeedupPercent": -400,
-    "memorySavingsPercent": -6.66
+    "rawBytes": 4065,
+    "rawPercent": 1.29,
+    "gzipBytes": 1408,
+    "gzipPercent": 2.82,
+    "brotliBytes": 390,
+    "brotliPercent": 1.11,
+    "buildTimeMs": -10.8,
+    "firstRenderMs": 0.9,
+    "speedupPercent": -3.9,
+    "updateMs": 1.8,
+    "updateSpeedupPercent": -600,
+    "evalSpeedupPercent": 22.22,
+    "registrationSpeedupPercent": 50,
+    "memorySavingsPercent": -12.3
   },
   "runtime": {
-    "firstRenderMs": 31.7,
-    "updateMs": 0.4,
-    "scriptEvalMs": 3.6,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 3201383,
-    "speedupPercent": 4.52,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": -100,
-    "registrationSpeedupPercent": -400,
-    "memorySavingsPercent": -6.66
+    "firstRenderMs": 24,
+    "updateMs": 2.1,
+    "scriptEvalMs": 1.4,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 152368,
+    "speedupPercent": -3.9,
+    "updateSpeedupPercent": -600,
+    "evalSpeedupPercent": 22.22,
+    "registrationSpeedupPercent": 50,
+    "memorySavingsPercent": -12.3
   },
   "domSnapshot": {
     "mount": {
@@ -174,7 +168,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -188,7 +182,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -213,14 +207,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -228,9 +222,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -259,7 +251,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -301,7 +293,6 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -320,14 +311,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch cds--toggle__switch--checked "
+                                      "class": "cds--toggle__switch cds--toggle__switch--checked"
                                     },
                                     "children": []
                                   },
@@ -368,8 +359,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -380,7 +369,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -390,7 +379,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -468,7 +457,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -484,7 +473,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -531,7 +520,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -558,8 +547,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "admin"
                                 },
@@ -643,7 +631,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",
@@ -729,7 +717,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -743,7 +731,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -768,14 +756,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -783,9 +771,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -814,7 +800,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -854,7 +840,6 @@
                               "aria-checked": "false",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -873,14 +858,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch "
+                                      "class": "cds--toggle__switch"
                                     },
                                     "children": []
                                   },
@@ -922,8 +907,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -934,7 +917,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -944,7 +927,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -1021,7 +1004,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -1037,7 +1020,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -1084,7 +1067,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -1111,8 +1094,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "viewer"
                                 },
@@ -1196,7 +1178,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",
@@ -1282,7 +1264,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -1296,7 +1278,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -1321,14 +1303,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -1336,9 +1318,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -1367,7 +1347,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -1409,7 +1389,6 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -1428,14 +1407,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch cds--toggle__switch--checked "
+                                      "class": "cds--toggle__switch cds--toggle__switch--checked"
                                     },
                                     "children": []
                                   },
@@ -1476,8 +1455,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -1488,7 +1465,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -1498,7 +1475,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -1575,7 +1552,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -1591,7 +1568,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -1638,7 +1615,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -1665,8 +1642,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "editor"
                                 },
@@ -1750,7 +1726,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",
@@ -1836,7 +1812,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -1850,7 +1826,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -1875,14 +1851,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -1890,9 +1866,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -1921,7 +1895,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -1963,7 +1937,6 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -1982,14 +1955,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch cds--toggle__switch--checked "
+                                      "class": "cds--toggle__switch cds--toggle__switch--checked"
                                     },
                                     "children": []
                                   },
@@ -2030,8 +2003,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -2042,7 +2013,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -2052,7 +2023,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -2130,7 +2101,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -2146,7 +2117,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -2193,7 +2164,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -2220,8 +2191,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "admin"
                                 },
@@ -2305,7 +2275,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",
@@ -2391,7 +2361,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -2405,7 +2375,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -2430,14 +2400,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -2445,9 +2415,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -2476,7 +2444,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -2516,7 +2484,6 @@
                               "aria-checked": "false",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -2535,14 +2502,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch "
+                                      "class": "cds--toggle__switch"
                                     },
                                     "children": []
                                   },
@@ -2584,8 +2551,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -2596,7 +2561,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -2606,7 +2571,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -2683,7 +2648,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -2699,7 +2664,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -2746,7 +2711,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -2773,8 +2738,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "editor"
                                 },
@@ -2858,7 +2822,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",
@@ -2963,7 +2927,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -2977,7 +2941,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -3002,14 +2966,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -3017,9 +2981,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -3048,7 +3010,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -3090,7 +3052,6 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -3109,14 +3070,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch cds--toggle__switch--checked "
+                                      "class": "cds--toggle__switch cds--toggle__switch--checked"
                                     },
                                     "children": []
                                   },
@@ -3157,8 +3118,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -3169,7 +3128,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -3179,7 +3138,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -3257,7 +3216,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -3273,7 +3232,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -3320,7 +3279,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -3347,8 +3306,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "admin"
                                 },
@@ -3432,7 +3390,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",
@@ -3518,7 +3476,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -3532,7 +3490,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -3557,14 +3515,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -3572,9 +3530,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -3603,7 +3559,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -3643,7 +3599,6 @@
                               "aria-checked": "false",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -3662,14 +3617,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch "
+                                      "class": "cds--toggle__switch"
                                     },
                                     "children": []
                                   },
@@ -3711,8 +3666,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -3723,7 +3676,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -3733,7 +3686,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -3810,7 +3763,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -3826,7 +3779,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -3873,7 +3826,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -3900,8 +3853,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "viewer"
                                 },
@@ -3985,7 +3937,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",
@@ -4071,7 +4023,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -4085,7 +4037,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -4110,14 +4062,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -4125,9 +4077,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -4156,7 +4106,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -4198,7 +4148,6 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -4217,14 +4166,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch cds--toggle__switch--checked "
+                                      "class": "cds--toggle__switch cds--toggle__switch--checked"
                                     },
                                     "children": []
                                   },
@@ -4265,8 +4214,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -4277,7 +4224,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -4287,7 +4234,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -4364,7 +4311,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -4380,7 +4327,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -4427,7 +4374,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -4454,8 +4401,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "editor"
                                 },
@@ -4539,7 +4485,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",
@@ -4625,7 +4571,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -4639,7 +4585,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -4664,14 +4610,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -4679,9 +4625,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -4710,7 +4654,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -4752,7 +4696,6 @@
                               "aria-checked": "true",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -4771,14 +4714,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch cds--toggle__switch--checked "
+                                      "class": "cds--toggle__switch cds--toggle__switch--checked"
                                     },
                                     "children": []
                                   },
@@ -4819,8 +4762,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -4831,7 +4772,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -4841,7 +4782,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -4919,7 +4860,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -4935,7 +4876,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -4982,7 +4923,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -5009,8 +4950,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "admin"
                                 },
@@ -5094,7 +5034,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",
@@ -5180,7 +5120,7 @@
                             "type": "element",
                             "tag": "div",
                             "attributes": {
-                              "class": " cds--form-item cds--text-input-wrapper "
+                              "class": "cds--form-item cds--text-input-wrapper"
                             },
                             "children": [
                               {
@@ -5194,7 +5134,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "class": " cds--label ",
+                                      "class": "cds--label",
                                       "for": "input"
                                     },
                                     "children": [
@@ -5219,14 +5159,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--text-input__field-outer-wrapper "
+                                  "class": "cds--text-input__field-outer-wrapper"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--text-input__field-wrapper "
+                                      "class": "cds--text-input__field-wrapper"
                                     },
                                     "children": [
                                       {
@@ -5234,9 +5174,7 @@
                                         "tag": "input",
                                         "attributes": {
                                           "autocomplete": "",
-                                          "class": " cds--text-input ",
-                                          "data-lh-change": "1",
-                                          "data-lh-input": "0",
+                                          "class": "cds--text-input",
                                           "id": "input",
                                           "type": "text"
                                         },
@@ -5265,7 +5203,7 @@
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--form__helper-text ",
+                                      "class": "cds--form__helper-text",
                                       "hidden": "",
                                       "id": "helper-text"
                                     },
@@ -5305,7 +5243,6 @@
                               "aria-checked": "false",
                               "aria-labelledby": "false",
                               "class": "cds--toggle__button",
-                              "data-lh-click": "0",
                               "id": "checkbox",
                               "role": "switch",
                               "type": "button"
@@ -5324,14 +5261,14 @@
                                 "type": "element",
                                 "tag": "div",
                                 "attributes": {
-                                  "class": " cds--toggle__appearance "
+                                  "class": "cds--toggle__appearance"
                                 },
                                 "children": [
                                   {
                                     "type": "element",
                                     "tag": "div",
                                     "attributes": {
-                                      "class": " cds--toggle__switch "
+                                      "class": "cds--toggle__switch"
                                     },
                                     "children": []
                                   },
@@ -5373,8 +5310,6 @@
                             "attributes": {
                               "aria-readonly": "false",
                               "class": "cds--checkbox",
-                              "data-lh-change": "0",
-                              "data-lh-click": "1",
                               "id": "checkbox",
                               "part": "input",
                               "type": "checkbox"
@@ -5385,7 +5320,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--checkbox-label ",
+                              "class": "cds--checkbox-label",
                               "for": "checkbox",
                               "part": "label",
                               "title": ""
@@ -5395,7 +5330,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--checkbox-label-text "
+                                  "class": "cds--checkbox-label-text"
                                 },
                                 "children": [
                                   {
@@ -5472,7 +5407,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": "cds--radio-button__label  ",
+                              "class": "cds--radio-button__label",
                               "for": "input"
                             },
                             "children": [
@@ -5488,7 +5423,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " cds--radio-button__label-text "
+                                  "class": "cds--radio-button__label-text"
                                 },
                                 "children": [
                                   {
@@ -5535,7 +5470,7 @@
                             "type": "element",
                             "tag": "label",
                             "attributes": {
-                              "class": " cds--label ",
+                              "class": "cds--label",
                               "for": "select"
                             },
                             "children": [
@@ -5562,8 +5497,7 @@
                                 "attributes": {
                                   "aria-invalid": "false",
                                   "aria-readonly": "false",
-                                  "class": " cds--select-input ",
-                                  "data-lh-input": "0",
+                                  "class": "cds--select-input",
                                   "id": "select",
                                   "title": "editor"
                                 },
@@ -5647,7 +5581,7 @@
                             "type": "element",
                             "tag": "button",
                             "attributes": {
-                              "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                              "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                               "id": "button",
                               "part": "button",
                               "tabindex": "0",

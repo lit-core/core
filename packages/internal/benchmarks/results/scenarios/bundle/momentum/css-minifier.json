@@ -10,8 +10,7 @@
       "props-lower",
       "css-minifier",
       "html-minifier",
-      "all",
-      "baseline"
+      "all"
     ],
     "componentConcepts": [
       "button",
@@ -47,13 +46,13 @@
     "name": "CSS template minification (css-minifier)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-17T16:32:10.096Z",
+  "timestamp": "2026-10-20T20:36:27.894Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -68,15 +67,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 331647,
-    "gzipBytes": 73588,
-    "brotliBytes": 59925,
-    "buildTimeMs": 70.4668749999837,
-    "firstRenderMs": 27.3,
-    "updateMs": 5.3,
-    "scriptEvalMs": 4.5,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 3599488,
+    "rawBytes": 336215,
+    "gzipBytes": 74076,
+    "brotliBytes": 60211,
+    "buildTimeMs": 46.33116699999664,
+    "firstRenderMs": 26.3,
+    "updateMs": 0.1,
+    "scriptEvalMs": 4.2,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 44756,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -105,69 +104,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 348521,
-    "gzipBytes": 75053,
-    "brotliBytes": 60402,
-    "buildTimeMs": 45.31079200000386,
-    "firstRenderMs": 31.8,
-    "updateMs": 6,
-    "scriptEvalMs": 5.2,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 3581441,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "mdc-button",
-        "mdc-checkbox",
-        "mdc-radio",
-        "mdc-toggle",
-        "mdc-input",
-        "mdc-select",
-        "mdc-dialog",
-        "mdc-badge",
-        "mdc-menubar",
-        "mdc-progressbar",
-        "mdc-spinner",
-        "mdc-slider",
-        "mdc-popover",
-        "mdc-divider",
-        "mdc-icon",
-        "mdc-avatarbutton",
-        "mdc-card",
-        "mdc-presence",
-        "mdc-list",
-        "mdc-chip"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 353258,
+    "gzipBytes": 75622,
+    "brotliBytes": 60835,
+    "buildTimeMs": 47.45375000000058,
+    "firstRenderMs": 27.1,
+    "updateMs": 0.2,
+    "scriptEvalMs": 4.3,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 44756
   },
   "deltas": {
-    "rawBytes": -16874,
-    "rawPercent": -4.84,
-    "gzipBytes": -1465,
-    "gzipPercent": -1.95,
-    "brotliBytes": -477,
-    "brotliPercent": -0.79,
-    "buildTimeMs": 25.2,
-    "firstRenderMs": -4.5,
-    "speedupPercent": 14.15,
-    "updateMs": -0.7,
-    "updateSpeedupPercent": 11.67,
-    "evalSpeedupPercent": 13.46,
-    "registrationSpeedupPercent": 66.67,
-    "memorySavingsPercent": -0.5
+    "rawBytes": -17043,
+    "rawPercent": -4.82,
+    "gzipBytes": -1546,
+    "gzipPercent": -2.04,
+    "brotliBytes": -624,
+    "brotliPercent": -1.03,
+    "buildTimeMs": -1.1,
+    "firstRenderMs": -0.8,
+    "speedupPercent": 2.95,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 2.33,
+    "registrationSpeedupPercent": -50,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 27.3,
-    "updateMs": 5.3,
-    "scriptEvalMs": 4.5,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 3599488,
-    "speedupPercent": 14.15,
-    "updateSpeedupPercent": 11.67,
-    "evalSpeedupPercent": 13.46,
-    "registrationSpeedupPercent": 66.67,
-    "memorySavingsPercent": -0.5
+    "firstRenderMs": 26.3,
+    "updateMs": 0.1,
+    "scriptEvalMs": 4.2,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 44756,
+    "speedupPercent": 2.95,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 2.33,
+    "registrationSpeedupPercent": -50,
+    "memorySavingsPercent": 0
   },
   "domSnapshot": {
     "mount": {
@@ -364,8 +337,9 @@
                                     "attributes": {
                                       "aria-checked": "false",
                                       "aria-describedby": "",
+                                      "aria-disabled": "false",
                                       "aria-label": "",
-                                      "id": "mdc-el-af301d6c-457b-4c6e-bbd3-474556e9af8e",
+                                      "id": "mdc-el-194a2adf-0b09-42bc-8c50-e3c78f569fad",
                                       "name": "",
                                       "part": "checkbox-input",
                                       "tabindex": "0",
@@ -422,6 +396,7 @@
                           "tag": "mdc-radio",
                           "attributes": {
                             "aria-checked": "false",
+                            "aria-disabled": "false",
                             "aria-label": "",
                             "data-canonical-tag": "mdc-radio",
                             "name": "",
@@ -533,8 +508,9 @@
                                     "attributes": {
                                       "aria-checked": "false",
                                       "aria-describedby": "",
+                                      "aria-disabled": "false",
                                       "aria-label": "",
-                                      "id": "mdc-el-14762d9e-6638-4a51-bfc7-4e23d0aa246e",
+                                      "id": "mdc-el-58b4bc86-8211-4c29-8cb6-acb0835a49b0",
                                       "name": "",
                                       "part": "toggle-input",
                                       "role": "switch",
@@ -653,11 +629,12 @@
                                             "tag": "input",
                                             "attributes": {
                                               "aria-describedby": "",
+                                              "aria-disabled": "false",
                                               "aria-invalid": "false",
                                               "aria-label": "",
                                               "autocapitalize": "off",
                                               "autocomplete": "off",
-                                              "id": "mdc-el-c740e6ac-8a63-41cc-aa41-2df89f47c8eb",
+                                              "id": "mdc-el-92372f23-177a-4c55-9cd1-373916fead58",
                                               "name": "",
                                               "part": "input-text",
                                               "placeholder": "",
@@ -687,7 +664,7 @@
                                   "data-aria-live": "polite",
                                   "debounce-time": "500",
                                   "delay": "500",
-                                  "identity": "mdc-el-c740e6ac-8a63-41cc-aa41-2df89f47c8eb",
+                                  "identity": "mdc-el-92372f23-177a-4c55-9cd1-373916fead58",
                                   "timeout": "20000"
                                 },
                                 "children": [],
@@ -816,7 +793,7 @@
                                     "attributes": {
                                       "aria-disabled": "false",
                                       "aria-hidden": "true",
-                                      "id": "mdc-el-0a3fc77e-363a-48f4-9891-29bb7f872cae",
+                                      "id": "mdc-el-aff5f813-ec08-4fa5-b887-00ba2ea6fcf2",
                                       "name": "",
                                       "part": "native-input",
                                       "tabindex": "-1",
@@ -1134,7 +1111,7 @@
                           "attributes": {
                             "data-canonical-tag": "mdc-progressbar",
                             "help-text-type": "default",
-                            "id": "mdc-progressbar-03e47467-80bc-4a44-a12f-8eb8275cfea3",
+                            "id": "mdc-progressbar-fe72abd8-c3df-445b-a7e4-9ef515b01211",
                             "toggletip-strategy": "absolute",
                             "value": "0",
                             "variant": "default"
@@ -1276,6 +1253,7 @@
                                         "type": "element",
                                         "tag": "input",
                                         "attributes": {
+                                          "aria-disabled": "false",
                                           "aria-label": "",
                                           "aria-valuemax": "100",
                                           "aria-valuemin": "0",
@@ -2002,8 +1980,9 @@
                                     "attributes": {
                                       "aria-checked": "false",
                                       "aria-describedby": "",
+                                      "aria-disabled": "false",
                                       "aria-label": "",
-                                      "id": "mdc-el-c4c9588b-a8fc-4020-8917-f39481a7e724",
+                                      "id": "mdc-el-d8503070-5c85-42a6-90fe-beecfd8f651e",
                                       "name": "",
                                       "part": "checkbox-input",
                                       "tabindex": "0",
@@ -2060,6 +2039,7 @@
                           "tag": "mdc-radio",
                           "attributes": {
                             "aria-checked": "false",
+                            "aria-disabled": "false",
                             "aria-label": "",
                             "data-canonical-tag": "mdc-radio",
                             "name": "",
@@ -2171,8 +2151,9 @@
                                     "attributes": {
                                       "aria-checked": "false",
                                       "aria-describedby": "",
+                                      "aria-disabled": "false",
                                       "aria-label": "",
-                                      "id": "mdc-el-93ad2418-e366-4a2d-83f6-206faff892c8",
+                                      "id": "mdc-el-48b4a4f1-88c3-4cb4-a02a-67b47aab70af",
                                       "name": "",
                                       "part": "toggle-input",
                                       "role": "switch",
@@ -2291,11 +2272,12 @@
                                             "tag": "input",
                                             "attributes": {
                                               "aria-describedby": "",
+                                              "aria-disabled": "false",
                                               "aria-invalid": "false",
                                               "aria-label": "",
                                               "autocapitalize": "off",
                                               "autocomplete": "off",
-                                              "id": "mdc-el-49f6fc0c-6eba-4ee4-aca4-34ce5dcb6cd8",
+                                              "id": "mdc-el-7fa6dac5-96c5-4e98-ba48-8729171076d0",
                                               "name": "",
                                               "part": "input-text",
                                               "placeholder": "",
@@ -2325,7 +2307,7 @@
                                   "data-aria-live": "polite",
                                   "debounce-time": "500",
                                   "delay": "500",
-                                  "identity": "mdc-el-49f6fc0c-6eba-4ee4-aca4-34ce5dcb6cd8",
+                                  "identity": "mdc-el-7fa6dac5-96c5-4e98-ba48-8729171076d0",
                                   "timeout": "20000"
                                 },
                                 "children": [],
@@ -2454,7 +2436,7 @@
                                     "attributes": {
                                       "aria-disabled": "false",
                                       "aria-hidden": "true",
-                                      "id": "mdc-el-49152bfa-5c3d-4c64-8388-b047e65ce41a",
+                                      "id": "mdc-el-edb0ff86-75fd-4773-9e11-d8554f69920b",
                                       "name": "",
                                       "part": "native-input",
                                       "tabindex": "-1",
@@ -2772,7 +2754,7 @@
                           "attributes": {
                             "data-canonical-tag": "mdc-progressbar",
                             "help-text-type": "default",
-                            "id": "mdc-progressbar-8b23588d-acdc-465a-a144-50248b2c6027",
+                            "id": "mdc-progressbar-58d5e79f-61f0-4880-ad3b-c41e3798367a",
                             "toggletip-strategy": "absolute",
                             "value": "0",
                             "variant": "default"
@@ -2914,6 +2896,7 @@
                                         "type": "element",
                                         "tag": "input",
                                         "attributes": {
+                                          "aria-disabled": "false",
                                           "aria-label": "",
                                           "aria-valuemax": "100",
                                           "aria-valuemin": "0",
@@ -3451,12 +3434,13 @@
     "shadowRootsCount": 20
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 49,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Attribute \"id\" mismatch at mount-root > [0] > [1] > [0] > [1] > [0] > shadowRoot > [0] > [0] (<input>): baseline=\"mdc-el-e43d9264-4af6-4d71-aa2a-5be785152799\", variant=\"mdc-el-194a2adf-0b09-42bc-8c50-e3c78f569fad\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

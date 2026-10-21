@@ -30,13 +30,13 @@
     "name": "Lit directive lowering (directives)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T19:54:40.551Z",
+  "timestamp": "2026-10-20T20:30:44.743Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -51,15 +51,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 635304,
-    "gzipBytes": 83400,
-    "brotliBytes": 51165,
-    "buildTimeMs": 60.70120800000001,
-    "firstRenderMs": 31.1,
-    "updateMs": 5.2,
-    "scriptEvalMs": 1.9,
+    "rawBytes": 634544,
+    "gzipBytes": 83206,
+    "brotliBytes": 50921,
+    "buildTimeMs": 30.703291999998328,
+    "firstRenderMs": 43.5,
+    "updateMs": 5,
+    "scriptEvalMs": 1.6,
     "registrationMs": 0.4,
-    "heapUsedBytes": 5234737,
+    "heapUsedBytes": 423144,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -72,53 +72,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 635666,
-    "gzipBytes": 83521,
-    "brotliBytes": 51149,
-    "buildTimeMs": 49.822749999999985,
-    "firstRenderMs": 41.8,
-    "updateMs": 5.7,
+    "rawBytes": 635765,
+    "gzipBytes": 83631,
+    "brotliBytes": 51204,
+    "buildTimeMs": 35.0825420000001,
+    "firstRenderMs": 42.5,
+    "updateMs": 6.1,
     "scriptEvalMs": 1.6,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 4642395,
-    "scenarioSpecific": {
-      "totalItems": 50,
-      "directivesUsed": [
-        "repeat",
-        "classMap",
-        "styleMap",
-        "ifDefined"
-      ],
-      "renderedCards": 50
-    }
+    "registrationMs": 0.3,
+    "heapUsedBytes": 451356
   },
   "deltas": {
-    "rawBytes": -362,
-    "rawPercent": -0.06,
-    "gzipBytes": -121,
-    "gzipPercent": -0.14,
-    "brotliBytes": 16,
-    "brotliPercent": 0.03,
-    "buildTimeMs": 10.9,
-    "firstRenderMs": -10.7,
-    "speedupPercent": 25.6,
-    "updateMs": -0.5,
-    "updateSpeedupPercent": 8.77,
-    "evalSpeedupPercent": -18.75,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -12.76
+    "rawBytes": -1221,
+    "rawPercent": -0.19,
+    "gzipBytes": -425,
+    "gzipPercent": -0.51,
+    "brotliBytes": -283,
+    "brotliPercent": -0.55,
+    "buildTimeMs": -4.4,
+    "firstRenderMs": 1,
+    "speedupPercent": -2.35,
+    "updateMs": -1.1,
+    "updateSpeedupPercent": 18.03,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": 6.25
   },
   "runtime": {
-    "firstRenderMs": 31.1,
-    "updateMs": 5.2,
-    "scriptEvalMs": 1.9,
+    "firstRenderMs": 43.5,
+    "updateMs": 5,
+    "scriptEvalMs": 1.6,
     "registrationMs": 0.4,
-    "heapUsedBytes": 5234737,
-    "speedupPercent": 25.6,
-    "updateSpeedupPercent": 8.77,
-    "evalSpeedupPercent": -18.75,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -12.76
+    "heapUsedBytes": 423144,
+    "speedupPercent": -2.35,
+    "updateSpeedupPercent": 18.03,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": 6.25
   },
   "domSnapshot": {
     "mount": {
@@ -190,9 +180,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -390,7 +380,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -443,7 +433,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -492,9 +482,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -692,7 +682,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -745,7 +735,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -794,9 +784,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -994,7 +984,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -1047,7 +1037,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -1096,9 +1086,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -1296,7 +1286,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -1349,7 +1339,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -1398,9 +1388,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -1598,7 +1588,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -1651,7 +1641,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -1700,9 +1690,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -1900,7 +1890,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -1953,7 +1943,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -2002,9 +1992,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -2202,7 +2192,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -2255,7 +2245,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -2304,9 +2294,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -2504,7 +2494,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -2557,7 +2547,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -2606,9 +2596,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -2806,7 +2796,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -2859,7 +2849,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -2908,9 +2898,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -3109,7 +3099,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -3162,7 +3152,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -3211,9 +3201,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -3411,7 +3401,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -3464,7 +3454,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -3513,9 +3503,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -3713,7 +3703,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -3766,7 +3756,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -3815,9 +3805,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -4015,7 +4005,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -4068,7 +4058,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -4117,9 +4107,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -4317,7 +4307,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -4370,7 +4360,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -4419,9 +4409,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -4619,7 +4609,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -4672,7 +4662,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -4721,9 +4711,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -4921,7 +4911,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -4974,7 +4964,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -5023,9 +5013,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -5223,7 +5213,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -5276,7 +5266,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -5325,9 +5315,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -5525,7 +5515,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -5578,7 +5568,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -5627,9 +5617,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -5827,7 +5817,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -5880,7 +5870,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -5929,9 +5919,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -6130,7 +6120,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -6183,7 +6173,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -6232,9 +6222,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -6432,7 +6422,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -6485,7 +6475,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -6534,9 +6524,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -6734,7 +6724,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -6787,7 +6777,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -6836,9 +6826,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -7036,7 +7026,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -7089,7 +7079,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -7138,9 +7128,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -7338,7 +7328,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -7391,7 +7381,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -7440,9 +7430,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -7640,7 +7630,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -7693,7 +7683,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -7742,9 +7732,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -7942,7 +7932,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -7995,7 +7985,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -8044,9 +8034,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -8244,7 +8234,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -8297,7 +8287,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -8346,9 +8336,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -8546,7 +8536,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -8599,7 +8589,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -8648,9 +8638,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -8848,7 +8838,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -8901,7 +8891,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -8950,9 +8940,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -9151,7 +9141,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -9204,7 +9194,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -9253,9 +9243,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -9453,7 +9443,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -9506,7 +9496,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -9555,9 +9545,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -9755,7 +9745,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -9808,7 +9798,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -9857,9 +9847,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10057,7 +10047,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -10110,7 +10100,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -10159,9 +10149,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10359,7 +10349,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -10412,7 +10402,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -10461,9 +10451,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10661,7 +10651,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -10714,7 +10704,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -10763,9 +10753,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -10963,7 +10953,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -11016,7 +11006,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -11065,9 +11055,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -11265,7 +11255,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -11318,7 +11308,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -11367,9 +11357,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -11567,7 +11557,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -11620,7 +11610,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -11669,9 +11659,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -11869,7 +11859,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -11922,7 +11912,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -11971,9 +11961,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-pinned ",
+                    "class": "feed-card is-pinned",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -12172,7 +12162,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -12225,7 +12215,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -12274,9 +12264,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -12474,7 +12464,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -12527,7 +12517,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -12576,9 +12566,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -12776,7 +12766,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -12829,7 +12819,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -12878,9 +12868,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13078,7 +13068,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -13131,7 +13121,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -13180,9 +13170,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13380,7 +13370,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -13433,7 +13423,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -13482,9 +13472,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13682,7 +13672,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -13735,7 +13725,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -13784,9 +13774,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -13984,7 +13974,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -14037,7 +14027,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -14086,9 +14076,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -14286,7 +14276,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -14339,7 +14329,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -14388,9 +14378,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -14588,7 +14578,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -14641,7 +14631,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -14690,9 +14680,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -14890,7 +14880,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -14943,7 +14933,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -14992,9 +14982,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-pinned ",
+                    "class": "feed-card is-pinned",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:3px solid #059669;"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -15193,7 +15183,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -15246,7 +15236,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -15366,9 +15356,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -15567,7 +15557,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -15620,7 +15610,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -15669,9 +15659,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -15870,7 +15860,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -15923,7 +15913,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -15972,9 +15962,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -16172,7 +16162,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -16225,7 +16215,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -16274,9 +16264,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -16475,7 +16465,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -16528,7 +16518,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -16577,9 +16567,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -16777,7 +16767,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -16830,7 +16820,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -16879,9 +16869,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -17080,7 +17070,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -17133,7 +17123,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -17182,9 +17172,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -17382,7 +17372,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -17435,7 +17425,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -17486,7 +17476,7 @@
                   "attributes": {
                     "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -17684,7 +17674,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -17737,7 +17727,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -17786,9 +17776,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -17986,7 +17976,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -18039,7 +18029,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -18088,9 +18078,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -18289,7 +18279,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -18342,7 +18332,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -18391,9 +18381,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -18591,7 +18581,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -18644,7 +18634,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -18693,9 +18683,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -18894,7 +18884,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -18947,7 +18937,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -18996,9 +18986,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -19196,7 +19186,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -19249,7 +19239,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -19298,9 +19288,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -19499,7 +19489,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -19552,7 +19542,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -19601,9 +19591,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -19801,7 +19791,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -19854,7 +19844,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -19903,9 +19893,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -20104,7 +20094,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -20157,7 +20147,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -20206,9 +20196,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -20406,7 +20396,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -20459,7 +20449,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -20510,7 +20500,7 @@
                   "attributes": {
                     "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -20708,7 +20698,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -20761,7 +20751,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -20810,9 +20800,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -21010,7 +21000,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -21063,7 +21053,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -21112,9 +21102,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -21313,7 +21303,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -21366,7 +21356,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -21415,9 +21405,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -21615,7 +21605,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -21668,7 +21658,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -21717,9 +21707,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -21918,7 +21908,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -21971,7 +21961,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -22020,9 +22010,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -22220,7 +22210,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -22273,7 +22263,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -22322,9 +22312,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -22523,7 +22513,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -22576,7 +22566,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -22625,9 +22615,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -22825,7 +22815,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -22878,7 +22868,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -22927,9 +22917,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -23128,7 +23118,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -23181,7 +23171,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -23230,9 +23220,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -23430,7 +23420,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -23483,7 +23473,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -23534,7 +23524,7 @@
                   "attributes": {
                     "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -23732,7 +23722,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -23785,7 +23775,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -23834,9 +23824,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -24034,7 +24024,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -24087,7 +24077,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -24136,9 +24126,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
+                    "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -24337,7 +24327,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -24390,7 +24380,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -24439,9 +24429,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -24639,7 +24629,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -24692,7 +24682,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -24743,7 +24733,7 @@
                   "attributes": {
                     "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -24942,7 +24932,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -24995,7 +24985,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -25044,9 +25034,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -25244,7 +25234,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -25297,7 +25287,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -25348,7 +25338,7 @@
                   "attributes": {
                     "class": "feed-card is-pinned is-featured",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -25547,7 +25537,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -25600,7 +25590,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -25649,9 +25639,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -25849,7 +25839,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -25902,7 +25892,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -25953,7 +25943,7 @@
                   "attributes": {
                     "class": "feed-card is-pinned",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -26152,7 +26142,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -26205,7 +26195,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -26254,9 +26244,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -26454,7 +26444,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -26507,7 +26497,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -26558,7 +26548,7 @@
                   "attributes": {
                     "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -26756,7 +26746,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -26809,7 +26799,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -26858,9 +26848,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -27058,7 +27048,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -27111,7 +27101,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -27162,7 +27152,7 @@
                   "attributes": {
                     "class": "feed-card is-pinned",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -27361,7 +27351,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -27414,7 +27404,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -27463,9 +27453,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -27663,7 +27653,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -27716,7 +27706,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -27767,7 +27757,7 @@
                   "attributes": {
                     "class": "feed-card is-pinned",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -27966,7 +27956,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -28019,7 +28009,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -28068,9 +28058,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -28268,7 +28258,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -28321,7 +28311,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -28372,7 +28362,7 @@
                   "attributes": {
                     "class": "feed-card is-pinned",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -28571,7 +28561,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -28624,7 +28614,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -28673,9 +28663,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -28873,7 +28863,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -28926,7 +28916,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -28977,7 +28967,7 @@
                   "attributes": {
                     "class": "feed-card is-pinned",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);"
+                    "style": "padding: 12px;border-left: 3px solid #059669;"
                   },
                   "children": [
                     {
@@ -29176,7 +29166,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -29229,7 +29219,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -29278,9 +29268,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -29478,7 +29468,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -29531,7 +29521,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -29582,7 +29572,7 @@
                   "attributes": {
                     "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -29780,7 +29770,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -29833,7 +29823,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -29882,9 +29872,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -30082,7 +30072,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -30135,7 +30125,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -30184,9 +30174,9 @@
                   "type": "element",
                   "tag": "cds-tile",
                   "attributes": {
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "color-scheme": "",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;"
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;"
                   },
                   "children": [
                     {
@@ -30384,7 +30374,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -30437,7 +30427,7 @@
                             "type": "element",
                             "tag": "p",
                             "attributes": {
-                              "class": " cds--skeleton__text ",
+                              "class": "cds--skeleton__text",
                               "style": "width:100%"
                             },
                             "children": []
@@ -30493,12 +30483,13 @@
     "shadowRootsCount": 251
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 555,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Style attribute mismatch at mount-root > [0] > [1] > [0] (<cds-tile>): baseline=\"padding:12px;border-left:1px solid #e4e4e7;\", variant=\"padding: 12px;border-left: 1px solid #e4e4e7;\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

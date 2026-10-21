@@ -30,13 +30,13 @@
     "name": "HTML fragment clustering (html-fuse)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-20T19:24:41.924Z",
+  "timestamp": "2026-10-20T20:33:01.111Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a289933",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -54,12 +54,12 @@
     "rawBytes": 59182,
     "gzipBytes": 17376,
     "brotliBytes": 15579,
-    "buildTimeMs": 43.981416000000536,
-    "firstRenderMs": 27.2,
-    "updateMs": 3.1,
-    "scriptEvalMs": 1.8,
+    "buildTimeMs": 69.12720799999079,
+    "firstRenderMs": 27.5,
+    "updateMs": 2.9,
+    "scriptEvalMs": 1.9,
     "registrationMs": 0.1,
-    "heapUsedBytes": 1536937,
+    "heapUsedBytes": 525925,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -75,12 +75,12 @@
     "rawBytes": 59176,
     "gzipBytes": 17369,
     "brotliBytes": 15540,
-    "buildTimeMs": 17.873000000000047,
-    "firstRenderMs": 26.7,
-    "updateMs": 3.1,
-    "scriptEvalMs": 2,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 1537098
+    "buildTimeMs": 20.38125000000582,
+    "firstRenderMs": 27.1,
+    "updateMs": 2.8,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 525920
   },
   "deltas": {
     "rawBytes": 6,
@@ -89,26 +89,26 @@
     "gzipPercent": 0.04,
     "brotliBytes": 39,
     "brotliPercent": 0.25,
-    "buildTimeMs": 26.1,
-    "firstRenderMs": 0.5,
-    "speedupPercent": -1.87,
-    "updateMs": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 10,
-    "registrationSpeedupPercent": 83.33,
-    "memorySavingsPercent": 0.01
+    "buildTimeMs": 48.7,
+    "firstRenderMs": 0.4,
+    "speedupPercent": -1.48,
+    "updateMs": 0.1,
+    "updateSpeedupPercent": -3.57,
+    "evalSpeedupPercent": -5.56,
+    "registrationSpeedupPercent": 66.67,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 27.2,
-    "updateMs": 3.1,
-    "scriptEvalMs": 1.8,
+    "firstRenderMs": 27.5,
+    "updateMs": 2.9,
+    "scriptEvalMs": 1.9,
     "registrationMs": 0.1,
-    "heapUsedBytes": 1536937,
-    "speedupPercent": -1.87,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 10,
-    "registrationSpeedupPercent": 83.33,
-    "memorySavingsPercent": 0.01
+    "heapUsedBytes": 525925,
+    "speedupPercent": -1.48,
+    "updateSpeedupPercent": -3.57,
+    "evalSpeedupPercent": -5.56,
+    "registrationSpeedupPercent": 66.67,
+    "memorySavingsPercent": 0
   },
   "domSnapshot": {
     "mount": {

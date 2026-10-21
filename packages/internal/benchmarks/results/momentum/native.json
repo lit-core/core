@@ -6,49 +6,13 @@
     "name": "Momentum Design (@momentum-design/components)",
     "packageName": "@momentum-design/components",
     "version": "0.140.1",
-    "componentCount": 20,
+    "componentCount": 4,
     "components": [
-      {
-        "concept": "button",
-        "tag": "mdc-button",
-        "path": "dist/components/button/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/button/index.js';"
-      },
       {
         "concept": "checkbox",
         "tag": "mdc-checkbox",
         "path": "dist/components/checkbox/index.js",
         "importStatement": "import '@momentum-design/components/dist/components/checkbox/index.js';"
-      },
-      {
-        "concept": "radio",
-        "tag": "mdc-radio",
-        "path": "dist/components/radio/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/radio/index.js';"
-      },
-      {
-        "concept": "switch",
-        "tag": "mdc-toggle",
-        "path": "dist/components/toggle/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/toggle/index.js';"
-      },
-      {
-        "concept": "text-input",
-        "tag": "mdc-input",
-        "path": "dist/components/input/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/input/index.js';"
-      },
-      {
-        "concept": "select",
-        "tag": "mdc-select",
-        "path": "dist/components/select/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/select/index.js';"
-      },
-      {
-        "concept": "dialog",
-        "tag": "mdc-dialog",
-        "path": "dist/components/dialog/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/dialog/index.js';"
       },
       {
         "concept": "badge",
@@ -57,76 +21,16 @@
         "importStatement": "import '@momentum-design/components/dist/components/badge/index.js';"
       },
       {
-        "concept": "tabs",
-        "tag": "mdc-menubar",
-        "path": "dist/components/menubar/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/menubar/index.js';"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "mdc-progressbar",
-        "path": "dist/components/progressbar/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/progressbar/index.js';"
-      },
-      {
-        "concept": "spinner",
-        "tag": "mdc-spinner",
-        "path": "dist/components/spinner/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/spinner/index.js';"
-      },
-      {
-        "concept": "slider",
-        "tag": "mdc-slider",
-        "path": "dist/components/slider/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/slider/index.js';"
-      },
-      {
-        "concept": "menu",
-        "tag": "mdc-popover",
-        "path": "dist/components/popover/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/popover/index.js';"
-      },
-      {
-        "concept": "divider",
-        "tag": "mdc-divider",
-        "path": "dist/components/divider/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/divider/index.js';"
-      },
-      {
-        "concept": "icon",
-        "tag": "mdc-icon",
-        "path": "dist/components/icon/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/icon/index.js';"
+        "concept": "button",
+        "tag": "mdc-button",
+        "path": "dist/components/button/index.js",
+        "importStatement": "import '@momentum-design/components/dist/components/button/index.js';"
       },
       {
         "concept": "icon-button",
         "tag": "mdc-avatarbutton",
         "path": "dist/components/avatarbutton/index.js",
         "importStatement": "import '@momentum-design/components/dist/components/avatarbutton/index.js';"
-      },
-      {
-        "concept": "card",
-        "tag": "mdc-card",
-        "path": "dist/components/card/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/card/index.js';"
-      },
-      {
-        "concept": "elevation",
-        "tag": "mdc-presence",
-        "path": "dist/components/presence/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/presence/index.js';"
-      },
-      {
-        "concept": "list",
-        "tag": "mdc-list",
-        "path": "dist/components/list/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/list/index.js';"
-      },
-      {
-        "concept": "chips",
-        "tag": "mdc-chip",
-        "path": "dist/components/chip/index.js",
-        "importStatement": "import '@momentum-design/components/dist/components/chip/index.js';"
       }
     ]
   },
@@ -137,18 +41,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "bundle",
-    "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "componentCount": 20
+    "id": "data-grid",
+    "name": "Data grid",
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
+    "componentCount": 4
   },
-  "timestamp": "2026-10-17T16:32:07.546Z",
+  "timestamp": "2026-10-20T20:33:13.438Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,83 +67,58 @@
     }
   },
   "metrics": {
-    "rawBytes": 348690,
-    "gzipBytes": 75127,
-    "brotliBytes": 60505,
-    "buildTimeMs": 45.78441700001713
+    "rawBytes": 198854,
+    "gzipBytes": 47065,
+    "brotliBytes": 39693,
+    "buildTimeMs": 35.008042000001296
   },
   "baseline": {
-    "rawBytes": 348521,
-    "gzipBytes": 75053,
-    "brotliBytes": 60402,
-    "buildTimeMs": 45.31079200000386,
-    "firstRenderMs": 31.8,
-    "updateMs": 6,
-    "scriptEvalMs": 5.2,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 3581441,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "mdc-button",
-        "mdc-checkbox",
-        "mdc-radio",
-        "mdc-toggle",
-        "mdc-input",
-        "mdc-select",
-        "mdc-dialog",
-        "mdc-badge",
-        "mdc-menubar",
-        "mdc-progressbar",
-        "mdc-spinner",
-        "mdc-slider",
-        "mdc-popover",
-        "mdc-divider",
-        "mdc-icon",
-        "mdc-avatarbutton",
-        "mdc-card",
-        "mdc-presence",
-        "mdc-list",
-        "mdc-chip"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 198854,
+    "gzipBytes": 47065,
+    "brotliBytes": 39693,
+    "buildTimeMs": 30.297209000011208,
+    "firstRenderMs": 52.3,
+    "updateMs": 3.2,
+    "scriptEvalMs": 2.4,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 992893
   },
   "deltas": {
-    "rawBytes": 169,
-    "rawPercent": 0.05,
-    "gzipBytes": 74,
-    "gzipPercent": 0.1,
-    "brotliBytes": 103,
-    "brotliPercent": 0.17,
-    "buildTimeMs": 0.5,
-    "firstRenderMs": -9.7,
-    "speedupPercent": 30.5,
-    "updateMs": -1.2,
-    "updateSpeedupPercent": 20,
-    "evalSpeedupPercent": 17.31,
-    "registrationSpeedupPercent": 33.33,
-    "memorySavingsPercent": -2.8
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": 4.7,
+    "firstRenderMs": -1.6,
+    "speedupPercent": 3.06,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 6.25,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 22.1,
-    "updateMs": 4.8,
-    "scriptEvalMs": 4.3,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 3681736,
-    "speedupPercent": 30.5,
-    "updateSpeedupPercent": 20,
-    "evalSpeedupPercent": 17.31,
-    "registrationSpeedupPercent": 33.33,
-    "memorySavingsPercent": -2.8
+    "firstRenderMs": 50.7,
+    "updateMs": 3,
+    "scriptEvalMs": 2.4,
+    "registrationMs": 0,
+    "heapUsedBytes": 992893,
+    "speedupPercent": 3.06,
+    "updateSpeedupPercent": 6.25,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "equivalence": {
-    "domStructureMatch": true,
-    "elementsCount": 49,
-    "verified": true,
+    "domStructureMatch": false,
+    "elementsCount": 801,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Attribute \"id\" mismatch at mount-root > [0] > [0] > [0] > shadowRoot > [0] > [0] (<input>): baseline=\"mdc-el-ec98e139-eb9a-4a58-85d9-0ab80ac10621\", variant=\"mdc-el-ebea4279-9425-4051-a24d-d4273a303d33\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

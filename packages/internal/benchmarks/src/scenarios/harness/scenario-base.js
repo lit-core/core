@@ -434,21 +434,37 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
           updateMs = Math.max(0.1, performance.now() - t1);
         }
 
-        // Measure memory footprint BEFORE serializing DOM snapshots
-        if (typeof win.gc === 'function') win.gc();
-        const heapAfter = win.performance?.memory?.usedJSHeapSize || 0;
-        heapUsed = Math.max(1024, heapAfter - (win.__heapBeforeEval || 0));
-
         if (typeof win.__scenario.getMetrics === 'function') {
           scenarioSpecific = await win.__scenario.getMetrics(container);
         }
 
         updateSnapshot = serializeDomTree(container);
 
-        delete (/** @type {any} */ (container)._$litPart$);
-        container.innerHTML = '';
-        await win.__scenario.mount(container);
-        void container.offsetHeight;
+        let minHeapDelta = Infinity;
+        for (let sampleIdx = 0; sampleIdx < 2; sampleIdx++) {
+          delete (/** @type {any} */ (container)._$litPart$);
+          container.innerHTML = '';
+          if (typeof win.gc === 'function') win.gc();
+          await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 25)));
+          if (typeof win.gc === 'function') win.gc();
+          await new Promise((r) => setTimeout(r, 15));
+          if (typeof win.gc === 'function') win.gc();
+          const heapBefore = win.performance?.memory?.usedJSHeapSize || 0;
+
+          await win.__scenario.mount(container);
+          void container.offsetHeight;
+
+          if (typeof win.gc === 'function') win.gc();
+          await new Promise((r) => setTimeout(r, 15));
+          if (typeof win.gc === 'function') win.gc();
+          const heapAfter = win.performance?.memory?.usedJSHeapSize || 0;
+          const delta = Math.round(heapAfter - heapBefore);
+          if (delta >= 1024 && delta < minHeapDelta) {
+            minHeapDelta = delta;
+          }
+        }
+        heapUsed = Number.isFinite(minHeapDelta) ? minHeapDelta : 1024;
+
         mountSnapshot = serializeDomTree(container);
       } else {
         const tags = (win.__registeredTags || []).filter((/** @type {any} */ t) => typeof t === 'string' && t.includes('-'));
@@ -473,21 +489,39 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         void container.offsetHeight;
         updateMs = Math.max(0.1, performance.now() - t1);
 
-        if (typeof win.gc === 'function') win.gc();
-        const heapAfter = win.performance?.memory?.usedJSHeapSize || 0;
-        heapUsed = Math.max(1024, heapAfter - (win.__heapBeforeEval || 0));
-
         updateSnapshot = serializeDomTree(container);
 
-        container.innerHTML = '';
-        const remounted = [];
-        for (const tag of tags) {
-          const el = document.createElement(tag);
-          container.appendChild(el);
-          remounted.push(el);
+        mounted.length = 0;
+        let minHeapDelta = Infinity;
+        for (let sampleIdx = 0; sampleIdx < 2; sampleIdx++) {
+          container.innerHTML = '';
+          if (typeof win.gc === 'function') win.gc();
+          await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 25)));
+          if (typeof win.gc === 'function') win.gc();
+          await new Promise((r) => setTimeout(r, 15));
+          if (typeof win.gc === 'function') win.gc();
+          const heapBefore = win.performance?.memory?.usedJSHeapSize || 0;
+
+          const remounted = [];
+          for (const tag of tags) {
+            const el = document.createElement(tag);
+            container.appendChild(el);
+            remounted.push(el);
+          }
+          await Promise.all(remounted.map(safeUpdateComplete));
+          void container.offsetHeight;
+
+          if (typeof win.gc === 'function') win.gc();
+          await new Promise((r) => setTimeout(r, 15));
+          if (typeof win.gc === 'function') win.gc();
+          const heapAfter = win.performance?.memory?.usedJSHeapSize || 0;
+          const delta = Math.round(heapAfter - heapBefore);
+          if (delta >= 1024 && delta < minHeapDelta) {
+            minHeapDelta = delta;
+          }
         }
-        await Promise.all(remounted.map(safeUpdateComplete));
-        void container.offsetHeight;
+        heapUsed = Number.isFinite(minHeapDelta) ? minHeapDelta : 1024;
+
         mountSnapshot = serializeDomTree(container);
       }
 

@@ -50,13 +50,15 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
   ): number | undefined => {
     const deltas: number[] = [];
     for (const r of allRuns) {
+      if (typeof r[fallbackKey] === 'number' && !Number.isNaN(r[fallbackKey])) {
+        deltas.push(r[fallbackKey] as number);
+        continue;
+      }
       const base = runMap[r.suiteId]?.baseline;
       const baseVal = base?.[key];
       const targetVal = r[key];
       if (baseVal && baseVal > 0 && targetVal && targetVal > 0) {
         deltas.push(((baseVal - targetVal) / baseVal) * 100);
-      } else if (typeof r[fallbackKey] === 'number' && r[fallbackKey] !== 0) {
-        deltas.push(r[fallbackKey] as number);
       }
     }
     if (deltas.length === 0) return undefined;
@@ -66,13 +68,15 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
   const calcHeapSavingsAverage = (): number | undefined => {
     const deltas: number[] = [];
     for (const r of allRuns) {
+      if (typeof r.memorySavingsPercent === 'number' && !Number.isNaN(r.memorySavingsPercent)) {
+        deltas.push(r.memorySavingsPercent);
+        continue;
+      }
       const base = runMap[r.suiteId]?.baseline;
       const baseVal = base?.heapUsedBytes;
       const targetVal = r.heapUsedBytes;
       if (baseVal && baseVal > 0 && targetVal && targetVal > 0) {
         deltas.push(((baseVal - targetVal) / baseVal) * 100);
-      } else if (typeof r.memorySavingsPercent === 'number' && r.memorySavingsPercent !== 0) {
-        deltas.push(r.memorySavingsPercent);
       }
     }
     if (deltas.length === 0) return undefined;
@@ -82,11 +86,13 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
   const avgGzipPercent = (() => {
     const deltas: number[] = [];
     for (const r of allRuns) {
+      if (typeof r.gzipPercent === 'number' && !Number.isNaN(r.gzipPercent)) {
+        deltas.push(r.gzipPercent);
+        continue;
+      }
       const base = runMap[r.suiteId]?.baseline;
       if (base?.gzipBytes && base.gzipBytes > 0 && r.gzipBytes && r.gzipBytes > 0) {
         deltas.push(((r.gzipBytes - base.gzipBytes) / base.gzipBytes) * 100);
-      } else if (typeof r.gzipPercent === 'number' && r.gzipPercent !== 0) {
-        deltas.push(r.gzipPercent);
       }
     }
     if (deltas.length === 0) return undefined;
@@ -131,21 +137,17 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       return <span className="text-base font-light text-zinc-400">—</span>;
     }
 
-    const baselineRun = libId ? runMap[libId]?.baseline : undefined;
+    const rawBaselineRun = libId ? runMap[libId]?.baseline : undefined;
+    const sameScenario = (run.scenarioId || 'bundle') === (rawBaselineRun?.scenarioId || 'bundle');
+    const baselineRun = sameScenario ? rawBaselineRun : undefined;
 
     if (category === 'payload') {
+      const candBytes = payloadFormat === 'gzip' ? run.gzipBytes : payloadFormat === 'brotli' ? run.brotliBytes : run.rawBytes;
+      const recordedPct = payloadFormat === 'gzip' ? run.gzipPercent : payloadFormat === 'brotli' ? run.brotliPercent : run.rawPercent;
       const baseBytes = baselineRun ? (payloadFormat === 'gzip' ? baselineRun.gzipBytes : payloadFormat === 'brotli' ? baselineRun.brotliBytes : baselineRun.rawBytes) : undefined;
 
-      const candBytes = payloadFormat === 'gzip' ? run.gzipBytes : payloadFormat === 'brotli' ? run.brotliBytes : run.rawBytes;
-
       const deltaPercent =
-        baseBytes && baseBytes > 0 && candBytes && candBytes > 0
-          ? ((candBytes - baseBytes) / baseBytes) * 100
-          : payloadFormat === 'gzip'
-            ? run.gzipPercent
-            : payloadFormat === 'brotli'
-              ? run.brotliPercent
-              : run.rawPercent;
+        typeof recordedPct === 'number' && !Number.isNaN(recordedPct) ? recordedPct : baseBytes && baseBytes > 0 && candBytes && candBytes > 0 ? ((candBytes - baseBytes) / baseBytes) * 100 : 0;
 
       const numVal = deltaPercent ?? 0;
       const colorClass = getReductionColorClass(numVal, 0.1);
@@ -175,9 +177,11 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       }
 
       const speedup =
-        baselineRun?.firstRenderMs && baselineRun.firstRenderMs > 0 && run.firstRenderMs > 0
-          ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100
-          : (run.speedupPercent ?? 0);
+        typeof run.speedupPercent === 'number' && !Number.isNaN(run.speedupPercent)
+          ? run.speedupPercent
+          : baselineRun?.firstRenderMs && baselineRun.firstRenderMs > 0 && run.firstRenderMs > 0
+            ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100
+            : 0;
 
       if (perfUnit === 'ms') {
         const msFormatted = `${run.firstRenderMs.toFixed(1)} ms`;
@@ -203,7 +207,12 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
         return <span className="text-base font-light text-zinc-400">—</span>;
       }
 
-      const speedup = baselineRun?.updateMs && baselineRun.updateMs > 0 && run.updateMs > 0 ? ((baselineRun.updateMs - run.updateMs) / baselineRun.updateMs) * 100 : (run.updateSpeedupPercent ?? 0);
+      const speedup =
+        typeof run.updateSpeedupPercent === 'number' && !Number.isNaN(run.updateSpeedupPercent)
+          ? run.updateSpeedupPercent
+          : baselineRun?.updateMs && baselineRun.updateMs > 0 && run.updateMs > 0
+            ? ((baselineRun.updateMs - run.updateMs) / baselineRun.updateMs) * 100
+            : 0;
 
       if (perfUnit === 'ms') {
         const msFormatted = `${run.updateMs.toFixed(2)} ms`;
@@ -230,9 +239,11 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       }
 
       const speedup =
-        baselineRun?.scriptEvalMs && baselineRun.scriptEvalMs > 0 && run.scriptEvalMs > 0
-          ? ((baselineRun.scriptEvalMs - run.scriptEvalMs) / baselineRun.scriptEvalMs) * 100
-          : (run.evalSpeedupPercent ?? 0);
+        typeof run.evalSpeedupPercent === 'number' && !Number.isNaN(run.evalSpeedupPercent)
+          ? run.evalSpeedupPercent
+          : baselineRun?.scriptEvalMs && baselineRun.scriptEvalMs > 0 && run.scriptEvalMs > 0
+            ? ((baselineRun.scriptEvalMs - run.scriptEvalMs) / baselineRun.scriptEvalMs) * 100
+            : 0;
 
       if (perfUnit === 'ms') {
         const msFormatted = `${run.scriptEvalMs.toFixed(2)} ms`;
@@ -259,9 +270,11 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       }
 
       const speedup =
-        baselineRun?.registrationMs && baselineRun.registrationMs > 0 && run.registrationMs > 0
-          ? ((baselineRun.registrationMs - run.registrationMs) / baselineRun.registrationMs) * 100
-          : (run.registrationSpeedupPercent ?? 0);
+        typeof run.registrationSpeedupPercent === 'number' && !Number.isNaN(run.registrationSpeedupPercent)
+          ? run.registrationSpeedupPercent
+          : baselineRun?.registrationMs && baselineRun.registrationMs > 0 && run.registrationMs > 0
+            ? ((baselineRun.registrationMs - run.registrationMs) / baselineRun.registrationMs) * 100
+            : 0;
 
       if (perfUnit === 'ms') {
         const msFormatted = `${run.registrationMs.toFixed(2)} ms`;
@@ -288,9 +301,11 @@ export const MatrixOverview: React.FC<MatrixOverviewProps> = ({ manifest, onSele
       }
 
       const savings =
-        baselineRun?.heapUsedBytes && baselineRun.heapUsedBytes > 0 && run.heapUsedBytes > 0
-          ? ((baselineRun.heapUsedBytes - run.heapUsedBytes) / baselineRun.heapUsedBytes) * 100
-          : (run.memorySavingsPercent ?? 0);
+        typeof run.memorySavingsPercent === 'number' && !Number.isNaN(run.memorySavingsPercent)
+          ? run.memorySavingsPercent
+          : baselineRun?.heapUsedBytes && baselineRun.heapUsedBytes > 0 && run.heapUsedBytes > 0
+            ? ((baselineRun.heapUsedBytes - run.heapUsedBytes) / baselineRun.heapUsedBytes) * 100
+            : 0;
 
       if (perfUnit === 'ms') {
         const kbFormatted = `${(run.heapUsedBytes / 1024).toFixed(1)} KB`;

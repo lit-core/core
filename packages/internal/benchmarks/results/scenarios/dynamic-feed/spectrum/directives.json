@@ -30,13 +30,13 @@
     "name": "Lit directive lowering (directives)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T19:54:41.421Z",
+  "timestamp": "2026-10-20T20:31:35.964Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -51,15 +51,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 252127,
-    "gzipBytes": 44660,
-    "brotliBytes": 36206,
-    "buildTimeMs": 46.03837500000009,
-    "firstRenderMs": 24.8,
-    "updateMs": 2.9,
-    "scriptEvalMs": 1.9,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 3750803,
+    "rawBytes": 250647,
+    "gzipBytes": 44177,
+    "brotliBytes": 35733,
+    "buildTimeMs": 30.377083999992465,
+    "firstRenderMs": 27.6,
+    "updateMs": 3.1,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 493208,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -72,53 +72,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 250859,
-    "gzipBytes": 44241,
-    "brotliBytes": 35823,
-    "buildTimeMs": 26.752250000005006,
+    "rawBytes": 252127,
+    "gzipBytes": 44660,
+    "brotliBytes": 36206,
+    "buildTimeMs": 31.799124999990454,
     "firstRenderMs": 28,
-    "updateMs": 3.3,
-    "scriptEvalMs": 2,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 3221093,
-    "scenarioSpecific": {
-      "totalItems": 50,
-      "directivesUsed": [
-        "repeat",
-        "classMap",
-        "styleMap",
-        "ifDefined"
-      ],
-      "renderedCards": 50
-    }
+    "updateMs": 3.2,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 529277
   },
   "deltas": {
-    "rawBytes": 1268,
-    "rawPercent": 0.51,
-    "gzipBytes": 419,
-    "gzipPercent": 0.95,
-    "brotliBytes": 383,
-    "brotliPercent": 1.07,
-    "buildTimeMs": 19.3,
-    "firstRenderMs": -3.2,
-    "speedupPercent": 11.43,
-    "updateMs": -0.4,
-    "updateSpeedupPercent": 12.12,
-    "evalSpeedupPercent": 5,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -16.45
+    "rawBytes": -1480,
+    "rawPercent": -0.59,
+    "gzipBytes": -483,
+    "gzipPercent": -1.08,
+    "brotliBytes": -473,
+    "brotliPercent": -1.31,
+    "buildTimeMs": -1.4,
+    "firstRenderMs": -0.4,
+    "speedupPercent": 1.43,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 3.13,
+    "evalSpeedupPercent": 5.26,
+    "registrationSpeedupPercent": -25,
+    "memorySavingsPercent": 6.81
   },
   "runtime": {
-    "firstRenderMs": 24.8,
-    "updateMs": 2.9,
-    "scriptEvalMs": 1.9,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 3750803,
-    "speedupPercent": 11.43,
-    "updateSpeedupPercent": 12.12,
-    "evalSpeedupPercent": 5,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -16.45
+    "firstRenderMs": 27.6,
+    "updateMs": 3.1,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 493208,
+    "speedupPercent": 1.43,
+    "updateSpeedupPercent": 3.13,
+    "evalSpeedupPercent": 5.26,
+    "registrationSpeedupPercent": -25,
+    "memorySavingsPercent": 6.81
   },
   "domSnapshot": {
     "mount": {
@@ -188,8 +178,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -507,8 +497,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -826,8 +816,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -1145,8 +1135,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -1464,8 +1454,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -1783,8 +1773,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -2102,8 +2092,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -2421,8 +2411,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -2740,8 +2730,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -3059,8 +3049,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-pinned is-featured ",
-                    "style": "padding:12px;border-left:3px solid #059669;",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -3379,8 +3369,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -3698,8 +3688,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -4017,8 +4007,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -4336,8 +4326,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -4655,8 +4645,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -4974,8 +4964,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -5293,8 +5283,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -5612,8 +5602,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -5931,8 +5921,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -6250,8 +6240,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-pinned is-featured ",
-                    "style": "padding:12px;border-left:3px solid #059669;",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -6570,8 +6560,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -6889,8 +6879,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -7208,8 +7198,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -7527,8 +7517,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -7846,8 +7836,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -8165,8 +8155,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -8484,8 +8474,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -8803,8 +8793,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -9122,8 +9112,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -9441,8 +9431,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-pinned is-featured ",
-                    "style": "padding:12px;border-left:3px solid #059669;",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -9761,8 +9751,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -10080,8 +10070,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -10399,8 +10389,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -10718,8 +10708,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -11037,8 +11027,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -11356,8 +11346,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -11675,8 +11665,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -11994,8 +11984,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -12313,8 +12303,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -12632,8 +12622,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-pinned ",
-                    "style": "padding:12px;border-left:3px solid #059669;",
+                    "class": "feed-card is-pinned",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -12952,8 +12942,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -13271,8 +13261,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -13590,8 +13580,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -13909,8 +13899,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -14228,8 +14218,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -14547,8 +14537,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -14866,8 +14856,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -15185,8 +15175,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -15504,8 +15494,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -15823,8 +15813,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-pinned ",
-                    "style": "padding:12px;border-left:3px solid #059669;",
+                    "class": "feed-card is-pinned",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -16212,8 +16202,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -16532,8 +16522,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -16852,8 +16842,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -17171,8 +17161,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -17491,8 +17481,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -17810,8 +17800,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -18130,8 +18120,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -18450,7 +18440,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-featured",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -18768,8 +18758,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -19087,8 +19077,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -19407,8 +19397,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -19726,8 +19716,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -20046,8 +20036,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -20365,8 +20355,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -20685,8 +20675,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -21004,8 +20994,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -21324,8 +21314,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -21644,7 +21634,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-featured",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -21962,8 +21952,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -22281,8 +22271,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -22601,8 +22591,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -22920,8 +22910,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -23240,8 +23230,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -23559,8 +23549,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -23879,8 +23869,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -24198,8 +24188,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -24518,8 +24508,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -24838,7 +24828,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-featured",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -25156,8 +25146,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -25475,8 +25465,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": "feed-card is-featured is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "class": "feed-card is-pinned is-featured",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -25795,8 +25785,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -26115,7 +26105,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-pinned is-featured",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -26434,8 +26424,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -26754,7 +26744,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-pinned is-featured",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -27073,8 +27063,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card is-featured ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card is-featured",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -27393,7 +27383,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -27712,8 +27702,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -28032,7 +28022,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -28350,8 +28340,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -28670,7 +28660,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -28989,8 +28979,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -29309,7 +29299,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -29628,8 +29618,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -29948,7 +29938,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -30267,8 +30257,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -30587,7 +30577,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card is-pinned",
-                    "style": "padding: 12px; border-left: 3px solid rgb(5, 150, 105);",
+                    "style": "padding: 12px;border-left: 3px solid #059669;",
                     "variant": "standard"
                   },
                   "children": [
@@ -30906,8 +30896,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -31226,7 +31216,7 @@
                   "tag": "sp-card",
                   "attributes": {
                     "class": "feed-card",
-                    "style": "padding: 12px; border-left: 1px solid rgb(228, 228, 231);",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -31544,8 +31534,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -31863,8 +31853,8 @@
                   "type": "element",
                   "tag": "sp-card",
                   "attributes": {
-                    "class": " feed-card ",
-                    "style": "padding:12px;border-left:1px solid #e4e4e7;",
+                    "class": "feed-card",
+                    "style": "padding: 12px;border-left: 1px solid #e4e4e7;",
                     "variant": "standard"
                   },
                   "children": [
@@ -32189,12 +32179,13 @@
     "shadowRootsCount": 251
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 555,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Style attribute mismatch at mount-root > [0] > [1] > [0] (<sp-card>): baseline=\"padding:12px;border-left:1px solid #e4e4e7;\", variant=\"padding: 12px;border-left: 1px solid #e4e4e7;\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

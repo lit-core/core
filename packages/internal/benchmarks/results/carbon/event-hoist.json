@@ -58,13 +58,13 @@
     "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration",
     "componentCount": 6
   },
-  "timestamp": "2026-10-19T19:54:35.743Z",
+  "timestamp": "2026-10-20T20:36:56.176Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -79,55 +79,49 @@
     }
   },
   "metrics": {
-    "rawBytes": 320628,
-    "gzipBytes": 51265,
-    "brotliBytes": 35403,
-    "buildTimeMs": 72.00625000000002
+    "rawBytes": 319641,
+    "gzipBytes": 51373,
+    "brotliBytes": 35423,
+    "buildTimeMs": 23.664416999999958
   },
   "baseline": {
-    "rawBytes": 310671,
-    "gzipBytes": 49400,
-    "brotliBytes": 34829,
-    "buildTimeMs": 33.34837500000003,
-    "firstRenderMs": 33.2,
-    "updateMs": 0.4,
+    "rawBytes": 315576,
+    "gzipBytes": 49965,
+    "brotliBytes": 35033,
+    "buildTimeMs": 34.43629100000004,
+    "firstRenderMs": 23.1,
+    "updateMs": 0.3,
     "scriptEvalMs": 1.8,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 3001534,
-    "scenarioSpecific": {
-      "sectionsCount": 5,
-      "controlsPerSection": 6,
-      "totalControls": 30,
-      "eventsDispatched": 15
-    }
+    "registrationMs": 0.2,
+    "heapUsedBytes": 135676
   },
   "deltas": {
-    "rawBytes": 9957,
-    "rawPercent": 3.2,
-    "gzipBytes": 1865,
-    "gzipPercent": 3.78,
-    "brotliBytes": 574,
-    "brotliPercent": 1.65,
-    "buildTimeMs": 38.7,
-    "firstRenderMs": -1.5,
-    "speedupPercent": 4.52,
-    "updateMs": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": -100,
-    "registrationSpeedupPercent": -400,
-    "memorySavingsPercent": -6.66
+    "rawBytes": 4065,
+    "rawPercent": 1.29,
+    "gzipBytes": 1408,
+    "gzipPercent": 2.82,
+    "brotliBytes": 390,
+    "brotliPercent": 1.11,
+    "buildTimeMs": -10.8,
+    "firstRenderMs": 0.9,
+    "speedupPercent": -3.9,
+    "updateMs": 1.8,
+    "updateSpeedupPercent": -600,
+    "evalSpeedupPercent": 22.22,
+    "registrationSpeedupPercent": 50,
+    "memorySavingsPercent": -12.3
   },
   "runtime": {
-    "firstRenderMs": 31.7,
-    "updateMs": 0.4,
-    "scriptEvalMs": 3.6,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 3201383,
-    "speedupPercent": 4.52,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": -100,
-    "registrationSpeedupPercent": -400,
-    "memorySavingsPercent": -6.66
+    "firstRenderMs": 24,
+    "updateMs": 2.1,
+    "scriptEvalMs": 1.4,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 152368,
+    "speedupPercent": -3.9,
+    "updateSpeedupPercent": -600,
+    "evalSpeedupPercent": 22.22,
+    "registrationSpeedupPercent": 50,
+    "memorySavingsPercent": -12.3
   },
   "equivalence": {
     "domStructureMatch": true,

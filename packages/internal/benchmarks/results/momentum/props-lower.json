@@ -142,13 +142,13 @@
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
     "componentCount": 20
   },
-  "timestamp": "2026-10-17T16:32:05.929Z",
+  "timestamp": "2026-10-20T20:36:26.941Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,83 +163,58 @@
     }
   },
   "metrics": {
-    "rawBytes": 326207,
-    "gzipBytes": 74014,
-    "brotliBytes": 59408,
-    "buildTimeMs": 46.911707999999635
+    "rawBytes": 326675,
+    "gzipBytes": 74214,
+    "brotliBytes": 59469,
+    "buildTimeMs": 87.34170900000026
   },
   "baseline": {
-    "rawBytes": 348521,
-    "gzipBytes": 75053,
-    "brotliBytes": 60402,
-    "buildTimeMs": 45.31079200000386,
-    "firstRenderMs": 31.8,
-    "updateMs": 6,
-    "scriptEvalMs": 5.2,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 3581441,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "mdc-button",
-        "mdc-checkbox",
-        "mdc-radio",
-        "mdc-toggle",
-        "mdc-input",
-        "mdc-select",
-        "mdc-dialog",
-        "mdc-badge",
-        "mdc-menubar",
-        "mdc-progressbar",
-        "mdc-spinner",
-        "mdc-slider",
-        "mdc-popover",
-        "mdc-divider",
-        "mdc-icon",
-        "mdc-avatarbutton",
-        "mdc-card",
-        "mdc-presence",
-        "mdc-list",
-        "mdc-chip"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 353258,
+    "gzipBytes": 75622,
+    "brotliBytes": 60835,
+    "buildTimeMs": 47.45375000000058,
+    "firstRenderMs": 27.1,
+    "updateMs": 0.2,
+    "scriptEvalMs": 4.3,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 44756
   },
   "deltas": {
-    "rawBytes": -22314,
-    "rawPercent": -6.4,
-    "gzipBytes": -1039,
-    "gzipPercent": -1.38,
-    "brotliBytes": -994,
-    "brotliPercent": -1.65,
-    "buildTimeMs": 1.6,
-    "firstRenderMs": -10.2,
-    "speedupPercent": 32.08,
-    "updateMs": -1.4,
-    "updateSpeedupPercent": 23.33,
-    "evalSpeedupPercent": -36.54,
-    "registrationSpeedupPercent": 83.33,
-    "memorySavingsPercent": 1.3
+    "rawBytes": -26583,
+    "rawPercent": -7.53,
+    "gzipBytes": -1408,
+    "gzipPercent": -1.86,
+    "brotliBytes": -1366,
+    "brotliPercent": -2.25,
+    "buildTimeMs": 39.9,
+    "firstRenderMs": 1.1,
+    "speedupPercent": -4.06,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 11.63,
+    "registrationSpeedupPercent": -125,
+    "memorySavingsPercent": -1.7
   },
   "runtime": {
-    "firstRenderMs": 21.6,
-    "updateMs": 4.6,
-    "scriptEvalMs": 7.1,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 3535037,
-    "speedupPercent": 32.08,
-    "updateSpeedupPercent": 23.33,
-    "evalSpeedupPercent": -36.54,
-    "registrationSpeedupPercent": 83.33,
-    "memorySavingsPercent": 1.3
+    "firstRenderMs": 28.2,
+    "updateMs": 0.1,
+    "scriptEvalMs": 3.8,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 45516,
+    "speedupPercent": -4.06,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 11.63,
+    "registrationSpeedupPercent": -125,
+    "memorySavingsPercent": -1.7
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 49,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Attribute \"id\" mismatch at mount-root > [0] > [1] > [0] > [1] > [0] > shadowRoot > [0] > [0] (<input>): baseline=\"mdc-el-e43d9264-4af6-4d71-aa2a-5be785152799\", variant=\"mdc-el-10678b0d-a6a2-407f-9552-e87f047bdd1a\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

@@ -46,13 +46,13 @@
     "name": "Baseline (Standard Vite)",
     "isBaseline": true
   },
-  "timestamp": "2026-10-20T19:24:25.594Z",
+  "timestamp": "2026-10-20T20:27:48.321Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a289933",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -70,12 +70,12 @@
     "rawBytes": 375776,
     "gzipBytes": 87837,
     "brotliBytes": 70320,
-    "buildTimeMs": 126.41633300000012,
-    "firstRenderMs": 82,
-    "updateMs": 0.4,
-    "scriptEvalMs": 14.7,
+    "buildTimeMs": 99.84724999999997,
+    "firstRenderMs": 75.9,
+    "updateMs": 0.2,
+    "scriptEvalMs": 12,
     "registrationMs": 4.6,
-    "heapUsedBytes": 1402517,
+    "heapUsedBytes": 57365,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -104,11 +104,11 @@
     }
   },
   "runtime": {
-    "firstRenderMs": 82,
-    "updateMs": 0.4,
-    "scriptEvalMs": 14.7,
+    "firstRenderMs": 75.9,
+    "updateMs": 0.2,
+    "scriptEvalMs": 12,
     "registrationMs": 4.6,
-    "heapUsedBytes": 1402517
+    "heapUsedBytes": 57365
   },
   "domSnapshot": {
     "mount": {
@@ -1728,7 +1728,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "Copy",
-                                      "aria-labelledby": "wa-tooltip-IE76reXP3XUPhsBVwVOl1",
+                                      "aria-labelledby": "wa-tooltip-Svr67EbZa0mmSYW64QM6W",
                                       "class": "button",
                                       "id": "copy-button",
                                       "part": "button",
@@ -1865,7 +1865,7 @@
                                     "attributes": {
                                       "class": "copy-button-tooltip",
                                       "for": "copy-button",
-                                      "id": "wa-tooltip-IE76reXP3XUPhsBVwVOl1",
+                                      "id": "wa-tooltip-Svr67EbZa0mmSYW64QM6W",
                                       "part": "feedback",
                                       "placement": "top",
                                       "trigger": "hover focus"
@@ -2097,7 +2097,7 @@
                           "tag": "wa-popover",
                           "attributes": {
                             "data-canonical-tag": "wa-popover",
-                            "id": "wa-popover-uWaaBnGVJVXkiKpMUsCQS"
+                            "id": "wa-popover-vuejmmd4HdPW1mBRqpkaS"
                           },
                           "children": [],
                           "shadowRoot": {
@@ -4081,7 +4081,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "Copy",
-                                      "aria-labelledby": "wa-tooltip-oZ-EHrqwY8gG4jJ1tG6cS",
+                                      "aria-labelledby": "wa-tooltip-MdMkgHffA21Pd8HAl1Y4A",
                                       "class": "button",
                                       "id": "copy-button",
                                       "part": "button",
@@ -4218,7 +4218,7 @@
                                     "attributes": {
                                       "class": "copy-button-tooltip",
                                       "for": "copy-button",
-                                      "id": "wa-tooltip-oZ-EHrqwY8gG4jJ1tG6cS",
+                                      "id": "wa-tooltip-MdMkgHffA21Pd8HAl1Y4A",
                                       "part": "feedback",
                                       "placement": "top",
                                       "trigger": "hover focus"
@@ -4450,7 +4450,7 @@
                           "tag": "wa-popover",
                           "attributes": {
                             "data-canonical-tag": "wa-popover",
-                            "id": "wa-popover-hqEsW-DBvmNkktJQTKyQE"
+                            "id": "wa-popover-BOZQTQ6m-UJnv-CLdWBaf"
                           },
                           "children": [],
                           "shadowRoot": {

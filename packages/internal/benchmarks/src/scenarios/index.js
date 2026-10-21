@@ -214,6 +214,69 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
         outDir: options.outDir,
       });
 
+      if (scenario.id === 'bundle') {
+        const scenarioComps = resolveScenarioComponents(suite.id, scenario.componentConcepts);
+        saveStandaloneResult({
+          suiteId: suite.id,
+          featureId: 'baseline',
+          result: {
+            schemaVersion: '2.0.0',
+            id: `${suite.id}-baseline`,
+            suite: {
+              id: suite.id,
+              name: suiteContext.name || suite.name,
+              packageName: suiteContext.packageName || suite.packageName,
+              version: suiteContext.version || 'unknown',
+              componentCount: scenarioComps.length,
+              components: scenarioComps,
+            },
+            feature: {
+              id: 'baseline',
+              name: 'Baseline (Standard Vite)',
+              description: FEATURE_METADATA.baseline?.description || 'Unmodified bundle with standard Vite + Rollup production build',
+              isBaseline: true,
+            },
+            scenario: {
+              id: scenario.id,
+              name: scenario.name,
+              description: scenario.description,
+              componentCount: scenarioComps.length,
+            },
+            timestamp: baselineResult.timestamp,
+            environment: baselineResult.environment,
+            metrics: baselineSize,
+            baseline: {
+              ...baselineSize,
+              ...baselineRuntime,
+            },
+            deltas: {
+              rawBytes: 0,
+              rawPercent: 0,
+              gzipBytes: 0,
+              gzipPercent: 0,
+              brotliBytes: 0,
+              brotliPercent: 0,
+              buildTimeMs: 0,
+              speedupPercent: 0,
+              updateSpeedupPercent: 0,
+              evalSpeedupPercent: 0,
+              registrationSpeedupPercent: 0,
+              memorySavingsPercent: 0,
+            },
+            runtime: {
+              ...baselineRuntime,
+              speedupPercent: 0,
+              updateSpeedupPercent: 0,
+              evalSpeedupPercent: 0,
+              registrationSpeedupPercent: 0,
+              memorySavingsPercent: 0,
+            },
+            equivalence: baselineEquivalence,
+          },
+          outDir: options.outDir,
+        });
+      }
+
       inMemoryBaselineCache.set(cacheKey, {
         size: baselineSize,
         runtime: baselineRuntime,
@@ -372,7 +435,10 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
           timestamp: new Date().toISOString(),
           environment: getEnvironmentMetadata(),
           metrics: variantSize,
-          baseline: baselineSize,
+          baseline: {
+            ...baselineSize,
+            ...baselineRuntime,
+          },
           deltas,
           runtime: scenarioResult.runtime,
           equivalence: variantEval.equivalence,

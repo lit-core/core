@@ -6,49 +6,13 @@
     "name": "Material Web (@material/web)",
     "packageName": "@material/web",
     "version": "2.5.0",
-    "componentCount": 20,
+    "componentCount": 4,
     "components": [
-      {
-        "concept": "button",
-        "tag": "md-filled-button",
-        "path": "button/filled-button.js",
-        "importStatement": "import '@material/web/button/filled-button.js';"
-      },
       {
         "concept": "checkbox",
         "tag": "md-checkbox",
         "path": "checkbox/checkbox.js",
         "importStatement": "import '@material/web/checkbox/checkbox.js';"
-      },
-      {
-        "concept": "radio",
-        "tag": "md-radio",
-        "path": "radio/radio.js",
-        "importStatement": "import '@material/web/radio/radio.js';"
-      },
-      {
-        "concept": "switch",
-        "tag": "md-switch",
-        "path": "switch/switch.js",
-        "importStatement": "import '@material/web/switch/switch.js';"
-      },
-      {
-        "concept": "text-input",
-        "tag": "md-filled-text-field",
-        "path": "textfield/filled-text-field.js",
-        "importStatement": "import '@material/web/textfield/filled-text-field.js';"
-      },
-      {
-        "concept": "select",
-        "tag": "md-filled-select",
-        "path": "select/filled-select.js",
-        "importStatement": "import '@material/web/select/filled-select.js';"
-      },
-      {
-        "concept": "dialog",
-        "tag": "md-dialog",
-        "path": "dialog/dialog.js",
-        "importStatement": "import '@material/web/dialog/dialog.js';"
       },
       {
         "concept": "badge",
@@ -57,76 +21,16 @@
         "importStatement": "import '@material/web/labs/badge/badge.js';"
       },
       {
-        "concept": "tabs",
-        "tag": "md-tabs",
-        "path": "tabs/tabs.js",
-        "importStatement": "import '@material/web/tabs/tabs.js';"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "md-linear-progress",
-        "path": "progress/linear-progress.js",
-        "importStatement": "import '@material/web/progress/linear-progress.js';"
-      },
-      {
-        "concept": "spinner",
-        "tag": "md-circular-progress",
-        "path": "progress/circular-progress.js",
-        "importStatement": "import '@material/web/progress/circular-progress.js';"
-      },
-      {
-        "concept": "slider",
-        "tag": "md-slider",
-        "path": "slider/slider.js",
-        "importStatement": "import '@material/web/slider/slider.js';"
-      },
-      {
-        "concept": "menu",
-        "tag": "md-menu",
-        "path": "menu/menu.js",
-        "importStatement": "import '@material/web/menu/menu.js';"
-      },
-      {
-        "concept": "divider",
-        "tag": "md-divider",
-        "path": "divider/divider.js",
-        "importStatement": "import '@material/web/divider/divider.js';"
-      },
-      {
-        "concept": "icon",
-        "tag": "md-icon",
-        "path": "icon/icon.js",
-        "importStatement": "import '@material/web/icon/icon.js';"
+        "concept": "button",
+        "tag": "md-filled-button",
+        "path": "button/filled-button.js",
+        "importStatement": "import '@material/web/button/filled-button.js';"
       },
       {
         "concept": "icon-button",
         "tag": "md-icon-button",
         "path": "iconbutton/icon-button.js",
         "importStatement": "import '@material/web/iconbutton/icon-button.js';"
-      },
-      {
-        "concept": "card",
-        "tag": "md-elevation",
-        "path": "elevation/elevation.js",
-        "importStatement": "import '@material/web/elevation/elevation.js';"
-      },
-      {
-        "concept": "elevation",
-        "tag": "md-focus-ring",
-        "path": "focus/md-focus-ring.js",
-        "importStatement": "import '@material/web/focus/md-focus-ring.js';"
-      },
-      {
-        "concept": "list",
-        "tag": "md-list",
-        "path": "list/list.js",
-        "importStatement": "import '@material/web/list/list.js';"
-      },
-      {
-        "concept": "chips",
-        "tag": "md-chip-set",
-        "path": "chips/chip-set.js",
-        "importStatement": "import '@material/web/chips/chip-set.js';"
       }
     ]
   },
@@ -137,18 +41,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "bundle",
-    "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "componentCount": 20
+    "id": "data-grid",
+    "name": "Data grid",
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
+    "componentCount": 4
   },
-  "timestamp": "2026-10-20T18:48:34.565Z",
+  "timestamp": "2026-10-20T20:32:55.115Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a289933",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,48 +67,53 @@
     }
   },
   "metrics": {
-    "rawBytes": 273529,
-    "gzipBytes": 58223,
-    "brotliBytes": 46959,
-    "buildTimeMs": 36.40608299999985
+    "rawBytes": 72946,
+    "gzipBytes": 18873,
+    "brotliBytes": 16739,
+    "buildTimeMs": 76.58766600000672
   },
   "baseline": {
-    "rawBytes": 271009,
-    "gzipBytes": 57599,
-    "brotliBytes": 46520,
-    "buildTimeMs": 51.46391599999998
+    "rawBytes": 71556,
+    "gzipBytes": 18605,
+    "brotliBytes": 16487,
+    "buildTimeMs": 15.228957999992417,
+    "firstRenderMs": 66.5,
+    "updateMs": 5.4,
+    "scriptEvalMs": 2.2,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1438843
   },
   "deltas": {
-    "rawBytes": 2520,
-    "rawPercent": 0.93,
-    "gzipBytes": 624,
-    "gzipPercent": 1.08,
-    "brotliBytes": 439,
-    "brotliPercent": 0.94,
-    "buildTimeMs": -15.1,
-    "firstRenderMs": -0.3,
-    "speedupPercent": 1,
-    "updateMs": -0.4,
-    "updateSpeedupPercent": 5.41,
-    "evalSpeedupPercent": -6.15,
-    "registrationSpeedupPercent": -50,
-    "memorySavingsPercent": -0.37
+    "rawBytes": 1390,
+    "rawPercent": 1.94,
+    "gzipBytes": 268,
+    "gzipPercent": 1.44,
+    "brotliBytes": 252,
+    "brotliPercent": 1.53,
+    "buildTimeMs": 61.4,
+    "firstRenderMs": 1,
+    "speedupPercent": -1.5,
+    "updateMs": -1,
+    "updateSpeedupPercent": 18.52,
+    "evalSpeedupPercent": -4.55,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -5.94
   },
   "runtime": {
-    "firstRenderMs": 29.7,
-    "updateMs": 7,
-    "scriptEvalMs": 6.9,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 1661381,
-    "speedupPercent": 1,
-    "updateSpeedupPercent": 5.41,
-    "evalSpeedupPercent": -6.15,
-    "registrationSpeedupPercent": -50,
-    "memorySavingsPercent": -0.37
+    "firstRenderMs": 67.5,
+    "updateMs": 4.4,
+    "scriptEvalMs": 2.3,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 1524251,
+    "speedupPercent": -1.5,
+    "updateSpeedupPercent": 18.52,
+    "evalSpeedupPercent": -4.55,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -5.94
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 49,
+    "elementsCount": 801,
     "verified": true,
     "phasesMatched": {
       "mount": true,

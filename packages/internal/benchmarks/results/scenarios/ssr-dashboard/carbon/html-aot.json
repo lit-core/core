@@ -5,27 +5,37 @@
     "id": "ssr-dashboard",
     "name": "SSR dashboard",
     "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
-    "relevantFeatures": ["resumable", "html-aot"],
-    "componentConcepts": ["card", "badge", "progress-bar", "button", "tabs"]
+    "relevantFeatures": [
+      "resumable",
+      "html-aot",
+      "ssr"
+    ],
+    "componentConcepts": [
+      "card",
+      "badge",
+      "progress-bar",
+      "button",
+      "tabs"
+    ]
   },
   "suite": {
     "id": "carbon",
     "name": "Carbon Web Components (@carbon/web-components)",
     "packageName": "@carbon/web-components",
-    "version": "2.64.0"
+    "version": "2.65.0"
   },
   "variant": {
     "id": "html-aot",
     "name": "AOT template compilation (html-aot)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-10T10:12:12.459Z",
+  "timestamp": "2026-10-20T20:30:51.870Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "fdd6e3c",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -40,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 796532,
-    "gzipBytes": 101012,
-    "brotliBytes": 59103,
-    "buildTimeMs": 38.94487500000105,
-    "firstRenderMs": 22.5,
+    "rawBytes": 813883,
+    "gzipBytes": 106151,
+    "brotliBytes": 61063,
+    "buildTimeMs": 48.28316700000141,
+    "firstRenderMs": 15.1,
     "updateMs": 0.4,
-    "scriptEvalMs": 2.3,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 4903517,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 46017,
     "scenarioSpecific": {
       "cardsCount": 4,
       "progressBarsCount": 4,
@@ -57,53 +67,2904 @@
     }
   },
   "baseline": {
-    "rawBytes": 796532,
-    "gzipBytes": 101012,
-    "brotliBytes": 59103,
-    "buildTimeMs": 52.032375,
-    "firstRenderMs": 27.9,
-    "updateMs": 0.9,
-    "scriptEvalMs": 2,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 4903340,
-    "scenarioSpecific": {
-      "cardsCount": 4,
-      "progressBarsCount": 4,
-      "resumedInteractions": 4,
-      "renderedNodes": 41
-    }
+    "rawBytes": 795847,
+    "gzipBytes": 101161,
+    "brotliBytes": 59159,
+    "buildTimeMs": 33.64479199999914,
+    "firstRenderMs": 25.8,
+    "updateMs": 0.4,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 40869
   },
   "deltas": {
-    "rawBytes": 0,
-    "rawPercent": 0,
-    "gzipBytes": 0,
-    "gzipPercent": 0,
-    "brotliBytes": 0,
-    "brotliPercent": 0,
-    "buildTimeMs": -13.1,
-    "firstRenderMs": -5.4,
-    "speedupPercent": 19.35,
-    "updateMs": -0.5,
-    "updateSpeedupPercent": 55.56,
-    "evalSpeedupPercent": -15,
-    "registrationSpeedupPercent": 20,
-    "memorySavingsPercent": 0
+    "rawBytes": 18036,
+    "rawPercent": 2.27,
+    "gzipBytes": 4990,
+    "gzipPercent": 4.93,
+    "brotliBytes": 1904,
+    "brotliPercent": 3.22,
+    "buildTimeMs": 14.6,
+    "firstRenderMs": -10.7,
+    "speedupPercent": 41.47,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -5.56,
+    "registrationSpeedupPercent": 85.71,
+    "memorySavingsPercent": -12.6
   },
   "runtime": {
-    "firstRenderMs": 22.5,
+    "firstRenderMs": 15.1,
     "updateMs": 0.4,
-    "scriptEvalMs": 2.3,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 4903517,
-    "speedupPercent": 19.35,
-    "updateSpeedupPercent": 55.56,
-    "evalSpeedupPercent": -15,
-    "registrationSpeedupPercent": 20,
-    "memorySavingsPercent": 0
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 46017,
+    "speedupPercent": 41.47,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": -5.56,
+    "registrationSpeedupPercent": 85.71,
+    "memorySavingsPercent": -12.6
+  },
+  "domSnapshot": {
+    "mount": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "ssr-dashboard-root",
+            "style": "display:flex; flex-direction:column; gap:20px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "dashboard-header",
+                "style": "display:flex; justify-content:space-between; align-items:center;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h3",
+                  "attributes": {
+                    "class": "dashboard-title"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "System telemetry overview"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "cds-tabs",
+                  "attributes": {
+                    "icon": "",
+                    "size": "",
+                    "type": "",
+                    "value": ""
+                  },
+                  "children": [],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "button",
+                        "attributes": {
+                          "aria-hidden": "true",
+                          "class": "cds--tab--overflow-nav-button cds--tabs__nav-caret-left cds--tab--overflow-nav-button--previous cds--tab--overflow-nav-button--hidden",
+                          "part": "prev-button",
+                          "tabindex": "-1"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "svg",
+                            "attributes": {
+                              "aria-hidden": "true",
+                              "fill": "currentColor",
+                              "focusable": "false",
+                              "height": "16",
+                              "preserveAspectRatio": "xMidYMid meet",
+                              "viewBox": "0 0 16 16",
+                              "width": "16",
+                              "xmlns": "http://www.w3.org/2000/svg"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "path",
+                                "attributes": {
+                                  "d": "M5 8 10 3 10.7 3.7 6.4 8 10.7 12.3 10 13z"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "cds--tabs-nav-content-container"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "cds--tabs-nav-content",
+                              "style": "inset-inline-start: 0px;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--tabs-nav"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--tab--list",
+                                      "id": "tablist",
+                                      "role": "tablist"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--sub-content-left"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--sub-content-right"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "button",
+                        "attributes": {
+                          "aria-hidden": "true",
+                          "class": "cds--tab--overflow-nav-button cds--tabs__nav-caret-right cds--tab--overflow-nav-button--next cds--tab--overflow-nav-button--hidden",
+                          "part": "next-button",
+                          "tabindex": "-1"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "svg",
+                            "attributes": {
+                              "aria-hidden": "true",
+                              "fill": "currentColor",
+                              "focusable": "false",
+                              "height": "16",
+                              "preserveAspectRatio": "xMidYMid meet",
+                              "viewBox": "0 0 16 16",
+                              "width": "16",
+                              "xmlns": "http://www.w3.org/2000/svg"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "path",
+                                "attributes": {
+                                  "d": "M11 8 6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "aria-live": "assertive",
+                          "aria-relevant": "additions text",
+                          "class": "cds--assistive-text",
+                          "role": "status"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "div",
+              "attributes": {
+                "class": "metrics-grid",
+                "style": "display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "cds-tile",
+                  "attributes": {
+                    "class": "metric-card",
+                    "color-scheme": "",
+                    "data-metric": "cpu"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "CPU utilization"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "cds-tag",
+                              "attributes": {
+                                "open": "",
+                                "size": "md",
+                                "type": "success"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Healthy"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--tag__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "decorator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "ai-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "42%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default",
+                            "value": "0.42"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "1",
+                                      "aria-valuemin": "0",
+                                      "aria-valuenow": "0.42",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar",
+                                          "style": "transform: scaleX(0.42);"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-button",
+                              "attributes": {
+                                "danger-description": "",
+                                "has-main-content": "",
+                                "kind": "primary",
+                                "size": "sm",
+                                "tab-index": "0",
+                                "tooltip-alignment": "",
+                                "tooltip-position": "top",
+                                "type": "button"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "cpu"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "decorator"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "ai-label"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "slug"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "cds-tile",
+                  "attributes": {
+                    "class": "metric-card",
+                    "color-scheme": "",
+                    "data-metric": "memory"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Memory allocation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "cds-tag",
+                              "attributes": {
+                                "open": "",
+                                "size": "md",
+                                "type": "warning"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Elevated"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--tag__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "decorator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "ai-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "78%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default",
+                            "value": "0.78"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "1",
+                                      "aria-valuemin": "0",
+                                      "aria-valuenow": "0.78",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar",
+                                          "style": "transform: scaleX(0.78);"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-button",
+                              "attributes": {
+                                "danger-description": "",
+                                "has-main-content": "",
+                                "kind": "primary",
+                                "size": "sm",
+                                "tab-index": "0",
+                                "tooltip-alignment": "",
+                                "tooltip-position": "top",
+                                "type": "button"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "memory"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "decorator"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "ai-label"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "slug"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "cds-tile",
+                  "attributes": {
+                    "class": "metric-card",
+                    "color-scheme": "",
+                    "data-metric": "io"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Disk throughput"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "cds-tag",
+                              "attributes": {
+                                "open": "",
+                                "size": "md",
+                                "type": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Normal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--tag__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "decorator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "ai-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "1.2 GB/s"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default",
+                            "value": "0.6"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "1",
+                                      "aria-valuemin": "0",
+                                      "aria-valuenow": "0.6",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar",
+                                          "style": "transform: scaleX(0.6);"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-button",
+                              "attributes": {
+                                "danger-description": "",
+                                "has-main-content": "",
+                                "kind": "primary",
+                                "size": "sm",
+                                "tab-index": "0",
+                                "tooltip-alignment": "",
+                                "tooltip-position": "top",
+                                "type": "button"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "io"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "decorator"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "ai-label"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "slug"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "cds-tile",
+                  "attributes": {
+                    "class": "metric-card",
+                    "color-scheme": "",
+                    "data-metric": "network"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Bandwidth saturation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "cds-tag",
+                              "attributes": {
+                                "open": "",
+                                "size": "md",
+                                "type": "success"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Optimal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--tag__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "decorator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "ai-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "25%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default",
+                            "value": "0.25"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "1",
+                                      "aria-valuemin": "0",
+                                      "aria-valuenow": "0.25",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar",
+                                          "style": "transform: scaleX(0.25);"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-button",
+                              "attributes": {
+                                "danger-description": "",
+                                "has-main-content": "",
+                                "kind": "primary",
+                                "size": "sm",
+                                "tab-index": "0",
+                                "tooltip-alignment": "",
+                                "tooltip-position": "top",
+                                "type": "button"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "network"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "decorator"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "ai-label"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "slug"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "type": "element",
+      "tag": "div",
+      "attributes": {
+        "id": "container"
+      },
+      "children": [
+        {
+          "type": "element",
+          "tag": "div",
+          "attributes": {
+            "class": "ssr-dashboard-root",
+            "style": "display:flex; flex-direction:column; gap:20px;"
+          },
+          "children": [
+            {
+              "type": "element",
+              "tag": "header",
+              "attributes": {
+                "class": "dashboard-header",
+                "style": "display:flex; justify-content:space-between; align-items:center;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "h3",
+                  "attributes": {
+                    "class": "dashboard-title"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "System telemetry overview"
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "tag": "cds-tabs",
+                  "attributes": {
+                    "icon": "",
+                    "size": "",
+                    "type": "",
+                    "value": ""
+                  },
+                  "children": [],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "button",
+                        "attributes": {
+                          "aria-hidden": "true",
+                          "class": "cds--tab--overflow-nav-button cds--tabs__nav-caret-left cds--tab--overflow-nav-button--previous cds--tab--overflow-nav-button--hidden",
+                          "part": "prev-button",
+                          "tabindex": "-1"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "svg",
+                            "attributes": {
+                              "aria-hidden": "true",
+                              "fill": "currentColor",
+                              "focusable": "false",
+                              "height": "16",
+                              "preserveAspectRatio": "xMidYMid meet",
+                              "viewBox": "0 0 16 16",
+                              "width": "16",
+                              "xmlns": "http://www.w3.org/2000/svg"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "path",
+                                "attributes": {
+                                  "d": "M5 8 10 3 10.7 3.7 6.4 8 10.7 12.3 10 13z"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "class": "cds--tabs-nav-content-container"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "cds--tabs-nav-content",
+                              "style": "inset-inline-start: 0px;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--tabs-nav"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--tab--list",
+                                      "id": "tablist",
+                                      "role": "tablist"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--sub-content-left"
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--sub-content-right"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "button",
+                        "attributes": {
+                          "aria-hidden": "true",
+                          "class": "cds--tab--overflow-nav-button cds--tabs__nav-caret-right cds--tab--overflow-nav-button--next cds--tab--overflow-nav-button--hidden",
+                          "part": "next-button",
+                          "tabindex": "-1"
+                        },
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "svg",
+                            "attributes": {
+                              "aria-hidden": "true",
+                              "fill": "currentColor",
+                              "focusable": "false",
+                              "height": "16",
+                              "preserveAspectRatio": "xMidYMid meet",
+                              "viewBox": "0 0 16 16",
+                              "width": "16",
+                              "xmlns": "http://www.w3.org/2000/svg"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "path",
+                                "attributes": {
+                                  "d": "M11 8 6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "element",
+                        "tag": "div",
+                        "attributes": {
+                          "aria-live": "assertive",
+                          "aria-relevant": "additions text",
+                          "class": "cds--assistive-text",
+                          "role": "status"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "tag": "div",
+              "attributes": {
+                "class": "metrics-grid",
+                "style": "display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;"
+              },
+              "children": [
+                {
+                  "type": "element",
+                  "tag": "cds-tile",
+                  "attributes": {
+                    "class": "metric-card",
+                    "color-scheme": "",
+                    "data-metric": "cpu"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "CPU utilization"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "cds-tag",
+                              "attributes": {
+                                "open": "",
+                                "size": "md",
+                                "type": "success"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Healthy"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--tag__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "decorator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "ai-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "42%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default",
+                            "value": "0.52"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "1",
+                                      "aria-valuemin": "0",
+                                      "aria-valuenow": "0.52",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar",
+                                          "style": "transform: scaleX(0.52);"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-button",
+                              "attributes": {
+                                "danger-description": "",
+                                "has-main-content": "",
+                                "kind": "primary",
+                                "size": "sm",
+                                "tab-index": "0",
+                                "tooltip-alignment": "",
+                                "tooltip-position": "top",
+                                "type": "button"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "cpu"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "decorator"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "ai-label"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "slug"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "cds-tile",
+                  "attributes": {
+                    "class": "metric-card",
+                    "color-scheme": "",
+                    "data-metric": "memory"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Memory allocation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "cds-tag",
+                              "attributes": {
+                                "open": "",
+                                "size": "md",
+                                "type": "warning"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Elevated"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--tag__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "decorator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "ai-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "78%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default",
+                            "value": "0.88"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "1",
+                                      "aria-valuemin": "0",
+                                      "aria-valuenow": "0.88",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar",
+                                          "style": "transform: scaleX(0.88);"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-button",
+                              "attributes": {
+                                "danger-description": "",
+                                "has-main-content": "",
+                                "kind": "primary",
+                                "size": "sm",
+                                "tab-index": "0",
+                                "tooltip-alignment": "",
+                                "tooltip-position": "top",
+                                "type": "button"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "memory"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "decorator"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "ai-label"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "slug"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "cds-tile",
+                  "attributes": {
+                    "class": "metric-card",
+                    "color-scheme": "",
+                    "data-metric": "io"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Disk throughput"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "cds-tag",
+                              "attributes": {
+                                "open": "",
+                                "size": "md",
+                                "type": "neutral"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Normal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--tag__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "decorator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "ai-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "1.2 GB/s"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default",
+                            "value": "0.7"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "1",
+                                      "aria-valuemin": "0",
+                                      "aria-valuenow": "0.7",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar",
+                                          "style": "transform: scaleX(0.7);"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-button",
+                              "attributes": {
+                                "danger-description": "",
+                                "has-main-content": "",
+                                "kind": "primary",
+                                "size": "sm",
+                                "tab-index": "0",
+                                "tooltip-alignment": "",
+                                "tooltip-position": "top",
+                                "type": "button"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "io"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "decorator"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "ai-label"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "slug"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "element",
+                  "tag": "cds-tile",
+                  "attributes": {
+                    "class": "metric-card",
+                    "color-scheme": "",
+                    "data-metric": "network"
+                  },
+                  "children": [
+                    {
+                      "type": "element",
+                      "tag": "div",
+                      "attributes": {
+                        "class": "card-inner",
+                        "style": "padding:16px; display:flex; flex-direction:column; gap:8px;"
+                      },
+                      "children": [
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-header",
+                            "style": "display:flex; justify-content:space-between; align-items:center;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "span",
+                              "attributes": {
+                                "class": "metric-label",
+                                "style": "font-size:14px; color:#52525b;"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Bandwidth saturation"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "tag": "cds-tag",
+                              "attributes": {
+                                "open": "",
+                                "size": "md",
+                                "type": "success"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Optimal"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "icon"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "span",
+                                    "attributes": {
+                                      "class": "cds--tag__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "decorator"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "ai-label"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "name": "slug"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "metric-value",
+                            "style": "font-size:24px; font-weight:500;"
+                          },
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "25%"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "tag": "cds-progress-bar",
+                          "attributes": {
+                            "max": "1",
+                            "size": "big",
+                            "status": "active",
+                            "type": "default",
+                            "value": "0.35"
+                          },
+                          "children": [],
+                          "shadowRoot": {
+                            "mode": "open",
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "div",
+                                "attributes": {
+                                  "class": "cds--progress-bar cds--progress-bar--big cds--progress-bar--default"
+                                },
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "class": "cds--progress-bar__label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "span",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__label-text"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "div",
+                                    "attributes": {
+                                      "aria-busy": "true",
+                                      "aria-invalid": "false",
+                                      "aria-valuemax": "1",
+                                      "aria-valuemin": "0",
+                                      "aria-valuenow": "0.35",
+                                      "class": "cds--progress-bar__track",
+                                      "role": "progressbar"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "div",
+                                        "attributes": {
+                                          "class": "cds--progress-bar__bar",
+                                          "style": "transform: scaleX(0.35);"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "tag": "div",
+                          "attributes": {
+                            "class": "card-footer",
+                            "style": "margin-top:8px;"
+                          },
+                          "children": [
+                            {
+                              "type": "element",
+                              "tag": "cds-button",
+                              "attributes": {
+                                "danger-description": "",
+                                "has-main-content": "",
+                                "kind": "primary",
+                                "size": "sm",
+                                "tab-index": "0",
+                                "tooltip-alignment": "",
+                                "tooltip-position": "top",
+                                "type": "button"
+                              },
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "value": "Inspect"
+                                },
+                                {
+                                  "type": "text",
+                                  "value": "network"
+                                }
+                              ],
+                              "shadowRoot": {
+                                "mode": "open",
+                                "children": [
+                                  {
+                                    "type": "element",
+                                    "tag": "button",
+                                    "attributes": {
+                                      "class": "cds--btn cds--btn--primary cds--btn--sm cds--layout--size-sm",
+                                      "id": "button",
+                                      "part": "button",
+                                      "tabindex": "0",
+                                      "type": "button"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {},
+                                        "children": []
+                                      },
+                                      {
+                                        "type": "element",
+                                        "tag": "slot",
+                                        "attributes": {
+                                          "name": "icon"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "element",
+                                    "tag": "slot",
+                                    "attributes": {
+                                      "id": "badge-indicator",
+                                      "name": "badge-indicator"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "shadowRoot": {
+                    "mode": "open",
+                    "children": [
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {},
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "decorator"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "ai-label"
+                        },
+                        "children": []
+                      },
+                      {
+                        "type": "element",
+                        "tag": "slot",
+                        "attributes": {
+                          "name": "slug"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "elementsCount": 41,
+    "customElementsCount": 17,
+    "shadowRootsCount": 17
   },
   "equivalence": {
     "domStructureMatch": true,
     "elementsCount": 41,
-    "verified": true
+    "verified": true,
+    "phasesMatched": {
+      "mount": true,
+      "update": true
+    }
   }
 }

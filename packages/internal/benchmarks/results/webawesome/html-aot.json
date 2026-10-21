@@ -52,13 +52,13 @@
     "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
     "componentCount": 5
   },
-  "timestamp": "2026-10-20T19:30:15.299Z",
+  "timestamp": "2026-10-20T20:28:05.899Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a289933",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -76,13 +76,18 @@
     "rawBytes": 172893,
     "gzipBytes": 41814,
     "brotliBytes": 34871,
-    "buildTimeMs": 30.37395800000013
+    "buildTimeMs": 26.163040999999794
   },
   "baseline": {
     "rawBytes": 164668,
     "gzipBytes": 40362,
     "brotliBytes": 33872,
-    "buildTimeMs": 40.61212499999999
+    "buildTimeMs": 19.10604200000307,
+    "firstRenderMs": 17,
+    "updateMs": 0.9,
+    "scriptEvalMs": 1.4,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 53034
   },
   "deltas": {
     "rawBytes": 8225,
@@ -91,26 +96,26 @@
     "gzipPercent": 3.6,
     "brotliBytes": 999,
     "brotliPercent": 2.95,
-    "buildTimeMs": -10.2,
-    "firstRenderMs": 0.2,
-    "speedupPercent": -1.44,
-    "updateMs": -0.1,
-    "updateSpeedupPercent": 14.29,
-    "evalSpeedupPercent": -35.71,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -1.05
+    "buildTimeMs": 7.1,
+    "firstRenderMs": -1.5,
+    "speedupPercent": 8.82,
+    "updateMs": -0.2,
+    "updateSpeedupPercent": 22.22,
+    "evalSpeedupPercent": -7.14,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -13.2
   },
   "runtime": {
-    "firstRenderMs": 14.1,
-    "updateMs": 0.6,
-    "scriptEvalMs": 1.9,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 1103339,
-    "speedupPercent": -1.44,
-    "updateSpeedupPercent": 14.29,
-    "evalSpeedupPercent": -35.71,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -1.05
+    "firstRenderMs": 15.5,
+    "updateMs": 0.7,
+    "scriptEvalMs": 1.5,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 60034,
+    "speedupPercent": 8.82,
+    "updateSpeedupPercent": 22.22,
+    "evalSpeedupPercent": -7.14,
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": -13.2
   },
   "equivalence": {
     "domStructureMatch": true,

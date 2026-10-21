@@ -10,8 +10,7 @@
       "props-lower",
       "css-minifier",
       "html-minifier",
-      "all",
-      "baseline"
+      "all"
     ],
     "componentConcepts": [
       "button",
@@ -40,20 +39,20 @@
     "id": "carbon",
     "name": "Carbon Web Components (@carbon/web-components)",
     "packageName": "@carbon/web-components",
-    "version": "2.64.0"
+    "version": "2.65.0"
   },
   "variant": {
     "id": "all",
     "name": "All optimizations combined",
     "isBaseline": false
   },
-  "timestamp": "2026-10-17T16:30:31.558Z",
+  "timestamp": "2026-10-20T20:30:55.251Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "7d68f91",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -68,15 +67,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 1447888,
-    "gzipBytes": 193021,
-    "brotliBytes": 100975,
-    "buildTimeMs": 1148.6023750000022,
-    "firstRenderMs": 34.4,
-    "updateMs": 4.9,
-    "scriptEvalMs": 3.1,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 8007470,
+    "rawBytes": 1249078,
+    "gzipBytes": 172446,
+    "brotliBytes": 101887,
+    "buildTimeMs": 700.3132910000022,
+    "firstRenderMs": 43.2,
+    "updateMs": 0.1,
+    "scriptEvalMs": 3.5,
+    "registrationMs": 2.1,
+    "heapUsedBytes": 58524,
     "scenarioSpecific": {
       "canonicalComponentCount": 20,
       "canonicalTags": [
@@ -105,69 +104,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 1440814,
-    "gzipBytes": 187054,
-    "brotliBytes": 98661,
-    "buildTimeMs": 70.33916699999997,
-    "firstRenderMs": 49.1,
-    "updateMs": 5.4,
-    "scriptEvalMs": 4.1,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 7892588,
-    "scenarioSpecific": {
-      "canonicalComponentCount": 20,
-      "canonicalTags": [
-        "cds-button",
-        "cds-checkbox",
-        "cds-radio-button",
-        "cds-toggle",
-        "cds-text-input",
-        "cds-select",
-        "cds-modal",
-        "cds-tag",
-        "cds-tabs",
-        "cds-progress-bar",
-        "cds-loading",
-        "cds-slider",
-        "cds-overflow-menu",
-        "cds-skeleton-text",
-        "cds-icon",
-        "cds-icon-button",
-        "cds-tile",
-        "cds-popover",
-        "cds-structured-list",
-        "cds-content-switcher"
-      ],
-      "renderedCells": 20
-    }
+    "rawBytes": 1451207,
+    "gzipBytes": 188052,
+    "brotliBytes": 99233,
+    "buildTimeMs": 115.01766700000002,
+    "firstRenderMs": 61.5,
+    "updateMs": 0.1,
+    "scriptEvalMs": 8.7,
+    "registrationMs": 2.2,
+    "heapUsedBytes": 155900
   },
   "deltas": {
-    "rawBytes": 7074,
-    "rawPercent": 0.49,
-    "gzipBytes": 5967,
-    "gzipPercent": 3.19,
-    "brotliBytes": 2314,
-    "brotliPercent": 2.35,
-    "buildTimeMs": 1078.3,
-    "firstRenderMs": -14.7,
-    "speedupPercent": 29.94,
-    "updateMs": -0.5,
-    "updateSpeedupPercent": 9.26,
-    "evalSpeedupPercent": 24.39,
-    "registrationSpeedupPercent": -120,
-    "memorySavingsPercent": -1.46
+    "rawBytes": -202129,
+    "rawPercent": -13.93,
+    "gzipBytes": -15606,
+    "gzipPercent": -8.3,
+    "brotliBytes": 2654,
+    "brotliPercent": 2.67,
+    "buildTimeMs": 585.3,
+    "firstRenderMs": -18.3,
+    "speedupPercent": 29.76,
+    "updateMs": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 59.77,
+    "registrationSpeedupPercent": 4.55,
+    "memorySavingsPercent": 62.46
   },
   "runtime": {
-    "firstRenderMs": 34.4,
-    "updateMs": 4.9,
-    "scriptEvalMs": 3.1,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 8007470,
-    "speedupPercent": 29.94,
-    "updateSpeedupPercent": 9.26,
-    "evalSpeedupPercent": 24.39,
-    "registrationSpeedupPercent": -120,
-    "memorySavingsPercent": -1.46
+    "firstRenderMs": 43.2,
+    "updateMs": 0.1,
+    "scriptEvalMs": 3.5,
+    "registrationMs": 2.1,
+    "heapUsedBytes": 58524,
+    "speedupPercent": 29.76,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 59.77,
+    "registrationSpeedupPercent": 4.55,
+    "memorySavingsPercent": 62.46
   },
   "domSnapshot": {
     "mount": {
@@ -301,7 +274,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -469,7 +442,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": "cds--radio-button__label  ",
+                                  "class": "cds--radio-button__label",
                                   "for": "input"
                                 },
                                 "children": [
@@ -852,7 +825,9 @@
                             {
                               "type": "element",
                               "tag": "cds-modal-body",
-                              "attributes": {},
+                              "attributes": {
+                                "no-fade": ""
+                              },
                               "children": [],
                               "shadowRoot": {
                                 "mode": "open",
@@ -1660,7 +1635,7 @@
                                 "type": "element",
                                 "tag": "p",
                                 "attributes": {
-                                  "class": " cds--skeleton__text ",
+                                  "class": "cds--skeleton__text",
                                   "style": "width:100%"
                                 },
                                 "children": []
@@ -1746,7 +1721,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "undefined",
-                                      "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                                      "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                                       "id": "button",
                                       "part": "button",
                                       "tabindex": "0",
@@ -2045,10 +2020,7 @@
                               {
                                 "type": "element",
                                 "tag": "slot",
-                                "attributes": {
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1"
-                                },
+                                "attributes": {},
                                 "children": []
                               }
                             ]
@@ -2195,7 +2167,7 @@
                                 "type": "element",
                                 "tag": "button",
                                 "attributes": {
-                                  "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                                  "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                                   "id": "button",
                                   "part": "button",
                                   "tabindex": "0",
@@ -2363,7 +2335,7 @@
                                 "type": "element",
                                 "tag": "label",
                                 "attributes": {
-                                  "class": "cds--radio-button__label  ",
+                                  "class": "cds--radio-button__label",
                                   "for": "input"
                                 },
                                 "children": [
@@ -3554,7 +3526,7 @@
                                 "type": "element",
                                 "tag": "p",
                                 "attributes": {
-                                  "class": " cds--skeleton__text ",
+                                  "class": "cds--skeleton__text",
                                   "style": "width:100%"
                                 },
                                 "children": []
@@ -3640,7 +3612,7 @@
                                     "tag": "button",
                                     "attributes": {
                                       "aria-label": "undefined",
-                                      "class": " cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg ",
+                                      "class": "cds--btn cds--btn--primary cds--btn--lg cds--layout--size-lg",
                                       "id": "button",
                                       "part": "button",
                                       "tabindex": "0",
@@ -3939,10 +3911,7 @@
                               {
                                 "type": "element",
                                 "tag": "slot",
-                                "attributes": {
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1"
-                                },
+                                "attributes": {},
                                 "children": []
                               }
                             ]

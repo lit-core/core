@@ -29,13 +29,13 @@
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T19:54:36.844Z",
+  "timestamp": "2026-10-20T20:31:33.152Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -53,12 +53,12 @@
     "rawBytes": 504647,
     "gzipBytes": 95572,
     "brotliBytes": 75381,
-    "buildTimeMs": 74.8927920000001,
-    "firstRenderMs": 28.6,
-    "updateMs": 0.3,
-    "scriptEvalMs": 2.8,
-    "registrationMs": 1,
-    "heapUsedBytes": 3979594,
+    "buildTimeMs": 46.559582999994745,
+    "firstRenderMs": 27.7,
+    "updateMs": 0.1,
+    "scriptEvalMs": 2.1,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 265755,
     "scenarioSpecific": {
       "sectionsCount": 5,
       "controlsPerSection": 6,
@@ -67,49 +67,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 504793,
-    "gzipBytes": 95567,
-    "brotliBytes": 75438,
-    "buildTimeMs": 43.29183299999568,
-    "firstRenderMs": 22.5,
+    "rawBytes": 504647,
+    "gzipBytes": 95572,
+    "brotliBytes": 75381,
+    "buildTimeMs": 92.1665420000063,
+    "firstRenderMs": 31.6,
     "updateMs": 0.2,
-    "scriptEvalMs": 2.2,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 3843541,
-    "scenarioSpecific": {
-      "sectionsCount": 5,
-      "controlsPerSection": 6,
-      "totalControls": 30,
-      "eventsDispatched": 15
-    }
+    "scriptEvalMs": 2.1,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 265023
   },
   "deltas": {
-    "rawBytes": -146,
-    "rawPercent": -0.03,
-    "gzipBytes": 5,
-    "gzipPercent": 0.01,
-    "brotliBytes": -57,
-    "brotliPercent": -0.08,
-    "buildTimeMs": 31.6,
-    "firstRenderMs": 6.1,
-    "speedupPercent": -27.11,
-    "updateMs": 0.1,
-    "updateSpeedupPercent": -50,
-    "evalSpeedupPercent": -27.27,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -3.54
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": -45.6,
+    "firstRenderMs": -3.9,
+    "speedupPercent": 12.34,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -50,
+    "memorySavingsPercent": -0.28
   },
   "runtime": {
-    "firstRenderMs": 28.6,
-    "updateMs": 0.3,
-    "scriptEvalMs": 2.8,
-    "registrationMs": 1,
-    "heapUsedBytes": 3979594,
-    "speedupPercent": -27.11,
-    "updateSpeedupPercent": -50,
-    "evalSpeedupPercent": -27.27,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -3.54
+    "firstRenderMs": 27.7,
+    "updateMs": 0.1,
+    "scriptEvalMs": 2.1,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 265755,
+    "speedupPercent": 12.34,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -50,
+    "memorySavingsPercent": -0.28
   },
   "domSnapshot": {
     "mount": {
@@ -181,7 +175,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-cff818b2",
+                                  "aria-describedby": "sp-help-text-2f727499",
                                   "aria-label": "Username",
                                   "class": "input",
                                   "placeholder": "",
@@ -196,14 +190,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-cff818b2"
+                              "id": "sp-help-text-2f727499"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-55054f5d"
+                                  "name": "pass-through-help-text-72f5a2d8"
                                 },
                                 "children": [
                                   {
@@ -400,7 +394,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -650,7 +644,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-75384fcd",
+                                  "aria-describedby": "sp-help-text-949ae88d",
                                   "aria-label": "Email channel",
                                   "class": "input",
                                   "placeholder": "",
@@ -665,14 +659,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-75384fcd"
+                              "id": "sp-help-text-949ae88d"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-6500794d"
+                                  "name": "pass-through-help-text-9be0a517"
                                 },
                                 "children": [
                                   {
@@ -909,7 +903,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -1159,7 +1153,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-4ac65015",
+                                  "aria-describedby": "sp-help-text-c5332263",
                                   "aria-label": "Passkey alias",
                                   "class": "input",
                                   "placeholder": "",
@@ -1174,14 +1168,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-4ac65015"
+                              "id": "sp-help-text-c5332263"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-1846f938"
+                                  "name": "pass-through-help-text-bcd6a300"
                                 },
                                 "children": [
                                   {
@@ -1377,7 +1371,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -1627,7 +1621,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-febedace",
+                                  "aria-describedby": "sp-help-text-2db9ef9a",
                                   "aria-label": "Organization",
                                   "class": "input",
                                   "placeholder": "",
@@ -1642,14 +1636,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-febedace"
+                              "id": "sp-help-text-2db9ef9a"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-0b87f3a4"
+                                  "name": "pass-through-help-text-dd360bad"
                                 },
                                 "children": [
                                   {
@@ -1846,7 +1840,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -2096,7 +2090,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-771d31f9",
+                                  "aria-describedby": "sp-help-text-e82a203a",
                                   "aria-label": "Webhook URL",
                                   "class": "input",
                                   "placeholder": "",
@@ -2111,14 +2105,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-771d31f9"
+                              "id": "sp-help-text-e82a203a"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-05990425"
+                                  "name": "pass-through-help-text-84b4e437"
                                 },
                                 "children": [
                                   {
@@ -2355,7 +2349,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -2624,7 +2618,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-cff818b2",
+                                  "aria-describedby": "sp-help-text-b886db24",
                                   "aria-label": "Username",
                                   "class": "input",
                                   "placeholder": "",
@@ -2639,14 +2633,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-cff818b2"
+                              "id": "sp-help-text-b886db24"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-55054f5d"
+                                  "name": "pass-through-help-text-0b6ac51e"
                                 },
                                 "children": [
                                   {
@@ -2843,7 +2837,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -3093,7 +3087,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-75384fcd",
+                                  "aria-describedby": "sp-help-text-c1626f00",
                                   "aria-label": "Email channel",
                                   "class": "input",
                                   "placeholder": "",
@@ -3108,14 +3102,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-75384fcd"
+                              "id": "sp-help-text-c1626f00"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-6500794d"
+                                  "name": "pass-through-help-text-4b8b1d0c"
                                 },
                                 "children": [
                                   {
@@ -3352,7 +3346,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -3602,7 +3596,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-4ac65015",
+                                  "aria-describedby": "sp-help-text-0e570631",
                                   "aria-label": "Passkey alias",
                                   "class": "input",
                                   "placeholder": "",
@@ -3617,14 +3611,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-4ac65015"
+                              "id": "sp-help-text-0e570631"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-1846f938"
+                                  "name": "pass-through-help-text-3e651efc"
                                 },
                                 "children": [
                                   {
@@ -3820,7 +3814,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -4070,7 +4064,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-febedace",
+                                  "aria-describedby": "sp-help-text-dd4c1bb4",
                                   "aria-label": "Organization",
                                   "class": "input",
                                   "placeholder": "",
@@ -4085,14 +4079,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-febedace"
+                              "id": "sp-help-text-dd4c1bb4"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-0b87f3a4"
+                                  "name": "pass-through-help-text-a99517a2"
                                 },
                                 "children": [
                                   {
@@ -4289,7 +4283,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -4539,7 +4533,7 @@
                                 "type": "element",
                                 "tag": "input",
                                 "attributes": {
-                                  "aria-describedby": "sp-help-text-771d31f9",
+                                  "aria-describedby": "sp-help-text-c27f8557",
                                   "aria-label": "Webhook URL",
                                   "class": "input",
                                   "placeholder": "",
@@ -4554,14 +4548,14 @@
                             "tag": "div",
                             "attributes": {
                               "aria-live": "assertive",
-                              "id": "sp-help-text-771d31f9"
+                              "id": "sp-help-text-c27f8557"
                             },
                             "children": [
                               {
                                 "type": "element",
                                 "tag": "slot",
                                 "attributes": {
-                                  "name": "pass-through-help-text-05990425"
+                                  "name": "pass-through-help-text-db5772e2"
                                 },
                                 "children": [
                                   {
@@ -4798,7 +4792,7 @@
                                 "type": "element",
                                 "tag": "span",
                                 "attributes": {
-                                  "class": " label "
+                                  "class": "label"
                                 },
                                 "children": [
                                   {
@@ -5003,12 +4997,13 @@
     "shadowRootsCount": 30
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 46,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Attribute \"aria-describedby\" mismatch at mount-root > [0] > [0] > [1] > [0] > shadowRoot > [0] > [0] (<input>): baseline=\"sp-help-text-93172a24\", variant=\"sp-help-text-2f727499\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

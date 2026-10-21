@@ -58,13 +58,13 @@
     "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering",
     "componentCount": 6
   },
-  "timestamp": "2026-10-19T20:05:47.990Z",
+  "timestamp": "2026-10-20T20:31:36.895Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -82,56 +82,46 @@
     "rawBytes": 252127,
     "gzipBytes": 44660,
     "brotliBytes": 36206,
-    "buildTimeMs": 39.20745899999997
+    "buildTimeMs": 51.01937500000349
   },
   "baseline": {
-    "rawBytes": 250859,
-    "gzipBytes": 44241,
-    "brotliBytes": 35823,
-    "buildTimeMs": 26.752250000005006,
+    "rawBytes": 252127,
+    "gzipBytes": 44660,
+    "brotliBytes": 36206,
+    "buildTimeMs": 31.799124999990454,
     "firstRenderMs": 28,
-    "updateMs": 3.3,
-    "scriptEvalMs": 2,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 3221093,
-    "scenarioSpecific": {
-      "totalItems": 50,
-      "directivesUsed": [
-        "repeat",
-        "classMap",
-        "styleMap",
-        "ifDefined"
-      ],
-      "renderedCards": 50
-    }
+    "updateMs": 3.2,
+    "scriptEvalMs": 1.9,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 529277
   },
   "deltas": {
-    "rawBytes": 1268,
-    "rawPercent": 0.51,
-    "gzipBytes": 419,
-    "gzipPercent": 0.95,
-    "brotliBytes": 383,
-    "brotliPercent": 1.07,
-    "buildTimeMs": 12.5,
-    "firstRenderMs": 0.4,
-    "speedupPercent": -1.43,
-    "updateMs": -0.3,
-    "updateSpeedupPercent": 9.09,
-    "evalSpeedupPercent": 10,
-    "registrationSpeedupPercent": -300,
-    "memorySavingsPercent": -20.95
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": 19.2,
+    "firstRenderMs": -0.1,
+    "speedupPercent": 0.36,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 3.13,
+    "evalSpeedupPercent": 5.26,
+    "registrationSpeedupPercent": 75,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 28.4,
-    "updateMs": 3,
+    "firstRenderMs": 27.9,
+    "updateMs": 3.1,
     "scriptEvalMs": 1.8,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 3896018,
-    "speedupPercent": -1.43,
-    "updateSpeedupPercent": 9.09,
-    "evalSpeedupPercent": 10,
-    "registrationSpeedupPercent": -300,
-    "memorySavingsPercent": -20.95
+    "registrationMs": 0.1,
+    "heapUsedBytes": 529277,
+    "speedupPercent": 0.36,
+    "updateSpeedupPercent": 3.13,
+    "evalSpeedupPercent": 5.26,
+    "registrationSpeedupPercent": 75,
+    "memorySavingsPercent": 0
   },
   "equivalence": {
     "domStructureMatch": true,

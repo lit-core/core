@@ -29,13 +29,13 @@
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T19:54:38.336Z",
+  "timestamp": "2026-10-20T20:33:14.957Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -50,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 247668,
-    "gzipBytes": 56187,
-    "brotliBytes": 46375,
-    "buildTimeMs": 46.49695800000018,
-    "firstRenderMs": 27.5,
-    "updateMs": 0.5,
-    "scriptEvalMs": 3.1,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 3175417,
+    "rawBytes": 246164,
+    "gzipBytes": 56044,
+    "brotliBytes": 46367,
+    "buildTimeMs": 35.04987499999697,
+    "firstRenderMs": 29.4,
+    "updateMs": 0.4,
+    "scriptEvalMs": 3,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 330242,
     "scenarioSpecific": {
       "sectionsCount": 5,
       "controlsPerSection": 6,
@@ -67,49 +67,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 241359,
-    "gzipBytes": 54976,
-    "brotliBytes": 45782,
-    "buildTimeMs": 31.47112499998184,
-    "firstRenderMs": 28.9,
-    "updateMs": 0.4,
-    "scriptEvalMs": 3.4,
+    "rawBytes": 242531,
+    "gzipBytes": 55201,
+    "brotliBytes": 45994,
+    "buildTimeMs": 34.72104100001161,
+    "firstRenderMs": 28.4,
+    "updateMs": 0.3,
+    "scriptEvalMs": 3,
     "registrationMs": 0.4,
-    "heapUsedBytes": 2952716,
-    "scenarioSpecific": {
-      "sectionsCount": 5,
-      "controlsPerSection": 6,
-      "totalControls": 30,
-      "eventsDispatched": 20
-    }
+    "heapUsedBytes": 322954
   },
   "deltas": {
-    "rawBytes": 6309,
-    "rawPercent": 2.61,
-    "gzipBytes": 1211,
-    "gzipPercent": 2.2,
-    "brotliBytes": 593,
-    "brotliPercent": 1.3,
-    "buildTimeMs": 15,
-    "firstRenderMs": -1.4,
-    "speedupPercent": 4.84,
+    "rawBytes": 3633,
+    "rawPercent": 1.5,
+    "gzipBytes": 843,
+    "gzipPercent": 1.53,
+    "brotliBytes": 373,
+    "brotliPercent": 0.81,
+    "buildTimeMs": 0.3,
+    "firstRenderMs": 1,
+    "speedupPercent": -3.52,
     "updateMs": 0.1,
-    "updateSpeedupPercent": -25,
-    "evalSpeedupPercent": 8.82,
-    "registrationSpeedupPercent": 75,
-    "memorySavingsPercent": -7.54
+    "updateSpeedupPercent": -33.33,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -25,
+    "memorySavingsPercent": -2.26
   },
   "runtime": {
-    "firstRenderMs": 27.5,
-    "updateMs": 0.5,
-    "scriptEvalMs": 3.1,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 3175417,
-    "speedupPercent": 4.84,
-    "updateSpeedupPercent": -25,
-    "evalSpeedupPercent": 8.82,
-    "registrationSpeedupPercent": 75,
-    "memorySavingsPercent": -7.54
+    "firstRenderMs": 29.4,
+    "updateMs": 0.4,
+    "scriptEvalMs": 3,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 330242,
+    "speedupPercent": -3.52,
+    "updateSpeedupPercent": -33.33,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -25,
+    "memorySavingsPercent": -2.26
   },
   "domSnapshot": {
     "mount": {
@@ -190,7 +184,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-8b4eee42-ec4e-4b2e-a45e-ae922d537d43",
+                                      "for": "mdc-el-3acc0cf3-6418-433c-822c-2e5d55141c50",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -262,7 +256,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-8b4eee42-ec4e-4b2e-a45e-ae922d537d43",
+                                          "id": "mdc-el-3acc0cf3-6418-433c-822c-2e5d55141c50",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -292,7 +286,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-8b4eee42-ec4e-4b2e-a45e-ae922d537d43",
+                              "identity": "mdc-el-3acc0cf3-6418-433c-822c-2e5d55141c50",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -338,9 +332,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-8c4d0b96-d2ad-4be0-b137-be6a075bbef2",
+                                  "id": "mdc-el-a1374bd6-9d90-4d8f-9a85-4791e3e65992",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -421,9 +413,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-8c39fe69-c155-4a35-87a4-c3ad75d94843",
+                                  "id": "mdc-el-def16b02-eb53-421f-8516-4748c8633be7",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -457,7 +447,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -581,9 +570,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -652,7 +638,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-ffee6178-b852-4c50-96e5-283a983cf767",
+                                  "id": "mdc-el-c3650e15-2f9b-4a4f-887c-a038d5b21de3",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -668,7 +654,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -693,9 +678,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -854,7 +837,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-2242cfe1-af74-4487-b25c-32e9b60052b7",
+                                      "for": "mdc-el-2f5adaec-f4fb-473c-9b29-6b5b33641ebc",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -926,7 +909,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-2242cfe1-af74-4487-b25c-32e9b60052b7",
+                                          "id": "mdc-el-2f5adaec-f4fb-473c-9b29-6b5b33641ebc",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -956,7 +939,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-2242cfe1-af74-4487-b25c-32e9b60052b7",
+                              "identity": "mdc-el-2f5adaec-f4fb-473c-9b29-6b5b33641ebc",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -1000,9 +983,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-df9bc88c-0651-4554-af55-56a57dddd83e",
+                                  "id": "mdc-el-4831e843-3728-41de-be63-6ffd112e1094",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -1085,9 +1066,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-c656677a-c86e-4b56-be8e-c967d9ef18ae",
+                                  "id": "mdc-el-95d0affc-d99d-4166-8fc8-353b85938ac9",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -1138,7 +1117,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -1260,9 +1238,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -1331,7 +1306,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-7976e24e-0d8e-46fd-8f28-e72705015a0b",
+                                  "id": "mdc-el-568b25cb-b3d0-4d2e-8c6d-cd41ce03319e",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -1347,7 +1322,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -1372,9 +1346,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -1533,7 +1505,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-e3c026e4-4a39-40ce-ab0d-a2a76b54e445",
+                                      "for": "mdc-el-6f54143e-0367-4357-be8f-6af08c2ea9e2",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -1605,7 +1577,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-e3c026e4-4a39-40ce-ab0d-a2a76b54e445",
+                                          "id": "mdc-el-6f54143e-0367-4357-be8f-6af08c2ea9e2",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -1635,7 +1607,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-e3c026e4-4a39-40ce-ab0d-a2a76b54e445",
+                              "identity": "mdc-el-6f54143e-0367-4357-be8f-6af08c2ea9e2",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -1681,9 +1653,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-9896bb52-1732-44d7-8602-1c799f9cb995",
+                                  "id": "mdc-el-dfa81ba2-eef0-43d9-9eb1-ca45d1c7ff33",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -1764,9 +1734,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-12078945-0fa2-422f-97bf-c48c8af6dc9a",
+                                  "id": "mdc-el-1ae15ed9-5469-44b7-b5b9-ce483f543a03",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -1800,7 +1768,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -1922,9 +1889,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -1993,7 +1957,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-907b697b-1dd5-4c74-8566-354eb383ab8c",
+                                  "id": "mdc-el-40cae607-a165-4d63-9e20-5f6a957d181c",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -2009,7 +1973,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -2034,9 +1997,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -2195,7 +2156,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-05ce2999-a2c9-49d1-b9c0-59f2e959372e",
+                                      "for": "mdc-el-3b83e8df-7229-4c82-85c7-91d08e46dec9",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -2267,7 +2228,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-05ce2999-a2c9-49d1-b9c0-59f2e959372e",
+                                          "id": "mdc-el-3b83e8df-7229-4c82-85c7-91d08e46dec9",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -2297,7 +2258,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-05ce2999-a2c9-49d1-b9c0-59f2e959372e",
+                              "identity": "mdc-el-3b83e8df-7229-4c82-85c7-91d08e46dec9",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -2343,9 +2304,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-c673a95e-47ac-4052-b872-2dbc5e8a18f6",
+                                  "id": "mdc-el-99d3f53f-01da-401f-a425-d721f9f3d86b",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -2426,9 +2385,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-14ad71a9-dc34-4838-8a5c-1a4c6880e285",
+                                  "id": "mdc-el-17b557f8-b1a6-4154-8928-d7bca48dfb9d",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -2462,7 +2419,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -2586,9 +2542,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -2657,7 +2610,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-a231de4f-d307-4d05-aa41-0f3113ead012",
+                                  "id": "mdc-el-35133598-b1b8-40a1-975a-7812421292d7",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -2673,7 +2626,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -2698,9 +2650,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -2859,7 +2809,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-2e910a25-b3c5-4724-a97c-6f34f8f96682",
+                                      "for": "mdc-el-39915565-0e3d-4c7e-8d5c-dc3cb78977bf",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -2931,7 +2881,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-2e910a25-b3c5-4724-a97c-6f34f8f96682",
+                                          "id": "mdc-el-39915565-0e3d-4c7e-8d5c-dc3cb78977bf",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -2961,7 +2911,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-2e910a25-b3c5-4724-a97c-6f34f8f96682",
+                              "identity": "mdc-el-39915565-0e3d-4c7e-8d5c-dc3cb78977bf",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -3005,9 +2955,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-8d1d7099-acba-4efc-b76e-cbd44390d8ba",
+                                  "id": "mdc-el-36479989-ffde-471a-a1af-7679518b66a1",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -3090,9 +3038,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-1b4f8c99-d2ac-459b-b2ed-a90c24055bb9",
+                                  "id": "mdc-el-623db8f5-84ce-49d1-8d5d-6fbe84ad64f8",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -3143,7 +3089,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -3265,9 +3210,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -3336,7 +3278,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-2928dbfe-bf14-4307-8bbf-0fcad22fb4d5",
+                                  "id": "mdc-el-04db23af-a953-4057-9fe7-7b00a12aa780",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -3352,7 +3294,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -3377,9 +3318,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -3557,7 +3496,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-8b4eee42-ec4e-4b2e-a45e-ae922d537d43",
+                                      "for": "mdc-el-f55fe4c1-008f-4aff-995e-f1e66a63d4aa",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -3629,7 +3568,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-8b4eee42-ec4e-4b2e-a45e-ae922d537d43",
+                                          "id": "mdc-el-f55fe4c1-008f-4aff-995e-f1e66a63d4aa",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -3659,7 +3598,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-8b4eee42-ec4e-4b2e-a45e-ae922d537d43",
+                              "identity": "mdc-el-f55fe4c1-008f-4aff-995e-f1e66a63d4aa",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -3705,9 +3644,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-8c4d0b96-d2ad-4be0-b137-be6a075bbef2",
+                                  "id": "mdc-el-7db46049-8d65-42fb-818e-3d06e150201f",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -3788,9 +3725,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-8c39fe69-c155-4a35-87a4-c3ad75d94843",
+                                  "id": "mdc-el-6835b462-e3c8-4030-bc8a-ff58d48384af",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -3824,7 +3759,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -3948,9 +3882,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -4019,7 +3950,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-ffee6178-b852-4c50-96e5-283a983cf767",
+                                  "id": "mdc-el-868c814b-8465-4ba4-a2d9-0cd3227d0e08",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -4035,7 +3966,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -4060,9 +3990,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -4221,7 +4149,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-2242cfe1-af74-4487-b25c-32e9b60052b7",
+                                      "for": "mdc-el-8aab4c7c-0f2b-4861-8230-575b1e86e49c",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -4293,7 +4221,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-2242cfe1-af74-4487-b25c-32e9b60052b7",
+                                          "id": "mdc-el-8aab4c7c-0f2b-4861-8230-575b1e86e49c",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -4323,7 +4251,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-2242cfe1-af74-4487-b25c-32e9b60052b7",
+                              "identity": "mdc-el-8aab4c7c-0f2b-4861-8230-575b1e86e49c",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -4367,9 +4295,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-df9bc88c-0651-4554-af55-56a57dddd83e",
+                                  "id": "mdc-el-9cf2c5e6-dd30-4a8c-a230-50c2b6a1b519",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -4452,9 +4378,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-c656677a-c86e-4b56-be8e-c967d9ef18ae",
+                                  "id": "mdc-el-938d2e81-236b-47a6-a9f5-3c6ef5645cd7",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -4505,7 +4429,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -4627,9 +4550,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -4698,7 +4618,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-7976e24e-0d8e-46fd-8f28-e72705015a0b",
+                                  "id": "mdc-el-d74d7840-45ad-46b0-9d9c-42a2bcdf0af3",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -4714,7 +4634,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -4739,9 +4658,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -4900,7 +4817,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-e3c026e4-4a39-40ce-ab0d-a2a76b54e445",
+                                      "for": "mdc-el-c0b00416-6696-4f5f-802e-91a3ce398181",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -4972,7 +4889,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-e3c026e4-4a39-40ce-ab0d-a2a76b54e445",
+                                          "id": "mdc-el-c0b00416-6696-4f5f-802e-91a3ce398181",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -5002,7 +4919,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-e3c026e4-4a39-40ce-ab0d-a2a76b54e445",
+                              "identity": "mdc-el-c0b00416-6696-4f5f-802e-91a3ce398181",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -5048,9 +4965,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-9896bb52-1732-44d7-8602-1c799f9cb995",
+                                  "id": "mdc-el-a96c7931-ffbc-445d-bb29-8bd4bb059940",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -5131,9 +5046,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-12078945-0fa2-422f-97bf-c48c8af6dc9a",
+                                  "id": "mdc-el-bbf961c4-c99c-4fd2-97e4-85d584caa464",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -5167,7 +5080,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -5289,9 +5201,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -5360,7 +5269,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-907b697b-1dd5-4c74-8566-354eb383ab8c",
+                                  "id": "mdc-el-13657c78-f03a-4795-8d3a-d6db86214e81",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -5376,7 +5285,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -5401,9 +5309,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -5562,7 +5468,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-05ce2999-a2c9-49d1-b9c0-59f2e959372e",
+                                      "for": "mdc-el-dc554dd9-1c79-4d53-becc-a20a8796a816",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -5634,7 +5540,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-05ce2999-a2c9-49d1-b9c0-59f2e959372e",
+                                          "id": "mdc-el-dc554dd9-1c79-4d53-becc-a20a8796a816",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -5664,7 +5570,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-05ce2999-a2c9-49d1-b9c0-59f2e959372e",
+                              "identity": "mdc-el-dc554dd9-1c79-4d53-becc-a20a8796a816",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -5710,9 +5616,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-c673a95e-47ac-4052-b872-2dbc5e8a18f6",
+                                  "id": "mdc-el-bd6cf0fa-044c-4f4a-b7a1-b9ce0dc319b0",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -5793,9 +5697,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-14ad71a9-dc34-4838-8a5c-1a4c6880e285",
+                                  "id": "mdc-el-85943a89-9e3c-4dc4-b94f-2374b57a9662",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -5829,7 +5731,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -5953,9 +5854,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -6024,7 +5922,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-a231de4f-d307-4d05-aa41-0f3113ead012",
+                                  "id": "mdc-el-efd2c046-9591-452f-9449-5b5be7f9faf1",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -6040,7 +5938,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -6065,9 +5962,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -6226,7 +6121,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-2e910a25-b3c5-4724-a97c-6f34f8f96682",
+                                      "for": "mdc-el-8e13a0c2-8134-49be-b9da-e32254526443",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -6298,7 +6193,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-2e910a25-b3c5-4724-a97c-6f34f8f96682",
+                                          "id": "mdc-el-8e13a0c2-8134-49be-b9da-e32254526443",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -6328,7 +6223,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-2e910a25-b3c5-4724-a97c-6f34f8f96682",
+                              "identity": "mdc-el-8e13a0c2-8134-49be-b9da-e32254526443",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -6372,9 +6267,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-8d1d7099-acba-4efc-b76e-cbd44390d8ba",
+                                  "id": "mdc-el-8e27f87f-b1d9-41b4-aa12-27cb82e6c8e2",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -6457,9 +6350,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "data-lh-change": "0",
-                                  "data-lh-keydown": "1",
-                                  "id": "mdc-el-1b4f8c99-d2ac-459b-b2ed-a90c24055bb9",
+                                  "id": "mdc-el-6696bbbe-c2e8-4e24-b6f9-7fe84070d69f",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -6510,7 +6401,6 @@
                             "type": "element",
                             "tag": "slot",
                             "attributes": {
-                              "data-lh-click": "2",
                               "hidden": "",
                               "name": "leading-visual"
                             },
@@ -6632,9 +6522,6 @@
                                   "aria-readonly": "false",
                                   "aria-required": "false",
                                   "class": "mdc-focus-ring",
-                                  "data-lh-click": "0",
-                                  "data-lh-keydown": "1",
-                                  "data-lh-keyup": "2",
                                   "id": "select-base-triggerid",
                                   "part": "base-container",
                                   "role": "combobox",
@@ -6703,7 +6590,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-2928dbfe-bf14-4307-8bbf-0fcad22fb4d5",
+                                  "id": "mdc-el-e05b2813-30d6-418a-8491-b5595e0b0e73",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -6719,7 +6606,6 @@
                                   "boundary": "clippingAncestors",
                                   "boundary-root": "viewport",
                                   "color": "tonal",
-                                  "data-lh-keydown": "3",
                                   "delay": "0,0",
                                   "exportparts": "popover-content",
                                   "focus-back-to-trigger": "",
@@ -6744,9 +6630,7 @@
                                   {
                                     "type": "element",
                                     "tag": "slot",
-                                    "attributes": {
-                                      "data-lh-click": "4"
-                                    },
+                                    "attributes": {},
                                     "children": []
                                   }
                                 ],
@@ -6851,12 +6735,13 @@
     "shadowRootsCount": 30
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 46,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Attribute \"for\" mismatch at mount-root > [0] > [0] > [1] > [0] > shadowRoot > [0] > [0] > [0] (<label>): baseline=\"mdc-el-dc615933-6f82-44d1-b817-903ac27da909\", variant=\"mdc-el-3acc0cf3-6418-433c-822c-2e5d55141c50\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

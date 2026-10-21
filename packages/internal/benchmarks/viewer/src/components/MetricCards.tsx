@@ -28,40 +28,46 @@ function formatPercent(pct?: number): string {
 export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, baseline, deltas, runtime, isBaseline, baselineRun }) => {
   if (!metrics) return null;
 
-  const rawDeltaPct = baselineRun?.rawBytes && metrics?.rawBytes && baselineRun.rawBytes > 0 ? ((metrics.rawBytes - baselineRun.rawBytes) / baselineRun.rawBytes) * 100 : deltas?.rawPercent;
-  const rawDeltaBytes = baselineRun?.rawBytes && metrics?.rawBytes ? metrics.rawBytes - baselineRun.rawBytes : deltas?.rawBytes;
+  const rawDeltaPct =
+    deltas?.rawPercent ?? (baselineRun?.rawBytes && metrics?.rawBytes && baselineRun.rawBytes > 0 ? ((metrics.rawBytes - baselineRun.rawBytes) / baselineRun.rawBytes) * 100 : undefined);
+  const rawDeltaBytes = deltas?.rawBytes ?? (baselineRun?.rawBytes && metrics?.rawBytes ? metrics.rawBytes - baselineRun.rawBytes : undefined);
 
-  const gzipDeltaPct = baselineRun?.gzipBytes && metrics?.gzipBytes && baselineRun.gzipBytes > 0 ? ((metrics.gzipBytes - baselineRun.gzipBytes) / baselineRun.gzipBytes) * 100 : deltas?.gzipPercent;
-  const gzipDeltaBytes = baselineRun?.gzipBytes && metrics?.gzipBytes ? metrics.gzipBytes - baselineRun.gzipBytes : deltas?.gzipBytes;
+  const gzipDeltaPct =
+    deltas?.gzipPercent ?? (baselineRun?.gzipBytes && metrics?.gzipBytes && baselineRun.gzipBytes > 0 ? ((metrics.gzipBytes - baselineRun.gzipBytes) / baselineRun.gzipBytes) * 100 : undefined);
+  const gzipDeltaBytes = deltas?.gzipBytes ?? (baselineRun?.gzipBytes && metrics?.gzipBytes ? metrics.gzipBytes - baselineRun.gzipBytes : undefined);
 
   const brotliDeltaPct =
-    baselineRun?.brotliBytes && metrics?.brotliBytes && baselineRun.brotliBytes > 0 ? ((metrics.brotliBytes - baselineRun.brotliBytes) / baselineRun.brotliBytes) * 100 : deltas?.brotliPercent;
-  const brotliDeltaBytes = baselineRun?.brotliBytes && metrics?.brotliBytes ? metrics.brotliBytes - baselineRun.brotliBytes : deltas?.brotliBytes;
+    deltas?.brotliPercent ??
+    (baselineRun?.brotliBytes && metrics?.brotliBytes && baselineRun.brotliBytes > 0 ? ((metrics.brotliBytes - baselineRun.brotliBytes) / baselineRun.brotliBytes) * 100 : undefined);
+  const brotliDeltaBytes = deltas?.brotliBytes ?? (baselineRun?.brotliBytes && metrics?.brotliBytes ? metrics.brotliBytes - baselineRun.brotliBytes : undefined);
 
   const firstRenderSpeedup =
-    baselineRun?.firstRenderMs && runtime?.firstRenderMs && baselineRun.firstRenderMs > 0 && runtime.firstRenderMs > 0
+    runtime?.speedupPercent ??
+    (baselineRun?.firstRenderMs && runtime?.firstRenderMs && baselineRun.firstRenderMs > 0 && runtime.firstRenderMs > 0
       ? ((baselineRun.firstRenderMs - runtime.firstRenderMs) / baselineRun.firstRenderMs) * 100
-      : runtime?.speedupPercent;
+      : undefined);
 
   const updateSpeedup =
-    baselineRun?.updateMs && runtime?.updateMs && baselineRun.updateMs > 0 && runtime.updateMs > 0
-      ? ((baselineRun.updateMs - runtime.updateMs) / baselineRun.updateMs) * 100
-      : runtime?.updateSpeedupPercent;
+    runtime?.updateSpeedupPercent ??
+    (baselineRun?.updateMs && runtime?.updateMs && baselineRun.updateMs > 0 && runtime.updateMs > 0 ? ((baselineRun.updateMs - runtime.updateMs) / baselineRun.updateMs) * 100 : undefined);
 
   const evalSpeedup =
-    baselineRun?.scriptEvalMs && runtime?.scriptEvalMs && baselineRun.scriptEvalMs > 0 && runtime.scriptEvalMs > 0
+    runtime?.evalSpeedupPercent ??
+    (baselineRun?.scriptEvalMs && runtime?.scriptEvalMs && baselineRun.scriptEvalMs > 0 && runtime.scriptEvalMs > 0
       ? ((baselineRun.scriptEvalMs - runtime.scriptEvalMs) / baselineRun.scriptEvalMs) * 100
-      : runtime?.evalSpeedupPercent;
+      : undefined);
 
   const registrationSpeedup =
-    baselineRun?.registrationMs && runtime?.registrationMs && baselineRun.registrationMs > 0 && runtime.registrationMs > 0
+    runtime?.registrationSpeedupPercent ??
+    (baselineRun?.registrationMs && runtime?.registrationMs && baselineRun.registrationMs > 0 && runtime.registrationMs > 0
       ? ((baselineRun.registrationMs - runtime.registrationMs) / baselineRun.registrationMs) * 100
-      : runtime?.registrationSpeedupPercent;
+      : undefined);
 
   const memorySavings =
-    baselineRun?.heapUsedBytes && runtime?.heapUsedBytes && baselineRun.heapUsedBytes > 0 && runtime.heapUsedBytes > 0
+    runtime?.memorySavingsPercent ??
+    (baselineRun?.heapUsedBytes && runtime?.heapUsedBytes && baselineRun.heapUsedBytes > 0 && runtime.heapUsedBytes > 0
       ? ((baselineRun.heapUsedBytes - runtime.heapUsedBytes) / baselineRun.heapUsedBytes) * 100
-      : runtime?.memorySavingsPercent;
+      : undefined);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">

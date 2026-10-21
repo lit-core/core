@@ -30,13 +30,13 @@
     "name": "Expression memoization (memoize)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-19T20:05:50.427Z",
+  "timestamp": "2026-10-20T20:33:18.004Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -54,12 +54,12 @@
     "rawBytes": 129615,
     "gzipBytes": 28629,
     "brotliBytes": 24336,
-    "buildTimeMs": 67.24420800000007,
-    "firstRenderMs": 21.9,
-    "updateMs": 4.2,
-    "scriptEvalMs": 1.9,
-    "registrationMs": 0,
-    "heapUsedBytes": 3362945,
+    "buildTimeMs": 32.00333399997908,
+    "firstRenderMs": 28.5,
+    "updateMs": 4.5,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 427852,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -72,53 +72,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 129428,
-    "gzipBytes": 28560,
-    "brotliBytes": 24229,
-    "buildTimeMs": 47.09412500000326,
-    "firstRenderMs": 32.7,
-    "updateMs": 4.9,
-    "scriptEvalMs": 1.8,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 2626196,
-    "scenarioSpecific": {
-      "totalItems": 50,
-      "directivesUsed": [
-        "repeat",
-        "classMap",
-        "styleMap",
-        "ifDefined"
-      ],
-      "renderedCards": 50
-    }
+    "rawBytes": 129615,
+    "gzipBytes": 28629,
+    "brotliBytes": 24336,
+    "buildTimeMs": 21.726416999998037,
+    "firstRenderMs": 29.3,
+    "updateMs": 4.6,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.1,
+    "heapUsedBytes": 427856
   },
   "deltas": {
-    "rawBytes": 187,
-    "rawPercent": 0.14,
-    "gzipBytes": 69,
-    "gzipPercent": 0.24,
-    "brotliBytes": 107,
-    "brotliPercent": 0.44,
-    "buildTimeMs": 20.2,
-    "firstRenderMs": -10.8,
-    "speedupPercent": 33.03,
-    "updateMs": -0.7,
-    "updateSpeedupPercent": 14.29,
-    "evalSpeedupPercent": -5.56,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -28.05
+    "rawBytes": 0,
+    "rawPercent": 0,
+    "gzipBytes": 0,
+    "gzipPercent": 0,
+    "brotliBytes": 0,
+    "brotliPercent": 0,
+    "buildTimeMs": 10.3,
+    "firstRenderMs": -0.8,
+    "speedupPercent": 2.73,
+    "updateMs": -0.1,
+    "updateSpeedupPercent": 2.17,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -200,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 21.9,
-    "updateMs": 4.2,
-    "scriptEvalMs": 1.9,
-    "registrationMs": 0,
-    "heapUsedBytes": 3362945,
-    "speedupPercent": 33.03,
-    "updateSpeedupPercent": 14.29,
-    "evalSpeedupPercent": -5.56,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -28.05
+    "firstRenderMs": 28.5,
+    "updateMs": 4.5,
+    "scriptEvalMs": 1.7,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 427852,
+    "speedupPercent": 2.73,
+    "updateSpeedupPercent": 2.17,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -200,
+    "memorySavingsPercent": 0
   },
   "domSnapshot": {
     "mount": {
@@ -186,7 +176,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -562,7 +552,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -938,7 +928,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -1314,7 +1304,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -1690,7 +1680,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -2066,7 +2056,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -2442,7 +2432,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -2818,7 +2808,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -3194,7 +3184,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -3570,7 +3560,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -3953,7 +3943,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -4329,7 +4319,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -4705,7 +4695,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -5081,7 +5071,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -5457,7 +5447,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -5833,7 +5823,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -6209,7 +6199,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -6585,7 +6575,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -6961,7 +6951,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -7337,7 +7327,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -7720,7 +7710,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -8096,7 +8086,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -8472,7 +8462,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -8848,7 +8838,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -9224,7 +9214,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -9600,7 +9590,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -9976,7 +9966,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -10352,7 +10342,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -10728,7 +10718,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -11104,7 +11094,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-pinned is-featured ",
+                    "class": "feed-card is-pinned is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -11487,7 +11477,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -11863,7 +11853,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -12239,7 +12229,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -12615,7 +12605,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -12991,7 +12981,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -13367,7 +13357,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -13743,7 +13733,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -14119,7 +14109,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -14495,7 +14485,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -14871,7 +14861,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-pinned ",
+                    "class": "feed-card is-pinned",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -15254,7 +15244,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -15630,7 +15620,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -16006,7 +15996,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -16382,7 +16372,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -16758,7 +16748,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -17134,7 +17124,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -17510,7 +17500,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -17886,7 +17876,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -18262,7 +18252,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -18638,7 +18628,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-pinned ",
+                    "class": "feed-card is-pinned",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -19853,7 +19843,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -20612,7 +20602,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -21371,7 +21361,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -22123,7 +22113,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -22882,7 +22872,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -23641,7 +23631,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -24400,7 +24390,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -25159,7 +25149,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -25911,7 +25901,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -26670,7 +26660,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -27429,7 +27419,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -28188,7 +28178,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -28947,7 +28937,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -29699,7 +29689,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -30458,7 +30448,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -31217,7 +31207,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -31976,7 +31966,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card is-featured ",
+                    "class": "feed-card is-featured",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -32735,7 +32725,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -33487,7 +33477,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -34246,7 +34236,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -35005,7 +34995,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -35764,7 +35754,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -36523,7 +36513,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -37275,7 +37265,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",
@@ -37651,7 +37641,7 @@
                   "tag": "mdc-card",
                   "attributes": {
                     "card-title": "",
-                    "class": " feed-card ",
+                    "class": "feed-card",
                     "image-alt": "",
                     "image-src": "",
                     "orientation": "vertical",

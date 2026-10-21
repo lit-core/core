@@ -52,13 +52,13 @@
     "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
     "componentCount": 5
   },
-  "timestamp": "2026-10-20T19:30:16.876Z",
+  "timestamp": "2026-10-20T20:33:03.956Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a289933",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -76,13 +76,18 @@
     "rawBytes": 66921,
     "gzipBytes": 19092,
     "brotliBytes": 16969,
-    "buildTimeMs": 18.51083400000016
+    "buildTimeMs": 15.845499999995809
   },
   "baseline": {
     "rawBytes": 66921,
     "gzipBytes": 19092,
     "brotliBytes": 16969,
-    "buildTimeMs": 25.135917000000063
+    "buildTimeMs": 15.498250000004191,
+    "firstRenderMs": 15.1,
+    "updateMs": 2,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 82748
   },
   "deltas": {
     "rawBytes": 0,
@@ -91,25 +96,25 @@
     "gzipPercent": 0,
     "brotliBytes": 0,
     "brotliPercent": 0,
-    "buildTimeMs": -6.6,
-    "firstRenderMs": 1,
-    "speedupPercent": -8.77,
-    "updateMs": 0.1,
-    "updateSpeedupPercent": -5.88,
-    "evalSpeedupPercent": -4.76,
-    "registrationSpeedupPercent": 60,
+    "buildTimeMs": 0.3,
+    "firstRenderMs": -0.1,
+    "speedupPercent": 0.66,
+    "updateMs": 0.2,
+    "updateSpeedupPercent": -10,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -25,
     "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 12.4,
-    "updateMs": 1.8,
-    "scriptEvalMs": 2.2,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 1109213,
-    "speedupPercent": -8.77,
-    "updateSpeedupPercent": -5.88,
-    "evalSpeedupPercent": -4.76,
-    "registrationSpeedupPercent": 60,
+    "firstRenderMs": 15,
+    "updateMs": 2.2,
+    "scriptEvalMs": 2,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 82748,
+    "speedupPercent": 0.66,
+    "updateSpeedupPercent": -10,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -25,
     "memorySavingsPercent": 0
   },
   "equivalence": {

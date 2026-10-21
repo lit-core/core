@@ -568,15 +568,12 @@ fn is_auxiliary_class_stmt(stmt: &Statement, cls_name: &str, resolver: &SymbolRe
         }
         Expression::ChainExpression(chain) => {
             if let ChainElement::CallExpression(call) = &chain.expression {
-                match call.callee.without_parentheses() {
-                    Expression::StaticMemberExpression(mem) => {
-                        if let Expression::Identifier(id) = mem.object.without_parentheses() {
-                            if id.name == cls_name {
-                                return true;
-                            }
+                if let Expression::StaticMemberExpression(mem) = call.callee.without_parentheses() {
+                    if let Expression::Identifier(id) = mem.object.without_parentheses() {
+                        if id.name == cls_name {
+                            return true;
                         }
                     }
-                    _ => {}
                 }
             }
             false

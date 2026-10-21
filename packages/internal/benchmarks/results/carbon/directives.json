@@ -58,13 +58,13 @@
     "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering",
     "componentCount": 6
   },
-  "timestamp": "2026-10-19T19:54:40.585Z",
+  "timestamp": "2026-10-20T20:30:44.775Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "d6c28b6",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -79,67 +79,58 @@
     }
   },
   "metrics": {
-    "rawBytes": 635304,
-    "gzipBytes": 83400,
-    "brotliBytes": 51165,
-    "buildTimeMs": 60.70120800000001
+    "rawBytes": 634544,
+    "gzipBytes": 83206,
+    "brotliBytes": 50921,
+    "buildTimeMs": 30.703291999998328
   },
   "baseline": {
-    "rawBytes": 635666,
-    "gzipBytes": 83521,
-    "brotliBytes": 51149,
-    "buildTimeMs": 49.822749999999985,
-    "firstRenderMs": 41.8,
-    "updateMs": 5.7,
+    "rawBytes": 635765,
+    "gzipBytes": 83631,
+    "brotliBytes": 51204,
+    "buildTimeMs": 35.0825420000001,
+    "firstRenderMs": 42.5,
+    "updateMs": 6.1,
     "scriptEvalMs": 1.6,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 4642395,
-    "scenarioSpecific": {
-      "totalItems": 50,
-      "directivesUsed": [
-        "repeat",
-        "classMap",
-        "styleMap",
-        "ifDefined"
-      ],
-      "renderedCards": 50
-    }
+    "registrationMs": 0.3,
+    "heapUsedBytes": 451356
   },
   "deltas": {
-    "rawBytes": -362,
-    "rawPercent": -0.06,
-    "gzipBytes": -121,
-    "gzipPercent": -0.14,
-    "brotliBytes": 16,
-    "brotliPercent": 0.03,
-    "buildTimeMs": 10.9,
-    "firstRenderMs": -10.7,
-    "speedupPercent": 25.6,
-    "updateMs": -0.5,
-    "updateSpeedupPercent": 8.77,
-    "evalSpeedupPercent": -18.75,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -12.76
+    "rawBytes": -1221,
+    "rawPercent": -0.19,
+    "gzipBytes": -425,
+    "gzipPercent": -0.51,
+    "brotliBytes": -283,
+    "brotliPercent": -0.55,
+    "buildTimeMs": -4.4,
+    "firstRenderMs": 1,
+    "speedupPercent": -2.35,
+    "updateMs": -1.1,
+    "updateSpeedupPercent": 18.03,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": 6.25
   },
   "runtime": {
-    "firstRenderMs": 31.1,
-    "updateMs": 5.2,
-    "scriptEvalMs": 1.9,
+    "firstRenderMs": 43.5,
+    "updateMs": 5,
+    "scriptEvalMs": 1.6,
     "registrationMs": 0.4,
-    "heapUsedBytes": 5234737,
-    "speedupPercent": 25.6,
-    "updateSpeedupPercent": 8.77,
-    "evalSpeedupPercent": -18.75,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": -12.76
+    "heapUsedBytes": 423144,
+    "speedupPercent": -2.35,
+    "updateSpeedupPercent": 18.03,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": 6.25
   },
   "equivalence": {
-    "domStructureMatch": true,
+    "domStructureMatch": false,
     "elementsCount": 555,
-    "verified": true,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Style attribute mismatch at mount-root > [0] > [1] > [0] (<cds-tile>): baseline=\"padding:12px;border-left:1px solid #e4e4e7;\", variant=\"padding: 12px;border-left: 1px solid #e4e4e7;\"",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

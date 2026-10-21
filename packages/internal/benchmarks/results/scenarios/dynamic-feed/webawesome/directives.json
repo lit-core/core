@@ -30,13 +30,13 @@
     "name": "Lit directive lowering (directives)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-20T19:24:38.000Z",
+  "timestamp": "2026-10-20T20:29:23.341Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "a289933",
+    "gitCommit": "97c3c29",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -54,12 +54,12 @@
     "rawBytes": 151234,
     "gzipBytes": 38317,
     "brotliBytes": 31884,
-    "buildTimeMs": 21.112750000000005,
-    "firstRenderMs": 31.3,
-    "updateMs": 4.8,
-    "scriptEvalMs": 1.4,
+    "buildTimeMs": 17.079458999999588,
+    "firstRenderMs": 32.7,
+    "updateMs": 4.9,
+    "scriptEvalMs": 1.3,
     "registrationMs": 0.2,
-    "heapUsedBytes": 1560998,
+    "heapUsedBytes": 409569,
     "scenarioSpecific": {
       "totalItems": 50,
       "directivesUsed": [
@@ -75,12 +75,12 @@
     "rawBytes": 152662,
     "gzipBytes": 38788,
     "brotliBytes": 32363,
-    "buildTimeMs": 37.80737499999998,
-    "firstRenderMs": 34.1,
-    "updateMs": 5.7,
-    "scriptEvalMs": 1.4,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 1659357
+    "buildTimeMs": 18.84600000000046,
+    "firstRenderMs": 36.8,
+    "updateMs": 4.8,
+    "scriptEvalMs": 1.8,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 477761
   },
   "deltas": {
     "rawBytes": -1428,
@@ -89,26 +89,26 @@
     "gzipPercent": -1.21,
     "brotliBytes": -479,
     "brotliPercent": -1.48,
-    "buildTimeMs": -16.7,
-    "firstRenderMs": -2.8,
-    "speedupPercent": 8.21,
-    "updateMs": -0.9,
-    "updateSpeedupPercent": 15.79,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": 5.93
+    "buildTimeMs": -1.8,
+    "firstRenderMs": -4.1,
+    "speedupPercent": 11.14,
+    "updateMs": 0.1,
+    "updateSpeedupPercent": -2.08,
+    "evalSpeedupPercent": 27.78,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 14.27
   },
   "runtime": {
-    "firstRenderMs": 31.3,
-    "updateMs": 4.8,
-    "scriptEvalMs": 1.4,
+    "firstRenderMs": 32.7,
+    "updateMs": 4.9,
+    "scriptEvalMs": 1.3,
     "registrationMs": 0.2,
-    "heapUsedBytes": 1560998,
-    "speedupPercent": 8.21,
-    "updateSpeedupPercent": 15.79,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": 5.93
+    "heapUsedBytes": 409569,
+    "speedupPercent": 11.14,
+    "updateSpeedupPercent": -2.08,
+    "evalSpeedupPercent": 27.78,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 14.27
   },
   "domSnapshot": {
     "mount": {
@@ -205,12 +205,20 @@
                                       "tag": "svg",
                                       "attributes": {
                                         "fill": "currentColor",
-                                        "height": "16",
                                         "part": "svg",
-                                        "viewBox": "0 0 16 16",
-                                        "width": "16"
+                                        "viewBox": "0 0 320 512",
+                                        "xmlns": "http://www.w3.org/2000/svg"
                                       },
-                                      "children": []
+                                      "children": [
+                                        {
+                                          "type": "element",
+                                          "tag": "path",
+                                          "attributes": {
+                                            "d": "M311.1 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L243.2 256 73.9 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
                                     }
                                   ]
                                 }
