@@ -46,13 +46,13 @@
     "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
     "componentCount": 4
   },
-  "timestamp": "2026-10-20T20:29:20.377Z",
+  "timestamp": "2026-10-21T22:42:47.752Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -67,58 +67,62 @@
     }
   },
   "metrics": {
-    "rawBytes": 200735,
-    "gzipBytes": 52756,
-    "brotliBytes": 44277,
-    "buildTimeMs": 77.996083
+    "rawBytes": 402015,
+    "gzipBytes": 91862,
+    "brotliBytes": 73379,
+    "buildTimeMs": 30.178208999999697
   },
   "baseline": {
-    "rawBytes": 198116,
-    "gzipBytes": 52030,
-    "brotliBytes": 43871,
-    "buildTimeMs": 39.34224999999998,
-    "firstRenderMs": 78.4,
-    "updateMs": 5.2,
-    "scriptEvalMs": 3.5,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 1534283
+    "rawBytes": 393207,
+    "gzipBytes": 90193,
+    "brotliBytes": 72245,
+    "buildTimeMs": 86.54862500000002,
+    "firstRenderMs": 67.2,
+    "updateMs": 0.31,
+    "scriptEvalMs": 10.2,
+    "registrationMs": 3.2,
+    "heapUsedBytes": 19071,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "deltas": {
-    "rawBytes": 2619,
-    "rawPercent": 1.32,
-    "gzipBytes": 726,
-    "gzipPercent": 1.4,
-    "brotliBytes": 406,
-    "brotliPercent": 0.93,
-    "buildTimeMs": 38.7,
-    "firstRenderMs": -2.5,
-    "speedupPercent": 3.19,
-    "updateMs": -1,
-    "updateSpeedupPercent": 19.23,
-    "evalSpeedupPercent": 42.86,
-    "registrationSpeedupPercent": 33.33,
-    "memorySavingsPercent": -4.67
+    "rawBytes": 8808,
+    "rawPercent": 2.24,
+    "gzipBytes": 1669,
+    "gzipPercent": 1.85,
+    "brotliBytes": 1134,
+    "brotliPercent": 1.57,
+    "buildTimeMs": 2.7,
+    "firstRenderMs": -2,
+    "speedupPercent": 5.73,
+    "updateMs": -0.02,
+    "updateSpeedupPercent": 18.18,
+    "evalSpeedupPercent": 19.23,
+    "registrationSpeedupPercent": 10,
+    "memorySavingsPercent": -28.99
   },
   "runtime": {
-    "firstRenderMs": 75.9,
-    "updateMs": 4.2,
-    "scriptEvalMs": 2,
-    "registrationMs": 0.8,
-    "heapUsedBytes": 1605983,
-    "speedupPercent": 3.19,
-    "updateSpeedupPercent": 19.23,
-    "evalSpeedupPercent": 42.86,
-    "registrationSpeedupPercent": 33.33,
-    "memorySavingsPercent": -4.67
+    "firstRenderMs": 63.35,
+    "updateMs": 0.25,
+    "scriptEvalMs": 8.24,
+    "registrationMs": 2.88,
+    "heapUsedBytes": 24600,
+    "speedupPercent": 5.73,
+    "updateSpeedupPercent": 18.18,
+    "evalSpeedupPercent": 19.23,
+    "registrationSpeedupPercent": 10,
+    "memorySavingsPercent": -28.99
   },
   "equivalence": {
-    "domStructureMatch": false,
-    "elementsCount": 801,
-    "verified": false,
-    "divergenceReason": "Mount phase divergence: Attribute \"aria-labelledby\" mismatch at mount-root > [0] > [0] > [6] > shadowRoot > [0] > [1] (<button>): baseline=\"wa-tooltip-fzhbK1rECWeB8UuTgao8Z\", variant=\"wa-tooltip-IpKDsOfyihtW0LkSfBOxD\"",
+    "domStructureMatch": true,
+    "elementsCount": 167,
+    "verified": true,
     "phasesMatched": {
-      "mount": false,
-      "update": false
+      "mount": true,
+      "update": true
     }
   }
 }

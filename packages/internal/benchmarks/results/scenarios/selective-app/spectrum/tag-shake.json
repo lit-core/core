@@ -25,13 +25,13 @@
     "name": "Tag shake dead code elimination (tag-shake)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-20T20:34:52.441Z",
+  "timestamp": "2026-10-21T22:45:39.922Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -46,15 +46,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 808138,
-    "gzipBytes": 146434,
-    "brotliBytes": 111119,
-    "buildTimeMs": 88.20045800000025,
-    "firstRenderMs": 11.9,
-    "updateMs": 0.2,
-    "scriptEvalMs": 10.5,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 30331,
+    "rawBytes": 808412,
+    "gzipBytes": 146618,
+    "brotliBytes": 111176,
+    "buildTimeMs": 86.24720899999375,
+    "firstRenderMs": 12.7,
+    "updateMs": 0.05,
+    "scriptEvalMs": 10.6,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 9903,
     "scenarioSpecific": {
       "importedCustomElementsCount": 20,
       "referencedCustomElementsCount": 3,
@@ -67,43 +67,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 822896,
-    "gzipBytes": 147875,
-    "brotliBytes": 112250,
-    "buildTimeMs": 70.6762920000001,
-    "firstRenderMs": 10.3,
-    "updateMs": 0.3,
-    "scriptEvalMs": 10.2,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 39012
+    "rawBytes": 824561,
+    "gzipBytes": 148234,
+    "brotliBytes": 112563,
+    "buildTimeMs": 123.45045900001423,
+    "firstRenderMs": 11.4,
+    "updateMs": 0.11,
+    "scriptEvalMs": 11.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 6659
   },
   "deltas": {
-    "rawBytes": -14758,
-    "rawPercent": -1.79,
-    "gzipBytes": -1441,
-    "gzipPercent": -0.97,
-    "brotliBytes": -1131,
-    "brotliPercent": -1.01,
-    "buildTimeMs": 17.5,
-    "firstRenderMs": 1.6,
-    "speedupPercent": -15.53,
-    "updateMs": -0.1,
-    "updateSpeedupPercent": 33.33,
-    "evalSpeedupPercent": -2.94,
-    "registrationSpeedupPercent": 54.55,
-    "memorySavingsPercent": 22.25
+    "rawBytes": -16149,
+    "rawPercent": -1.96,
+    "gzipBytes": -1616,
+    "gzipPercent": -1.09,
+    "brotliBytes": -1387,
+    "brotliPercent": -1.23,
+    "buildTimeMs": -37.2,
+    "firstRenderMs": 1.3,
+    "speedupPercent": -11.4,
+    "updateMs": -0.06,
+    "updateSpeedupPercent": 54.55,
+    "evalSpeedupPercent": 7.83,
+    "registrationSpeedupPercent": 25,
+    "memorySavingsPercent": -48.72
   },
   "runtime": {
-    "firstRenderMs": 11.9,
-    "updateMs": 0.2,
-    "scriptEvalMs": 10.5,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 30331,
-    "speedupPercent": -15.53,
-    "updateSpeedupPercent": 33.33,
-    "evalSpeedupPercent": -2.94,
-    "registrationSpeedupPercent": 54.55,
-    "memorySavingsPercent": 22.25
+    "firstRenderMs": 12.7,
+    "updateMs": 0.05,
+    "scriptEvalMs": 10.6,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 9903,
+    "speedupPercent": -11.4,
+    "updateSpeedupPercent": 54.55,
+    "evalSpeedupPercent": 7.83,
+    "registrationSpeedupPercent": 25,
+    "memorySavingsPercent": -48.72
   },
   "domSnapshot": {
     "mount": {
@@ -424,13 +424,13 @@
                           "type": "element",
                           "tag": "sp-badge",
                           "attributes": {
-                            "type": "success",
+                            "type": "neutral",
                             "variant": "informative"
                           },
                           "children": [
                             {
                               "type": "text",
-                              "value": "Active"
+                              "value": "Standby"
                             }
                           ],
                           "shadowRoot": {

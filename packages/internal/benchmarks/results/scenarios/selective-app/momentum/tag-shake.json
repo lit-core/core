@@ -25,13 +25,13 @@
     "name": "Tag shake dead code elimination (tag-shake)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-20T20:33:20.634Z",
+  "timestamp": "2026-10-21T22:46:01.719Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -46,15 +46,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 349647,
-    "gzipBytes": 75214,
-    "brotliBytes": 60395,
-    "buildTimeMs": 48.56770799998776,
-    "firstRenderMs": 4.5,
-    "updateMs": 0.2,
-    "scriptEvalMs": 4.2,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 46828,
+    "rawBytes": 349927,
+    "gzipBytes": 75400,
+    "brotliBytes": 60590,
+    "buildTimeMs": 47.11195799999405,
+    "firstRenderMs": 5,
+    "updateMs": 0.05,
+    "scriptEvalMs": 4.1,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 3163,
     "scenarioSpecific": {
       "importedCustomElementsCount": 20,
       "referencedCustomElementsCount": 3,
@@ -67,43 +67,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 349647,
-    "gzipBytes": 75214,
-    "brotliBytes": 60395,
-    "buildTimeMs": 43.07308299999568,
-    "firstRenderMs": 6,
-    "updateMs": 0.1,
-    "scriptEvalMs": 4.1,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 248080
+    "rawBytes": 351321,
+    "gzipBytes": 75557,
+    "brotliBytes": 60735,
+    "buildTimeMs": 41.81320799997775,
+    "firstRenderMs": 5.6,
+    "updateMs": 0.13,
+    "scriptEvalMs": 4.7,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 2347
   },
   "deltas": {
-    "rawBytes": 0,
-    "rawPercent": 0,
-    "gzipBytes": 0,
-    "gzipPercent": 0,
-    "brotliBytes": 0,
-    "brotliPercent": 0,
-    "buildTimeMs": 5.5,
-    "firstRenderMs": -1.5,
-    "speedupPercent": 25,
-    "updateMs": 0.1,
-    "updateSpeedupPercent": -100,
-    "evalSpeedupPercent": -2.44,
-    "registrationSpeedupPercent": -50,
-    "memorySavingsPercent": 81.12
+    "rawBytes": -1394,
+    "rawPercent": -0.4,
+    "gzipBytes": -157,
+    "gzipPercent": -0.21,
+    "brotliBytes": -145,
+    "brotliPercent": -0.24,
+    "buildTimeMs": 5.3,
+    "firstRenderMs": -0.6,
+    "speedupPercent": 10.71,
+    "updateMs": -0.08,
+    "updateSpeedupPercent": 61.54,
+    "evalSpeedupPercent": 12.77,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": -34.77
   },
   "runtime": {
-    "firstRenderMs": 4.5,
-    "updateMs": 0.2,
-    "scriptEvalMs": 4.2,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 46828,
-    "speedupPercent": 25,
-    "updateSpeedupPercent": -100,
-    "evalSpeedupPercent": -2.44,
-    "registrationSpeedupPercent": -50,
-    "memorySavingsPercent": 81.12
+    "firstRenderMs": 5,
+    "updateMs": 0.05,
+    "scriptEvalMs": 4.1,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 3163,
+    "speedupPercent": 10.71,
+    "updateSpeedupPercent": 61.54,
+    "evalSpeedupPercent": 12.77,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": -34.77
   },
   "domSnapshot": {
     "mount": {
@@ -483,13 +483,13 @@
                           "tag": "mdc-badge",
                           "attributes": {
                             "max-counter": "99",
-                            "type": "success",
+                            "type": "dot",
                             "variant": "primary"
                           },
                           "children": [
                             {
                               "type": "text",
-                              "value": "Active"
+                              "value": "Standby"
                             }
                           ],
                           "shadowRoot": {
@@ -497,17 +497,11 @@
                             "children": [
                               {
                                 "type": "element",
-                                "tag": "mdc-icon",
+                                "tag": "div",
                                 "attributes": {
-                                  "name": "check-circle-badge-filled",
-                                  "part": "badge-icon ",
-                                  "size": "1"
+                                  "part": "badge-dot "
                                 },
-                                "children": [],
-                                "shadowRoot": {
-                                  "mode": "open",
-                                  "children": []
-                                }
+                                "children": []
                               }
                             ]
                           }

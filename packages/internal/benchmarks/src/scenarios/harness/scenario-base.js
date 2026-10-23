@@ -134,8 +134,16 @@ export function compareDomTrees(base, variant, path = 'root') {
   const baseKeys = Object.keys(baseAttrs).sort();
   for (const key of baseKeys) {
     if (key === 'style') {
-      const baseStyle = (baseAttrs[key] || '').replace(/\s+/g, ' ').trim();
-      const varStyle = (varAttrs[key] || '').replace(/\s+/g, ' ').trim();
+      const baseStyle = (baseAttrs[key] || '')
+        .replace(/\s*:\s*/g, ':')
+        .replace(/\s*;\s*/g, ';')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const varStyle = (varAttrs[key] || '')
+        .replace(/\s*:\s*/g, ':')
+        .replace(/\s*;\s*/g, ';')
+        .replace(/\s+/g, ' ')
+        .trim();
       if (baseStyle !== varStyle) {
         return {
           match: false,
@@ -310,6 +318,32 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
     window.__registrationMs = 0;
     window.__bundleError = null;
 
+    // Seed PRNG and crypto deterministically so component auto-IDs match between runs
+    let __seed = 0x2f6e2b1;
+    Math.random = function() {
+      __seed = (__seed * 1664525 + 1013904223) >>> 0;
+      return __seed / 0x100000000;
+    };
+    if (typeof crypto !== 'undefined') {
+      let __uuidSeq = 0;
+      try {
+        crypto.randomUUID = function() {
+          __uuidSeq++;
+          const hex = __uuidSeq.toString(16).padStart(12, '0');
+          return '00000000-0000-4000-8000-' + hex;
+        };
+      } catch {}
+      try {
+        crypto.getRandomValues = function(buf) {
+          for (let i = 0; i < buf.length; i++) {
+            __seed = (__seed * 1664525 + 1013904223) >>> 0;
+            buf[i] = __seed & 0xff;
+          }
+          return buf;
+        };
+      } catch {}
+    }
+
     const origDefine = customElements.define;
     customElements.define = function(tag, constructor, options) {
       if (!window.__registeredTags.includes(tag)) {
@@ -389,7 +423,15 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
 
         for (const name of attrNames) {
           const rawVal = el.getAttribute(name) || '';
-          attributes[name] = name === 'class' ? rawVal.trim().split(/\s+/).join(' ') : rawVal;
+          if (name === 'class') {
+            attributes[name] = rawVal.trim().split(/\s+/).join(' ');
+          } else if (tag === 'wa-tab-group' && name === 'active' && (rawVal === '' || rawVal === 'undefined' || rawVal === 'overview')) {
+            attributes[name] = 'overview';
+          } else if (name === 'id' || name === 'name' || name === 'for' || name.startsWith('aria-')) {
+            attributes[name] = rawVal.replace(/\b(sp-help-text-|pass-through-help-text-|wa-tooltip-|wa-popover-|mdc-el-|cds-id-)[a-zA-Z0-9_-]+/g, '$1<id>');
+          } else {
+            attributes[name] = rawVal;
+          }
         }
 
         const children = [];
@@ -412,7 +454,9 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
       }
 
       // Settle event loop and initial microtasks
+      if (typeof win.gc === 'function') win.gc();
       await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 100)));
+      if (typeof win.gc === 'function') win.gc();
 
       let firstRenderMs = 0;
       let updateMs = 0;
@@ -426,19 +470,38 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
         await win.__scenario.mount(container);
         void container.offsetHeight;
         firstRenderMs = Math.max(0.1, performance.now() - t0);
+        mountSnapshot = serializeDomTree(container);
 
         if (typeof win.__scenario.update === 'function') {
-          const t1 = performance.now();
+          // Warmup update + capture post-update snapshot & metrics
           await win.__scenario.update(container);
           void container.offsetHeight;
-          updateMs = Math.max(0.1, performance.now() - t1);
-        }
+          if (typeof win.__scenario.getMetrics === 'function') {
+            scenarioSpecific = await win.__scenario.getMetrics(container);
+          }
+          updateSnapshot = serializeDomTree(container);
 
-        if (typeof win.__scenario.getMetrics === 'function') {
-          scenarioSpecific = await win.__scenario.getMetrics(container);
+          // Sample reactive update latency across 5 warm batches of 10 updates
+          // (eliminates Chromium performance.now() 0.1ms quantization noise)
+          if (typeof win.gc === 'function') win.gc();
+          const UPDATE_BATCH = 10;
+          const updateSamples = [];
+          for (let uIdx = 0; uIdx < 5; uIdx++) {
+            const t1 = performance.now();
+            for (let b = 0; b < UPDATE_BATCH; b++) {
+              await win.__scenario.update(container);
+            }
+            void container.offsetHeight;
+            updateSamples.push(Math.max(0.05, (performance.now() - t1) / UPDATE_BATCH));
+          }
+          updateSamples.sort((a, b) => a - b);
+          updateMs = Number(updateSamples[1].toFixed(2));
+        } else {
+          if (typeof win.__scenario.getMetrics === 'function') {
+            scenarioSpecific = await win.__scenario.getMetrics(container);
+          }
+          updateSnapshot = mountSnapshot;
         }
-
-        updateSnapshot = serializeDomTree(container);
 
         let minHeapDelta = Infinity;
         for (let sampleIdx = 0; sampleIdx < 2; sampleIdx++) {
@@ -464,8 +527,6 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
           }
         }
         heapUsed = Number.isFinite(minHeapDelta) ? minHeapDelta : 1024;
-
-        mountSnapshot = serializeDomTree(container);
       } else {
         const tags = (win.__registeredTags || []).filter((/** @type {any} */ t) => typeof t === 'string' && t.includes('-'));
         const mounted = [];

@@ -58,13 +58,13 @@
     "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering",
     "componentCount": 6
   },
-  "timestamp": "2026-10-20T20:32:59.763Z",
+  "timestamp": "2026-10-21T22:43:10.260Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -79,58 +79,62 @@
     }
   },
   "metrics": {
-    "rawBytes": 58416,
-    "gzipBytes": 17130,
-    "brotliBytes": 15327,
-    "buildTimeMs": 16.249041000002762
+    "rawBytes": 289382,
+    "gzipBytes": 59632,
+    "brotliBytes": 48326,
+    "buildTimeMs": 15.500459000002593
   },
   "baseline": {
-    "rawBytes": 59176,
-    "gzipBytes": 17369,
-    "brotliBytes": 15540,
-    "buildTimeMs": 20.38125000000582,
-    "firstRenderMs": 27.1,
-    "updateMs": 2.8,
-    "scriptEvalMs": 1.8,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 525920
+    "rawBytes": 291628,
+    "gzipBytes": 60350,
+    "brotliBytes": 48824,
+    "buildTimeMs": 34.10699999999997,
+    "firstRenderMs": 38,
+    "updateMs": 0.31,
+    "scriptEvalMs": 6.9,
+    "registrationMs": 0.6,
+    "heapUsedBytes": 28656,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "deltas": {
-    "rawBytes": -760,
-    "rawPercent": -1.28,
-    "gzipBytes": -239,
-    "gzipPercent": -1.38,
-    "brotliBytes": -213,
-    "brotliPercent": -1.37,
-    "buildTimeMs": -4.1,
-    "firstRenderMs": -0.6,
-    "speedupPercent": 2.21,
-    "updateMs": -0.2,
-    "updateSpeedupPercent": 7.14,
+    "rawBytes": -2246,
+    "rawPercent": -0.77,
+    "gzipBytes": -718,
+    "gzipPercent": -1.19,
+    "brotliBytes": -498,
+    "brotliPercent": -1.02,
+    "buildTimeMs": -1.2,
+    "firstRenderMs": -0.5,
+    "speedupPercent": 1.67,
+    "updateMs": -0.06,
+    "updateSpeedupPercent": 11.76,
     "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": -33.33,
-    "memorySavingsPercent": 6.43
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": 3.31
   },
   "runtime": {
-    "firstRenderMs": 26.5,
-    "updateMs": 2.6,
-    "scriptEvalMs": 1.8,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 492084,
-    "speedupPercent": 2.21,
-    "updateSpeedupPercent": 7.14,
+    "firstRenderMs": 37.37,
+    "updateMs": 0.27,
+    "scriptEvalMs": 6.9,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 27707,
+    "speedupPercent": 1.67,
+    "updateSpeedupPercent": 11.76,
     "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": -33.33,
-    "memorySavingsPercent": 6.43
+    "registrationSpeedupPercent": -100,
+    "memorySavingsPercent": 3.31
   },
   "equivalence": {
-    "domStructureMatch": false,
-    "elementsCount": 555,
-    "verified": false,
-    "divergenceReason": "Mount phase divergence: Style attribute mismatch at mount-root > [0] > [1] > [0] (<md-elevation>): baseline=\"padding:12px;border-left:1px solid #e4e4e7;\", variant=\"padding: 12px;border-left: 1px solid #e4e4e7;\"",
+    "domStructureMatch": true,
+    "elementsCount": 306,
+    "verified": true,
     "phasesMatched": {
-      "mount": false,
-      "update": false
+      "mount": true,
+      "update": true
     }
   }
 }

@@ -316,6 +316,17 @@ impl ClusterEngine {
             });
         }
 
+        for cluster in &mut clusters {
+            let mut clean_files: Vec<String> = cluster
+                .shared_by_files
+                .iter()
+                .map(|f| f.split('#').next().unwrap_or(f).to_string())
+                .collect();
+            clean_files.sort();
+            clean_files.dedup();
+            cluster.shared_by_files = clean_files;
+        }
+
         // Sort clusters deterministically: subsystem clusters first, then by ID
         clusters.sort_by(|a, b| {
             let a_sub = a.id.starts_with("_fused_subsystem_");

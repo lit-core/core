@@ -58,13 +58,13 @@
     "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration",
     "componentCount": 6
   },
-  "timestamp": "2026-10-20T20:31:33.181Z",
+  "timestamp": "2026-10-21T22:45:32.845Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -79,58 +79,62 @@
     }
   },
   "metrics": {
-    "rawBytes": 504647,
-    "gzipBytes": 95572,
-    "brotliBytes": 75381,
-    "buildTimeMs": 46.559582999994745
+    "rawBytes": 846918,
+    "gzipBytes": 151513,
+    "brotliBytes": 114971,
+    "buildTimeMs": 54.952458999992814
   },
   "baseline": {
-    "rawBytes": 504647,
-    "gzipBytes": 95572,
-    "brotliBytes": 75381,
-    "buildTimeMs": 92.1665420000063,
-    "firstRenderMs": 31.6,
-    "updateMs": 0.2,
-    "scriptEvalMs": 2.1,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 265023
+    "rawBytes": 843964,
+    "gzipBytes": 150909,
+    "brotliBytes": 114502,
+    "buildTimeMs": 88.77537499999744,
+    "firstRenderMs": 43.5,
+    "updateMs": 0.3,
+    "scriptEvalMs": 11.9,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 24445,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "deltas": {
-    "rawBytes": 0,
-    "rawPercent": 0,
-    "gzipBytes": 0,
-    "gzipPercent": 0,
-    "brotliBytes": 0,
-    "brotliPercent": 0,
-    "buildTimeMs": -45.6,
-    "firstRenderMs": -3.9,
-    "speedupPercent": 12.34,
-    "updateMs": -0.1,
-    "updateSpeedupPercent": 50,
+    "rawBytes": 2954,
+    "rawPercent": 0.35,
+    "gzipBytes": 604,
+    "gzipPercent": 0.4,
+    "brotliBytes": 469,
+    "brotliPercent": 0.41,
+    "buildTimeMs": 2.3,
+    "firstRenderMs": -5.7,
+    "speedupPercent": 16.1,
+    "updateMs": -0.06,
+    "updateSpeedupPercent": 28.57,
     "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": -50,
-    "memorySavingsPercent": -0.28
+    "registrationSpeedupPercent": 25,
+    "memorySavingsPercent": 47.83
   },
   "runtime": {
-    "firstRenderMs": 27.7,
-    "updateMs": 0.1,
-    "scriptEvalMs": 2.1,
+    "firstRenderMs": 36.5,
+    "updateMs": 0.21,
+    "scriptEvalMs": 11.9,
     "registrationMs": 0.3,
-    "heapUsedBytes": 265755,
-    "speedupPercent": 12.34,
-    "updateSpeedupPercent": 50,
+    "heapUsedBytes": 12753,
+    "speedupPercent": 16.1,
+    "updateSpeedupPercent": 28.57,
     "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": -50,
-    "memorySavingsPercent": -0.28
+    "registrationSpeedupPercent": 25,
+    "memorySavingsPercent": 47.83
   },
   "equivalence": {
-    "domStructureMatch": false,
-    "elementsCount": 46,
-    "verified": false,
-    "divergenceReason": "Mount phase divergence: Attribute \"aria-describedby\" mismatch at mount-root > [0] > [0] > [1] > [0] > shadowRoot > [0] > [0] (<input>): baseline=\"sp-help-text-93172a24\", variant=\"sp-help-text-2f727499\"",
+    "domStructureMatch": true,
+    "elementsCount": 51,
+    "verified": true,
     "phasesMatched": {
-      "mount": false,
-      "update": false
+      "mount": true,
+      "update": true
     }
   }
 }

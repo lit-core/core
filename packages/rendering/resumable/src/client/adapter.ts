@@ -560,14 +560,24 @@ function patchReactivePrototype(targetProto: any): void {
   }
   patchedPrototypes.add(targetProto);
 
+  const origRequestUpdate = targetProto.requestUpdate;
+  if (typeof origRequestUpdate === 'function') {
+    targetProto.requestUpdate = function (name?: PropertyKey, oldValue?: unknown, options?: unknown) {
+      if (this.hasUpdated && name === undefined && (!this._$changedProperties || this._$changedProperties.size === 0)) {
+        return this.updateComplete;
+      }
+      return origRequestUpdate.call(this, name, oldValue, options);
+    };
+  }
+
   const origConnected = targetProto.connectedCallback;
   targetProto.connectedCallback = function () {
-    restoreComponentState(this);
+    const restored = restoreComponentState(this);
     if (typeof origConnected === 'function') {
       origConnected.call(this);
     }
-    if (typeof this.requestUpdate === 'function') {
-      this.requestUpdate();
+    if (restored && typeof origRequestUpdate === 'function') {
+      origRequestUpdate.call(this);
     }
   };
 
@@ -584,32 +594,48 @@ function patchReactivePrototype(targetProto: any): void {
     const isFirstUpdate = !this.hasUpdated;
     const root = (this.renderRoot || this.shadowRoot) as any;
 
-    if (isFirstUpdate && root && root.childNodes.length > 0) {
-      this.hasUpdated = true;
-      if (this.renderOptions) {
-        this.renderOptions.isConnected = this.isConnected;
+    if (isFirstUpdate) {
+      const hasSsrContent =
+        root &&
+        root.childNodes &&
+        root.childNodes.length > 0 &&
+        Array.from(root.childNodes as NodeListOf<ChildNode>).some(
+          (n: any) => (n.nodeType === 1 && (!n.tagName || n.tagName.toLowerCase() !== 'style')) || (n.nodeType === 3 && n.textContent && n.textContent.trim().length > 0),
+        );
+      if (hasSsrContent) {
+        this.hasUpdated = true;
+        if (this.renderOptions) {
+          this.renderOptions.isConnected = this.isConnected;
+        }
+        if (typeof this._$markUpdated === 'function') {
+          this._$markUpdated();
+        } else {
+          this.isUpdatePending = false;
+        }
+
+        if (typeof this.willUpdate === 'function') {
+          this.willUpdate(changedProperties);
+        }
+
+        if (typeof this.render === 'function') {
+          const renderResult = this.render();
+          this.__resumablePrevFlat = flattenTemplateResult(renderResult);
+          bindTemplateEventHandlers(root, renderResult, this);
+        }
+
+        if (typeof this.firstUpdated === 'function') {
+          this.firstUpdated(changedProperties);
+        }
+        if (typeof this.updated === 'function') {
+          this.updated(changedProperties);
+        }
+        return;
       }
+    } else if (!changedProperties || changedProperties.size === 0) {
       if (typeof this._$markUpdated === 'function') {
         this._$markUpdated();
       } else {
         this.isUpdatePending = false;
-      }
-
-      if (typeof this.willUpdate === 'function') {
-        this.willUpdate(changedProperties);
-      }
-
-      if (typeof this.render === 'function') {
-        const renderResult = this.render();
-        this.__resumablePrevFlat = flattenTemplateResult(renderResult);
-        bindTemplateEventHandlers(root, renderResult, this);
-      }
-
-      if (typeof this.firstUpdated === 'function') {
-        this.firstUpdated(changedProperties);
-      }
-      if (typeof this.updated === 'function') {
-        this.updated(changedProperties);
       }
       return;
     }

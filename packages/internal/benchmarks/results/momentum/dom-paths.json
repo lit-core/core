@@ -46,13 +46,13 @@
     "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
     "componentCount": 4
   },
-  "timestamp": "2026-10-20T20:33:11.520Z",
+  "timestamp": "2026-10-21T22:45:48.488Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -67,58 +67,62 @@
     }
   },
   "metrics": {
-    "rawBytes": 199024,
-    "gzipBytes": 47141,
-    "brotliBytes": 39744,
-    "buildTimeMs": 30.891499999997905
+    "rawBytes": 377949,
+    "gzipBytes": 79503,
+    "brotliBytes": 63890,
+    "buildTimeMs": 34.190042000001995
   },
   "baseline": {
-    "rawBytes": 198854,
-    "gzipBytes": 47065,
-    "brotliBytes": 39693,
-    "buildTimeMs": 30.297209000011208,
-    "firstRenderMs": 52.3,
-    "updateMs": 3.2,
-    "scriptEvalMs": 2.4,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 992893
+    "rawBytes": 372254,
+    "gzipBytes": 78654,
+    "brotliBytes": 63176,
+    "buildTimeMs": 51.383250000013504,
+    "firstRenderMs": 49.4,
+    "updateMs": 0.31,
+    "scriptEvalMs": 5.3,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 10762,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "deltas": {
-    "rawBytes": 170,
-    "rawPercent": 0.09,
-    "gzipBytes": 76,
-    "gzipPercent": 0.16,
-    "brotliBytes": 51,
-    "brotliPercent": 0.13,
-    "buildTimeMs": 0.6,
-    "firstRenderMs": -0.6,
-    "speedupPercent": 1.15,
-    "updateMs": -0.3,
-    "updateSpeedupPercent": 9.38,
-    "evalSpeedupPercent": 0,
+    "rawBytes": 5695,
+    "rawPercent": 1.53,
+    "gzipBytes": 849,
+    "gzipPercent": 1.08,
+    "brotliBytes": 714,
+    "brotliPercent": 1.13,
+    "buildTimeMs": 0.8,
+    "firstRenderMs": -0.8,
+    "speedupPercent": 2.6,
+    "updateMs": -0.07,
+    "updateSpeedupPercent": 58.33,
+    "evalSpeedupPercent": 10.34,
     "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0
+    "memorySavingsPercent": -112.92
   },
   "runtime": {
-    "firstRenderMs": 51.7,
-    "updateMs": 2.9,
-    "scriptEvalMs": 2.4,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 992893,
-    "speedupPercent": 1.15,
-    "updateSpeedupPercent": 9.38,
-    "evalSpeedupPercent": 0,
+    "firstRenderMs": 48.12,
+    "updateMs": 0.13,
+    "scriptEvalMs": 4.75,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 22914,
+    "speedupPercent": 2.6,
+    "updateSpeedupPercent": 58.33,
+    "evalSpeedupPercent": 10.34,
     "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0
+    "memorySavingsPercent": -112.92
   },
   "equivalence": {
-    "domStructureMatch": false,
-    "elementsCount": 801,
-    "verified": false,
-    "divergenceReason": "Mount phase divergence: Attribute \"id\" mismatch at mount-root > [0] > [0] > [0] > shadowRoot > [0] > [0] (<input>): baseline=\"mdc-el-ec98e139-eb9a-4a58-85d9-0ab80ac10621\", variant=\"mdc-el-2cf73b8a-94f7-40e4-a892-b3b874e725e9\"",
+    "domStructureMatch": true,
+    "elementsCount": 167,
+    "verified": true,
     "phasesMatched": {
-      "mount": false,
-      "update": false
+      "mount": true,
+      "update": true
     }
   }
 }

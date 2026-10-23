@@ -29,13 +29,13 @@
     "name": "ShadowRoot event delegation (event-hoist)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-20T20:36:56.144Z",
+  "timestamp": "2026-10-21T22:43:41.591Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -50,60 +50,60 @@
     }
   },
   "metrics": {
-    "rawBytes": 319641,
-    "gzipBytes": 51373,
-    "brotliBytes": 35423,
-    "buildTimeMs": 23.664416999999958,
-    "firstRenderMs": 24,
-    "updateMs": 2.1,
-    "scriptEvalMs": 1.4,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 152368,
+    "rawBytes": 324132,
+    "gzipBytes": 52215,
+    "brotliBytes": 36144,
+    "buildTimeMs": 20.20720799999981,
+    "firstRenderMs": 27.2,
+    "updateMs": 0.16,
+    "scriptEvalMs": 1.5,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 25728,
     "scenarioSpecific": {
       "sectionsCount": 5,
-      "controlsPerSection": 6,
-      "totalControls": 30,
-      "eventsDispatched": 15
+      "controlsPerSection": 7,
+      "totalControls": 35,
+      "eventsDispatched": 1
     }
   },
   "baseline": {
-    "rawBytes": 315576,
-    "gzipBytes": 49965,
-    "brotliBytes": 35033,
-    "buildTimeMs": 34.43629100000004,
-    "firstRenderMs": 23.1,
-    "updateMs": 0.3,
-    "scriptEvalMs": 1.8,
-    "registrationMs": 0.2,
-    "heapUsedBytes": 135676
+    "rawBytes": 318283,
+    "gzipBytes": 50744,
+    "brotliBytes": 35662,
+    "buildTimeMs": 62.41125000000466,
+    "firstRenderMs": 29.5,
+    "updateMs": 0.21,
+    "scriptEvalMs": 1.5,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 27516
   },
   "deltas": {
-    "rawBytes": 4065,
-    "rawPercent": 1.29,
-    "gzipBytes": 1408,
-    "gzipPercent": 2.82,
-    "brotliBytes": 390,
-    "brotliPercent": 1.11,
-    "buildTimeMs": -10.8,
-    "firstRenderMs": 0.9,
-    "speedupPercent": -3.9,
-    "updateMs": 1.8,
-    "updateSpeedupPercent": -600,
-    "evalSpeedupPercent": 22.22,
-    "registrationSpeedupPercent": 50,
-    "memorySavingsPercent": -12.3
+    "rawBytes": 5849,
+    "rawPercent": 1.84,
+    "gzipBytes": 1471,
+    "gzipPercent": 2.9,
+    "brotliBytes": 482,
+    "brotliPercent": 1.35,
+    "buildTimeMs": -42.2,
+    "firstRenderMs": -2.3,
+    "speedupPercent": 7.8,
+    "updateMs": -0.05,
+    "updateSpeedupPercent": 23.81,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": 6.5
   },
   "runtime": {
-    "firstRenderMs": 24,
-    "updateMs": 2.1,
-    "scriptEvalMs": 1.4,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 152368,
-    "speedupPercent": -3.9,
-    "updateSpeedupPercent": -600,
-    "evalSpeedupPercent": 22.22,
-    "registrationSpeedupPercent": 50,
-    "memorySavingsPercent": -12.3
+    "firstRenderMs": 27.2,
+    "updateMs": 0.16,
+    "scriptEvalMs": 1.5,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 25728,
+    "speedupPercent": 7.8,
+    "updateSpeedupPercent": 23.81,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": -33.33,
+    "memorySavingsPercent": 6.5
   },
   "domSnapshot": {
     "mount": {
@@ -118,6 +118,7 @@
           "tag": "div",
           "attributes": {
             "class": "interactive-form-root",
+            "data-step": "0",
             "style": "display:flex; flex-direction:column; gap:16px;"
           },
           "children": [
@@ -158,7 +159,7 @@
                         "label": "Username",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Username value"
+                        "value": "Username value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -665,6 +666,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "profile"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "admin"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -707,7 +811,7 @@
                         "label": "Email channel",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Email channel value"
+                        "value": "Email channel value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -1212,6 +1316,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "notifications"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "viewer"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -1254,7 +1461,7 @@
                         "label": "Passkey alias",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Passkey alias value"
+                        "value": "Passkey alias value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -1760,6 +1967,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "security"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "editor"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -1802,7 +2112,7 @@
                         "label": "Organization",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Organization value"
+                        "value": "Organization value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -2309,6 +2619,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "workspace"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "admin"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -2351,7 +2764,7 @@
                         "label": "Webhook URL",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Webhook URL value"
+                        "value": "Webhook URL value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -2853,6 +3266,109 @@
                               "name": "badge-indicator"
                             },
                             "children": []
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "integrations"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "editor"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
                           }
                         ]
                       }
@@ -2877,6 +3393,7 @@
           "tag": "div",
           "attributes": {
             "class": "interactive-form-root",
+            "data-step": "0",
             "style": "display:flex; flex-direction:column; gap:16px;"
           },
           "children": [
@@ -2917,7 +3434,7 @@
                         "label": "Username",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Username value"
+                        "value": "Username value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -3424,6 +3941,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "profile"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "admin"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -3466,7 +4086,7 @@
                         "label": "Email channel",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Email channel value"
+                        "value": "Email channel value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -3971,6 +4591,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "notifications"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "viewer"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -4013,7 +4736,7 @@
                         "label": "Passkey alias",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Passkey alias value"
+                        "value": "Passkey alias value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -4519,6 +5242,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "security"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "editor"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -4561,7 +5387,7 @@
                         "label": "Organization",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Organization value"
+                        "value": "Organization value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -5068,6 +5894,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "workspace"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "admin"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -5110,7 +6039,7 @@
                         "label": "Webhook URL",
                         "placeholder": "",
                         "type": "text",
-                        "value": "Webhook URL value"
+                        "value": "Webhook URL value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -5615,6 +6544,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "integrations"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "editor"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -5624,13 +6656,13 @@
         }
       ]
     },
-    "elementsCount": 46,
-    "customElementsCount": 30,
-    "shadowRootsCount": 30
+    "elementsCount": 51,
+    "customElementsCount": 35,
+    "shadowRootsCount": 35
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 46,
+    "elementsCount": 51,
     "verified": true,
     "phasesMatched": {
       "mount": true,

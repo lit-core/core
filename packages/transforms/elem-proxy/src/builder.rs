@@ -274,7 +274,44 @@ fn build_props_loop<'a>(
         ast,
     ));
 
-    let get_desc_call = Expression::new_call_expression(
+    let get_proto_call = Expression::new_call_expression(
+        SPAN,
+        Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "Object", ast),
+            IdentifierName::new(SPAN, "getPrototypeOf", ast),
+            false,
+            ast,
+        ),
+        None,
+        {
+            let mut a = ArenaVec::new_in(ast);
+            a.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
+            a
+        },
+        false,
+        ast,
+    );
+    let get_proto_desc_call = Expression::new_call_expression(
+        SPAN,
+        Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "Object", ast),
+            IdentifierName::new(SPAN, "getOwnPropertyDescriptor", ast),
+            false,
+            ast,
+        ),
+        None,
+        {
+            let mut a = ArenaVec::new_in(ast);
+            a.push(Argument::from(get_proto_call));
+            a.push(Argument::from(Expression::new_identifier(SPAN, "__p", ast)));
+            a
+        },
+        false,
+        ast,
+    );
+    let get_own_desc_call = Expression::new_call_expression(
         SPAN,
         Expression::new_static_member_expression(
             SPAN,
@@ -291,6 +328,13 @@ fn build_props_loop<'a>(
             a
         },
         false,
+        ast,
+    );
+    let get_desc_call = Expression::new_logical_expression(
+        SPAN,
+        get_proto_desc_call,
+        LogicalOperator::Or,
+        get_own_desc_call,
         ast,
     );
     let mut desc_decl = ArenaVec::new_in(ast);
@@ -422,7 +466,44 @@ fn build_props_loop<'a>(
         ast,
     ));
 
-    let set_desc_call = Expression::new_call_expression(
+    let set_proto_call = Expression::new_call_expression(
+        SPAN,
+        Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "Object", ast),
+            IdentifierName::new(SPAN, "getPrototypeOf", ast),
+            false,
+            ast,
+        ),
+        None,
+        {
+            let mut a = ArenaVec::new_in(ast);
+            a.push(Argument::from(Expression::new_this_expression(SPAN, ast)));
+            a
+        },
+        false,
+        ast,
+    );
+    let set_proto_desc_call = Expression::new_call_expression(
+        SPAN,
+        Expression::new_static_member_expression(
+            SPAN,
+            Expression::new_identifier(SPAN, "Object", ast),
+            IdentifierName::new(SPAN, "getOwnPropertyDescriptor", ast),
+            false,
+            ast,
+        ),
+        None,
+        {
+            let mut a = ArenaVec::new_in(ast);
+            a.push(Argument::from(set_proto_call));
+            a.push(Argument::from(Expression::new_identifier(SPAN, "__p", ast)));
+            a
+        },
+        false,
+        ast,
+    );
+    let set_own_desc_call = Expression::new_call_expression(
         SPAN,
         Expression::new_static_member_expression(
             SPAN,
@@ -439,6 +520,13 @@ fn build_props_loop<'a>(
             a
         },
         false,
+        ast,
+    );
+    let set_desc_call = Expression::new_logical_expression(
+        SPAN,
+        set_proto_desc_call,
+        LogicalOperator::Or,
+        set_own_desc_call,
         ast,
     );
     let mut set_desc_decl = ArenaVec::new_in(ast);

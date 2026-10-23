@@ -1,4 +1,4 @@
-import { createIsolatedToolPlugin } from './base.js';
+import { createIsolatedToolPlugin, normalizeInclude } from './base.js';
 
 /**
  * Tool definition for @lit-core/html-aot
@@ -19,7 +19,7 @@ export const htmlAotTool = {
    */
   getPlugins(suite) {
     return createIsolatedToolPlugin('htmlAot', {
-      include: suite?.includePattern ? [suite.includePattern].flat() : undefined,
+      include: normalizeInclude(suite?.includePattern),
       exclude: [],
     });
   },

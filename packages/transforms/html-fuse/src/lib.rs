@@ -150,7 +150,7 @@ pub fn run_html_fuse_pipeline(config: &HtmlFuseConfig, dry_run: bool) -> HtmlFus
     let mut bytes_saved = 0;
 
     for cluster in &clusters {
-        let multiplier = cluster.shared_by_files.len().saturating_sub(1);
+        let multiplier = cluster.occurrences_count.saturating_sub(1);
         fragments_deduped += multiplier as u32;
         bytes_saved += (multiplier * cluster.canonical_text.len()) as u32;
     }

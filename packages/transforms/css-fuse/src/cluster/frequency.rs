@@ -20,6 +20,7 @@ impl FrequencyIndex {
 
     pub fn index_rules(&mut self, rules: &[NormalizedRule]) {
         for rule in rules {
+            let source_key = format!("{}#{}", rule.source_file, rule.span.start);
             self.rule_map
                 .entry(rule.hash.clone())
                 .or_insert_with(|| rule.clone());
@@ -29,12 +30,12 @@ impl FrequencyIndex {
                     .whole_rules
                     .entry(rule.hash.clone())
                     .or_insert_with(|| (rule.clone(), HashSet::new()));
-                entry.1.insert(rule.source_file.clone());
+                entry.1.insert(source_key);
             } else {
                 *self
                     .file_selector_decl_counts
                     .entry((
-                        rule.source_file.clone(),
+                        source_key.clone(),
                         rule.at_rule.clone(),
                         rule.selector.clone(),
                     ))
@@ -44,7 +45,7 @@ impl FrequencyIndex {
                     self.decl_occurrences
                         .entry(key)
                         .or_default()
-                        .insert(rule.source_file.clone());
+                        .insert(source_key.clone());
                 }
             }
         }

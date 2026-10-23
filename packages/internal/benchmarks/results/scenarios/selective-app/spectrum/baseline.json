@@ -25,13 +25,13 @@
     "name": "Baseline (Standard Vite)",
     "isBaseline": true
   },
-  "timestamp": "2026-10-20T20:34:50.860Z",
+  "timestamp": "2026-10-21T22:45:38.288Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -46,15 +46,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 822896,
-    "gzipBytes": 147875,
-    "brotliBytes": 112250,
-    "buildTimeMs": 70.6762920000001,
-    "firstRenderMs": 10.3,
-    "updateMs": 0.3,
-    "scriptEvalMs": 10.2,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 39012,
+    "rawBytes": 824561,
+    "gzipBytes": 148234,
+    "brotliBytes": 112563,
+    "buildTimeMs": 123.45045900001423,
+    "firstRenderMs": 11.4,
+    "updateMs": 0.11,
+    "scriptEvalMs": 11.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 6659,
     "scenarioSpecific": {
       "importedCustomElementsCount": 20,
       "referencedCustomElementsCount": 3,
@@ -67,11 +67,11 @@
     }
   },
   "runtime": {
-    "firstRenderMs": 10.3,
-    "updateMs": 0.3,
-    "scriptEvalMs": 10.2,
-    "registrationMs": 1.1,
-    "heapUsedBytes": 39012
+    "firstRenderMs": 11.4,
+    "updateMs": 0.11,
+    "scriptEvalMs": 11.5,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 6659
   },
   "domSnapshot": {
     "mount": {
@@ -392,13 +392,13 @@
                           "type": "element",
                           "tag": "sp-badge",
                           "attributes": {
-                            "type": "success",
+                            "type": "neutral",
                             "variant": "informative"
                           },
                           "children": [
                             {
                               "type": "text",
-                              "value": "Active"
+                              "value": "Standby"
                             }
                           ],
                           "shadowRoot": {

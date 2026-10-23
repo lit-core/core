@@ -142,13 +142,13 @@
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
     "componentCount": 20
   },
-  "timestamp": "2026-10-20T20:35:14.937Z",
+  "timestamp": "2026-10-21T22:46:26.262Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,21 +163,21 @@
     }
   },
   "metrics": {
-    "rawBytes": 826509,
-    "gzipBytes": 148314,
-    "brotliBytes": 112477,
-    "buildTimeMs": 101.44462499999997
+    "rawBytes": 843964,
+    "gzipBytes": 150909,
+    "brotliBytes": 114502,
+    "buildTimeMs": 106.56370799999996
   },
   "baseline": {
-    "rawBytes": 826509,
-    "gzipBytes": 148314,
-    "brotliBytes": 112477,
-    "buildTimeMs": 101.44462499999997,
-    "firstRenderMs": 33.6,
-    "updateMs": 0.1,
-    "scriptEvalMs": 10.4,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 150103
+    "rawBytes": 843964,
+    "gzipBytes": 150909,
+    "brotliBytes": 114502,
+    "buildTimeMs": 106.56370799999996,
+    "firstRenderMs": 38.3,
+    "updateMs": 0.32,
+    "scriptEvalMs": 10.8,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 24445
   },
   "deltas": {
     "rawBytes": 0,
@@ -194,11 +194,11 @@
     "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 33.6,
-    "updateMs": 0.1,
-    "scriptEvalMs": 10.4,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 150103,
+    "firstRenderMs": 38.3,
+    "updateMs": 0.32,
+    "scriptEvalMs": 10.8,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 24445,
     "speedupPercent": 0,
     "updateSpeedupPercent": 0,
     "evalSpeedupPercent": 0,
@@ -207,7 +207,7 @@
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 49,
+    "elementsCount": 73,
     "verified": true,
     "phasesMatched": {
       "mount": true,

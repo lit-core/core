@@ -44,6 +44,23 @@ pub fn transform_vanilla_class<'a>(
     let mut template_exprs: Vec<Expression<'a>> = Vec::new();
     let mut properties: Vec<PropertyInfo<'a>> = Vec::new();
     let mut seen_props = HashSet::new();
+    let mut instance_defaults: std::collections::HashMap<String, Expression<'a>> =
+        std::collections::HashMap::new();
+
+    for elem in &class.body.body {
+        if let ClassElement::PropertyDefinition(prop) = elem {
+            if !prop.r#static {
+                let name = match &prop.key {
+                    PropertyKey::StaticIdentifier(id) => Some(id.name.as_str().to_string()),
+                    PropertyKey::StringLiteral(lit) => Some(lit.value.as_str().to_string()),
+                    _ => None,
+                };
+                if let (Some(prop_name), Some(val)) = (name, &prop.value) {
+                    instance_defaults.insert(prop_name, val.clone_in(allocator));
+                }
+            }
+        }
+    }
 
     for elem in &class.body.body {
         match elem {
@@ -62,6 +79,19 @@ pub fn transform_vanilla_class<'a>(
                         continue;
                     }
 
+                    if prop.r#static && prop_name == "properties" {
+                        if let Some(Expression::ObjectExpression(obj)) = &prop.value {
+                            extract_static_properties_obj(
+                                obj,
+                                allocator,
+                                &instance_defaults,
+                                &mut seen_props,
+                                &mut properties,
+                            );
+                        }
+                        continue;
+                    }
+
                     // Check for @property or @state decorators
                     for dec in &prop.decorators {
                         if let Expression::CallExpression(call) = &dec.expression {
@@ -69,65 +99,18 @@ pub fn transform_vanilla_class<'a>(
                                 || import_ctx.is_state_decorator(&call.callee, scoping))
                                 && seen_props.insert(prop_name.clone())
                             {
-                                let mut p_type = "string".to_string();
-                                let mut reflect = false;
-                                // Internal state never maps to an attribute.
                                 let is_state = import_ctx.is_state_decorator(&call.callee, scoping);
-                                let mut attr_name = if is_state {
-                                    String::new()
-                                } else {
-                                    prop_name.to_lowercase()
-                                };
-
-                                if let Some(arg) = call.arguments.first() {
+                                let opts_obj = call.arguments.first().and_then(|arg| {
                                     if let Some(Expression::ObjectExpression(obj)) =
                                         arg.as_expression()
                                     {
-                                        for p in &obj.properties {
-                                            if let ObjectPropertyKind::ObjectProperty(prop_kv) = p {
-                                                let k = match &prop_kv.key {
-                                                    PropertyKey::StaticIdentifier(id) => {
-                                                        Some(id.name.as_str())
-                                                    }
-                                                    _ => None,
-                                                };
-                                                if k == Some("type") {
-                                                    if let Expression::Identifier(t_id) =
-                                                        &prop_kv.value
-                                                    {
-                                                        let tn = t_id.name.as_str();
-                                                        if tn == "Number" {
-                                                            p_type = "number".to_string();
-                                                        } else if tn == "Boolean" {
-                                                            p_type = "boolean".to_string();
-                                                        }
-                                                    }
-                                                }
-                                                if k == Some("reflect") {
-                                                    if let Expression::BooleanLiteral(b) =
-                                                        &prop_kv.value
-                                                    {
-                                                        reflect = b.value;
-                                                    }
-                                                }
-                                                if k == Some("attribute") && !is_state {
-                                                    match &prop_kv.value {
-                                                        Expression::StringLiteral(s) => {
-                                                            attr_name =
-                                                                s.value.as_str().to_string();
-                                                        }
-                                                        Expression::BooleanLiteral(b)
-                                                            if !b.value =>
-                                                        {
-                                                            attr_name.clear();
-                                                        }
-                                                        _ => {}
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        Some(obj.as_ref())
+                                    } else {
+                                        None
                                     }
-                                }
+                                });
+                                let (p_type, reflect, attr_name) =
+                                    parse_property_options_obj(opts_obj, &prop_name, is_state);
 
                                 let default_val =
                                     prop.value.as_ref().map(|v| v.clone_in(allocator));
@@ -152,6 +135,22 @@ pub fn transform_vanilla_class<'a>(
                             if let Statement::ReturnStatement(ret) = stmt {
                                 if let Some(arg) = &ret.argument {
                                     styles_css = extract_css_from_expr(arg);
+                                }
+                            }
+                        }
+                    }
+                } else if m.r#static && name == "properties" {
+                    if let Some(body) = &m.value.body {
+                        for stmt in &body.statements {
+                            if let Statement::ReturnStatement(ret) = stmt {
+                                if let Some(Expression::ObjectExpression(obj)) = &ret.argument {
+                                    extract_static_properties_obj(
+                                        obj,
+                                        allocator,
+                                        &instance_defaults,
+                                        &mut seen_props,
+                                        &mut properties,
+                                    );
                                 }
                             }
                         }
@@ -255,7 +254,7 @@ pub fn transform_vanilla_class<'a>(
             ClassElement::MethodDefinition(m) => {
                 let m_name = m.key.static_name().unwrap_or_default();
                 if m_name == "render"
-                    || (m.r#static && m_name == "styles")
+                    || (m.r#static && (m_name == "styles" || m_name == "properties"))
                     || m_name == "constructor"
                 {
                     continue;
@@ -268,7 +267,7 @@ pub fn transform_vanilla_class<'a>(
                     PropertyKey::StringLiteral(lit) => Some(lit.value.as_str()),
                     _ => None,
                 };
-                if p.r#static && p_name == Some("styles") {
+                if p.r#static && (p_name == Some("styles") || p_name == Some("properties")) {
                     continue;
                 }
                 if let Some(pn) = p_name {
@@ -298,6 +297,110 @@ pub fn transform_vanilla_class<'a>(
     }
 
     true
+}
+
+fn parse_property_options_obj<'a>(
+    opts_obj: Option<&ObjectExpression<'a>>,
+    prop_name: &str,
+    mut is_state: bool,
+) -> (String, bool, String) {
+    let mut p_type = "string".to_string();
+    let mut reflect = false;
+    let mut custom_attr: Option<String> = None;
+
+    if let Some(obj) = opts_obj {
+        for p in &obj.properties {
+            if let ObjectPropertyKind::ObjectProperty(prop_kv) = p {
+                let k = match &prop_kv.key {
+                    PropertyKey::StaticIdentifier(id) => Some(id.name.as_str()),
+                    PropertyKey::StringLiteral(lit) => Some(lit.value.as_str()),
+                    _ => None,
+                };
+                match k {
+                    Some("type") => {
+                        if let Expression::Identifier(t_id) = &prop_kv.value {
+                            let tn = t_id.name.as_str();
+                            if tn == "Number" {
+                                p_type = "number".to_string();
+                            } else if tn == "Boolean" {
+                                p_type = "boolean".to_string();
+                            }
+                        }
+                    }
+                    Some("reflect") => {
+                        if let Expression::BooleanLiteral(b) = &prop_kv.value {
+                            reflect = b.value;
+                        }
+                    }
+                    Some("state") => {
+                        if let Expression::BooleanLiteral(b) = &prop_kv.value {
+                            if b.value {
+                                is_state = true;
+                            }
+                        }
+                    }
+                    Some("attribute") => match &prop_kv.value {
+                        Expression::StringLiteral(s) => {
+                            custom_attr = Some(s.value.as_str().to_string());
+                        }
+                        Expression::BooleanLiteral(b) if !b.value => {
+                            custom_attr = Some(String::new());
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                }
+            }
+        }
+    }
+
+    let attr_name = if is_state {
+        String::new()
+    } else if let Some(ca) = custom_attr {
+        ca
+    } else {
+        prop_name.to_lowercase()
+    };
+
+    (p_type, reflect, attr_name)
+}
+
+fn extract_static_properties_obj<'a>(
+    obj: &ObjectExpression<'a>,
+    allocator: &'a Allocator,
+    instance_defaults: &std::collections::HashMap<String, Expression<'a>>,
+    seen_props: &mut HashSet<String>,
+    properties: &mut Vec<PropertyInfo<'a>>,
+) {
+    for prop_kind in &obj.properties {
+        if let ObjectPropertyKind::ObjectProperty(prop_kv) = prop_kind {
+            let prop_name_opt = match &prop_kv.key {
+                PropertyKey::StaticIdentifier(id) => Some(id.name.as_str().to_string()),
+                PropertyKey::StringLiteral(lit) => Some(lit.value.as_str().to_string()),
+                _ => None,
+            };
+            if let Some(prop_name) = prop_name_opt {
+                if seen_props.insert(prop_name.clone()) {
+                    let opts_obj = match &prop_kv.value {
+                        Expression::ObjectExpression(inner_obj) => Some(inner_obj.as_ref()),
+                        _ => None,
+                    };
+                    let (p_type, reflect, attr_name) =
+                        parse_property_options_obj(opts_obj, &prop_name, false);
+                    let default_val = instance_defaults
+                        .get(&prop_name)
+                        .map(|v| v.clone_in(allocator));
+                    properties.push(PropertyInfo {
+                        name: prop_name,
+                        prop_type: p_type,
+                        reflect,
+                        attribute_name: attr_name,
+                        default_value: default_val,
+                    });
+                }
+            }
+        }
+    }
 }
 
 fn extract_css_from_expr<'a>(expr: &Expression<'a>) -> Option<String> {

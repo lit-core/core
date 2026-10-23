@@ -52,13 +52,13 @@
     "description": "Server-rendered dashboard with Declarative Shadow DOM components testing zero-JS resumption and AOT template compilation",
     "componentCount": 5
   },
-  "timestamp": "2026-10-20T20:33:22.021Z",
+  "timestamp": "2026-10-21T22:45:59.883Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -73,58 +73,62 @@
     }
   },
   "metrics": {
-    "rawBytes": 200785,
-    "gzipBytes": 48521,
-    "brotliBytes": 40495,
-    "buildTimeMs": 40.12299999999232
+    "rawBytes": 390383,
+    "gzipBytes": 81383,
+    "brotliBytes": 65021,
+    "buildTimeMs": 41.90887500002282
   },
   "baseline": {
-    "rawBytes": 189524,
-    "gzipBytes": 46560,
-    "brotliBytes": 39186,
-    "buildTimeMs": 32.01408399999491,
-    "firstRenderMs": 13.1,
-    "updateMs": 0.4,
-    "scriptEvalMs": 2.4,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 98880
+    "rawBytes": 372254,
+    "gzipBytes": 78654,
+    "brotliBytes": 63176,
+    "buildTimeMs": 51.383250000013504,
+    "firstRenderMs": 49.4,
+    "updateMs": 0.31,
+    "scriptEvalMs": 5.3,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 10762,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "deltas": {
-    "rawBytes": 11261,
-    "rawPercent": 5.94,
-    "gzipBytes": 1961,
-    "gzipPercent": 4.21,
-    "brotliBytes": 1309,
-    "brotliPercent": 3.34,
-    "buildTimeMs": 8.1,
-    "firstRenderMs": 2.2,
-    "speedupPercent": -16.79,
-    "updateMs": 0.2,
-    "updateSpeedupPercent": -50,
-    "evalSpeedupPercent": -4.17,
-    "registrationSpeedupPercent": 75,
-    "memorySavingsPercent": -4.07
+    "rawBytes": 18129,
+    "rawPercent": 4.87,
+    "gzipBytes": 2729,
+    "gzipPercent": 3.47,
+    "brotliBytes": 1845,
+    "brotliPercent": 2.92,
+    "buildTimeMs": 3.1,
+    "firstRenderMs": -1.5,
+    "speedupPercent": 10.07,
+    "updateMs": -0.14,
+    "updateSpeedupPercent": 45.16,
+    "evalSpeedupPercent": -4.35,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -30.41
   },
   "runtime": {
-    "firstRenderMs": 15.3,
-    "updateMs": 0.6,
-    "scriptEvalMs": 2.5,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 102905,
-    "speedupPercent": -16.79,
-    "updateSpeedupPercent": -50,
-    "evalSpeedupPercent": -4.17,
-    "registrationSpeedupPercent": 75,
-    "memorySavingsPercent": -4.07
+    "firstRenderMs": 44.43,
+    "updateMs": 0.17,
+    "scriptEvalMs": 5.53,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 14035,
+    "speedupPercent": 10.07,
+    "updateSpeedupPercent": 45.16,
+    "evalSpeedupPercent": -4.35,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -30.41
   },
   "equivalence": {
-    "domStructureMatch": false,
-    "elementsCount": 41,
-    "verified": false,
-    "divergenceReason": "Mount phase divergence: Attribute \"id\" mismatch at mount-root > [0] > [1] > [0] > [0] > [2] (<mdc-progressbar>): baseline=\"mdc-progressbar-6c535e44-7a53-402f-b039-5db222798fc1\", variant=\"mdc-progressbar-3f4e2c6f-e309-4784-86a9-e543f4217a57\"",
+    "domStructureMatch": true,
+    "elementsCount": 73,
+    "verified": true,
     "phasesMatched": {
-      "mount": false,
-      "update": false
+      "mount": true,
+      "update": true
     }
   }
 }

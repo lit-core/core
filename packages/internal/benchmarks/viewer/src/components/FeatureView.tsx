@@ -211,12 +211,23 @@ export const FeatureView: React.FC<FeatureViewProps> = ({ manifest, selectedSuit
                   }
 
                   const gzipDelta =
-                    baselineRun?.gzipBytes && baselineRun.gzipBytes > 0 && run.gzipBytes ? ((run.gzipBytes - baselineRun.gzipBytes) / baselineRun.gzipBytes) * 100 : (run.gzipPercent ?? 0);
-                  const rawDelta = baselineRun?.rawBytes && baselineRun.rawBytes > 0 && run.rawBytes ? ((run.rawBytes - baselineRun.rawBytes) / baselineRun.rawBytes) * 100 : (run.rawPercent ?? 0);
+                    run.gzipPercent !== undefined
+                      ? run.gzipPercent
+                      : baselineRun?.gzipBytes && baselineRun.gzipBytes > 0 && run.gzipBytes
+                        ? ((run.gzipBytes - baselineRun.gzipBytes) / baselineRun.gzipBytes) * 100
+                        : 0;
+                  const rawDelta =
+                    run.rawPercent !== undefined
+                      ? run.rawPercent
+                      : baselineRun?.rawBytes && baselineRun.rawBytes > 0 && run.rawBytes
+                        ? ((run.rawBytes - baselineRun.rawBytes) / baselineRun.rawBytes) * 100
+                        : 0;
                   const speedup =
-                    baselineRun?.firstRenderMs && run.firstRenderMs && baselineRun.firstRenderMs > 0
-                      ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100
-                      : run.speedupPercent;
+                    run.speedupPercent !== undefined
+                      ? run.speedupPercent
+                      : baselineRun?.firstRenderMs && run.firstRenderMs && baselineRun.firstRenderMs > 0
+                        ? ((baselineRun.firstRenderMs - run.firstRenderMs) / baselineRun.firstRenderMs) * 100
+                        : undefined;
 
                   return (
                     <tr

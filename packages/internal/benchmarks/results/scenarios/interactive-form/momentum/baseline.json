@@ -29,13 +29,13 @@
     "name": "Baseline (Standard Vite)",
     "isBaseline": true
   },
-  "timestamp": "2026-10-20T20:33:14.192Z",
+  "timestamp": "2026-10-21T22:45:55.764Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -50,28 +50,28 @@
     }
   },
   "metrics": {
-    "rawBytes": 242531,
-    "gzipBytes": 55201,
-    "brotliBytes": 45994,
-    "buildTimeMs": 34.72104100001161,
-    "firstRenderMs": 28.4,
-    "updateMs": 0.3,
+    "rawBytes": 245239,
+    "gzipBytes": 55934,
+    "brotliBytes": 46643,
+    "buildTimeMs": 36.59512499999255,
+    "firstRenderMs": 25.3,
+    "updateMs": 0.23,
     "scriptEvalMs": 3,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 322954,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 46268,
     "scenarioSpecific": {
       "sectionsCount": 5,
-      "controlsPerSection": 6,
-      "totalControls": 30,
-      "eventsDispatched": 20
+      "controlsPerSection": 7,
+      "totalControls": 35,
+      "eventsDispatched": 6
     }
   },
   "runtime": {
-    "firstRenderMs": 28.4,
-    "updateMs": 0.3,
+    "firstRenderMs": 25.3,
+    "updateMs": 0.23,
     "scriptEvalMs": 3,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 322954
+    "registrationMs": 0.5,
+    "heapUsedBytes": 46268
   },
   "domSnapshot": {
     "mount": {
@@ -86,6 +86,7 @@
           "tag": "div",
           "attributes": {
             "class": "interactive-form-root",
+            "data-step": "0",
             "style": "display:flex; flex-direction:column; gap:16px;"
           },
           "children": [
@@ -128,7 +129,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Username value"
+                        "value": "Username value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -152,7 +153,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-dc615933-6f82-44d1-b817-903ac27da909",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -224,7 +225,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-dc615933-6f82-44d1-b817-903ac27da909",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -254,7 +255,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-dc615933-6f82-44d1-b817-903ac27da909",
+                              "identity": "mdc-el-00000000-0000-4000-8000-000000000001",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -300,7 +301,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-87e81ecc-6741-46e9-93b0-f7f35c7ad6d0",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -381,7 +382,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-3336069a-9365-4361-88eb-fcbaa289d535",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -606,7 +607,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-a04f4260-8bf2-4af0-bb0b-9901c1e8997a",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -737,6 +738,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "profile"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "admin"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -781,7 +885,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Email channel value"
+                        "value": "Email channel value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -805,7 +909,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-6f7a405b-4604-4195-9ce9-c76399ad6cef",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -877,7 +981,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-6f7a405b-4604-4195-9ce9-c76399ad6cef",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -907,7 +1011,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-6f7a405b-4604-4195-9ce9-c76399ad6cef",
+                              "identity": "mdc-el-00000000-0000-4000-8000-000000000006",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -951,7 +1055,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-7888b897-5652-4e90-a3e9-c3ad3e571842",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -1034,7 +1138,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-dfc4add3-7529-4e8c-a4c2-a9a024b3437d",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -1274,7 +1378,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-399b9fd6-7bb6-4f3a-a9c1-6e93be4eaa65",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -1405,6 +1509,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "notifications"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "viewer"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -1449,7 +1656,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Passkey alias value"
+                        "value": "Passkey alias value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -1473,7 +1680,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-2361ae54-8af1-4dc1-bd1d-31b582750237",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -1545,7 +1752,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-2361ae54-8af1-4dc1-bd1d-31b582750237",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -1575,7 +1782,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-2361ae54-8af1-4dc1-bd1d-31b582750237",
+                              "identity": "mdc-el-00000000-0000-4000-8000-00000000000b",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -1621,7 +1828,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-fc471576-b0a7-4c55-ab17-616694ae392b",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -1702,7 +1909,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-bd915150-e3f8-4364-9f7a-f36eb33f23fe",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -1925,7 +2132,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-6bce56b0-b415-46fb-b3df-24ab60a75012",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -2056,6 +2263,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "security"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "editor"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -2100,7 +2410,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Organization value"
+                        "value": "Organization value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -2124,7 +2434,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-c295dc14-b5e4-48f0-a96a-ac9b6f84eac9",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -2196,7 +2506,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-c295dc14-b5e4-48f0-a96a-ac9b6f84eac9",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -2226,7 +2536,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-c295dc14-b5e4-48f0-a96a-ac9b6f84eac9",
+                              "identity": "mdc-el-00000000-0000-4000-8000-000000000010",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -2272,7 +2582,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-af867661-48b8-437e-b1bb-0ecfa7dca2d4",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -2353,7 +2663,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-90e4ec37-0e50-4c0b-b454-c14fe687962c",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -2578,7 +2888,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-4211e7ee-3e18-41a0-997c-92dc5dba038c",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -2709,6 +3019,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "workspace"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "admin"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -2753,7 +3166,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Webhook URL value"
+                        "value": "Webhook URL value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -2777,7 +3190,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-09b65458-c232-4494-961f-cd86b296f58a",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -2849,7 +3262,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-09b65458-c232-4494-961f-cd86b296f58a",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -2879,7 +3292,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-09b65458-c232-4494-961f-cd86b296f58a",
+                              "identity": "mdc-el-00000000-0000-4000-8000-000000000015",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -2923,7 +3336,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-ba8bd253-4969-4f6e-b67d-ee820b7bf87a",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -3006,7 +3419,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-1edb8f41-1ac9-48c0-ab8c-45b9b301ffd7",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -3246,7 +3659,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-2d514468-40cf-4c79-9ca3-22de88fe7291",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -3374,6 +3787,109 @@
                               "part": "postfix"
                             },
                             "children": []
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "0",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "integrations"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "editor"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "0"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
                           }
                         ]
                       }
@@ -3398,6 +3914,7 @@
           "tag": "div",
           "attributes": {
             "class": "interactive-form-root",
+            "data-step": "0",
             "style": "display:flex; flex-direction:column; gap:16px;"
           },
           "children": [
@@ -3440,7 +3957,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Username value"
+                        "value": "Username value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -3464,7 +3981,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-0135c21d-5592-4630-93b5-e0a492ab60fb",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -3536,7 +4053,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-0135c21d-5592-4630-93b5-e0a492ab60fb",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -3566,7 +4083,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-0135c21d-5592-4630-93b5-e0a492ab60fb",
+                              "identity": "mdc-el-00000000-0000-4000-8000-000000000001",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -3612,7 +4129,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-fb6c2a83-a827-47d9-9cc3-0a2b37aa6651",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -3693,7 +4210,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-306cc4a9-f65c-4075-8482-847688f99082",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -3918,7 +4435,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-937b5935-c1fa-4031-95c3-7ade0513e242",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -4049,6 +4566,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "profile"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "admin"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -4093,7 +4713,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Email channel value"
+                        "value": "Email channel value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -4117,7 +4737,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-85dcc1d2-6fbf-40d5-a971-29f309d1b0be",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -4189,7 +4809,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-85dcc1d2-6fbf-40d5-a971-29f309d1b0be",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -4219,7 +4839,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-85dcc1d2-6fbf-40d5-a971-29f309d1b0be",
+                              "identity": "mdc-el-00000000-0000-4000-8000-000000000006",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -4263,7 +4883,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-5525816a-e3ac-4e43-9d02-4bb9895fa089",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -4346,7 +4966,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-5e3c906c-e7e8-4071-9cf8-8b65484b97fe",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -4586,7 +5206,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-bafb9c7c-0dde-45b0-919e-9c6dc4d729d4",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -4717,6 +5337,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "notifications"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "viewer"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -4761,7 +5484,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Passkey alias value"
+                        "value": "Passkey alias value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -4785,7 +5508,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-3fc2c62d-191e-41d2-a10f-e20f57f1ba93",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -4857,7 +5580,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-3fc2c62d-191e-41d2-a10f-e20f57f1ba93",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -4887,7 +5610,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-3fc2c62d-191e-41d2-a10f-e20f57f1ba93",
+                              "identity": "mdc-el-00000000-0000-4000-8000-00000000000b",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -4933,7 +5656,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-4792e490-447e-4691-8645-4a2ad8660599",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -5014,7 +5737,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-3c19bb74-d99f-4ed4-a80d-ead0a048ea20",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -5237,7 +5960,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-8e01020a-054d-4252-9beb-2971b37b7275",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -5368,6 +6091,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "security"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "editor"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -5412,7 +6238,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Organization value"
+                        "value": "Organization value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -5436,7 +6262,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-3015da43-77c8-4a39-8c85-630848239b79",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -5508,7 +6334,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-3015da43-77c8-4a39-8c85-630848239b79",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -5538,7 +6364,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-3015da43-77c8-4a39-8c85-630848239b79",
+                              "identity": "mdc-el-00000000-0000-4000-8000-000000000010",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -5584,7 +6410,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-1acc24a5-f4a0-4e31-989a-14c15997537e",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -5665,7 +6491,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-a076ab50-3941-45ba-b338-bfc1fc1fb7a7",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -5890,7 +6716,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-7b9d077d-6d54-4476-bed1-b817a87e5bc9",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -6021,6 +6847,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "workspace"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "admin"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -6065,7 +6994,7 @@
                         "name": "",
                         "toggletip-placement": "top",
                         "toggletip-strategy": "absolute",
-                        "value": "Webhook URL value"
+                        "value": "Webhook URL value 0"
                       },
                       "children": [],
                       "shadowRoot": {
@@ -6089,7 +7018,7 @@
                                     "type": "element",
                                     "tag": "label",
                                     "attributes": {
-                                      "for": "mdc-el-66e38a6b-3b43-4b9e-ab01-87f3f93ad07c",
+                                      "for": "mdc-el-<id>",
                                       "id": "heading-id",
                                       "part": "label"
                                     },
@@ -6161,7 +7090,7 @@
                                           "aria-labelledby": "heading-id",
                                           "autocapitalize": "off",
                                           "autocomplete": "off",
-                                          "id": "mdc-el-66e38a6b-3b43-4b9e-ab01-87f3f93ad07c",
+                                          "id": "mdc-el-<id>",
                                           "name": "",
                                           "part": "input-text",
                                           "placeholder": "",
@@ -6191,7 +7120,7 @@
                               "data-aria-live": "polite",
                               "debounce-time": "500",
                               "delay": "500",
-                              "identity": "mdc-el-66e38a6b-3b43-4b9e-ab01-87f3f93ad07c",
+                              "identity": "mdc-el-00000000-0000-4000-8000-000000000015",
                               "timeout": "20000"
                             },
                             "children": [],
@@ -6235,7 +7164,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-e9992dda-87d2-4b33-ac78-d8e0b4f55451",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "toggle-input",
                                   "role": "switch",
@@ -6318,7 +7247,7 @@
                                   "aria-describedby": "",
                                   "aria-disabled": "false",
                                   "aria-label": "",
-                                  "id": "mdc-el-bd9e5ecb-2b7e-4af4-9f22-bfb27c2437f3",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "checkbox-input",
                                   "tabindex": "0",
@@ -6558,7 +7487,7 @@
                                 "attributes": {
                                   "aria-disabled": "false",
                                   "aria-hidden": "true",
-                                  "id": "mdc-el-afc872da-72b1-4c1e-8a39-feb408f27227",
+                                  "id": "mdc-el-<id>",
                                   "name": "",
                                   "part": "native-input",
                                   "tabindex": "-1",
@@ -6689,6 +7618,109 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "element",
+                      "tag": "benchmark-form-control-strip",
+                      "attributes": {},
+                      "children": [],
+                      "shadowRoot": {
+                        "mode": "open",
+                        "children": [
+                          {
+                            "type": "element",
+                            "tag": "div",
+                            "attributes": {
+                              "class": "control-strip",
+                              "data-step": "1",
+                              "style": "display:flex; gap:6px; align-items:center;"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Verify"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "integrations"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Reset"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "editor"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Sync ("
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": "1"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "value": ")"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "button",
+                                "attributes": {
+                                  "class": "strip-btn",
+                                  "type": "button"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text",
+                                    "value": "Audit"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "tag": "input",
+                                "attributes": {
+                                  "class": "strip-input",
+                                  "type": "text"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -6698,13 +7730,13 @@
         }
       ]
     },
-    "elementsCount": 46,
-    "customElementsCount": 30,
-    "shadowRootsCount": 30
+    "elementsCount": 51,
+    "customElementsCount": 35,
+    "shadowRootsCount": 35
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 46,
+    "elementsCount": 51,
     "verified": true,
     "phasesMatched": {
       "mount": true,

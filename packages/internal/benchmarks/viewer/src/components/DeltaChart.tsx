@@ -43,9 +43,10 @@ export const DeltaChart: React.FC<DeltaChartProps> = ({ runs, baselineRun, metri
           const pct = Math.max(4, Math.round((val / maxBytes) * 100));
 
           const deltaBytes = val - baselineBytes;
-          const deltaPercent = baselineBytes > 0 ? (deltaBytes / baselineBytes) * 100 : 0;
-          const isGood = deltaBytes < -50;
-          const isNeutral = Math.abs(deltaBytes) <= 50;
+          const recordedPct = metric === 'gzipBytes' ? run.gzipPercent : metric === 'rawBytes' ? run.rawPercent : undefined;
+          const deltaPercent = recordedPct !== undefined ? recordedPct : baselineBytes > 0 ? (deltaBytes / baselineBytes) * 100 : 0;
+          const isGood = deltaPercent < -0.1 || deltaBytes < -50;
+          const isNeutral = Math.abs(deltaPercent) <= 0.1 && Math.abs(deltaBytes) <= 50;
 
           // Render a subtle divider between macro tier and individual passes
           const showDividerAfter = isAll && individualRuns.length > 0 && idx === 1;

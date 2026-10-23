@@ -25,13 +25,13 @@
     "name": "Tag shake dead code elimination (tag-shake)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-20T20:28:04.639Z",
+  "timestamp": "2026-10-21T22:42:59.549Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -46,15 +46,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 164316,
-    "gzipBytes": 34191,
-    "brotliBytes": 28785,
-    "buildTimeMs": 29.414709000000585,
-    "firstRenderMs": 11.7,
-    "updateMs": 0.4,
+    "rawBytes": 164587,
+    "gzipBytes": 34390,
+    "brotliBytes": 28994,
+    "buildTimeMs": 31.838959000000614,
+    "firstRenderMs": 7.7,
+    "updateMs": 0.05,
     "scriptEvalMs": 1.2,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 42592,
+    "registrationMs": 0.2,
+    "heapUsedBytes": 17543,
     "scenarioSpecific": {
       "importedCustomElementsCount": 20,
       "referencedCustomElementsCount": 3,
@@ -67,43 +67,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 372191,
-    "gzipBytes": 87384,
-    "brotliBytes": 69916,
-    "buildTimeMs": 36.76929100000052,
-    "firstRenderMs": 12.6,
-    "updateMs": 0.5,
-    "scriptEvalMs": 3.4,
-    "registrationMs": 1.5,
-    "heapUsedBytes": 42032
+    "rawBytes": 373857,
+    "gzipBytes": 87730,
+    "brotliBytes": 70190,
+    "buildTimeMs": 39.210917000000336,
+    "firstRenderMs": 7.5,
+    "updateMs": 0.07,
+    "scriptEvalMs": 3.1,
+    "registrationMs": 1.2,
+    "heapUsedBytes": 15067
   },
   "deltas": {
-    "rawBytes": -207875,
-    "rawPercent": -55.85,
-    "gzipBytes": -53193,
-    "gzipPercent": -60.87,
-    "brotliBytes": -41131,
-    "brotliPercent": -58.83,
+    "rawBytes": -209270,
+    "rawPercent": -55.98,
+    "gzipBytes": -53340,
+    "gzipPercent": -60.8,
+    "brotliBytes": -41196,
+    "brotliPercent": -58.69,
     "buildTimeMs": -7.4,
-    "firstRenderMs": -0.9,
-    "speedupPercent": 7.14,
-    "updateMs": -0.1,
-    "updateSpeedupPercent": 20,
-    "evalSpeedupPercent": 64.71,
-    "registrationSpeedupPercent": 93.33,
-    "memorySavingsPercent": -1.33
+    "firstRenderMs": 0.2,
+    "speedupPercent": -2.67,
+    "updateMs": -0.02,
+    "updateSpeedupPercent": 28.57,
+    "evalSpeedupPercent": 61.29,
+    "registrationSpeedupPercent": 83.33,
+    "memorySavingsPercent": -16.43
   },
   "runtime": {
-    "firstRenderMs": 11.7,
-    "updateMs": 0.4,
+    "firstRenderMs": 7.7,
+    "updateMs": 0.05,
     "scriptEvalMs": 1.2,
-    "registrationMs": 0.1,
-    "heapUsedBytes": 42592,
-    "speedupPercent": 7.14,
-    "updateSpeedupPercent": 20,
-    "evalSpeedupPercent": 64.71,
-    "registrationSpeedupPercent": 93.33,
-    "memorySavingsPercent": -1.33
+    "registrationMs": 0.2,
+    "heapUsedBytes": 17543,
+    "speedupPercent": -2.67,
+    "updateSpeedupPercent": 28.57,
+    "evalSpeedupPercent": 61.29,
+    "registrationSpeedupPercent": 83.33,
+    "memorySavingsPercent": -16.43
   },
   "domSnapshot": {
     "mount": {
@@ -458,13 +458,13 @@
                           "attributes": {
                             "appearance": "accent",
                             "attention": "none",
-                            "type": "success",
+                            "type": "neutral",
                             "variant": "brand"
                           },
                           "children": [
                             {
                               "type": "text",
-                              "value": "Active"
+                              "value": "Standby"
                             }
                           ],
                           "shadowRoot": {

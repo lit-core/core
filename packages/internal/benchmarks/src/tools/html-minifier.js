@@ -1,4 +1,4 @@
-import { createIsolatedToolPlugin } from './base.js';
+import { createIsolatedToolPlugin, normalizeInclude } from './base.js';
 
 /**
  * Tool definition for @lit-core/html-minifier
@@ -19,7 +19,7 @@ export const htmlMinifierTool = {
    */
   getPlugins(suite) {
     return createIsolatedToolPlugin('htmlMinifier', {
-      include: suite?.includePattern ? [suite.includePattern].flat() : undefined,
+      include: normalizeInclude(suite?.includePattern),
       exclude: [],
     });
   },

@@ -12,9 +12,9 @@ impl HtmlClusterEngine {
         let mut clusters = Vec::new();
 
         for (hash, occ) in &frequency_index.fragments {
-            if occ.files.len() >= threshold {
+            if occ.total_occurrences >= threshold {
                 let text_len = occ.sample_fragment.canonical_text.len();
-                let net_savings = (occ.files.len().saturating_sub(1)) * text_len;
+                let net_savings = (occ.total_occurrences.saturating_sub(1)) * text_len;
 
                 if net_savings >= min_savings {
                     let mut sorted_files: Vec<String> = occ.files.iter().cloned().collect();

@@ -142,13 +142,13 @@
     "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
     "componentCount": 20
   },
-  "timestamp": "2026-10-20T20:36:25.925Z",
+  "timestamp": "2026-10-21T22:45:42.323Z",
   "environment": {
     "node": "v24.14.0",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "97c3c29",
+    "gitCommit": "b3e4776",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,58 +163,57 @@
     }
   },
   "metrics": {
-    "rawBytes": 353258,
-    "gzipBytes": 75622,
-    "brotliBytes": 60835,
-    "buildTimeMs": 197.49558399998932
+    "rawBytes": 367898,
+    "gzipBytes": 78479,
+    "brotliBytes": 63082,
+    "buildTimeMs": 221.7477920000092
   },
   "baseline": {
-    "rawBytes": 353258,
-    "gzipBytes": 75622,
-    "brotliBytes": 60835,
-    "buildTimeMs": 47.45375000000058,
-    "firstRenderMs": 27.1,
-    "updateMs": 0.2,
-    "scriptEvalMs": 4.3,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 44756
+    "rawBytes": 372254,
+    "gzipBytes": 78654,
+    "brotliBytes": 63176,
+    "buildTimeMs": 51.383250000013504,
+    "firstRenderMs": 49.4,
+    "updateMs": 0.31,
+    "scriptEvalMs": 5.3,
+    "registrationMs": 0.3,
+    "heapUsedBytes": 10762
   },
   "deltas": {
-    "rawBytes": 0,
-    "rawPercent": 0,
-    "gzipBytes": 0,
-    "gzipPercent": 0,
-    "brotliBytes": 0,
-    "brotliPercent": 0,
-    "buildTimeMs": 150,
-    "firstRenderMs": -1.1,
-    "speedupPercent": 4.06,
-    "updateMs": -0.1,
-    "updateSpeedupPercent": 50,
-    "evalSpeedupPercent": -2.33,
-    "registrationSpeedupPercent": 25,
+    "rawBytes": -4356,
+    "rawPercent": -1.17,
+    "gzipBytes": -175,
+    "gzipPercent": -0.22,
+    "brotliBytes": -94,
+    "brotliPercent": -0.15,
+    "buildTimeMs": 170.4,
+    "firstRenderMs": -13.8,
+    "speedupPercent": 27.94,
+    "updateMs": -0.08,
+    "updateSpeedupPercent": 25.81,
+    "evalSpeedupPercent": 13.21,
+    "registrationSpeedupPercent": -133.33,
     "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 26,
-    "updateMs": 0.1,
-    "scriptEvalMs": 4.4,
-    "registrationMs": 0.3,
-    "heapUsedBytes": 44756,
-    "speedupPercent": 4.06,
-    "updateSpeedupPercent": 50,
-    "evalSpeedupPercent": -2.33,
-    "registrationSpeedupPercent": 25,
+    "firstRenderMs": 35.6,
+    "updateMs": 0.23,
+    "scriptEvalMs": 4.6,
+    "registrationMs": 0.7,
+    "heapUsedBytes": 10762,
+    "speedupPercent": 27.94,
+    "updateSpeedupPercent": 25.81,
+    "evalSpeedupPercent": 13.21,
+    "registrationSpeedupPercent": -133.33,
     "memorySavingsPercent": 0
   },
   "equivalence": {
-    "domStructureMatch": false,
-    "elementsCount": 49,
-    "verified": false,
-    "divergenceReason": "Mount phase divergence: Attribute \"id\" mismatch at mount-root > [0] > [1] > [0] > [1] > [0] > shadowRoot > [0] > [0] (<input>): baseline=\"mdc-el-e43d9264-4af6-4d71-aa2a-5be785152799\", variant=\"mdc-el-49ae5652-8860-48d5-84c0-9381971a057a\"",
+    "domStructureMatch": true,
+    "elementsCount": 73,
+    "verified": true,
     "phasesMatched": {
-      "mount": false,
-      "update": false
+      "mount": true,
+      "update": true
     }
   }
 }

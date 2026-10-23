@@ -329,6 +329,54 @@ pub fn analyze_expr_dependencies_with_locals(
                 );
             }
         }
+        Expression::TaggedTemplateExpression(tagged) => {
+            for sub_expr in &tagged.quasi.expressions {
+                analyze_expr_dependencies_with_locals(
+                    sub_expr,
+                    reactive_props,
+                    local_var_masks,
+                    accessed_bits,
+                    has_unknown,
+                );
+            }
+        }
+        Expression::ObjectExpression(obj) => {
+            for prop in &obj.properties {
+                match prop {
+                    oxc_ast::ast::ObjectPropertyKind::ObjectProperty(p) => {
+                        if p.computed {
+                            if let Some(key_expr) = p.key.as_expression() {
+                                analyze_expr_dependencies_with_locals(
+                                    key_expr,
+                                    reactive_props,
+                                    local_var_masks,
+                                    accessed_bits,
+                                    has_unknown,
+                                );
+                            } else {
+                                *has_unknown = true;
+                            }
+                        }
+                        analyze_expr_dependencies_with_locals(
+                            &p.value,
+                            reactive_props,
+                            local_var_masks,
+                            accessed_bits,
+                            has_unknown,
+                        );
+                    }
+                    oxc_ast::ast::ObjectPropertyKind::SpreadProperty(sp) => {
+                        analyze_expr_dependencies_with_locals(
+                            &sp.argument,
+                            reactive_props,
+                            local_var_masks,
+                            accessed_bits,
+                            has_unknown,
+                        );
+                    }
+                }
+            }
+        }
         Expression::ArrayExpression(arr) => {
             for elem in &arr.elements {
                 if let Some(el_expr) = elem.as_expression() {
