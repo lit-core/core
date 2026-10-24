@@ -1,5 +1,3 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { scanTags, transformTagShake } from '@lit-core/tag-shake';
 import type { Plugin } from 'vite';
 import { reportTransformError } from '../errors.js';
@@ -7,58 +5,10 @@ import type { TagShakeOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
 const TAG_SHAKE_FAST_CHECK = /\.define\(|customElement|decorate|\bclass\b/;
-const RELATIVE_IMPORT_RE = /(?:import\s+(?:[^'"]*?\s+from\s+)?|export\s+[^'"]*?\s+from\s+)['"](\.\.?\/[^'"]+)['"]/g;
-
-function resolveRelativeFile(fromFile: string, relSpec: string): string | null {
-  const base = path.resolve(path.dirname(fromFile), relSpec);
-  const candidates = [base, base.replace(/\.js$/, '.ts'), `${base}.js`, `${base}.ts`, path.join(base, 'index.js'), path.join(base, 'index.ts')];
-  for (const c of candidates) {
-    try {
-      if (fs.existsSync(c) && fs.statSync(c).isFile()) {
-        return c;
-      }
-    } catch {}
-  }
-  return null;
-}
 
 export function tagShake(options: TagShakeOptions = {}): Plugin {
   const { sourcemap = true, keepTags = [] } = options;
   const usedTags = new Set<string>(keepTags);
-  const scannedTransitiveFiles = new Set<string>();
-
-  function collectTransitiveTags(sourceCode: string, filePath: string, depth = 0) {
-    if (depth > 3 || scannedTransitiveFiles.has(filePath)) {
-      return;
-    }
-    scannedTransitiveFiles.add(filePath);
-    try {
-      const tags = scanTags(sourceCode, filePath);
-      for (const t of tags) {
-        usedTags.add(t);
-      }
-    } catch {}
-
-    RELATIVE_IMPORT_RE.lastIndex = 0;
-    const specs: string[] = [];
-    let match = RELATIVE_IMPORT_RE.exec(sourceCode);
-    while (match !== null) {
-      if (match[1]) {
-        specs.push(match[1]);
-      }
-      match = RELATIVE_IMPORT_RE.exec(sourceCode);
-    }
-
-    for (const relSpec of specs) {
-      const targetFile = resolveRelativeFile(filePath, relSpec);
-      if (targetFile && !scannedTransitiveFiles.has(targetFile)) {
-        try {
-          const targetCode = fs.readFileSync(targetFile, 'utf-8');
-          collectTransitiveTags(targetCode, targetFile, depth + 1);
-        } catch {}
-      }
-    }
-  }
 
   return {
     name: 'tag-shake',
@@ -66,7 +16,6 @@ export function tagShake(options: TagShakeOptions = {}): Plugin {
 
     buildStart() {
       usedTags.clear();
-      scannedTransitiveFiles.clear();
       for (const t of keepTags) {
         usedTags.add(t);
       }
@@ -112,11 +61,6 @@ export function tagShake(options: TagShakeOptions = {}): Plugin {
           sourcemap,
           filename: cleanId,
         });
-
-        if (result.preservedTags && result.preservedTags.length > 0) {
-          const survivingCode = result.shakenRegistrationsCount > 0 ? result.code : code;
-          collectTransitiveTags(survivingCode, cleanId, 0);
-        }
 
         if (result.shakenRegistrationsCount === 0) {
           return null;

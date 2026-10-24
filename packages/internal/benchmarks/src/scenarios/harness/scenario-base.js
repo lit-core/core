@@ -451,7 +451,7 @@ ${bundleCode}
           } else if (tag === 'wa-tab-group' && name === 'active' && (rawVal === '' || rawVal === 'undefined' || rawVal === 'overview')) {
             attributes[name] = 'overview';
           } else if (name === 'id' || name === 'name' || name === 'for' || name.startsWith('aria-')) {
-            attributes[name] = rawVal.replace(/\b(sp-help-text-|pass-through-help-text-|wa-tooltip-|wa-popover-|mdc-el-|cds-id-)[a-zA-Z0-9_-]+/g, '$1<id>');
+            attributes[name] = rawVal.replace(/\b(sp-field-label-|sp-help-text-|pass-through-help-text-|wa-tooltip-|wa-popover-|mdc-el-|cds-id-)[a-zA-Z0-9_-]+/g, '$1<id>');
           } else {
             attributes[name] = rawVal;
           }
@@ -493,12 +493,14 @@ ${bundleCode}
         await win.__scenario.mount(container);
         void container.offsetHeight;
         firstRenderMs = Math.max(0.1, performance.now() - t0);
+        await new Promise((r) => setTimeout(r, 0));
         mountSnapshot = serializeDomTree(container);
 
         if (typeof win.__scenario.update === 'function') {
           // Warmup update + capture post-update snapshot & metrics
           await win.__scenario.update(container);
           void container.offsetHeight;
+          await new Promise((r) => setTimeout(r, 0));
           if (typeof win.__scenario.getMetrics === 'function') {
             scenarioSpecific = await win.__scenario.getMetrics(container);
           }

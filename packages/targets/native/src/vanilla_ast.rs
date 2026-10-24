@@ -241,10 +241,7 @@ pub fn build_constructor_element<'a>(
 
         match b.kind {
             BindingKind::Text => {
-                let m_var_name = allocator.alloc_str(&format!("__m_{}", idx));
-                stmts.push(helper.const_declaration(m_var_name, path_expr));
-
-                // this.__lit_node_X = document.createTextNode('');
+                // path_expr.replaceWith(this.__lit_node_X = document.createTextNode(''));
                 let create_tn = helper.call_expr(
                     helper.static_member(helper.ident_ref("document"), "createTextNode", false),
                     {
@@ -254,29 +251,29 @@ pub fn build_constructor_element<'a>(
                     },
                     false,
                 );
-                stmts.push(helper.this_prop_assign(node_prop_name, create_tn));
-
-                // if (__m_X) __m_X.replaceWith(this.__lit_node_X);
+                let assign_node = Expression::new_assignment_expression(
+                    SPAN,
+                    AssignmentOperator::Assign,
+                    AssignmentTarget::from(MemberExpression::new_static_member_expression(
+                        SPAN,
+                        helper.this_expr(),
+                        helper.ident_name(node_prop_name),
+                        false,
+                        ast,
+                    )),
+                    create_tn,
+                    ast,
+                );
                 let call_replace = helper.call_expr(
-                    helper.static_member(helper.ident_ref(m_var_name), "replaceWith", false),
+                    helper.static_member(path_expr, "replaceWith", false),
                     {
                         let mut a = ArenaVec::new_in(ast);
-                        a.push(Argument::from(helper.static_member(
-                            helper.this_expr(),
-                            node_prop_name,
-                            false,
-                        )));
+                        a.push(Argument::from(assign_node));
                         a
                     },
                     false,
                 );
-                stmts.push(Statement::new_if_statement(
-                    SPAN,
-                    helper.ident_ref(m_var_name),
-                    helper.expr_stmt(call_replace),
-                    None,
-                    ast,
-                ));
+                stmts.push(helper.expr_stmt(call_replace));
             }
             BindingKind::Event => {
                 let Some(ref ev_name) = b.name else {
@@ -421,6 +418,7 @@ pub fn build_property_accessors<'a>(
     p: &PropertyInfo<'a>,
     parsed_template: &ParsedTemplate,
     template_expr_nodes: &[Expression<'a>],
+    multi_prop_bindings: &std::collections::HashSet<usize>,
 ) -> (ClassElement<'a>, ClassElement<'a>) {
     let helper = AstHelper::new(ast);
     let p_name = allocator.alloc_str(&p.name);
@@ -500,168 +498,18 @@ pub fn build_property_accessors<'a>(
                 continue;
             };
             if expr_references_property(binding_expr, &p.name) {
-                let node_prop = allocator.alloc_str(&format!("__lit_node_{}", idx));
-                let node_expr = helper.static_member(helper.this_expr(), node_prop, false);
-
-                match b.kind {
-                    BindingKind::Text => {
-                        let data_target =
-                            AssignmentTarget::from(MemberExpression::new_static_member_expression(
-                                SPAN,
-                                node_expr,
-                                helper.ident_name("data"),
-                                false,
-                                ast,
-                            ));
-                        let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
-                            helper.ident_ref("v")
-                        } else {
-                            binding_expr.clone_in(allocator)
-                        };
-                        let v_coalesce = helper.nullish_coalescing(val_expr, helper.string_lit(""));
-                        let str_call = helper.call_expr(
-                            helper.ident_ref("String"),
-                            {
-                                let mut a = ArenaVec::new_in(ast);
-                                a.push(Argument::from(v_coalesce));
-                                a
-                            },
-                            false,
-                        );
-                        let assign_data = Expression::new_assignment_expression(
-                            SPAN,
-                            AssignmentOperator::Assign,
-                            data_target,
-                            str_call,
-                            ast,
-                        );
-                        stmts.push(Statement::new_if_statement(
-                            SPAN,
-                            helper.static_member(helper.this_expr(), node_prop, false),
-                            helper.expr_stmt(assign_data),
-                            None,
-                            ast,
-                        ));
-                    }
-                    BindingKind::BooleanAttribute => {
-                        if let Some(attr) = &b.name {
-                            let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
-                                helper.ident_ref("v")
-                            } else {
-                                binding_expr.clone_in(allocator)
-                            };
-                            let bool_call = helper.call_expr(
-                                helper.ident_ref("Boolean"),
-                                {
-                                    let mut a = ArenaVec::new_in(ast);
-                                    a.push(Argument::from(val_expr));
-                                    a
-                                },
-                                false,
-                            );
-                            let toggle_call = helper.call_expr(
-                                helper.static_member(node_expr, "toggleAttribute", false),
-                                {
-                                    let mut a = ArenaVec::new_in(ast);
-                                    a.push(Argument::from(
-                                        helper.string_lit(allocator.alloc_str(attr)),
-                                    ));
-                                    a.push(Argument::from(bool_call));
-                                    a
-                                },
-                                false,
-                            );
-                            stmts.push(Statement::new_if_statement(
-                                SPAN,
-                                helper.static_member(helper.this_expr(), node_prop, false),
-                                helper.expr_stmt(toggle_call),
-                                None,
-                                ast,
-                            ));
-                        }
-                    }
-                    BindingKind::Attribute => {
-                        if let Some(attr) = &b.name
-                            && !attr.is_empty()
-                        {
-                            let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
-                                helper.ident_ref("v")
-                            } else {
-                                binding_expr.clone_in(allocator)
-                            };
-                            let v_coalesce =
-                                helper.nullish_coalescing(val_expr, helper.string_lit(""));
-                            let str_call = helper.call_expr(
-                                helper.ident_ref("String"),
-                                {
-                                    let mut a = ArenaVec::new_in(ast);
-                                    a.push(Argument::from(v_coalesce));
-                                    a
-                                },
-                                false,
-                            );
-                            let set_call = helper.call_expr(
-                                helper.static_member(node_expr, "setAttribute", false),
-                                {
-                                    let mut a = ArenaVec::new_in(ast);
-                                    a.push(Argument::from(
-                                        helper.string_lit(allocator.alloc_str(attr)),
-                                    ));
-                                    a.push(Argument::from(str_call));
-                                    a
-                                },
-                                false,
-                            );
-                            stmts.push(Statement::new_if_statement(
-                                SPAN,
-                                helper.static_member(helper.this_expr(), node_prop, false),
-                                helper.expr_stmt(set_call),
-                                None,
-                                ast,
-                            ));
-                        }
-                    }
-                    BindingKind::Property => {
-                        if let Some(prop_name) = &b.name
-                            && !prop_name.is_empty()
-                        {
-                            let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
-                                helper.ident_ref("v")
-                            } else {
-                                binding_expr.clone_in(allocator)
-                            };
-                            let prop_alloc = allocator.alloc_str(prop_name);
-                            let assign_stmt = Statement::new_expression_statement(
-                                SPAN,
-                                Expression::new_assignment_expression(
-                                    SPAN,
-                                    AssignmentOperator::Assign,
-                                    AssignmentTarget::from(
-                                        MemberExpression::new_computed_member_expression(
-                                            SPAN,
-                                            node_expr,
-                                            Expression::new_string_literal(
-                                                SPAN, prop_alloc, None, ast,
-                                            ),
-                                            false,
-                                            ast,
-                                        ),
-                                    ),
-                                    val_expr,
-                                    ast,
-                                ),
-                                ast,
-                            );
-                            stmts.push(Statement::new_if_statement(
-                                SPAN,
-                                helper.static_member(helper.this_expr(), node_prop, false),
-                                assign_stmt,
-                                None,
-                                ast,
-                            ));
-                        }
-                    }
-                    _ => {}
+                if multi_prop_bindings.contains(&idx) {
+                    let u_name = allocator.alloc_str(&format!("_u{}", idx));
+                    let call_u = helper.call_expr(
+                        helper.static_member(helper.this_expr(), u_name, false),
+                        ArenaVec::new_in(ast),
+                        false,
+                    );
+                    stmts.push(helper.expr_stmt(call_u));
+                } else if let Some(update_stmt) =
+                    build_binding_update_stmt(ast, allocator, idx, b, binding_expr, Some(&p.name))
+                {
+                    stmts.push(update_stmt);
                 }
             }
         }
@@ -1070,4 +918,203 @@ pub fn is_direct_prop_access(expr: &Expression, prop_name: &str) -> bool {
         }
         _ => false,
     }
+}
+
+pub fn build_binding_update_stmt<'a>(
+    ast: &AstBuilder<'a>,
+    allocator: &'a Allocator,
+    idx: usize,
+    b: &crate::template_parser::BindingSite,
+    binding_expr: &Expression<'a>,
+    direct_prop_name: Option<&str>,
+) -> Option<Statement<'a>> {
+    let helper = AstHelper::new(ast);
+    let node_prop = allocator.alloc_str(&format!("__lit_node_{}", idx));
+    let node_expr = helper.static_member(helper.this_expr(), node_prop, false);
+    let val_expr = if let Some(p_name) = direct_prop_name
+        && is_direct_prop_access(binding_expr, p_name)
+    {
+        helper.ident_ref("v")
+    } else {
+        binding_expr.clone_in(allocator)
+    };
+
+    match b.kind {
+        BindingKind::Text => {
+            let data_target =
+                AssignmentTarget::from(MemberExpression::new_static_member_expression(
+                    SPAN,
+                    node_expr,
+                    helper.ident_name("data"),
+                    false,
+                    ast,
+                ));
+            let v_coalesce = helper.nullish_coalescing(val_expr, helper.string_lit(""));
+            let str_call = helper.call_expr(
+                helper.ident_ref("String"),
+                {
+                    let mut a = ArenaVec::new_in(ast);
+                    a.push(Argument::from(v_coalesce));
+                    a
+                },
+                false,
+            );
+            let assign_data = Expression::new_assignment_expression(
+                SPAN,
+                AssignmentOperator::Assign,
+                data_target,
+                str_call,
+                ast,
+            );
+            Some(Statement::new_if_statement(
+                SPAN,
+                helper.static_member(helper.this_expr(), node_prop, false),
+                helper.expr_stmt(assign_data),
+                None,
+                ast,
+            ))
+        }
+        BindingKind::BooleanAttribute => {
+            let attr = b.name.as_ref()?;
+            let bool_call = helper.call_expr(
+                helper.ident_ref("Boolean"),
+                {
+                    let mut a = ArenaVec::new_in(ast);
+                    a.push(Argument::from(val_expr));
+                    a
+                },
+                false,
+            );
+            let toggle_call = helper.call_expr(
+                helper.static_member(node_expr, "toggleAttribute", false),
+                {
+                    let mut a = ArenaVec::new_in(ast);
+                    a.push(Argument::from(helper.string_lit(allocator.alloc_str(attr))));
+                    a.push(Argument::from(bool_call));
+                    a
+                },
+                false,
+            );
+            Some(Statement::new_if_statement(
+                SPAN,
+                helper.static_member(helper.this_expr(), node_prop, false),
+                helper.expr_stmt(toggle_call),
+                None,
+                ast,
+            ))
+        }
+        BindingKind::Attribute => {
+            let attr = b.name.as_ref()?;
+            if attr.is_empty() {
+                return None;
+            }
+            let v_coalesce = helper.nullish_coalescing(val_expr, helper.string_lit(""));
+            let str_call = helper.call_expr(
+                helper.ident_ref("String"),
+                {
+                    let mut a = ArenaVec::new_in(ast);
+                    a.push(Argument::from(v_coalesce));
+                    a
+                },
+                false,
+            );
+            let set_call = helper.call_expr(
+                helper.static_member(node_expr, "setAttribute", false),
+                {
+                    let mut a = ArenaVec::new_in(ast);
+                    a.push(Argument::from(helper.string_lit(allocator.alloc_str(attr))));
+                    a.push(Argument::from(str_call));
+                    a
+                },
+                false,
+            );
+            Some(Statement::new_if_statement(
+                SPAN,
+                helper.static_member(helper.this_expr(), node_prop, false),
+                helper.expr_stmt(set_call),
+                None,
+                ast,
+            ))
+        }
+        BindingKind::Property => {
+            let prop_name = b.name.as_ref()?;
+            if prop_name.is_empty() {
+                return None;
+            }
+            let prop_alloc = allocator.alloc_str(prop_name);
+            let assign_stmt = Statement::new_expression_statement(
+                SPAN,
+                Expression::new_assignment_expression(
+                    SPAN,
+                    AssignmentOperator::Assign,
+                    AssignmentTarget::from(MemberExpression::new_computed_member_expression(
+                        SPAN,
+                        node_expr,
+                        Expression::new_string_literal(SPAN, prop_alloc, None, ast),
+                        false,
+                        ast,
+                    )),
+                    val_expr,
+                    ast,
+                ),
+                ast,
+            );
+            Some(Statement::new_if_statement(
+                SPAN,
+                helper.static_member(helper.this_expr(), node_prop, false),
+                assign_stmt,
+                None,
+                ast,
+            ))
+        }
+        _ => None,
+    }
+}
+
+pub fn build_shared_binding_update_method<'a>(
+    ast: &AstBuilder<'a>,
+    allocator: &'a Allocator,
+    idx: usize,
+    b: &crate::template_parser::BindingSite,
+    binding_expr: &Expression<'a>,
+) -> Option<ClassElement<'a>> {
+    let update_stmt = build_binding_update_stmt(ast, allocator, idx, b, binding_expr, None)?;
+    let u_name = allocator.alloc_str(&format!("_u{}", idx));
+    let mut stmts = ArenaVec::new_in(ast);
+    stmts.push(update_stmt);
+    let body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), stmts, ast);
+    let func = Function::boxed(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        None,
+        None,
+        FormalParameters::boxed(
+            SPAN,
+            FormalParameterKind::FormalParameter,
+            ArenaVec::new_in(ast),
+            None,
+            ast,
+        ),
+        None,
+        Some(body),
+        ast,
+    );
+    Some(ClassElement::new_method_definition(
+        SPAN,
+        MethodDefinitionType::MethodDefinition,
+        ArenaVec::new_in(ast),
+        PropertyKey::new_static_identifier(SPAN, u_name, ast),
+        func,
+        MethodDefinitionKind::Method,
+        false,
+        false,
+        false,
+        false,
+        None,
+        ast,
+    ))
 }

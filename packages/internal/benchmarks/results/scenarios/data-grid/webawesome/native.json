@@ -28,19 +28,19 @@
     "name": "Vanilla Web Component compiler (native)",
     "isBaseline": false
   },
-  "timestamp": "2026-10-21T22:42:48.874Z",
+  "timestamp": "2026-10-24T12:24:11.279Z",
   "environment": {
-    "node": "v24.14.0",
+    "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b3e4776",
+    "gitCommit": "dbf7ecf",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
       "vite": "8.3.1",
       "playwright": "1.63.0",
-      "node": "v24.14.0",
+      "node": "v26.12.1",
       "carbon": "2.64.0",
       "spectrum": "1.12.2",
       "webawesome": "3.14.0",
@@ -49,15 +49,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 206865,
-    "gzipBytes": 53550,
-    "brotliBytes": 45015,
-    "buildTimeMs": 34.30125000000044,
-    "firstRenderMs": 35.8,
-    "updateMs": 0.07,
-    "scriptEvalMs": 2.2,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 41356,
+    "rawBytes": 204450,
+    "gzipBytes": 53470,
+    "brotliBytes": 45000,
+    "buildTimeMs": 49.97624999999971,
+    "firstRenderMs": 48.1,
+    "updateMs": 0.11,
+    "scriptEvalMs": 3,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 46052,
     "scenarioSpecific": {
       "rowCount": 25,
       "customElementsPerCell": 5,
@@ -66,43 +66,43 @@
     }
   },
   "baseline": {
-    "rawBytes": 201460,
-    "gzipBytes": 52791,
-    "brotliBytes": 44516,
-    "buildTimeMs": 27.515916999999718,
-    "firstRenderMs": 34.9,
-    "updateMs": 0.11,
-    "scriptEvalMs": 2.6,
-    "registrationMs": 1,
-    "heapUsedBytes": 34608
+    "rawBytes": 201449,
+    "gzipBytes": 52788,
+    "brotliBytes": 44493,
+    "buildTimeMs": 129.582084,
+    "firstRenderMs": 89.5,
+    "updateMs": 0.16,
+    "scriptEvalMs": 9.2,
+    "registrationMs": 2.9,
+    "heapUsedBytes": 26552
   },
   "deltas": {
-    "rawBytes": 5405,
-    "rawPercent": 2.68,
-    "gzipBytes": 759,
-    "gzipPercent": 1.44,
-    "brotliBytes": 499,
-    "brotliPercent": 1.12,
-    "buildTimeMs": 6.8,
-    "firstRenderMs": 0.9,
-    "speedupPercent": -2.58,
-    "updateMs": -0.04,
-    "updateSpeedupPercent": 36.36,
-    "evalSpeedupPercent": 15.38,
-    "registrationSpeedupPercent": 60,
-    "memorySavingsPercent": -19.5
+    "rawBytes": 3001,
+    "rawPercent": 1.49,
+    "gzipBytes": 682,
+    "gzipPercent": 1.29,
+    "brotliBytes": 507,
+    "brotliPercent": 1.14,
+    "buildTimeMs": -79.6,
+    "firstRenderMs": -41.4,
+    "speedupPercent": 46.26,
+    "updateMs": -0.05,
+    "updateSpeedupPercent": 31.25,
+    "evalSpeedupPercent": 67.39,
+    "registrationSpeedupPercent": 68.97,
+    "memorySavingsPercent": -73.44
   },
   "runtime": {
-    "firstRenderMs": 35.8,
-    "updateMs": 0.07,
-    "scriptEvalMs": 2.2,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 41356,
-    "speedupPercent": -2.58,
-    "updateSpeedupPercent": 36.36,
-    "evalSpeedupPercent": 15.38,
-    "registrationSpeedupPercent": 60,
-    "memorySavingsPercent": -19.5
+    "firstRenderMs": 48.1,
+    "updateMs": 0.11,
+    "scriptEvalMs": 3,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 46052,
+    "speedupPercent": 46.26,
+    "updateSpeedupPercent": 31.25,
+    "evalSpeedupPercent": 67.39,
+    "registrationSpeedupPercent": 68.97,
+    "memorySavingsPercent": -73.44
   },
   "domSnapshot": {
     "mount": {
@@ -803,7 +803,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -1525,7 +1525,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -2247,7 +2247,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -2971,7 +2971,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -3693,7 +3693,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -4415,7 +4415,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -5139,7 +5139,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -5863,7 +5863,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -6585,7 +6585,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -7309,7 +7309,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -8031,7 +8031,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -8753,7 +8753,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -9477,7 +9477,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -10199,7 +10199,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -10923,7 +10923,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -11647,7 +11647,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -12296,7 +12296,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -12945,7 +12945,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -13596,7 +13596,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -14245,7 +14245,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -14894,7 +14894,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -15547,7 +15547,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -16196,7 +16196,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -16845,7 +16845,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },
@@ -17496,7 +17496,7 @@
                                         "type": "element",
                                         "tag": "div",
                                         "attributes": {
-                                          "class": "popup popup-fixed popup-has-arrow",
+                                          "class": "popup popup-has-arrow",
                                           "part": "popup",
                                           "popover": "manual"
                                         },

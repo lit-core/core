@@ -84,7 +84,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
     }
 
     // 1. Apply css-fuse rewritten code if available for this component
-    if (pluginState && options.cssFuse !== false) {
+    if (pluginState && (options.cssFuse !== false || Boolean(options.htmlFuse || options['html-fuse']))) {
       const cleanId = resourcePath.split('?')[0];
       let transformed = pluginState.transformedFiles.get(cleanId);
       if (!transformed) {
@@ -105,6 +105,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
+    // Stage 1: Primitives and syntax normalization
     // 2. Apply props-lower AOT lowering if enabled
     const propsLowerOpt = options.propsLower ?? options['props-lower'];
     if (propsLowerOpt) {
@@ -131,11 +132,11 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
-    // 3.5. Apply native AOT vanilla / micro-runtime compiler if enabled
-    const nativeOpt = options.native ?? options['native-compile'];
-    if (nativeOpt) {
-      const nativeOpts: NativeOptions = typeof nativeOpt === 'object' ? nativeOpt : {};
-      const result = transformNativePlugin(currentSource, resourcePath, nativeOpts);
+    // 4. Apply directives AOT lowering if enabled
+    const directivesOpt = options.directives;
+    if (directivesOpt) {
+      const directivesOpts: DirectivesOptions = typeof directivesOpt === 'object' ? directivesOpt : {};
+      const result = transformDirectivesPlugin(currentSource, resourcePath, directivesOpts);
       if (result) {
         currentSource = result.code;
         if (result.map) {
@@ -144,33 +145,9 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
-    // 4. Apply event-hoist AOT ShadowRoot event delegation if enabled
-    const eventHoistOpt = options.eventHoist ?? options['event-hoist'];
-    if (eventHoistOpt) {
-      const hoistOpts: EventHoistOptions = typeof eventHoistOpt === 'object' ? eventHoistOpt : {};
-      const result = transformEventHoistPlugin(currentSource, resourcePath, hoistOpts);
-      if (result) {
-        currentSource = result.code;
-        if (result.map) {
-          currentMap = result.map;
-        }
-      }
-    }
-
-    // 5. Apply dirty-mask AOT bitmasking if enabled
-    const dirtyMaskOpt = options.dirtyMask ?? options['dirty-mask'];
-    if (dirtyMaskOpt) {
-      const maskOpts: DirtyMaskOptions = typeof dirtyMaskOpt === 'object' ? dirtyMaskOpt : {};
-      const result = transformDirtyMaskPlugin(currentSource, resourcePath, maskOpts);
-      if (result) {
-        currentSource = result.code;
-        if (result.map) {
-          currentMap = result.map;
-        }
-      }
-    }
-
-    // 6. Apply dom-paths AOT structural DOM path compilation if enabled
+    // Stage 3: Reactive template AST optimizations
+    // Stage 3: Reactive template AST optimizations
+    // 5. Apply dom-paths AOT structural DOM path compilation if enabled
     const domPathsOpt = options.domPaths ?? options['dom-paths'];
     if (domPathsOpt) {
       const domOpts: DomPathsOptions = typeof domPathsOpt === 'object' ? domPathsOpt : {};
@@ -183,6 +160,18 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
+    // 6. Apply dirty-mask AOT bitmasking if enabled
+    const dirtyMaskOpt = options.dirtyMask ?? options['dirty-mask'];
+    if (dirtyMaskOpt) {
+      const maskOpts: DirtyMaskOptions = typeof dirtyMaskOpt === 'object' ? dirtyMaskOpt : {};
+      const result = transformDirtyMaskPlugin(currentSource, resourcePath, maskOpts);
+      if (result) {
+        currentSource = result.code;
+        if (result.map) {
+          currentMap = result.map;
+        }
+      }
+    }
     // 7. Apply memoize auto-memoization if enabled
     const memoizeOpt = options.memoize;
     if (memoizeOpt) {
@@ -196,11 +185,11 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
-    // 8. Apply directives AOT lowering if enabled
-    const directivesOpt = options.directives;
-    if (directivesOpt) {
-      const directivesOpts: DirectivesOptions = typeof directivesOpt === 'object' ? directivesOpt : {};
-      const result = transformDirectivesPlugin(currentSource, resourcePath, directivesOpts);
+    // 8. Apply event-hoist AOT ShadowRoot event delegation if enabled
+    const eventHoistOpt = options.eventHoist ?? options['event-hoist'];
+    if (eventHoistOpt) {
+      const hoistOpts: EventHoistOptions = typeof eventHoistOpt === 'object' ? eventHoistOpt : {};
+      const result = transformEventHoistPlugin(currentSource, resourcePath, hoistOpts);
       if (result) {
         currentSource = result.code;
         if (result.map) {
@@ -209,7 +198,8 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
-    // 7. Apply css-minifier embedded CSS minification if enabled
+    // Stage 4: Minification and AOT compilation
+    // 9. Apply css-minifier embedded CSS minification if enabled
     const cssMinifierOpt = options.cssMinifier ?? options['css-minifier'];
     if (cssMinifierOpt) {
       const cssOpts: CssMinifierOptions = typeof cssMinifierOpt === 'object' ? cssMinifierOpt : {};
@@ -222,20 +212,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
-    // 4. Apply html-aot template compilation if enabled
-    const htmlAotOpt = options.htmlAot ?? options['html-aot'];
-    if (htmlAotOpt) {
-      const aotOpts: HtmlAotOptions = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
-      const result = transformHtmlAot(currentSource, resourcePath, aotOpts);
-      if (result) {
-        currentSource = result.code;
-        if (result.map) {
-          currentMap = result.map;
-        }
-      }
-    }
-
-    // 5. Apply html-minifier template minification if enabled
+    // 10. Apply html-minifier template minification if enabled
     const htmlMinifierOpt = options.htmlMinifier ?? options['html-minifier'];
     if (htmlMinifierOpt) {
       const htmlOpts: HtmlMinifierOptions = typeof htmlMinifierOpt === 'object' ? htmlMinifierOpt : {};
@@ -248,20 +225,34 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
-    // 6. Apply resumable client adapter injection if enabled
-    const ssrOpt = options.ssr ?? options['lit-ssr'];
-    const isSsr = Boolean(pluginState?.isSsr);
-    const ssrResumable = typeof ssrOpt === 'object' && ssrOpt !== null && Boolean(ssrOpt.resumable);
-    const resumableOpt = options.resumable ?? (ssrResumable && !isSsr ? true : undefined);
-    if (resumableOpt && !isSsr) {
-      const resumableOpts: ResumableOptions = typeof resumableOpt === 'object' ? resumableOpt : {};
-      const result = transformResumable(currentSource, resourcePath, resumableOpts);
+    // 11. Apply html-aot template compilation if enabled
+    const htmlAotOpt = options.htmlAot ?? options['html-aot'];
+    if (htmlAotOpt) {
+      const aotOpts: HtmlAotOptions = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
+      const result = transformHtmlAot(currentSource, resourcePath, aotOpts);
       if (result) {
         currentSource = result.code;
+        if (result.map) {
+          currentMap = result.map;
+        }
       }
     }
 
-    // 7. Apply tag-shake AOT dead code elimination if enabled
+    // 12. Apply native AOT vanilla / micro-runtime compiler if enabled
+    const nativeOpt = options.native ?? options['native-compile'];
+    if (nativeOpt) {
+      const nativeOpts: NativeOptions = typeof nativeOpt === 'object' ? nativeOpt : {};
+      const result = transformNativePlugin(currentSource, resourcePath, nativeOpts);
+      if (result) {
+        currentSource = result.code;
+        if (result.map) {
+          currentMap = result.map;
+        }
+      }
+    }
+
+    // Stage 5: Post-bundle pruning and rendering
+    // 13. Apply tag-shake AOT dead code elimination if enabled
     const tagShakeOpt = options.tagShake ?? options['tag-shake'];
     if (tagShakeOpt) {
       const shakeOpts: TagShakeOptions = typeof tagShakeOpt === 'object' ? tagShakeOpt : {};
@@ -280,7 +271,9 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
-    // 8. Apply SSR ahead-of-time transform if enabled
+    // 14. Apply SSR ahead-of-time transform if enabled
+    const ssrOpt = options.ssr ?? options['lit-ssr'];
+    const isSsr = Boolean(pluginState?.isSsr);
     if (ssrOpt) {
       const ssrOpts: SsrOptions = typeof ssrOpt === 'object' ? ssrOpt : {};
       const result = transformSsr(currentSource, resourcePath, { ...ssrOpts, ssrMode: isSsr });
@@ -289,6 +282,17 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
         if (result.map) {
           currentMap = result.map;
         }
+      }
+    }
+
+    // 15. Apply resumable client adapter injection if enabled
+    const ssrResumable = typeof ssrOpt === 'object' && ssrOpt !== null && Boolean(ssrOpt.resumable);
+    const resumableOpt = options.resumable ?? (ssrResumable && !isSsr ? true : undefined);
+    if (resumableOpt && !isSsr) {
+      const resumableOpts: ResumableOptions = typeof resumableOpt === 'object' ? resumableOpt : {};
+      const result = transformResumable(currentSource, resourcePath, resumableOpts);
+      if (result) {
+        currentSource = result.code;
       }
     }
 

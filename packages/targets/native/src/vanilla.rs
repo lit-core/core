@@ -227,6 +227,19 @@ pub fn transform_vanilla_class<'a>(
     );
     new_body_elements.push(ctor_elem);
 
+    let mut multi_prop_bindings = HashSet::new();
+    for (idx, b) in parsed_template.bindings.iter().enumerate() {
+        if let Some(binding_expr) = template_exprs.get(b.expression_index) {
+            let ref_count = properties
+                .iter()
+                .filter(|p| crate::vanilla_ast::expr_references_property(binding_expr, &p.name))
+                .count();
+            if ref_count > 1 {
+                multi_prop_bindings.insert(idx);
+            }
+        }
+    }
+
     for p in &properties {
         let (getter, setter) = crate::vanilla_ast::build_property_accessors(
             ast,
@@ -234,9 +247,25 @@ pub fn transform_vanilla_class<'a>(
             p,
             &parsed_template,
             &template_exprs,
+            &multi_prop_bindings,
         );
         new_body_elements.push(getter);
         new_body_elements.push(setter);
+    }
+
+    for (idx, b) in parsed_template.bindings.iter().enumerate() {
+        if multi_prop_bindings.contains(&idx)
+            && let Some(binding_expr) = template_exprs.get(b.expression_index)
+            && let Some(u_method) = crate::vanilla_ast::build_shared_binding_update_method(
+                ast,
+                allocator,
+                idx,
+                b,
+                binding_expr,
+            )
+        {
+            new_body_elements.push(u_method);
+        }
     }
 
     if let Some(acc_elem) =

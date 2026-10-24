@@ -455,9 +455,8 @@ pub fn clean_dead_imports<'a>(program: &mut Program<'a>, ast: &AstBuilder<'a>) {
     for stmt in &old_body {
         if let Statement::ImportDeclaration(import_decl) = stmt {
             let src = import_decl.source.value.as_str();
-            if (is_lit_import_source(src) || is_lit_directive_source(src))
-                && let Some(ref specifiers) = import_decl.specifiers
-            {
+            let is_cleanable = is_lit_import_source(src) || is_lit_directive_source(src);
+            if is_cleanable && let Some(ref specifiers) = import_decl.specifiers {
                 for spec in specifiers {
                     let name = match spec {
                         ImportDeclarationSpecifier::ImportSpecifier(named) => {
@@ -492,9 +491,8 @@ pub fn clean_dead_imports<'a>(program: &mut Program<'a>, ast: &AstBuilder<'a>) {
     for mut stmt in old_body {
         if let Statement::ImportDeclaration(ref mut import_decl) = stmt {
             let src = import_decl.source.value.as_str();
-            if (is_lit_import_source(src) || is_lit_directive_source(src))
-                && let Some(ref mut specifiers) = import_decl.specifiers
-            {
+            let is_cleanable = is_lit_import_source(src) || is_lit_directive_source(src);
+            if is_cleanable && let Some(ref mut specifiers) = import_decl.specifiers {
                 specifiers.retain(|spec| {
                     let local_name = match spec {
                         ImportDeclarationSpecifier::ImportSpecifier(named) => {

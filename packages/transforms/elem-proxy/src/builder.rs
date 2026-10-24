@@ -70,10 +70,11 @@ pub fn build_proxy_wrapper<'a>(
     stmts.push(build_alias_decl(ast, class_name, proxy_name));
 
     // 4. const __props_Name = [...];
-    stmts.push(build_props_decl(ast, props_var, &target.properties));
-
     // 5. for (const __p of __props_Name) { Object.defineProperty(NameProxy.prototype, __p, { ... }); }
-    stmts.push(build_props_loop(ast, proxy_name, props_var));
+    if !target.properties.is_empty() {
+        stmts.push(build_props_decl(ast, props_var, &target.properties));
+        stmts.push(build_props_loop(ast, proxy_name, props_var));
+    }
 
     // 6. customElements.define('tag-name', NameProxy);
     stmts.push(build_ce_define(ast, tag_name, proxy_name));
@@ -873,13 +874,17 @@ fn build_proxy_class<'a>(
 ) -> Statement<'a> {
     let mut elements = ArenaVec::new_in(ast);
 
+    let has_observed_attrs = is_external || !observed_attributes.is_empty();
+
     // 1. static get observedAttributes() { ... }
-    elements.push(build_observed_attributes_method(
-        ast,
-        is_external,
-        class_name,
-        observed_attributes,
-    ));
+    if has_observed_attrs {
+        elements.push(build_observed_attributes_method(
+            ast,
+            is_external,
+            class_name,
+            observed_attributes,
+        ));
+    }
 
     // 2. static [Symbol.hasInstance](instance) { ... }
     elements.push(build_has_instance_method(
@@ -915,7 +920,9 @@ fn build_proxy_class<'a>(
     ));
 
     // 6. attributeChangedCallback(name, oldValue, newValue) { ... }
-    elements.push(build_attribute_changed_callback_method(ast));
+    if has_observed_attrs {
+        elements.push(build_attribute_changed_callback_method(ast));
+    }
 
     // 7. connectedCallback() { ... }
     elements.push(build_connected_callback_method(ast));
@@ -924,6 +931,7 @@ fn build_proxy_class<'a>(
     elements.push(build_upgrade_method(
         ast,
         is_external,
+        has_observed_attrs,
         class_name,
         getter_name,
     ));
@@ -1968,6 +1976,7 @@ fn build_connected_callback_method<'a>(ast: &AstBuilder<'a>) -> ClassElement<'a>
 fn build_upgrade_method<'a>(
     ast: &AstBuilder<'a>,
     is_external: bool,
+    has_observed_attrs: bool,
     class_name: &'a str,
     getter_name: &'a str,
 ) -> ClassElement<'a> {
@@ -2145,7 +2154,9 @@ fn build_upgrade_method<'a>(
     ));
 
     // Flush buffered attributes
-    stmts.push(build_upgrade_attr_buffer(ast));
+    if has_observed_attrs {
+        stmts.push(build_upgrade_attr_buffer(ast));
+    }
 
     // connectedCallback & requestUpdate
     stmts.push(build_upgrade_connected_cb(ast, is_external));

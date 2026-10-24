@@ -4,7 +4,7 @@ import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import type { Plugin } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { HtmlAotOptions } from '../options.js';
-import { matchesPattern } from '../utils.js';
+import { isVirtualHtmlFusedId, matchesPattern } from '../utils.js';
 
 const LIT_HTML_AOT_FAST_CHECK = /\b(?:html|svg)\s*`|\b[a-zA-Z0-9_$]+\.html\s*`|\bimport\b[^;]*\b(?:html|svg)\b/;
 const esmRequire = createRequire(import.meta.url);
@@ -33,35 +33,39 @@ export function htmlAot(options: HtmlAotOptions = {}): Plugin {
 
     transform(code: string, id: string) {
       const cleanId = id.split('?')[0] ?? id;
-      if (!/\.[jt]sx?$/.test(cleanId)) {
+      const isVirtualHtml = isVirtualHtmlFusedId(cleanId);
+      if (!isVirtualHtml && !/\.[jt]sx?$/.test(cleanId)) {
         return null;
       }
 
-      if (options.exclude) {
-        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
-        for (const pattern of excludes) {
-          if (matchesPattern(cleanId, pattern)) return null;
+      if (!isVirtualHtml) {
+        if (options.exclude) {
+          const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+          for (const pattern of excludes) {
+            if (matchesPattern(cleanId, pattern)) return null;
+          }
+        } else if (!options.include && cleanId.includes('/node_modules/')) {
+          return null;
         }
-      } else if (!options.include && cleanId.includes('/node_modules/')) {
-        return null;
-      }
 
-      if (options.include) {
-        const includes = Array.isArray(options.include) ? options.include : [options.include];
-        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
-        if (!matched) return null;
+        if (options.include) {
+          const includes = Array.isArray(options.include) ? options.include : [options.include];
+          const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+          if (!matched) return null;
+        }
       }
 
       if (!LIT_HTML_AOT_FAST_CHECK.test(code)) {
         return null;
       }
 
+      const safeFilename = cleanId.replace(/^\0/, '');
       try {
         let inputCode = code;
         try {
           const minified = minifyHtmlTemplates(code, {
             sourcemap: false,
-            filename: cleanId,
+            filename: safeFilename,
           });
           if (minified.templatesCount > 0) {
             inputCode = minified.code;
@@ -69,7 +73,7 @@ export function htmlAot(options: HtmlAotOptions = {}): Plugin {
         } catch {}
 
         const result = compileHtmlAot(inputCode, {
-          filename: cleanId,
+          filename: safeFilename,
           sourcemap,
         });
 

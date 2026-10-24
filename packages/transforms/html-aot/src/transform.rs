@@ -5,9 +5,10 @@ use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_semantic::SemanticBuilder;
+use oxc_semantic::{Scoping, SemanticBuilder};
 use oxc_span::{GetSpan, SPAN, SourceType, Span};
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 use crate::parser::{PartKind, PreparedTemplate, parse_lit_template};
 
@@ -30,6 +31,53 @@ pub struct HtmlAotResult {
 struct CompiledTemplateData {
     var_name: String,
     prepared: PreparedTemplate,
+}
+
+struct ScopeIdGenerator<'a> {
+    scoping: &'a Scoping,
+    used_names: HashSet<String>,
+}
+
+impl<'a> ScopeIdGenerator<'a> {
+    fn new(scoping: &'a Scoping) -> Self {
+        Self {
+            scoping,
+            used_names: HashSet::new(),
+        }
+    }
+
+    fn is_available(&self, name: &str) -> bool {
+        let root = self.scoping.root_scope_id();
+        self.scoping.get_binding(root, name.into()).is_none()
+            && !self.scoping.root_unresolved_references().contains_key(name)
+            && !self.used_names.contains(name)
+    }
+
+    fn generate(&mut self, preferred: &str) -> String {
+        if self.is_available(preferred) {
+            self.used_names.insert(preferred.to_string());
+            return preferred.to_string();
+        }
+        let (prefix, start_idx) = if let Some(pos) = preferred.rfind('_') {
+            if let Ok(num) = preferred[pos + 1..].parse::<usize>() {
+                (&preferred[..pos], num + 1)
+            } else {
+                (preferred, 1)
+            }
+        } else {
+            (preferred, 1)
+        };
+
+        let mut counter = start_idx;
+        loop {
+            let candidate = format!("{}_{}", prefix, counter);
+            if self.is_available(&candidate) {
+                self.used_names.insert(candidate.clone());
+                return candidate;
+            }
+            counter += 1;
+        }
+    }
 }
 
 fn contains_octal_escape(quasis: &[TemplateElement]) -> bool {
@@ -86,15 +134,16 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
         };
     }
 
+    let mut id_gen = ScopeIdGenerator::new(&scoping);
+
     // 2. Walk AST to find lit template expressions
     let mut template_matches: Vec<(Span, CompiledTemplateData)> = Vec::new();
-    let mut template_counter = 0;
 
     walk_and_collect_templates(
         &parsed.program.body,
         &symbol_ctx,
         &mut template_matches,
-        &mut template_counter,
+        &mut id_gen,
     );
 
     if template_matches.is_empty() {
@@ -131,22 +180,29 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let ast = AstBuilder::new(&allocator);
     let mut header_stmts = Vec::new();
 
+    let brand_name = id_gen.generate("b_1");
+    let private_ssr_name = id_gen.generate("litHtmlPrivate_1");
+    let attr_alias = id_gen.generate("A_1");
+    let prop_alias = id_gen.generate("P_1");
+    let bool_alias = id_gen.generate("B_1");
+    let event_alias = id_gen.generate("E_1");
+
     if need_ssr_import {
         let mut binding_pairs = Vec::new();
         if need_attr_part {
-            binding_pairs.push(("AttributePart", "A_1"));
+            binding_pairs.push(("AttributePart", attr_alias.as_str()));
         }
         if need_prop_part {
-            binding_pairs.push(("PropertyPart", "P_1"));
+            binding_pairs.push(("PropertyPart", prop_alias.as_str()));
         }
         if need_bool_part {
-            binding_pairs.push(("BooleanAttributePart", "B_1"));
+            binding_pairs.push(("BooleanAttributePart", bool_alias.as_str()));
         }
         if need_event_part {
-            binding_pairs.push(("EventPart", "E_1"));
+            binding_pairs.push(("EventPart", event_alias.as_str()));
         }
 
-        let local = BindingIdentifier::new(SPAN, "litHtmlPrivate_1", &ast);
+        let local = BindingIdentifier::new(SPAN, allocator.alloc_str(&private_ssr_name), &ast);
         let ns_spec = ImportNamespaceSpecifier::boxed(SPAN, local, &ast);
         let mut specs = ArenaVec::new_in(&ast);
         specs.push(ImportDeclarationSpecifier::ImportNamespaceSpecifier(
@@ -178,7 +234,8 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
         }
         let binding_pat = BindingPattern::new_object_pattern(SPAN, obj_pat_props, None, &ast);
 
-        let callee_obj = Expression::new_identifier(SPAN, "litHtmlPrivate_1", &ast);
+        let callee_obj =
+            Expression::new_identifier(SPAN, allocator.alloc_str(&private_ssr_name), &ast);
         let prop_name = IdentifierName::new(SPAN, "_$LH", &ast);
         let init_expr =
             Expression::new_static_member_expression(SPAN, callee_obj, prop_name, false, &ast);
@@ -218,7 +275,8 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
         &ast,
     );
 
-    let b1_binding = BindingPattern::new_binding_identifier(SPAN, "b_1", &ast);
+    let b1_binding =
+        BindingPattern::new_binding_identifier(SPAN, allocator.alloc_str(&brand_name), &ast);
     let declarator = VariableDeclarator::new(SPAN, b1_binding, None, Some(arrow_expr), false, &ast);
     let mut decls = ArenaVec::new_in(&ast);
     decls.push(declarator);
@@ -233,7 +291,7 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     // Top-level template definitions associated with their source span
     let mut tmpl_stmts: Vec<(Span, Vec<Statement<'_>>)> = Vec::new();
     for (tmpl_span, tmpl) in &template_matches {
-        let tag_ident = Expression::new_identifier(SPAN, "b_1", &ast);
+        let tag_ident = Expression::new_identifier(SPAN, allocator.alloc_str(&brand_name), &ast);
         let mut quasis = ArenaVec::new_in(&ast);
         let raw_html = allocator.alloc_str(&tmpl.prepared.prepared_html);
         let val = TemplateElementValue {
@@ -421,13 +479,14 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
                         &ast,
                     ));
                     let ctor_alias = match ctor_type {
-                        3 => "P_1",
-                        4 => "B_1",
-                        5 => "E_1",
-                        _ => "A_1",
+                        3 => prop_alias.as_str(),
+                        4 => bool_alias.as_str(),
+                        5 => event_alias.as_str(),
+                        _ => attr_alias.as_str(),
                     };
                     let key_ctor = PropertyKey::new_static_identifier(SPAN, "ctor", &ast);
-                    let val_ctor = Expression::new_identifier(SPAN, ctor_alias, &ast);
+                    let val_ctor =
+                        Expression::new_identifier(SPAN, allocator.alloc_str(ctor_alias), &ast);
                     part_props.push(ObjectPropertyKind::new_object_property(
                         SPAN,
                         PropertyKind::Init,
@@ -876,10 +935,10 @@ fn walk_and_collect_templates<'a>(
     stmts: &[Statement<'a>],
     symbol_ctx: &SymbolProofContext<'a>,
     out: &mut Vec<(Span, CompiledTemplateData)>,
-    counter: &mut usize,
+    id_gen: &mut ScopeIdGenerator<'a>,
 ) {
     for stmt in stmts {
-        walk_stmt_for_templates(stmt, symbol_ctx, out, counter);
+        walk_stmt_for_templates(stmt, symbol_ctx, out, id_gen);
     }
 }
 
@@ -887,20 +946,20 @@ fn walk_class_for_templates<'a>(
     class: &Class<'a>,
     symbol_ctx: &SymbolProofContext<'a>,
     out: &mut Vec<(Span, CompiledTemplateData)>,
-    counter: &mut usize,
+    id_gen: &mut ScopeIdGenerator<'a>,
 ) {
     for elem in &class.body.body {
         match elem {
             ClassElement::MethodDefinition(m) => {
                 if let Some(body) = &m.value.body {
                     for s in &body.statements {
-                        walk_stmt_for_templates(s, symbol_ctx, out, counter);
+                        walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
                     }
                 }
             }
             ClassElement::PropertyDefinition(p) => {
                 if let Some(init) = &p.value {
-                    walk_expr_for_templates(init, symbol_ctx, out, counter);
+                    walk_expr_for_templates(init, symbol_ctx, out, id_gen);
                 }
             }
             _ => {}
@@ -912,66 +971,66 @@ fn walk_stmt_for_templates<'a>(
     stmt: &Statement<'a>,
     symbol_ctx: &SymbolProofContext<'a>,
     out: &mut Vec<(Span, CompiledTemplateData)>,
-    counter: &mut usize,
+    id_gen: &mut ScopeIdGenerator<'a>,
 ) {
     match stmt {
         Statement::ExpressionStatement(s) => {
-            walk_expr_for_templates(&s.expression, symbol_ctx, out, counter);
+            walk_expr_for_templates(&s.expression, symbol_ctx, out, id_gen);
         }
         Statement::ReturnStatement(s) => {
             if let Some(arg) = &s.argument {
-                walk_expr_for_templates(arg, symbol_ctx, out, counter);
+                walk_expr_for_templates(arg, symbol_ctx, out, id_gen);
             }
         }
         Statement::VariableDeclaration(s) => {
             for decl in &s.declarations {
                 if let Some(init) = &decl.init {
-                    walk_expr_for_templates(init, symbol_ctx, out, counter);
+                    walk_expr_for_templates(init, symbol_ctx, out, id_gen);
                 }
             }
         }
         Statement::ClassDeclaration(class) => {
-            walk_class_for_templates(class, symbol_ctx, out, counter);
+            walk_class_for_templates(class, symbol_ctx, out, id_gen);
         }
         Statement::ExportDeclaration(export_decl) => match &export_decl.declaration {
             Declaration::VariableDeclaration(v) => {
                 for decl in &v.declarations {
                     if let Some(init) = &decl.init {
-                        walk_expr_for_templates(init, symbol_ctx, out, counter);
+                        walk_expr_for_templates(init, symbol_ctx, out, id_gen);
                     }
                 }
             }
             Declaration::FunctionDeclaration(f) => {
                 if let Some(body) = &f.body {
                     for s in &body.statements {
-                        walk_stmt_for_templates(s, symbol_ctx, out, counter);
+                        walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
                     }
                 }
             }
             Declaration::ClassDeclaration(class) => {
-                walk_class_for_templates(class, symbol_ctx, out, counter);
+                walk_class_for_templates(class, symbol_ctx, out, id_gen);
             }
             _ => {}
         },
         Statement::ExportDefaultDeclaration(export_decl) => {
             if let Some(expr) = export_decl.declaration.as_expression() {
-                walk_expr_for_templates(expr, symbol_ctx, out, counter);
+                walk_expr_for_templates(expr, symbol_ctx, out, id_gen);
             } else if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                 &export_decl.declaration
             {
-                walk_class_for_templates(class, symbol_ctx, out, counter);
+                walk_class_for_templates(class, symbol_ctx, out, id_gen);
             }
         }
         Statement::BlockStatement(b) => {
             for s in &b.body {
-                walk_stmt_for_templates(s, symbol_ctx, out, counter);
+                walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
             }
         }
         Statement::IfStatement(if_stmt) => {
-            walk_expr_for_templates(&if_stmt.test, symbol_ctx, out, counter);
-            walk_stmt_for_templates(&if_stmt.consequent, symbol_ctx, out, counter);
+            walk_expr_for_templates(&if_stmt.test, symbol_ctx, out, id_gen);
+            walk_stmt_for_templates(&if_stmt.consequent, symbol_ctx, out, id_gen);
             if let Some(alt) = &if_stmt.alternate {
-                walk_stmt_for_templates(alt, symbol_ctx, out, counter);
+                walk_stmt_for_templates(alt, symbol_ctx, out, id_gen);
             }
         }
         _ => {}
@@ -982,7 +1041,7 @@ fn walk_expr_for_templates<'a>(
     expr: &Expression<'a>,
     symbol_ctx: &SymbolProofContext<'a>,
     out: &mut Vec<(Span, CompiledTemplateData)>,
-    counter: &mut usize,
+    id_gen: &mut ScopeIdGenerator<'a>,
 ) {
     match expr {
         Expression::TaggedTemplateExpression(tagged) => {
@@ -997,84 +1056,83 @@ fn walk_expr_for_templates<'a>(
                     .collect();
 
                 if let Some(prepared) = parse_lit_template(&quasis) {
-                    *counter += 1;
-                    let var_name = format!("lit_template_{}", counter);
+                    let var_name = id_gen.generate("lit_template_1");
 
                     out.push((tagged.span, CompiledTemplateData { var_name, prepared }));
                 }
             }
 
             for quasi_expr in &tagged.quasi.expressions {
-                walk_expr_for_templates(quasi_expr, symbol_ctx, out, counter);
+                walk_expr_for_templates(quasi_expr, symbol_ctx, out, id_gen);
             }
         }
         Expression::ClassExpression(class) => {
-            walk_class_for_templates(class, symbol_ctx, out, counter);
+            walk_class_for_templates(class, symbol_ctx, out, id_gen);
         }
         Expression::ConditionalExpression(cond) => {
-            walk_expr_for_templates(&cond.test, symbol_ctx, out, counter);
-            walk_expr_for_templates(&cond.consequent, symbol_ctx, out, counter);
-            walk_expr_for_templates(&cond.alternate, symbol_ctx, out, counter);
+            walk_expr_for_templates(&cond.test, symbol_ctx, out, id_gen);
+            walk_expr_for_templates(&cond.consequent, symbol_ctx, out, id_gen);
+            walk_expr_for_templates(&cond.alternate, symbol_ctx, out, id_gen);
         }
         Expression::LogicalExpression(log) => {
-            walk_expr_for_templates(&log.left, symbol_ctx, out, counter);
-            walk_expr_for_templates(&log.right, symbol_ctx, out, counter);
+            walk_expr_for_templates(&log.left, symbol_ctx, out, id_gen);
+            walk_expr_for_templates(&log.right, symbol_ctx, out, id_gen);
         }
         Expression::BinaryExpression(bin) => {
-            walk_expr_for_templates(&bin.left, symbol_ctx, out, counter);
-            walk_expr_for_templates(&bin.right, symbol_ctx, out, counter);
+            walk_expr_for_templates(&bin.left, symbol_ctx, out, id_gen);
+            walk_expr_for_templates(&bin.right, symbol_ctx, out, id_gen);
         }
         Expression::AssignmentExpression(assign) => {
-            walk_expr_for_templates(&assign.right, symbol_ctx, out, counter);
+            walk_expr_for_templates(&assign.right, symbol_ctx, out, id_gen);
         }
         Expression::SequenceExpression(seq) => {
             for e in &seq.expressions {
-                walk_expr_for_templates(e, symbol_ctx, out, counter);
+                walk_expr_for_templates(e, symbol_ctx, out, id_gen);
             }
         }
         Expression::ArrowFunctionExpression(arrow) => match &arrow.body {
             ArrowFunctionBody::FunctionBody(body) => {
                 for s in &body.statements {
-                    walk_stmt_for_templates(s, symbol_ctx, out, counter);
+                    walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
                 }
             }
             _ => {
                 if let Some(e) = arrow.body.as_expression() {
-                    walk_expr_for_templates(e, symbol_ctx, out, counter);
+                    walk_expr_for_templates(e, symbol_ctx, out, id_gen);
                 }
             }
         },
         Expression::FunctionExpression(func) => {
             if let Some(body) = &func.body {
                 for s in &body.statements {
-                    walk_stmt_for_templates(s, symbol_ctx, out, counter);
+                    walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
                 }
             }
         }
         Expression::CallExpression(call) => {
-            walk_expr_for_templates(&call.callee, symbol_ctx, out, counter);
+            walk_expr_for_templates(&call.callee, symbol_ctx, out, id_gen);
             for arg in &call.arguments {
                 if let Some(e) = arg.as_expression() {
-                    walk_expr_for_templates(e, symbol_ctx, out, counter);
+                    walk_expr_for_templates(e, symbol_ctx, out, id_gen);
                 }
             }
         }
         Expression::ArrayExpression(arr) => {
             for elem in &arr.elements {
                 if let Some(e) = elem.as_expression() {
-                    walk_expr_for_templates(e, symbol_ctx, out, counter);
+                    walk_expr_for_templates(e, symbol_ctx, out, id_gen);
                 }
             }
         }
         Expression::ObjectExpression(obj) => {
             for prop in &obj.properties {
                 if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                    walk_expr_for_templates(&p.value, symbol_ctx, out, counter);
+                    walk_expr_for_templates(&p.value, symbol_ctx, out, id_gen);
                 }
             }
         }
         Expression::ParenthesizedExpression(p) => {
-            walk_expr_for_templates(&p.expression, symbol_ctx, out, counter);
+            walk_expr_for_templates(&p.expression, symbol_ctx, out, id_gen);
         }
         _ => {}
     }

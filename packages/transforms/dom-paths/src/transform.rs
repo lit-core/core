@@ -9,6 +9,8 @@ use oxc_span::{SPAN, SourceType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
+use lit_analysis::decorator::{DecoratorExtractor, LitDecoratorKind};
+use lit_analysis::property::PropertyModelExtractor;
 use lit_analysis::symbol::SymbolProofContext;
 use oxc_semantic::SemanticBuilder;
 
@@ -137,6 +139,20 @@ impl<'a, 's> Visit<'a> for ExprDepCollector<'s> {
     }
 }
 
+fn is_property_reflecting(p: &ObjectProperty) -> bool {
+    if let Expression::ObjectExpression(opts) = &p.value {
+        for opt in &opts.properties {
+            if let ObjectPropertyKind::ObjectProperty(opt_prop) = opt
+                && opt_prop.key.is_specific_static_name("reflect")
+                && PropertyModelExtractor::is_truthy(&opt_prop.value) != Some(false)
+            {
+                return true;
+            }
+        }
+    }
+    false
+}
+
 fn try_build_dom_path_update_method<'a>(
     class: &Class<'a>,
     part_descriptors: &[PartDescriptor],
@@ -155,7 +171,7 @@ fn try_build_dom_path_update_method<'a>(
         }
     }
 
-    // Collect reactive properties from `static properties = { ... }` and check lifecycle methods
+    // Collect reactive properties from `static properties`, `static get properties()`, and decorators
     let mut reactive_props = HashSet::new();
     let mut render_method: Option<&MethodDefinition<'a>> = None;
 
@@ -164,9 +180,32 @@ fn try_build_dom_path_update_method<'a>(
             ClassElement::MethodDefinition(method) => {
                 if let PropertyKey::StaticIdentifier(ident) = &method.key {
                     match ident.name.as_str() {
-                        "update" | "willUpdate" | "firstUpdated" | "updated" => return None,
+                        "update" => return None,
                         "render" => render_method = Some(method),
                         _ => {}
+                    }
+                }
+                // static get properties() { return { ... }; }
+                if method.r#static
+                    && method.kind == MethodDefinitionKind::Get
+                    && method.key.is_specific_static_name("properties")
+                    && let Some(body) = &method.value.body
+                {
+                    for stmt in &body.statements {
+                        if let Statement::ReturnStatement(ret) = stmt
+                            && let Some(Expression::ObjectExpression(obj)) = &ret.argument
+                        {
+                            for prop_kind in &obj.properties {
+                                if let ObjectPropertyKind::ObjectProperty(p) = prop_kind
+                                    && let Some(name) = p.key.static_name()
+                                {
+                                    if is_property_reflecting(p) {
+                                        return None;
+                                    }
+                                    reactive_props.insert(name.into_owned());
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -178,12 +217,31 @@ fn try_build_dom_path_update_method<'a>(
                         if let ObjectPropertyKind::ObjectProperty(p) = prop_kind
                             && let Some(name) = p.key.static_name()
                         {
+                            if is_property_reflecting(p) {
+                                return None;
+                            }
                             reactive_props.insert(name.into_owned());
                         }
                     }
                 }
             }
             _ => {}
+        }
+    }
+
+    // Check decorators on class members for @property({ reflect: true })
+    let member_decorators = DecoratorExtractor::extract_member_decorators(class, symbol_ctx);
+    for dec in &member_decorators {
+        if let LitDecoratorKind::Property { reflect: true, .. } = dec.kind {
+            return None;
+        }
+        if let Some(target) = &dec.target_member {
+            match dec.kind {
+                LitDecoratorKind::Property { .. } | LitDecoratorKind::State { .. } => {
+                    reactive_props.insert(target.clone());
+                }
+                _ => {}
+            }
         }
     }
 
@@ -275,33 +333,7 @@ fn try_build_dom_path_update_method<'a>(
         ast,
     ));
 
-    // 2. `let __nodes = this.__litDomNodes;`
-    let mut nodes_decls = ArenaVec::new_in(ast);
-    nodes_decls.push(VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "__nodes", ast),
-        None,
-        Some(Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_this_expression(SPAN, ast),
-            IdentifierName::new(SPAN, "__litDomNodes", ast),
-            false,
-            ast,
-        )),
-        false,
-        ast,
-    ));
-    stmts.push(Statement::new_variable_declaration(
-        SPAN,
-        VariableDeclarationKind::Let,
-        nodes_decls,
-        false,
-        ast,
-    ));
-
-    // 3. `if (!__nodes) { const __paths = this.constructor.__litPartPaths; const __root = this.renderRoot; __nodes = __paths.map((__p) => { ... }); this.__litDomNodes = __nodes; }`
-    let mut init_stmts = ArenaVec::new_in(ast);
-
+    // 2. Ephemeral node traversal: resolve paths on stack without caching on `this`
     let mut paths_decls = ArenaVec::new_in(ast);
     paths_decls.push(VariableDeclarator::new(
         SPAN,
@@ -323,7 +355,7 @@ fn try_build_dom_path_update_method<'a>(
         false,
         ast,
     ));
-    init_stmts.push(Statement::new_variable_declaration(
+    stmts.push(Statement::new_variable_declaration(
         SPAN,
         VariableDeclarationKind::Const,
         paths_decls,
@@ -346,7 +378,7 @@ fn try_build_dom_path_update_method<'a>(
         false,
         ast,
     ));
-    init_stmts.push(Statement::new_variable_declaration(
+    stmts.push(Statement::new_variable_declaration(
         SPAN,
         VariableDeclarationKind::Const,
         root_decls,
@@ -405,7 +437,7 @@ fn try_build_dom_path_update_method<'a>(
         false,
         ast,
     ));
-    init_stmts.push(Statement::new_variable_declaration(
+    stmts.push(Statement::new_variable_declaration(
         SPAN,
         VariableDeclarationKind::Const,
         off_decls,
@@ -413,17 +445,25 @@ fn try_build_dom_path_update_method<'a>(
         ast,
     ));
 
-    // `__nodes = [];`
-    let assign_empty_nodes = Expression::new_assignment_expression(
+    // `const __nodes = [];` (ephemeral local array)
+    let mut nodes_decls = ArenaVec::new_in(ast);
+    nodes_decls.push(VariableDeclarator::new(
         SPAN,
-        AssignmentOperator::Assign,
-        AssignmentTarget::new_assignment_target_identifier(SPAN, "__nodes", ast),
-        Expression::new_array_expression(SPAN, ArenaVec::new_in(ast), ast),
+        BindingPattern::new_binding_identifier(SPAN, "__nodes", ast),
+        None,
+        Some(Expression::new_array_expression(
+            SPAN,
+            ArenaVec::new_in(ast),
+            ast,
+        )),
+        false,
         ast,
-    );
-    init_stmts.push(Statement::new_expression_statement(
+    ));
+    stmts.push(Statement::new_variable_declaration(
         SPAN,
-        assign_empty_nodes,
+        VariableDeclarationKind::Const,
+        nodes_decls,
+        false,
         ast,
     ));
 
@@ -702,40 +742,12 @@ fn try_build_dom_path_update_method<'a>(
         SimpleAssignmentTarget::new_assignment_target_identifier(SPAN, "__i", ast),
         ast,
     );
-    init_stmts.push(Statement::new_for_statement(
+    stmts.push(Statement::new_for_statement(
         SPAN,
         Some(outer_for_init),
         Some(outer_for_test),
         Some(outer_for_update),
         Statement::new_block_statement(SPAN, outer_loop_stmts, ast),
-        ast,
-    ));
-
-    let cache_nodes = Expression::new_assignment_expression(
-        SPAN,
-        AssignmentOperator::Assign,
-        AssignmentTarget::new_static_member_expression(
-            SPAN,
-            Expression::new_this_expression(SPAN, ast),
-            IdentifierName::new(SPAN, "__litDomNodes", ast),
-            false,
-            ast,
-        ),
-        Expression::new_identifier(SPAN, "__nodes", ast),
-        ast,
-    );
-    init_stmts.push(Statement::new_expression_statement(SPAN, cache_nodes, ast));
-
-    stmts.push(Statement::new_if_statement(
-        SPAN,
-        Expression::new_unary_expression(
-            SPAN,
-            UnaryOperator::LogicalNot,
-            Expression::new_identifier(SPAN, "__nodes", ast),
-            ast,
-        ),
-        Statement::new_block_statement(SPAN, init_stmts, ast),
-        None,
         ast,
     ));
 
@@ -815,6 +827,10 @@ fn try_build_dom_path_update_method<'a>(
             ast,
         ));
     }
+
+    // Note: this.updated(changedProperties) is invoked by Lit's performUpdate()
+    // inside _$AE(changedProperties) after update() returns. It must not be called
+    // inside update() to avoid duplicate lifecycle callbacks.
 
     let mut params_vec = ArenaVec::new_in(ast);
     params_vec.push(FormalParameter::new_plain(
@@ -995,12 +1011,17 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         let numeric_paths: Vec<Vec<u32>> =
             part_descriptors.iter().map(|p| p.path.clone()).collect();
 
+        // If the fast update method cannot be built (e.g. unsupported parts, custom update),
+        // bail out cleanly without injecting static __litPartPaths dead code.
+        let Some(update_method) =
+            try_build_dom_path_update_method(class, &part_descriptors, &symbol_ctx, &ast)
+        else {
+            continue;
+        };
+
         total_paths_count += numeric_paths.len() as u32;
         transformed_components += 1;
         all_component_paths.push(numeric_paths);
-
-        let fast_update =
-            try_build_dom_path_update_method(class, &part_descriptors, &symbol_ctx, &ast);
 
         // Construct AST node for `static __litPartPaths = [ ... ];`
         let mut elements = ArenaVec::new_in(&ast);
@@ -1043,9 +1064,7 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
         );
 
         class.body.body.insert(0, prop_def);
-        if let Some(update_method) = fast_update {
-            class.body.body.push(update_method);
-        }
+        class.body.body.push(update_method);
     }
 
     if transformed_components == 0 {

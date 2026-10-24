@@ -57,3 +57,10 @@ export interface HtmlFuseResult {
 export declare function fuse(config?: HtmlFuseConfig): HtmlFuseResult;
 export declare function analyze(config?: HtmlFuseConfig): HtmlFuseResult;
 export declare function auditTemplates(config?: HtmlFuseConfig): Array<Diagnostic>;
+export declare function transformHtmlFuseCode(
+  filePath: string,
+  code: string,
+  clusterIds: Array<string>,
+  outputDir?: string,
+  virtualImports?: boolean,
+): string | null;

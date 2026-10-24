@@ -41,5 +41,5 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding for @lit-core/html-fuse (${currentPlatform}-${currentArch})`);
 }
 
-export const { fuse, analyze, auditTemplates } = nativeBinding;
+export const { fuse, analyze, auditTemplates, transformHtmlFuseCode } = nativeBinding;
 export default nativeBinding;

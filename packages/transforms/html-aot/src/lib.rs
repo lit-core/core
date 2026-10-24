@@ -58,4 +58,34 @@ const tmpl = lit.html`<div class="btn">${label}</div>`;
         assert_eq!(res.templates_count, 1);
         assert!(res.code.contains("lit_template_1"));
     }
+
+    #[test]
+    fn test_scope_collision_avoidance() {
+        let code = r#"
+import { html } from 'lit';
+const b_1 = "occupied";
+const lit_template_1 = "occupied";
+const tmpl = html`<div class="btn">${label}</div>`;
+"#;
+        let res = transform_html_aot(code.to_string(), None);
+        assert_eq!(res.templates_count, 1);
+        assert!(res.code.contains("const b_2 = (i) => i;"));
+        assert!(res.code.contains("lit_template_2"));
+        assert!(!res.code.contains("const b_1 = (i) => i;"));
+    }
+
+    #[test]
+    fn test_ambient_unresolved_reference_collision_avoidance() {
+        let code = r#"
+import { html } from 'lit';
+console.log(b_1, lit_template_1);
+export const tmpl = html`<div class="btn">${label}</div>`;
+"#;
+        let res = transform_html_aot(code.to_string(), None);
+        assert_eq!(res.templates_count, 1);
+        assert!(res.code.contains("const b_2 = (i) => i;"));
+        assert!(res.code.contains("const lit_template_2 ="));
+        assert!(!res.code.contains("const b_1 = (i) => i;"));
+        assert!(!res.code.contains("const lit_template_1 ="));
+    }
 }

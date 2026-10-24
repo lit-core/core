@@ -425,11 +425,12 @@ export function ssr(options: SsrOptions = {}): Plugin {
 
     transformIndexHtml(html: string, ctx?: any) {
       const islandsManifest: Record<string, string> = {};
+      const base = (config?.base || '/').replace(/\/$/, '') + '/';
       if (ctx?.bundle) {
         for (const item of Object.values(ctx.bundle)) {
           if ((item as any).type === 'chunk') {
             const chunk = item as any;
-            const chunkUrl = chunk.fileName.startsWith('assets/') ? `/${chunk.fileName}` : `/assets/${chunk.fileName}`;
+            const chunkUrl = `${base}${chunk.fileName.replace(/^\/+/, '')}`;
             if (Array.isArray(chunk.moduleIds)) {
               for (const modId of chunk.moduleIds) {
                 const cleanModId = String(modId).split('?')[0];
@@ -467,10 +468,11 @@ export function ssr(options: SsrOptions = {}): Plugin {
 
       // Build tag-to-chunk URL manifest across bundle chunks
       const islandsManifest: Record<string, string> = {};
+      const base = (config?.base || '/').replace(/\/$/, '') + '/';
       for (const item of Object.values(bundle)) {
         if ((item as any).type === 'chunk') {
           const chunk = item as any;
-          const chunkUrl = chunk.fileName.startsWith('assets/') ? `/${chunk.fileName}` : `/assets/${chunk.fileName}`;
+          const chunkUrl = `${base}${chunk.fileName.replace(/^\/+/, '')}`;
           if (Array.isArray(chunk.moduleIds)) {
             for (const modId of chunk.moduleIds) {
               const cleanModId = String(modId).split('?')[0];
@@ -497,7 +499,7 @@ export function ssr(options: SsrOptions = {}): Plugin {
 
       // Locate client entry JS chunk from bundle
       const entryChunk = Object.values(bundle).find((c: any) => c.type === 'chunk' && Boolean(c.isEntry)) || (Object.values(bundle).find((c: any) => c.type === 'chunk') as any);
-      const clientScriptTag = entryChunk ? `<script type="module" src="/assets/${entryChunk.fileName}"></script>` : '';
+      const clientScriptTag = entryChunk ? `<script type="module" src="${base}${entryChunk.fileName.replace(/^\/+/, '')}"></script>` : '';
 
       // Base template resolution
       const rootDir = config?.root || process.cwd();

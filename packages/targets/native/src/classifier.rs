@@ -239,6 +239,26 @@ pub fn get_ce_define_call<'a>(stmt: &Statement<'a>) -> Option<(String, String)> 
                 return Some((tag, cls));
             }
         }
+        // Also support `Component.define("my-tag")`
+        if let Expression::StaticMemberExpression(mem) = &call.callee
+            && mem.property.name.as_str() == "define"
+            && let Expression::Identifier(obj_id) = &mem.object
+            && obj_id.name != "customElements"
+            && let Some(first_arg) = call.arguments.first()
+        {
+            let tag_str = match first_arg.as_expression() {
+                Some(Expression::StringLiteral(s)) => Some(s.value.as_str().to_string()),
+                Some(Expression::TemplateLiteral(t))
+                    if t.expressions.is_empty() && !t.quasis.is_empty() =>
+                {
+                    Some(t.quasis[0].value.raw.as_str().to_string())
+                }
+                _ => None,
+            };
+            if let Some(tag) = tag_str {
+                return Some((tag, obj_id.name.as_str().to_string()));
+            }
+        }
     }
     None
 }

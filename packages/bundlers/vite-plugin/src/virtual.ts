@@ -11,7 +11,8 @@ export const ISLANDS_LOADER_SOURCE = `(function () {
     if (loaded.has(tag)) return;
     loaded.add(tag);
     const manifest = typeof window !== 'undefined' ? (window.__LIT_ISLANDS_MANIFEST__ || window.__LIT_RESUMABLE_MANIFEST__) : undefined;
-    const src = el.getAttribute('data-island-src') || (manifest && manifest[tag]) || ('/assets/' + tag + '.js');
+    const src = el.getAttribute('data-island-src') || (manifest && manifest[tag]);
+    if (!src) return;
     import(/* @vite-ignore */ src).catch(() => {});
   }
   if (typeof IntersectionObserver !== 'undefined') {

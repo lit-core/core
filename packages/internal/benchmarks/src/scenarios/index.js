@@ -404,7 +404,7 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
     });
 
     // Also sync standalone feature result (schema 2.0.0) with scenario metadata attached
-    if (variantId !== 'ssr') {
+    if (variantId !== 'ssr' && scenario.id === getScenarioForFeature(variantId).id) {
       const scenarioComps = resolveScenarioComponents(suite.id, scenario.componentConcepts);
       const outDir = options.outDir || defaultResultsDir;
       const suiteBaselinePath = path.join(outDir, suite.id, 'baseline.json');

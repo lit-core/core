@@ -11,6 +11,7 @@ export function runFuseOptimization(options: CssFuseOptions = {}): OptimizationR
     exclude = ['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**'],
     threshold = 2,
     outputDir = '.fused',
+    minSavings = 200,
   } = options;
 
   const res = fuse({
@@ -20,6 +21,7 @@ export function runFuseOptimization(options: CssFuseOptions = {}): OptimizationR
     outputDir,
     write: false,
     virtualImports: true,
+    minSavings,
   });
 
   const virtualSheets = new Map<string, string>();

@@ -43,15 +43,22 @@ impl ImportResolver {
             for spec in specifiers {
                 match spec {
                     ImportDeclarationSpecifier::ImportSpecifier(named_spec) => {
-                        let imported_name = named_spec.imported.name();
-                        if imported_name == "html" || imported_name == "svg" {
+                        let imported_name = named_spec.imported.name().as_str();
+                        let resolved_kind = if imported_name == "html" {
+                            Some(false)
+                        } else if imported_name == "svg" {
+                            Some(true)
+                        } else {
+                            None
+                        };
+                        if let Some(is_svg) = resolved_kind {
                             let root = scoping.root_scope_id();
                             let sym_id = named_spec.local.symbol_id.get().or_else(|| {
                                 scoping.get_binding(root, named_spec.local.name.as_str().into())
                             });
                             if let Some(sym) = sym_id {
                                 self.lit_html_symbols.insert(sym);
-                                if imported_name == "svg" {
+                                if is_svg {
                                     self.lit_svg_symbols.insert(sym);
                                 }
                             }

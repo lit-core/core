@@ -39,22 +39,26 @@ import {
 export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [];
 
+  // Stage 0: Universal virtual module resolver
   if (options.virtual) {
     plugins.push(litVirtual());
   }
 
+  // Stage 1: Cross-component styling and template extraction
   const { cssFuse: cssFuseOpt = true } = options;
   if (cssFuseOpt !== false) {
     const fuseOpts = typeof cssFuseOpt === 'object' ? cssFuseOpt : {};
     plugins.push(cssFuse(fuseOpts));
   }
 
+  // html-fuse is strictly opt-in and disabled by default due to negative compression savings
   const htmlFuseOpt = options.htmlFuse ?? options['html-fuse'];
   if (htmlFuseOpt) {
     const fuseOpts = typeof htmlFuseOpt === 'object' ? htmlFuseOpt : {};
     plugins.push(htmlFuse(fuseOpts));
   }
 
+  // Stage 2: Primitives and syntax normalization
   const propsLowerOpt = options.propsLower ?? options['props-lower'];
   if (propsLowerOpt) {
     const lowerOpts = typeof propsLowerOpt === 'object' ? propsLowerOpt : {};
@@ -67,16 +71,17 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(elemProxy(proxyOpts));
   }
 
-  const nativeOpt = options.native;
-  if (nativeOpt) {
-    const nativeOpts = typeof nativeOpt === 'object' ? nativeOpt : {};
-    plugins.push(native(nativeOpts));
+  const directivesOpt = options.directives;
+  if (directivesOpt) {
+    const directivesOpts = typeof directivesOpt === 'object' ? directivesOpt : {};
+    plugins.push(directives(directivesOpts));
   }
 
-  const eventHoistOpt = options.eventHoist ?? options['event-hoist'];
-  if (eventHoistOpt) {
-    const hoistOpts = typeof eventHoistOpt === 'object' ? eventHoistOpt : {};
-    plugins.push(eventHoist(hoistOpts));
+  // Stage 3: Reactive template AST optimizations
+  const domPathsOpt = options.domPaths ?? options['dom-paths'];
+  if (domPathsOpt) {
+    const pathsOpts = typeof domPathsOpt === 'object' ? domPathsOpt : {};
+    plugins.push(domPaths(pathsOpts));
   }
 
   const dirtyMaskOpt = options.dirtyMask ?? options['dirty-mask'];
@@ -84,31 +89,27 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     const maskOpts = typeof dirtyMaskOpt === 'object' ? dirtyMaskOpt : {};
     plugins.push(dirtyMask(maskOpts));
   }
-
-  const domPathsOpt = options.domPaths ?? options['dom-paths'];
-  if (domPathsOpt) {
-    const pathsOpts = typeof domPathsOpt === 'object' ? domPathsOpt : {};
-    plugins.push(domPaths(pathsOpts));
-  }
-
   const memoizeOpt = options.memoize;
   if (memoizeOpt) {
     const memoizeOpts = typeof memoizeOpt === 'object' ? memoizeOpt : {};
     plugins.push(memoize(memoizeOpts));
   }
 
-  const directivesOpt = options.directives;
-  if (directivesOpt) {
-    const directivesOpts = typeof directivesOpt === 'object' ? directivesOpt : {};
-    plugins.push(directives(directivesOpts));
+  // eventHoist placed at end of Stage 3 to prevent lifecycle collisions with domPaths and dirtyMask
+  const eventHoistOpt = options.eventHoist ?? options['event-hoist'];
+  if (eventHoistOpt) {
+    const hoistOpts = typeof eventHoistOpt === 'object' ? eventHoistOpt : {};
+    plugins.push(eventHoist(hoistOpts));
   }
 
+  // Stage 4: Minification and AOT compilation
   const cssMinifierOpt = options.cssMinifier ?? options['css-minifier'];
   if (cssMinifierOpt) {
     const minifierOpts = typeof cssMinifierOpt === 'object' ? cssMinifierOpt : {};
     plugins.push(cssMinifier(minifierOpts));
   }
 
+  // htmlMinifier runs before htmlAot so templates are minified prior to static AST descriptor serialization
   const minifierOpt = options.htmlMinifier ?? options['html-minifier'];
   if (minifierOpt) {
     const minifierOpts = typeof minifierOpt === 'object' ? minifierOpt : {};
@@ -121,23 +122,30 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(htmlAot(aotOpts));
   }
 
-  const ssrOpt = options.ssr ?? options['lit-ssr'];
-  const ssrResumable = typeof ssrOpt === 'object' && ssrOpt !== null && Boolean(ssrOpt.resumable);
-  const resumableOpt = options.resumable ?? (ssrResumable ? true : undefined);
-  if (resumableOpt) {
-    const resumableOpts = typeof resumableOpt === 'object' ? resumableOpt : {};
-    plugins.push(litResumablePlugin(resumableOpts));
+  const nativeOpt = options.native;
+  if (nativeOpt) {
+    const nativeOpts = typeof nativeOpt === 'object' ? nativeOpt : {};
+    plugins.push(native(nativeOpts));
   }
 
+  // Stage 5: Post-bundle pruning and rendering (all enforce: 'post')
   const tagShakeOpt = options.tagShake ?? options['tag-shake'];
   if (tagShakeOpt) {
     const shakeOpts = typeof tagShakeOpt === 'object' ? tagShakeOpt : {};
     plugins.push(tagShake(shakeOpts));
   }
 
+  const ssrOpt = options.ssr ?? options['lit-ssr'];
   if (ssrOpt) {
     const ssrOpts = typeof ssrOpt === 'object' ? ssrOpt : {};
     plugins.push(ssr(ssrOpts));
+  }
+
+  const ssrResumable = typeof ssrOpt === 'object' && ssrOpt !== null && Boolean(ssrOpt.resumable);
+  const resumableOpt = options.resumable ?? (ssrResumable ? true : undefined);
+  if (resumableOpt) {
+    const resumableOpts = typeof resumableOpt === 'object' ? resumableOpt : {};
+    plugins.push(litResumablePlugin(resumableOpts));
   }
 
   return plugins;

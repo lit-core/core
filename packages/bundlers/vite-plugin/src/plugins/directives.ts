@@ -4,7 +4,8 @@ import { reportTransformError } from '../errors.js';
 import type { DirectivesOptions } from '../options.js';
 import { matchesPattern } from '../utils.js';
 
-const LIT_DIRECTIVES_FAST_CHECK = /(?:lit|lit-html)\/directives\//;
+const LIT_DIRECTIVES_FAST_CHECK =
+  /(?:lit|lit-html)\/directives\/|\b(?:classMap|styleMap|ifDefined|guard|cache|keyed|live|ref|createRef|repeat|choose|when|map|join|range|templateContent|unsafeHTML|unsafeSVG|unsafeMathML|until|asyncAppend|asyncReplace)\b/;
 
 export function directives(options: DirectivesOptions = {}): Plugin {
   const { sourcemap = true } = options;

@@ -1,6 +1,8 @@
 use napi_derive::napi;
 use serde::{Deserialize, Serialize};
 
+pub const DEFAULT_MIN_SAVINGS: u32 = 200;
+
 #[napi(object)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FuseConfig {
@@ -29,7 +31,7 @@ impl Default for FuseConfig {
             output_dir: Some(".fused".to_string()),
             write: Some(false),
             virtual_imports: Some(false),
-            min_savings: None,
+            min_savings: Some(DEFAULT_MIN_SAVINGS),
         }
     }
 }

@@ -120,3 +120,106 @@ fn test_challenge_css_fuse_tagged_template_extraction_boundaries() {
         "CSS imported from non-Lit library must not be extracted"
     );
 }
+
+#[test]
+fn test_challenge_css_fuse_micro_cluster_threshold_rejection() {
+    use css_fuse::cluster::{ClusterEngine, FrequencyIndex};
+    use css_fuse::models::{DEFAULT_MIN_SAVINGS, ExtractedStyle, SourceSpan};
+    use css_fuse::normalizer::normalize_css;
+
+    let make_style = |file: &str, css: &str| ExtractedStyle {
+        file_path: file.to_string(),
+        component_name: Some("Comp".to_string()),
+        tag_name: Some("x-comp".to_string()),
+        css_text: css.to_string(),
+        span: SourceSpan {
+            start: 0,
+            end: css.len(),
+            line: 1,
+            column: 1,
+        },
+        is_external_module: false,
+        export_name: None,
+        location_kind: "static_property".to_string(),
+        parent_span: None,
+        tag_identifier: None,
+    };
+
+    // 1. Micro-cluster (< 200 bytes gross savings)
+    {
+        let s1 = make_style("a.ts", ":host { display: block; box-sizing: border-box; }");
+        let s2 = make_style("b.ts", ":host { display: block; box-sizing: border-box; }");
+        let r1 = normalize_css(&s1);
+        let r2 = normalize_css(&s2);
+        let mut index = FrequencyIndex::new();
+        index.index_rules(&r1);
+        index.index_rules(&r2);
+
+        // With min_savings = 0: accepted
+        let clusters_0 = ClusterEngine::cluster_with_min_savings(&index, 2, 0);
+        assert_eq!(
+            clusters_0.len(),
+            1,
+            "Micro-cluster accepted when min_savings = 0"
+        );
+
+        // With DEFAULT_MIN_SAVINGS (200): rejected
+        let clusters_200 =
+            ClusterEngine::cluster_with_min_savings(&index, 2, DEFAULT_MIN_SAVINGS as usize);
+        assert_eq!(
+            clusters_200.len(),
+            0,
+            "Micro-cluster rejected when net savings < 200"
+        );
+    }
+
+    // 2. Gross savings is 300 bytes (> 200 gross), but module overhead is 168 bytes (64 + 2*52),
+    // so net savings is 300 - 168 = 132 bytes (< 200 net). Must be rejected!
+    {
+        let decls = (0..10)
+            .map(|i| format!("--custom-var-color-property-{}: red;", i))
+            .collect::<Vec<_>>()
+            .join(" ");
+        let css = format!(":host {{ {} }}", decls);
+
+        let s1 = make_style("a.ts", &css);
+        let s2 = make_style("b.ts", &css);
+        let r1 = normalize_css(&s1);
+        let r2 = normalize_css(&s2);
+        let mut index = FrequencyIndex::new();
+        index.index_rules(&r1);
+        index.index_rules(&r2);
+
+        let clusters_200 = ClusterEngine::cluster_with_min_savings(&index, 2, 200);
+        assert_eq!(
+            clusters_200.len(),
+            0,
+            "Cluster with 300 gross savings must be rejected because net savings after 168B module overhead is 132B (< 200B)"
+        );
+    }
+
+    // 3. Gross savings is ~500 bytes. Module overhead for 2 files is 168 bytes.
+    // Net savings is > 200 bytes. Must be accepted!
+    {
+        let decls = (0..20)
+            .map(|i| format!("--large-custom-design-token-var-{}: #123456;", i))
+            .collect::<Vec<_>>()
+            .join(" ");
+        let css = format!(":host {{ {} }}", decls);
+
+        let s1 = make_style("a.ts", &css);
+        let s2 = make_style("b.ts", &css);
+        let r1 = normalize_css(&s1);
+        let r2 = normalize_css(&s2);
+        let mut index = FrequencyIndex::new();
+        index.index_rules(&r1);
+        index.index_rules(&r2);
+
+        let clusters_200 = ClusterEngine::cluster_with_min_savings(&index, 2, 200);
+        assert_eq!(
+            clusters_200.len(),
+            1,
+            "Cluster with ~500B gross savings must be accepted because net savings after 168B module overhead is > 200B"
+        );
+    }
+}

@@ -297,22 +297,31 @@ impl<'a> Visit<'a> for CustomElementAstVisitor<'a> {
 
     fn visit_call_expression(&mut self, call: &CallExpression<'a>) {
         if let Some(method_name) = get_callee_method_name(&call.callee) {
+            let first_static_str = call
+                .arguments
+                .first()
+                .and_then(|a| a.as_expression())
+                .and_then(|expr| match expr {
+                    Expression::StringLiteral(str_lit) => Some(str_lit.value.as_str()),
+                    Expression::TemplateLiteral(tpl)
+                        if tpl.expressions.is_empty() && tpl.quasis.len() == 1 =>
+                    {
+                        Some(tpl.quasis[0].value.raw.as_str())
+                    }
+                    _ => None,
+                });
             match method_name {
                 "createElement" | "get" | "whenDefined" => {
-                    if let Some(Expression::StringLiteral(str_lit)) =
-                        call.arguments.first().and_then(|a| a.as_expression())
-                    {
-                        let tag = str_lit.value.as_str().to_ascii_lowercase();
+                    if let Some(raw_str) = first_static_str {
+                        let tag = raw_str.trim().to_ascii_lowercase();
                         if is_valid_custom_element_name(&tag) {
                             self.tags.insert(tag);
                         }
                     }
                 }
                 "querySelector" | "querySelectorAll" | "closest" | "matches" => {
-                    if let Some(Expression::StringLiteral(str_lit)) =
-                        call.arguments.first().and_then(|a| a.as_expression())
-                    {
-                        extract_tags_from_css_selector(str_lit.value.as_str(), &mut self.tags);
+                    if let Some(raw_str) = first_static_str {
+                        extract_tags_from_css_selector(raw_str, &mut self.tags);
                     }
                 }
                 _ => {}

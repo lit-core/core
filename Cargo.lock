@@ -1401,6 +1401,7 @@ dependencies = [
 name = "native"
 version = "0.1.0"
 dependencies = [
+ "lit_analysis",
  "napi",
  "napi-build",
  "napi-derive",

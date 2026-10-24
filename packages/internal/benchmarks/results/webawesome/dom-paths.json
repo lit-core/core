@@ -6,49 +6,13 @@
     "name": "Web Awesome (20 Canonical Components)",
     "packageName": "@awesome.me/webawesome",
     "version": "3.14.0",
-    "componentCount": 20,
+    "componentCount": 4,
     "components": [
-      {
-        "concept": "button",
-        "tag": "wa-button",
-        "path": "dist/components/button/button.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/button/button.js';"
-      },
       {
         "concept": "checkbox",
         "tag": "wa-checkbox",
         "path": "dist/components/checkbox/checkbox.js",
         "importStatement": "import '@awesome.me/webawesome/dist/components/checkbox/checkbox.js';"
-      },
-      {
-        "concept": "radio",
-        "tag": "wa-radio",
-        "path": "dist/components/radio/radio.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/radio/radio.js';"
-      },
-      {
-        "concept": "switch",
-        "tag": "wa-switch",
-        "path": "dist/components/switch/switch.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/switch/switch.js';"
-      },
-      {
-        "concept": "text-input",
-        "tag": "wa-input",
-        "path": "dist/components/input/input.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/input/input.js';"
-      },
-      {
-        "concept": "select",
-        "tag": "wa-select",
-        "path": "dist/components/select/select.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/select/select.js';"
-      },
-      {
-        "concept": "dialog",
-        "tag": "wa-dialog",
-        "path": "dist/components/dialog/dialog.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/dialog/dialog.js';"
       },
       {
         "concept": "badge",
@@ -57,76 +21,16 @@
         "importStatement": "import '@awesome.me/webawesome/dist/components/badge/badge.js';"
       },
       {
-        "concept": "tabs",
-        "tag": "wa-tab-group",
-        "path": "dist/components/tab-group/tab-group.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/tab-group/tab-group.js';"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "wa-progress-bar",
-        "path": "dist/components/progress-bar/progress-bar.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/progress-bar/progress-bar.js';"
-      },
-      {
-        "concept": "spinner",
-        "tag": "wa-spinner",
-        "path": "dist/components/spinner/spinner.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/spinner/spinner.js';"
-      },
-      {
-        "concept": "slider",
-        "tag": "wa-slider",
-        "path": "dist/components/slider/slider.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/slider/slider.js';"
-      },
-      {
-        "concept": "menu",
-        "tag": "wa-dropdown",
-        "path": "dist/components/dropdown/dropdown.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';"
-      },
-      {
-        "concept": "divider",
-        "tag": "wa-divider",
-        "path": "dist/components/divider/divider.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/divider/divider.js';"
-      },
-      {
-        "concept": "icon",
-        "tag": "wa-icon",
-        "path": "dist/components/icon/icon.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/icon/icon.js';"
+        "concept": "button",
+        "tag": "wa-button",
+        "path": "dist/components/button/button.js",
+        "importStatement": "import '@awesome.me/webawesome/dist/components/button/button.js';"
       },
       {
         "concept": "icon-button",
         "tag": "wa-copy-button",
         "path": "dist/components/copy-button/copy-button.js",
         "importStatement": "import '@awesome.me/webawesome/dist/components/copy-button/copy-button.js';"
-      },
-      {
-        "concept": "card",
-        "tag": "wa-card",
-        "path": "dist/components/card/card.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/card/card.js';"
-      },
-      {
-        "concept": "elevation",
-        "tag": "wa-popover",
-        "path": "dist/components/popover/popover.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/popover/popover.js';"
-      },
-      {
-        "concept": "list",
-        "tag": "wa-details",
-        "path": "dist/components/details/details.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/details/details.js';"
-      },
-      {
-        "concept": "chips",
-        "tag": "wa-breadcrumb",
-        "path": "dist/components/breadcrumb/breadcrumb.js",
-        "importStatement": "import '@awesome.me/webawesome/dist/components/breadcrumb/breadcrumb.js';"
       }
     ]
   },
@@ -137,18 +41,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "bundle",
-    "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "componentCount": 20
+    "id": "data-grid",
+    "name": "Data grid",
+    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
+    "componentCount": 4
   },
-  "timestamp": "2026-10-24T09:46:54.384Z",
+  "timestamp": "2026-10-24T12:24:09.001Z",
   "environment": {
     "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "6c3875e",
+    "gitCommit": "dbf7ecf",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,10 +67,10 @@
     }
   },
   "metrics": {
-    "rawBytes": 394174,
-    "gzipBytes": 90441,
-    "brotliBytes": 72462,
-    "buildTimeMs": 59.13366699999824
+    "rawBytes": 399437,
+    "gzipBytes": 91136,
+    "brotliBytes": 72883,
+    "buildTimeMs": 129.01183300000002
   },
   "baseline": {
     "rawBytes": 393185,
@@ -177,39 +81,44 @@
     "updateMs": 0.31,
     "scriptEvalMs": 23.9,
     "registrationMs": 3.7,
-    "heapUsedBytes": 26063
+    "heapUsedBytes": 26063,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "deltas": {
-    "rawBytes": 989,
-    "rawPercent": 0.25,
-    "gzipBytes": 261,
-    "gzipPercent": 0.29,
-    "brotliBytes": 229,
-    "brotliPercent": 0.32,
-    "buildTimeMs": -72.2,
-    "firstRenderMs": -42.2,
-    "speedupPercent": 55.24,
-    "updateMs": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 56.49,
-    "registrationSpeedupPercent": 56.76,
-    "memorySavingsPercent": -0.6
+    "rawBytes": 6252,
+    "rawPercent": 1.59,
+    "gzipBytes": 956,
+    "gzipPercent": 1.06,
+    "brotliBytes": 650,
+    "brotliPercent": 0.9,
+    "buildTimeMs": -0.6,
+    "firstRenderMs": -46.1,
+    "speedupPercent": 51.51,
+    "updateMs": -0.11,
+    "updateSpeedupPercent": 68.75,
+    "evalSpeedupPercent": 66.3,
+    "registrationSpeedupPercent": 72.41,
+    "memorySavingsPercent": -55.8
   },
   "runtime": {
-    "firstRenderMs": 34.2,
-    "updateMs": 0.31,
-    "scriptEvalMs": 10.4,
-    "registrationMs": 1.6,
-    "heapUsedBytes": 26219,
-    "speedupPercent": 55.24,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 56.49,
-    "registrationSpeedupPercent": 56.76,
-    "memorySavingsPercent": -0.6
+    "firstRenderMs": 37.05,
+    "updateMs": 0.1,
+    "scriptEvalMs": 8.05,
+    "registrationMs": 1.02,
+    "heapUsedBytes": 40606,
+    "speedupPercent": 51.51,
+    "updateSpeedupPercent": 68.75,
+    "evalSpeedupPercent": 66.3,
+    "registrationSpeedupPercent": 72.41,
+    "memorySavingsPercent": -55.8
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 73,
+    "elementsCount": 167,
     "verified": true,
     "phasesMatched": {
       "mount": true,

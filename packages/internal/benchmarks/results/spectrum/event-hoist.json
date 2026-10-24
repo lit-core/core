@@ -6,13 +6,13 @@
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
     "version": "1.12.5",
-    "componentCount": 20,
+    "componentCount": 6,
     "components": [
       {
-        "concept": "button",
-        "tag": "sp-button",
-        "path": "button/sp-button.js",
-        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
+        "concept": "text-input",
+        "tag": "sp-textfield",
+        "path": "textfield/sp-textfield.js",
+        "importStatement": "import '@spectrum-web-components/textfield/sp-textfield.js';"
       },
       {
         "concept": "checkbox",
@@ -21,22 +21,16 @@
         "importStatement": "import '@spectrum-web-components/checkbox/sp-checkbox.js';"
       },
       {
-        "concept": "radio",
-        "tag": "sp-radio",
-        "path": "radio/sp-radio.js",
-        "importStatement": "import '@spectrum-web-components/radio/sp-radio.js';"
-      },
-      {
         "concept": "switch",
         "tag": "sp-switch",
         "path": "switch/sp-switch.js",
         "importStatement": "import '@spectrum-web-components/switch/sp-switch.js';"
       },
       {
-        "concept": "text-input",
-        "tag": "sp-textfield",
-        "path": "textfield/sp-textfield.js",
-        "importStatement": "import '@spectrum-web-components/textfield/sp-textfield.js';"
+        "concept": "radio",
+        "tag": "sp-radio",
+        "path": "radio/sp-radio.js",
+        "importStatement": "import '@spectrum-web-components/radio/sp-radio.js';"
       },
       {
         "concept": "select",
@@ -45,88 +39,10 @@
         "importStatement": "import '@spectrum-web-components/picker/sp-picker.js';"
       },
       {
-        "concept": "dialog",
-        "tag": "sp-dialog",
-        "path": "dialog/sp-dialog.js",
-        "importStatement": "import '@spectrum-web-components/dialog/sp-dialog.js';"
-      },
-      {
-        "concept": "badge",
-        "tag": "sp-badge",
-        "path": "badge/sp-badge.js",
-        "importStatement": "import '@spectrum-web-components/badge/sp-badge.js';"
-      },
-      {
-        "concept": "tabs",
-        "tag": "sp-tabs",
-        "path": "tabs/sp-tabs.js",
-        "importStatement": "import '@spectrum-web-components/tabs/sp-tabs.js';"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "sp-progress-bar",
-        "path": "progress-bar/sp-progress-bar.js",
-        "importStatement": "import '@spectrum-web-components/progress-bar/sp-progress-bar.js';"
-      },
-      {
-        "concept": "spinner",
-        "tag": "sp-progress-circle",
-        "path": "progress-circle/sp-progress-circle.js",
-        "importStatement": "import '@spectrum-web-components/progress-circle/sp-progress-circle.js';"
-      },
-      {
-        "concept": "slider",
-        "tag": "sp-slider",
-        "path": "slider/sp-slider.js",
-        "importStatement": "import '@spectrum-web-components/slider/sp-slider.js';"
-      },
-      {
-        "concept": "menu",
-        "tag": "sp-menu",
-        "path": "menu/sp-menu.js",
-        "importStatement": "import '@spectrum-web-components/menu/sp-menu.js';"
-      },
-      {
-        "concept": "divider",
-        "tag": "sp-divider",
-        "path": "divider/sp-divider.js",
-        "importStatement": "import '@spectrum-web-components/divider/sp-divider.js';"
-      },
-      {
-        "concept": "icon",
-        "tag": "sp-icon",
-        "path": "icon/sp-icon.js",
-        "importStatement": "import '@spectrum-web-components/icon/sp-icon.js';"
-      },
-      {
-        "concept": "icon-button",
-        "tag": "sp-action-button",
-        "path": "action-button/sp-action-button.js",
-        "importStatement": "import '@spectrum-web-components/action-button/sp-action-button.js';"
-      },
-      {
-        "concept": "card",
-        "tag": "sp-card",
-        "path": "card/sp-card.js",
-        "importStatement": "import '@spectrum-web-components/card/sp-card.js';"
-      },
-      {
-        "concept": "elevation",
-        "tag": "sp-popover",
-        "path": "popover/sp-popover.js",
-        "importStatement": "import '@spectrum-web-components/popover/sp-popover.js';"
-      },
-      {
-        "concept": "list",
-        "tag": "sp-sidenav",
-        "path": "sidenav/sp-sidenav.js",
-        "importStatement": "import '@spectrum-web-components/sidenav/sp-sidenav.js';"
-      },
-      {
-        "concept": "chips",
-        "tag": "sp-action-group",
-        "path": "action-group/sp-action-group.js",
-        "importStatement": "import '@spectrum-web-components/action-group/sp-action-group.js';"
+        "concept": "button",
+        "tag": "sp-button",
+        "path": "button/sp-button.js",
+        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
       }
     ]
   },
@@ -137,18 +53,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "bundle",
-    "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "componentCount": 20
+    "id": "interactive-form",
+    "name": "Interactive form",
+    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration",
+    "componentCount": 6
   },
-  "timestamp": "2026-10-24T09:49:05.252Z",
+  "timestamp": "2026-10-24T12:24:47.071Z",
   "environment": {
     "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "6c3875e",
+    "gitCommit": "dbf7ecf",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,10 +79,10 @@
     }
   },
   "metrics": {
-    "rawBytes": 844959,
-    "gzipBytes": 151271,
-    "brotliBytes": 114893,
-    "buildTimeMs": 83.82337500000722
+    "rawBytes": 847042,
+    "gzipBytes": 151546,
+    "brotliBytes": 115146,
+    "buildTimeMs": 166.53887499999837
   },
   "baseline": {
     "rawBytes": 844172,
@@ -177,39 +93,44 @@
     "updateMs": 0.34,
     "scriptEvalMs": 24.2,
     "registrationMs": 0.9,
-    "heapUsedBytes": 22893
+    "heapUsedBytes": 22893,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "deltas": {
-    "rawBytes": 787,
-    "rawPercent": 0.09,
-    "gzipBytes": 299,
-    "gzipPercent": 0.2,
-    "brotliBytes": 149,
-    "brotliPercent": 0.13,
-    "buildTimeMs": -37,
-    "firstRenderMs": -7.2,
-    "speedupPercent": 15.55,
-    "updateMs": -0.02,
-    "updateSpeedupPercent": 5.88,
-    "evalSpeedupPercent": 10.33,
-    "registrationSpeedupPercent": 33.33,
-    "memorySavingsPercent": 1.17
+    "rawBytes": 2870,
+    "rawPercent": 0.34,
+    "gzipBytes": 574,
+    "gzipPercent": 0.38,
+    "brotliBytes": 402,
+    "brotliPercent": 0.35,
+    "buildTimeMs": 82.5,
+    "firstRenderMs": -10.5,
+    "speedupPercent": 25.36,
+    "updateMs": -0.06,
+    "updateSpeedupPercent": 27.27,
+    "evalSpeedupPercent": 19.44,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 30.63
   },
   "runtime": {
-    "firstRenderMs": 39.1,
-    "updateMs": 0.32,
-    "scriptEvalMs": 21.7,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 22625,
-    "speedupPercent": 15.55,
-    "updateSpeedupPercent": 5.88,
-    "evalSpeedupPercent": 10.33,
-    "registrationSpeedupPercent": 33.33,
-    "memorySavingsPercent": 1.17
+    "firstRenderMs": 34.56,
+    "updateMs": 0.25,
+    "scriptEvalMs": 19.5,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 15881,
+    "speedupPercent": 25.36,
+    "updateSpeedupPercent": 27.27,
+    "evalSpeedupPercent": 19.44,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 30.63
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 73,
+    "elementsCount": 51,
     "verified": true,
     "phasesMatched": {
       "mount": true,

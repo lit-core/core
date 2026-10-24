@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { fuse as fuseHtml, type HtmlFuseResult } from '@lit-core/html-fuse';
+import { fuse as fuseHtml, type HtmlFuseResult, type RewrittenFileInfo, transformHtmlFuseCode } from '@lit-core/html-fuse';
 import type { Plugin, ResolvedConfig } from 'vite';
 import type { HtmlFuseOptions } from '../options.js';
 import { extractHtmlTemplateId, formatVirtualHtmlId, isVirtualHtmlFusedId } from '../utils.js';
@@ -11,7 +11,7 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
   let fuseResult: HtmlFuseResult | null = null;
   const virtualTemplates = new Map<string, string>();
   const templateOrigins = new Map<string, string>();
-  const transformedFiles = new Map<string, string>();
+  const transformedFiles = new Map<string, RewrittenFileInfo>();
 
   const {
     include = ['packages/components/**/src/**/*.ts', 'src/**/*.ts'],
@@ -57,12 +57,12 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
     const files = res.rewrittenFiles || [];
     for (const file of files) {
       if (file.filePath && file.transformedCode) {
-        transformedFiles.set(file.filePath, file.transformedCode);
+        transformedFiles.set(file.filePath, file);
         const abs = path.resolve(file.filePath);
-        transformedFiles.set(abs, file.transformedCode);
+        transformedFiles.set(abs, file);
         try {
           const real = fs.realpathSync(abs);
-          transformedFiles.set(real, file.transformedCode);
+          transformedFiles.set(real, file);
         } catch {}
       }
     }
@@ -150,24 +150,40 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
       return undefined;
     },
 
-    transform(_code, id) {
+    transform(code, id) {
       const cleanId = id.split('?')[0];
-      let transformed = transformedFiles.get(cleanId);
-      if (!transformed) {
+      let entry = transformedFiles.get(cleanId);
+      if (!entry) {
         const abs = path.resolve(cleanId);
-        transformed = transformedFiles.get(abs);
-        if (!transformed) {
+        entry = transformedFiles.get(abs);
+        if (!entry) {
           try {
             const real = fs.realpathSync(abs);
-            transformed = transformedFiles.get(real);
+            entry = transformedFiles.get(real);
           } catch {}
         }
       }
-      if (transformed) {
-        return {
-          code: transformed,
-          map: null,
-        };
+      if (entry) {
+        if (code === entry.originalCode) {
+          return {
+            code: entry.transformedCode,
+            map: null,
+          };
+        }
+        if (typeof transformHtmlFuseCode === 'function' && Array.isArray(entry.fusedImports) && entry.fusedImports.length > 0) {
+          const composed = transformHtmlFuseCode(entry.filePath, code, entry.fusedImports, outputDir, true);
+          if (composed) {
+            return {
+              code: composed,
+              map: null,
+            };
+          }
+        } else {
+          return {
+            code: entry.transformedCode,
+            map: null,
+          };
+        }
       }
       return undefined;
     },

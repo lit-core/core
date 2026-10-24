@@ -749,9 +749,7 @@ impl<'a> SymbolProofContext<'a> {
                 {
                     styled_classes.insert(target_id.name.as_str().to_string());
                 }
-                if let Expression::CallExpression(call) = assign.right.without_parentheses() {
-                    self.scan_helper_call(call, decorated_classes);
-                }
+                self.scan_top_level_expr(&assign.right, decorated_classes, styled_classes);
             }
             Expression::SequenceExpression(seq) => {
                 for e in &seq.expressions {
@@ -801,7 +799,10 @@ impl<'a> SymbolProofContext<'a> {
         }
 
         // Form B: TargetClass = __decorate([decorators], TargetClass)
-        if let Some(Expression::Identifier(target_id)) = call.arguments[1].as_expression()
+        if call.arguments.len() == 2
+            && let Some(Expression::Identifier(target_id)) = call.arguments[1]
+                .as_expression()
+                .map(|e| e.without_parentheses())
             && let Some(Expression::ArrayExpression(arr)) = call.arguments[0].as_expression()
             && arr.elements.iter().any(|el| {
                 el.as_expression()
@@ -817,7 +818,7 @@ impl<'a> SymbolProofContext<'a> {
     }
 
     pub fn is_class_custom_element_decorator_call(&self, expr: &Expression) -> Option<String> {
-        if !self.has_lit_imports() {
+        if !self.has_lit_imports() && self.helper_symbols.is_empty() {
             return None;
         }
         let Expression::CallExpression(call) = expr.without_parentheses() else {
@@ -843,7 +844,8 @@ impl<'a> SymbolProofContext<'a> {
                 if let Some(ref_id) = id.reference_id.get()
                     && let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id()
                     && (self.imported_classes.contains_key(&sym_id)
-                        || self.lit_symbols.contains_key(&sym_id))
+                        || self.lit_symbols.get(&sym_id)
+                            == Some(&CanonicalLitSymbol::CustomElementDecorator))
                 {
                     return Some(tag);
                 }
@@ -1657,6 +1659,35 @@ impl<'a> SymbolProofContext<'a> {
                 self.expr_contains_lit_template(&log.left)
                     || self.expr_contains_lit_template(&log.right)
             }
+            Expression::ArrayExpression(arr) => arr.elements.iter().any(|el| {
+                el.as_expression()
+                    .is_some_and(|e| self.expr_contains_lit_template(e))
+            }),
+            _ => false,
+        }
+    }
+
+    fn stmt_contains_lit_template(&self, stmt: &Statement) -> bool {
+        match stmt {
+            Statement::ReturnStatement(ret) => ret
+                .argument
+                .as_ref()
+                .is_some_and(|arg| self.expr_contains_lit_template(arg)),
+            Statement::BlockStatement(blk) => {
+                blk.body.iter().any(|s| self.stmt_contains_lit_template(s))
+            }
+            Statement::IfStatement(if_stmt) => {
+                self.stmt_contains_lit_template(&if_stmt.consequent)
+                    || if_stmt
+                        .alternate
+                        .as_ref()
+                        .is_some_and(|alt| self.stmt_contains_lit_template(alt))
+            }
+            Statement::SwitchStatement(sw) => sw.cases.iter().any(|c| {
+                c.consequent
+                    .iter()
+                    .any(|s| self.stmt_contains_lit_template(s))
+            }),
             _ => false,
         }
     }
@@ -1665,14 +1696,10 @@ impl<'a> SymbolProofContext<'a> {
         for element in &class.body.body {
             if let ClassElement::MethodDefinition(method) = element
                 && !method.r#static
-                && method.key.is_specific_static_name("render")
                 && let Some(body) = &method.value.body
             {
                 for stmt in &body.statements {
-                    if let Statement::ReturnStatement(ret) = stmt
-                        && let Some(arg) = &ret.argument
-                        && self.expr_contains_lit_template(arg)
-                    {
+                    if self.stmt_contains_lit_template(stmt) {
                         return true;
                     }
                 }

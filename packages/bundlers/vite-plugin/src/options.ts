@@ -39,7 +39,7 @@ export interface CssFuseOptions {
   /**
    * Minimum net byte savings threshold for extracting a shared constructable sheet.
    * Prevents creating micro-sheets where virtual module import overhead exceeds CSS savings.
-   * @default 150
+   * @default 200
    */
   minSavings?: number;
 }

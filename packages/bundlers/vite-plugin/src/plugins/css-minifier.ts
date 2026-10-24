@@ -2,7 +2,7 @@ import { minifyEmbeddedCss } from '@lit-core/css-minifier';
 import type { Plugin } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { CssMinifierOptions } from '../options.js';
-import { matchesPattern } from '../utils.js';
+import { isVirtualFusedId, matchesPattern } from '../utils.js';
 
 const LIT_CSS_FAST_CHECK = /\bcss\s*[`(]|\bimport\b[^;]*\bcss\b/;
 
@@ -15,23 +15,26 @@ export function cssMinifier(options: CssMinifierOptions = {}): Plugin {
 
     transform(code: string, id: string) {
       const cleanId = id.split('?')[0] ?? id;
-      if (!/\.[jt]sx?$/.test(cleanId)) {
+      const isVirtualCss = isVirtualFusedId(cleanId);
+      if (!isVirtualCss && !/\.[jt]sx?$/.test(cleanId)) {
         return null;
       }
 
-      if (options.exclude) {
-        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
-        for (const pattern of excludes) {
-          if (matchesPattern(cleanId, pattern)) return null;
+      if (!isVirtualCss) {
+        if (options.exclude) {
+          const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+          for (const pattern of excludes) {
+            if (matchesPattern(cleanId, pattern)) return null;
+          }
+        } else if (!options.include && cleanId.includes('/node_modules/')) {
+          return null;
         }
-      } else if (!options.include && cleanId.includes('/node_modules/')) {
-        return null;
-      }
 
-      if (options.include) {
-        const includes = Array.isArray(options.include) ? options.include : [options.include];
-        const matched = includes.some((pattern: string | RegExp) => matchesPattern(cleanId, pattern));
-        if (!matched) return null;
+        if (options.include) {
+          const includes = Array.isArray(options.include) ? options.include : [options.include];
+          const matched = includes.some((pattern: string | RegExp) => matchesPattern(cleanId, pattern));
+          if (!matched) return null;
+        }
       }
 
       if (!LIT_CSS_FAST_CHECK.test(code)) {
@@ -41,7 +44,7 @@ export function cssMinifier(options: CssMinifierOptions = {}): Plugin {
       try {
         const result = minifyEmbeddedCss(code, {
           sourcemap,
-          filename: cleanId,
+          filename: cleanId.replace(/^\0/, ''),
         });
 
         if (result.minifiedTemplates === 0) {

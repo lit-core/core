@@ -8,10 +8,20 @@ use std::collections::HashSet;
 pub fn clean_lit_import<'a>(
     import_decl: &mut ImportDeclaration<'a>,
     referenced_names: &HashSet<String>,
+    decorator_local_names: &HashSet<String>,
     ast: &AstBuilder<'a>,
 ) -> bool {
     let specifier = import_decl.source.value.as_str();
-    if !SymbolProofContext::is_canonical_lit_specifier(specifier) {
+    let is_canonical = SymbolProofContext::is_canonical_lit_specifier(specifier);
+    let has_known_decorator = import_decl.specifiers.as_ref().is_some_and(|specs| {
+        specs.iter().any(|s| match s {
+            ImportDeclarationSpecifier::ImportSpecifier(named) => {
+                decorator_local_names.contains(named.local.name.as_str())
+            }
+            _ => false,
+        })
+    });
+    if !is_canonical && !has_known_decorator {
         return true;
     }
 
@@ -27,7 +37,9 @@ pub fn clean_lit_import<'a>(
             ImportDeclarationSpecifier::ImportSpecifier(named) => {
                 let imported_name = named.imported.name();
                 let local_name = named.local.name.as_str();
-                if imported_name.as_str() == "localized" {
+                if imported_name.as_str() == "localized"
+                    && (is_canonical || decorator_local_names.contains(local_name))
+                {
                     named.imported = ModuleExportName::IdentifierName(IdentifierName::new(
                         SPAN,
                         "updateWhenLocaleChanges",
@@ -37,7 +49,9 @@ pub fn clean_lit_import<'a>(
                         named.local = BindingIdentifier::new(SPAN, "updateWhenLocaleChanges", ast);
                     }
                     new_specs.push(spec);
-                } else if is_lit_decorator_name(specifier, imported_name.as_str()) {
+                } else if decorator_local_names.contains(local_name)
+                    || (is_canonical && is_lit_decorator_name(specifier, imported_name.as_str()))
+                {
                     // Only strip if NO references remain in the program!
                     if referenced_names.contains(local_name) {
                         new_specs.push(spec);

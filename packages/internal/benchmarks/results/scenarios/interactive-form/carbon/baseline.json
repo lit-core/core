@@ -22,26 +22,26 @@
     "id": "carbon",
     "name": "Carbon Web Components (@carbon/web-components)",
     "packageName": "@carbon/web-components",
-    "version": "2.65.0"
+    "version": "2.66.0"
   },
   "variant": {
     "id": "baseline",
     "name": "Baseline (Standard Vite)",
     "isBaseline": true
   },
-  "timestamp": "2026-10-21T22:43:40.733Z",
+  "timestamp": "2026-10-24T12:24:41.406Z",
   "environment": {
-    "node": "v24.14.0",
+    "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b3e4776",
+    "gitCommit": "dbf7ecf",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
       "vite": "8.3.1",
       "playwright": "1.63.0",
-      "node": "v24.14.0",
+      "node": "v26.12.1",
       "carbon": "2.64.0",
       "spectrum": "1.12.2",
       "webawesome": "3.14.0",
@@ -50,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 318283,
-    "gzipBytes": 50744,
-    "brotliBytes": 35662,
-    "buildTimeMs": 62.41125000000466,
-    "firstRenderMs": 29.5,
-    "updateMs": 0.21,
-    "scriptEvalMs": 1.5,
+    "rawBytes": 325544,
+    "gzipBytes": 51414,
+    "brotliBytes": 35910,
+    "buildTimeMs": 37.00420899999972,
+    "firstRenderMs": 26.8,
+    "updateMs": 0.26,
+    "scriptEvalMs": 1.8,
     "registrationMs": 0.3,
-    "heapUsedBytes": 27516,
+    "heapUsedBytes": 26864,
     "scenarioSpecific": {
       "sectionsCount": 5,
       "controlsPerSection": 7,
@@ -67,11 +67,11 @@
     }
   },
   "runtime": {
-    "firstRenderMs": 29.5,
-    "updateMs": 0.21,
-    "scriptEvalMs": 1.5,
+    "firstRenderMs": 26.8,
+    "updateMs": 0.26,
+    "scriptEvalMs": 1.8,
     "registrationMs": 0.3,
-    "heapUsedBytes": 27516
+    "heapUsedBytes": 26864
   },
   "domSnapshot": {
     "mount": {

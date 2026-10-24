@@ -35,6 +35,13 @@ export interface CssFuseOptions {
    * @default false
    */
   applyInDev?: boolean;
+
+  /**
+   * Minimum net byte savings threshold for extracting a shared constructable sheet.
+   * Prevents creating micro-sheets where virtual module import overhead exceeds CSS savings.
+   * @default 200
+   */
+  minSavings?: number;
 }
 
 export type LitCssFuseOptions = CssFuseOptions;

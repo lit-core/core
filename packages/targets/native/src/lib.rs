@@ -239,6 +239,63 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
                     }
                 }
             }
+            Statement::VariableDeclaration(var_decl) => {
+                let mut pre_stmts = Vec::new();
+                let mut post_stmts = Vec::new();
+                for decl in &mut var_decl.declarations {
+                    let name_owned = match &decl.id {
+                        BindingPattern::BindingIdentifier(id) => Some(id.name.as_str().to_string()),
+                        _ => None,
+                    };
+                    if let Some(Expression::ClassExpression(class)) = &mut decl.init
+                        && let Some(target) = classifier::classify_class(
+                            class,
+                            forced_mode,
+                            &define_calls,
+                            &trailing_decorators,
+                            &import_ctx,
+                            &scoping,
+                            name_owned.as_deref(),
+                        )
+                    {
+                        classifications.push(target.clone());
+                        match target.mode.as_str() {
+                            "vanilla" => {
+                                if vanilla::transform_vanilla_class(
+                                    class,
+                                    &target,
+                                    &ast,
+                                    &scoping,
+                                    &import_ctx,
+                                    &mut pre_stmts,
+                                    &mut post_stmts,
+                                ) {
+                                    vanilla_count += 1;
+                                }
+                            }
+                            "micro"
+                                if micro::transform_micro_class(
+                                    class,
+                                    &source,
+                                    &target,
+                                    &ast,
+                                    &import_ctx,
+                                ) =>
+                            {
+                                micro_count += 1;
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                for s in pre_stmts {
+                    new_statements.push(s);
+                }
+                new_statements.push(stmt);
+                for s in post_stmts {
+                    new_statements.push(s);
+                }
+            }
             _ => {
                 new_statements.push(stmt);
             }

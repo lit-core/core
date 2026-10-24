@@ -158,13 +158,13 @@ impl ClusterEngine {
                         .iter()
                         .map(|r| compute_rule_savings(r, &common_files))
                         .sum();
-                    let net_bytes_saved = if min_savings > 0 {
-                        let module_overhead = 64 + common_files.len() * 52;
-                        gross_savings.saturating_sub(module_overhead)
-                    } else {
-                        gross_savings
-                    };
-                    if net_bytes_saved < min_savings || gross_savings == 0 {
+                    let module_overhead = 64 + common_files.len() * 52;
+                    let net_bytes_saved = gross_savings.saturating_sub(module_overhead);
+                    if min_savings > 0 {
+                        if net_bytes_saved < min_savings || gross_savings == 0 {
+                            continue;
+                        }
+                    } else if gross_savings == 0 {
                         continue;
                     }
 
@@ -229,13 +229,13 @@ impl ClusterEngine {
                         .iter()
                         .map(|r| compute_rule_savings(r, &common_files))
                         .sum();
-                    let net_bytes_saved = if min_savings > 0 {
-                        let module_overhead = 64 + common_files.len() * 52;
-                        gross_savings.saturating_sub(module_overhead)
-                    } else {
-                        gross_savings
-                    };
-                    if net_bytes_saved < min_savings || gross_savings == 0 {
+                    let module_overhead = 64 + common_files.len() * 52;
+                    let net_bytes_saved = gross_savings.saturating_sub(module_overhead);
+                    if min_savings > 0 {
+                        if net_bytes_saved < min_savings || gross_savings == 0 {
+                            continue;
+                        }
+                    } else if gross_savings == 0 {
                         continue;
                     }
 
@@ -295,13 +295,13 @@ impl ClusterEngine {
                 .iter()
                 .map(|r| compute_rule_savings(r, &files_set))
                 .sum();
-            let net_bytes_saved = if min_savings > 0 {
-                let module_overhead = 64 + files.len() * 52;
-                gross_savings.saturating_sub(module_overhead)
-            } else {
-                gross_savings
-            };
-            if net_bytes_saved < min_savings || gross_savings == 0 {
+            let module_overhead = 64 + files.len() * 52;
+            let net_bytes_saved = gross_savings.saturating_sub(module_overhead);
+            if min_savings > 0 {
+                if net_bytes_saved < min_savings || gross_savings == 0 {
+                    continue;
+                }
+            } else if gross_savings == 0 {
                 continue;
             }
 

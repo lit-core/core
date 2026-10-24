@@ -2,7 +2,7 @@ import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import type { Plugin } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { HtmlMinifierOptions } from '../options.js';
-import { matchesPattern } from '../utils.js';
+import { isVirtualHtmlFusedId, matchesPattern } from '../utils.js';
 
 const LIT_HTML_FAST_CHECK = /\b(?:html|svg)\s*`|\bimport\b[^;]*\b(?:html|svg)\b/;
 
@@ -15,23 +15,26 @@ export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
 
     transform(code: string, id: string) {
       const cleanId = id.split('?')[0] ?? id;
-      if (!/\.[jt]sx?$/.test(cleanId)) {
+      const isVirtualHtml = isVirtualHtmlFusedId(cleanId);
+      if (!isVirtualHtml && !/\.[jt]sx?$/.test(cleanId)) {
         return null;
       }
 
-      if (options.exclude) {
-        const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
-        for (const pattern of excludes) {
-          if (matchesPattern(cleanId, pattern)) return null;
+      if (!isVirtualHtml) {
+        if (options.exclude) {
+          const excludes = Array.isArray(options.exclude) ? options.exclude : [options.exclude];
+          for (const pattern of excludes) {
+            if (matchesPattern(cleanId, pattern)) return null;
+          }
+        } else if (!options.include && cleanId.includes('/node_modules/')) {
+          return null;
         }
-      } else if (!options.include && cleanId.includes('/node_modules/')) {
-        return null;
-      }
 
-      if (options.include) {
-        const includes = Array.isArray(options.include) ? options.include : [options.include];
-        const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
-        if (!matched) return null;
+        if (options.include) {
+          const includes = Array.isArray(options.include) ? options.include : [options.include];
+          const matched = includes.some((pattern) => matchesPattern(cleanId, pattern));
+          if (!matched) return null;
+        }
       }
 
       if (!LIT_HTML_FAST_CHECK.test(code)) {
@@ -41,7 +44,7 @@ export function htmlMinifier(options: HtmlMinifierOptions = {}): Plugin {
       try {
         const result = minifyHtmlTemplates(code, {
           sourcemap,
-          filename: cleanId,
+          filename: cleanId.replace(/^\0/, ''),
         });
 
         if (result.templatesCount === 0) {

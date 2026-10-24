@@ -14,7 +14,7 @@ use std::fs;
 use std::path::Path;
 
 use crate::cluster::{FragmentFrequencyIndex, HtmlClusterEngine};
-use crate::codegen::{generate_fused_template, rewrite_file};
+use crate::codegen::{generate_fused_template, rewrite_code_with_clusters, rewrite_file};
 use crate::diagnostics::TemplateAuditor;
 use crate::extractor::TemplateExtractor;
 use crate::models::{Diagnostic, HtmlFuseConfig, HtmlFuseResult, HtmlFuseStats};
@@ -194,4 +194,21 @@ pub fn audit_templates(config: Option<HtmlFuseConfig>) -> Vec<Diagnostic> {
     let min_fragment_length = cfg.min_fragment_length.unwrap_or(15) as usize;
     let (extracted, _) = TemplateExtractor::extract_from_files(&files, min_fragment_length);
     TemplateAuditor::audit_all(&extracted)
+}
+
+#[napi]
+pub fn transform_html_fuse_code(
+    file_path: String,
+    code: String,
+    cluster_ids: Vec<String>,
+    output_dir: Option<String>,
+    virtual_imports: Option<bool>,
+) -> Option<String> {
+    rewrite_code_with_clusters(
+        &file_path,
+        &code,
+        &cluster_ids,
+        output_dir.as_deref().unwrap_or(".fused-html"),
+        virtual_imports.unwrap_or(true),
+    )
 }

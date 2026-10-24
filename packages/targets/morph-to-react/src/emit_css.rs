@@ -92,13 +92,8 @@ pub fn transform_component_styles(
 }
 
 fn process_component_css(css: &str, options: &ScopedCssOptions) -> Result<ScopedCssResult, String> {
-    let sheet = match StyleSheet::parse(css, ParserOptions::default()) {
-        Ok(s) => s,
-        Err(_) => {
-            // Lenient fallback
-            return process_raw_css_lenient(css, options);
-        }
-    };
+    let sheet = StyleSheet::parse(css, ParserOptions::default())
+        .map_err(|e| format!("failed to parse component styles: {:?}", e))?;
 
     let printer_opts = || PrinterOptions {
         minify: options.minify,
@@ -287,19 +282,16 @@ fn assemble_scoped_stylesheet(
     let full_css = parts.join("\n");
 
     // Minify and canonicalize final CSS through lightningcss
-    let final_css = match StyleSheet::parse(&full_css, ParserOptions::default()) {
-        Ok(parsed) => {
-            let printer_opts = PrinterOptions {
-                minify: options.minify,
-                ..Default::default()
-            };
-            parsed
-                .to_css(printer_opts)
-                .map(|c| c.code)
-                .unwrap_or_else(|_| full_css.clone())
-        }
-        Err(_) => full_css.clone(),
+    let parsed = StyleSheet::parse(&full_css, ParserOptions::default())
+        .map_err(|e| format!("failed to parse assembled scoped stylesheet: {:?}", e))?;
+    let printer_opts = PrinterOptions {
+        minify: options.minify,
+        ..Default::default()
     };
+    let final_css = parsed
+        .to_css(printer_opts)
+        .map(|c| c.code)
+        .map_err(|e| format!("failed to emit scoped CSS: {:?}", e))?;
 
     // Calculate deterministic 12-char hex hash from content
     let hash = blake3::hash(final_css.as_bytes()).to_hex().to_string();
@@ -405,43 +397,6 @@ pub fn build_jsx_style_element<'a>(
     children.push(expr_container);
 
     JSXElement::new(SPAN, opening, children, closing, ast)
-}
-
-fn process_raw_css_lenient(
-    css: &str,
-    options: &ScopedCssOptions,
-) -> Result<ScopedCssResult, String> {
-    let mut internal_rules = Vec::new();
-    let mut slotted_rules = Vec::new();
-    let mut has_slotted = false;
-
-    for chunk in css.split('}') {
-        let chunk = chunk.trim();
-        if chunk.is_empty() {
-            continue;
-        }
-        if let Some(idx) = chunk.find('{') {
-            let sel = chunk[..idx].trim();
-            let body = chunk[idx + 1..].trim();
-            if sel.contains("::slotted") {
-                has_slotted = true;
-                let rewritten = rewrite_slotted_selector(sel);
-                slotted_rules.push(format!("{} {{{}}}", rewritten, body));
-            } else {
-                let rewritten = rewrite_internal_selector(sel);
-                internal_rules.push(format!("{} {{{}}}", rewritten, body));
-            }
-        }
-    }
-
-    assemble_scoped_stylesheet(
-        Vec::new(),
-        internal_rules,
-        slotted_rules,
-        has_slotted,
-        1,
-        options,
-    )
 }
 
 /// Splits a comma-separated selector string into individual selector items,
@@ -554,19 +509,21 @@ pub fn rewrite_slotted_selector(selector_str: &str) -> String {
 }
 
 fn rewrite_single_slotted_selector(sel: &str) -> String {
-    // Check if selector contains slot[name="..."]::slotted(...)
-    let mut s = sel.to_string();
-
     // First rewrite any :host inside slotted rule
-    s = rewrite_single_internal_selector(&s);
+    let s = rewrite_single_internal_selector(sel);
 
     // Look for slot[name="..."]::slotted(...)
-    while let Some(slot_idx) = s.find("slot[name=") {
-        if let Some(close_bracket) = s[slot_idx..].find(']') {
-            let attr_part = &s[slot_idx..slot_idx + close_bracket + 1];
-            let after_bracket = &s[slot_idx + close_bracket + 1..];
+    let mut result = String::with_capacity(s.len());
+    let mut remainder = s.as_str();
+
+    while let Some(slot_idx) = remainder.find("slot[name=") {
+        result.push_str(&remainder[..slot_idx]);
+        let match_slice = &remainder[slot_idx..];
+        let mut handled = false;
+        if let Some(close_bracket) = match_slice.find(']') {
+            let attr_part = &match_slice[..close_bracket + 1];
+            let after_bracket = &match_slice[close_bracket + 1..];
             if after_bracket.starts_with("::slotted(") {
-                // Extract slot name
                 let name = extract_slot_name_from_attr(attr_part);
                 if let Some(inner) = extract_parenthesized_content(after_bracket, "::slotted") {
                     let total_len = close_bracket + 1 + "::slotted(".len() + inner.len() + 1;
@@ -575,20 +532,23 @@ fn rewrite_single_slotted_selector(sel: &str) -> String {
                         name,
                         inner.trim()
                     );
-                    s.replace_range(slot_idx..slot_idx + total_len, &replacement);
-                    continue;
+                    result.push_str(&replacement);
+                    remainder = &match_slice[total_len..];
+                    handled = true;
                 }
             }
         }
-        break;
+        if !handled {
+            result.push_str("slot[name=");
+            remainder = &match_slice["slot[name=".len()..];
+        }
     }
+    result.push_str(remainder);
 
     // Now rewrite generic ::slotted(selector)
-    s = replace_functional_pseudo(&s, "::slotted", |inner| {
+    replace_functional_pseudo(&result, "::slotted", |inner| {
         format!(":scope [data-slot-boundary] > :is({})", inner.trim())
-    });
-
-    s
+    })
 }
 
 fn extract_slot_name_from_attr(attr: &str) -> &str {
@@ -603,28 +563,26 @@ fn extract_slot_name_from_attr(attr: &str) -> &str {
 fn replace_host_siblings(sel: &str) -> String {
     let mut out = sel.to_string();
     let patterns = [
-        (":host + :host", ":not(*)"),
-        (":host+ :host", ":not(*)"),
-        (":host +:host", ":not(*)"),
-        (":host+:host", ":not(*)"),
-        (":host ~ :host", ":not(*)"),
-        (":host~ :host", ":not(*)"),
-        (":host ~:host", ":not(*)"),
-        (":host~:host", ":not(*)"),
-        (":scope + :scope", ":not(*)"),
-        (":scope+ :scope", ":not(*)"),
-        (":scope +:scope", ":not(*)"),
-        (":scope+:scope", ":not(*)"),
-        (":scope ~ :scope", ":not(*)"),
-        (":scope~ :scope", ":not(*)"),
-        (":scope ~:scope", ":not(*)"),
-        (":scope~:scope", ":not(*)"),
+        ":host + :host",
+        ":host+ :host",
+        ":host +:host",
+        ":host+:host",
+        ":host ~ :host",
+        ":host~ :host",
+        ":host ~:host",
+        ":host~:host",
+        ":scope + :scope",
+        ":scope+ :scope",
+        ":scope +:scope",
+        ":scope+:scope",
+        ":scope ~ :scope",
+        ":scope~ :scope",
+        ":scope ~:scope",
+        ":scope~:scope",
     ];
 
-    for (pat, rep) in patterns {
-        while let Some(idx) = out.find(pat) {
-            out.replace_range(idx..idx + pat.len(), rep);
-        }
+    for pat in patterns {
+        out = out.replace(pat, ":not(*)");
     }
 
     out
@@ -673,20 +631,30 @@ fn replace_functional_pseudo<F>(sel: &str, pseudo_name: &str, replace_fn: F) -> 
 where
     F: Fn(&str) -> String,
 {
-    let mut out = sel.to_string();
     let pattern = format!("{}(", pseudo_name);
-
-    while let Some(start_idx) = out.find(&pattern) {
-        if let Some(inner) = extract_parenthesized_content(&out[start_idx..], pseudo_name) {
-            let total_len = pattern.len() + inner.len() + 1; // +1 for closing ')'
-            let replacement = replace_fn(inner);
-            out.replace_range(start_idx..start_idx + total_len, &replacement);
-        } else {
-            break;
-        }
+    if !sel.contains(&pattern) {
+        return sel.to_string();
     }
 
-    out
+    let mut result = String::with_capacity(sel.len());
+    let mut remainder = sel;
+
+    while let Some(start_idx) = remainder.find(&pattern) {
+        result.push_str(&remainder[..start_idx]);
+        let match_slice = &remainder[start_idx..];
+        if let Some(inner) = extract_parenthesized_content(match_slice, pseudo_name) {
+            let total_len = pattern.len() + inner.len() + 1; // +1 for closing ')'
+            let replacement = replace_fn(inner);
+            result.push_str(&replacement);
+            remainder = &match_slice[total_len..];
+        } else {
+            result.push_str(&match_slice[..pattern.len()]);
+            remainder = &match_slice[pattern.len()..];
+        }
+    }
+    result.push_str(remainder);
+
+    result
 }
 
 fn extract_parenthesized_content<'a>(slice: &'a str, prefix: &str) -> Option<&'a str> {
@@ -827,5 +795,42 @@ mod tests {
 
         let res = transform_component_styles(&styles, &opts).unwrap();
         assert_eq!(res.external_file_name, Some("my-card.css".to_string()));
+    }
+
+    #[test]
+    fn test_transform_component_styles_malformed_css_bails_out() {
+        let styles = vec![StyleInfo {
+            css_text: "@media ( { div { color: red; }".to_string(),
+            is_shared: false,
+            shared_import_path: None,
+        }];
+
+        let opts = ScopedCssOptions {
+            host_tag: "bad-elem".to_string(),
+            ..Default::default()
+        };
+
+        let res = transform_component_styles(&styles, &opts);
+        assert!(res.is_err(), "malformed CSS must bail out with Err");
+    }
+
+    #[test]
+    fn test_repeated_functional_pseudo_replacement_order() {
+        let sel = "div:host(.primary) > span:host(.primary)";
+        let rewritten = rewrite_internal_selector(sel);
+        assert_eq!(
+            rewritten,
+            "div:scope:is(.primary) > span:scope:is(.primary)"
+        );
+    }
+
+    #[test]
+    fn test_slotted_selector_repeated_target_in_compound() {
+        let sel = "slot[name=\"icon\"]::slotted(svg) > slot[name=\"icon\"]::slotted(path)";
+        let rewritten = rewrite_slotted_selector(sel);
+        assert_eq!(
+            rewritten,
+            ":scope [data-slot-boundary][data-slot=\"icon\"] > :is(svg) > :scope [data-slot-boundary][data-slot=\"icon\"] > :is(path)"
+        );
     }
 }

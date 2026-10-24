@@ -542,7 +542,6 @@ fn is_auxiliary_class_stmt(stmt: &Statement, cls_name: &str, resolver: &SymbolRe
                 && let Expression::Identifier(id) = mem.object.without_parentheses()
                 && id.name == cls_name
                 && mem.property.name != "define"
-                && mem.property.name != "register"
             {
                 return true;
             }

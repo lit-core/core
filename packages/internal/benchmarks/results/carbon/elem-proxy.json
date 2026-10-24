@@ -6,13 +6,13 @@
     "name": "Carbon Web Components (@carbon/web-components)",
     "packageName": "@carbon/web-components",
     "version": "2.66.0",
-    "componentCount": 20,
+    "componentCount": 6,
     "components": [
       {
-        "concept": "button",
-        "tag": "cds-button",
-        "path": "es/components/button/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/button/index.js';"
+        "concept": "text-input",
+        "tag": "cds-text-input",
+        "path": "es/components/text-input/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/text-input/index.js';"
       },
       {
         "concept": "checkbox",
@@ -21,22 +21,16 @@
         "importStatement": "import '@carbon/web-components/es/components/checkbox/index.js';"
       },
       {
-        "concept": "radio",
-        "tag": "cds-radio-button",
-        "path": "es/components/radio-button/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/radio-button/index.js';"
-      },
-      {
         "concept": "switch",
         "tag": "cds-toggle",
         "path": "es/components/toggle/index.js",
         "importStatement": "import '@carbon/web-components/es/components/toggle/index.js';"
       },
       {
-        "concept": "text-input",
-        "tag": "cds-text-input",
-        "path": "es/components/text-input/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/text-input/index.js';"
+        "concept": "radio",
+        "tag": "cds-radio-button",
+        "path": "es/components/radio-button/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/radio-button/index.js';"
       },
       {
         "concept": "select",
@@ -45,88 +39,10 @@
         "importStatement": "import '@carbon/web-components/es/components/select/index.js';"
       },
       {
-        "concept": "dialog",
-        "tag": "cds-modal",
-        "path": "es/components/modal/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/modal/index.js';"
-      },
-      {
-        "concept": "badge",
-        "tag": "cds-tag",
-        "path": "es/components/tag/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/tag/index.js';"
-      },
-      {
-        "concept": "tabs",
-        "tag": "cds-tabs",
-        "path": "es/components/tabs/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/tabs/index.js';"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "cds-progress-bar",
-        "path": "es/components/progress-bar/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/progress-bar/index.js';"
-      },
-      {
-        "concept": "spinner",
-        "tag": "cds-loading",
-        "path": "es/components/loading/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/loading/index.js';"
-      },
-      {
-        "concept": "slider",
-        "tag": "cds-slider",
-        "path": "es/components/slider/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/slider/index.js';"
-      },
-      {
-        "concept": "menu",
-        "tag": "cds-overflow-menu",
-        "path": "es/components/overflow-menu/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/overflow-menu/index.js';"
-      },
-      {
-        "concept": "divider",
-        "tag": "cds-skeleton-text",
-        "path": "es/components/skeleton-text/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/skeleton-text/index.js';"
-      },
-      {
-        "concept": "icon",
-        "tag": "cds-icon",
-        "path": "es/components/icon/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/icon/index.js';"
-      },
-      {
-        "concept": "icon-button",
-        "tag": "cds-icon-button",
-        "path": "es/components/icon-button/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/icon-button/index.js';"
-      },
-      {
-        "concept": "card",
-        "tag": "cds-tile",
-        "path": "es/components/tile/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/tile/index.js';"
-      },
-      {
-        "concept": "elevation",
-        "tag": "cds-popover",
-        "path": "es/components/popover/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/popover/index.js';"
-      },
-      {
-        "concept": "list",
-        "tag": "cds-structured-list",
-        "path": "es/components/structured-list/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/structured-list/index.js';"
-      },
-      {
-        "concept": "chips",
-        "tag": "cds-content-switcher",
-        "path": "es/components/content-switcher/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/content-switcher/index.js';"
+        "concept": "button",
+        "tag": "cds-button",
+        "path": "es/components/button/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/button/index.js';"
       }
     ]
   },
@@ -137,18 +53,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "bundle",
-    "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "componentCount": 20
+    "id": "interactive-form",
+    "name": "Interactive form",
+    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration",
+    "componentCount": 6
   },
-  "timestamp": "2026-10-24T09:47:29.373Z",
+  "timestamp": "2026-10-24T12:24:43.655Z",
   "environment": {
     "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "6c3875e",
+    "gitCommit": "dbf7ecf",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,10 +79,10 @@
     }
   },
   "metrics": {
-    "rawBytes": 1510116,
-    "gzipBytes": 194867,
-    "brotliBytes": 102595,
-    "buildTimeMs": 64.22395800000231
+    "rawBytes": 1506813,
+    "gzipBytes": 195301,
+    "brotliBytes": 102613,
+    "buildTimeMs": 32.7250839999997
   },
   "baseline": {
     "rawBytes": 1502756,
@@ -177,39 +93,44 @@
     "updateMs": 0.32,
     "scriptEvalMs": 21.3,
     "registrationMs": 0.9,
-    "heapUsedBytes": 39788
+    "heapUsedBytes": 39788,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "deltas": {
-    "rawBytes": 7360,
-    "rawPercent": 0.49,
-    "gzipBytes": 673,
-    "gzipPercent": 0.35,
-    "brotliBytes": 493,
-    "brotliPercent": 0.48,
-    "buildTimeMs": -68.5,
-    "firstRenderMs": 0.9,
-    "speedupPercent": -1.65,
-    "updateMs": -0.12,
-    "updateSpeedupPercent": 37.5,
-    "evalSpeedupPercent": 12.21,
-    "registrationSpeedupPercent": -11.11,
-    "memorySavingsPercent": 0
+    "rawBytes": 4057,
+    "rawPercent": 0.27,
+    "gzipBytes": 1107,
+    "gzipPercent": 0.57,
+    "brotliBytes": 511,
+    "brotliPercent": 0.5,
+    "buildTimeMs": -4.3,
+    "firstRenderMs": -1.8,
+    "speedupPercent": 6.72,
+    "updateMs": -0.13,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": -5.56,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -11.9
   },
   "runtime": {
-    "firstRenderMs": 55.3,
-    "updateMs": 0.2,
-    "scriptEvalMs": 18.7,
-    "registrationMs": 1,
-    "heapUsedBytes": 39788,
-    "speedupPercent": -1.65,
-    "updateSpeedupPercent": 37.5,
-    "evalSpeedupPercent": 12.21,
-    "registrationSpeedupPercent": -11.11,
-    "memorySavingsPercent": 0
+    "firstRenderMs": 50.74,
+    "updateMs": 0.16,
+    "scriptEvalMs": 22.48,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 44523,
+    "speedupPercent": 6.72,
+    "updateSpeedupPercent": 50,
+    "evalSpeedupPercent": -5.56,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": -11.9
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 74,
+    "elementsCount": 51,
     "verified": true,
     "phasesMatched": {
       "mount": true,

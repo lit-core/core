@@ -223,9 +223,7 @@ impl DecoratorExtractor {
             }
             Expression::AssignmentExpression(assign) => {
                 // Class decorator assignment: Target = helper([customElement("...")], Target)
-                if let Expression::CallExpression(call) = &assign.right {
-                    Self::try_extract_helper_call(call, class_name, ctx, extracted);
-                }
+                Self::inspect_expression_for_helpers(&assign.right, class_name, ctx, extracted);
             }
             Expression::SequenceExpression(seq) => {
                 for e in &seq.expressions {

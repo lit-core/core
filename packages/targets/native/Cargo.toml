@@ -14,6 +14,7 @@ serde_json = { workspace = true }
 
 # Diagnostics
 thiserror = { workspace = true }
+lit_analysis = { path = "../../../crates/lit-analysis" }
 
 # OXC stack
 oxc_allocator = { workspace = true }

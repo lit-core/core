@@ -12,8 +12,91 @@ use std::path::Path;
 struct FragReplacement<'a> {
     start: usize,
     end: usize,
-    cluster: &'a HtmlClusterGroup,
+    cluster_id: &'a str,
+    hash: String,
     is_full_template: bool,
+}
+
+pub fn rewrite_code_with_clusters(
+    file_path: &str,
+    code: &str,
+    cluster_ids: &[String],
+    output_dir: &str,
+    virtual_imports: bool,
+) -> Option<String> {
+    if cluster_ids.is_empty() {
+        return None;
+    }
+
+    let mut replacements = Vec::new();
+    for cid in cluster_ids {
+        if let Some(hash) = cid.split('_').next_back() {
+            replacements.push(FragReplacement {
+                start: usize::MAX,
+                end: usize::MAX,
+                cluster_id: cid.as_str(),
+                hash: hash.to_string(),
+                is_full_template: true,
+            });
+        }
+    }
+
+    if replacements.is_empty() {
+        return None;
+    }
+
+    let allocator = Allocator::default();
+    let source_type = SourceType::from_path(Path::new(file_path)).unwrap_or_default();
+    let parser = Parser::new(&allocator, code, source_type);
+    let mut parsed = parser.parse();
+
+    if !parsed.diagnostics.is_empty() && parsed.program.body.is_empty() {
+        return None;
+    }
+
+    let ast = AstBuilder::new(&allocator);
+    let mut rewritten_count = 0;
+
+    for stmt in &mut parsed.program.body {
+        walk_statement(stmt, &ast, &allocator, &replacements, &mut rewritten_count);
+    }
+
+    if rewritten_count == 0 {
+        return None;
+    }
+
+    let mut sorted_clusters = cluster_ids.to_vec();
+    sorted_clusters.sort();
+    sorted_clusters.dedup();
+
+    let mut new_body = ArenaVec::new_in(&ast);
+    for cid in &sorted_clusters {
+        let import_specifier = if virtual_imports {
+            format!("virtual:html-fuse/{}.js", cid)
+        } else {
+            compute_relative_import(file_path, output_dir, cid)
+        };
+        new_body.push(create_import_declaration(
+            &ast,
+            &allocator,
+            cid,
+            &import_specifier,
+        ));
+    }
+    for stmt in parsed.program.body {
+        new_body.push(stmt);
+    }
+    parsed.program.body = new_body;
+
+    let codegen_options = oxc_codegen::CodegenOptions {
+        single_quote: true,
+        ..oxc_codegen::CodegenOptions::default()
+    };
+    let codegen_result = Codegen::new()
+        .with_options(codegen_options)
+        .build(&parsed.program);
+
+    Some(codegen_result.code)
 }
 
 pub fn rewrite_file(
@@ -56,7 +139,8 @@ pub fn rewrite_file(
             replacements.push(FragReplacement {
                 start: frag.span.start,
                 end: frag.span.end,
-                cluster,
+                cluster_id: cluster.id.as_str(),
+                hash: frag.hash.clone(),
                 is_full_template: frag.is_full_template,
             });
         }
@@ -81,7 +165,7 @@ pub fn rewrite_file(
     for rep in replacements {
         if rep.start >= last_end {
             last_end = rep.end;
-            used_clusters.push(rep.cluster.id.clone());
+            used_clusters.push(rep.cluster_id.to_string());
             filtered_replacements.push(rep);
         }
     }
@@ -459,11 +543,25 @@ fn walk_expression<'a>(
         let tagged_start = tagged.span.start as usize;
 
         // Check if full template candidate matches this tagged template
-        if let Some(rep) = replacements
+        let matched_cluster_id = replacements
             .iter()
             .find(|r| r.is_full_template && r.start == tagged_start)
-        {
-            *expr = Expression::new_identifier(SPAN, allocator.alloc_str(&rep.cluster.id), ast);
+            .map(|r| r.cluster_id)
+            .or_else(|| {
+                if tagged.quasi.expressions.is_empty() && !tagged.quasi.quasis.is_empty() {
+                    let trimmed = tagged.quasi.quasis[0].value.raw.as_str().trim();
+                    let (_, hash) = crate::normalizer::normalize_fragment(trimmed);
+                    replacements
+                        .iter()
+                        .find(|r| r.is_full_template && r.hash == hash)
+                        .map(|r| r.cluster_id)
+                } else {
+                    None
+                }
+            });
+
+        if let Some(cluster_id) = matched_cluster_id {
+            *expr = Expression::new_identifier(SPAN, allocator.alloc_str(cluster_id), ast);
             *rewritten_count += 1;
             return;
         }

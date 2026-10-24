@@ -233,11 +233,19 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     fold_lowered_decorators_into_local_classes(&mut intermediate_statements, &ast);
 
     program.body = intermediate_statements;
-    let (referenced_names, decorate_used, metadata_used, helper_bindings, metadata_bindings) = {
+    let (
+        referenced_names,
+        decorator_local_names,
+        decorate_used,
+        metadata_used,
+        helper_bindings,
+        metadata_bindings,
+    ) = {
         let semantic_ret = oxc_semantic::SemanticBuilder::new().build(&program);
         let semantic = &semantic_ret.semantic;
 
         let mut referenced = std::collections::HashSet::new();
+        let mut dec_locals = std::collections::HashSet::new();
         for (&sym_id, sym) in &symbol_ctx.lit_symbols {
             if matches!(
                 sym,
@@ -253,6 +261,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
                     | CanonicalLitSymbol::LocalizedDecorator
             ) {
                 let name = scoping.symbol_name(sym_id);
+                dec_locals.insert(name.to_string());
                 if is_identifier_referenced_semantically(semantic, name) {
                     referenced.insert(name.to_string());
                 }
@@ -318,6 +327,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
 
         (
             referenced,
+            dec_locals,
             dec_used,
             meta_used,
             helper_bindings,
@@ -329,7 +339,7 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     let mut new_statements = ArenaVec::new_in(&ast);
     for mut stmt in intermediate {
         if let Statement::ImportDeclaration(import_decl) = &mut stmt {
-            if clean_lit_import(import_decl, &referenced_names, &ast) {
+            if clean_lit_import(import_decl, &referenced_names, &decorator_local_names, &ast) {
                 new_statements.push(stmt);
             }
         } else {

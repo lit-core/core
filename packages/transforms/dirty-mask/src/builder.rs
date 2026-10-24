@@ -61,45 +61,145 @@ pub fn build_mask_calc_statements<'a>(
     ));
 
     let mut if_stmts = ArenaVec::new_in(ast);
-    for (prop_name, idx) in sorted_props {
-        if *idx >= 32 {
-            continue;
+    let is_consecutive = sorted_props
+        .iter()
+        .enumerate()
+        .all(|(i, (_, idx))| i == *idx && *idx < 32);
+
+    if sorted_props.len() >= 4 && is_consecutive {
+        let mut elems = ArenaVec::new_in(ast);
+        for (prop_name, _) in sorted_props {
+            elems.push(ArrayExpressionElement::from(
+                Expression::new_string_literal(
+                    SPAN,
+                    ast.allocator().alloc_str(prop_name.as_str()),
+                    None,
+                    ast,
+                ),
+            ));
         }
-        let bit = 1u32 << idx;
+        let arr_expr = Expression::new_array_expression(SPAN, elems, ast);
+        let for_each_member = Expression::new_static_member_expression(
+            SPAN,
+            arr_expr,
+            IdentifierName::new(SPAN, "forEach", ast),
+            false,
+            ast,
+        );
 
         let cp_ident = Expression::new_identifier(SPAN, "changedProperties", ast);
-        let has_prop = IdentifierName::new(SPAN, "has", ast);
-        let has_member =
-            Expression::new_static_member_expression(SPAN, cp_ident, has_prop, false, ast);
-        let mut has_args = ArenaVec::new_in(ast);
-        has_args.push(Argument::from(Expression::new_string_literal(
+        let has_member = Expression::new_static_member_expression(
             SPAN,
-            ast.allocator().alloc_str(prop_name.as_str()),
-            None,
+            cp_ident,
+            IdentifierName::new(SPAN, "has", ast),
+            false,
             ast,
-        )));
+        );
+        let mut has_args = ArenaVec::new_in(ast);
+        has_args.push(Argument::from(Expression::new_identifier(SPAN, "p", ast)));
         let has_call =
             Expression::new_call_expression(SPAN, has_member, None, has_args, false, ast);
 
         let mask_target = AssignmentTarget::new_assignment_target_identifier(SPAN, "mask", ast);
-        let bit_num =
-            Expression::new_numeric_literal(SPAN, bit as f64, None, NumberBase::Decimal, ast);
+        let shift_expr = Expression::new_binary_expression(
+            SPAN,
+            Expression::new_numeric_literal(SPAN, 1.0, None, NumberBase::Decimal, ast),
+            BinaryOperator::ShiftLeft,
+            Expression::new_identifier(SPAN, "i", ast),
+            ast,
+        );
         let assign = Expression::new_assignment_expression(
             SPAN,
             AssignmentOperator::BitwiseOR,
             mask_target,
-            bit_num,
+            shift_expr,
             ast,
         );
         let assign_stmt = Statement::new_expression_statement(SPAN, assign, ast);
+        let inner_if = Statement::new_if_statement(SPAN, has_call, assign_stmt, None, ast);
 
-        if_stmts.push(Statement::new_if_statement(
+        let mut arrow_stmts = ArenaVec::new_in(ast);
+        arrow_stmts.push(inner_if);
+        let arrow_body = FunctionBody::boxed(SPAN, ArenaVec::new_in(ast), arrow_stmts, ast);
+
+        let mut params_vec = ArenaVec::new_in(ast);
+        params_vec.push(FormalParameter::new_plain(
             SPAN,
-            has_call,
-            assign_stmt,
-            None,
+            BindingPattern::new_binding_identifier(SPAN, "p", ast),
             ast,
         ));
+        params_vec.push(FormalParameter::new_plain(
+            SPAN,
+            BindingPattern::new_binding_identifier(SPAN, "i", ast),
+            ast,
+        ));
+        let arrow_params = FormalParameters::boxed(
+            SPAN,
+            FormalParameterKind::ArrowFormalParameters,
+            params_vec,
+            None,
+            ast,
+        );
+        let arrow_fn = Expression::new_arrow_function_expression(
+            SPAN,
+            false,
+            None,
+            arrow_params,
+            None,
+            ArrowFunctionBody::FunctionBody(arrow_body),
+            ast,
+        );
+
+        let mut for_each_args = ArenaVec::new_in(ast);
+        for_each_args.push(Argument::from(arrow_fn));
+        let for_each_call =
+            Expression::new_call_expression(SPAN, for_each_member, None, for_each_args, false, ast);
+        if_stmts.push(Statement::new_expression_statement(
+            SPAN,
+            for_each_call,
+            ast,
+        ));
+    } else {
+        for (prop_name, idx) in sorted_props {
+            if *idx >= 32 {
+                continue;
+            }
+            let bit = 1u32 << idx;
+
+            let cp_ident = Expression::new_identifier(SPAN, "changedProperties", ast);
+            let has_prop = IdentifierName::new(SPAN, "has", ast);
+            let has_member =
+                Expression::new_static_member_expression(SPAN, cp_ident, has_prop, false, ast);
+            let mut has_args = ArenaVec::new_in(ast);
+            has_args.push(Argument::from(Expression::new_string_literal(
+                SPAN,
+                ast.allocator().alloc_str(prop_name.as_str()),
+                None,
+                ast,
+            )));
+            let has_call =
+                Expression::new_call_expression(SPAN, has_member, None, has_args, false, ast);
+
+            let mask_target = AssignmentTarget::new_assignment_target_identifier(SPAN, "mask", ast);
+            let bit_num =
+                Expression::new_numeric_literal(SPAN, bit as f64, None, NumberBase::Decimal, ast);
+            let assign = Expression::new_assignment_expression(
+                SPAN,
+                AssignmentOperator::BitwiseOR,
+                mask_target,
+                bit_num,
+                ast,
+            );
+            let assign_stmt = Statement::new_expression_statement(SPAN, assign, ast);
+
+            if_stmts.push(Statement::new_if_statement(
+                SPAN,
+                has_call,
+                assign_stmt,
+                None,
+                ast,
+            ));
+        }
     }
 
     let if_block = Statement::new_block_statement(SPAN, if_stmts, ast);

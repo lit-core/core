@@ -21,7 +21,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
     outputDir = '.fused',
     scopingAudit = true,
     applyInDev = false,
-    minSavings = 80,
+    minSavings = 200,
   } = options;
 
   function runOptimization(virtualImports = true, write = false): FuseResult {

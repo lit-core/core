@@ -25,19 +25,19 @@
     "name": "Baseline (Standard Vite)",
     "isBaseline": true
   },
-  "timestamp": "2026-10-21T22:42:58.889Z",
+  "timestamp": "2026-10-24T12:50:36.789Z",
   "environment": {
-    "node": "v24.14.0",
+    "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b3e4776",
+    "gitCommit": "dbf7ecf",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
       "vite": "8.3.1",
       "playwright": "1.63.0",
-      "node": "v24.14.0",
+      "node": "v26.12.1",
       "carbon": "2.64.0",
       "spectrum": "1.12.2",
       "webawesome": "3.14.0",
@@ -46,15 +46,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 373857,
-    "gzipBytes": 87730,
-    "brotliBytes": 70190,
-    "buildTimeMs": 39.210917000000336,
-    "firstRenderMs": 7.5,
-    "updateMs": 0.07,
-    "scriptEvalMs": 3.1,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 15067,
+    "rawBytes": 373835,
+    "gzipBytes": 87717,
+    "brotliBytes": 70221,
+    "buildTimeMs": 108.29020800000035,
+    "firstRenderMs": 21.3,
+    "updateMs": 0.1,
+    "scriptEvalMs": 7.1,
+    "registrationMs": 2.7,
+    "heapUsedBytes": 16192,
     "scenarioSpecific": {
       "importedCustomElementsCount": 20,
       "referencedCustomElementsCount": 3,
@@ -67,11 +67,11 @@
     }
   },
   "runtime": {
-    "firstRenderMs": 7.5,
-    "updateMs": 0.07,
-    "scriptEvalMs": 3.1,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 15067
+    "firstRenderMs": 21.3,
+    "updateMs": 0.1,
+    "scriptEvalMs": 7.1,
+    "registrationMs": 2.7,
+    "heapUsedBytes": 16192
   },
   "domSnapshot": {
     "mount": {

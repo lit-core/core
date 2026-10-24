@@ -75,12 +75,18 @@ assert.strictEqual(kebabMinifierPlugins.length, 1);
 assert.strictEqual(kebabMinifierPlugins[0].name, 'html-minifier');
 
 // Test lit with all active
+// Test lit with all active
 const allPlugins = lit({ propsLower: true, htmlMinifier: true });
 assert.strictEqual(allPlugins.length, 3);
 assert.strictEqual(allPlugins[0].name, 'css-fuse');
 assert.strictEqual(allPlugins[1].name, 'props-lower');
 assert.strictEqual(allPlugins[2].name, 'html-minifier');
 
+// Test Stage 3 ordering: dom-paths before dirty-mask
+const stage3Plugins = lit({ cssFuse: false, dirtyMask: true, domPaths: true });
+assert.strictEqual(stage3Plugins.length, 2);
+assert.strictEqual(stage3Plugins[0].name, 'dom-paths');
+assert.strictEqual(stage3Plugins[1].name, 'dirty-mask');
 // Test lit({ dirtyMask: true }): includes dirty-mask
 const dirtyMaskPlugins = lit({ cssFuse: false, dirtyMask: true });
 assert.strictEqual(dirtyMaskPlugins.length, 1);
@@ -101,6 +107,24 @@ const kebabDomPathsPlugins = lit({ cssFuse: false, 'dom-paths': true });
 assert.strictEqual(kebabDomPathsPlugins.length, 1);
 assert.strictEqual(kebabDomPathsPlugins[0].name, 'dom-paths');
 
+// Test full pipeline registration ordering
+const fullPipelinePlugins = lit({
+  propsLower: true,
+  elemProxy: true,
+  directives: true,
+  cssFuse: true,
+  domPaths: true,
+  dirtyMask: true,
+  htmlMinifier: true,
+});
+const pluginNames = fullPipelinePlugins.map((p) => p.name);
+assert(pluginNames.indexOf('css-fuse') < pluginNames.indexOf('props-lower'), 'css-fuse must precede props-lower');
+assert(pluginNames.indexOf('props-lower') < pluginNames.indexOf('elem-proxy'), 'props-lower must precede elem-proxy');
+assert(pluginNames.indexOf('elem-proxy') < pluginNames.indexOf('directives'), 'elem-proxy must precede directives');
+assert(pluginNames.indexOf('directives') < pluginNames.indexOf('dom-paths'), 'directives must precede dom-paths');
+assert(pluginNames.indexOf('dom-paths') < pluginNames.indexOf('dirty-mask'), 'dom-paths must precede dirty-mask');
+assert(pluginNames.indexOf('dirty-mask') < pluginNames.indexOf('html-minifier'), 'dirty-mask must precede html-minifier');
+
 // Test standalone domPaths transform hook
 const domPathsInstance = domPaths();
 assert.strictEqual(domPathsInstance.name, 'dom-paths');
@@ -110,16 +134,30 @@ assert.strictEqual(typeof domPathsInstance.transform, 'function');
 const sampleDomPathsTemplate = `
   import { LitElement, html } from 'lit';
   export class TestComp extends LitElement {
+    static properties = { count: { type: Number } };
     render() {
-      return html\`<div><p>Count: \${this.count}</p><button @click=\${this.inc}>+</button></div>\`;
+      return html\`<div><p>\${this.count}</p></div>\`;
     }
   }
 `;
 const transformedDomPaths = domPathsInstance.transform.call({}, sampleDomPathsTemplate, 'test-comp.ts');
 assert(transformedDomPaths, 'domPaths transform should return result');
 assert(transformedDomPaths.code.includes('static __litPartPaths = ['), 'static __litPartPaths emitted on class');
-assert(/\[\s*0,\s*0,\s*1\s*\]/.test(transformedDomPaths.code), 'path to count child part computed');
-assert(transformedDomPaths.code.includes('[0, 1]') || /\[\s*0,\s*1\s*\]/.test(transformedDomPaths.code), 'path to button attribute computed');
+assert(/\[\s*0,\s*0,\s*0\s*\]/.test(transformedDomPaths.code), 'path to count child part computed');
+assert(!transformedDomPaths.code.includes('this.__litDomNodes'), 'instance DOM nodes array not cached on this');
+assert(!transformedDomPaths.code.includes('this.updated?.(changedProperties)'), 'lifecycle updated hook not duplicated in update method');
+
+// Verify dead code omission when fast update method cannot be built
+const unacceleratedTemplate = `
+  import { LitElement, html } from 'lit';
+  export class BailoutComp extends LitElement {
+    render() {
+      return html\`<div><p>Count: \${this.count}</p><button @click=\${this.inc}>+</button></div>\`;
+    }
+  }
+`;
+const bailoutRes = domPathsInstance.transform.call({}, unacceleratedTemplate, 'bailout.ts');
+assert.strictEqual(bailoutRes, null, 'domPaths should return null when fast update cannot be built');
 
 // Test standalone dirtyMask transform hook
 const dirtyMaskInstance = dirtyMask();
@@ -141,6 +179,110 @@ const transformedDirty = dirtyMaskInstance.transform.call({}, sampleDirtyTemplat
 assert(transformedDirty, 'dirtyMask transform should return result');
 assert(transformedDirty.code.includes('this.__litDirtyMask & 1'), 'dirty mask short-circuit generated');
 assert(transformedDirty.code.includes('noChange'), 'noChange imported and used');
+
+// Test domPaths and dirtyMask composition without starvation
+{
+  const pDom = domPaths();
+  const pDirty = dirtyMask();
+
+  const componentSource = `
+    import { LitElement, html } from 'lit';
+    export class CounterComp extends LitElement {
+      static properties = { count: { type: Number } };
+      render() {
+        return html\`<div><p>\${this.count}</p></div>\`;
+      }
+    }
+  `;
+
+  // Pipeline order: domPaths executes before dirtyMask
+  const domResult = pDom.transform.call({}, componentSource, '/src/counter-comp.ts');
+  assert(domResult, 'domPaths must transform qualifying component');
+  assert(domResult.code.includes('static __litPartPaths = ['), 'domPaths must emit static __litPartPaths');
+
+  const composedResult = pDirty.transform.call({}, domResult.code, '/src/counter-comp.ts');
+  assert(composedResult, 'dirtyMask must transform domPaths output');
+  assert(composedResult.code.includes('static __litPartPaths = ['), 'composed output must retain static __litPartPaths');
+  assert(composedResult.code.includes('this.__litDirtyMask & 1'), 'composed output must contain __litDirtyMask check');
+  assert(composedResult.code.includes('noChange'), 'composed output must import/use noChange');
+  assert(!composedResult.code.includes('this.updated?.(changedProperties)'), 'composed output must not duplicate updated callback');
+
+  // Verify reverse order (dirtyMask before domPaths) starves domPaths
+  const dirtyFirst = pDirty.transform.call({}, componentSource, '/src/counter-comp.ts');
+  assert(dirtyFirst, 'dirtyMask transforms original component');
+  const domAfterDirty = pDom.transform.call({}, dirtyFirst.code, '/src/counter-comp.ts');
+  assert.strictEqual(domAfterDirty, null, 'domPaths must return null when dirtyMask update() already exists');
+}
+
+// Test cssFuse and propsLower composition without decorator lowering erasure
+{
+  const pProps = propsLower();
+
+  const fusedCode = `
+    import { LitElement, css } from 'lit';
+    import { customElement, property } from 'lit/decorators.js';
+    import { _fused_sheet1 } from 'virtual:css-fuse/_fused_sheet1.js';
+
+    @customElement('fused-btn')
+    export class FusedBtn extends LitElement {
+      static styles = [_fused_sheet1, css\`
+        .btn { color: red; }
+      \`];
+      @property({ type: String }) label = 'Submit';
+    }
+  `;
+
+  // In Vite pipeline, propsLower processes code output by cssFuse
+  const loweredResult = pProps.transform.call({}, fusedCode, '/src/fused-btn.ts');
+  assert(loweredResult, 'propsLower must transform fused code');
+  assert(!loweredResult.code.includes('@customElement'), 'decorators must be stripped from fused component');
+  assert(!loweredResult.code.includes('@property'), '@property decorator must be lowered');
+  assert(loweredResult.code.includes('static properties = {'), 'static properties must be emitted');
+  assert(loweredResult.code.includes('customElements.define("fused-btn", FusedBtn)'), 'customElements.define must be emitted');
+  assert(loweredResult.code.includes('_fused_sheet1'), 'shared constructable sheet import must be preserved');
+  assert(loweredResult.code.includes('static styles = [_fused_sheet1'), 'fused static styles array must remain intact');
+}
+
+// Test full multi-stage pipeline chaining (cssFuse -> propsLower -> domPaths -> dirtyMask)
+{
+  const pProps = propsLower();
+  const pDom = domPaths();
+  const pDirty = dirtyMask();
+
+  const fusedComponentSource = `
+    import { LitElement, html, css } from 'lit';
+    import { customElement, property } from 'lit/decorators.js';
+    import { _fused_sheet } from 'virtual:css-fuse/_fused_sheet.js';
+
+    @customElement('fused-card')
+    export class FusedCard extends LitElement {
+      static styles = [_fused_sheet, css\`.card { padding: 8px; }\`];
+      @property({ type: Number }) count = 0;
+      render() {
+        return html\`<div><p>\${this.count}</p></div>\`;
+      }
+    }
+  `;
+
+  // Step 1: propsLower lowers decorators into static properties
+  const stage1 = pProps.transform.call({}, fusedComponentSource, '/src/fused-card.ts');
+  assert(stage1, 'propsLower must succeed');
+  assert(!stage1.code.includes('@property'), 'decorators lowered');
+  assert(stage1.code.includes('static properties'), 'static properties emitted');
+
+  // Step 2: domPaths compiles template part indices
+  const stage2 = pDom.transform.call({}, stage1.code, '/src/fused-card.ts');
+  assert(stage2, 'domPaths must succeed on lowered component');
+  assert(stage2.code.includes('static __litPartPaths'), 'static __litPartPaths emitted');
+
+  // Step 3: dirtyMask injects bitmask into update() method
+  const stage3 = pDirty.transform.call({}, stage2.code, '/src/fused-card.ts');
+  assert(stage3, 'dirtyMask must succeed on domPaths output');
+  assert(stage3.code.includes('static __litPartPaths'), 'dom paths preserved');
+  assert(stage3.code.includes('this.__litDirtyMask & 1'), 'dirty mask short-circuit emitted');
+  assert(stage3.code.includes('customElements.define'), 'customElements.define preserved');
+  assert(stage3.code.includes('_fused_sheet'), 'fused sheet preserved');
+}
 
 // Test standalone htmlMinifier transform hook
 const htmlMinifierInstance = htmlMinifier();

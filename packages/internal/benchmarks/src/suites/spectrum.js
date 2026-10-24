@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { createComponentSuite } from './base.js';
 import { getCanonicalSuiteConfig } from './canonical-components.js';
@@ -17,10 +18,23 @@ export const spectrumSuite = createComponentSuite({
     const spectrumDir = path.dirname(specDir);
     const { entryContent, componentCount, components } = getCanonicalSuiteConfig('spectrum');
 
+    const resolvedPatterns = [path.join(spectrumDir, '**/*.js')];
+    try {
+      for (const entry of fs.readdirSync(spectrumDir)) {
+        const full = path.join(spectrumDir, entry);
+        try {
+          const real = fs.realpathSync(full);
+          if (fs.statSync(real).isDirectory()) {
+            resolvedPatterns.push(path.join(real, '**/*.js'));
+          }
+        } catch {}
+      }
+    } catch {}
+
     return {
       entryContent,
       componentCount,
-      includePattern: [path.join(spectrumDir, '**/*.js'), '**/@spectrum-web-components*/**/*.js'],
+      includePattern: resolvedPatterns,
       metadata: { specDir, spectrumDir, components },
     };
   },

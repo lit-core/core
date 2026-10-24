@@ -98,7 +98,8 @@ export class LitWebpackPlugin {
     const logger = compiler.getInfrastructureLogger(this.name);
     const options = this.options;
     const cssFuseOpt = options.cssFuse !== false ? (typeof options.cssFuse === 'object' ? options.cssFuse : {}) : null;
-    const htmlFuseOpt = options.htmlFuse ? (typeof options.htmlFuse === 'object' ? options.htmlFuse : {}) : null;
+    const rawHtmlFuse = options.htmlFuse ?? options['html-fuse'];
+    const htmlFuseOpt = rawHtmlFuse ? (typeof rawHtmlFuse === 'object' ? rawHtmlFuse : {}) : null;
 
     // Detect whether current Webpack compiler target requires SSR
     const isTargetServer = isSsrTarget(compiler.options.target);

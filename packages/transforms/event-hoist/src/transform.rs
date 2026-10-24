@@ -13,7 +13,8 @@ pub use crate::analyzer::{SAFE_BUBBLING_EVENTS, collect_classes_mut, match_event
 pub use crate::builder::{
     build_add_listener_statement, build_call_init_event_hoist, build_connected_callback_method,
     build_first_updated_method, build_init_lit_event_hoist_method, build_lh_action_method,
-    build_lh_actions_property, build_lh_dispatch_method, build_lh_initialized_property,
+    build_lh_actions_property, build_lh_dispatch_delegating_method,
+    build_lh_dispatch_helper_function, build_lh_dispatch_method, build_lh_initialized_property,
     build_reset_lh_actions, build_will_update_method,
 };
 pub use crate::hoister::{

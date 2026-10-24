@@ -6,7 +6,7 @@
     "name": "Carbon Web Components (@carbon/web-components)",
     "packageName": "@carbon/web-components",
     "version": "2.66.0",
-    "componentCount": 20,
+    "componentCount": 3,
     "components": [
       {
         "concept": "button",
@@ -15,118 +15,16 @@
         "importStatement": "import '@carbon/web-components/es/components/button/index.js';"
       },
       {
-        "concept": "checkbox",
-        "tag": "cds-checkbox",
-        "path": "es/components/checkbox/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/checkbox/index.js';"
-      },
-      {
-        "concept": "radio",
-        "tag": "cds-radio-button",
-        "path": "es/components/radio-button/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/radio-button/index.js';"
-      },
-      {
-        "concept": "switch",
-        "tag": "cds-toggle",
-        "path": "es/components/toggle/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/toggle/index.js';"
-      },
-      {
-        "concept": "text-input",
-        "tag": "cds-text-input",
-        "path": "es/components/text-input/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/text-input/index.js';"
-      },
-      {
-        "concept": "select",
-        "tag": "cds-select",
-        "path": "es/components/select/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/select/index.js';"
-      },
-      {
-        "concept": "dialog",
-        "tag": "cds-modal",
-        "path": "es/components/modal/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/modal/index.js';"
-      },
-      {
         "concept": "badge",
         "tag": "cds-tag",
         "path": "es/components/tag/index.js",
         "importStatement": "import '@carbon/web-components/es/components/tag/index.js';"
       },
       {
-        "concept": "tabs",
-        "tag": "cds-tabs",
-        "path": "es/components/tabs/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/tabs/index.js';"
-      },
-      {
-        "concept": "progress-bar",
-        "tag": "cds-progress-bar",
-        "path": "es/components/progress-bar/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/progress-bar/index.js';"
-      },
-      {
-        "concept": "spinner",
-        "tag": "cds-loading",
-        "path": "es/components/loading/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/loading/index.js';"
-      },
-      {
-        "concept": "slider",
-        "tag": "cds-slider",
-        "path": "es/components/slider/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/slider/index.js';"
-      },
-      {
-        "concept": "menu",
-        "tag": "cds-overflow-menu",
-        "path": "es/components/overflow-menu/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/overflow-menu/index.js';"
-      },
-      {
-        "concept": "divider",
-        "tag": "cds-skeleton-text",
-        "path": "es/components/skeleton-text/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/skeleton-text/index.js';"
-      },
-      {
-        "concept": "icon",
-        "tag": "cds-icon",
-        "path": "es/components/icon/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/icon/index.js';"
-      },
-      {
-        "concept": "icon-button",
-        "tag": "cds-icon-button",
-        "path": "es/components/icon-button/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/icon-button/index.js';"
-      },
-      {
         "concept": "card",
         "tag": "cds-tile",
         "path": "es/components/tile/index.js",
         "importStatement": "import '@carbon/web-components/es/components/tile/index.js';"
-      },
-      {
-        "concept": "elevation",
-        "tag": "cds-popover",
-        "path": "es/components/popover/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/popover/index.js';"
-      },
-      {
-        "concept": "list",
-        "tag": "cds-structured-list",
-        "path": "es/components/structured-list/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/structured-list/index.js';"
-      },
-      {
-        "concept": "chips",
-        "tag": "cds-content-switcher",
-        "path": "es/components/content-switcher/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/content-switcher/index.js';"
       }
     ]
   },
@@ -137,18 +35,18 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "bundle",
-    "name": "Multi-component bundle",
-    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
-    "componentCount": 20
+    "id": "selective-app",
+    "name": "Selective application",
+    "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination",
+    "componentCount": 3
   },
-  "timestamp": "2026-10-24T09:47:50.578Z",
+  "timestamp": "2026-10-24T12:50:41.778Z",
   "environment": {
     "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "6c3875e",
+    "gitCommit": "dbf7ecf",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
@@ -163,10 +61,10 @@
     }
   },
   "metrics": {
-    "rawBytes": 1418863,
-    "gzipBytes": 176993,
-    "brotliBytes": 91620,
-    "buildTimeMs": 71.06733299999905
+    "rawBytes": 311822,
+    "gzipBytes": 39965,
+    "brotliBytes": 28660,
+    "buildTimeMs": 76.16929199999868
   },
   "baseline": {
     "rawBytes": 1502756,
@@ -177,44 +75,48 @@
     "updateMs": 0.32,
     "scriptEvalMs": 21.3,
     "registrationMs": 0.9,
-    "heapUsedBytes": 39788
+    "heapUsedBytes": 39788,
+    "speedupPercent": 0,
+    "updateSpeedupPercent": 0,
+    "evalSpeedupPercent": 0,
+    "registrationSpeedupPercent": 0,
+    "memorySavingsPercent": 0
   },
   "deltas": {
-    "rawBytes": -83893,
-    "rawPercent": -5.58,
-    "gzipBytes": -17201,
-    "gzipPercent": -8.86,
-    "brotliBytes": -10482,
-    "brotliPercent": -10.27,
-    "buildTimeMs": -61.6,
-    "firstRenderMs": -2.4,
-    "speedupPercent": 4.41,
-    "updateMs": -0.03,
-    "updateSpeedupPercent": 9.38,
-    "evalSpeedupPercent": 21.6,
-    "registrationSpeedupPercent": 44.44,
-    "memorySavingsPercent": 0.19
+    "rawBytes": -1190934,
+    "rawPercent": -79.25,
+    "gzipBytes": -154229,
+    "gzipPercent": -79.42,
+    "brotliBytes": -73442,
+    "brotliPercent": -71.93,
+    "buildTimeMs": 18.9,
+    "firstRenderMs": 4.7,
+    "speedupPercent": -40.87,
+    "updateMs": -0.06,
+    "updateSpeedupPercent": 54.55,
+    "evalSpeedupPercent": 69.44,
+    "registrationSpeedupPercent": 80,
+    "memorySavingsPercent": -16.43
   },
   "runtime": {
-    "firstRenderMs": 52,
-    "updateMs": 0.29,
-    "scriptEvalMs": 16.7,
-    "registrationMs": 0.5,
-    "heapUsedBytes": 39712,
-    "speedupPercent": 4.41,
-    "updateSpeedupPercent": 9.38,
-    "evalSpeedupPercent": 21.6,
-    "registrationSpeedupPercent": 44.44,
-    "memorySavingsPercent": 0.19
+    "firstRenderMs": 76.63,
+    "updateMs": 0.15,
+    "scriptEvalMs": 6.51,
+    "registrationMs": 0.18,
+    "heapUsedBytes": 46325,
+    "speedupPercent": -40.87,
+    "updateSpeedupPercent": 54.55,
+    "evalSpeedupPercent": 69.44,
+    "registrationSpeedupPercent": 80,
+    "memorySavingsPercent": -16.43
   },
   "equivalence": {
-    "domStructureMatch": false,
-    "elementsCount": 74,
-    "verified": false,
-    "divergenceReason": "Mount phase divergence: Shadow root presence mismatch at mount-root > [0] > [1] > [0] > [6] > [0] > [0] (<cds-modal-body>): baseline has open shadow root, variant has none",
+    "domStructureMatch": true,
+    "elementsCount": 9,
+    "verified": true,
     "phasesMatched": {
-      "mount": false,
-      "update": false
+      "mount": true,
+      "update": true
     }
   }
 }

@@ -24,9 +24,11 @@ import litDefault, {
   litWebpackLoader,
   PropsLowerWebpackPlugin,
   propsLower,
+  registerPluginState,
   SsrWebpackPlugin,
   ssr,
   TransformError,
+  unregisterPluginState,
 } from '../dist/index.js';
 import { transformCssMinifier, transformElemProxy, transformHtmlMinifier, transformPropsLower } from '../dist/transforms.js';
 import { extractSheetId, formatVirtualId, isVirtualFusedId } from '../dist/utils.js';
@@ -97,6 +99,12 @@ assert.strictEqual(cssMinPlugin.options.cssMinifier, true);
 
 const kebabCssMinPlugin = lit({ cssFuse: false, 'css-minifier': true });
 assert.strictEqual(kebabCssMinPlugin.options['css-minifier'], true);
+
+const htmlFusePlugin = lit({ cssFuse: false, htmlFuse: true });
+assert.strictEqual(htmlFusePlugin.options.htmlFuse, true);
+
+const kebabHtmlFusePlugin = lit({ cssFuse: false, 'html-fuse': true });
+assert.strictEqual(kebabHtmlFusePlugin.options['html-fuse'], true);
 
 // 6. Test granular plugin factories
 const standaloneFuse = cssFuse({ threshold: 3 });
@@ -258,6 +266,205 @@ litWebpackLoader.call(mockLoaderContext, compSource);
 assert(loaderResult, 'Loader must execute callback');
 assert(!loaderResult.code.includes('@customElement'), 'Loader should lower decorators');
 assert(!loaderResult.code.includes('<!-- comment -->'), 'Loader should strip comments');
+
+// Test Stage 3 ordering in loader: domPaths executes before dirtyMask without starvation
+let stage3LoaderResult = null;
+const stage3LoaderContext = {
+  resourcePath: '/src/stage3-comp.ts',
+  getOptions() {
+    return {
+      options: {
+        cssFuse: false,
+        domPaths: true,
+        dirtyMask: true,
+      },
+    };
+  },
+  async() {
+    return (err, code, map) => {
+      if (err) throw err;
+      stage3LoaderResult = { code, map };
+    };
+  },
+};
+
+const stage3Source = `
+  import { LitElement, html } from 'lit';
+  export class Stage3Comp extends LitElement {
+    static properties = { count: { type: Number } };
+    render() {
+      return html\`<div><p>\${this.count}</p></div>\`;
+    }
+  }
+`;
+
+litWebpackLoader.call(stage3LoaderContext, stage3Source);
+assert(stage3LoaderResult, 'Loader must execute callback for Stage 3');
+assert(stage3LoaderResult.code.includes('static __litPartPaths'), 'domPaths must emit static __litPartPaths');
+assert(stage3LoaderResult.code.includes('__litDirtyMask'), 'dirtyMask must compose onto update method');
+assert(!stage3LoaderResult.code.includes('this.updated?.(changedProperties)'), 'updated callback not duplicated');
+
+// Test loader applies transformedFiles when cssFuse: false, htmlFuse: true
+{
+  const pluginId = 'test-html-fuse-loader-state';
+  const targetPath = '/src/fused-template-comp.ts';
+  const transformedTemplateSource = `
+    import { LitElement, html } from 'lit';
+    import { _fused_html_1 } from 'virtual:html-fuse/_fused_html_1.js';
+    export class FusedTemplateComp extends LitElement {
+      render() {
+        return _fused_html_1;
+      }
+    }
+  `;
+
+  registerPluginState(pluginId, {
+    transformedFiles: new Map([[targetPath, transformedTemplateSource]]),
+    virtualSheets: new Map(),
+    virtualTemplates: new Map(),
+    options: {
+      cssFuse: false,
+      htmlFuse: true,
+    },
+  });
+
+  let loaderOut = null;
+  const mockContext = {
+    resourcePath: targetPath,
+    getOptions() {
+      return { pluginId };
+    },
+    async() {
+      return (err, code) => {
+        if (err) throw err;
+        loaderOut = code;
+      };
+    },
+  };
+
+  litWebpackLoader.call(mockContext, 'export class FusedTemplateComp extends LitElement {}');
+  unregisterPluginState(pluginId);
+
+  assert(loaderOut, 'Loader must return result');
+  assert(loaderOut.includes('_fused_html_1'), 'Loader must apply transformedFiles when cssFuse: false, htmlFuse: true');
+  assert(loaderOut.includes('virtual:html-fuse/'), 'Loader output must include virtual html template import');
+
+  // Verify kebab-case alias 'html-fuse': true also applies transformedFiles
+  const kebabPluginId = 'test-kebab-html-fuse-loader-state';
+  registerPluginState(kebabPluginId, {
+    transformedFiles: new Map([[targetPath, transformedTemplateSource]]),
+    virtualSheets: new Map(),
+    virtualTemplates: new Map(),
+    options: {
+      cssFuse: false,
+      'html-fuse': true,
+    },
+  });
+
+  let kebabLoaderOut = null;
+  const mockKebabContext = {
+    resourcePath: targetPath,
+    getOptions() {
+      return { pluginId: kebabPluginId };
+    },
+    async() {
+      return (err, code) => {
+        if (err) throw err;
+        kebabLoaderOut = code;
+      };
+    },
+  };
+
+  litWebpackLoader.call(mockKebabContext, 'export class FusedTemplateComp extends LitElement {}');
+  unregisterPluginState(kebabPluginId);
+
+  assert(kebabLoaderOut, 'Loader must return result for kebab-case html-fuse');
+  assert(kebabLoaderOut.includes('_fused_html_1'), 'Loader must apply transformedFiles when "html-fuse": true');
+
+  // Verify bailout: when both cssFuse and htmlFuse are false, raw source is returned unmodified
+  const disabledPluginId = 'test-disabled-fuse-loader-state';
+  registerPluginState(disabledPluginId, {
+    transformedFiles: new Map([[targetPath, transformedTemplateSource]]),
+    virtualSheets: new Map(),
+    virtualTemplates: new Map(),
+    options: {
+      cssFuse: false,
+      htmlFuse: false,
+    },
+  });
+
+  let disabledLoaderOut = null;
+  const mockDisabledContext = {
+    resourcePath: targetPath,
+    getOptions() {
+      return { pluginId: disabledPluginId };
+    },
+    async() {
+      return (err, code) => {
+        if (err) throw err;
+        disabledLoaderOut = code;
+      };
+    },
+  };
+
+  const rawSource = 'export class FusedTemplateComp extends LitElement { /* raw */ }';
+  litWebpackLoader.call(mockDisabledContext, rawSource);
+  unregisterPluginState(disabledPluginId);
+
+  assert.strictEqual(disabledLoaderOut, rawSource, 'Loader must not apply transformedFiles when both cssFuse and htmlFuse are false');
+}
+
+// Test Webpack loader composition: transformedFiles + propsLower
+{
+  const compPluginId = 'test-fused-props-state';
+  const filePath = '/src/fused-btn-comp.ts';
+  const fusedWithDecorators = `
+    import { LitElement, css } from 'lit';
+    import { customElement, property } from 'lit/decorators.js';
+    import { _fused_sheet1 } from 'virtual:css-fuse/_fused_sheet1.js';
+
+    @customElement('fused-wp-btn')
+    export class FusedWpBtn extends LitElement {
+      static styles = [_fused_sheet1, css\`
+        .btn { color: green; }
+      \`];
+      @property() label = 'Save';
+    }
+  `;
+
+  registerPluginState(compPluginId, {
+    transformedFiles: new Map([[filePath, fusedWithDecorators]]),
+    virtualSheets: new Map(),
+    options: {
+      cssFuse: true,
+      propsLower: true,
+    },
+  });
+
+  let compResult = null;
+  const mockCompContext = {
+    resourcePath: filePath,
+    getOptions() {
+      return { pluginId: compPluginId };
+    },
+    async() {
+      return (err, code) => {
+        if (err) throw err;
+        compResult = code;
+      };
+    },
+  };
+
+  litWebpackLoader.call(mockCompContext, 'export class FusedWpBtn {}');
+  unregisterPluginState(compPluginId);
+
+  assert(compResult, 'Loader must return result');
+  assert(!compResult.includes('@customElement'), 'Decorators must be stripped by propsLower in Webpack loader');
+  assert(!compResult.includes('@property'), '@property decorator must be stripped');
+  assert(compResult.includes('static properties'), 'static properties must be emitted');
+  assert(compResult.includes('customElements.define("fused-wp-btn", FusedWpBtn)'), 'customElements.define emitted');
+  assert(compResult.includes('_fused_sheet1'), 'Shared constructable sheet import must be preserved');
+}
 
 // 9. Test Webpack virtual scheme resolution and redirection
 let virtualResourceHook = null;

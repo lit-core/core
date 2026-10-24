@@ -73,6 +73,7 @@ export class CompB extends LitElement {
     threshold: 2,
     write: false,
     virtualImports: true,
+    minSavings: 0,
   });
 
   // Verify extraction and deduplication metrics
@@ -99,6 +100,7 @@ export class CompB extends LitElement {
   const analyzeResult = analyze({
     files: [compAPath, compBPath],
     threshold: 2,
+    minSavings: 0,
   });
 
   assert.ok(analyzeResult.stats.rulesDeduped >= 1, 'analyze mode must report deduplicated rules');

@@ -124,6 +124,7 @@ async function runTests() {
       outputDir: '.fused',
       write: false,
       virtualImports: true,
+      minSavings: 0,
     });
 
     assert(result.fusedSheets.length >= 2, 'Should create shared sheets for [A, B] and [C, D]');
@@ -175,6 +176,7 @@ async function runTests() {
             exclude: [`${fixtureDir}/entry-*.ts`],
             threshold: 2,
             applyInDev: true,
+            minSavings: 0,
           },
         }),
       ],

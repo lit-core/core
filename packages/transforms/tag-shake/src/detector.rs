@@ -100,12 +100,12 @@ impl RegistrationDetector {
         stmt_index: usize,
         resolver: &SymbolResolver,
     ) -> Option<DetectedRegistration> {
-        let call = match expr {
+        let mut curr = expr.without_parentheses();
+        while let Expression::AssignmentExpression(assign) = curr {
+            curr = assign.right.without_parentheses();
+        }
+        let call = match curr {
             Expression::CallExpression(call) => call,
-            Expression::AssignmentExpression(assign) => match &assign.right {
-                Expression::CallExpression(call) => call,
-                _ => return None,
-            },
             _ => return None,
         };
 
@@ -168,11 +168,12 @@ impl RegistrationDetector {
 
         // 3. Check transpiled decorators: __decorate([customElement('tag')], Component)
         if resolver.is_decorator_helper_callee(&call.callee)
-            && call.arguments.len() >= 2
+            && call.arguments.len() == 2
             && let (Some(Expression::ArrayExpression(arr)), Some(second_arg)) = (
                 call.arguments.first().and_then(|a| a.as_expression()),
                 call.arguments.get(1).and_then(|a| a.as_expression()),
             )
+            && let Expression::Identifier(comp_ident) = second_arg.without_parentheses()
         {
             for elem in &arr.elements {
                 if let Some(dec_expr) = elem.as_expression()
@@ -198,12 +199,8 @@ impl RegistrationDetector {
                     };
 
                     if let Some((tag, is_dynamic)) = matched_tag {
-                        let (comp_name, comp_span) = match second_arg.without_parentheses() {
-                            Expression::Identifier(ident) => {
-                                (ident.name.as_str().to_string(), ident.span)
-                            }
-                            _ => ("".to_string(), Span::default()),
-                        };
+                        let comp_name = comp_ident.name.as_str().to_string();
+                        let comp_span = comp_ident.span;
 
                         let dec_name = match dec_call.callee.without_parentheses() {
                             Expression::Identifier(id) => id.name.as_str().to_string(),
