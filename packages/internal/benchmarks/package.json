@@ -18,7 +18,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=26.0.0"
   },
   "scripts": {
     "build": "vite build viewer --base=./",
@@ -82,13 +82,13 @@
     "@lit-core/tag-shake": "workspace:*",
     "@lit-core/test-kit": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
-    "lucide-react": "^1.59.0"
+    "lucide-react": "^1.61.0"
   },
   "devDependencies": {
     "@awesome.me/webawesome": "^3.14.0",
-    "@carbon/web-components": "^2.65.0",
+    "@carbon/web-components": "^2.66.0",
     "@material/web": "^2.5.0",
-    "@momentum-design/components": "^0.141.5",
+    "@momentum-design/components": "^0.142.1",
     "@spectrum-web-components/bundle": "^1.12.5",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.5",
@@ -96,12 +96,12 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "lit": "^3.3.3",
-    "playwright": "~1.63.0",
+    "playwright": "~1.64.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.3.4",
+    "vite": "^8.3.5",
     "vitest": "^5.0.5"
   }
 }

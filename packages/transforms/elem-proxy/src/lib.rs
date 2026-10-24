@@ -2,7 +2,7 @@ pub mod builder;
 pub mod extractor;
 pub mod transform;
 
-use crate::transform::{transform_code, ElemProxyOptions, ElemProxyResult};
+use crate::transform::{ElemProxyOptions, ElemProxyResult, transform_code};
 use napi_derive::napi;
 
 #[napi]

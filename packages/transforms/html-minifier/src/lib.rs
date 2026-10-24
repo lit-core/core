@@ -1,7 +1,7 @@
 pub mod collapser;
 pub mod visitor;
 
-use crate::visitor::{collapse_code, CollapseOptions, CollapseResult};
+use crate::visitor::{CollapseOptions, CollapseResult, collapse_code};
 use napi_derive::napi;
 
 #[napi]

@@ -7,7 +7,7 @@ pub mod decorators;
 pub mod static_properties;
 pub mod transform;
 
-use crate::transform::{transform_code, TransformOptions, TransformResult};
+use crate::transform::{TransformOptions, TransformResult, transform_code};
 use napi_derive::napi;
 
 #[napi]

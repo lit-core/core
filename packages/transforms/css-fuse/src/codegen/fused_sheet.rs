@@ -3,7 +3,7 @@ use oxc_allocator::{Allocator, ArenaVec, Box as ArenaBox};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 use std::collections::BTreeMap;
 
 pub fn generate_fused_sheet(cluster: &ClusterGroup) -> FusedSheetInfo {

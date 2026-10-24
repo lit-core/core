@@ -5,6 +5,9 @@
   "description": "Comprehensive multi-framework Playwright test suite for all @lit-core compiler and bundler features",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=26.0.0"
+  },
   "scripts": {
     "test": "vitest run",
     "test:carbon": "vitest run carbon",
@@ -24,7 +27,7 @@
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.14.0",
-    "@carbon/web-components": "^2.65.0",
+    "@carbon/web-components": "^2.66.0",
     "@lit-core/benchmarks": "workspace:*",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
@@ -48,10 +51,10 @@
     "@lit-core/vite-plugin": "workspace:*",
     "@lit-core/webpack-plugin": "workspace:*",
     "@material/web": "^2.5.0",
-    "@momentum-design/components": "^0.141.5",
+    "@momentum-design/components": "^0.142.1",
     "@spectrum-web-components/bundle": "^1.12.5",
     "lit": "^3.3.3",
-    "playwright": "~1.63.0",
+    "playwright": "~1.64.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
@@ -60,7 +63,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.4",
+    "vite": "^8.3.5",
     "vitest": "^5.0.5"
   }
 }

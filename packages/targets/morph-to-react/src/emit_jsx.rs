@@ -231,11 +231,11 @@ fn scan_ids_from_node(
                     if let AttributeValue::Static(s) = &attr.value {
                         declared.insert(s.clone());
                     }
-                } else if is_idref_attribute(&attr.name) {
-                    if let AttributeValue::Static(s) = &attr.value {
-                        for token in s.split_whitespace() {
-                            referenced.insert(token.to_string());
-                        }
+                } else if is_idref_attribute(&attr.name)
+                    && let AttributeValue::Static(s) = &attr.value
+                {
+                    for token in s.split_whitespace() {
+                        referenced.insert(token.to_string());
                     }
                 }
             }
@@ -260,10 +260,10 @@ pub fn collect_constant_strings<'a>(
     for stmt in statements {
         if let Statement::VariableDeclaration(decl) = stmt {
             for d in &decl.declarations {
-                if let BindingPattern::BindingIdentifier(id) = &d.id {
-                    if let Some(Expression::StringLiteral(s)) = &d.init {
-                        map.insert(id.name.to_string(), s.value.to_string());
-                    }
+                if let BindingPattern::BindingIdentifier(id) = &d.id
+                    && let Some(Expression::StringLiteral(s)) = &d.init
+                {
+                    map.insert(id.name.to_string(), s.value.to_string());
                 }
             }
         }
@@ -723,14 +723,12 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
 
         // Check for unsafeHTML / unsafeSVG on sole-child
         let mut sole_child_unsafe_html = None;
-        if el.children.len() == 1 {
-            if let TemplateNode::Expression(idx) = &el.children[0] {
-                if let Some(expr) = self.expressions.get(*idx) {
-                    if let Some(raw) = get_unsafe_html_arg(expr) {
-                        sole_child_unsafe_html = Some(raw);
-                    }
-                }
-            }
+        if el.children.len() == 1
+            && let TemplateNode::Expression(idx) = &el.children[0]
+            && let Some(expr) = self.expressions.get(*idx)
+            && let Some(raw) = get_unsafe_html_arg(expr)
+        {
+            sole_child_unsafe_html = Some(raw);
         }
 
         if let Some(raw_expr) = sole_child_unsafe_html {
@@ -1419,33 +1417,28 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
                 }
             }
             AttributePrefix::Plain => {
-                if let Some(PropertyType::Number) = res.property_types.get(&attr.name) {
-                    if let AttributeValue::Static(s) = &attr.value {
-                        if let Ok(num) = s.parse::<f64>() {
-                            let prop_id = self.allocator.alloc_str(&attr.name);
-                            let attr_name = JSXAttributeName::Identifier(JSXIdentifier::boxed(
-                                SPAN, prop_id, self.ast,
-                            ));
-                            let num_lit = Expression::new_numeric_literal(
-                                SPAN,
-                                num,
-                                None,
-                                oxc_syntax::number::NumberBase::Decimal,
-                                self.ast,
-                            );
-                            let container = JSXExpressionContainer::boxed(
-                                SPAN,
-                                JSXExpression::from(num_lit),
-                                self.ast,
-                            );
-                            return Some(JSXAttributeItem::Attribute(JSXAttribute::boxed(
-                                SPAN,
-                                attr_name,
-                                Some(JSXAttributeValue::ExpressionContainer(container)),
-                                self.ast,
-                            )));
-                        }
-                    }
+                if let Some(PropertyType::Number) = res.property_types.get(&attr.name)
+                    && let AttributeValue::Static(s) = &attr.value
+                    && let Ok(num) = s.parse::<f64>()
+                {
+                    let prop_id = self.allocator.alloc_str(&attr.name);
+                    let attr_name =
+                        JSXAttributeName::Identifier(JSXIdentifier::boxed(SPAN, prop_id, self.ast));
+                    let num_lit = Expression::new_numeric_literal(
+                        SPAN,
+                        num,
+                        None,
+                        oxc_syntax::number::NumberBase::Decimal,
+                        self.ast,
+                    );
+                    let container =
+                        JSXExpressionContainer::boxed(SPAN, JSXExpression::from(num_lit), self.ast);
+                    return Some(JSXAttributeItem::Attribute(JSXAttribute::boxed(
+                        SPAN,
+                        attr_name,
+                        Some(JSXAttributeValue::ExpressionContainer(container)),
+                        self.ast,
+                    )));
                 }
                 self.lower_attribute(attr, ElementNamespace::Html)
             }
@@ -1622,17 +1615,17 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
         }
 
         // 2. Style attribute lowering
-        if attr_name_str == "style" {
-            if let Some(style_obj) = self.lower_style_attribute(&attr.value) {
-                let container =
-                    JSXExpressionContainer::boxed(SPAN, JSXExpression::from(style_obj), self.ast);
-                return Some(JSXAttributeItem::Attribute(JSXAttribute::boxed(
-                    SPAN,
-                    attr_name,
-                    Some(JSXAttributeValue::ExpressionContainer(container)),
-                    self.ast,
-                )));
-            }
+        if attr_name_str == "style"
+            && let Some(style_obj) = self.lower_style_attribute(&attr.value)
+        {
+            let container =
+                JSXExpressionContainer::boxed(SPAN, JSXExpression::from(style_obj), self.ast);
+            return Some(JSXAttributeItem::Attribute(JSXAttribute::boxed(
+                SPAN,
+                attr_name,
+                Some(JSXAttributeValue::ExpressionContainer(container)),
+                self.ast,
+            )));
         }
 
         // 3. Regular attributes
@@ -1703,24 +1696,24 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
                     }
 
                     // Check live(v) on property binding: .value=${live(v)}
-                    if attr.prefix == AttributePrefix::Property {
-                        if let Some(live_arg) = is_live_directive_call(orig_expr) {
-                            return Some(self.lower_live_property_attribute(&attr.name, live_arg));
-                        }
+                    if attr.prefix == AttributePrefix::Property
+                        && let Some(live_arg) = is_live_directive_call(orig_expr)
+                    {
+                        return Some(self.lower_live_property_attribute(&attr.name, live_arg));
                     }
 
                     // Check classMap
-                    if attr_name_str == "className" || attr_name_str == "class" {
-                        if let Some(class_arg) = is_class_map_call(orig_expr) {
-                            return Some(self.lower_class_map_attribute(attr_name, class_arg));
-                        }
+                    if (attr_name_str == "className" || attr_name_str == "class")
+                        && let Some(class_arg) = is_class_map_call(orig_expr)
+                    {
+                        return Some(self.lower_class_map_attribute(attr_name, class_arg));
                     }
 
                     // Check styleMap
-                    if attr_name_str == "style" {
-                        if let Some(style_arg) = is_style_map_call(orig_expr) {
-                            return Some(self.lower_style_map_attribute(attr_name, style_arg));
-                        }
+                    if attr_name_str == "style"
+                        && let Some(style_arg) = is_style_map_call(orig_expr)
+                    {
+                        return Some(self.lower_style_map_attribute(attr_name, style_arg));
                     }
 
                     // Check ifDefined
@@ -1792,10 +1785,10 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
         match val {
             AttributeValue::Static(s) => Some(self.parse_style_string_to_object(s)),
             AttributeValue::Dynamic(expr_idx) => {
-                if let Some(orig_expr) = self.expressions.get(*expr_idx) {
-                    if let Some(style_arg) = is_style_map_call(orig_expr) {
-                        return Some(self.lower_style_map_expression(style_arg));
-                    }
+                if let Some(orig_expr) = self.expressions.get(*expr_idx)
+                    && let Some(style_arg) = is_style_map_call(orig_expr)
+                {
+                    return Some(self.lower_style_map_expression(style_arg));
                 }
                 Some(self.clone_expression(*expr_idx))
             }
@@ -1835,21 +1828,21 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
                                 } else {
                                     // Finished dynamic value
                                     let v = chunk.trim();
-                                    if !v.is_empty() {
-                                        if let Some(colon) = v.find(':') {
-                                            let p = v[..colon].trim();
-                                            let val_str = v[colon + 1..].trim();
-                                            if !p.is_empty() && !val_str.is_empty() {
-                                                props.push(self.create_style_object_property(
-                                                    p,
-                                                    Expression::new_string_literal(
-                                                        SPAN,
-                                                        self.allocator.alloc_str(val_str),
-                                                        None,
-                                                        self.ast,
-                                                    ),
-                                                ));
-                                            }
+                                    if !v.is_empty()
+                                        && let Some(colon) = v.find(':')
+                                    {
+                                        let p = v[..colon].trim();
+                                        let val_str = v[colon + 1..].trim();
+                                        if !p.is_empty() && !val_str.is_empty() {
+                                            props.push(self.create_style_object_property(
+                                                p,
+                                                Expression::new_string_literal(
+                                                    SPAN,
+                                                    self.allocator.alloc_str(val_str),
+                                                    None,
+                                                    self.ast,
+                                                ),
+                                            ));
                                         }
                                     }
                                     reading_val = false;
@@ -2107,25 +2100,25 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
         }
 
         // 4. Check for map directive: map(items, (item, index) => html`...`)
-        if let Some((items, fn_arg)) = is_map_directive_call(peeled_expr) {
-            if let Some(mapped) = self.lower_map_directive(items, fn_arg) {
-                return JSXChild::ExpressionContainer(JSXExpressionContainer::boxed(
-                    SPAN,
-                    JSXExpression::from(mapped),
-                    self.ast,
-                ));
-            }
+        if let Some((items, fn_arg)) = is_map_directive_call(peeled_expr)
+            && let Some(mapped) = self.lower_map_directive(items, fn_arg)
+        {
+            return JSXChild::ExpressionContainer(JSXExpressionContainer::boxed(
+                SPAN,
+                JSXExpression::from(mapped),
+                self.ast,
+            ));
         }
 
         // 5. Check for repeat directive: repeat(items, keyFn, tmplFn)
-        if let Some((items, key_fn, tmpl_fn)) = is_repeat_directive_call(peeled_expr) {
-            if let Some(repeated) = self.lower_repeat_directive(items, key_fn, tmpl_fn) {
-                return JSXChild::ExpressionContainer(JSXExpressionContainer::boxed(
-                    SPAN,
-                    JSXExpression::from(repeated),
-                    self.ast,
-                ));
-            }
+        if let Some((items, key_fn, tmpl_fn)) = is_repeat_directive_call(peeled_expr)
+            && let Some(repeated) = self.lower_repeat_directive(items, key_fn, tmpl_fn)
+        {
+            return JSXChild::ExpressionContainer(JSXExpressionContainer::boxed(
+                SPAN,
+                JSXExpression::from(repeated),
+                self.ast,
+            ));
         }
 
         // 6. Check for join directive: join(items, sep)
@@ -2321,16 +2314,15 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
                                 _ => true,
                             })
                             .count();
-                        if elem_count == 1 && non_ws_count == 1 {
-                            if let Some(pos) = frag
+                        if elem_count == 1
+                            && non_ws_count == 1
+                            && let Some(pos) = frag
                                 .children
                                 .iter()
                                 .position(|c| matches!(c, JSXChild::Element(_)))
-                            {
-                                if let JSXChild::Element(el) = frag.children.remove(pos) {
-                                    lowered = Expression::JSXElement(el);
-                                }
-                            }
+                            && let JSXChild::Element(el) = frag.children.remove(pos)
+                        {
+                            lowered = Expression::JSXElement(el);
                         }
                     }
                     if let Some(k) = key_for_branch {
@@ -2842,153 +2834,145 @@ impl<'a, 'b> JsxEmitter<'a, 'b> {
                 _ => false,
             };
 
-            if is_map && !call.arguments.is_empty() {
-                if let Argument::ArrowFunctionExpression(arrow) = &call.arguments[0] {
-                    // If arrow has 1 parameter, add index: (t, index) => ...
-                    let mut new_params = ArenaVec::new_in(self.ast);
-                    for p in &arrow.params.items {
-                        new_params.push(p.clone_in(self.allocator));
-                    }
-                    if new_params.len() == 1 {
-                        let index_binding =
-                            BindingPattern::new_binding_identifier(SPAN, "index", self.ast);
-                        let index_param = FormalParameter::new_plain(SPAN, index_binding, self.ast);
-                        new_params.push(index_param);
-                    }
-
-                    // Check return expression for tagged template or JSX
-                    let new_body = if let Some(concise_expr) = arrow.body.as_expression() {
-                        let mut lowered_body_expr = concise_expr.clone_in(self.allocator);
-                        if let Expression::TaggedTemplateExpression(tagged) = &lowered_body_expr {
-                            let quasis: Vec<&str> = tagged
-                                .quasi
-                                .quasis
-                                .iter()
-                                .map(|q| q.value.raw.as_str())
-                                .collect();
-                            let count = tagged.quasi.expressions.len();
-                            if let Ok(inner_ir) =
-                                lit_analysis::TemplateParser::parse_lit_template(&quasis, count)
-                            {
-                                let mut sub_emitter = JsxEmitter::new(
-                                    self.ast,
-                                    self.allocator,
-                                    &tagged.quasi.expressions,
-                                    self.options.clone(),
-                                    None,
-                                );
-                                let mut lowered_jsx = sub_emitter.lower_template(&inner_ir);
-                                inject_key_into_jsx(&mut lowered_jsx, "index", self.ast);
-                                lowered_body_expr = lowered_jsx;
-                            }
-                        } else if let Expression::JSXElement(jsx_el) = &mut lowered_body_expr {
-                            inject_key_into_jsx_elem(jsx_el, "index", self.ast);
-                        } else {
-                            rewrite_this_to_props(&mut lowered_body_expr, self.ast);
-                        }
-                        ArrowFunctionBody::from(lowered_body_expr)
-                    } else if let ArrowFunctionBody::FunctionBody(b) = &arrow.body {
-                        let mut new_stmts = ArenaVec::new_in(self.ast);
-                        for stmt in &b.statements {
-                            let mut new_stmt = stmt.clone_in(self.allocator);
-                            if let Statement::ReturnStatement(ret) = &mut new_stmt {
-                                if let Some(ret_arg) = &mut ret.argument {
-                                    if let Expression::TaggedTemplateExpression(tagged) = ret_arg {
-                                        let quasis: Vec<&str> = tagged
-                                            .quasi
-                                            .quasis
-                                            .iter()
-                                            .map(|q| q.value.raw.as_str())
-                                            .collect();
-                                        let count = tagged.quasi.expressions.len();
-                                        if let Ok(inner_ir) =
-                                            lit_analysis::TemplateParser::parse_lit_template(
-                                                &quasis, count,
-                                            )
-                                        {
-                                            let mut sub_emitter = JsxEmitter::new(
-                                                self.ast,
-                                                self.allocator,
-                                                &tagged.quasi.expressions,
-                                                self.options.clone(),
-                                                None,
-                                            );
-                                            let mut lowered_jsx =
-                                                sub_emitter.lower_template(&inner_ir);
-                                            inject_key_into_jsx(
-                                                &mut lowered_jsx,
-                                                "index",
-                                                self.ast,
-                                            );
-                                            *ret_arg = lowered_jsx;
-                                        }
-                                    } else if let Expression::JSXElement(jsx_el) = ret_arg {
-                                        inject_key_into_jsx_elem(jsx_el, "index", self.ast);
-                                    } else {
-                                        rewrite_this_to_props(ret_arg, self.ast);
-                                    }
-                                }
-                            } else {
-                                rewrite_statement_this_to_props(&mut new_stmt, self.ast);
-                            }
-                            new_stmts.push(new_stmt);
-                        }
-                        let body_box = FunctionBody::boxed(
-                            SPAN,
-                            ArenaVec::new_in(self.ast),
-                            new_stmts,
-                            self.ast,
-                        );
-                        ArrowFunctionBody::FunctionBody(body_box)
-                    } else {
-                        let mut body_clone = arrow.body.clone_in(self.allocator);
-                        if let Some(e) = body_clone.as_expression_mut() {
-                            rewrite_this_to_props(e, self.ast);
-                        }
-                        body_clone
-                    };
-
-                    let formal_params = FormalParameters::boxed(
-                        SPAN,
-                        FormalParameterKind::ArrowFormalParameters,
-                        new_params,
-                        None,
-                        self.ast,
-                    );
-
-                    let new_arrow = Expression::new_arrow_function_expression(
-                        arrow.span,
-                        arrow.r#async,
-                        None,
-                        formal_params,
-                        None,
-                        new_body,
-                        self.ast,
-                    );
-
-                    let mut new_args = ArenaVec::new_in(self.ast);
-                    new_args.push(Argument::from(new_arrow));
-                    for arg in call.arguments.iter().skip(1) {
-                        let mut cloned_arg = arg.clone_in(self.allocator);
-                        rewrite_argument_this_to_props(&mut cloned_arg, self.ast);
-                        new_args.push(cloned_arg);
-                    }
-
-                    // Callee rewrite: this.items.map -> props.items.map
-                    let mut new_callee = call.callee.clone_in(self.allocator);
-                    rewrite_this_to_props(&mut new_callee, self.ast);
-
-                    let new_call = Expression::new_call_expression(
-                        call.span,
-                        new_callee,
-                        call.type_arguments.clone_in(self.allocator),
-                        new_args,
-                        call.optional,
-                        self.ast,
-                    );
-
-                    return Some(new_call);
+            if is_map
+                && !call.arguments.is_empty()
+                && let Argument::ArrowFunctionExpression(arrow) = &call.arguments[0]
+            {
+                // If arrow has 1 parameter, add index: (t, index) => ...
+                let mut new_params = ArenaVec::new_in(self.ast);
+                for p in &arrow.params.items {
+                    new_params.push(p.clone_in(self.allocator));
                 }
+                if new_params.len() == 1 {
+                    let index_binding =
+                        BindingPattern::new_binding_identifier(SPAN, "index", self.ast);
+                    let index_param = FormalParameter::new_plain(SPAN, index_binding, self.ast);
+                    new_params.push(index_param);
+                }
+
+                // Check return expression for tagged template or JSX
+                let new_body = if let Some(concise_expr) = arrow.body.as_expression() {
+                    let mut lowered_body_expr = concise_expr.clone_in(self.allocator);
+                    if let Expression::TaggedTemplateExpression(tagged) = &lowered_body_expr {
+                        let quasis: Vec<&str> = tagged
+                            .quasi
+                            .quasis
+                            .iter()
+                            .map(|q| q.value.raw.as_str())
+                            .collect();
+                        let count = tagged.quasi.expressions.len();
+                        if let Ok(inner_ir) =
+                            lit_analysis::TemplateParser::parse_lit_template(&quasis, count)
+                        {
+                            let mut sub_emitter = JsxEmitter::new(
+                                self.ast,
+                                self.allocator,
+                                &tagged.quasi.expressions,
+                                self.options.clone(),
+                                None,
+                            );
+                            let mut lowered_jsx = sub_emitter.lower_template(&inner_ir);
+                            inject_key_into_jsx(&mut lowered_jsx, "index", self.ast);
+                            lowered_body_expr = lowered_jsx;
+                        }
+                    } else if let Expression::JSXElement(jsx_el) = &mut lowered_body_expr {
+                        inject_key_into_jsx_elem(jsx_el, "index", self.ast);
+                    } else {
+                        rewrite_this_to_props(&mut lowered_body_expr, self.ast);
+                    }
+                    ArrowFunctionBody::from(lowered_body_expr)
+                } else if let ArrowFunctionBody::FunctionBody(b) = &arrow.body {
+                    let mut new_stmts = ArenaVec::new_in(self.ast);
+                    for stmt in &b.statements {
+                        let mut new_stmt = stmt.clone_in(self.allocator);
+                        if let Statement::ReturnStatement(ret) = &mut new_stmt {
+                            if let Some(ret_arg) = &mut ret.argument {
+                                if let Expression::TaggedTemplateExpression(tagged) = ret_arg {
+                                    let quasis: Vec<&str> = tagged
+                                        .quasi
+                                        .quasis
+                                        .iter()
+                                        .map(|q| q.value.raw.as_str())
+                                        .collect();
+                                    let count = tagged.quasi.expressions.len();
+                                    if let Ok(inner_ir) =
+                                        lit_analysis::TemplateParser::parse_lit_template(
+                                            &quasis, count,
+                                        )
+                                    {
+                                        let mut sub_emitter = JsxEmitter::new(
+                                            self.ast,
+                                            self.allocator,
+                                            &tagged.quasi.expressions,
+                                            self.options.clone(),
+                                            None,
+                                        );
+                                        let mut lowered_jsx = sub_emitter.lower_template(&inner_ir);
+                                        inject_key_into_jsx(&mut lowered_jsx, "index", self.ast);
+                                        *ret_arg = lowered_jsx;
+                                    }
+                                } else if let Expression::JSXElement(jsx_el) = ret_arg {
+                                    inject_key_into_jsx_elem(jsx_el, "index", self.ast);
+                                } else {
+                                    rewrite_this_to_props(ret_arg, self.ast);
+                                }
+                            }
+                        } else {
+                            rewrite_statement_this_to_props(&mut new_stmt, self.ast);
+                        }
+                        new_stmts.push(new_stmt);
+                    }
+                    let body_box =
+                        FunctionBody::boxed(SPAN, ArenaVec::new_in(self.ast), new_stmts, self.ast);
+                    ArrowFunctionBody::FunctionBody(body_box)
+                } else {
+                    let mut body_clone = arrow.body.clone_in(self.allocator);
+                    if let Some(e) = body_clone.as_expression_mut() {
+                        rewrite_this_to_props(e, self.ast);
+                    }
+                    body_clone
+                };
+
+                let formal_params = FormalParameters::boxed(
+                    SPAN,
+                    FormalParameterKind::ArrowFormalParameters,
+                    new_params,
+                    None,
+                    self.ast,
+                );
+
+                let new_arrow = Expression::new_arrow_function_expression(
+                    arrow.span,
+                    arrow.r#async,
+                    None,
+                    formal_params,
+                    None,
+                    new_body,
+                    self.ast,
+                );
+
+                let mut new_args = ArenaVec::new_in(self.ast);
+                new_args.push(Argument::from(new_arrow));
+                for arg in call.arguments.iter().skip(1) {
+                    let mut cloned_arg = arg.clone_in(self.allocator);
+                    rewrite_argument_this_to_props(&mut cloned_arg, self.ast);
+                    new_args.push(cloned_arg);
+                }
+
+                // Callee rewrite: this.items.map -> props.items.map
+                let mut new_callee = call.callee.clone_in(self.allocator);
+                rewrite_this_to_props(&mut new_callee, self.ast);
+
+                let new_call = Expression::new_call_expression(
+                    call.span,
+                    new_callee,
+                    call.type_arguments.clone_in(self.allocator),
+                    new_args,
+                    call.optional,
+                    self.ast,
+                );
+
+                return Some(new_call);
             }
         }
         None
@@ -3270,12 +3254,11 @@ pub fn inject_key_into_jsx<'a>(expr: &mut Expression<'a>, key_var: &str, ast: &A
 
 pub fn inject_key_into_jsx_elem<'a>(el: &mut JSXElement<'a>, key_var: &str, ast: &AstBuilder<'a>) {
     for attr in &el.opening_element.attributes {
-        if let JSXAttributeItem::Attribute(a) = attr {
-            if let JSXAttributeName::Identifier(id) = &a.name {
-                if id.name == "key" {
-                    return;
-                }
-            }
+        if let JSXAttributeItem::Attribute(a) = attr
+            && let JSXAttributeName::Identifier(id) = &a.name
+            && id.name == "key"
+        {
+            return;
         }
     }
 
@@ -3319,12 +3302,11 @@ pub fn inject_static_string_key_into_jsx_elem<'a>(
     ast: &AstBuilder<'a>,
 ) {
     for attr in &el.opening_element.attributes {
-        if let JSXAttributeItem::Attribute(a) = attr {
-            if let JSXAttributeName::Identifier(id) = &a.name {
-                if id.name == "key" {
-                    return;
-                }
-            }
+        if let JSXAttributeItem::Attribute(a) = attr
+            && let JSXAttributeName::Identifier(id) = &a.name
+            && id.name == "key"
+        {
+            return;
         }
     }
 
@@ -3373,12 +3355,11 @@ pub fn inject_expression_key_into_jsx_elem<'a>(
     ast: &AstBuilder<'a>,
 ) {
     for attr in &el.opening_element.attributes {
-        if let JSXAttributeItem::Attribute(a) = attr {
-            if let JSXAttributeName::Identifier(id) = &a.name {
-                if id.name == "key" {
-                    return;
-                }
-            }
+        if let JSXAttributeItem::Attribute(a) = attr
+            && let JSXAttributeName::Identifier(id) = &a.name
+            && id.name == "key"
+        {
+            return;
         }
     }
 
@@ -3781,15 +3762,14 @@ fn is_choose_call<'e, 'a>(
             if let Expression::ArrayExpression(arr) = cases_expr {
                 let mut cases = Vec::new();
                 for elem in &arr.elements {
-                    if let ArrayExpressionElement::ArrayExpression(pair) = elem {
-                        if pair.elements.len() >= 2 {
-                            if let (Some(c_val), Some(c_fn)) = (
-                                pair.elements.first().and_then(|e| e.as_expression()),
-                                pair.elements.get(1).and_then(|e| e.as_expression()),
-                            ) {
-                                cases.push((c_val, c_fn));
-                            }
-                        }
+                    if let ArrayExpressionElement::ArrayExpression(pair) = elem
+                        && pair.elements.len() >= 2
+                        && let (Some(c_val), Some(c_fn)) = (
+                            pair.elements.first().and_then(|e| e.as_expression()),
+                            pair.elements.get(1).and_then(|e| e.as_expression()),
+                        )
+                    {
+                        cases.push((c_val, c_fn));
                     }
                 }
                 return Some((val, cases, default_case));
@@ -4001,16 +3981,15 @@ pub fn lower_expression_lit_templates<'a>(
                                 _ => true,
                             })
                             .count();
-                        if elem_count == 1 && non_ws_count == 1 {
-                            if let Some(pos) = frag
+                        if elem_count == 1
+                            && non_ws_count == 1
+                            && let Some(pos) = frag
                                 .children
                                 .iter()
                                 .position(|c| matches!(c, JSXChild::Element(_)))
-                            {
-                                if let JSXChild::Element(el) = frag.children.remove(pos) {
-                                    lowered_jsx = Expression::JSXElement(el);
-                                }
-                            }
+                            && let JSXChild::Element(el) = frag.children.remove(pos)
+                        {
+                            lowered_jsx = Expression::JSXElement(el);
                         }
                     }
 

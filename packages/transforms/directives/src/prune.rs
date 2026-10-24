@@ -35,20 +35,19 @@ pub fn prune_and_update_imports<'a>(
                             let sym = named.local.symbol_id.get().or_else(|| {
                                 scoping.get_binding(root, named.local.name.as_str().into())
                             });
-                            if let Some(sym_id) = sym {
-                                if matches!(
+                            if let Some(sym_id) = sym
+                                && matches!(
                                     lowerer.symbol_ctx.lit_symbols.get(&sym_id),
                                     Some(CanonicalLitSymbol::Directive(_))
-                                ) {
-                                    let total_refs =
-                                        scoping.get_resolved_references(sym_id).count();
-                                    let lowered_refs = lowerer
-                                        .lowered_symbol_refs
-                                        .get(&sym_id)
-                                        .copied()
-                                        .unwrap_or(0);
-                                    return !(lowered_refs > 0 && lowered_refs >= total_refs);
-                                }
+                                )
+                            {
+                                let total_refs = scoping.get_resolved_references(sym_id).count();
+                                let lowered_refs = lowerer
+                                    .lowered_symbol_refs
+                                    .get(&sym_id)
+                                    .copied()
+                                    .unwrap_or(0);
+                                return !(lowered_refs > 0 && lowered_refs >= total_refs);
                             }
                             true
                         }
@@ -56,20 +55,19 @@ pub fn prune_and_update_imports<'a>(
                             let sym = ns.local.symbol_id.get().or_else(|| {
                                 scoping.get_binding(root, ns.local.name.as_str().into())
                             });
-                            if let Some(sym_id) = sym {
-                                if matches!(
+                            if let Some(sym_id) = sym
+                                && matches!(
                                     lowerer.symbol_ctx.lit_symbols.get(&sym_id),
                                     Some(CanonicalLitSymbol::DirectiveNamespace(_))
-                                ) {
-                                    let total_refs =
-                                        scoping.get_resolved_references(sym_id).count();
-                                    let lowered_refs = lowerer
-                                        .lowered_namespace_refs
-                                        .get(&sym_id)
-                                        .copied()
-                                        .unwrap_or(0);
-                                    return !(lowered_refs > 0 && lowered_refs >= total_refs);
-                                }
+                                )
+                            {
+                                let total_refs = scoping.get_resolved_references(sym_id).count();
+                                let lowered_refs = lowerer
+                                    .lowered_namespace_refs
+                                    .get(&sym_id)
+                                    .copied()
+                                    .unwrap_or(0);
+                                return !(lowered_refs > 0 && lowered_refs >= total_refs);
                             }
                             true
                         }
@@ -88,20 +86,19 @@ pub fn prune_and_update_imports<'a>(
                             let sym = named.local.symbol_id.get().or_else(|| {
                                 scoping.get_binding(root, named.local.name.as_str().into())
                             });
-                            if let Some(sym_id) = sym {
-                                if matches!(
+                            if let Some(sym_id) = sym
+                                && matches!(
                                     lowerer.symbol_ctx.lit_symbols.get(&sym_id),
                                     Some(CanonicalLitSymbol::Directive(_))
-                                ) {
-                                    let total_refs =
-                                        scoping.get_resolved_references(sym_id).count();
-                                    let lowered_refs = lowerer
-                                        .lowered_symbol_refs
-                                        .get(&sym_id)
-                                        .copied()
-                                        .unwrap_or(0);
-                                    return !(lowered_refs > 0 && lowered_refs >= total_refs);
-                                }
+                                )
+                            {
+                                let total_refs = scoping.get_resolved_references(sym_id).count();
+                                let lowered_refs = lowerer
+                                    .lowered_symbol_refs
+                                    .get(&sym_id)
+                                    .copied()
+                                    .unwrap_or(0);
+                                return !(lowered_refs > 0 && lowered_refs >= total_refs);
                             }
                             true
                         }
@@ -134,10 +131,10 @@ pub fn prune_and_update_imports<'a>(
                     }
                 }
 
-                if let Some(specifiers) = &import_decl.specifiers {
-                    if specifiers.is_empty() {
-                        continue;
-                    }
+                if let Some(specifiers) = &import_decl.specifiers
+                    && specifiers.is_empty()
+                {
+                    continue;
                 }
             }
         }

@@ -2,12 +2,12 @@ use napi_derive::napi;
 use oxc_allocator::{Allocator, ArenaVec, CloneIn, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
-use oxc_ast_visit::walk_mut::walk_expression;
 use oxc_ast_visit::VisitMut;
+use oxc_ast_visit::walk_mut::walk_expression;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
 use oxc_semantic::{Scoping, SemanticBuilder, SymbolId};
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
@@ -239,25 +239,25 @@ impl<'a, 'b> DirectiveLowerer<'a, 'b> {
             }
 
             for (cond, key_expr) in conditional_classes {
-                if let Expression::BooleanLiteral(b) = &cond {
-                    if b.value {
-                        if let Some(cur_acc) = acc {
-                            let spaced_key = if let Expression::StringLiteral(s) = &key_expr {
-                                let mut space_str = String::with_capacity(1 + s.value.len());
-                                space_str.push(' ');
-                                space_str.push_str(s.value.as_str());
-                                let space_lit = self.ast.allocator().alloc_str(&space_str);
-                                self.helper.string_lit(space_lit)
-                            } else {
-                                let space_lit = self.helper.string_lit(" ");
-                                self.helper.binary_plus(space_lit, key_expr)
-                            };
-                            acc = Some(self.helper.binary_plus(cur_acc, spaced_key));
+                if let Expression::BooleanLiteral(b) = &cond
+                    && b.value
+                {
+                    if let Some(cur_acc) = acc {
+                        let spaced_key = if let Expression::StringLiteral(s) = &key_expr {
+                            let mut space_str = String::with_capacity(1 + s.value.len());
+                            space_str.push(' ');
+                            space_str.push_str(s.value.as_str());
+                            let space_lit = self.ast.allocator().alloc_str(&space_str);
+                            self.helper.string_lit(space_lit)
                         } else {
-                            acc = Some(key_expr);
-                        }
-                        continue;
+                            let space_lit = self.helper.string_lit(" ");
+                            self.helper.binary_plus(space_lit, key_expr)
+                        };
+                        acc = Some(self.helper.binary_plus(cur_acc, spaced_key));
+                    } else {
+                        acc = Some(key_expr);
                     }
+                    continue;
                 }
 
                 if let Some(cur_acc) = acc {
@@ -825,17 +825,17 @@ impl<'a, 'b> VisitMut<'a> for DirectiveLowerer<'a, 'b> {
                 _ => None,
             };
 
-            if let Some((directive, sym_id_opt, ns_sym_id_opt)) = matched_directive {
-                if let Some(lowered) = self.lower_call(directive, call) {
-                    *expr = lowered;
-                    self.lowered_count += 1;
-                    self.directives_used.insert(directive.name().to_string());
-                    if let Some(sym) = sym_id_opt {
-                        *self.lowered_symbol_refs.entry(sym).or_default() += 1;
-                    }
-                    if let Some(ns_sym) = ns_sym_id_opt {
-                        *self.lowered_namespace_refs.entry(ns_sym).or_default() += 1;
-                    }
+            if let Some((directive, sym_id_opt, ns_sym_id_opt)) = matched_directive
+                && let Some(lowered) = self.lower_call(directive, call)
+            {
+                *expr = lowered;
+                self.lowered_count += 1;
+                self.directives_used.insert(directive.name().to_string());
+                if let Some(sym) = sym_id_opt {
+                    *self.lowered_symbol_refs.entry(sym).or_default() += 1;
+                }
+                if let Some(ns_sym) = ns_sym_id_opt {
+                    *self.lowered_namespace_refs.entry(ns_sym).or_default() += 1;
                 }
             }
         }

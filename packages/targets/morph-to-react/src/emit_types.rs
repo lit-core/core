@@ -2,7 +2,7 @@ use lit_analysis::{EventInfo, LitComponentInfo, PropertyInfo, PropertyType};
 use oxc_allocator::{Allocator, ArenaVec, CloneIn};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 
 /// Helper to build an identifier-based type reference like `HTMLElement` or `MorphHost`.
 fn build_id_type_ref<'a>(name: &str, ast: &AstBuilder<'a>, allocator: &'a Allocator) -> TSType<'a> {
@@ -421,70 +421,70 @@ fn build_host_class_declaration<'a>(
     // 2. Public methods from original class (excluding lifecycle hooks)
     if let Some(c) = original_class {
         for elem in &c.body.body {
-            if let ClassElement::MethodDefinition(method) = elem {
-                if !method.r#static {
-                    let name = method.key.static_name().unwrap_or_default();
-                    let is_lifecycle = matches!(
-                        name.as_ref(),
-                        "render"
-                            | "connectedCallback"
-                            | "disconnectedCallback"
-                            | "willUpdate"
-                            | "update"
-                            | "updated"
-                            | "firstUpdated"
-                            | "shouldUpdate"
-                            | "requestUpdate"
-                            | "scheduleUpdate"
+            if let ClassElement::MethodDefinition(method) = elem
+                && !method.r#static
+            {
+                let name = method.key.static_name().unwrap_or_default();
+                let is_lifecycle = matches!(
+                    name.as_ref(),
+                    "render"
+                        | "connectedCallback"
+                        | "disconnectedCallback"
+                        | "willUpdate"
+                        | "update"
+                        | "updated"
+                        | "firstUpdated"
+                        | "shouldUpdate"
+                        | "requestUpdate"
+                        | "scheduleUpdate"
+                );
+                let is_private = name.starts_with('_') || name.starts_with('#');
+
+                if !is_lifecycle && !is_private {
+                    // Extract method return type or fallback to any
+                    let ret_annot = method
+                        .value
+                        .return_type
+                        .as_ref()
+                        .map(|rt| rt.clone_in(allocator))
+                        .unwrap_or_else(|| {
+                            TSTypeAnnotation::boxed(
+                                SPAN,
+                                TSType::TSAnyKeyword(TSAnyKeyword::boxed(SPAN, ast)),
+                                ast,
+                            )
+                        });
+
+                    let func = Function::boxed(
+                        SPAN,
+                        FunctionType::FunctionDeclaration,
+                        None,
+                        false,
+                        false,
+                        false,
+                        None,
+                        None,
+                        method.value.params.clone_in(allocator),
+                        Some(ret_annot),
+                        None, // body is None in declaration
+                        ast,
                     );
-                    let is_private = name.starts_with('_') || name.starts_with('#');
 
-                    if !is_lifecycle && !is_private {
-                        // Extract method return type or fallback to any
-                        let ret_annot = method
-                            .value
-                            .return_type
-                            .as_ref()
-                            .map(|rt| rt.clone_in(allocator))
-                            .unwrap_or_else(|| {
-                                TSTypeAnnotation::boxed(
-                                    SPAN,
-                                    TSType::TSAnyKeyword(TSAnyKeyword::boxed(SPAN, ast)),
-                                    ast,
-                                )
-                            });
-
-                        let func = Function::boxed(
-                            SPAN,
-                            FunctionType::FunctionDeclaration,
-                            None,
-                            false,
-                            false,
-                            false,
-                            None,
-                            None,
-                            method.value.params.clone_in(allocator),
-                            Some(ret_annot),
-                            None, // body is None in declaration
-                            ast,
-                        );
-
-                        let method_def = ClassElement::new_method_definition(
-                            SPAN,
-                            MethodDefinitionType::MethodDefinition,
-                            ArenaVec::new_in(ast),
-                            method.key.clone_in(allocator),
-                            func,
-                            MethodDefinitionKind::Method,
-                            false,
-                            false,
-                            false,
-                            false,
-                            None,
-                            ast,
-                        );
-                        class_elements.push(method_def);
-                    }
+                    let method_def = ClassElement::new_method_definition(
+                        SPAN,
+                        MethodDefinitionType::MethodDefinition,
+                        ArenaVec::new_in(ast),
+                        method.key.clone_in(allocator),
+                        func,
+                        MethodDefinitionKind::Method,
+                        false,
+                        false,
+                        false,
+                        false,
+                        None,
+                        ast,
+                    );
+                    class_elements.push(method_def);
                 }
             }
         }

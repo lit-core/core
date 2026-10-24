@@ -107,10 +107,10 @@ impl<'a> Visit<'a> for PurityAndDependencyVisitor {
     }
 
     fn visit_new_expression(&mut self, expr: &NewExpression<'a>) {
-        if let Expression::Identifier(ident) = &expr.callee {
-            if ident.name == "Date" {
-                self.is_pure = false;
-            }
+        if let Expression::Identifier(ident) = &expr.callee
+            && ident.name == "Date"
+        {
+            self.is_pure = false;
         }
         oxc_ast_visit::walk::walk_new_expression(self, expr);
     }
@@ -179,12 +179,12 @@ impl<'a> Visit<'a> for PurityAndDependencyVisitor {
     }
 
     fn visit_computed_member_expression(&mut self, mem: &ComputedMemberExpression<'a>) {
-        if matches!(&mem.object, Expression::ThisExpression(_)) {
-            if let Expression::StringLiteral(lit) = &mem.expression {
-                let prop = lit.value.as_str().to_string();
-                if !prop.starts_with("__memo") && !self.dependencies.contains(&prop) {
-                    self.dependencies.push(prop);
-                }
+        if matches!(&mem.object, Expression::ThisExpression(_))
+            && let Expression::StringLiteral(lit) = &mem.expression
+        {
+            let prop = lit.value.as_str().to_string();
+            if !prop.starts_with("__memo") && !self.dependencies.contains(&prop) {
+                self.dependencies.push(prop);
             }
         }
         oxc_ast_visit::walk::walk_computed_member_expression(self, mem);
@@ -272,24 +272,23 @@ pub fn analyze_candidate<'a>(expr: &'a Expression<'a>) -> Option<CandidateInfo> 
                 cur = next_obj;
             }
             Expression::ComputedMemberExpression(mem) => {
-                if matches!(&mem.object, Expression::ThisExpression(_)) {
-                    if let Expression::StringLiteral(s) = &mem.expression {
-                        root_prop = Some(s.value.as_str().to_string());
-                        break;
-                    }
+                if matches!(&mem.object, Expression::ThisExpression(_))
+                    && let Expression::StringLiteral(s) = &mem.expression
+                {
+                    root_prop = Some(s.value.as_str().to_string());
+                    break;
                 }
                 cur = next_obj;
             }
             Expression::ArrayExpression(arr) => {
                 // e.g. [...this.items]
                 for elem in &arr.elements {
-                    if let ArrayExpressionElement::SpreadElement(spread) = elem {
-                        if let Expression::StaticMemberExpression(mem) = &spread.argument {
-                            if matches!(&mem.object, Expression::ThisExpression(_)) {
-                                root_prop = Some(mem.property.name.as_str().to_string());
-                                break;
-                            }
-                        }
+                    if let ArrayExpressionElement::SpreadElement(spread) = elem
+                        && let Expression::StaticMemberExpression(mem) = &spread.argument
+                        && matches!(&mem.object, Expression::ThisExpression(_))
+                    {
+                        root_prop = Some(mem.property.name.as_str().to_string());
+                        break;
                     }
                 }
                 break;

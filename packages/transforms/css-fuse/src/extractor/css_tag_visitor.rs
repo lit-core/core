@@ -255,17 +255,13 @@ impl<'a> CssTagVisitor<'a> {
 
     fn get_decorator_tag_name(&self, class: &Class<'a>) -> Option<String> {
         for decorator in &class.decorators {
-            if let Expression::CallExpression(call) = &decorator.expression {
-                if self.symbol_ctx.is_proven_decorator(&call.callee)
+            if let Expression::CallExpression(call) = &decorator.expression
+                && self.symbol_ctx.is_proven_decorator(&call.callee)
                     == Some(CanonicalLitSymbol::CustomElementDecorator)
-                {
-                    if let Some(first_arg) = call.arguments.first() {
-                        if let Some(Expression::StringLiteral(str_lit)) = first_arg.as_expression()
-                        {
-                            return Some(str_lit.value.to_string());
-                        }
-                    }
-                }
+                && let Some(first_arg) = call.arguments.first()
+                && let Some(Expression::StringLiteral(str_lit)) = first_arg.as_expression()
+            {
+                return Some(str_lit.value.to_string());
             }
         }
         None
@@ -323,18 +319,19 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
                         _ => false,
                     };
 
-                    if prop.r#static && is_styles_key {
-                        if let Some(value) = &prop.value {
-                            let parent_span = Some(self.compute_span(prop.span));
-                            self.extract_from_expression(
-                                value,
-                                Some(class_name.clone()),
-                                tag_name.clone(),
-                                None,
-                                "static_property",
-                                parent_span,
-                            );
-                        }
+                    if prop.r#static
+                        && is_styles_key
+                        && let Some(value) = &prop.value
+                    {
+                        let parent_span = Some(self.compute_span(prop.span));
+                        self.extract_from_expression(
+                            value,
+                            Some(class_name.clone()),
+                            tag_name.clone(),
+                            None,
+                            "static_property",
+                            parent_span,
+                        );
                     }
                 }
                 ClassElement::MethodDefinition(method) => {
@@ -344,23 +341,24 @@ impl<'a> Visit<'a> for CssTagVisitor<'a> {
                         _ => false,
                     };
 
-                    if method.r#static && method.kind == MethodDefinitionKind::Get && is_styles_key
+                    if method.r#static
+                        && method.kind == MethodDefinitionKind::Get
+                        && is_styles_key
+                        && let Some(body) = &method.value.body
                     {
-                        if let Some(body) = &method.value.body {
-                            for stmt in &body.statements {
-                                if let Statement::ReturnStatement(ret) = stmt {
-                                    if let Some(arg) = &ret.argument {
-                                        let parent_span = Some(self.compute_span(ret.span));
-                                        self.extract_from_expression(
-                                            arg,
-                                            Some(class_name.clone()),
-                                            tag_name.clone(),
-                                            None,
-                                            "static_getter",
-                                            parent_span,
-                                        );
-                                    }
-                                }
+                        for stmt in &body.statements {
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(arg) = &ret.argument
+                            {
+                                let parent_span = Some(self.compute_span(ret.span));
+                                self.extract_from_expression(
+                                    arg,
+                                    Some(class_name.clone()),
+                                    tag_name.clone(),
+                                    None,
+                                    "static_getter",
+                                    parent_span,
+                                );
                             }
                         }
                     }

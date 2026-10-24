@@ -29,12 +29,14 @@ function runStep(name, cmd, cwd = ROOT) {
   log(`▶ ${name}...`);
   fs.appendFileSync(LOG_FILE, `--- RUNNING: ${cmd} (cwd: ${cwd}) ---\n`, 'utf-8');
 
+  const binPaths = [path.join(cwd, 'node_modules', '.bin'), path.join(ROOT, 'node_modules', '.bin')].join(path.delimiter);
   const res = spawnSync(cmd, {
     cwd,
     shell: true,
     encoding: 'utf-8',
     env: {
       ...process.env,
+      PATH: `${binPaths}${path.delimiter}${process.env.PATH || ''}`,
       TURBO_TELEMETRY_DISABLED: '1',
       CI: '1',
     },
@@ -112,12 +114,13 @@ async function main() {
         continue;
       }
       const pkgDir = findPackageDir(ROOT, pkg);
-      const pkgJsonPath = pkgDir ? path.join(pkgDir, 'package.json') : path.join(ROOT, 'packages', pkg, 'package.json');
+      const targetDir = pkgDir || path.join(ROOT, 'packages', pkg);
+      const pkgJsonPath = path.join(targetDir, 'package.json');
       if (fs.existsSync(pkgJsonPath)) {
         try {
           const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
           if (pkgJson.scripts?.test) {
-            const passed = runStep(`tier 2: js tests for ${pkg}`, `pnpm --filter @lit-core/${pkg} run test`);
+            const passed = runStep(`tier 2: js tests for ${pkg}`, pkgJson.scripts.test, targetDir);
             if (!passed) allPassed = false;
           }
         } catch {}

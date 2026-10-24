@@ -45,14 +45,16 @@ fn test_aliased_imports() {
     assert_eq!(comp.styles.len(), 1);
     assert!(comp.styles[0].css_text.contains("display: block;"));
     assert_eq!(comp.properties.len(), 2);
-    assert!(comp
-        .properties
-        .iter()
-        .any(|p| p.name == "title" && !p.is_state));
-    assert!(comp
-        .properties
-        .iter()
-        .any(|p| p.name == "counter" && p.is_state));
+    assert!(
+        comp.properties
+            .iter()
+            .any(|p| p.name == "title" && !p.is_state)
+    );
+    assert!(
+        comp.properties
+            .iter()
+            .any(|p| p.name == "counter" && p.is_state)
+    );
 }
 
 #[test]

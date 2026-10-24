@@ -9,7 +9,7 @@ on:
       - main
   schedule:
     # Monthly scheduled check on the first day of each month at 00:00 UTC
-    - cron: '0 0 1 * *'
+    - cron: "0 0 1 * *"
   workflow_dispatch:
 
 concurrency:
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
-          version: "2.5.15"
+          version: "2.6.2"
 
       - name: Run Biome check
         run: biome check .
@@ -78,8 +78,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 24
-          cache: 'pnpm'
+          node-version: 26
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -47,12 +47,14 @@ flowchart TD
 ### In-depth technical details
 
 #### 1. Static HTML parsing with `parse5`
+
 During the bundling pass, `html-aot` inspects tagged template literals:
 - Divides template quasis and expressions into structured tokens.
 - Constructs an in-memory HTML document fragment via `parse5`.
 - Identifies element boundaries, attribute names, text nodes, and interpolation points.
 
 #### 2. Pre-computed part descriptor schema
+
 The compiler generates a static descriptor adhering to Lit's native compiled template interface:
 
 ```javascript
@@ -77,13 +79,14 @@ export const _compiled_tpl = {
 
 #### 3. Browser execution comparison
 
-| Stage | Standard Lit runtime | With `@lit-core/html-aot` |
-| :--- | :--- | :--- |
-| First render template preparation | `innerHTML` parsing + `TreeWalker` traversal | **Bypassed completely** |
-| Memory allocation | Template cache records + DOM walker metadata | Single static descriptor |
-| Mount execution | Synchronous preparation on main thread | Immediate `<template>` cloning & part binding |
+| Stage                             | Standard Lit runtime                         | With `@lit-core/html-aot`                     |
+| :-------------------------------- | :------------------------------------------- | :-------------------------------------------- |
+| First render template preparation | `innerHTML` parsing + `TreeWalker` traversal | **Bypassed completely**                       |
+| Memory allocation                 | Template cache records + DOM walker metadata | Single static descriptor                      |
+| Mount execution                   | Synchronous preparation on main thread       | Immediate `<template>` cloning & part binding |
 
 #### 4. Trade-off characteristics
+
 - **First render latency**: Accelerates initial mount by +35% to +38% across production design systems.
 - **Bundle size**: Because precomputed part descriptors are serialized into JavaScript objects, raw bundle size increases slightly (~1.5% to ~3.5%). For applications where initial render responsiveness is critical, this trade-off is advantageous.
 
@@ -112,7 +115,6 @@ export default defineConfig({
     }),
   ],
 });
-
 ```
 
 ### Via `@lit-core/webpack-plugin`
@@ -145,13 +147,13 @@ console.log(descriptor.parts);
 
 Evaluated across canonical component suites (standalone `html-aot` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
 
-| Design system | First render mount latency (baseline) | With `html-aot` | Mount acceleration | Reactive update speedup |
-| :--- | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 96.0 ms | 53.5 ms | +44.3% | +28.3% (3.3 ms vs 4.6 ms) |
-| Spectrum Web Components | 52.3 ms | 24.6 ms | +53.0% | 0.0% (2.1 ms vs 2.1 ms) |
-| Web Awesome | 41.0 ms | 28.4 ms | +30.7% | +43.8% (0.9 ms vs 1.6 ms) |
-| Momentum Design | 39.6 ms | 19.2 ms | +51.5% | +9.1% (1.0 ms vs 1.1 ms) |
-| Material Web | 45.1 ms | 19.1 ms | +57.6% | +19.0% (1.7 ms vs 2.1 ms) |
+| Design system           | First render mount latency (baseline) | With `html-aot` | Mount acceleration |   Reactive update speedup |
+| :---------------------- | ------------------------------------: | --------------: | -----------------: | ------------------------: |
+| Carbon Web Components   |                               96.0 ms |         53.5 ms |             +44.3% | +28.3% (3.3 ms vs 4.6 ms) |
+| Spectrum Web Components |                               52.3 ms |         24.6 ms |             +53.0% |   0.0% (2.1 ms vs 2.1 ms) |
+| Web Awesome             |                               41.0 ms |         28.4 ms |             +30.7% | +43.8% (0.9 ms vs 1.6 ms) |
+| Momentum Design         |                               39.6 ms |         19.2 ms |             +51.5% |  +9.1% (1.0 ms vs 1.1 ms) |
+| Material Web            |                               45.1 ms |         19.1 ms |             +57.6% | +19.0% (1.7 ms vs 2.1 ms) |
 
 > Pre-compiling Lit `html` templates into static descriptors ahead of time eliminates the browser template preparation phase (`<template>` creation and `TreeWalker` traversal), cutting initial mount latency by **30.7% to 57.6%**.
 

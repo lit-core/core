@@ -74,28 +74,27 @@ impl<'a> TemplateVisitor<'a> {
             Expression::Identifier(ident) => {
                 if let Some(ref_id) = ident.reference_id.get() {
                     let reference = self.scoping.get_reference(ref_id);
-                    if let Some(sym_id) = reference.symbol_id() {
-                        if self.resolver.lit_html_symbols.contains(&sym_id) {
-                            let is_svg = self.resolver.lit_svg_symbols.contains(&sym_id);
-                            return Some((ident.name.to_string(), is_svg));
-                        }
+                    if let Some(sym_id) = reference.symbol_id()
+                        && self.resolver.lit_html_symbols.contains(&sym_id)
+                    {
+                        let is_svg = self.resolver.lit_svg_symbols.contains(&sym_id);
+                        return Some((ident.name.to_string(), is_svg));
                     }
                 }
                 None
             }
             Expression::StaticMemberExpression(member) => {
                 let prop_name = member.property.name.as_str();
-                if prop_name == "html" || prop_name == "svg" {
-                    if let Expression::Identifier(obj) = &member.object {
-                        if let Some(ref_id) = obj.reference_id.get() {
-                            let reference = self.scoping.get_reference(ref_id);
-                            if let Some(sym_id) = reference.symbol_id() {
-                                if self.resolver.lit_namespaces.contains(&sym_id) {
-                                    let is_svg = prop_name == "svg";
-                                    return Some((prop_name.to_string(), is_svg));
-                                }
-                            }
-                        }
+                if (prop_name == "html" || prop_name == "svg")
+                    && let Expression::Identifier(obj) = &member.object
+                    && let Some(ref_id) = obj.reference_id.get()
+                {
+                    let reference = self.scoping.get_reference(ref_id);
+                    if let Some(sym_id) = reference.symbol_id()
+                        && self.resolver.lit_namespaces.contains(&sym_id)
+                    {
+                        let is_svg = prop_name == "svg";
+                        return Some((prop_name.to_string(), is_svg));
                     }
                 }
                 None
@@ -167,10 +166,12 @@ mod tests {
         visitor.visit_program(&parsed.program);
 
         assert_eq!(visitor.extracted_fragments.len(), 2);
-        assert!(visitor
-            .extracted_fragments
-            .iter()
-            .all(|f| f.is_full_template));
+        assert!(
+            visitor
+                .extracted_fragments
+                .iter()
+                .all(|f| f.is_full_template)
+        );
         assert!(visitor.extracted_fragments[0].is_svg);
         assert!(!visitor.extracted_fragments[1].is_svg);
     }

@@ -22,4 +22,3 @@ This package implements the Webpack 5 integration for `@lit-core`.
 
 4. **Writing style**:
    - Strictly follow sentence case for all headings, table headers, descriptions, and comments as defined in monorepo rules.
-

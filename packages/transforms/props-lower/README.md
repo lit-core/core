@@ -48,17 +48,18 @@ flowchart TD
 
 #### Supported decorators and lowering targets
 
-| Decorator | Lowering target | Benefit |
-| :--- | :--- | :--- |
-| `@customElement(tag)` | `customElements.define(tag, Class)` | Removes class decorator wrapper routine |
-| `@property(opts)` | `static properties = { [name]: opts }` | Eliminates runtime descriptor allocation |
-| `@state(opts)` | `static properties = { [name]: { state: true, ...opts } }` | Standard native Lit reactive state field |
-| `@query(selector)` | `get [name]() { return this.renderRoot?.querySelector(selector); }` | Zero runtime decorator overhead |
-| `@queryAll(selector)` | `get [name]() { return this.renderRoot?.querySelectorAll(selector); }` | Zero runtime decorator overhead |
+| Decorator             | Lowering target                                                        | Benefit                                  |
+| :-------------------- | :--------------------------------------------------------------------- | :--------------------------------------- |
+| `@customElement(tag)` | `customElements.define(tag, Class)`                                    | Removes class decorator wrapper routine  |
+| `@property(opts)`     | `static properties = { [name]: opts }`                                 | Eliminates runtime descriptor allocation |
+| `@state(opts)`        | `static properties = { [name]: { state: true, ...opts } }`             | Standard native Lit reactive state field |
+| `@query(selector)`    | `get [name]() { return this.renderRoot?.querySelector(selector); }`    | Zero runtime decorator overhead          |
+| `@queryAll(selector)` | `get [name]() { return this.renderRoot?.querySelectorAll(selector); }` | Zero runtime decorator overhead          |
 
 #### Code transformation comparison
 
 ##### Input source:
+
 ```typescript
 import { LitElement, html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
@@ -76,6 +77,7 @@ export class MyCounter extends LitElement {
 ```
 
 ##### Compiled output:
+
 ```typescript
 import { LitElement, html } from 'lit';
 
@@ -103,6 +105,7 @@ customElements.define('my-counter', MyCounter);
 ```
 
 #### Invariant guarantees
+
 - **Semantic identification**: Identifiers are resolved via `oxc_semantic` symbol tables. Aliased imports like `import { property as p } from 'lit/decorators.js'` are recognized accurately.
 - **Minification safety**: The AST visitor relies on symbol binding resolution rather than variable name matching, ensuring safety across pre-bundled or mangled code.
 - **Direct AST manipulation**: Code is constructed deterministically with `AstBuilder` and emitted via `oxc_codegen`, avoiding fragile string splicing or re-parsing.
@@ -132,7 +135,6 @@ export default defineConfig({
     }),
   ],
 });
-
 ```
 
 ### Via `@lit-core/webpack-plugin`
@@ -168,13 +170,13 @@ console.log(`Lowered ${result.propertiesCount} properties across ${result.classe
 
 Evaluated across canonical components from production suites (standalone `props-lower` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
 
-| Design system | Baseline mount latency | With `props-lower` | First render speedup | Reactive update speedup | Script eval latency |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 96.0 ms | 57.5 ms | +40.1% | +34.8% (3.0 ms vs 4.6 ms) | 4.3 ms (vs 4.4 ms) |
-| Spectrum Web Components | 52.3 ms | 25.0 ms | +52.2% | -4.8% (2.2 ms vs 2.1 ms) | 11.1 ms (vs 10.5 ms) |
-| Web Awesome | 41.0 ms | 28.9 ms | +29.5% | +37.5% (1.0 ms vs 1.6 ms) | 2.6 ms (vs 6.2 ms, +58.1%) |
-| Momentum Design | 39.6 ms | 18.1 ms | +54.3% | +27.3% (0.8 ms vs 1.1 ms) | 3.8 ms (vs 4.3 ms, +11.6%) |
-| Material Web | 45.1 ms | 21.3 ms | +52.8% | 0.0% (2.1 ms vs 2.1 ms) | 6.1 ms (vs 6.8 ms, +10.3%) |
+| Design system           | Baseline mount latency | With `props-lower` | First render speedup |   Reactive update speedup |        Script eval latency |
+| :---------------------- | ---------------------: | -----------------: | -------------------: | ------------------------: | -------------------------: |
+| Carbon Web Components   |                96.0 ms |            57.5 ms |               +40.1% | +34.8% (3.0 ms vs 4.6 ms) |         4.3 ms (vs 4.4 ms) |
+| Spectrum Web Components |                52.3 ms |            25.0 ms |               +52.2% |  -4.8% (2.2 ms vs 2.1 ms) |       11.1 ms (vs 10.5 ms) |
+| Web Awesome             |                41.0 ms |            28.9 ms |               +29.5% | +37.5% (1.0 ms vs 1.6 ms) | 2.6 ms (vs 6.2 ms, +58.1%) |
+| Momentum Design         |                39.6 ms |            18.1 ms |               +54.3% | +27.3% (0.8 ms vs 1.1 ms) | 3.8 ms (vs 4.3 ms, +11.6%) |
+| Material Web            |                45.1 ms |            21.3 ms |               +52.8% |   0.0% (2.1 ms vs 2.1 ms) | 6.1 ms (vs 6.8 ms, +10.3%) |
 
 > By lowering TypeScript `@property` and `@state` decorators to static class `properties` descriptors ahead of time, `@lit-core/props-lower` accelerates initial component mounting by **29.5% to 54.3%** across all evaluated design systems, while eliminating runtime decorator metadata helpers.
 

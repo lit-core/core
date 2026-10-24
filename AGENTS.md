@@ -9,23 +9,23 @@ Welcome to the `@lit-core` monorepo. This file outlines core architectural princ
 > **IMPORTANT WRITING INSTRUCTION**:
 > Whenever you write text or documentation, **do NOT uppercase every single word**.
 >
-> - **Never use Title Case for headings, titles, table headers, bullet items, descriptions, or summaries.**
->   - ❌ Incorrect: `Detailed Breakdown Of Component Rules`
->   - ❌ Incorrect: `Evaluated Design Systems And Libraries`
->   - ❌ Incorrect: `Shared Constructable Sheets Created`
->   - ❌ Incorrect: `Optimization Tool / Mode`
->   - ✅ Correct: `Detailed breakdown of component rules`
->   - ✅ Correct: `Evaluated design systems and libraries`
->   - ✅ Correct: `Shared constructable sheets created`
->   - ✅ Correct: `Optimization tool or mode`
-> - **Always use sentence case** for:
->   - Markdown titles (`#`, `##`, `###`, etc.)
->   - Table headers (`| Library | Rules scanned | Duplicate rules fused |`)
->   - Pull request titles, commit messages, and summaries
->   - Diagram labels and descriptions
->   - Prose, callouts, and notes
->   - UI components, navigation tabs, buttons, section headers, badges, and filters
-> - Preserve proper nouns, brand names, acronyms, and code identifiers exactly as they are (e.g. `Lit`, `Vite`, `AST`, `Rollup`, `HTML`, `CSSStyleSheet`, `oxc`, `lightningcss`, `Carbon Web Components`).
+- **Never use Title Case for headings, titles, table headers, bullet items, descriptions, or summaries.**
+  - ❌ Incorrect: `Detailed Breakdown Of Component Rules`
+  - ❌ Incorrect: `Evaluated Design Systems And Libraries`
+  - ❌ Incorrect: `Shared Constructable Sheets Created`
+  - ❌ Incorrect: `Optimization Tool / Mode`
+  - ✅ Correct: `Detailed breakdown of component rules`
+  - ✅ Correct: `Evaluated design systems and libraries`
+  - ✅ Correct: `Shared constructable sheets created`
+  - ✅ Correct: `Optimization tool or mode`
+- **Always use sentence case** for:
+  - Markdown titles (`#`, `##`, `###`, etc.)
+  - Table headers (`| Library | Rules scanned | Duplicate rules fused |`)
+  - Pull request titles, commit messages, and summaries
+  - Diagram labels and descriptions
+  - Prose, callouts, and notes
+  - UI components, navigation tabs, buttons, section headers, badges, and filters
+- Preserve proper nouns, brand names, acronyms, and code identifiers exactly as they are (e.g. `Lit`, `Vite`, `AST`, `Rollup`, `HTML`, `CSSStyleSheet`, `oxc`, `lightningcss`, `Carbon Web Components`).
 
 ---
 
@@ -34,40 +34,41 @@ Welcome to the `@lit-core` monorepo. This file outlines core architectural princ
 > **MANDATORY DESIGN RULE: SCANDINAVIAN MINIMALISM AND BALANCED TYPOGRAPHY**:
 > Every frontend application, viewer dashboard, and showcase in this monorepo must adhere to the following UI standards:
 >
-> 1. **Zero uppercasing anywhere**:
->    - Never use CSS `uppercase` or `tracking-wider` on headings, badges, tabs, or buttons.
->    - Never use Title Case. All UI copy must strictly use **sentence case**.
-> 2. **16px root font size and 1rem minimum floor**:
->    - Root HTML must be 16px (`html { font-size: 16px; }`).
->    - **Never go below 1rem (16px) anywhere in the UI.**
->    - Strictly forbid `text-xs` (12px) and `text-sm` (14px). Use `text-base` (1rem, 16px) as the floor for badges, helper text, and secondary labels.
-> 3. **Thinner font weights**:
->    - Use `font-light` (300) for secondary copy, neutral values, helper text, and unselected pills.
->    - Use `font-normal` (400) for body copy, table values, and table headers.
->    - Use `font-medium` (500) strictly for section titles and active button/pill states.
->    - Strictly forbid heavy weights (`font-semibold`, `font-bold`).
-> 4. **Reuse standard typography variants**:
->    - Page / view title: `text-2xl font-light text-zinc-950 tracking-tight`
->    - Section heading: `text-lg font-medium text-zinc-950 tracking-tight`
->    - Base body & table cell: `text-base font-normal text-zinc-900` or `text-base font-light text-zinc-700`
->    - Filter label, column header & supporting text: `text-base font-light text-zinc-500` (never low-contrast `text-zinc-400`)
->    - Tabular numeric value: `tabular-nums text-base font-light text-zinc-700`
-> 5. **Wide container alignment**:
->    - Header and main content must share identical container constraints: `w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-14`.
-> 6. **Headings outside surface cards**:
->    - Never trap section headings inside cards or nested boxes. Place headings cleanly on the canvas outside and above the surface cards.
-> 7. **Unboxed filter controls**:
->    - Filter and selection controls live directly on the `#fafafb` canvas with fixed-width muted labels (`w-28 text-base font-light text-zinc-500 shrink-0`), not wrapped inside bulky white cards.
-> 8. **Combined soft modern shadows and super subtle border definition**:
->    - Strictly forbid heavy 1px gray borders (`border border-zinc-200`, `border-b`, `border-t`).
->    - Elevate cards, surfaces, panels, and tables with soft, diffuse, larger modern shadows paired with a super subtle border ring: `shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5` (transitioning to `shadow-[0_12px_36px_rgb(0,0,0,0.06)]` on hover).
->    - Keep interactive controls flat (`shadow-none`) without heavy shadows. Dropdowns use rich emerald with white text (`bg-emerald-700 hover:bg-emerald-800 text-white`).
->    - When an active or selected outline is needed (e.g. overview cards), use a thick green ring (`ring-[3px] ring-emerald-600`), keeping the card background identical to inactive cards.
-> 9. **Balanced grayscales and contrast**:
->    - Clean surface distinction between `#ffffff` cards and `#fafafb` canvas provided by soft shadows.
->    - Maintain legible contrast: use `text-zinc-500` (WCAG AA compliant ~4.6:1 against `#fafafb`) for column headers, secondary labels, and muted text.
-> 10. **Component isolation via iframes**:
->    - Third-party Web Components must render in isolated `<iframe>` canvases to strictly prevent global reset stylesheets from leaking into the dashboard.
+1. **Zero uppercasing anywhere**:
+   - Never use CSS `uppercase` or `tracking-wider` on headings, badges, tabs, or buttons.
+   - Never use Title Case. All UI copy must strictly use **sentence case**.
+2. **16px root font size and 1rem minimum floor**:
+   - Root HTML must be 16px (`html { font-size: 16px; }`).
+   - **Never go below 1rem (16px) anywhere in the UI.**
+   - Strictly forbid `text-xs` (12px) and `text-sm` (14px). Use `text-base` (1rem, 16px) as the floor for badges, helper text, and secondary labels.
+3. **Thinner font weights**:
+   - Use `font-light` (300) for secondary copy, neutral values, helper text, and unselected pills.
+   - Use `font-normal` (400) for body copy, table values, and table headers.
+   - Use `font-medium` (500) strictly for section titles and active button/pill states.
+   - Strictly forbid heavy weights (`font-semibold`, `font-bold`).
+4. **Reuse standard typography variants**:
+   - Page / view title: `text-2xl font-light text-zinc-950 tracking-tight`
+   - Section heading: `text-lg font-medium text-zinc-950 tracking-tight`
+   - Base body & table cell: `text-base font-normal text-zinc-900` or `text-base font-light text-zinc-700`
+   - Filter label, column header & supporting text: `text-base font-light text-zinc-500` (never low-contrast `text-zinc-400`)
+   - Tabular numeric value: `tabular-nums text-base font-light text-zinc-700`
+5. **Wide container alignment**:
+   - Header and main content must share identical container constraints: `w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-14`.
+6. **Headings outside surface cards**:
+   - Never trap section headings inside cards or nested boxes. Place headings cleanly on the canvas outside and above the surface cards.
+7. **Unboxed filter controls**:
+   - Filter and selection controls live directly on the `#fafafb` canvas with fixed-width muted labels (`w-28 text-base font-light text-zinc-500 shrink-0`), not wrapped inside bulky white cards.
+8. **Combined soft modern shadows and super subtle border definition**:
+   - Strictly forbid heavy 1px gray borders (`border border-zinc-200`, `border-b`, `border-t`).
+   - Elevate cards, surfaces, panels, and tables with soft, diffuse, larger modern shadows paired with a super subtle border ring: `shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-zinc-900/5` (transitioning to `shadow-[0_12px_36px_rgb(0,0,0,0.06)]` on hover).
+   - Keep interactive controls flat (`shadow-none`) without heavy shadows. Dropdowns use rich emerald with white text (`bg-emerald-700 hover:bg-emerald-800 text-white`).
+   - When an active or selected outline is needed (e.g. overview cards), use a thick green ring (`ring-[3px] ring-emerald-600`), keeping the card background identical to inactive cards.
+9. **Balanced grayscales and contrast**:
+   - Clean surface distinction between `#ffffff` cards and `#fafafb` canvas provided by soft shadows.
+   - Maintain legible contrast: use `text-zinc-500` (WCAG AA compliant ~4.6:1 against `#fafafb`) for column headers, secondary labels, and muted text.
+10. **Component isolation via iframes**:
+
+- Third-party Web Components must render in isolated `<iframe>` canvases to strictly prevent global reset stylesheets from leaking into the dashboard.
 
 ## 🌐 General-purpose architecture and transform principles
 
@@ -76,12 +77,12 @@ Welcome to the `@lit-core` monorepo. This file outlines core architectural princ
 >
 > For full architectural rationale, refer to the authoritative skill: `.agents/skills/transform-principles/SKILL.md`.
 >
-> - **Core tenets**:
->   - **Assume input may be minified**: Never rely on local variable names, decorator helper names (`__decorate`), comments, or formatting. Rely exclusively on semantic symbol bindings (`oxc_semantic`) traced to canonical import specifiers.
->   - **Identify by meaning, not spelling**: Resolve imports and bindings semantically. Never match on raw identifier names (`callee == "property"`) or search substrings in source text (`contains("Element")`).
->   - **Structure in, structure out**: Always build AST directly using `AstBuilder`. Strictly forbid string interpolation (`format!`, `push_str`) and re-parsing generated strings (`Parser::new`).
->   - **Prove it or leave it alone**: Only transform when AST-level evidence proves all preconditions are met. If anything is ambiguous or unsupported, bail out cleanly and leave the file untouched. Never invent fake stubs, global prototype monkey-patches, or fallback markup.
->   - **Fix classes of bugs, not instances**: Never introduce library-specific or component-specific class names, IDs, tags, or heuristics (e.g. `iconContainer`, `carbonElement`, `indicator`, `focus-ring`). Benchmarks measure compiler performance objectively without special casing.
+- **Core tenets**:
+  - **Assume input may be minified**: Never rely on local variable names, decorator helper names (`__decorate`), comments, or formatting. Rely exclusively on semantic symbol bindings (`oxc_semantic`) traced to canonical import specifiers.
+  - **Identify by meaning, not spelling**: Resolve imports and bindings semantically. Never match on raw identifier names (`callee == "property"`) or search substrings in source text (`contains("Element")`).
+  - **Structure in, structure out**: Always build AST directly using `AstBuilder`. Strictly forbid string interpolation (`format!`, `push_str`) and re-parsing generated strings (`Parser::new`).
+  - **Prove it or leave it alone**: Only transform when AST-level evidence proves all preconditions are met. If anything is ambiguous or unsupported, bail out cleanly and leave the file untouched. Never invent fake stubs, global prototype monkey-patches, or fallback markup.
+  - **Fix classes of bugs, not instances**: Never introduce library-specific or component-specific class names, IDs, tags, or heuristics (e.g. `iconContainer`, `carbonElement`, `indicator`, `focus-ring`). Benchmarks measure compiler performance objectively without special casing.
 
 ---
 
@@ -90,9 +91,11 @@ Welcome to the `@lit-core` monorepo. This file outlines core architectural princ
 `@lit-core` is an ahead-of-time (AOT) compiler and bundler optimization toolchain for Lit and Web Component applications.
 
 ### Core problem
+
 Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization (utility classes like Tailwind) fails inside Shadow DOM because encapsulation prevents utility classes from piercing shadow boundaries without template modification. This forces component libraries to either duplicate large blocks of theme/reset styles across every component or incur runtime stylesheet injection costs.
 
 ### Solution and mechanism
+
 1. **Compile-time CSS AST deduplication (`css-fuse`)**:
    - Parses component styles at the AST level using `oxc` and `lightningcss`.
    - Identifies identical declaration blocks and rules across components.
@@ -115,39 +118,39 @@ Web Components encapsulate styles inside Shadow DOM. Traditional CSS atomization
 
 Packages are organized into six architectural categories under `packages/<category>/<name>` (plus shared Rust internals in `crates/`):
 
-| Category | Package | Path | Tech stack | Purpose |
-| :--- | :--- | :--- | :--- | :--- |
-| **Primitives** | *(authoring APIs)* | `packages/primitives/*` | TypeScript, Rust (`oxc`) | Developer-facing decorators, signals, and authoring helpers |
-| **Transforms** | `@lit-core/css-fuse` | `packages/transforms/css-fuse` | Rust (`oxc`, `lightningcss`), NAPI-RS | Cross-component CSS deduplication into shared constructable sheets |
-| **Transforms** | `@lit-core/html-fuse` | `packages/transforms/html-fuse` | Rust (`oxc`), NAPI-RS | Cross-component static HTML and SVG fragment clustering |
-| **Transforms** | `@lit-core/props-lower` | `packages/transforms/props-lower` | Rust (`oxc`), NAPI-RS | AOT Lit decorator and property lowering |
-| **Transforms** | `@lit-core/event-hoist` | `packages/transforms/event-hoist` | Rust (`oxc`), NAPI-RS | Ahead-of-time ShadowRoot event delegation |
-| **Transforms** | `@lit-core/dom-paths` | `packages/transforms/dom-paths` | Rust (`oxc`), NAPI-RS | Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal |
-| **Transforms** | `@lit-core/dirty-mask` | `packages/transforms/dirty-mask` | Rust (`oxc`), NAPI-RS | Ahead-of-time property-to-part dependency bitmasking |
-| **Transforms** | `@lit-core/memoize` | `packages/transforms/memoize` | Rust (`oxc`), NAPI-RS | Ahead-of-time reactive expression auto-memoization |
-| **Transforms** | `@lit-core/elem-proxy` | `packages/transforms/elem-proxy` | Rust (`oxc`), NAPI-RS | AOT Custom Element proxy stubs for deferred registration |
-| **Transforms** | `@lit-core/directives` | `packages/transforms/directives` | Rust (`oxc`), NAPI-RS | Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations and pruning dead imports |
-| **Transforms** | `@lit-core/css-minifier` | `packages/transforms/css-minifier` | Rust (`lightningcss`), NAPI-RS | High-speed CSS template literal minifier |
-| **Transforms** | `@lit-core/html-minifier` | `packages/transforms/html-minifier` | Rust (`oxc`), NAPI-RS | High-speed HTML template literal minifier |
-| **Transforms** | `@lit-core/html-aot` | `packages/transforms/html-aot` | Rust (`oxc`), TypeScript | Ahead-of-time Lit template compilation eliminating runtime prepare phase |
-| **Transforms** | `@lit-core/tag-shake` | `packages/transforms/tag-shake` | Rust (`oxc`), NAPI-RS | Ahead-of-time Web Component dead code elimination and registration tag shaking |
-| **Targets** | `@lit-core/native` | `packages/targets/native` | Rust (`oxc`), NAPI-RS | AOT vanilla Web Component and micro-runtime compiler |
-| **Targets** | `@lit-core/morph-to-react` | `packages/targets/morph-to-react` | Rust (`oxc`, `lightningcss`), NAPI-RS, TypeScript | AOT compiler and native React 19 runtime lowering Lit components into React |
-| **Rendering** | `@lit-core/ssr` | `packages/rendering/ssr` | Rust (`oxc`), TypeScript | Universal streaming Declarative Shadow DOM server-side rendering engine |
-| **Rendering** | `@lit-core/resumable` | `packages/rendering/resumable` | Rust (`oxc`), TypeScript, Lit | Zero-JavaScript SSR and interaction-driven runtime resumption |
-| **Bundlers** | `@lit-core/vite-plugin` | `packages/bundlers/vite-plugin` | TypeScript, Vite / Rollup | Bundler plugin unifying all `@lit-core` optimizations |
-| **Bundlers** | `@lit-core/webpack-plugin` | `packages/bundlers/webpack-plugin` | TypeScript, Webpack | Bundler plugin unifying all `@lit-core` optimizations for Webpack |
-| **Crates** | `lit_analysis` | `crates/lit-analysis` | Rust (`oxc`, `html5ever`) | Shared semantic analysis engine for Lit components, decorators, and templates |
-| **Internal** | `@lit-core/benchmarks` | `packages/internal/benchmarks` | Node.js, Vite | Multi-library bundle size and deduplication benchmark harness |
-| **Internal** | `@lit-core/showcase` | `packages/internal/showcase` | TypeScript, Vite | Multi-framework component visualization showcase with isolated compiler passes |
-| **Internal** | `@lit-core/tests` | `packages/internal/tests` | TypeScript, Vitest, Playwright | Real component multi-framework Playwright test suite |
-| **Internal** | `@lit-core/test-kit` | `packages/internal/test-kit` | TypeScript, Playwright | Sandboxed Playwright Chromium runner and Shadow DOM test helpers |
+| Category       | Package                    | Path                                | Tech stack                                        | Purpose                                                                                                        |
+| :------------- | :------------------------- | :---------------------------------- | :------------------------------------------------ | :------------------------------------------------------------------------------------------------------------- |
+| **Primitives** | _(authoring APIs)_         | `packages/primitives/*`             | TypeScript, Rust (`oxc`)                          | Developer-facing decorators, signals, and authoring helpers                                                    |
+| **Transforms** | `@lit-core/css-fuse`       | `packages/transforms/css-fuse`      | Rust (`oxc`, `lightningcss`), NAPI-RS             | Cross-component CSS deduplication into shared constructable sheets                                             |
+| **Transforms** | `@lit-core/html-fuse`      | `packages/transforms/html-fuse`     | Rust (`oxc`), NAPI-RS                             | Cross-component static HTML and SVG fragment clustering                                                        |
+| **Transforms** | `@lit-core/props-lower`    | `packages/transforms/props-lower`   | Rust (`oxc`), NAPI-RS                             | AOT Lit decorator and property lowering                                                                        |
+| **Transforms** | `@lit-core/event-hoist`    | `packages/transforms/event-hoist`   | Rust (`oxc`), NAPI-RS                             | Ahead-of-time ShadowRoot event delegation                                                                      |
+| **Transforms** | `@lit-core/dom-paths`      | `packages/transforms/dom-paths`     | Rust (`oxc`), NAPI-RS                             | Ahead-of-time structural DOM path compiler eliminating TreeWalker mounting traversal                           |
+| **Transforms** | `@lit-core/dirty-mask`     | `packages/transforms/dirty-mask`    | Rust (`oxc`), NAPI-RS                             | Ahead-of-time property-to-part dependency bitmasking                                                           |
+| **Transforms** | `@lit-core/memoize`        | `packages/transforms/memoize`       | Rust (`oxc`), NAPI-RS                             | Ahead-of-time reactive expression auto-memoization                                                             |
+| **Transforms** | `@lit-core/elem-proxy`     | `packages/transforms/elem-proxy`    | Rust (`oxc`), NAPI-RS                             | AOT Custom Element proxy stubs for deferred registration                                                       |
+| **Transforms** | `@lit-core/directives`     | `packages/transforms/directives`    | Rust (`oxc`), NAPI-RS                             | Ahead-of-time Lit directive lowering compiler eliminating runtime wrapper allocations and pruning dead imports |
+| **Transforms** | `@lit-core/css-minifier`   | `packages/transforms/css-minifier`  | Rust (`lightningcss`), NAPI-RS                    | High-speed CSS template literal minifier                                                                       |
+| **Transforms** | `@lit-core/html-minifier`  | `packages/transforms/html-minifier` | Rust (`oxc`), NAPI-RS                             | High-speed HTML template literal minifier                                                                      |
+| **Transforms** | `@lit-core/html-aot`       | `packages/transforms/html-aot`      | Rust (`oxc`), TypeScript                          | Ahead-of-time Lit template compilation eliminating runtime prepare phase                                       |
+| **Transforms** | `@lit-core/tag-shake`      | `packages/transforms/tag-shake`     | Rust (`oxc`), NAPI-RS                             | Ahead-of-time Web Component dead code elimination and registration tag shaking                                 |
+| **Targets**    | `@lit-core/native`         | `packages/targets/native`           | Rust (`oxc`), NAPI-RS                             | AOT vanilla Web Component and micro-runtime compiler                                                           |
+| **Targets**    | `@lit-core/morph-to-react` | `packages/targets/morph-to-react`   | Rust (`oxc`, `lightningcss`), NAPI-RS, TypeScript | AOT compiler and native React 19 runtime lowering Lit components into React                                    |
+| **Rendering**  | `@lit-core/ssr`            | `packages/rendering/ssr`            | Rust (`oxc`), TypeScript                          | Universal streaming Declarative Shadow DOM server-side rendering engine                                        |
+| **Rendering**  | `@lit-core/resumable`      | `packages/rendering/resumable`      | Rust (`oxc`), TypeScript, Lit                     | Zero-JavaScript SSR and interaction-driven runtime resumption                                                  |
+| **Bundlers**   | `@lit-core/vite-plugin`    | `packages/bundlers/vite-plugin`     | TypeScript, Vite / Rollup                         | Bundler plugin unifying all `@lit-core` optimizations                                                          |
+| **Bundlers**   | `@lit-core/webpack-plugin` | `packages/bundlers/webpack-plugin`  | TypeScript, Webpack                               | Bundler plugin unifying all `@lit-core` optimizations for Webpack                                              |
+| **Crates**     | `lit_analysis`             | `crates/lit-analysis`               | Rust (`oxc`, `html5ever`)                         | Shared semantic analysis engine for Lit components, decorators, and templates                                  |
+| **Internal**   | `@lit-core/benchmarks`     | `packages/internal/benchmarks`      | Node.js, Vite                                     | Multi-library bundle size and deduplication benchmark harness                                                  |
+| **Internal**   | `@lit-core/showcase`       | `packages/internal/showcase`        | TypeScript, Vite                                  | Multi-framework component visualization showcase with isolated compiler passes                                 |
+| **Internal**   | `@lit-core/tests`          | `packages/internal/tests`           | TypeScript, Vitest, Playwright                    | Real component multi-framework Playwright test suite                                                           |
+| **Internal**   | `@lit-core/test-kit`       | `packages/internal/test-kit`        | TypeScript, Playwright                            | Sandboxed Playwright Chromium runner and Shadow DOM test helpers                                               |
 
 ---
 
 ## 🛠️ Development and build workflows
 
-- **Package manager**: `pnpm` (version >= 10, monorepo managed via `pnpm-workspace.yaml`).
+- **Package manager**: `pnpm` (version >= 12, monorepo managed via `pnpm-workspace.yaml`).
 - **Monorepo build orchestration**: `turbo run build`.
 - **Rust NAPI modules**:
   - Rust packages contain native `.node` bindings.
@@ -194,6 +197,7 @@ Packages are organized into six architectural categories under `packages/<catego
    - Never start local HTTP servers on loopback (`127.0.0.1`), as standard sandbox mode restricts local socket binding and triggers permission prompts.
    - Always launch Playwright Chromium through `@lit-core/test-kit` which configures verified `--single-process` flags.
    - Never run recursive searches across `node_modules`. Use `pnpm run vendor:where <suite> [component]` to resolve canonical component source files directly.
+
 ---
 
 ## Autonomous goal orchestration and specialized subagent roster
@@ -216,7 +220,6 @@ Whenever the user triggers `/goal` or asks for hands-off execution:
 ### Subagent team roster
 
 Subagents are defined in `.agents/agents/*.md` and can be launched via `invoke_subagent` or selected as primary agents:
-
 - [**`software-architect`**](file:///Users/rawlings/core-1/.agents/agents/software-architect.md) (`Model: 'pro'`): High-reasoning architectural decomposition, invariant auditing, and execution planning.
 - [**`rust-compiler-engineer`**](file:///Users/rawlings/core-1/.agents/agents/rust-compiler-engineer.md) (`Model: 'flash'` or `'pro'`): Native Rust AST parsing, lowering, and minification using `oxc` and `lightningcss`. Strictly enforces AST builder neutrality and minification resilience.
 - [**`web-components-engineer`**](file:///Users/rawlings/core-1/.agents/agents/web-components-engineer.md) (`Model: 'flash'`): Lit 3.x, Web Components, ReactiveElement, SSR resumability, and bundler plugin integration.

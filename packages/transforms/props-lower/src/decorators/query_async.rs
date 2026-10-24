@@ -21,12 +21,11 @@ pub fn try_transform_query_async<'a>(
     for dec in &prop_def.decorators {
         if symbol_ctx.resolve_decorator(dec) == Some(CanonicalLitSymbol::QueryAsyncDecorator) {
             has_query_async = true;
-            if let Expression::CallExpression(call) = &dec.expression {
-                if let Some(arg0) = call.arguments.first() {
-                    if let Some(Expression::StringLiteral(lit)) = arg0.as_expression() {
-                        selector = Some(lit.value.as_str().to_string());
-                    }
-                }
+            if let Expression::CallExpression(call) = &dec.expression
+                && let Some(arg0) = call.arguments.first()
+                && let Some(Expression::StringLiteral(lit)) = arg0.as_expression()
+            {
+                selector = Some(lit.value.as_str().to_string());
             }
             break;
         }

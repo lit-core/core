@@ -156,15 +156,16 @@ pub fn compute_template_parts(
                     } else if ch == '>' {
                         i += 1;
                         state = ParserState::Text;
-                        if let Some(opening) = current_opening.take() {
-                            if !opening.is_void && !opening.is_self_closing {
-                                stack.push(OpenElement {
-                                    tag: opening.tag,
-                                    child_count: 0,
-                                    path: opening.path,
-                                    last_child_was_text: false,
-                                });
-                            }
+                        if let Some(opening) = current_opening.take()
+                            && !opening.is_void
+                            && !opening.is_self_closing
+                        {
+                            stack.push(OpenElement {
+                                tag: opening.tag,
+                                child_count: 0,
+                                path: opening.path,
+                                last_child_was_text: false,
+                            });
                         }
                     } else {
                         i += 1;

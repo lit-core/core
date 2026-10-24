@@ -49,18 +49,21 @@ flowchart TD
 ### In-depth technical details
 
 #### 1. AST extraction with `oxc`
+
 The compiler inspects JavaScript and TypeScript files using `oxc` 0.151.0:
 - Resolves Lit imports semantically using `oxc_semantic` to trace identifiers regardless of mangling or aliasing (`import { css as c } from 'lit'`).
 - Matches both tagged template expressions (`static styles = css\`...\``) and call expressions (`static styles = css([styles1, styles2])`, common in compiled SCSS outputs).
 - Preserves template expression interpolation bindings if present, extracting only pure CSS rules.
 
 #### 2. Rule canonicalization and hashing with `lightningcss`
+
 Extracted stylesheet strings are parsed through `lightningcss`:
 - Normalizes shorthand declarations and formats values deterministically.
 - Sorts CSS declarations within each rule block into a canonical order.
 - Generates a 64-bit hash fingerprint for each `(selector, declaration_block)` pair.
 
 #### 3. Cross-module clustering and frequency index
+
 The engine builds an in-memory graph mapping rule hash fingerprints to the components that contain them:
 - Rules occurring at or above the configured `threshold` (default: `2`) become candidates for extraction.
 - Identical sharing patterns (rules shared across the exact same set of components) are consolidated into a single virtual module.
@@ -71,12 +74,15 @@ $$\text{net savings} = \sum (\text{rule bytes} \times (\text{occurrences} - 1)) 
 If the total bytes saved do not exceed the module overhead (~60 bytes per import), the rules remain local to the component.
 
 #### 4. Cascade, specificity, and safety invariants
+
 `css-fuse` strictly enforces Shadow DOM cascade semantics:
 - **Selector preservation**: Selectors are never mangled, combined, or shortened. `:host`, `:host(...)`, `:host-context(...)`, and `::slotted(...)` retain their exact specificity weight.
 - **Precedence ordering**: Shared constructable stylesheets are always prepended before local component overrides:
+
   ```javascript
   static styles = [_fused_sheet_a1b2, css`:host { display: inline-flex; }`];
   ```
+
   Because CSS rules with identical specificity resolve according to source order, this guarantees that local component overrides always take precedence over shared declarations.
 - **Chunk boundary scoping**: Virtual modules are scoped to the smallest common ancestor chunk in the bundler's module graph. Shared styles from lazy-loaded routes never leak into entry chunks or create circular dependency cycles.
 
@@ -108,7 +114,6 @@ export default defineConfig({
     }),
   ],
 });
-
 ```
 
 ### Via `@lit-core/webpack-plugin`
@@ -148,13 +153,13 @@ for (const mod of result.rewrittenModules) {
 
 ### Options reference
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `threshold` | `number` | `2` | Minimum number of component occurrences required to cluster a CSS rule |
-| `minNetSavings` | `number` | `30` | Minimum net byte savings required after accounting for module import overhead |
-| `include` | `string \| string[]` | `undefined` | Glob pattern of source files to include in deduplication analysis |
-| `exclude` | `string \| string[]` | `undefined` | Glob pattern of source files to exclude |
-| `applyInDev` | `boolean` | `false` | Whether to run CSS deduplication during local development server mode |
+| Option          | Type                 | Default     | Description                                                                   |
+| :-------------- | :------------------- | :---------- | :---------------------------------------------------------------------------- |
+| `threshold`     | `number`             | `2`         | Minimum number of component occurrences required to cluster a CSS rule        |
+| `minNetSavings` | `number`             | `30`        | Minimum net byte savings required after accounting for module import overhead |
+| `include`       | `string \| string[]` | `undefined` | Glob pattern of source files to include in deduplication analysis             |
+| `exclude`       | `string \| string[]` | `undefined` | Glob pattern of source files to exclude                                       |
+| `applyInDev`    | `boolean`            | `false`     | Whether to run CSS deduplication during local development server mode         |
 
 ---
 
@@ -162,13 +167,13 @@ for (const mod of result.rewrittenModules) {
 
 Evaluated across canonical components from production design systems (standalone `css-fuse` vs baseline in `packages/internal/benchmarks/results/`):
 
-| Design system | Baseline bundle size | `css-fuse` bundle size | Raw byte reduction | Gzip reduction | Fused constructable sheets |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 1,438,781 B | 924,632 B | -35.7% (-514,149 B) | -23.6% (-43,957 B) | 170 sheets (14,896 rules deduped) |
-| Spectrum Web Components | 819,006 B | 821,875 B | +0.4% (+2,869 B) | +1.5% (+2,243 B) | 571 sheets (10,033 rules deduped) |
-| Web Awesome | 370,946 B | 366,050 B | -1.3% (-4,896 B) | -0.9% (-762 B) | 86 sheets (205 rules deduped) |
-| Momentum Design | 346,579 B | 343,877 B | -0.8% (-2,702 B) | -0.1% (-111 B) | 70 sheets (227 rules deduped) |
-| Material Web | 269,272 B | 271,126 B | +0.7% (+1,854 B) | +1.0% (+596 B) | 82 sheets (212 rules deduped) |
+| Design system           | Baseline bundle size | `css-fuse` bundle size |  Raw byte reduction |     Gzip reduction |        Fused constructable sheets |
+| :---------------------- | -------------------: | ---------------------: | ------------------: | -----------------: | --------------------------------: |
+| Carbon Web Components   |          1,438,781 B |              924,632 B | -35.7% (-514,149 B) | -23.6% (-43,957 B) | 170 sheets (14,896 rules deduped) |
+| Spectrum Web Components |            819,006 B |              821,875 B |    +0.4% (+2,869 B) |   +1.5% (+2,243 B) | 571 sheets (10,033 rules deduped) |
+| Web Awesome             |            370,946 B |              366,050 B |    -1.3% (-4,896 B) |     -0.9% (-762 B) |     86 sheets (205 rules deduped) |
+| Momentum Design         |            346,579 B |              343,877 B |    -0.8% (-2,702 B) |     -0.1% (-111 B) |     70 sheets (227 rules deduped) |
+| Material Web            |            269,272 B |              271,126 B |    +0.7% (+1,854 B) |     +1.0% (+596 B) |     82 sheets (212 rules deduped) |
 
 > In design systems with extensive cross-component CSS duplication like IBM Carbon, `css-fuse` extracts 14,896 duplicate rules across 102 component modules, reducing the raw production bundle by **514 KB (-35.7%)** and gzip by **43.9 KB (-23.6%)**. In libraries with minimal duplication, module boundary overhead is protected by `minNetSavings`.
 

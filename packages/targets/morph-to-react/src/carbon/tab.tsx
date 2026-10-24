@@ -178,7 +178,7 @@ export const CdsTab = forwardRef<HTMLElement, CdsTabProps>(function CdsTab(props
         host._attachHostElement(node);
         elementRef(node);
       }}
-      role="listitem"
+      role="presentation"
       value={value}
       selected={isSelected ? '' : undefined}
       disabled={disabled ? '' : undefined}

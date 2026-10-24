@@ -170,11 +170,10 @@ impl PropertyModelExtractor {
                 {
                     if let Some(body) = &method.value.body {
                         for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(Expression::ObjectExpression(obj)) = &ret.argument {
-                                    properties
-                                        .extend(Self::parse_properties_object(obj, source_text));
-                                }
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(Expression::ObjectExpression(obj)) = &ret.argument
+                            {
+                                properties.extend(Self::parse_properties_object(obj, source_text));
                             }
                         }
                     }
@@ -194,23 +193,15 @@ impl PropertyModelExtractor {
         let mut properties = Vec::new();
 
         for stmt in &program.body {
-            if let Statement::ExpressionStatement(expr_stmt) = stmt {
-                if let Expression::AssignmentExpression(assign) = &expr_stmt.expression {
-                    if let AssignmentTarget::StaticMemberExpression(mem) = &assign.left {
-                        if mem.property.name == "properties" {
-                            if let Expression::Identifier(target_id) = &mem.object {
-                                if target_id.name == class_name {
-                                    if let Expression::ObjectExpression(obj) = &assign.right {
-                                        properties.extend(Self::parse_properties_object(
-                                            obj,
-                                            source_text,
-                                        ));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            if let Statement::ExpressionStatement(expr_stmt) = stmt
+                && let Expression::AssignmentExpression(assign) = &expr_stmt.expression
+                && let AssignmentTarget::StaticMemberExpression(mem) = &assign.left
+                && mem.property.name == "properties"
+                && let Expression::Identifier(target_id) = &mem.object
+                && target_id.name == class_name
+                && let Expression::ObjectExpression(obj) = &assign.right
+            {
+                properties.extend(Self::parse_properties_object(obj, source_text));
             }
         }
 
@@ -224,99 +215,89 @@ impl PropertyModelExtractor {
         let mut properties = Vec::new();
 
         for prop in &obj.properties {
-            if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                if let Some(prop_name) = p.key.static_name() {
-                    let mut prop_type = PropertyType::Unknown;
-                    let mut reflect = false;
-                    let mut attribute = Some(Self::to_kebab_case(&prop_name));
-                    let mut is_state = false;
-                    let mut no_accessor = false;
-                    let mut has_changed = None;
+            if let ObjectPropertyKind::ObjectProperty(p) = prop
+                && let Some(prop_name) = p.key.static_name()
+            {
+                let mut prop_type = PropertyType::Unknown;
+                let mut reflect = false;
+                let mut attribute = Some(Self::to_kebab_case(&prop_name));
+                let mut is_state = false;
+                let mut no_accessor = false;
+                let mut has_changed = None;
 
-                    match &p.value {
-                        Expression::ObjectExpression(opts) => {
-                            for opt in &opts.properties {
-                                if let ObjectPropertyKind::ObjectProperty(opt_prop) = opt {
-                                    if let Some(opt_key) = opt_prop.key.static_name() {
-                                        match opt_key.as_ref() {
-                                            "type" => {
-                                                if let Expression::Identifier(t_id) =
-                                                    &opt_prop.value
-                                                {
-                                                    prop_type = PropertyType::from_str_name(
-                                                        t_id.name.as_str(),
-                                                    );
-                                                }
-                                            }
-                                            "reflect" => {
-                                                reflect = Self::evaluate_boolean(&opt_prop.value)
-                                                    .unwrap_or(false);
-                                            }
-                                            "attribute" => {
-                                                attribute = match &opt_prop.value {
-                                                    Expression::StringLiteral(s) => {
-                                                        Some(s.value.to_string())
-                                                    }
-                                                    other => {
-                                                        if let Some(b) =
-                                                            Self::evaluate_boolean(other)
-                                                        {
-                                                            if !b {
-                                                                None
-                                                            } else {
-                                                                Some(Self::to_kebab_case(
-                                                                    &prop_name,
-                                                                ))
-                                                            }
-                                                        } else {
-                                                            None
-                                                        }
-                                                    }
-                                                };
-                                            }
-                                            "hasChanged" => {
-                                                has_changed = Self::extract_has_changed(
-                                                    opt_prop,
-                                                    source_text,
-                                                );
-                                            }
-                                            "state" => {
-                                                is_state = Self::evaluate_boolean(&opt_prop.value)
-                                                    .unwrap_or(false);
-                                            }
-                                            "noAccessor" => {
-                                                no_accessor =
-                                                    Self::evaluate_boolean(&opt_prop.value)
-                                                        .unwrap_or(false);
-                                            }
-                                            _ => {}
+                match &p.value {
+                    Expression::ObjectExpression(opts) => {
+                        for opt in &opts.properties {
+                            if let ObjectPropertyKind::ObjectProperty(opt_prop) = opt
+                                && let Some(opt_key) = opt_prop.key.static_name()
+                            {
+                                match opt_key.as_ref() {
+                                    "type" => {
+                                        if let Expression::Identifier(t_id) = &opt_prop.value {
+                                            prop_type =
+                                                PropertyType::from_str_name(t_id.name.as_str());
                                         }
                                     }
+                                    "reflect" => {
+                                        reflect = Self::evaluate_boolean(&opt_prop.value)
+                                            .unwrap_or(false);
+                                    }
+                                    "attribute" => {
+                                        attribute = match &opt_prop.value {
+                                            Expression::StringLiteral(s) => {
+                                                Some(s.value.to_string())
+                                            }
+                                            other => {
+                                                if let Some(b) = Self::evaluate_boolean(other) {
+                                                    if !b {
+                                                        None
+                                                    } else {
+                                                        Some(Self::to_kebab_case(&prop_name))
+                                                    }
+                                                } else {
+                                                    None
+                                                }
+                                            }
+                                        };
+                                    }
+                                    "hasChanged" => {
+                                        has_changed =
+                                            Self::extract_has_changed(opt_prop, source_text);
+                                    }
+                                    "state" => {
+                                        is_state = Self::evaluate_boolean(&opt_prop.value)
+                                            .unwrap_or(false);
+                                    }
+                                    "noAccessor" => {
+                                        no_accessor = Self::evaluate_boolean(&opt_prop.value)
+                                            .unwrap_or(false);
+                                    }
+                                    _ => {}
                                 }
                             }
                         }
-                        Expression::Identifier(type_id) => {
-                            prop_type = PropertyType::from_str_name(type_id.name.as_str());
-                        }
-                        _ => {}
                     }
-
-                    if is_state {
-                        attribute = None;
-                        reflect = false;
+                    Expression::Identifier(type_id) => {
+                        prop_type = PropertyType::from_str_name(type_id.name.as_str());
                     }
-
-                    properties.push(PropertyInfo {
-                        name: prop_name.to_string(),
-                        property_type: prop_type,
-                        attribute,
-                        reflect,
-                        has_changed,
-                        no_accessor,
-                        is_state,
-                        default_value: None,
-                    });
+                    _ => {}
                 }
+
+                if is_state {
+                    attribute = None;
+                    reflect = false;
+                }
+
+                properties.push(PropertyInfo {
+                    name: prop_name.to_string(),
+                    property_type: prop_type,
+                    attribute,
+                    reflect,
+                    has_changed,
+                    no_accessor,
+                    is_state,
+                    default_value: None,
+                });
             }
         }
 
@@ -356,45 +337,33 @@ impl PropertyModelExtractor {
 
         // 1. From class field initializers
         for element in &class.body.body {
-            if let ClassElement::PropertyDefinition(prop) = element {
-                if !prop.r#static {
-                    if let Some(prop_name) = prop.key.static_name() {
-                        if let Some(val) = &prop.value {
-                            if let Some(lit_val) = Self::expression_to_literal_string(val) {
-                                defaults_by_name.insert(prop_name.to_string(), lit_val);
-                            }
-                        }
-                    }
-                }
+            if let ClassElement::PropertyDefinition(prop) = element
+                && !prop.r#static
+                && let Some(prop_name) = prop.key.static_name()
+                && let Some(val) = &prop.value
+                && let Some(lit_val) = Self::expression_to_literal_string(val)
+            {
+                defaults_by_name.insert(prop_name.to_string(), lit_val);
             }
         }
 
         // 2. From constructor assignments: this.propName = value;
         for element in &class.body.body {
-            if let ClassElement::MethodDefinition(method) = element {
-                if method.kind == MethodDefinitionKind::Constructor {
-                    if let Some(body) = &method.value.body {
-                        for stmt in &body.statements {
-                            if let Statement::ExpressionStatement(expr_stmt) = stmt {
-                                if let Expression::AssignmentExpression(assign) =
-                                    &expr_stmt.expression
-                                {
-                                    if let AssignmentTarget::StaticMemberExpression(mem) =
-                                        &assign.left
-                                    {
-                                        if let Expression::ThisExpression(_) = &mem.object {
-                                            let prop_name = mem.property.name.as_str();
-                                            if let Some(val_str) =
-                                                Self::expression_to_literal_string(&assign.right)
-                                            {
-                                                defaults_by_name
-                                                    .entry(prop_name.to_string())
-                                                    .or_insert(val_str);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+            if let ClassElement::MethodDefinition(method) = element
+                && method.kind == MethodDefinitionKind::Constructor
+                && let Some(body) = &method.value.body
+            {
+                for stmt in &body.statements {
+                    if let Statement::ExpressionStatement(expr_stmt) = stmt
+                        && let Expression::AssignmentExpression(assign) = &expr_stmt.expression
+                        && let AssignmentTarget::StaticMemberExpression(mem) = &assign.left
+                        && let Expression::ThisExpression(_) = &mem.object
+                    {
+                        let prop_name = mem.property.name.as_str();
+                        if let Some(val_str) = Self::expression_to_literal_string(&assign.right) {
+                            defaults_by_name
+                                .entry(prop_name.to_string())
+                                .or_insert(val_str);
                         }
                     }
                 }

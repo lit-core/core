@@ -6,7 +6,7 @@ use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
 use oxc_semantic::{Scoping, SemanticBuilder, SymbolId};
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
@@ -77,23 +77,21 @@ fn get_tag_from_decorators(
     symbol_ctx: &SymbolProofContext<'_>,
 ) -> Option<String> {
     for dec in &class.decorators {
-        if let Expression::CallExpression(call) = &dec.expression {
-            if symbol_ctx.is_proven_decorator(&call.callee)
+        if let Expression::CallExpression(call) = &dec.expression
+            && symbol_ctx.is_proven_decorator(&call.callee)
                 == Some(CanonicalLitSymbol::CustomElementDecorator)
-            {
-                if let Some(first_arg) = call.arguments.first().and_then(|a| a.as_expression()) {
-                    match first_arg.without_parentheses() {
-                        Expression::StringLiteral(str_lit) => {
-                            return Some(str_lit.value.as_str().to_string());
-                        }
-                        Expression::TemplateLiteral(tpl)
-                            if tpl.expressions.is_empty() && !tpl.quasis.is_empty() =>
-                        {
-                            return Some(tpl.quasis[0].value.raw.to_string());
-                        }
-                        _ => {}
-                    }
+            && let Some(first_arg) = call.arguments.first().and_then(|a| a.as_expression())
+        {
+            match first_arg.without_parentheses() {
+                Expression::StringLiteral(str_lit) => {
+                    return Some(str_lit.value.as_str().to_string());
                 }
+                Expression::TemplateLiteral(tpl)
+                    if tpl.expressions.is_empty() && !tpl.quasis.is_empty() =>
+                {
+                    return Some(tpl.quasis[0].value.raw.to_string());
+                }
+                _ => {}
             }
         }
     }
@@ -141,16 +139,15 @@ fn scan_expression_registrations<'a>(
     class_to_tag: &mut HashMap<String, String>,
     discovered_tags: &mut Vec<String>,
 ) {
-    if let Expression::CallExpression(call) = expr {
-        if let Some(reg) = symbol_ctx.is_custom_elements_define(call) {
-            if let Some(tag) = reg.tag {
-                if !discovered_tags.contains(&tag) {
-                    discovered_tags.push(tag.clone());
-                }
-                if let Expression::Identifier(class_id) = reg.class_expr.without_parentheses() {
-                    class_to_tag.insert(class_id.name.as_str().to_string(), tag);
-                }
-            }
+    if let Expression::CallExpression(call) = expr
+        && let Some(reg) = symbol_ctx.is_custom_elements_define(call)
+        && let Some(tag) = reg.tag
+    {
+        if !discovered_tags.contains(&tag) {
+            discovered_tags.push(tag.clone());
+        }
+        if let Expression::Identifier(class_id) = reg.class_expr.without_parentheses() {
+            class_to_tag.insert(class_id.name.as_str().to_string(), tag);
         }
     }
 }
@@ -206,10 +203,10 @@ fn build_ssr_analysis<'a, 'p>(
                     .as_ref()
                     .and_then(|id| class_to_tag.get(id.name.as_str()).cloned())
             });
-            if let Some(t) = &tag {
-                if !discovered_tags.contains(t) {
-                    discovered_tags.push(t.clone());
-                }
+            if let Some(t) = &tag
+                && !discovered_tags.contains(t)
+            {
+                discovered_tags.push(t.clone());
             }
             let is_ce = tag.is_some()
                 || symbol_ctx.prove_heritage(class).is_reactive()
@@ -217,10 +214,8 @@ fn build_ssr_analysis<'a, 'p>(
                     .heritage
                     .as_ref()
                     .is_some_and(|h| extends_unshadowed_html_element(&h.expression, &symbol_ctx));
-            if is_ce {
-                if let Some(sym) = get_class_id_symbol(class, scoping) {
-                    custom_element_symbols.insert(sym);
-                }
+            if is_ce && let Some(sym) = get_class_id_symbol(class, scoping) {
+                custom_element_symbols.insert(sym);
             }
         });
     }
@@ -229,14 +224,12 @@ fn build_ssr_analysis<'a, 'p>(
     for _ in 0..2 {
         for stmt in &program.body {
             for_each_class_in_stmt(stmt, |class| {
-                if let Some(heritage) = &class.heritage {
-                    if let Some(super_sym) = resolve_super_symbol(&heritage.expression, scoping) {
-                        if custom_element_symbols.contains(&super_sym) {
-                            if let Some(sym) = get_class_id_symbol(class, scoping) {
-                                custom_element_symbols.insert(sym);
-                            }
-                        }
-                    }
+                if let Some(heritage) = &class.heritage
+                    && let Some(super_sym) = resolve_super_symbol(&heritage.expression, scoping)
+                    && custom_element_symbols.contains(&super_sym)
+                    && let Some(sym) = get_class_id_symbol(class, scoping)
+                {
+                    custom_element_symbols.insert(sym);
                 }
             });
         }
@@ -259,10 +252,10 @@ fn is_custom_element_class(
     if tag.is_some() {
         return true;
     }
-    if let Some(sym) = get_class_id_symbol(class, symbol_ctx.scoping) {
-        if custom_element_symbols.contains(&sym) {
-            return true;
-        }
+    if let Some(sym) = get_class_id_symbol(class, symbol_ctx.scoping)
+        && custom_element_symbols.contains(&sym)
+    {
+        return true;
     }
     if symbol_ctx.prove_heritage(class).is_reactive() {
         return true;
@@ -271,10 +264,10 @@ fn is_custom_element_class(
         if extends_unshadowed_html_element(&heritage.expression, symbol_ctx) {
             return true;
         }
-        if let Some(super_sym) = resolve_super_symbol(&heritage.expression, symbol_ctx.scoping) {
-            if custom_element_symbols.contains(&super_sym) {
-                return true;
-            }
+        if let Some(super_sym) = resolve_super_symbol(&heritage.expression, symbol_ctx.scoping)
+            && custom_element_symbols.contains(&super_sym)
+        {
+            return true;
         }
     }
     false
@@ -287,10 +280,10 @@ fn matches_island_criteria(
     include_patterns: &Option<Vec<String>>,
     exclude_patterns: &Option<Vec<String>>,
 ) -> bool {
-    if let (Some(excludes), Some(t)) = (exclude_patterns, tag) {
-        if excludes.iter().any(|p| t == p || t.contains(p.as_str())) {
-            return false;
-        }
+    if let (Some(excludes), Some(t)) = (exclude_patterns, tag)
+        && excludes.iter().any(|p| t == p || t.contains(p.as_str()))
+    {
+        return false;
     }
     if is_all_islands {
         return is_custom_element;
@@ -303,26 +296,24 @@ fn matches_island_criteria(
 
 fn has_existing_island_prop(class: &Class<'_>) -> bool {
     for member in &class.body.body {
-        if let ClassElement::PropertyDefinition(prop) = member {
-            if prop.r#static && prop.key.is_specific_static_name("__isIsland") {
-                return true;
-            }
+        if let ClassElement::PropertyDefinition(prop) = member
+            && prop.r#static
+            && prop.key.is_specific_static_name("__isIsland")
+        {
+            return true;
         }
     }
     false
 }
 
 fn is_super_connected_callback_stmt(stmt: &Statement<'_>) -> bool {
-    if let Statement::ExpressionStatement(expr_stmt) = stmt {
-        if let Expression::CallExpression(call) = &expr_stmt.expression {
-            if let Expression::StaticMemberExpression(mem) = &call.callee {
-                if matches!(mem.object, Expression::Super(_))
-                    && mem.property.name == "connectedCallback"
-                {
-                    return true;
-                }
-            }
-        }
+    if let Statement::ExpressionStatement(expr_stmt) = stmt
+        && let Expression::CallExpression(call) = &expr_stmt.expression
+        && let Expression::StaticMemberExpression(mem) = &call.callee
+        && matches!(mem.object, Expression::Super(_))
+        && mem.property.name == "connectedCallback"
+    {
+        return true;
     }
     false
 }
@@ -335,16 +326,16 @@ fn transform_class<'a>(
 ) -> bool {
     let mut modified = false;
     let mut tag = get_tag_from_decorators(class, &analysis.symbol_ctx);
-    if tag.is_none() {
-        if let Some(ref id) = class.id {
-            tag = analysis.class_to_tag.get(id.name.as_str()).cloned();
-        }
+    if tag.is_none()
+        && let Some(ref id) = class.id
+    {
+        tag = analysis.class_to_tag.get(id.name.as_str()).cloned();
     }
 
-    if let Some(ref t) = tag {
-        if !analysis.discovered_tags.contains(t) {
-            analysis.discovered_tags.push(t.clone());
-        }
+    if let Some(ref t) = tag
+        && !analysis.discovered_tags.contains(t)
+    {
+        analysis.discovered_tags.push(t.clone());
     }
 
     let is_custom_element = is_custom_element_class(
@@ -357,23 +348,24 @@ fn transform_class<'a>(
     // 1. In SSR mode, strip browser-only firstUpdated and non-super connectedCallback bodies
     if options.ssr_mode.unwrap_or(false) && is_custom_element {
         for element in &mut class.body.body {
-            if let ClassElement::MethodDefinition(method_def) = element {
-                if !method_def.r#static && method_def.kind == MethodDefinitionKind::Method {
-                    if method_def.key.is_specific_static_name("firstUpdated") {
-                        if let Some(ref mut body) = method_def.value.body {
-                            if !body.statements.is_empty() {
-                                body.statements.clear();
-                                modified = true;
-                            }
-                        }
-                    } else if method_def.key.is_specific_static_name("connectedCallback") {
-                        if let Some(ref mut body) = method_def.value.body {
-                            let orig_len = body.statements.len();
-                            body.statements.retain(is_super_connected_callback_stmt);
-                            if body.statements.len() != orig_len {
-                                modified = true;
-                            }
-                        }
+            if let ClassElement::MethodDefinition(method_def) = element
+                && !method_def.r#static
+                && method_def.kind == MethodDefinitionKind::Method
+            {
+                if method_def.key.is_specific_static_name("firstUpdated") {
+                    if let Some(ref mut body) = method_def.value.body
+                        && !body.statements.is_empty()
+                    {
+                        body.statements.clear();
+                        modified = true;
+                    }
+                } else if method_def.key.is_specific_static_name("connectedCallback")
+                    && let Some(ref mut body) = method_def.value.body
+                {
+                    let orig_len = body.statements.len();
+                    body.statements.retain(is_super_connected_callback_stmt);
+                    if body.statements.len() != orig_len {
+                        modified = true;
                     }
                 }
             }
@@ -459,27 +451,26 @@ pub fn transform_ssr_component(
                 }
             }
             Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration {
-                    if transform_class(class, &mut analysis, &opts, &ast) {
-                        modified = true;
-                    }
+                if let Declaration::ClassDeclaration(class) = &mut export_decl.declaration
+                    && transform_class(class, &mut analysis, &opts, &ast)
+                {
+                    modified = true;
                 }
             }
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                     &mut export_decl.declaration
+                    && transform_class(class, &mut analysis, &opts, &ast)
                 {
-                    if transform_class(class, &mut analysis, &opts, &ast) {
-                        modified = true;
-                    }
+                    modified = true;
                 }
             }
             Statement::VariableDeclaration(var_decl) => {
                 for decl in &mut var_decl.declarations {
-                    if let Some(Expression::ClassExpression(class)) = &mut decl.init {
-                        if transform_class(class, &mut analysis, &opts, &ast) {
-                            modified = true;
-                        }
+                    if let Some(Expression::ClassExpression(class)) = &mut decl.init
+                        && transform_class(class, &mut analysis, &opts, &ast)
+                    {
+                        modified = true;
                     }
                 }
             }

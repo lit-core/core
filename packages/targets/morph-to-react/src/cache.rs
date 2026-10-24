@@ -87,19 +87,19 @@ pub fn put_cached(key: String, result: CompileResultDto) {
 
 /// Clears the global compilation cache.
 pub fn clear_cache() {
-    if let Ok(mut guard) = COMPILE_CACHE.write() {
-        if let Some(map) = guard.as_mut() {
-            map.clear();
-        }
+    if let Ok(mut guard) = COMPILE_CACHE.write()
+        && let Some(map) = guard.as_mut()
+    {
+        map.clear();
     }
 }
 
 /// Returns the current number of cached module compilations.
 pub fn cache_size() -> usize {
-    if let Ok(guard) = COMPILE_CACHE.read() {
-        if let Some(map) = guard.as_ref() {
-            return map.len();
-        }
+    if let Ok(guard) = COMPILE_CACHE.read()
+        && let Some(map) = guard.as_ref()
+    {
+        return map.len();
     }
     0
 }

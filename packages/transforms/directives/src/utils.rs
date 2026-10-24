@@ -25,13 +25,13 @@ pub fn extract_arrow_expr<'a>(
     if let Some(expr) = arrow.body.as_expression() {
         return Some(expr);
     }
-    if let ArrowFunctionBody::FunctionBody(b) = &arrow.body {
-        if let Some(first_stmt) = b.statements.first() {
-            match first_stmt {
-                Statement::ExpressionStatement(e) => return Some(&e.expression),
-                Statement::ReturnStatement(r) => return r.argument.as_ref(),
-                _ => {}
-            }
+    if let ArrowFunctionBody::FunctionBody(b) = &arrow.body
+        && let Some(first_stmt) = b.statements.first()
+    {
+        match first_stmt {
+            Statement::ExpressionStatement(e) => return Some(&e.expression),
+            Statement::ReturnStatement(r) => return r.argument.as_ref(),
+            _ => {}
         }
     }
     None

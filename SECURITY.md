@@ -2,9 +2,9 @@
 
 ## Supported versions
 
-| Package | Supported versions |
-| :--- | :--- |
-| `@lit-core/*` | `>= 0.1.0` |
+| Package       | Supported versions |
+| :------------ | :----------------- |
+| `@lit-core/*` | `>= 0.1.0`         |
 
 ## Reporting a vulnerability
 

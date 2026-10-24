@@ -261,10 +261,10 @@ pub fn transform_native(source: String, options: Option<TransformOptions>) -> Tr
     import_scanner::clean_dead_imports(&mut program, &ast);
 
     let mut codegen_options = CodegenOptions::default();
-    if opts.sourcemap.unwrap_or(false) {
-        if let Some(ref filename) = opts.filename {
-            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
-        }
+    if opts.sourcemap.unwrap_or(false)
+        && let Some(ref filename) = opts.filename
+    {
+        codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
     }
 
     let codegen_result = Codegen::new().with_options(codegen_options).build(&program);

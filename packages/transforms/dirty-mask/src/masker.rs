@@ -58,15 +58,12 @@ fn update_local_var_masks_from_decl(
             }
             BindingPattern::BindingIdentifier(bind_id) => {
                 let local_name = bind_id.name.as_str();
-                if !reassigned_vars.contains(local_name) {
-                    if let Some(init) = &decl.init {
-                        let mask = compute_part_mask_with_locals(
-                            init,
-                            reactive_props,
-                            Some(local_var_masks),
-                        );
-                        local_var_masks.insert(local_name.to_string(), mask);
-                    }
+                if !reassigned_vars.contains(local_name)
+                    && let Some(init) = &decl.init
+                {
+                    let mask =
+                        compute_part_mask_with_locals(init, reactive_props, Some(local_var_masks));
+                    local_var_masks.insert(local_name.to_string(), mask);
                 }
             }
             _ => {}
@@ -298,14 +295,12 @@ fn mask_expressions_in_expr_with_locals<'a>(
             if is_tag(&tagged.tag) {
                 for expr_idx in 0..tagged.quasi.expressions.len() {
                     let quasi_expr = &tagged.quasi.expressions[expr_idx];
-                    if let Expression::ConditionalExpression(cond) = quasi_expr {
-                        if let Expression::BinaryExpression(bin) = &cond.test {
-                            if let Expression::StaticMemberExpression(mem) = &bin.left {
-                                if mem.property.name == "__litDirtyMask" {
-                                    continue;
-                                }
-                            }
-                        }
+                    if let Expression::ConditionalExpression(cond) = quasi_expr
+                        && let Expression::BinaryExpression(bin) = &cond.test
+                        && let Expression::StaticMemberExpression(mem) = &bin.left
+                        && mem.property.name == "__litDirtyMask"
+                    {
+                        continue;
                     }
 
                     if expr_idx < tagged.quasi.quasis.len() {

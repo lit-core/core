@@ -54,6 +54,7 @@ flowchart TD
 ### In-depth technical details
 
 #### 1. Lightning CSS optimization passes
+
 The minifier executes full CSS AST-level optimization:
 - **Color shortening**: Converts verbose hex codes and named colors to their shortest equivalent (`#ffffff` to `#fff`, `rgba(0, 0, 0, 0)` to `transparent`).
 - **Unit simplification**: Strips units from zero values (`0px` to `0`, `0rem` to `0`).
@@ -61,9 +62,10 @@ The minifier executes full CSS AST-level optimization:
 - **Comment elimination**: Purges block and line comments.
 
 #### 2. Interpolation safety
+
 When templates include dynamic JavaScript expressions:
 ```typescript
-css`:host { color: ${themeColor}; margin: 8px; }`
+css`:host { color: ${themeColor}; margin: 8px; }`;
 ```
 `css-minifier` minifies each static quasi independently while protecting dynamic expression boundary tokens, guaranteeing valid CSS syntax at runtime.
 
@@ -92,7 +94,6 @@ export default defineConfig({
     }),
   ],
 });
-
 ```
 
 ### Via `@lit-core/webpack-plugin`
@@ -131,13 +132,13 @@ console.log(minified);
 
 Evaluated across canonical component suites (standalone `css-minifier` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
 
-| Design system | Baseline bundle size | With `css-minifier` | Raw bundle reduction | Gzip reduction | First render speedup |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 1,438,781 B | 1,434,476 B | -0.3% (-4,305 B) | -0.04% (-66 B) | +49.1% (48.9 ms vs 96.0 ms) |
-| Spectrum Web Components | 819,006 B | 818,661 B | -0.04% (-345 B) | -0.05% (-72 B) | +51.1% (25.6 ms vs 52.3 ms) |
-| Web Awesome | 370,946 B | 337,367 B | -9.1% (-33,579 B) | -6.8% (-5,886 B) | +32.0% (27.9 ms vs 41.0 ms) |
-| Momentum Design | 346,579 B | 328,340 B | -5.3% (-18,239 B) | -2.3% (-1,692 B) | +49.5% (20.0 ms vs 39.6 ms) |
-| Material Web | 269,272 B | 269,272 B | 0.0% (0 B) | 0.0% (0 B) | +58.8% (18.6 ms vs 45.1 ms) |
+| Design system           | Baseline bundle size | With `css-minifier` | Raw bundle reduction |   Gzip reduction |        First render speedup |
+| :---------------------- | -------------------: | ------------------: | -------------------: | ---------------: | --------------------------: |
+| Carbon Web Components   |          1,438,781 B |         1,434,476 B |     -0.3% (-4,305 B) |   -0.04% (-66 B) | +49.1% (48.9 ms vs 96.0 ms) |
+| Spectrum Web Components |            819,006 B |           818,661 B |      -0.04% (-345 B) |   -0.05% (-72 B) | +51.1% (25.6 ms vs 52.3 ms) |
+| Web Awesome             |            370,946 B |           337,367 B |    -9.1% (-33,579 B) | -6.8% (-5,886 B) | +32.0% (27.9 ms vs 41.0 ms) |
+| Momentum Design         |            346,579 B |           328,340 B |    -5.3% (-18,239 B) | -2.3% (-1,692 B) | +49.5% (20.0 ms vs 39.6 ms) |
+| Material Web            |            269,272 B |           269,272 B |           0.0% (0 B) |       0.0% (0 B) | +58.8% (18.6 ms vs 45.1 ms) |
 
 > Embedded CSS template minification via `lightningcss` parses and optimizes inline CSS in `css\`...\`` tagged template strings, eliminating whitespace, redundant semicolons, and comments without disturbing JavaScript syntax.
 

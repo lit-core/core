@@ -1,7 +1,7 @@
 use oxc_allocator::{ArenaVec, GetAllocator};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 use std::collections::HashMap;
 
 pub fn build_loader_program<'a>(

@@ -48,16 +48,16 @@ pub fn transform_vanilla_class<'a>(
         std::collections::HashMap::new();
 
     for elem in &class.body.body {
-        if let ClassElement::PropertyDefinition(prop) = elem {
-            if !prop.r#static {
-                let name = match &prop.key {
-                    PropertyKey::StaticIdentifier(id) => Some(id.name.as_str().to_string()),
-                    PropertyKey::StringLiteral(lit) => Some(lit.value.as_str().to_string()),
-                    _ => None,
-                };
-                if let (Some(prop_name), Some(val)) = (name, &prop.value) {
-                    instance_defaults.insert(prop_name, val.clone_in(allocator));
-                }
+        if let ClassElement::PropertyDefinition(prop) = elem
+            && !prop.r#static
+        {
+            let name = match &prop.key {
+                PropertyKey::StaticIdentifier(id) => Some(id.name.as_str().to_string()),
+                PropertyKey::StringLiteral(lit) => Some(lit.value.as_str().to_string()),
+                _ => None,
+            };
+            if let (Some(prop_name), Some(val)) = (name, &prop.value) {
+                instance_defaults.insert(prop_name, val.clone_in(allocator));
             }
         }
     }
@@ -94,35 +94,32 @@ pub fn transform_vanilla_class<'a>(
 
                     // Check for @property or @state decorators
                     for dec in &prop.decorators {
-                        if let Expression::CallExpression(call) = &dec.expression {
-                            if (import_ctx.is_property_decorator(&call.callee, scoping)
+                        if let Expression::CallExpression(call) = &dec.expression
+                            && (import_ctx.is_property_decorator(&call.callee, scoping)
                                 || import_ctx.is_state_decorator(&call.callee, scoping))
-                                && seen_props.insert(prop_name.clone())
-                            {
-                                let is_state = import_ctx.is_state_decorator(&call.callee, scoping);
-                                let opts_obj = call.arguments.first().and_then(|arg| {
-                                    if let Some(Expression::ObjectExpression(obj)) =
-                                        arg.as_expression()
-                                    {
-                                        Some(obj.as_ref())
-                                    } else {
-                                        None
-                                    }
-                                });
-                                let (p_type, reflect, attr_name) =
-                                    parse_property_options_obj(opts_obj, &prop_name, is_state);
+                            && seen_props.insert(prop_name.clone())
+                        {
+                            let is_state = import_ctx.is_state_decorator(&call.callee, scoping);
+                            let opts_obj = call.arguments.first().and_then(|arg| {
+                                if let Some(Expression::ObjectExpression(obj)) = arg.as_expression()
+                                {
+                                    Some(obj.as_ref())
+                                } else {
+                                    None
+                                }
+                            });
+                            let (p_type, reflect, attr_name) =
+                                parse_property_options_obj(opts_obj, &prop_name, is_state);
 
-                                let default_val =
-                                    prop.value.as_ref().map(|v| v.clone_in(allocator));
+                            let default_val = prop.value.as_ref().map(|v| v.clone_in(allocator));
 
-                                properties.push(PropertyInfo {
-                                    name: prop_name.clone(),
-                                    prop_type: p_type,
-                                    reflect,
-                                    attribute_name: attr_name,
-                                    default_value: default_val,
-                                });
-                            }
+                            properties.push(PropertyInfo {
+                                name: prop_name.clone(),
+                                prop_type: p_type,
+                                reflect,
+                                attribute_name: attr_name,
+                                default_value: default_val,
+                            });
                         }
                     }
                 }
@@ -132,40 +129,40 @@ pub fn transform_vanilla_class<'a>(
                 if m.r#static && name == "styles" {
                     if let Some(body) = &m.value.body {
                         for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(arg) = &ret.argument {
-                                    styles_css = extract_css_from_expr(arg);
-                                }
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(arg) = &ret.argument
+                            {
+                                styles_css = extract_css_from_expr(arg);
                             }
                         }
                     }
                 } else if m.r#static && name == "properties" {
                     if let Some(body) = &m.value.body {
                         for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(Expression::ObjectExpression(obj)) = &ret.argument {
-                                    extract_static_properties_obj(
-                                        obj,
-                                        allocator,
-                                        &instance_defaults,
-                                        &mut seen_props,
-                                        &mut properties,
-                                    );
-                                }
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(Expression::ObjectExpression(obj)) = &ret.argument
+                            {
+                                extract_static_properties_obj(
+                                    obj,
+                                    allocator,
+                                    &instance_defaults,
+                                    &mut seen_props,
+                                    &mut properties,
+                                );
                             }
                         }
                     }
-                } else if name == "render" {
-                    if let Some(body) = &m.value.body {
-                        extract_render_quasis_and_exprs(
-                            body,
-                            allocator,
-                            scoping,
-                            import_ctx,
-                            &mut template_quasis,
-                            &mut template_exprs,
-                        );
-                    }
+                } else if name == "render"
+                    && let Some(body) = &m.value.body
+                {
+                    extract_render_quasis_and_exprs(
+                        body,
+                        allocator,
+                        scoping,
+                        import_ctx,
+                        &mut template_quasis,
+                        &mut template_exprs,
+                    );
                 }
             }
             _ => {}
@@ -270,10 +267,10 @@ pub fn transform_vanilla_class<'a>(
                 if p.r#static && (p_name == Some("styles") || p_name == Some("properties")) {
                     continue;
                 }
-                if let Some(pn) = p_name {
-                    if seen_props.contains(pn) {
-                        continue;
-                    }
+                if let Some(pn) = p_name
+                    && seen_props.contains(pn)
+                {
+                    continue;
                 }
                 new_body_elements.push(elem);
             }
@@ -288,12 +285,10 @@ pub fn transform_vanilla_class<'a>(
     // 6. Define custom element if tag_name is present and class had a decorator.
     // If the element was not defined via decorator, the input source code already contains
     // a customElements.define statement so do not emit a duplicate.
-    if has_custom_element_decorator {
-        if let Some(tag) = &target.tag_name {
-            let define_stmt = helper
-                .define_custom_element(allocator.alloc_str(tag), allocator.alloc_str(comp_id));
-            out_post_stmts.push(define_stmt);
-        }
+    if has_custom_element_decorator && let Some(tag) = &target.tag_name {
+        let define_stmt =
+            helper.define_custom_element(allocator.alloc_str(tag), allocator.alloc_str(comp_id));
+        out_post_stmts.push(define_stmt);
     }
 
     true
@@ -333,10 +328,10 @@ fn parse_property_options_obj<'a>(
                         }
                     }
                     Some("state") => {
-                        if let Expression::BooleanLiteral(b) = &prop_kv.value {
-                            if b.value {
-                                is_state = true;
-                            }
+                        if let Expression::BooleanLiteral(b) = &prop_kv.value
+                            && b.value
+                        {
+                            is_state = true;
                         }
                     }
                     Some("attribute") => match &prop_kv.value {
@@ -379,25 +374,25 @@ fn extract_static_properties_obj<'a>(
                 PropertyKey::StringLiteral(lit) => Some(lit.value.as_str().to_string()),
                 _ => None,
             };
-            if let Some(prop_name) = prop_name_opt {
-                if seen_props.insert(prop_name.clone()) {
-                    let opts_obj = match &prop_kv.value {
-                        Expression::ObjectExpression(inner_obj) => Some(inner_obj.as_ref()),
-                        _ => None,
-                    };
-                    let (p_type, reflect, attr_name) =
-                        parse_property_options_obj(opts_obj, &prop_name, false);
-                    let default_val = instance_defaults
-                        .get(&prop_name)
-                        .map(|v| v.clone_in(allocator));
-                    properties.push(PropertyInfo {
-                        name: prop_name,
-                        prop_type: p_type,
-                        reflect,
-                        attribute_name: attr_name,
-                        default_value: default_val,
-                    });
-                }
+            if let Some(prop_name) = prop_name_opt
+                && seen_props.insert(prop_name.clone())
+            {
+                let opts_obj = match &prop_kv.value {
+                    Expression::ObjectExpression(inner_obj) => Some(inner_obj.as_ref()),
+                    _ => None,
+                };
+                let (p_type, reflect, attr_name) =
+                    parse_property_options_obj(opts_obj, &prop_name, false);
+                let default_val = instance_defaults
+                    .get(&prop_name)
+                    .map(|v| v.clone_in(allocator));
+                properties.push(PropertyInfo {
+                    name: prop_name,
+                    prop_type: p_type,
+                    reflect,
+                    attribute_name: attr_name,
+                    default_value: default_val,
+                });
             }
         }
     }
@@ -418,10 +413,10 @@ fn extract_css_from_expr<'a>(expr: &Expression<'a>) -> Option<String> {
         Expression::ArrayExpression(arr) => {
             let mut parts = Vec::new();
             for el in &arr.elements {
-                if let Some(e) = el.as_expression() {
-                    if let Some(s) = extract_css_from_expr(e) {
-                        parts.push(s);
-                    }
+                if let Some(e) = el.as_expression()
+                    && let Some(s) = extract_css_from_expr(e)
+                {
+                    parts.push(s);
                 }
             }
             Some(parts.join("\n"))
@@ -439,18 +434,17 @@ fn extract_render_quasis_and_exprs<'a>(
     out_exprs: &mut Vec<Expression<'a>>,
 ) {
     for stmt in &body.statements {
-        if let Statement::ReturnStatement(ret) = stmt {
-            if let Some(Expression::TaggedTemplateExpression(tag)) = &ret.argument {
-                if import_ctx.is_html_tag(&tag.tag, scoping) {
-                    for q in &tag.quasi.quasis {
-                        out_quasis.push(q.value.raw.as_str().to_string());
-                    }
-                    for e in &tag.quasi.expressions {
-                        out_exprs.push(e.clone_in(allocator));
-                    }
-                    return;
-                }
+        if let Statement::ReturnStatement(ret) = stmt
+            && let Some(Expression::TaggedTemplateExpression(tag)) = &ret.argument
+            && import_ctx.is_html_tag(&tag.tag, scoping)
+        {
+            for q in &tag.quasi.quasis {
+                out_quasis.push(q.value.raw.as_str().to_string());
             }
+            for e in &tag.quasi.expressions {
+                out_exprs.push(e.clone_in(allocator));
+            }
+            return;
         }
     }
 }

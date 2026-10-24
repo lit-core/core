@@ -2,7 +2,7 @@
 
 use html5ever::driver::ParseOpts;
 use html5ever::tendril::TendrilSink;
-use html5ever::{local_name, namespace_url, ns, parse_fragment, QualName};
+use html5ever::{QualName, local_name, namespace_url, ns, parse_fragment};
 use markup5ever_rcdom::{Handle, NodeData, RcDom};
 use serde::{Deserialize, Serialize};
 
@@ -332,10 +332,10 @@ impl TemplateParser {
             | NodeData::ProcessingInstruction { .. } => None,
             NodeData::Comment { ref contents } => {
                 let text: &str = contents.as_ref();
-                if let Some(idx_str) = text.strip_prefix("lit-part-") {
-                    if let Ok(idx) = idx_str.parse::<usize>() {
-                        return Some(TemplateNode::Expression(idx));
-                    }
+                if let Some(idx_str) = text.strip_prefix("lit-part-")
+                    && let Ok(idx) = idx_str.parse::<usize>()
+                {
+                    return Some(TemplateNode::Expression(idx));
                 }
                 Some(TemplateNode::Comment(text.to_string()))
             }
@@ -435,15 +435,15 @@ impl TemplateParser {
         let mut attributes = Vec::new();
 
         for (attr_name_raw, attr_val_raw) in raw_attrs {
-            if let Some(idx_str) = attr_name_raw.strip_prefix("lit-attr-directive-") {
-                if let Ok(idx) = idx_str.parse::<usize>() {
-                    attributes.push(TemplateAttribute {
-                        name: String::new(),
-                        prefix: AttributePrefix::Plain,
-                        value: AttributeValue::Directive(idx),
-                    });
-                    continue;
-                }
+            if let Some(idx_str) = attr_name_raw.strip_prefix("lit-attr-directive-")
+                && let Ok(idx) = idx_str.parse::<usize>()
+            {
+                attributes.push(TemplateAttribute {
+                    name: String::new(),
+                    prefix: AttributePrefix::Plain,
+                    value: AttributeValue::Directive(idx),
+                });
+                continue;
             }
 
             let (parts, first_hole_idx) = Self::parse_attribute_value_parts(attr_val_raw);

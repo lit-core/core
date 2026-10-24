@@ -184,29 +184,26 @@ impl DecoratorExtractor {
 
         // 2. From statements: customElements.define("my-tag", TargetClass)
         for stmt in &program.body {
-            if let Statement::ExpressionStatement(expr_stmt) = stmt {
-                if let Expression::CallExpression(call) = &expr_stmt.expression {
-                    if let Some(reg) = ctx.is_custom_elements_define(call) {
-                        let targets_class = match reg.class_expr {
-                            Expression::Identifier(id) => {
-                                if let Some(target_sym) = class_sym_id {
-                                    id.reference_id
-                                        .get()
-                                        .and_then(|r| ctx.scoping.get_reference(r).symbol_id())
-                                        == Some(target_sym)
-                                } else {
-                                    id.name == class_name
-                                }
-                            }
-                            _ => false,
-                        };
-
-                        if targets_class {
-                            if let Some(tag) = reg.tag {
-                                return Some(tag);
-                            }
+            if let Statement::ExpressionStatement(expr_stmt) = stmt
+                && let Expression::CallExpression(call) = &expr_stmt.expression
+                && let Some(reg) = ctx.is_custom_elements_define(call)
+            {
+                let targets_class = match reg.class_expr {
+                    Expression::Identifier(id) => {
+                        if let Some(target_sym) = class_sym_id {
+                            id.reference_id
+                                .get()
+                                .and_then(|r| ctx.scoping.get_reference(r).symbol_id())
+                                == Some(target_sym)
+                        } else {
+                            id.name == class_name
                         }
                     }
+                    _ => false,
+                };
+
+                if targets_class && let Some(tag) = reg.tag {
+                    return Some(tag);
                 }
             }
         }
@@ -260,43 +257,33 @@ impl DecoratorExtractor {
         match helper_kind {
             CanonicalHelperSymbol::ApplyDecoratedDescriptor => {
                 // Babel: applyDecoratedDescriptor(Target.prototype, "propName", [decorators], descriptor, target)
-                if call.arguments.len() >= 3 {
-                    if let Some(Expression::StaticMemberExpression(mem)) =
+                if call.arguments.len() >= 3
+                    && let Some(Expression::StaticMemberExpression(mem)) =
                         call.arguments[0].as_expression()
-                    {
-                        if mem.property.name == "prototype" {
-                            if let Expression::Identifier(target_id) = &mem.object {
-                                if target_id.name == class_name {
-                                    let prop_name = match call.arguments[1].as_expression() {
-                                        Some(Expression::StringLiteral(s)) => {
-                                            Some(s.value.to_string())
-                                        }
-                                        Some(Expression::Identifier(id)) => {
-                                            Some(id.name.to_string())
-                                        }
-                                        _ => None,
-                                    };
+                    && mem.property.name == "prototype"
+                    && let Expression::Identifier(target_id) = &mem.object
+                    && target_id.name == class_name
+                {
+                    let prop_name = match call.arguments[1].as_expression() {
+                        Some(Expression::StringLiteral(s)) => Some(s.value.to_string()),
+                        Some(Expression::Identifier(id)) => Some(id.name.to_string()),
+                        _ => None,
+                    };
 
-                                    if let Some(Expression::ArrayExpression(decorators_arr)) =
-                                        call.arguments[2].as_expression()
-                                    {
-                                        for elem in &decorators_arr.elements {
-                                            if let Some(dec_expr) = elem.as_expression() {
-                                                if Self::is_metadata_helper(dec_expr, ctx) {
-                                                    continue;
-                                                }
-                                                if let Some(kind) =
-                                                    Self::parse_decorator_expr(dec_expr, ctx)
-                                                {
-                                                    extracted.push(ExtractedDecorator {
-                                                        kind,
-                                                        target_member: prop_name.clone(),
-                                                        span: (call.span.start, call.span.end),
-                                                    });
-                                                }
-                                            }
-                                        }
-                                    }
+                    if let Some(Expression::ArrayExpression(decorators_arr)) =
+                        call.arguments[2].as_expression()
+                    {
+                        for elem in &decorators_arr.elements {
+                            if let Some(dec_expr) = elem.as_expression() {
+                                if Self::is_metadata_helper(dec_expr, ctx) {
+                                    continue;
+                                }
+                                if let Some(kind) = Self::parse_decorator_expr(dec_expr, ctx) {
+                                    extracted.push(ExtractedDecorator {
+                                        kind,
+                                        target_member: prop_name.clone(),
+                                        span: (call.span.start, call.span.end),
+                                    });
                                 }
                             }
                         }
@@ -311,67 +298,57 @@ impl DecoratorExtractor {
 
                 // Form A: Member decorator call
                 // helper([dec1, dec2], TargetClass.prototype, "propName", descriptor)
-                if call.arguments.len() >= 3 {
-                    if let Some(Expression::StaticMemberExpression(mem)) =
+                if call.arguments.len() >= 3
+                    && let Some(Expression::StaticMemberExpression(mem)) =
                         call.arguments[1].as_expression()
-                    {
-                        if mem.property.name == "prototype" {
-                            if let Expression::Identifier(target_id) = &mem.object {
-                                if target_id.name == class_name {
-                                    let prop_name = match call.arguments[2].as_expression() {
-                                        Some(Expression::StringLiteral(s)) => {
-                                            Some(s.value.to_string())
-                                        }
-                                        Some(Expression::Identifier(id)) => {
-                                            Some(id.name.to_string())
-                                        }
-                                        _ => None,
-                                    };
+                    && mem.property.name == "prototype"
+                    && let Expression::Identifier(target_id) = &mem.object
+                    && target_id.name == class_name
+                {
+                    let prop_name = match call.arguments[2].as_expression() {
+                        Some(Expression::StringLiteral(s)) => Some(s.value.to_string()),
+                        Some(Expression::Identifier(id)) => Some(id.name.to_string()),
+                        _ => None,
+                    };
 
-                                    for elem in &decorators_arr.elements {
-                                        if let Some(dec_expr) = elem.as_expression() {
-                                            if Self::is_metadata_helper(dec_expr, ctx) {
-                                                continue;
-                                            }
-                                            if let Some(kind) =
-                                                Self::parse_decorator_expr(dec_expr, ctx)
-                                            {
-                                                extracted.push(ExtractedDecorator {
-                                                    kind,
-                                                    target_member: prop_name.clone(),
-                                                    span: (call.span.start, call.span.end),
-                                                });
-                                            }
-                                        }
-                                    }
-                                    return;
-                                }
+                    for elem in &decorators_arr.elements {
+                        if let Some(dec_expr) = elem.as_expression() {
+                            if Self::is_metadata_helper(dec_expr, ctx) {
+                                continue;
+                            }
+                            if let Some(kind) = Self::parse_decorator_expr(dec_expr, ctx) {
+                                extracted.push(ExtractedDecorator {
+                                    kind,
+                                    target_member: prop_name.clone(),
+                                    span: (call.span.start, call.span.end),
+                                });
                             }
                         }
                     }
+                    return;
                 }
 
                 // Form B: Class decorator call
                 // helper([customElement("my-tag")], TargetClass)
-                if let Some(Expression::Identifier(target_id)) = call.arguments[1].as_expression() {
-                    if target_id.name == class_name {
-                        for elem in &decorators_arr.elements {
-                            if let Some(dec_expr) = elem.as_expression() {
-                                if let Some(kind) = Self::parse_decorator_expr(dec_expr, ctx) {
-                                    extracted.push(ExtractedDecorator {
-                                        kind,
-                                        target_member: None,
-                                        span: (call.span.start, call.span.end),
-                                    });
-                                } else if let Some(tag) =
-                                    ctx.is_class_custom_element_decorator_call(dec_expr)
-                                {
-                                    extracted.push(ExtractedDecorator {
-                                        kind: LitDecoratorKind::CustomElement { tag },
-                                        target_member: None,
-                                        span: (call.span.start, call.span.end),
-                                    });
-                                }
+                if let Some(Expression::Identifier(target_id)) = call.arguments[1].as_expression()
+                    && target_id.name == class_name
+                {
+                    for elem in &decorators_arr.elements {
+                        if let Some(dec_expr) = elem.as_expression() {
+                            if let Some(kind) = Self::parse_decorator_expr(dec_expr, ctx) {
+                                extracted.push(ExtractedDecorator {
+                                    kind,
+                                    target_member: None,
+                                    span: (call.span.start, call.span.end),
+                                });
+                            } else if let Some(tag) =
+                                ctx.is_class_custom_element_decorator_call(dec_expr)
+                            {
+                                extracted.push(ExtractedDecorator {
+                                    kind: LitDecoratorKind::CustomElement { tag },
+                                    target_member: None,
+                                    span: (call.span.start, call.span.end),
+                                });
                             }
                         }
                     }
@@ -442,19 +419,20 @@ impl DecoratorExtractor {
                             call.arguments.first().and_then(|a| a.as_expression())
                         {
                             for prop in &obj.properties {
-                                if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                                    if let Some(key_name) = p.key.static_name() {
-                                        match key_name.as_ref() {
-                                            "type" => {
-                                                if let Expression::Identifier(t_id) = &p.value {
-                                                    prop_type = Some(t_id.name.to_string());
-                                                }
+                                if let ObjectPropertyKind::ObjectProperty(p) = prop
+                                    && let Some(key_name) = p.key.static_name()
+                                {
+                                    match key_name.as_ref() {
+                                        "type" => {
+                                            if let Expression::Identifier(t_id) = &p.value {
+                                                prop_type = Some(t_id.name.to_string());
                                             }
-                                            "reflect" => {
-                                                reflect = crate::property::PropertyModelExtractor::evaluate_boolean(&p.value).unwrap_or(false);
-                                            }
-                                            "attribute" => {
-                                                attribute = match &p.value {
+                                        }
+                                        "reflect" => {
+                                            reflect = crate::property::PropertyModelExtractor::evaluate_boolean(&p.value).unwrap_or(false);
+                                        }
+                                        "attribute" => {
+                                            attribute = match &p.value {
                                                         Expression::StringLiteral(s) => Some(s.value.to_string()),
                                                         other => {
                                                             if let Some(b) = crate::property::PropertyModelExtractor::evaluate_boolean(other) {
@@ -468,15 +446,14 @@ impl DecoratorExtractor {
                                                             }
                                                         }
                                                     };
-                                            }
-                                            "hasChanged" => {
-                                                has_changed = crate::property::PropertyModelExtractor::extract_has_changed(p, Some(ctx.source_text));
-                                            }
-                                            "noAccessor" => {
-                                                no_accessor = crate::property::PropertyModelExtractor::evaluate_boolean(&p.value).unwrap_or(false);
-                                            }
-                                            _ => {}
                                         }
+                                        "hasChanged" => {
+                                            has_changed = crate::property::PropertyModelExtractor::extract_has_changed(p, Some(ctx.source_text));
+                                        }
+                                        "noAccessor" => {
+                                            no_accessor = crate::property::PropertyModelExtractor::evaluate_boolean(&p.value).unwrap_or(false);
+                                        }
+                                        _ => {}
                                     }
                                 }
                             }
@@ -497,12 +474,11 @@ impl DecoratorExtractor {
                             call.arguments.first().and_then(|a| a.as_expression())
                         {
                             for prop in &obj.properties {
-                                if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                                    if let Some(key_name) = p.key.static_name() {
-                                        if key_name.as_ref() == "hasChanged" {
-                                            has_changed = crate::property::PropertyModelExtractor::extract_has_changed(p, Some(ctx.source_text));
-                                        }
-                                    }
+                                if let ObjectPropertyKind::ObjectProperty(p) = prop
+                                    && let Some(key_name) = p.key.static_name()
+                                    && key_name.as_ref() == "hasChanged"
+                                {
+                                    has_changed = crate::property::PropertyModelExtractor::extract_has_changed(p, Some(ctx.source_text));
                                 }
                             }
                         }
@@ -554,21 +530,21 @@ impl DecoratorExtractor {
                             call.arguments.first().and_then(|a| a.as_expression())
                         {
                             for prop in &obj.properties {
-                                if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                                    if let Some(key_name) = p.key.static_name() {
-                                        match key_name.as_ref() {
-                                            "slot" => {
-                                                if let Expression::StringLiteral(s) = &p.value {
-                                                    slot = Some(s.value.to_string());
-                                                }
+                                if let ObjectPropertyKind::ObjectProperty(p) = prop
+                                    && let Some(key_name) = p.key.static_name()
+                                {
+                                    match key_name.as_ref() {
+                                        "slot" => {
+                                            if let Expression::StringLiteral(s) = &p.value {
+                                                slot = Some(s.value.to_string());
                                             }
-                                            "selector" => {
-                                                if let Expression::StringLiteral(s) = &p.value {
-                                                    selector = Some(s.value.to_string());
-                                                }
-                                            }
-                                            _ => {}
                                         }
+                                        "selector" => {
+                                            if let Expression::StringLiteral(s) = &p.value {
+                                                selector = Some(s.value.to_string());
+                                            }
+                                        }
+                                        _ => {}
                                     }
                                 }
                             }
@@ -581,14 +557,12 @@ impl DecoratorExtractor {
                             call.arguments.first().and_then(|a| a.as_expression())
                         {
                             for prop in &obj.properties {
-                                if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                                    if let Some(key_name) = p.key.static_name() {
-                                        if key_name == "slot" {
-                                            if let Expression::StringLiteral(s) = &p.value {
-                                                slot = Some(s.value.to_string());
-                                            }
-                                        }
-                                    }
+                                if let ObjectPropertyKind::ObjectProperty(p) = prop
+                                    && let Some(key_name) = p.key.static_name()
+                                    && key_name == "slot"
+                                    && let Expression::StringLiteral(s) = &p.value
+                                {
+                                    slot = Some(s.value.to_string());
                                 }
                             }
                         }
@@ -602,29 +576,29 @@ impl DecoratorExtractor {
                             call.arguments.first().and_then(|a| a.as_expression())
                         {
                             for prop in &obj.properties {
-                                if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                                    if let Some(key_name) = p.key.static_name() {
-                                        match key_name.as_ref() {
-                                            "capture" => {
-                                                capture = match &p.value {
-                                                    Expression::BooleanLiteral(b) => b.value,
-                                                    _ => false,
-                                                }
+                                if let ObjectPropertyKind::ObjectProperty(p) = prop
+                                    && let Some(key_name) = p.key.static_name()
+                                {
+                                    match key_name.as_ref() {
+                                        "capture" => {
+                                            capture = match &p.value {
+                                                Expression::BooleanLiteral(b) => b.value,
+                                                _ => false,
                                             }
-                                            "passive" => {
-                                                passive = match &p.value {
-                                                    Expression::BooleanLiteral(b) => b.value,
-                                                    _ => false,
-                                                }
-                                            }
-                                            "once" => {
-                                                once = match &p.value {
-                                                    Expression::BooleanLiteral(b) => b.value,
-                                                    _ => false,
-                                                }
-                                            }
-                                            _ => {}
                                         }
+                                        "passive" => {
+                                            passive = match &p.value {
+                                                Expression::BooleanLiteral(b) => b.value,
+                                                _ => false,
+                                            }
+                                        }
+                                        "once" => {
+                                            once = match &p.value {
+                                                Expression::BooleanLiteral(b) => b.value,
+                                                _ => false,
+                                            }
+                                        }
+                                        _ => {}
                                     }
                                 }
                             }

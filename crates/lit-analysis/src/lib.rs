@@ -145,18 +145,18 @@ pub fn analyze_lit_module(
                             }
                             _ => (None, None),
                         };
-                        if let Some(init) = &decl_entry.init {
-                            if let Some(cls) = find_class_in_expr(init) {
-                                analyze_class_node(
-                                    &program,
-                                    cls,
-                                    name_hint,
-                                    sym_id,
-                                    &symbol_ctx,
-                                    &mut components,
-                                    &mut diagnostics,
-                                );
-                            }
+                        if let Some(init) = &decl_entry.init
+                            && let Some(cls) = find_class_in_expr(init)
+                        {
+                            analyze_class_node(
+                                &program,
+                                cls,
+                                name_hint,
+                                sym_id,
+                                &symbol_ctx,
+                                &mut components,
+                                &mut diagnostics,
+                            );
                         }
                     }
                 }
@@ -170,18 +170,18 @@ pub fn analyze_lit_module(
                         }
                         _ => (None, None),
                     };
-                    if let Some(init) = &decl_entry.init {
-                        if let Some(cls) = find_class_in_expr(init) {
-                            analyze_class_node(
-                                &program,
-                                cls,
-                                name_hint,
-                                sym_id,
-                                &symbol_ctx,
-                                &mut components,
-                                &mut diagnostics,
-                            );
-                        }
+                    if let Some(init) = &decl_entry.init
+                        && let Some(cls) = find_class_in_expr(init)
+                    {
+                        analyze_class_node(
+                            &program,
+                            cls,
+                            name_hint,
+                            sym_id,
+                            &symbol_ctx,
+                            &mut components,
+                            &mut diagnostics,
+                        );
                     }
                 }
             }
@@ -407,39 +407,30 @@ fn extract_component_template<'a>(
     ctx: &SymbolProofContext<'a>,
 ) -> Option<TemplateIR> {
     for element in &class.body.body {
-        if let oxc_ast::ast::ClassElement::MethodDefinition(method) = element {
-            if !method.r#static && method.key.is_specific_static_name("render") {
-                if let Some(body) = &method.value.body {
-                    for stmt in &body.statements {
-                        if let oxc_ast::ast::Statement::ReturnStatement(ret) = stmt {
-                            if let Some(arg) = &ret.argument {
-                                let mut curr = arg;
-                                while let oxc_ast::ast::Expression::ParenthesizedExpression(p) =
-                                    curr
-                                {
-                                    curr = &p.expression;
-                                }
-                                if let oxc_ast::ast::Expression::TaggedTemplateExpression(tagged) =
-                                    curr
-                                {
-                                    if ctx.is_lit_html_tag(&tagged.tag)
-                                        || ctx.is_lit_svg_tag(&tagged.tag)
-                                    {
-                                        let quasis: Vec<&str> = tagged
-                                            .quasi
-                                            .quasis
-                                            .iter()
-                                            .map(|q| q.value.raw.as_str())
-                                            .collect();
-                                        let expr_count = tagged.quasi.expressions.len();
-                                        return TemplateParser::parse_lit_template(
-                                            &quasis, expr_count,
-                                        )
-                                        .ok();
-                                    }
-                                }
-                            }
-                        }
+        if let oxc_ast::ast::ClassElement::MethodDefinition(method) = element
+            && !method.r#static
+            && method.key.is_specific_static_name("render")
+            && let Some(body) = &method.value.body
+        {
+            for stmt in &body.statements {
+                if let oxc_ast::ast::Statement::ReturnStatement(ret) = stmt
+                    && let Some(arg) = &ret.argument
+                {
+                    let mut curr = arg;
+                    while let oxc_ast::ast::Expression::ParenthesizedExpression(p) = curr {
+                        curr = &p.expression;
+                    }
+                    if let oxc_ast::ast::Expression::TaggedTemplateExpression(tagged) = curr
+                        && (ctx.is_lit_html_tag(&tagged.tag) || ctx.is_lit_svg_tag(&tagged.tag))
+                    {
+                        let quasis: Vec<&str> = tagged
+                            .quasi
+                            .quasis
+                            .iter()
+                            .map(|q| q.value.raw.as_str())
+                            .collect();
+                        let expr_count = tagged.quasi.expressions.len();
+                        return TemplateParser::parse_lit_template(&quasis, expr_count).ok();
                     }
                 }
             }

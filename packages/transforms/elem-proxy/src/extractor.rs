@@ -18,23 +18,20 @@ pub fn extract_decorator_tag<'a>(
     dec: &Decorator<'a>,
     ctx: &SymbolProofContext<'a>,
 ) -> Option<String> {
-    if let Expression::CallExpression(call) = &dec.expression {
-        if ctx.is_proven_decorator(&call.callee) == Some(CanonicalLitSymbol::CustomElementDecorator)
-            || ctx.resolve_decorator_call(call) == Some(CanonicalLitSymbol::CustomElementDecorator)
-        {
-            if let Some(first_arg) = call.arguments.first().and_then(|a| a.as_expression()) {
-                match first_arg.without_parentheses() {
-                    Expression::StringLiteral(str_lit) => {
-                        return Some(str_lit.value.as_str().to_string());
-                    }
-                    Expression::TemplateLiteral(t)
-                        if t.expressions.is_empty() && !t.quasis.is_empty() =>
-                    {
-                        return Some(t.quasis[0].value.raw.to_string());
-                    }
-                    _ => {}
-                }
+    if let Expression::CallExpression(call) = &dec.expression
+        && (ctx.is_proven_decorator(&call.callee)
+            == Some(CanonicalLitSymbol::CustomElementDecorator)
+            || ctx.resolve_decorator_call(call) == Some(CanonicalLitSymbol::CustomElementDecorator))
+        && let Some(first_arg) = call.arguments.first().and_then(|a| a.as_expression())
+    {
+        match first_arg.without_parentheses() {
+            Expression::StringLiteral(str_lit) => {
+                return Some(str_lit.value.as_str().to_string());
             }
+            Expression::TemplateLiteral(t) if t.expressions.is_empty() && !t.quasis.is_empty() => {
+                return Some(t.quasis[0].value.raw.to_string());
+            }
+            _ => {}
         }
     }
     None
@@ -43,27 +40,25 @@ pub fn extract_decorator_tag<'a>(
 /// Extract observed attributes explicitly returned by static get observedAttributes()
 pub fn extract_observed_attributes<'a>(class: &'a Class<'a>, out_attributes: &mut HashSet<String>) {
     for elem in &class.body.body {
-        if let ClassElement::MethodDefinition(method) = elem {
-            if method.r#static && method.kind == MethodDefinitionKind::Get {
-                let name = match &method.key {
-                    PropertyKey::StaticIdentifier(id) => Some(id.name.as_str()),
-                    PropertyKey::StringLiteral(lit) => Some(lit.value.as_str()),
-                    _ => None,
-                };
-                if name == Some("observedAttributes") {
-                    if let Some(body) = &method.value.body {
-                        for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(Expression::ArrayExpression(arr)) = &ret.argument {
-                                    for elem in &arr.elements {
-                                        if let Some(Expression::StringLiteral(str_lit)) =
-                                            elem.as_expression()
-                                        {
-                                            out_attributes
-                                                .insert(str_lit.value.as_str().to_string());
-                                        }
-                                    }
-                                }
+        if let ClassElement::MethodDefinition(method) = elem
+            && method.r#static
+            && method.kind == MethodDefinitionKind::Get
+        {
+            let name = match &method.key {
+                PropertyKey::StaticIdentifier(id) => Some(id.name.as_str()),
+                PropertyKey::StringLiteral(lit) => Some(lit.value.as_str()),
+                _ => None,
+            };
+            if name == Some("observedAttributes")
+                && let Some(body) = &method.value.body
+            {
+                for stmt in &body.statements {
+                    if let Statement::ReturnStatement(ret) = stmt
+                        && let Some(Expression::ArrayExpression(arr)) = &ret.argument
+                    {
+                        for elem in &arr.elements {
+                            if let Some(Expression::StringLiteral(str_lit)) = elem.as_expression() {
+                                out_attributes.insert(str_lit.value.as_str().to_string());
                             }
                         }
                     }
@@ -115,16 +110,13 @@ pub fn get_ce_define_call<'a>(
     stmt: &Statement<'a>,
     ctx: &SymbolProofContext<'a>,
 ) -> Option<(String, String)> {
-    if let Statement::ExpressionStatement(expr_stmt) = stmt {
-        if let Expression::CallExpression(call) = &expr_stmt.expression {
-            if let Some(reg) = ctx.is_custom_elements_define(call) {
-                if let (Some(tag), Expression::Identifier(id)) =
-                    (reg.tag, reg.class_expr.without_parentheses())
-                {
-                    return Some((tag, id.name.as_str().to_string()));
-                }
-            }
-        }
+    if let Statement::ExpressionStatement(expr_stmt) = stmt
+        && let Expression::CallExpression(call) = &expr_stmt.expression
+        && let Some(reg) = ctx.is_custom_elements_define(call)
+        && let (Some(tag), Expression::Identifier(id)) =
+            (reg.tag, reg.class_expr.without_parentheses())
+    {
+        return Some((tag, id.name.as_str().to_string()));
     }
     None
 }
@@ -148,10 +140,10 @@ pub fn check_and_extract_target<'a>(
         }
     }
 
-    if tag_name.is_none() {
-        if let Some(tag) = define_calls.get(&class_name) {
-            tag_name = Some(tag.clone());
-        }
+    if tag_name.is_none()
+        && let Some(tag) = define_calls.get(&class_name)
+    {
+        tag_name = Some(tag.clone());
     }
 
     let tag = tag_name?;

@@ -5,11 +5,13 @@
 ---
 
 ## Writing style reminder
+
 Use sentence case for all headings, options descriptions, comments, and documentation. Do not uppercase every word.
 
 ---
 
 ## Plugin lifecycle and responsibilities
+
 1. **Virtual module resolution**:
    - Resolves virtual ID prefixes (`virtual:css-fuse/`) to virtual modules containing shared constructable stylesheet code.
 2. **Transform pipeline**:
@@ -24,9 +26,9 @@ Use sentence case for all headings, options descriptions, comments, and document
    - Downstream consumers do not install, import, or manage runtime loaders manually.
    - Strictly prohibit naive path fallbacks (such as `/components/*`); resolve all chunk mappings dynamically through Vite / Rollup build manifests.
 
-
 ---
 
 ## Configuration guidelines
+
 - Support both unified plugin invocation (`LitCoreVitePlugin({ cssFuse: true, propsLower: true })`) and direct modular imports (`cssFuse()`, `propsLower()`).
 - Always preserve TypeScript types and documentation comments in `options.ts`.

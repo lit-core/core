@@ -775,15 +775,17 @@ mod tests {
         };
 
         let res = transform_component_styles(&styles, &opts).unwrap();
-        assert!(res
-            .scoped_css
-            .contains("@scope(cds-button) to (slot,[data-slot-boundary],slot-boundary)"));
+        assert!(
+            res.scoped_css
+                .contains("@scope(cds-button) to (slot,[data-slot-boundary],slot-boundary)")
+        );
         assert!(res.scoped_css.contains(":scope{display:block}"));
         assert!(res.scoped_css.contains(":scope[disabled]{opacity:.5}"));
         assert!(res.scoped_css.contains("[data-state~=selected]"));
-        assert!(res
-            .scoped_css
-            .contains(":scope [data-slot-boundary]>:is(svg)"));
+        assert!(
+            res.scoped_css
+                .contains(":scope [data-slot-boundary]>:is(svg)")
+        );
         assert!(!res.scoped_css.contains(":host"));
         assert!(!res.scoped_css.contains(":host-context"));
         assert!(res.stylesheet_id.starts_with("style-cds-button-"));

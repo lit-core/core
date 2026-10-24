@@ -9,7 +9,7 @@ use oxc_span::SourceType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-pub use crate::analyzer::{collect_classes_mut, match_event_attr, SAFE_BUBBLING_EVENTS};
+pub use crate::analyzer::{SAFE_BUBBLING_EVENTS, collect_classes_mut, match_event_attr};
 pub use crate::builder::{
     build_add_listener_statement, build_call_init_event_hoist, build_connected_callback_method,
     build_first_updated_method, build_init_lit_event_hoist_method, build_lh_action_method,
@@ -17,7 +17,7 @@ pub use crate::builder::{
     build_reset_lh_actions, build_will_update_method,
 };
 pub use crate::hoister::{
-    has_event_options, hoist_events_in_expr, hoist_events_in_stmt, HoistContext,
+    HoistContext, has_event_options, hoist_events_in_expr, hoist_events_in_stmt,
 };
 use lit_analysis::symbol::SymbolProofContext;
 
@@ -177,10 +177,10 @@ pub fn transform_code(source: &str, options: EventHoistOptions) -> EventHoistRes
     }
 
     let mut codegen_options = CodegenOptions::default();
-    if options.sourcemap.unwrap_or(false) {
-        if let Some(ref filename) = options.filename {
-            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
-        }
+    if options.sourcemap.unwrap_or(false)
+        && let Some(ref filename) = options.filename
+    {
+        codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
     }
 
     let codegen_result = Codegen::new()

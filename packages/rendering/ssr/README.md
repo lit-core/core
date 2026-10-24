@@ -52,6 +52,7 @@ flowchart TD
 ### Technical architecture
 
 #### 1. Pure isolate minimal environment (ISME)
+
 Edge runtimes such as Cloudflare Workers and Fastly Compute execute code in pure V8 isolates where DOM globals do not exist. ISME provides stateless, lightweight stubs:
 - `HTMLElementStub`: Implements custom element lifecycle requirements (`connectedCallback`, `attachShadow`, attribute management) without allocating mock DOM trees.
 - `CustomEventStub`: Safe event stub providing `preventDefault()` and `detail` payload access.
@@ -60,6 +61,7 @@ Edge runtimes such as Cloudflare Workers and Fastly Compute execute code in pure
 - Zero mandatory global prototype mutation.
 
 #### 2. Clean Declarative Shadow DOM emission
+
 The engine emits valid W3C Declarative Shadow DOM:
 ```html
 <user-card data-lit-paths="true">
@@ -74,6 +76,7 @@ The engine emits valid W3C Declarative Shadow DOM:
 Every dynamic slot is mapped via `@lit-core/dom-paths`, completely eliminating `<!--lit-part-->` comment markers from server output.
 
 #### 3. Deterministic multi-level slot projection
+
 Server rendering maintains a lexical `SlotManager` context stack that projects light DOM elements across nested custom element boundaries:
 - Named slots (`slot="header"`) match corresponding `<slot name="header">` targets.
 - Default slots project unslotted light DOM elements into unnamed `<slot>` targets.
@@ -81,6 +84,7 @@ Server rendering maintains a lexical `SlotManager` context stack that projects l
 - Unmatched children remain in the light DOM remainder without slot leakage or cross-boundary bleed.
 
 #### 4. Web Standard ReadableStream with backpressure
+
 `renderToStream` constructs a standard `ReadableStream<Uint8Array>`:
 - **Instant TTFB**: Dispatches the first HTML chunk immediately upon `pull(controller)`.
 - **Chunk batching**: Subsequent chunks buffer up to 1024 bytes before binary encoding via `TextEncoder`.
@@ -88,6 +92,7 @@ Server rendering maintains a lexical `SlotManager` context stack that projects l
 - **Cancellation**: Terminates iterator consumption and frees memory if the HTTP client aborts the connection.
 
 #### 5. Compiler bridge integration
+
 - **`@lit-core/html-aot`**: Directly ingests static `CompiledTemplateDescriptor` objects, executing pre-calculated chunk plans cached in a `WeakMap`.
 - **`@lit-core/dom-paths`**: Ingests deterministic child pointer paths, enabling clean DSD emission without comment markers.
 - **`@lit-core/css-fuse`**: Deduplicates shared stylesheets across components, extracting common CSS into constructable sheets.
@@ -95,6 +100,7 @@ Server rendering maintains a lexical `SlotManager` context stack that projects l
 - **`@lit-core/resumable`**: Emits `<script type="lit/state">` snapshots and `resumes-on-*` listener attributes.
 
 #### 6. Dual client execution modes
+
 - **Mode A (Path-hydrated mode)**: Clean Declarative Shadow DOM paired with `@lit-core/dom-paths`. The browser attaches dynamic bindings directly via precomputed child index paths without tree-walking comment markers.
 - **Mode B (Resumable mode)**: Clean Declarative Shadow DOM paired with `<script type="lit/state">` and `@lit-core/resumable`. Delivers zero initial JavaScript payload, deferring component script loading until user interaction.
 
@@ -117,28 +123,29 @@ pnpm add lit@^3.0.0
 
 ### Main entry point (`@lit-core/ssr`)
 
-| Export | Kind | Signature | Purpose |
-| :--- | :--- | :--- | :--- |
-| `render` | Function | `(value: unknown, options?: RenderOptions) => IterableIterator<string>` | Main synchronous string chunk iterator |
-| `renderToStream` | Function | `(value: unknown, options?: StreamRenderOptions) => ReadableStream<Uint8Array>` | WHATWG binary streaming with backpressure |
-| `collectResult` | Function | `(result: Iterable<string> \| AsyncIterable<string> \| ReadableStream<Uint8Array>) => Promise<string>` | Unified asynchronous string accumulator |
-| `renderToString` | Function | `(value: unknown, options?: RenderOptions) => string` | Synchronous HTML string collector |
-| `createIsolateEnvironment` | Function | `(parentRegistry?: CustomElementRegistryLike) => SsrEnvironment` | Creates pure V8 isolate stubs and registry |
-| `installIsolateGlobals` | Function | `() => void` | Installs stubs on `globalThis` if undefined |
-| `projectSlots` | Function | `(shadowHtml: string, lightChildren: Array<{ slot?: string; content: string }>) => { projectedShadow: string; lightRemainder: string }` | Deterministic slot projection helper |
-| `SlotManager` | Class | `class SlotManager` | Lexical slot projection context stack manager |
-| `StyleDeduplicator` | Class | `class StyleDeduplicator` | Extracts and deduplicates component styles |
-| `CompilerBridge` | Class | `class CompilerBridge` | Integrates `html-aot`, `css-fuse`, and `resumable` |
-| `HTMLElementStub` | Class | `class HTMLElementStub` | Minimal `HTMLElement` implementation for SSR |
-| `CustomEventStub` | Class | `class CustomEventStub<T>` | Minimal `CustomEvent` stub |
-| `CSSStyleSheetStub` | Class | `class CSSStyleSheetStub` | Minimal `CSSStyleSheet` stub with `replaceSync` |
-| `DocumentStub` | Class | `class DocumentStub` | Referentially stable document stub |
-| `KeyboardEventStub` | Class | `class KeyboardEventStub` | Minimal `KeyboardEvent` stub |
-| `IsolateCustomElementRegistry` | Class | `class IsolateCustomElementRegistry` | Scoped custom elements registry |
-| `LIT_NOTHING` | Constant | `Symbol.for('lit-nothing')` | Sentinel for empty template parts |
-| `LIT_NO_CHANGE` | Constant | `Symbol.for('lit-noChange')` | Sentinel for unchanged template parts |
+| Export                         | Kind     | Signature                                                                                                                               | Purpose                                            |
+| :----------------------------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------- |
+| `render`                       | Function | `(value: unknown, options?: RenderOptions) => IterableIterator<string>`                                                                 | Main synchronous string chunk iterator             |
+| `renderToStream`               | Function | `(value: unknown, options?: StreamRenderOptions) => ReadableStream<Uint8Array>`                                                         | WHATWG binary streaming with backpressure          |
+| `collectResult`                | Function | `(result: Iterable<string> \| AsyncIterable<string> \| ReadableStream<Uint8Array>) => Promise<string>`                                  | Unified asynchronous string accumulator            |
+| `renderToString`               | Function | `(value: unknown, options?: RenderOptions) => string`                                                                                   | Synchronous HTML string collector                  |
+| `createIsolateEnvironment`     | Function | `(parentRegistry?: CustomElementRegistryLike) => SsrEnvironment`                                                                        | Creates pure V8 isolate stubs and registry         |
+| `installIsolateGlobals`        | Function | `() => void`                                                                                                                            | Installs stubs on `globalThis` if undefined        |
+| `projectSlots`                 | Function | `(shadowHtml: string, lightChildren: Array<{ slot?: string; content: string }>) => { projectedShadow: string; lightRemainder: string }` | Deterministic slot projection helper               |
+| `SlotManager`                  | Class    | `class SlotManager`                                                                                                                     | Lexical slot projection context stack manager      |
+| `StyleDeduplicator`            | Class    | `class StyleDeduplicator`                                                                                                               | Extracts and deduplicates component styles         |
+| `CompilerBridge`               | Class    | `class CompilerBridge`                                                                                                                  | Integrates `html-aot`, `css-fuse`, and `resumable` |
+| `HTMLElementStub`              | Class    | `class HTMLElementStub`                                                                                                                 | Minimal `HTMLElement` implementation for SSR       |
+| `CustomEventStub`              | Class    | `class CustomEventStub<T>`                                                                                                              | Minimal `CustomEvent` stub                         |
+| `CSSStyleSheetStub`            | Class    | `class CSSStyleSheetStub`                                                                                                               | Minimal `CSSStyleSheet` stub with `replaceSync`    |
+| `DocumentStub`                 | Class    | `class DocumentStub`                                                                                                                    | Referentially stable document stub                 |
+| `KeyboardEventStub`            | Class    | `class KeyboardEventStub`                                                                                                               | Minimal `KeyboardEvent` stub                       |
+| `IsolateCustomElementRegistry` | Class    | `class IsolateCustomElementRegistry`                                                                                                    | Scoped custom elements registry                    |
+| `LIT_NOTHING`                  | Constant | `Symbol.for('lit-nothing')`                                                                                                             | Sentinel for empty template parts                  |
+| `LIT_NO_CHANGE`                | Constant | `Symbol.for('lit-noChange')`                                                                                                            | Sentinel for unchanged template parts              |
 
 #### `render(value, options?)`
+
 Synchronous generator yielding HTML string chunks.
 ```typescript
 import { render } from '@lit-core/ssr';
@@ -151,6 +158,7 @@ for (const chunk of iterator) {
 ```
 
 #### `renderToStream(value, options?)`
+
 Streams rendered HTML as binary chunks via a WHATWG `ReadableStream<Uint8Array>`.
 ```typescript
 import { renderToStream } from '@lit-core/ssr';
@@ -162,6 +170,7 @@ const stream = renderToStream(html`<my-page></my-page>`, {
 ```
 
 #### `renderToString(value, options?)`
+
 Convenience helper that joins all string chunks into a single HTML string.
 ```typescript
 import { renderToString } from '@lit-core/ssr';
@@ -171,6 +180,7 @@ const htmlString = renderToString(html`<div>Hello</div>`);
 ```
 
 #### `collectResult(result)`
+
 Asynchronously accumulates string chunks from an iterable, async iterable, or `ReadableStream<Uint8Array>`.
 ```typescript
 import { collectResult, renderToStream } from '@lit-core/ssr';
@@ -183,6 +193,7 @@ const fullHtml = await collectResult(stream);
 ### Configuration interfaces
 
 #### `RenderOptions`
+
 ```typescript
 export interface RenderOptions {
   // Output mode: 'dsd' (Declarative Shadow DOM) or 'flattened' (SEO crawler light DOM)
@@ -209,6 +220,7 @@ export interface RenderOptions {
 ```
 
 #### `StreamRenderOptions`
+
 Extends `RenderOptions` with streaming configuration:
 ```typescript
 export interface StreamRenderOptions extends RenderOptions {
@@ -223,6 +235,7 @@ export interface StreamRenderOptions extends RenderOptions {
 ### Isolate minimal environment (`@lit-core/ssr/environment`)
 
 #### `createIsolateEnvironment(parentRegistry?)`
+
 Creates a sandboxed execution context with stubs for `HTMLElement`, `CustomEvent`, `CSSStyleSheet`, and an isolated custom elements registry.
 ```typescript
 import { createIsolateEnvironment } from '@lit-core/ssr/environment';
@@ -239,6 +252,7 @@ env.customElements.define('user-badge', UserBadge);
 ```
 
 #### `installIsolateGlobals()`
+
 Safely installs missing isolate stubs onto `globalThis` if they are not already defined.
 ```typescript
 import { installIsolateGlobals } from '@lit-core/ssr/environment';
@@ -314,15 +328,15 @@ module.exports = {
 
 ### Architectural comparison
 
-| Architectural dimension | @lit-labs/ssr (4.1.0) | @lit-core/ssr | Migration benefit |
-| :--- | :--- | :--- | :--- |
-| **Execution environment** | Mutates `globalThis` via `install-global-dom-shim.js`; requires `node:vm` | Pure V8 Isolate Minimal Environment (ISME); zero `window`, `document`, or `node:vm` | Unlocks Cloudflare Workers, Fastly Compute, Bun, Deno, and multi-tenant isolates |
-| **HTML markup output** | Verbose comment markers (`<!--lit-part-->`, `<!--lit-node-->`) | Clean Declarative Shadow DOM (`<template shadowrootmode="open">`) | Eliminates 28% to 45% markup bloat; removes comment-stripping regex scripts |
-| **Streaming interface** | Node.js `stream.Readable` (`RenderResultReadable`) | Web Standard WHATWG `ReadableStream<Uint8Array>` (`renderToStream`) | Native compatibility with `Response(stream)`; true backpressure handling |
-| **Stylesheet handling** | Duplicates inline `<style>` inside every component shadow root | Integrated with `@lit-core/css-fuse` constructable sheets | Up to 99% reduction in duplicated CSS byte payloads across multi-instance pages |
-| **Template processing** | Runtime HTML string parsing via `parse5` on every request | Ahead-of-time AST pre-indexing via `@lit-core/html-aot` with `WeakMap` cached plans | 2.2x to 3.3x higher rendering throughput (requests per second) |
-| **Client hydration** | `TreeWalker` scanning comments via `@lit-labs/ssr-client` | Direct array index lookup (`@lit-core/dom-paths`) or zero-JS resumption (`@lit-core/resumable`) | Sub-microsecond hydration or zero initial client JavaScript |
-| **Bundler integration** | Manual build orchestration or custom server loading scripts | First-class `@lit-core/vite-plugin` and `@lit-core/webpack-plugin` | Single-flag configuration (`ssr: true`) with automated dev server and prerender hooks |
+| Architectural dimension   | @lit-labs/ssr (4.1.0)                                                     | @lit-core/ssr                                                                                   | Migration benefit                                                                     |
+| :------------------------ | :------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| **Execution environment** | Mutates `globalThis` via `install-global-dom-shim.js`; requires `node:vm` | Pure V8 Isolate Minimal Environment (ISME); zero `window`, `document`, or `node:vm`             | Unlocks Cloudflare Workers, Fastly Compute, Bun, Deno, and multi-tenant isolates      |
+| **HTML markup output**    | Verbose comment markers (`<!--lit-part-->`, `<!--lit-node-->`)            | Clean Declarative Shadow DOM (`<template shadowrootmode="open">`)                               | Eliminates 28% to 45% markup bloat; removes comment-stripping regex scripts           |
+| **Streaming interface**   | Node.js `stream.Readable` (`RenderResultReadable`)                        | Web Standard WHATWG `ReadableStream<Uint8Array>` (`renderToStream`)                             | Native compatibility with `Response(stream)`; true backpressure handling              |
+| **Stylesheet handling**   | Duplicates inline `<style>` inside every component shadow root            | Integrated with `@lit-core/css-fuse` constructable sheets                                       | Up to 99% reduction in duplicated CSS byte payloads across multi-instance pages       |
+| **Template processing**   | Runtime HTML string parsing via `parse5` on every request                 | Ahead-of-time AST pre-indexing via `@lit-core/html-aot` with `WeakMap` cached plans             | 2.2x to 3.3x higher rendering throughput (requests per second)                        |
+| **Client hydration**      | `TreeWalker` scanning comments via `@lit-labs/ssr-client`                 | Direct array index lookup (`@lit-core/dom-paths`) or zero-JS resumption (`@lit-core/resumable`) | Sub-microsecond hydration or zero initial client JavaScript                           |
+| **Bundler integration**   | Manual build orchestration or custom server loading scripts               | First-class `@lit-core/vite-plugin` and `@lit-core/webpack-plugin`                              | Single-flag configuration (`ssr: true`) with automated dev server and prerender hooks |
 
 ### Step-by-step migration blueprint
 
@@ -345,6 +359,7 @@ Migrating from `@lit-labs/ssr` to `@lit-core/ssr` follows a 5-step sequence:
 ```
 
 #### Step 1: remove global DOM shims and uninstall legacy packages
+
 Uninstall legacy packages:
 ```bash
 pnpm remove @lit-labs/ssr @lit-labs/ssr-client @lit-labs/ssr-dom-shim
@@ -362,6 +377,7 @@ import { render, renderToStream, collectResult } from '@lit-core/ssr';
 ```
 
 #### Step 2: update server render calls
+
 Replace legacy rendering calls with modern APIs:
 ```typescript
 // Legacy @lit-labs/ssr
@@ -379,11 +395,13 @@ const stream = renderToStream(template);
 ```
 
 #### Step 3: remove comment-stripping regex scripts and post-processors
+
 Because `@lit-labs/ssr` emitted heavy comment markers (`<!--lit-part-->`, `<!--lit-node-->`), teams frequently introduced regex post-processors to strip comments. These regex hacks broke client `TreeWalker` hydration.
 
 `@lit-core/ssr` emits 100% clean Declarative Shadow DOM natively. Delete all comment stripping regex filters and HTML cleaner passes. Output HTML is clean by default.
 
 #### Step 4: configure bundler plugins (Vite and Webpack)
+
 Enable the SSR pipeline in `vite.config.ts` or `webpack.config.js`:
 ```typescript
 // vite.config.ts
@@ -405,6 +423,7 @@ export default defineConfig({
 ```
 
 #### Step 5: adapt component lifecycle and authoring best practices
+
 - **Client-only initialization**: Relocate browser global accesses (`window`, `document`, `navigator`, `localStorage`, `IntersectionObserver`) from `connectedCallback()` to `firstUpdated()`. `firstUpdated()` is never invoked on the server.
 - **Eliminate `createRenderRoot` overrides**: Remove any custom `createRenderRoot` overrides previously added to bypass `@lit-labs/ssr` crashes. Standard Lit `createRenderRoot` works out of the box with `CSSStyleSheetStub`.
 - **Hydration upgrade**: Replace `@lit-labs/ssr-client` with `@lit-core/dom-paths` (for direct O(1) path hydration) or `@lit-core/resumable` (for zero-JS event-driven resumption).
@@ -597,28 +616,29 @@ Evaluated across canonical component suites in `packages/internal/benchmarks/res
 
 ### Verified benchmark results
 
-| Design system | Metric | Baseline (@lit-labs/ssr) | Optimized (@lit-core/ssr) | Improvement delta |
-| :--- | :--- | ---: | ---: | :--- |
-| **IBM Carbon Web Components** | Throughput | 2,398.2 req/s | 7,856.7 req/s | **+227.6% (3.28x higher)** |
-| | Streaming TTFB | 0.2094 ms | 0.0060 ms | **-97.1% (34.9x faster)** |
-| | Raw payload | 374,743 B | 3,905 B | **-99.0% (-370.8 KB saved)** |
-| | Gzip payload | 35,983 B | 950 B | **-97.4% (-35.0 KB saved)** |
-| | Memory footprint | 36.8 MB | 21.4 MB | **-41.8% lower memory** |
-| | Comment markers | 49 markers | 0 markers | **-100% (eliminated)** |
-| **Adobe Spectrum Web Components** | Throughput | 3,232.1 req/s | 7,714.7 req/s | **+138.7% (2.39x higher)** |
-| | Streaming TTFB | 0.3207 ms | 0.0075 ms | **-97.7% (42.8x faster)** |
-| | Raw payload | 120,423 B | 3,880 B | **-96.8% (-116.5 KB saved)** |
-| | Gzip payload | 12,102 B | 1,097 B | **-90.9% (-11.0 KB saved)** |
-| | Memory footprint | 37.8 MB | 25.1 MB | **-33.7% lower memory** |
-| | Comment markers | 54 markers | 0 markers | **-100% (eliminated)** |
-| **Google Material Web** | Throughput | 4,099.2 req/s | 9,076.7 req/s | **+121.4% (2.21x higher)** |
-| | Streaming TTFB | 0.4063 ms | 0.0064 ms | **-98.4% (63.5x faster)** |
-| | Raw payload | 38,784 B | 3,134 B | **-91.9% (-35.7 KB saved)** |
-| | Gzip payload | 5,372 B | 812 B | **-84.9% (-4.6 KB saved)** |
-| | Memory footprint | 10.6 MB | 8.1 MB | **-23.7% lower memory** |
-| | Comment markers | 62 markers | 0 markers | **-100% (eliminated)** |
+| Design system                     | Metric           | Baseline (@lit-labs/ssr) | Optimized (@lit-core/ssr) | Improvement delta            |
+| :-------------------------------- | :--------------- | -----------------------: | ------------------------: | :--------------------------- |
+| **IBM Carbon Web Components**     | Throughput       |            2,398.2 req/s |             7,856.7 req/s | **+227.6% (3.28x higher)**   |
+|                                   | Streaming TTFB   |                0.2094 ms |                 0.0060 ms | **-97.1% (34.9x faster)**    |
+|                                   | Raw payload      |                374,743 B |                   3,905 B | **-99.0% (-370.8 KB saved)** |
+|                                   | Gzip payload     |                 35,983 B |                     950 B | **-97.4% (-35.0 KB saved)**  |
+|                                   | Memory footprint |                  36.8 MB |                   21.4 MB | **-41.8% lower memory**      |
+|                                   | Comment markers  |               49 markers |                 0 markers | **-100% (eliminated)**       |
+| **Adobe Spectrum Web Components** | Throughput       |            3,232.1 req/s |             7,714.7 req/s | **+138.7% (2.39x higher)**   |
+|                                   | Streaming TTFB   |                0.3207 ms |                 0.0075 ms | **-97.7% (42.8x faster)**    |
+|                                   | Raw payload      |                120,423 B |                   3,880 B | **-96.8% (-116.5 KB saved)** |
+|                                   | Gzip payload     |                 12,102 B |                   1,097 B | **-90.9% (-11.0 KB saved)**  |
+|                                   | Memory footprint |                  37.8 MB |                   25.1 MB | **-33.7% lower memory**      |
+|                                   | Comment markers  |               54 markers |                 0 markers | **-100% (eliminated)**       |
+| **Google Material Web**           | Throughput       |            4,099.2 req/s |             9,076.7 req/s | **+121.4% (2.21x higher)**   |
+|                                   | Streaming TTFB   |                0.4063 ms |                 0.0064 ms | **-98.4% (63.5x faster)**    |
+|                                   | Raw payload      |                 38,784 B |                   3,134 B | **-91.9% (-35.7 KB saved)**  |
+|                                   | Gzip payload     |                  5,372 B |                     812 B | **-84.9% (-4.6 KB saved)**   |
+|                                   | Memory footprint |                  10.6 MB |                    8.1 MB | **-23.7% lower memory**      |
+|                                   | Comment markers  |               62 markers |                 0 markers | **-100% (eliminated)**       |
 
 ### Overall benchmark highlights
+
 1. **Rendering throughput**: Delivers **2.2x to 3.3x higher request throughput** by executing pre-indexed chunk plans and eliminating runtime `parse5` template parsing.
 2. **Streaming TTFB**: Delivers **34x to 63x faster streaming TTFB (< 0.01 ms)** via immediate first-chunk dispatch.
 3. **Payload reduction**: Achieves **91.9% to 99.0% raw payload reduction** and **84.9% to 97.4% gzip payload reduction** by eliminating comment markers and extracting constructable stylesheets.
@@ -632,12 +652,14 @@ For complete reproducible benchmarks and raw JSON outputs, refer to the [monorep
 ## Frequently asked questions
 
 ### Q1: I see `window is not defined` when importing a third-party component. How do I fix it?
+
 **Cause**: The component attempts to access browser globals at the top-level module scope (e.g. `const isMobile = window.innerWidth < 768;`).
 **Solution**:
 1. If the module is outside your direct control, call `installIsolateGlobals()` from `@lit-core/ssr` in your server entry point before importing the component. This provides safe `window` and `document` stubs without `node:vm`.
 2. For first-party components, move browser checks inside `firstUpdated()` or guard them with `isServer` from `lit`.
 
 ### Q2: Why are my custom element shadow roots not rendering in output HTML?
+
 **Cause**: Custom element classes were not registered in the isolate environment registry before rendering occurred.
 **Solution**:
 Ensure your component files are imported in the server bundle (e.g. `import './components/my-element.js'`), or pass an explicit custom element registry to the render call:
@@ -654,11 +676,13 @@ const html = renderToString(template, {
 ```
 
 ### Q3: Do I need to keep `@lit-labs/ssr-client` for client hydration?
+
 **No**. Delete `@lit-labs/ssr-client`. It relies on finding `<!--lit-part-->` comment markers that `@lit-core/ssr` intentionally omits. Instead, use:
 - `@lit-core/dom-paths` for fast direct-pointer DOM hydration.
 - `@lit-core/resumable` for zero-JS interactive resumption.
 
 ### Q4: How do I handle slotted content across nested components?
+
 `@lit-core/ssr` features built-in lexical slot projection (`SlotManager`). Named slots (`<slot name="...">`) and default slots automatically project child light DOM nodes into their designated shadow root locations, preserving fallback slot contents when no light child is supplied. No custom slot polyfill is required.
 
 ---

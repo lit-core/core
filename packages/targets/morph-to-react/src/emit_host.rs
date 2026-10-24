@@ -1,11 +1,11 @@
+use crate::CompileOptionsDto;
 use crate::emit_css::build_jsx_style_element;
 use crate::emit_jsx::{
-    collect_constant_strings, collect_static_ids, lower_expression_lit_templates,
-    lower_range_in_statement, lower_statement_lit_templates, rewrite_statement_this_to_host,
     ComponentTagRegistry, JsxEmitOptions, JsxEmitter, QueryLoweringInfo, TemplateLoweringScope,
-    ThisRewritingTarget,
+    ThisRewritingTarget, collect_constant_strings, collect_static_ids,
+    lower_expression_lit_templates, lower_range_in_statement, lower_statement_lit_templates,
+    rewrite_statement_this_to_host,
 };
-use crate::CompileOptionsDto;
 use lit_analysis::{LitComponentInfo, PropertyModelExtractor, PropertyType};
 use oxc_allocator::{Allocator, ArenaBox, ArenaVec, CloneIn};
 use oxc_ast::ast::*;
@@ -62,21 +62,20 @@ pub fn scan_queries<'a>(
                                     }
                                     _ => None,
                                 };
-                                if let Some(name) = callee_name {
-                                    if name == "query" || name == "queryAll" {
-                                        let is_all = name == "queryAll";
-                                        if let Some(arg0) = call.arguments.first() {
-                                            if let Some(Expression::StringLiteral(lit)) =
-                                                arg0.as_expression()
-                                            {
-                                                queries.push(QueryLoweringInfo {
-                                                    property_name: prop_name.to_string(),
-                                                    selector: lit.value.as_str().to_string(),
-                                                    ref_var_name: format!("{}Ref", prop_name),
-                                                    is_all,
-                                                });
-                                            }
-                                        }
+                                if let Some(name) = callee_name
+                                    && (name == "query" || name == "queryAll")
+                                {
+                                    let is_all = name == "queryAll";
+                                    if let Some(arg0) = call.arguments.first()
+                                        && let Some(Expression::StringLiteral(lit)) =
+                                            arg0.as_expression()
+                                    {
+                                        queries.push(QueryLoweringInfo {
+                                            property_name: prop_name.to_string(),
+                                            selector: lit.value.as_str().to_string(),
+                                            ref_var_name: format!("{}Ref", prop_name),
+                                            is_all,
+                                        });
                                     }
                                 }
                             }
@@ -93,21 +92,20 @@ pub fn scan_queries<'a>(
                                     }
                                     _ => None,
                                 };
-                                if let Some(name) = callee_name {
-                                    if name == "query" || name == "queryAll" {
-                                        let is_all = name == "queryAll";
-                                        if let Some(arg0) = call.arguments.first() {
-                                            if let Some(Expression::StringLiteral(lit)) =
-                                                arg0.as_expression()
-                                            {
-                                                queries.push(QueryLoweringInfo {
-                                                    property_name: prop_name.to_string(),
-                                                    selector: lit.value.as_str().to_string(),
-                                                    ref_var_name: format!("{}Ref", prop_name),
-                                                    is_all,
-                                                });
-                                            }
-                                        }
+                                if let Some(name) = callee_name
+                                    && (name == "query" || name == "queryAll")
+                                {
+                                    let is_all = name == "queryAll";
+                                    if let Some(arg0) = call.arguments.first()
+                                        && let Some(Expression::StringLiteral(lit)) =
+                                            arg0.as_expression()
+                                    {
+                                        queries.push(QueryLoweringInfo {
+                                            property_name: prop_name.to_string(),
+                                            selector: lit.value.as_str().to_string(),
+                                            ref_var_name: format!("{}Ref", prop_name),
+                                            is_all,
+                                        });
                                     }
                                 }
                             }
@@ -731,18 +729,18 @@ pub fn is_component_form_associated<'a>(
         match element {
             // 1. Static property: static formAssociated = true;
             ClassElement::PropertyDefinition(prop) => {
-                if prop.r#static && prop.key.is_specific_static_name("formAssociated") {
-                    if let Some(val) = &prop.value {
-                        if PropertyModelExtractor::evaluate_boolean(val).unwrap_or(false) {
-                            return true;
-                        }
-                    }
+                if prop.r#static
+                    && prop.key.is_specific_static_name("formAssociated")
+                    && let Some(val) = &prop.value
+                    && PropertyModelExtractor::evaluate_boolean(val).unwrap_or(false)
+                {
+                    return true;
                 }
                 // Check if property initializer calls attachInternals: internals = this.attachInternals();
-                if let Some(val) = &prop.value {
-                    if expr_calls_form_api(val) {
-                        return true;
-                    }
+                if let Some(val) = &prop.value
+                    && expr_calls_form_api(val)
+                {
+                    return true;
                 }
             }
             // 2. Methods and static getters
@@ -751,33 +749,29 @@ pub fn is_component_form_associated<'a>(
                 if method.r#static
                     && method.kind == MethodDefinitionKind::Get
                     && method.key.is_specific_static_name("formAssociated")
+                    && let Some(body) = &method.value.body
                 {
-                    if let Some(body) = &method.value.body {
-                        for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(arg) = &ret.argument {
-                                    if PropertyModelExtractor::evaluate_boolean(arg)
-                                        .unwrap_or(false)
-                                    {
-                                        return true;
-                                    }
-                                }
-                            }
+                    for stmt in &body.statements {
+                        if let Statement::ReturnStatement(ret) = stmt
+                            && let Some(arg) = &ret.argument
+                            && PropertyModelExtractor::evaluate_boolean(arg).unwrap_or(false)
+                        {
+                            return true;
                         }
                     }
                 }
 
                 // Standard form lifecycle callbacks
-                if let Some(name) = method.key.static_name() {
-                    if matches!(
+                if let Some(name) = method.key.static_name()
+                    && matches!(
                         name.as_ref(),
                         "formResetCallback"
                             | "formDisabledCallback"
                             | "formStateRestoreCallback"
                             | "formAssociatedCallback"
-                    ) {
-                        return true;
-                    }
+                    )
+                {
+                    return true;
                 }
 
                 // Check method body (including constructor) for attachInternals() / setFormValue()

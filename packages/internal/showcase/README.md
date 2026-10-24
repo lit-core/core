@@ -44,12 +44,14 @@ flowchart TD
 ### In-depth technical details
 
 #### 1. Iframe canvas isolation
+
 Each design system applies custom base styles to `:root` and `body` (e.g. IBM Plex Sans typography, Carbon resets, Spectrum color themes). To allow side-by-side evaluation without visual collisions:
 - Components render in isolated `<iframe>` instances.
 - Only the specific component's styles and its declared dependencies are loaded in that iframe.
 - The parent dashboard UI remains styled cleanly with Scandinavian minimalism rules.
 
 #### 2. Canonical registry mapping
+
 `canonical-registry.ts` bridges disparate component naming schemes across design systems into a unified conceptual catalog:
 - Concept `button` maps to `cds-button`, `sp-button`, `wa-button`, `md-elevated-button`, and `momentum-button`.
 - Allows instantaneous framework switching while preserving the selected component view and configuration state.

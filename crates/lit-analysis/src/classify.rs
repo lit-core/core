@@ -80,24 +80,23 @@ impl ComponentClassifier {
 
         // Check unsupported directives in render method
         for element in &class.body.body {
-            if let ClassElement::MethodDefinition(method) = element {
-                if method.key.is_specific_static_name("render") {
-                    if let Some(body) = &method.value.body {
-                        for stmt in &body.statements {
-                            Self::check_stmt_for_directives(stmt, ctx, &mut bailout_reasons);
-                        }
-                    }
+            if let ClassElement::MethodDefinition(method) = element
+                && method.key.is_specific_static_name("render")
+                && let Some(body) = &method.value.body
+            {
+                for stmt in &body.statements {
+                    Self::check_stmt_for_directives(stmt, ctx, &mut bailout_reasons);
                 }
             }
         }
 
         // Check methods for escaping `this` or direct `shadowRoot` mutation
         for element in &class.body.body {
-            if let ClassElement::MethodDefinition(method) = element {
-                if let Some(body) = &method.value.body {
-                    for stmt in &body.statements {
-                        Self::check_stmt_for_bailout(stmt, &mut bailout_reasons);
-                    }
+            if let ClassElement::MethodDefinition(method) = element
+                && let Some(body) = &method.value.body
+            {
+                for stmt in &body.statements {
+                    Self::check_stmt_for_bailout(stmt, &mut bailout_reasons);
                 }
             }
         }
@@ -507,17 +506,15 @@ impl ComponentClassifier {
             }
         }
 
-        if let Expression::StaticMemberExpression(mem) = &call.callee {
-            if mem.property.name == "adoptedStyleSheets" {
-                if let Expression::StaticMemberExpression(inner_mem) = &mem.object {
-                    if inner_mem.property.name == "shadowRoot" {
-                        reasons.push(BailoutReason::DirectShadowRootAccess {
-                            operation: "adoptedStyleSheets mutation".to_string(),
-                            span: (call.span.start, call.span.end),
-                        });
-                    }
-                }
-            }
+        if let Expression::StaticMemberExpression(mem) = &call.callee
+            && mem.property.name == "adoptedStyleSheets"
+            && let Expression::StaticMemberExpression(inner_mem) = &mem.object
+            && inner_mem.property.name == "shadowRoot"
+        {
+            reasons.push(BailoutReason::DirectShadowRootAccess {
+                operation: "adoptedStyleSheets mutation".to_string(),
+                span: (call.span.start, call.span.end),
+            });
         }
 
         Self::check_expr_for_bailout(&call.callee, reasons);
@@ -534,15 +531,14 @@ impl ComponentClassifier {
                 Self::check_call_for_bailout(call, reasons);
             }
             Expression::AssignmentExpression(assign) => {
-                if let AssignmentTarget::StaticMemberExpression(mem) = &assign.left {
-                    if let Expression::StaticMemberExpression(inner_mem) = &mem.object {
-                        if inner_mem.property.name == "shadowRoot" {
-                            reasons.push(BailoutReason::DirectShadowRootAccess {
-                                operation: format!("mutation of shadowRoot.{}", mem.property.name),
-                                span: (assign.span.start, assign.span.end),
-                            });
-                        }
-                    }
+                if let AssignmentTarget::StaticMemberExpression(mem) = &assign.left
+                    && let Expression::StaticMemberExpression(inner_mem) = &mem.object
+                    && inner_mem.property.name == "shadowRoot"
+                {
+                    reasons.push(BailoutReason::DirectShadowRootAccess {
+                        operation: format!("mutation of shadowRoot.{}", mem.property.name),
+                        span: (assign.span.start, assign.span.end),
+                    });
                 }
                 Self::check_expr_for_bailout(&assign.right, reasons);
             }
@@ -621,10 +617,10 @@ impl ComponentClassifier {
         decorators: &[ExtractedDecorator],
     ) -> bool {
         // 1. Delegated focus: static shadowRootOptions = { delegatesFocus: true }
-        if let Some(sro) = shadow_root_options {
-            if sro.delegates_focus {
-                return true;
-            }
+        if let Some(sro) = shadow_root_options
+            && sro.delegates_focus
+        {
+            return true;
         }
 
         // 2. Inspected slot: <slot @slotchange=...>
@@ -648,14 +644,13 @@ impl ComponentClassifier {
             match element {
                 // static formAssociated = true
                 ClassElement::PropertyDefinition(prop) => {
-                    if prop.r#static && prop.key.is_specific_static_name("formAssociated") {
-                        if let Some(val) = &prop.value {
-                            if crate::property::PropertyModelExtractor::evaluate_boolean(val)
-                                .unwrap_or(false)
-                            {
-                                return true;
-                            }
-                        }
+                    if prop.r#static
+                        && prop.key.is_specific_static_name("formAssociated")
+                        && let Some(val) = &prop.value
+                        && crate::property::PropertyModelExtractor::evaluate_boolean(val)
+                            .unwrap_or(false)
+                    {
+                        return true;
                     }
                 }
                 ClassElement::MethodDefinition(method) => {
@@ -663,25 +658,22 @@ impl ComponentClassifier {
                     if method.r#static
                         && method.kind == MethodDefinitionKind::Get
                         && method.key.is_specific_static_name("formAssociated")
+                        && let Some(body) = &method.value.body
                     {
-                        if let Some(body) = &method.value.body {
-                            for stmt in &body.statements {
-                                if let Statement::ReturnStatement(ret) = stmt {
-                                    if let Some(arg) = &ret.argument {
-                                        if crate::property::PropertyModelExtractor::evaluate_boolean(arg)
-                                            .unwrap_or(false)
-                                        {
-                                            return true;
-                                        }
-                                    }
-                                }
+                        for stmt in &body.statements {
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(arg) = &ret.argument
+                                && crate::property::PropertyModelExtractor::evaluate_boolean(arg)
+                                    .unwrap_or(false)
+                            {
+                                return true;
                             }
                         }
                     }
-                    if let Some(name) = method.key.static_name() {
-                        if Self::FORM_CALLBACKS.contains(&name.as_ref()) {
-                            return true;
-                        }
+                    if let Some(name) = method.key.static_name()
+                        && Self::FORM_CALLBACKS.contains(&name.as_ref())
+                    {
+                        return true;
                     }
                     // check method body for attachInternals() or assignedElements()
                     if let Some(body) = &method.value.body {

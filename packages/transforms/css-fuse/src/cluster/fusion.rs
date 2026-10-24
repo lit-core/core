@@ -118,10 +118,10 @@ impl ClusterEngine {
         // Map: namespace -> Vec<candidate_index>
         let mut namespace_groups: HashMap<String, Vec<usize>> = HashMap::new();
         for (idx, candidate) in candidate_rules.iter().enumerate() {
-            if let Some(ns) = &candidate.namespace {
-                if ns.len() >= 2 {
-                    namespace_groups.entry(ns.clone()).or_default().push(idx);
-                }
+            if let Some(ns) = &candidate.namespace
+                && ns.len() >= 2
+            {
+                namespace_groups.entry(ns.clone()).or_default().push(idx);
             }
         }
 
@@ -361,31 +361,30 @@ fn extract_selector_namespace(selector: &str) -> Option<String> {
     };
 
     // 1. Check for attribute selector: [attr] or [attr~="value"] or [attr="value"]
-    if let Some(bracket_start) = inner.find('[') {
-        if let Some(bracket_end) = inner[bracket_start..].find(']') {
-            let attr_content = &inner[bracket_start + 1..bracket_start + bracket_end];
-            // If it is [part~="..."] or [part="..."]
-            if let Some(part_match) = attr_content.strip_prefix("part") {
-                if let Some(quote_start) = part_match.find('"') {
-                    if let Some(quote_end) = part_match[quote_start + 1..].find('"') {
-                        let part_val = &part_match[quote_start + 1..quote_start + 1 + quote_end];
-                        return Some(clean_namespace_token(part_val));
-                    }
-                }
-            }
-            // General attribute: e.g. popover, data-tooltip, aria-disabled
-            let attr_name = attr_content
-                .split(['=', '~', '|', '^', '$', '*'])
-                .next()
-                .unwrap_or("")
-                .trim();
-            let stripped_attr = attr_name
-                .strip_prefix("data-")
-                .or_else(|| attr_name.strip_prefix("aria-"))
-                .unwrap_or(attr_name);
-            if !stripped_attr.is_empty() {
-                return Some(clean_namespace_token(stripped_attr));
-            }
+    if let Some(bracket_start) = inner.find('[')
+        && let Some(bracket_end) = inner[bracket_start..].find(']')
+    {
+        let attr_content = &inner[bracket_start + 1..bracket_start + bracket_end];
+        // If it is [part~="..."] or [part="..."]
+        if let Some(part_match) = attr_content.strip_prefix("part")
+            && let Some(quote_start) = part_match.find('"')
+            && let Some(quote_end) = part_match[quote_start + 1..].find('"')
+        {
+            let part_val = &part_match[quote_start + 1..quote_start + 1 + quote_end];
+            return Some(clean_namespace_token(part_val));
+        }
+        // General attribute: e.g. popover, data-tooltip, aria-disabled
+        let attr_name = attr_content
+            .split(['=', '~', '|', '^', '$', '*'])
+            .next()
+            .unwrap_or("")
+            .trim();
+        let stripped_attr = attr_name
+            .strip_prefix("data-")
+            .or_else(|| attr_name.strip_prefix("aria-"))
+            .unwrap_or(attr_name);
+        if !stripped_attr.is_empty() {
+            return Some(clean_namespace_token(stripped_attr));
         }
     }
 
@@ -422,17 +421,9 @@ fn clean_namespace_token(token: &str) -> String {
 
     // Standard BEM: extract block before element (__) or modifier (--)
     let base = if let Some(idx) = lower.find("__") {
-        if idx > 0 {
-            &lower[..idx]
-        } else {
-            &lower[2..]
-        }
+        if idx > 0 { &lower[..idx] } else { &lower[2..] }
     } else if let Some(idx) = lower.find("--") {
-        if idx > 0 {
-            &lower[..idx]
-        } else {
-            &lower[2..]
-        }
+        if idx > 0 { &lower[..idx] } else { &lower[2..] }
     } else {
         &lower
     };

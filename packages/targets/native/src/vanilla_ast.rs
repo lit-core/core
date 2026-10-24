@@ -581,84 +581,84 @@ pub fn build_property_accessors<'a>(
                         }
                     }
                     BindingKind::Attribute => {
-                        if let Some(attr) = &b.name {
-                            if !attr.is_empty() {
-                                let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
-                                    helper.ident_ref("v")
-                                } else {
-                                    binding_expr.clone_in(allocator)
-                                };
-                                let v_coalesce =
-                                    helper.nullish_coalescing(val_expr, helper.string_lit(""));
-                                let str_call = helper.call_expr(
-                                    helper.ident_ref("String"),
-                                    {
-                                        let mut a = ArenaVec::new_in(ast);
-                                        a.push(Argument::from(v_coalesce));
-                                        a
-                                    },
-                                    false,
-                                );
-                                let set_call = helper.call_expr(
-                                    helper.static_member(node_expr, "setAttribute", false),
-                                    {
-                                        let mut a = ArenaVec::new_in(ast);
-                                        a.push(Argument::from(
-                                            helper.string_lit(allocator.alloc_str(attr)),
-                                        ));
-                                        a.push(Argument::from(str_call));
-                                        a
-                                    },
-                                    false,
-                                );
-                                stmts.push(Statement::new_if_statement(
-                                    SPAN,
-                                    helper.static_member(helper.this_expr(), node_prop, false),
-                                    helper.expr_stmt(set_call),
-                                    None,
-                                    ast,
-                                ));
-                            }
+                        if let Some(attr) = &b.name
+                            && !attr.is_empty()
+                        {
+                            let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
+                                helper.ident_ref("v")
+                            } else {
+                                binding_expr.clone_in(allocator)
+                            };
+                            let v_coalesce =
+                                helper.nullish_coalescing(val_expr, helper.string_lit(""));
+                            let str_call = helper.call_expr(
+                                helper.ident_ref("String"),
+                                {
+                                    let mut a = ArenaVec::new_in(ast);
+                                    a.push(Argument::from(v_coalesce));
+                                    a
+                                },
+                                false,
+                            );
+                            let set_call = helper.call_expr(
+                                helper.static_member(node_expr, "setAttribute", false),
+                                {
+                                    let mut a = ArenaVec::new_in(ast);
+                                    a.push(Argument::from(
+                                        helper.string_lit(allocator.alloc_str(attr)),
+                                    ));
+                                    a.push(Argument::from(str_call));
+                                    a
+                                },
+                                false,
+                            );
+                            stmts.push(Statement::new_if_statement(
+                                SPAN,
+                                helper.static_member(helper.this_expr(), node_prop, false),
+                                helper.expr_stmt(set_call),
+                                None,
+                                ast,
+                            ));
                         }
                     }
                     BindingKind::Property => {
-                        if let Some(prop_name) = &b.name {
-                            if !prop_name.is_empty() {
-                                let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
-                                    helper.ident_ref("v")
-                                } else {
-                                    binding_expr.clone_in(allocator)
-                                };
-                                let prop_alloc = allocator.alloc_str(prop_name);
-                                let assign_stmt = Statement::new_expression_statement(
+                        if let Some(prop_name) = &b.name
+                            && !prop_name.is_empty()
+                        {
+                            let val_expr = if is_direct_prop_access(binding_expr, &p.name) {
+                                helper.ident_ref("v")
+                            } else {
+                                binding_expr.clone_in(allocator)
+                            };
+                            let prop_alloc = allocator.alloc_str(prop_name);
+                            let assign_stmt = Statement::new_expression_statement(
+                                SPAN,
+                                Expression::new_assignment_expression(
                                     SPAN,
-                                    Expression::new_assignment_expression(
-                                        SPAN,
-                                        AssignmentOperator::Assign,
-                                        AssignmentTarget::from(
-                                            MemberExpression::new_computed_member_expression(
-                                                SPAN,
-                                                node_expr,
-                                                Expression::new_string_literal(
-                                                    SPAN, prop_alloc, None, ast,
-                                                ),
-                                                false,
-                                                ast,
+                                    AssignmentOperator::Assign,
+                                    AssignmentTarget::from(
+                                        MemberExpression::new_computed_member_expression(
+                                            SPAN,
+                                            node_expr,
+                                            Expression::new_string_literal(
+                                                SPAN, prop_alloc, None, ast,
                                             ),
+                                            false,
+                                            ast,
                                         ),
-                                        val_expr,
-                                        ast,
                                     ),
+                                    val_expr,
                                     ast,
-                                );
-                                stmts.push(Statement::new_if_statement(
-                                    SPAN,
-                                    helper.static_member(helper.this_expr(), node_prop, false),
-                                    assign_stmt,
-                                    None,
-                                    ast,
-                                ));
-                            }
+                                ),
+                                ast,
+                            );
+                            stmts.push(Statement::new_if_statement(
+                                SPAN,
+                                helper.static_member(helper.this_expr(), node_prop, false),
+                                assign_stmt,
+                                None,
+                                ast,
+                            ));
                         }
                     }
                     _ => {}

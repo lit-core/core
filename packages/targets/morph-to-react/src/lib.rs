@@ -282,40 +282,36 @@ fn extract_render_info<'a>(
 
             if is_match {
                 for elem in &c.body.body {
-                    if let ClassElement::MethodDefinition(method) = elem {
-                        if !method.r#static && method.key.is_specific_static_name("render") {
-                            if let Some(body) = &method.value.body {
-                                let mut preceding: Vec<&Statement<'a>> = Vec::new();
-                                for body_stmt in &body.statements {
-                                    if let Statement::ReturnStatement(ret) = body_stmt {
-                                        if let Some(arg) = &ret.argument {
-                                            let mut curr = arg;
-                                            while let Expression::ParenthesizedExpression(p) = curr
-                                            {
-                                                curr = &p.expression;
-                                            }
-                                            if let Expression::TaggedTemplateExpression(tagged) =
-                                                curr
-                                            {
-                                                if symbol_ctx.is_lit_html_tag(&tagged.tag)
-                                                    || symbol_ctx.is_lit_svg_tag(&tagged.tag)
-                                                {
-                                                    let mut exprs = Vec::new();
-                                                    for e in &tagged.quasi.expressions {
-                                                        exprs.push(e.clone_in(allocator));
-                                                    }
-                                                    let mut pre = Vec::new();
-                                                    for s in preceding {
-                                                        pre.push(s.clone_in(allocator));
-                                                    }
-                                                    return (exprs, pre);
-                                                }
-                                            }
+                    if let ClassElement::MethodDefinition(method) = elem
+                        && !method.r#static
+                        && method.key.is_specific_static_name("render")
+                        && let Some(body) = &method.value.body
+                    {
+                        let mut preceding: Vec<&Statement<'a>> = Vec::new();
+                        for body_stmt in &body.statements {
+                            if let Statement::ReturnStatement(ret) = body_stmt {
+                                if let Some(arg) = &ret.argument {
+                                    let mut curr = arg;
+                                    while let Expression::ParenthesizedExpression(p) = curr {
+                                        curr = &p.expression;
+                                    }
+                                    if let Expression::TaggedTemplateExpression(tagged) = curr
+                                        && (symbol_ctx.is_lit_html_tag(&tagged.tag)
+                                            || symbol_ctx.is_lit_svg_tag(&tagged.tag))
+                                    {
+                                        let mut exprs = Vec::new();
+                                        for e in &tagged.quasi.expressions {
+                                            exprs.push(e.clone_in(allocator));
                                         }
-                                    } else {
-                                        preceding.push(body_stmt);
+                                        let mut pre = Vec::new();
+                                        for s in preceding {
+                                            pre.push(s.clone_in(allocator));
+                                        }
+                                        return (exprs, pre);
                                     }
                                 }
+                            } else {
+                                preceding.push(body_stmt);
                             }
                         }
                     }
@@ -798,13 +794,15 @@ mod tests {
         println!("INHERITANCE CODE:\n{}", res.code);
         assert!(res.code.contains("class BaseCardHost extends MorphHost"));
         assert!(res.code.contains("export const BaseCard = forwardRef("));
-        assert!(res
-            .code
-            .contains("class SpecializedCardHost extends BaseCardHost"));
+        assert!(
+            res.code
+                .contains("class SpecializedCardHost extends BaseCardHost")
+        );
         assert!(res.code.contains("...super._propertyDefaults"));
-        assert!(res
-            .code
-            .contains("export const SpecializedCard = forwardRef("));
+        assert!(
+            res.code
+                .contains("export const SpecializedCard = forwardRef(")
+        );
     }
 
     #[test]
@@ -830,9 +828,10 @@ mod tests {
             ..Default::default()
         };
         let res = compile_module(code.to_string(), Some(opts)).unwrap();
-        assert!(res
-            .code
-            .contains("class MixedCardHost extends DisabledMixin(MorphHost)"));
+        assert!(
+            res.code
+                .contains("class MixedCardHost extends DisabledMixin(MorphHost)")
+        );
         assert!(res.code.contains("export const MixedCard = forwardRef("));
     }
 
@@ -871,9 +870,10 @@ mod tests {
         let res = compile_module(code.to_string(), Some(opts)).unwrap();
         // F67: Compiled child custom element rewritten
         assert!(res.code.contains("<MyIcon"));
-        assert!(res
-            .code
-            .contains(r#"import { MyIcon } from "./my-icon.js""#));
+        assert!(
+            res.code
+                .contains(r#"import { MyIcon } from "./my-icon.js""#)
+        );
         assert!(res.code.contains("name="));
         assert!(res.code.contains("onIconClick="));
         assert!(!res.code.contains("<my-icon"));
@@ -967,9 +967,10 @@ mod tests {
         let res = compile_module(code.to_string(), None).unwrap();
         assert_eq!(res.tier, "Bailout");
         assert_eq!(res.component_name, "StreamingView");
-        assert!(res
-            .code
-            .contains("export const StreamingView = forwardRef("));
+        assert!(
+            res.code
+                .contains("export const StreamingView = forwardRef(")
+        );
         assert!(res.code.contains("<streaming-view"));
         assert!(res.code.contains("ref={elementRef}"));
         assert!(res.diagnostics.iter().any(|d| d.code == "LIT101"));

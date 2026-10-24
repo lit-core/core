@@ -552,11 +552,9 @@ pub fn emit_bailout_component<'a>(
     let mut jsx_children = ArenaVec::new_in(&ast);
 
     // Style element if scoped_css is present and not external
-    if !emit_css_flag {
-        if let (Some(css), Some(id)) = (scoped_css, stylesheet_id) {
-            let style_elem = build_jsx_style_element(id, css, "default", &ast);
-            jsx_children.push(JSXChild::Element(ArenaBox::new_in(style_elem, &ast)));
-        }
+    if !emit_css_flag && let (Some(css), Some(id)) = (scoped_css, stylesheet_id) {
+        let style_elem = build_jsx_style_element(id, css, "default", &ast);
+        jsx_children.push(JSXChild::Element(ArenaBox::new_in(style_elem, &ast)));
     }
 
     // {props.children}

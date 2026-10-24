@@ -7,24 +7,27 @@ Thank you for your interest in contributing to `@lit-core`. This guide covers ho
 ## Development prerequisites
 
 Ensure you have the following installed:
-- Node.js `>= 24`
-- `pnpm >= 11`
-- Rust toolchain (`rustc`, `cargo`, `rustfmt`, `clippy`) `>= 1.80`
+- Node.js `>= 26`
+- `pnpm >= 12`
+- Rust toolchain (`rustc`, `cargo`, `rustfmt`, `clippy`) `>= 1.85` (Rust 2024 edition)
 
 ---
 
 ## Getting started
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/lit-core/core.git
    cd core
    ```
 2. Install workspace dependencies:
+
    ```bash
    pnpm install
    ```
 3. Build all packages and native Rust NAPI bindings:
+
    ```bash
    pnpm run build
    ```
@@ -34,6 +37,7 @@ Ensure you have the following installed:
 ## Development workflow
 
 ### Building native Rust packages
+
 Rust crates (`css-fuse`, `props-lower`, `css-minifier`, `html-minifier`, etc.) compile native `.node` addons. When editing Rust code in any package under `packages/<category>/<name>`:
 ```bash
 # Rebuild all native addons and TypeScript packages
@@ -44,6 +48,7 @@ node scripts/build-native.mjs css-fuse --release
 ```
 
 ### Running tests
+
 ```bash
 # Fast affected validation loop
 pnpm run check
@@ -56,6 +61,7 @@ node packages/bundlers/vite-plugin/tests/integration.test.js
 ```
 
 ### Formatting and linting
+
 We use Biome for JavaScript/TypeScript and `cargo fmt` / `cargo clippy` for Rust:
 ```bash
 # Check formatting and linting

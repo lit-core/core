@@ -5,7 +5,7 @@ use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::Codegen;
 use oxc_parser::Parser;
-use oxc_span::{GetSpan, SourceType, SPAN};
+use oxc_span::{GetSpan, SPAN, SourceType};
 use std::path::Path;
 
 struct StyleRewrite {
@@ -274,22 +274,24 @@ fn rewrite_class<'a>(
                     _ => false,
                 };
 
-                if method.r#static && method.kind == MethodDefinitionKind::Get && is_styles_key {
-                    if let Some(body) = &mut method.value.body {
-                        for body_stmt in &mut body.statements {
-                            if let Statement::ReturnStatement(ret) = body_stmt {
-                                let ret_start = ret.span.start as usize;
-                                if let Some(arg) = &mut ret.argument {
-                                    rewrite_styles_expression(
-                                        arg,
-                                        ast,
-                                        allocator,
-                                        cluster_ids,
-                                        rewrites,
-                                        Some(ret_start),
-                                        rewritten_count,
-                                    );
-                                }
+                if method.r#static
+                    && method.kind == MethodDefinitionKind::Get
+                    && is_styles_key
+                    && let Some(body) = &mut method.value.body
+                {
+                    for body_stmt in &mut body.statements {
+                        if let Statement::ReturnStatement(ret) = body_stmt {
+                            let ret_start = ret.span.start as usize;
+                            if let Some(arg) = &mut ret.argument {
+                                rewrite_styles_expression(
+                                    arg,
+                                    ast,
+                                    allocator,
+                                    cluster_ids,
+                                    rewrites,
+                                    Some(ret_start),
+                                    rewritten_count,
+                                );
                             }
                         }
                     }
@@ -409,20 +411,19 @@ fn rewrite_styles_expression<'a>(
                 }
 
                 arr.elements = new_elements;
-            } else if let Some(p_start) = parent_span_start {
-                if let Some(rw) = rewrites
+            } else if let Some(p_start) = parent_span_start
+                && let Some(rw) = rewrites
                     .iter()
                     .find(|r| r.parent_span_start == Some(p_start))
-                {
-                    *expr = create_styles_array_expr(
-                        ast,
-                        allocator,
-                        cluster_ids,
-                        rw.remaining_css.as_deref(),
-                        &rw.tag,
-                    );
-                    *rewritten_count += 1;
-                }
+            {
+                *expr = create_styles_array_expr(
+                    ast,
+                    allocator,
+                    cluster_ids,
+                    rw.remaining_css.as_deref(),
+                    &rw.tag,
+                );
+                *rewritten_count += 1;
             }
         }
         _ => {

@@ -27,10 +27,10 @@ pub fn get_trailing_custom_element_call<'a>(stmt: &Statement<'a>) -> Option<(Str
         }
         Statement::VariableDeclaration(var_decl) => {
             for decl in &var_decl.declarations {
-                if let Some(init) = &decl.init {
-                    if let Some(res) = get_custom_element_from_decorator_expr(init) {
-                        return Some(res);
-                    }
+                if let Some(init) = &decl.init
+                    && let Some(res) = get_custom_element_from_decorator_expr(init)
+                {
+                    return Some(res);
                 }
             }
             None
@@ -49,17 +49,17 @@ fn get_custom_element_from_decorator_expr<'a>(expr: &Expression<'a>) -> Option<(
             }
         }
         Expression::AssignmentExpression(assign) => {
-            if let Expression::CallExpression(call) = &assign.right {
-                if is_decorator_callee(&call.callee) {
-                    let tag = extract_tag_from_decorator_array(call.arguments.first()?)?;
-                    let cls = if let Some(arg1) = call.arguments.get(1) {
-                        extract_class_name_from_decorator_target(arg1)
-                    } else {
-                        None
-                    }
-                    .or_else(|| extract_class_name_from_assign_target(&assign.left))?;
-                    return Some((tag, cls));
+            if let Expression::CallExpression(call) = &assign.right
+                && is_decorator_callee(&call.callee)
+            {
+                let tag = extract_tag_from_decorator_array(call.arguments.first()?)?;
+                let cls = if let Some(arg1) = call.arguments.get(1) {
+                    extract_class_name_from_decorator_target(arg1)
+                } else {
+                    None
                 }
+                .or_else(|| extract_class_name_from_assign_target(&assign.left))?;
+                return Some((tag, cls));
             }
         }
         _ => {}
@@ -76,12 +76,11 @@ fn extract_tag_from_decorator_array<'a>(arg: &Argument<'a>) -> Option<String> {
                     Expression::StaticMemberExpression(mem) => mem.property.name == "customElement",
                     _ => false,
                 };
-                if is_ce {
-                    if let Some(first_arg) = call.arguments.first() {
-                        if let Some(Expression::StringLiteral(s)) = first_arg.as_expression() {
-                            return Some(s.value.as_str().to_string());
-                        }
-                    }
+                if is_ce
+                    && let Some(first_arg) = call.arguments.first()
+                    && let Some(Expression::StringLiteral(s)) = first_arg.as_expression()
+                {
+                    return Some(s.value.as_str().to_string());
                 }
             }
         }
@@ -136,25 +135,24 @@ fn is_decorator_callee<'a>(expr: &Expression<'a>) -> bool {
 fn check_trailing_decorator_expr<'a>(expr: &Expression<'a>, set: &mut HashSet<String>) {
     match expr {
         Expression::CallExpression(call) => {
-            if is_decorator_callee(&call.callee) {
-                if let Some(arg1) = call.arguments.get(1) {
-                    if let Some(cls) = extract_class_name_from_decorator_target(arg1) {
-                        set.insert(cls);
-                    }
-                }
+            if is_decorator_callee(&call.callee)
+                && let Some(arg1) = call.arguments.get(1)
+                && let Some(cls) = extract_class_name_from_decorator_target(arg1)
+            {
+                set.insert(cls);
             }
         }
         Expression::AssignmentExpression(assign) => {
-            if let Expression::CallExpression(call) = &assign.right {
-                if is_decorator_callee(&call.callee) {
-                    if let Some(cls) = extract_class_name_from_assign_target(&assign.left) {
-                        set.insert(cls);
-                    }
-                    if let Some(arg1) = call.arguments.get(1) {
-                        if let Some(cls) = extract_class_name_from_decorator_target(arg1) {
-                            set.insert(cls);
-                        }
-                    }
+            if let Expression::CallExpression(call) = &assign.right
+                && is_decorator_callee(&call.callee)
+            {
+                if let Some(cls) = extract_class_name_from_assign_target(&assign.left) {
+                    set.insert(cls);
+                }
+                if let Some(arg1) = call.arguments.get(1)
+                    && let Some(cls) = extract_class_name_from_decorator_target(arg1)
+                {
+                    set.insert(cls);
                 }
             }
         }
@@ -207,38 +205,38 @@ fn extract_class_name_from_decorator_target<'a>(arg: &Argument<'a>) -> Option<St
 }
 
 pub fn get_ce_define_call<'a>(stmt: &Statement<'a>) -> Option<(String, String)> {
-    if let Statement::ExpressionStatement(expr_stmt) = stmt {
-        if let Expression::CallExpression(call) = &expr_stmt.expression {
-            let is_ce_define = match &call.callee {
-                Expression::StaticMemberExpression(mem) => {
-                    mem.property.name == "define"
-                        && match &mem.object {
-                            Expression::Identifier(id) => id.name == "customElements",
-                            Expression::StaticMemberExpression(inner) => {
-                                inner.property.name == "customElements"
-                            }
-                            _ => false,
+    if let Statement::ExpressionStatement(expr_stmt) = stmt
+        && let Expression::CallExpression(call) = &expr_stmt.expression
+    {
+        let is_ce_define = match &call.callee {
+            Expression::StaticMemberExpression(mem) => {
+                mem.property.name == "define"
+                    && match &mem.object {
+                        Expression::Identifier(id) => id.name == "customElements",
+                        Expression::StaticMemberExpression(inner) => {
+                            inner.property.name == "customElements"
                         }
-                }
-                _ => false,
-            };
-            if is_ce_define && call.arguments.len() >= 2 {
-                let tag_str = match call.arguments[0].as_expression() {
-                    Some(Expression::StringLiteral(s)) => Some(s.value.as_str().to_string()),
-                    Some(Expression::TemplateLiteral(t))
-                        if t.expressions.is_empty() && !t.quasis.is_empty() =>
-                    {
-                        Some(t.quasis[0].value.raw.as_str().to_string())
+                        _ => false,
                     }
-                    _ => None,
-                };
-                let class_str = match call.arguments[1].as_expression() {
-                    Some(Expression::Identifier(id)) => Some(id.name.as_str().to_string()),
-                    _ => None,
-                };
-                if let (Some(tag), Some(cls)) = (tag_str, class_str) {
-                    return Some((tag, cls));
+            }
+            _ => false,
+        };
+        if is_ce_define && call.arguments.len() >= 2 {
+            let tag_str = match call.arguments[0].as_expression() {
+                Some(Expression::StringLiteral(s)) => Some(s.value.as_str().to_string()),
+                Some(Expression::TemplateLiteral(t))
+                    if t.expressions.is_empty() && !t.quasis.is_empty() =>
+                {
+                    Some(t.quasis[0].value.raw.as_str().to_string())
                 }
+                _ => None,
+            };
+            let class_str = match call.arguments[1].as_expression() {
+                Some(Expression::Identifier(id)) => Some(id.name.as_str().to_string()),
+                _ => None,
+            };
+            if let (Some(tag), Some(cls)) = (tag_str, class_str) {
+                return Some((tag, cls));
             }
         }
     }
@@ -434,17 +432,15 @@ pub fn classify_class<'a>(
                                 &mut num_html_templates,
                                 &mut has_unsupported_template_expr,
                             );
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(Expression::TaggedTemplateExpression(tag)) =
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(Expression::TaggedTemplateExpression(tag)) =
                                     &ret.argument
-                                {
-                                    if import_ctx.is_html_tag(&tag.tag, scoping) {
-                                        for q in &tag.quasi.quasis {
-                                            template_quasis.push(q.value.raw.as_str().to_string());
-                                        }
-                                        template_exprs_count = tag.quasi.expressions.len();
-                                    }
+                                && import_ctx.is_html_tag(&tag.tag, scoping)
+                            {
+                                for q in &tag.quasi.quasis {
+                                    template_quasis.push(q.value.raw.as_str().to_string());
                                 }
+                                template_exprs_count = tag.quasi.expressions.len();
                             }
                         }
                     } else {
@@ -466,16 +462,16 @@ pub fn classify_class<'a>(
                     PropertyKey::StringLiteral(lit) => Some(lit.value.as_str()),
                     _ => None,
                 };
-                if let Some(p_name) = name {
-                    if !prop.r#static && p_name != "styles" {
-                        for dec in &prop.decorators {
-                            if let Expression::CallExpression(call) = &dec.expression {
-                                if import_ctx.is_property_decorator(&call.callee, scoping)
-                                    || import_ctx.is_state_decorator(&call.callee, scoping)
-                                {
-                                    num_reactive_props += 1;
-                                }
-                            }
+                if let Some(p_name) = name
+                    && !prop.r#static
+                    && p_name != "styles"
+                {
+                    for dec in &prop.decorators {
+                        if let Expression::CallExpression(call) = &dec.expression
+                            && (import_ctx.is_property_decorator(&call.callee, scoping)
+                                || import_ctx.is_state_decorator(&call.callee, scoping))
+                        {
+                            num_reactive_props += 1;
                         }
                     }
                 }
@@ -957,14 +953,12 @@ fn extract_tag_name<'a>(
     scoping: &Scoping,
 ) -> Option<String> {
     for dec in &class.decorators {
-        if let Expression::CallExpression(call) = &dec.expression {
-            if import_ctx.is_custom_element_decorator(&call.callee, scoping) {
-                if let Some(first_arg) = call.arguments.first() {
-                    if let Some(Expression::StringLiteral(str_lit)) = first_arg.as_expression() {
-                        return Some(str_lit.value.as_str().to_string());
-                    }
-                }
-            }
+        if let Expression::CallExpression(call) = &dec.expression
+            && import_ctx.is_custom_element_decorator(&call.callee, scoping)
+            && let Some(first_arg) = call.arguments.first()
+            && let Some(Expression::StringLiteral(str_lit)) = first_arg.as_expression()
+        {
+            return Some(str_lit.value.as_str().to_string());
         }
     }
 
@@ -1035,24 +1029,21 @@ fn has_any_lit_decorator<'a>(
 
 fn has_non_trivial_constructor<'a>(class: &Class<'a>) -> bool {
     for elem in &class.body.body {
-        if let ClassElement::MethodDefinition(m) = elem {
-            if m.kind == MethodDefinitionKind::Constructor {
-                if let Some(body) = &m.value.body {
-                    if body.statements.is_empty() {
-                        return false;
-                    }
-                    if body.statements.len() == 1 {
-                        if let Statement::ExpressionStatement(expr_stmt) = &body.statements[0] {
-                            if let Expression::CallExpression(call) = &expr_stmt.expression {
-                                if matches!(&call.callee, Expression::Super(_)) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                    return true;
-                }
+        if let ClassElement::MethodDefinition(m) = elem
+            && m.kind == MethodDefinitionKind::Constructor
+            && let Some(body) = &m.value.body
+        {
+            if body.statements.is_empty() {
+                return false;
             }
+            if body.statements.len() == 1
+                && let Statement::ExpressionStatement(expr_stmt) = &body.statements[0]
+                && let Expression::CallExpression(call) = &expr_stmt.expression
+                && matches!(&call.callee, Expression::Super(_))
+            {
+                return false;
+            }
+            return true;
         }
     }
     false
@@ -1119,66 +1110,56 @@ fn has_unsupported_property_options<'a>(
     for elem in &class.body.body {
         if let ClassElement::PropertyDefinition(prop) = elem {
             for dec in &prop.decorators {
-                if let Expression::CallExpression(call) = &dec.expression {
-                    if import_ctx.is_property_decorator(&call.callee, scoping) {
-                        if let Some(first_arg) = call.arguments.first() {
-                            if let Some(Expression::ObjectExpression(obj)) =
-                                first_arg.as_expression()
-                            {
-                                for prop_kind in &obj.properties {
-                                    match prop_kind {
-                                        ObjectPropertyKind::ObjectProperty(kv) => {
-                                            let key_name = match &kv.key {
-                                                PropertyKey::StaticIdentifier(id) => {
-                                                    Some(id.name.as_str())
-                                                }
-                                                PropertyKey::StringLiteral(lit) => {
-                                                    Some(lit.value.as_str())
-                                                }
-                                                _ => None,
+                if let Expression::CallExpression(call) = &dec.expression
+                    && import_ctx.is_property_decorator(&call.callee, scoping)
+                    && let Some(first_arg) = call.arguments.first()
+                {
+                    if let Some(Expression::ObjectExpression(obj)) = first_arg.as_expression() {
+                        for prop_kind in &obj.properties {
+                            match prop_kind {
+                                ObjectPropertyKind::ObjectProperty(kv) => {
+                                    let key_name = match &kv.key {
+                                        PropertyKey::StaticIdentifier(id) => Some(id.name.as_str()),
+                                        PropertyKey::StringLiteral(lit) => Some(lit.value.as_str()),
+                                        _ => None,
+                                    };
+                                    match key_name {
+                                        Some("type") => {
+                                            let is_valid_type = match &kv.value {
+                                                Expression::Identifier(id) => matches!(
+                                                    id.name.as_str(),
+                                                    "String" | "Number" | "Boolean"
+                                                ),
+                                                _ => false,
                                             };
-                                            match key_name {
-                                                Some("type") => {
-                                                    let is_valid_type = match &kv.value {
-                                                        Expression::Identifier(id) => matches!(
-                                                            id.name.as_str(),
-                                                            "String" | "Number" | "Boolean"
-                                                        ),
-                                                        _ => false,
-                                                    };
-                                                    if !is_valid_type {
-                                                        return true;
-                                                    }
-                                                }
-                                                Some("reflect") => {
-                                                    if !matches!(
-                                                        &kv.value,
-                                                        Expression::BooleanLiteral(_)
-                                                    ) {
-                                                        return true;
-                                                    }
-                                                }
-                                                Some("attribute") => {
-                                                    let is_valid_attr = matches!(
-                                                        &kv.value,
-                                                        Expression::StringLiteral(_)
-                                                            | Expression::BooleanLiteral(_)
-                                                    );
-                                                    if !is_valid_attr {
-                                                        return true;
-                                                    }
-                                                }
-                                                Some("state") => {}
-                                                _ => return true,
+                                            if !is_valid_type {
+                                                return true;
                                             }
                                         }
+                                        Some("reflect") => {
+                                            if !matches!(&kv.value, Expression::BooleanLiteral(_)) {
+                                                return true;
+                                            }
+                                        }
+                                        Some("attribute") => {
+                                            let is_valid_attr = matches!(
+                                                &kv.value,
+                                                Expression::StringLiteral(_)
+                                                    | Expression::BooleanLiteral(_)
+                                            );
+                                            if !is_valid_attr {
+                                                return true;
+                                            }
+                                        }
+                                        Some("state") => {}
                                         _ => return true,
                                     }
                                 }
-                            } else {
-                                return true;
+                                _ => return true,
                             }
                         }
+                    } else {
+                        return true;
                     }
                 }
             }
@@ -1189,23 +1170,22 @@ fn has_unsupported_property_options<'a>(
 
 fn class_references_lit_lifecycle<'a>(class: &Class<'a>) -> bool {
     for elem in &class.body.body {
-        if let ClassElement::MethodDefinition(m) = elem {
-            if let Some(name) = m.key.static_name() {
-                if matches!(
-                    name.as_ref(),
-                    "update"
-                        | "shouldUpdate"
-                        | "willUpdate"
-                        | "updated"
-                        | "firstUpdated"
-                        | "connectedCallback"
-                        | "disconnectedCallback"
-                        | "attributeChangedCallback"
-                        | "createRenderRoot"
-                ) {
-                    return true;
-                }
-            }
+        if let ClassElement::MethodDefinition(m) = elem
+            && let Some(name) = m.key.static_name()
+            && matches!(
+                name.as_ref(),
+                "update"
+                    | "shouldUpdate"
+                    | "willUpdate"
+                    | "updated"
+                    | "firstUpdated"
+                    | "connectedCallback"
+                    | "disconnectedCallback"
+                    | "attributeChangedCallback"
+                    | "createRenderRoot"
+            )
+        {
+            return true;
         }
     }
 
@@ -1221,10 +1201,10 @@ fn class_references_lit_lifecycle<'a>(class: &Class<'a>) -> bool {
                 }
             }
             ClassElement::PropertyDefinition(prop) => {
-                if let Some(val) = &prop.value {
-                    if expr_references_lit_runtime(val) {
-                        return true;
-                    }
+                if let Some(val) = &prop.value
+                    && expr_references_lit_runtime(val)
+                {
+                    return true;
                 }
             }
             _ => {}
@@ -1259,12 +1239,11 @@ fn expr_references_lit_runtime<'a>(expr: &Expression<'a>) -> bool {
             expr_references_lit_runtime(&mem.object)
         }
         Expression::ComputedMemberExpression(mem) => {
-            if matches!(&mem.object, Expression::ThisExpression(_)) {
-                if let Expression::StringLiteral(s) = &mem.expression {
-                    if is_lit_reactive_member_name(s.value.as_str()) {
-                        return true;
-                    }
-                }
+            if matches!(&mem.object, Expression::ThisExpression(_))
+                && let Expression::StringLiteral(s) = &mem.expression
+                && is_lit_reactive_member_name(s.value.as_str())
+            {
+                return true;
             }
             expr_references_lit_runtime(&mem.object) || expr_references_lit_runtime(&mem.expression)
         }
@@ -1273,10 +1252,10 @@ fn expr_references_lit_runtime<'a>(expr: &Expression<'a>) -> bool {
                 return true;
             }
             for arg in &call.arguments {
-                if let Some(e) = arg.as_expression() {
-                    if expr_references_lit_runtime(e) {
-                        return true;
-                    }
+                if let Some(e) = arg.as_expression()
+                    && expr_references_lit_runtime(e)
+                {
+                    return true;
                 }
             }
             false
@@ -1417,11 +1396,13 @@ mod tests {
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].mode, "micro");
         assert_eq!(results[0].component_name, "DecoratedTabs");
-        assert!(results[0]
-            .reason
-            .as_deref()
-            .unwrap()
-            .contains("trailing decorator"));
+        assert!(
+            results[0]
+                .reason
+                .as_deref()
+                .unwrap()
+                .contains("trailing decorator")
+        );
     }
 
     #[test]
@@ -1466,11 +1447,13 @@ mod tests {
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].mode, "micro");
         assert_eq!(results[0].component_name, "ConstructorButton");
-        assert!(results[0]
-            .reason
-            .as_deref()
-            .unwrap()
-            .contains("constructor"));
+        assert!(
+            results[0]
+                .reason
+                .as_deref()
+                .unwrap()
+                .contains("constructor")
+        );
     }
 
     #[test]

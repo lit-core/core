@@ -6,10 +6,10 @@ use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
 use oxc_semantic::SemanticBuilder;
-use oxc_span::{GetSpan, SourceType, Span, SPAN};
+use oxc_span::{GetSpan, SPAN, SourceType, Span};
 use serde::{Deserialize, Serialize};
 
-use crate::parser::{parse_lit_template, PartKind, PreparedTemplate};
+use crate::parser::{PartKind, PreparedTemplate, parse_lit_template};
 
 #[napi(object)]
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
@@ -541,10 +541,10 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     parsed.program.body = new_body;
 
     let mut codegen_options = CodegenOptions::default();
-    if options.sourcemap.unwrap_or(false) {
-        if let Some(ref fname) = options.filename {
-            codegen_options.source_map_path = Some(std::path::PathBuf::from(fname));
-        }
+    if options.sourcemap.unwrap_or(false)
+        && let Some(ref fname) = options.filename
+    {
+        codegen_options.source_map_path = Some(std::path::PathBuf::from(fname));
     }
 
     let codegen_result = Codegen::new()
@@ -1236,7 +1236,7 @@ fn replace_in_expr<'a>(
             ));
 
             let mut elements = ArenaVec::new_in(&ast);
-            if let Expression::TaggedTemplateExpression(ref mut tagged) = expr {
+            if let Expression::TaggedTemplateExpression(tagged) = expr {
                 for mut e in tagged.quasi.expressions.drain(..) {
                     replace_in_expr(&mut e, template_matches, source, allocator, source_type);
                     elements.push(ArrayExpressionElement::from(e));

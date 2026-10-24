@@ -333,11 +333,11 @@ impl ManifestScanner {
 
         // 2. From this.dispatchEvent(new CustomEvent('event-name', ...)) in class methods
         for element in &class.body.body {
-            if let ClassElement::MethodDefinition(method) = element {
-                if let Some(body) = &method.value.body {
-                    for stmt in &body.statements {
-                        Self::inspect_stmt_for_events(stmt, &mut events_map);
-                    }
+            if let ClassElement::MethodDefinition(method) = element
+                && let Some(body) = &method.value.body
+            {
+                for stmt in &body.statements {
+                    Self::inspect_stmt_for_events(stmt, &mut events_map);
                 }
             }
         }
@@ -382,60 +382,42 @@ impl ManifestScanner {
         stmt: &'a Statement<'a>,
         events_map: &mut HashMap<String, EventInfo>,
     ) {
-        if let Statement::ExpressionStatement(expr_stmt) = stmt {
-            if let Expression::CallExpression(call) = &expr_stmt.expression {
-                if let Expression::StaticMemberExpression(mem) = &call.callee {
-                    if mem.property.name == "dispatchEvent" {
-                        if let Expression::ThisExpression(_) = &mem.object {
-                            if let Some(Expression::NewExpression(new_expr)) =
-                                call.arguments.first().and_then(|a| a.as_expression())
-                            {
-                                if let Some(Expression::StringLiteral(s)) =
-                                    new_expr.arguments.first().and_then(|a| a.as_expression())
-                                {
-                                    let event_name = s.value.to_string();
-                                    let prop_name = Self::derive_event_prop_name(&event_name);
-                                    let detail_type =
-                                        new_expr.type_arguments.as_ref().and_then(|tp| {
-                                            tp.params.first().and_then(|param| match param {
-                                                TSType::TSTypeReference(tref) => {
-                                                    match &tref.type_name {
-                                                        TSTypeName::IdentifierReference(id) => {
-                                                            Some(id.name.to_string())
-                                                        }
-                                                        _ => None,
-                                                    }
-                                                }
-                                                TSType::TSStringKeyword(_) => {
-                                                    Some("string".to_string())
-                                                }
-                                                TSType::TSNumberKeyword(_) => {
-                                                    Some("number".to_string())
-                                                }
-                                                TSType::TSBooleanKeyword(_) => {
-                                                    Some("boolean".to_string())
-                                                }
-                                                _ => None,
-                                            })
-                                        });
-                                    let entry = events_map
-                                        .entry(event_name.clone())
-                                        .or_insert_with(|| EventInfo {
-                                            name: event_name,
-                                            prop_name,
-                                            detail_type: detail_type.clone(),
-                                            bubbles: true,
-                                            cancelable: false,
-                                            composed: true,
-                                        });
-                                    if entry.detail_type.is_none() && detail_type.is_some() {
-                                        entry.detail_type = detail_type;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        if let Statement::ExpressionStatement(expr_stmt) = stmt
+            && let Expression::CallExpression(call) = &expr_stmt.expression
+            && let Expression::StaticMemberExpression(mem) = &call.callee
+            && mem.property.name == "dispatchEvent"
+            && let Expression::ThisExpression(_) = &mem.object
+            && let Some(Expression::NewExpression(new_expr)) =
+                call.arguments.first().and_then(|a| a.as_expression())
+            && let Some(Expression::StringLiteral(s)) =
+                new_expr.arguments.first().and_then(|a| a.as_expression())
+        {
+            let event_name = s.value.to_string();
+            let prop_name = Self::derive_event_prop_name(&event_name);
+            let detail_type = new_expr.type_arguments.as_ref().and_then(|tp| {
+                tp.params.first().and_then(|param| match param {
+                    TSType::TSTypeReference(tref) => match &tref.type_name {
+                        TSTypeName::IdentifierReference(id) => Some(id.name.to_string()),
+                        _ => None,
+                    },
+                    TSType::TSStringKeyword(_) => Some("string".to_string()),
+                    TSType::TSNumberKeyword(_) => Some("number".to_string()),
+                    TSType::TSBooleanKeyword(_) => Some("boolean".to_string()),
+                    _ => None,
+                })
+            });
+            let entry = events_map
+                .entry(event_name.clone())
+                .or_insert_with(|| EventInfo {
+                    name: event_name,
+                    prop_name,
+                    detail_type: detail_type.clone(),
+                    bubbles: true,
+                    cancelable: false,
+                    composed: true,
+                });
+            if entry.detail_type.is_none() && detail_type.is_some() {
+                entry.detail_type = detail_type;
             }
         }
     }
@@ -462,10 +444,10 @@ impl ManifestScanner {
                 {
                     if let Some(body) = &method.value.body {
                         for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(val) = &ret.argument {
-                                    Self::collect_styles_from_expr(val, ctx, &mut styles);
-                                }
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(val) = &ret.argument
+                            {
+                                Self::collect_styles_from_expr(val, ctx, &mut styles);
                             }
                         }
                     }
@@ -517,25 +499,25 @@ impl ManifestScanner {
                     Expression::StaticMemberExpression(mem) => mem.property.name == "unsafeCSS",
                     _ => false,
                 };
-                if is_unsafe_css {
-                    if let Some(arg) = call.arguments.first().and_then(|a| a.as_expression()) {
-                        let css_text = match arg {
-                            Expression::StringLiteral(s) => s.value.to_string(),
-                            Expression::TemplateLiteral(t) => {
-                                let mut s = String::new();
-                                for q in &t.quasis {
-                                    s.push_str(&q.value.raw);
-                                }
-                                s
+                if is_unsafe_css
+                    && let Some(arg) = call.arguments.first().and_then(|a| a.as_expression())
+                {
+                    let css_text = match arg {
+                        Expression::StringLiteral(s) => s.value.to_string(),
+                        Expression::TemplateLiteral(t) => {
+                            let mut s = String::new();
+                            for q in &t.quasis {
+                                s.push_str(&q.value.raw);
                             }
-                            _ => String::new(),
-                        };
-                        styles.push(StyleInfo {
-                            css_text,
-                            is_shared: false,
-                            shared_import_path: None,
-                        });
-                    }
+                            s
+                        }
+                        _ => String::new(),
+                    };
+                    styles.push(StyleInfo {
+                        css_text,
+                        is_shared: false,
+                        shared_import_path: None,
+                    });
                 }
             }
             _ => {}
@@ -544,40 +526,40 @@ impl ManifestScanner {
 
     pub fn extract_shadow_root_options<'a>(class: &'a Class<'a>) -> Option<ShadowRootOptions> {
         for element in &class.body.body {
-            if let ClassElement::PropertyDefinition(prop) = element {
-                if prop.r#static && prop.key.is_specific_static_name("shadowRootOptions") {
-                    if let Some(Expression::ObjectExpression(obj)) = &prop.value {
-                        let mut delegates_focus = false;
-                        let mut mode = "open".to_string();
+            if let ClassElement::PropertyDefinition(prop) = element
+                && prop.r#static
+                && prop.key.is_specific_static_name("shadowRootOptions")
+                && let Some(Expression::ObjectExpression(obj)) = &prop.value
+            {
+                let mut delegates_focus = false;
+                let mut mode = "open".to_string();
 
-                        for p in &obj.properties {
-                            if let ObjectPropertyKind::ObjectProperty(prop_kv) = p {
-                                if let Some(k) = prop_kv.key.static_name() {
-                                    match k.as_ref() {
-                                        "delegatesFocus" => {
-                                            delegates_focus =
-                                                crate::property::PropertyModelExtractor::evaluate_boolean(
-                                                    &prop_kv.value,
-                                                )
-                                                .unwrap_or(false);
-                                        }
-                                        "mode" => {
-                                            if let Expression::StringLiteral(s) = &prop_kv.value {
-                                                mode = s.value.to_string();
-                                            }
-                                        }
-                                        _ => {}
-                                    }
+                for p in &obj.properties {
+                    if let ObjectPropertyKind::ObjectProperty(prop_kv) = p
+                        && let Some(k) = prop_kv.key.static_name()
+                    {
+                        match k.as_ref() {
+                            "delegatesFocus" => {
+                                delegates_focus =
+                                    crate::property::PropertyModelExtractor::evaluate_boolean(
+                                        &prop_kv.value,
+                                    )
+                                    .unwrap_or(false);
+                            }
+                            "mode" => {
+                                if let Expression::StringLiteral(s) = &prop_kv.value {
+                                    mode = s.value.to_string();
                                 }
                             }
+                            _ => {}
                         }
-
-                        return Some(ShadowRootOptions {
-                            delegates_focus,
-                            mode,
-                        });
                     }
                 }
+
+                return Some(ShadowRootOptions {
+                    delegates_focus,
+                    mode,
+                });
             }
         }
         None

@@ -5,14 +5,14 @@ use oxc_ast::builder::AstBuilder;
 use oxc_ast_visit::Visit;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 use lit_analysis::symbol::SymbolProofContext;
 use oxc_semantic::SemanticBuilder;
 
-use crate::parser::{compute_template_parts, PartDescriptor};
+use crate::parser::{PartDescriptor, compute_template_parts};
 
 #[napi(object)]
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
@@ -95,14 +95,14 @@ impl<'a, 's> Visit<'a> for ExprDepCollector<'s> {
     }
 
     fn visit_call_expression(&mut self, call: &CallExpression<'a>) {
-        if let Expression::StaticMemberExpression(mem) = call.callee.without_parentheses() {
-            if matches!(
+        if let Expression::StaticMemberExpression(mem) = call.callee.without_parentheses()
+            && matches!(
                 mem.object.without_parentheses(),
                 Expression::ThisExpression(_)
-            ) {
-                self.valid = false;
-                return;
-            }
+            )
+        {
+            self.valid = false;
+            return;
         }
         oxc_ast_visit::walk::walk_call_expression(self, call);
     }
@@ -170,15 +170,15 @@ fn try_build_dom_path_update_method<'a>(
                     }
                 }
             }
-            ClassElement::PropertyDefinition(prop) => {
-                if prop.r#static && prop.key.is_specific_static_name("properties") {
-                    if let Some(Expression::ObjectExpression(obj)) = &prop.value {
-                        for prop_kind in &obj.properties {
-                            if let ObjectPropertyKind::ObjectProperty(p) = prop_kind {
-                                if let Some(name) = p.key.static_name() {
-                                    reactive_props.insert(name.into_owned());
-                                }
-                            }
+            ClassElement::PropertyDefinition(prop)
+                if prop.r#static && prop.key.is_specific_static_name("properties") =>
+            {
+                if let Some(Expression::ObjectExpression(obj)) = &prop.value {
+                    for prop_kind in &obj.properties {
+                        if let ObjectPropertyKind::ObjectProperty(p) = prop_kind
+                            && let Some(name) = p.key.static_name()
+                        {
+                            reactive_props.insert(name.into_owned());
                         }
                     }
                 }
@@ -1059,10 +1059,10 @@ pub fn transform_code(source: &str, options: DomPathsOptions) -> DomPathsResult 
     }
 
     let mut codegen_options = CodegenOptions::default();
-    if options.sourcemap.unwrap_or(false) {
-        if let Some(ref filename) = options.filename {
-            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
-        }
+    if options.sourcemap.unwrap_or(false)
+        && let Some(ref filename) = options.filename
+    {
+        codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
     }
 
     let codegen_result = Codegen::new()

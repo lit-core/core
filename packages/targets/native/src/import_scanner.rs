@@ -99,15 +99,14 @@ impl ImportContext {
                                     .get()
                                     .or_else(|| scoping.get_binding(root, local_name.into()));
 
-                                if is_directive || is_lit {
-                                    if let Some(kind) =
+                                if (is_directive || is_lit)
+                                    && let Some(kind) =
                                         DirectiveKind::from_name(imported_name.as_str())
-                                    {
-                                        if let Some(s) = sym_id {
-                                            ctx.directive_symbols.insert(s, kind);
-                                        }
-                                        ctx.directive_bindings.insert(local_name.to_string(), kind);
+                                {
+                                    if let Some(s) = sym_id {
+                                        ctx.directive_symbols.insert(s, kind);
                                     }
+                                    ctx.directive_bindings.insert(local_name.to_string(), kind);
                                 }
 
                                 if is_lit {
@@ -217,18 +216,18 @@ impl ImportContext {
                 }
             }
             Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "LitElement" || mem.property.name == "ReactiveElement" {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
-                            scoping.get_reference(ref_id).symbol_id()
-                        } else {
-                            let root = scoping.root_scope_id();
-                            scoping.get_binding(root, obj.name.as_str().into())
-                        };
+                if (mem.property.name == "LitElement" || mem.property.name == "ReactiveElement")
+                    && let Expression::Identifier(obj) = &mem.object
+                {
+                    let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
+                        scoping.get_reference(ref_id).symbol_id()
+                    } else {
+                        let root = scoping.root_scope_id();
+                        scoping.get_binding(root, obj.name.as_str().into())
+                    };
 
-                        if let Some(sym) = obj_sym {
-                            return self.lit_namespace_symbols.contains(&sym);
-                        }
+                    if let Some(sym) = obj_sym {
+                        return self.lit_namespace_symbols.contains(&sym);
                     }
                 }
                 false
@@ -254,18 +253,18 @@ impl ImportContext {
                 }
             }
             Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "html" {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
-                            scoping.get_reference(ref_id).symbol_id()
-                        } else {
-                            let root = scoping.root_scope_id();
-                            scoping.get_binding(root, obj.name.as_str().into())
-                        };
+                if mem.property.name == "html"
+                    && let Expression::Identifier(obj) = &mem.object
+                {
+                    let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
+                        scoping.get_reference(ref_id).symbol_id()
+                    } else {
+                        let root = scoping.root_scope_id();
+                        scoping.get_binding(root, obj.name.as_str().into())
+                    };
 
-                        if let Some(sym) = obj_sym {
-                            return self.lit_namespace_symbols.contains(&sym);
-                        }
+                    if let Some(sym) = obj_sym {
+                        return self.lit_namespace_symbols.contains(&sym);
                     }
                 }
                 false
@@ -291,18 +290,18 @@ impl ImportContext {
                 }
             }
             Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "customElement" {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
-                            scoping.get_reference(ref_id).symbol_id()
-                        } else {
-                            let root = scoping.root_scope_id();
-                            scoping.get_binding(root, obj.name.as_str().into())
-                        };
+                if mem.property.name == "customElement"
+                    && let Expression::Identifier(obj) = &mem.object
+                {
+                    let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
+                        scoping.get_reference(ref_id).symbol_id()
+                    } else {
+                        let root = scoping.root_scope_id();
+                        scoping.get_binding(root, obj.name.as_str().into())
+                    };
 
-                        if let Some(sym) = obj_sym {
-                            return self.lit_namespace_symbols.contains(&sym);
-                        }
+                    if let Some(sym) = obj_sym {
+                        return self.lit_namespace_symbols.contains(&sym);
                     }
                 }
                 false
@@ -328,18 +327,18 @@ impl ImportContext {
                 }
             }
             Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "property" {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
-                            scoping.get_reference(ref_id).symbol_id()
-                        } else {
-                            let root = scoping.root_scope_id();
-                            scoping.get_binding(root, obj.name.as_str().into())
-                        };
+                if mem.property.name == "property"
+                    && let Expression::Identifier(obj) = &mem.object
+                {
+                    let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
+                        scoping.get_reference(ref_id).symbol_id()
+                    } else {
+                        let root = scoping.root_scope_id();
+                        scoping.get_binding(root, obj.name.as_str().into())
+                    };
 
-                        if let Some(sym) = obj_sym {
-                            return self.lit_namespace_symbols.contains(&sym);
-                        }
+                    if let Some(sym) = obj_sym {
+                        return self.lit_namespace_symbols.contains(&sym);
                     }
                 }
                 false
@@ -365,18 +364,18 @@ impl ImportContext {
                 }
             }
             Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "state" {
-                    if let Expression::Identifier(obj) = &mem.object {
-                        let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
-                            scoping.get_reference(ref_id).symbol_id()
-                        } else {
-                            let root = scoping.root_scope_id();
-                            scoping.get_binding(root, obj.name.as_str().into())
-                        };
+                if mem.property.name == "state"
+                    && let Expression::Identifier(obj) = &mem.object
+                {
+                    let obj_sym = if let Some(ref_id) = obj.reference_id.get() {
+                        scoping.get_reference(ref_id).symbol_id()
+                    } else {
+                        let root = scoping.root_scope_id();
+                        scoping.get_binding(root, obj.name.as_str().into())
+                    };
 
-                        if let Some(sym) = obj_sym {
-                            return self.lit_namespace_symbols.contains(&sym);
-                        }
+                    if let Some(sym) = obj_sym {
+                        return self.lit_namespace_symbols.contains(&sym);
                     }
                 }
                 false
@@ -454,24 +453,24 @@ pub fn clean_dead_imports<'a>(program: &mut Program<'a>, ast: &AstBuilder<'a>) {
 
     let mut candidate_names = HashSet::new();
     for stmt in &old_body {
-        if let Statement::ImportDeclaration(ref import_decl) = stmt {
+        if let Statement::ImportDeclaration(import_decl) = stmt {
             let src = import_decl.source.value.as_str();
-            if is_lit_import_source(src) || is_lit_directive_source(src) {
-                if let Some(ref specifiers) = import_decl.specifiers {
-                    for spec in specifiers {
-                        let name = match spec {
-                            ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                                named.local.name.as_str()
-                            }
-                            ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => {
-                                def.local.name.as_str()
-                            }
-                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                                ns.local.name.as_str()
-                            }
-                        };
-                        candidate_names.insert(name.to_string());
-                    }
+            if (is_lit_import_source(src) || is_lit_directive_source(src))
+                && let Some(ref specifiers) = import_decl.specifiers
+            {
+                for spec in specifiers {
+                    let name = match spec {
+                        ImportDeclarationSpecifier::ImportSpecifier(named) => {
+                            named.local.name.as_str()
+                        }
+                        ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => {
+                            def.local.name.as_str()
+                        }
+                        ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                            ns.local.name.as_str()
+                        }
+                    };
+                    candidate_names.insert(name.to_string());
                 }
             }
         }
@@ -493,26 +492,26 @@ pub fn clean_dead_imports<'a>(program: &mut Program<'a>, ast: &AstBuilder<'a>) {
     for mut stmt in old_body {
         if let Statement::ImportDeclaration(ref mut import_decl) = stmt {
             let src = import_decl.source.value.as_str();
-            if is_lit_import_source(src) || is_lit_directive_source(src) {
-                if let Some(ref mut specifiers) = import_decl.specifiers {
-                    specifiers.retain(|spec| {
-                        let local_name = match spec {
-                            ImportDeclarationSpecifier::ImportSpecifier(named) => {
-                                named.local.name.as_str()
-                            }
-                            ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => {
-                                def.local.name.as_str()
-                            }
-                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
-                                ns.local.name.as_str()
-                            }
-                        };
-                        used_names.contains(local_name)
-                    });
+            if (is_lit_import_source(src) || is_lit_directive_source(src))
+                && let Some(ref mut specifiers) = import_decl.specifiers
+            {
+                specifiers.retain(|spec| {
+                    let local_name = match spec {
+                        ImportDeclarationSpecifier::ImportSpecifier(named) => {
+                            named.local.name.as_str()
+                        }
+                        ImportDeclarationSpecifier::ImportDefaultSpecifier(def) => {
+                            def.local.name.as_str()
+                        }
+                        ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
+                            ns.local.name.as_str()
+                        }
+                    };
+                    used_names.contains(local_name)
+                });
 
-                    if specifiers.is_empty() {
-                        continue;
-                    }
+                if specifiers.is_empty() {
+                    continue;
                 }
             }
         }

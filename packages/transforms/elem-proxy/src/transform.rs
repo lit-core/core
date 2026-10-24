@@ -9,8 +9,8 @@ use std::collections::HashMap;
 
 pub use crate::builder::{build_external_proxy_wrapper, build_proxy_wrapper};
 pub use crate::extractor::{
-    check_and_extract_target, extract_class_properties, extract_decorator_tag, get_ce_define_call,
-    CustomElementTarget,
+    CustomElementTarget, check_and_extract_target, extract_class_properties, extract_decorator_tag,
+    get_ce_define_call,
 };
 use oxc_ast::builder::AstBuilder;
 
@@ -63,16 +63,13 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
     // Scan for customElements.define calls
     let mut define_calls: HashMap<String, String> = HashMap::new(); // class_name -> tag_name
     for stmt in &parsed.program.body {
-        if let Statement::ExpressionStatement(expr_stmt) = stmt {
-            if let Expression::CallExpression(call) = &expr_stmt.expression {
-                if let Some(reg) = symbol_ctx.is_custom_elements_define(call) {
-                    if let (Some(tag), Expression::Identifier(id)) =
-                        (&reg.tag, reg.class_expr.without_parentheses())
-                    {
-                        define_calls.insert(id.name.as_str().to_string(), tag.clone());
-                    }
-                }
-            }
+        if let Statement::ExpressionStatement(expr_stmt) = stmt
+            && let Expression::CallExpression(call) = &expr_stmt.expression
+            && let Some(reg) = symbol_ctx.is_custom_elements_define(call)
+            && let (Some(tag), Expression::Identifier(id)) =
+                (&reg.tag, reg.class_expr.without_parentheses())
+        {
+            define_calls.insert(id.name.as_str().to_string(), tag.clone());
         }
     }
 
@@ -94,33 +91,32 @@ pub fn transform_code(source: &str, options: ElemProxyOptions) -> ElemProxyResul
                 }
             }
             Statement::ExportDeclaration(export_decl) => {
-                if let Declaration::ClassDeclaration(class) = &export_decl.declaration {
-                    if let Some(target) = check_and_extract_target(
+                if let Declaration::ClassDeclaration(class) = &export_decl.declaration
+                    && let Some(target) = check_and_extract_target(
                         &parsed.program,
                         class,
                         true,
                         false,
                         &define_calls,
                         &symbol_ctx,
-                    ) {
-                        targets.insert(target.class_name.clone(), target);
-                    }
+                    )
+                {
+                    targets.insert(target.class_name.clone(), target);
                 }
             }
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                     &export_decl.declaration
-                {
-                    if let Some(target) = check_and_extract_target(
+                    && let Some(target) = check_and_extract_target(
                         &parsed.program,
                         class,
                         true,
                         true,
                         &define_calls,
                         &symbol_ctx,
-                    ) {
-                        targets.insert(target.class_name.clone(), target);
-                    }
+                    )
+                {
+                    targets.insert(target.class_name.clone(), target);
                 }
             }
             _ => {}

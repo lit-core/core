@@ -49,18 +49,21 @@ flowchart TD
 ### In-depth technical details
 
 #### 1. Static subtree extraction
+
 The compiler traverses template literal AST nodes:
 - Quasis (static string parts) and expressions are analyzed simultaneously.
 - Subtrees containing dynamic interpolation bindings (`${this.value}`) are excluded from clustering to avoid complex part reconciliation.
 - Only self-contained static HTML or SVG elements (e.g. `<svg class="caret" viewBox="0 0 16 16"><path d="..."/></svg>`) are considered.
 
 #### 2. Structural canonicalization
+
 Before hashing, candidate fragments undergo deterministic normalization:
 - Attribute keys are sorted alphabetically.
 - Collapsible whitespace between tags is condensed.
 - Fragments below `minFragmentLength` (default: 15 characters) are ignored to prevent creating modules for trivial snippets.
 
 #### 3. Virtual module emission and code rewriting
+
 When a static fragment appears in components equal to or greater than `threshold` (default: `2`), the compiler extracts it:
 
 ```javascript
@@ -83,6 +86,7 @@ export class DropdownMenu extends LitElement {
 ```
 
 #### 4. Browser template cache reuse
+
 `lit-html` caches template results using the unique reference of `TemplateStringsArray`:
 - When multiple components reference `_tpl_caret`, `lit-html` matches the existing cache entry on first render.
 - The browser bypasses `document.createElement('template')` and `template.innerHTML = ...` calls entirely for all subsequent component mounts.
@@ -115,7 +119,6 @@ export default defineConfig({
     }),
   ],
 });
-
 ```
 
 ### Via `@lit-core/webpack-plugin`
@@ -137,12 +140,12 @@ module.exports = {
 
 ### Options reference
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `threshold` | `number` | `2` | Minimum number of component occurrences required to cluster a markup subtree |
-| `minFragmentLength` | `number` | `15` | Minimum character length for candidate subtrees |
-| `include` | `string \| string[]` | `undefined` | Glob pattern of files to analyze |
-| `exclude` | `string \| string[]` | `undefined` | Glob pattern of files to exclude |
+| Option              | Type                 | Default     | Description                                                                  |
+| :------------------ | :------------------- | :---------- | :--------------------------------------------------------------------------- |
+| `threshold`         | `number`             | `2`         | Minimum number of component occurrences required to cluster a markup subtree |
+| `minFragmentLength` | `number`             | `15`        | Minimum character length for candidate subtrees                              |
+| `include`           | `string \| string[]` | `undefined` | Glob pattern of files to analyze                                             |
+| `exclude`           | `string \| string[]` | `undefined` | Glob pattern of files to exclude                                             |
 
 ---
 
@@ -150,13 +153,13 @@ module.exports = {
 
 Evaluated across canonical components from production suites (standalone `html-fuse` vs baseline in `packages/internal/benchmarks/results/`):
 
-| Design system | Static fragments clustered | Fused templates created | Baseline first render | With `html-fuse` | Mount speedup |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 35 fragments | 19 templates | 96.0 ms | 66.7 ms | +30.5% |
-| Spectrum Web Components | 160 fragments | 120 templates | 52.3 ms | 24.4 ms | +53.3% |
-| Web Awesome | 31 fragments | 14 templates | 41.0 ms | 28.6 ms | +30.2% |
-| Momentum Design | 16 fragments | 8 templates | 39.6 ms | 20.6 ms | +48.0% |
-| Material Web | 29 fragments | 11 templates | 45.1 ms | 26.3 ms | +41.7% |
+| Design system           | Static fragments clustered | Fused templates created | Baseline first render | With `html-fuse` | Mount speedup |
+| :---------------------- | -------------------------: | ----------------------: | --------------------: | ---------------: | ------------: |
+| Carbon Web Components   |               35 fragments |            19 templates |               96.0 ms |          66.7 ms |        +30.5% |
+| Spectrum Web Components |              160 fragments |           120 templates |               52.3 ms |          24.4 ms |        +53.3% |
+| Web Awesome             |               31 fragments |            14 templates |               41.0 ms |          28.6 ms |        +30.2% |
+| Momentum Design         |               16 fragments |             8 templates |               39.6 ms |          20.6 ms |        +48.0% |
+| Material Web            |               29 fragments |            11 templates |               45.1 ms |          26.3 ms |        +41.7% |
 
 > By extracting repeated static HTML and SVG subtrees into module-level template constants, `@lit-core/html-fuse` eliminates redundant template parsing and DOM subtree allocations during element initialization.
 

@@ -2,7 +2,7 @@ pub mod parser;
 pub mod transform;
 
 use crate::parser::compute_template_paths;
-use crate::transform::{transform_code, DomPathsOptions, DomPathsResult};
+use crate::transform::{DomPathsOptions, DomPathsResult, transform_code};
 use napi_derive::napi;
 
 #[napi]

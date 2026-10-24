@@ -3,7 +3,7 @@ pub mod builder;
 pub mod hoister;
 pub mod transform;
 
-use crate::transform::{transform_code, EventHoistOptions, EventHoistResult};
+use crate::transform::{EventHoistOptions, EventHoistResult, transform_code};
 use napi_derive::napi;
 
 #[napi]

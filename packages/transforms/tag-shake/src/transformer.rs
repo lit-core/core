@@ -173,25 +173,23 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
             let root = scoping.root_scope_id();
 
             for (stmt_idx, stmt) in program.body.iter().enumerate() {
-                if let Statement::ImportDeclaration(import_decl) = stmt {
-                    if let Some(specifiers) = &import_decl.specifiers {
-                        for (spec_idx, spec) in specifiers.iter().enumerate() {
-                            let local_name = match spec {
-                                ImportDeclarationSpecifier::ImportSpecifier(s) => {
-                                    s.local.name.as_str()
-                                }
-                                ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
-                                    s.local.name.as_str()
-                                }
-                                ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
-                                    s.local.name.as_str()
-                                }
-                            };
-                            if let Some(sym_id) = scoping.get_binding(root, local_name.into()) {
-                                if scoping.get_resolved_references(sym_id).count() > 0 {
-                                    originally_referenced_imports.insert((stmt_idx, spec_idx));
-                                }
+                if let Statement::ImportDeclaration(import_decl) = stmt
+                    && let Some(specifiers) = &import_decl.specifiers
+                {
+                    for (spec_idx, spec) in specifiers.iter().enumerate() {
+                        let local_name = match spec {
+                            ImportDeclarationSpecifier::ImportSpecifier(s) => s.local.name.as_str(),
+                            ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
+                                s.local.name.as_str()
                             }
+                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
+                                s.local.name.as_str()
+                            }
+                        };
+                        if let Some(sym_id) = scoping.get_binding(root, local_name.into())
+                            && scoping.get_resolved_references(sym_id).count() > 0
+                        {
+                            originally_referenced_imports.insert((stmt_idx, spec_idx));
                         }
                     }
                 }
@@ -276,10 +274,10 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
                 }
                 Statement::VariableDeclaration(var_decl) => {
                     for decl in &mut var_decl.declarations {
-                        if let Some(Expression::ClassExpression(class)) = &mut decl.init {
-                            if *dec_idx < class.decorators.len() {
-                                class.decorators.remove(*dec_idx);
-                            }
+                        if let Some(Expression::ClassExpression(class)) = &mut decl.init
+                            && *dec_idx < class.decorators.len()
+                        {
+                            class.decorators.remove(*dec_idx);
                         }
                     }
                 }
@@ -291,10 +289,10 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
                     }
                     Declaration::VariableDeclaration(var_decl) => {
                         for decl in &mut var_decl.declarations {
-                            if let Some(Expression::ClassExpression(class)) = &mut decl.init {
-                                if *dec_idx < class.decorators.len() {
-                                    class.decorators.remove(*dec_idx);
-                                }
+                            if let Some(Expression::ClassExpression(class)) = &mut decl.init
+                                && *dec_idx < class.decorators.len()
+                            {
+                                class.decorators.remove(*dec_idx);
                             }
                         }
                     }
@@ -303,10 +301,9 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
                 Statement::ExportDefaultDeclaration(export_decl) => {
                     if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                         &mut export_decl.declaration
+                        && *dec_idx < class.decorators.len()
                     {
-                        if *dec_idx < class.decorators.len() {
-                            class.decorators.remove(*dec_idx);
-                        }
+                        class.decorators.remove(*dec_idx);
                     }
                 }
                 _ => {}
@@ -332,38 +329,33 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
         let mut pruned_count = 0;
 
         for &(stmt_idx, spec_idx) in &originally_referenced_imports {
-            if let Some(Statement::ImportDeclaration(import_decl)) = program.body.get(stmt_idx) {
-                if let Some(specifiers) = &import_decl.specifiers {
-                    if let Some(spec) = specifiers.get(spec_idx) {
-                        let local_name = match spec {
-                            ImportDeclarationSpecifier::ImportSpecifier(s) => s.local.name.as_str(),
-                            ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
-                                s.local.name.as_str()
-                            }
-                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
-                                s.local.name.as_str()
-                            }
-                        };
+            if let Some(Statement::ImportDeclaration(import_decl)) = program.body.get(stmt_idx)
+                && let Some(specifiers) = &import_decl.specifiers
+                && let Some(spec) = specifiers.get(spec_idx)
+            {
+                let local_name = match spec {
+                    ImportDeclarationSpecifier::ImportSpecifier(s) => s.local.name.as_str(),
+                    ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => s.local.name.as_str(),
+                    ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
+                        s.local.name.as_str()
+                    }
+                };
 
-                        if SymbolResolver::is_identifier_exported(&program, local_name) {
-                            continue;
-                        }
+                if SymbolResolver::is_identifier_exported(&program, local_name) {
+                    continue;
+                }
 
-                        if let Some(symbol_id) = scoping.get_binding(root, local_name.into()) {
-                            let remaining_refs: usize = program
-                                .body
-                                .iter()
-                                .enumerate()
-                                .filter(|(idx, _)| !stmts_to_remove.contains(idx))
-                                .map(|(_, s)| {
-                                    resolver.count_symbol_references_in_statement(s, symbol_id)
-                                })
-                                .sum();
+                if let Some(symbol_id) = scoping.get_binding(root, local_name.into()) {
+                    let remaining_refs: usize = program
+                        .body
+                        .iter()
+                        .enumerate()
+                        .filter(|(idx, _)| !stmts_to_remove.contains(idx))
+                        .map(|(_, s)| resolver.count_symbol_references_in_statement(s, symbol_id))
+                        .sum();
 
-                            if remaining_refs == 0 && specs_to_remove.insert((stmt_idx, spec_idx)) {
-                                pruned_count += 1;
-                            }
-                        }
+                    if remaining_refs == 0 && specs_to_remove.insert((stmt_idx, spec_idx)) {
+                        pruned_count += 1;
                     }
                 }
             }
@@ -375,15 +367,15 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
     // 4. Remove specifiers from import declarations deterministically without index shift
     if !specifiers_to_remove.is_empty() {
         for (stmt_idx, stmt) in program.body.iter_mut().enumerate() {
-            if let Statement::ImportDeclaration(import_decl) = stmt {
-                if let Some(specifiers) = &mut import_decl.specifiers {
-                    let mut current_idx = 0;
-                    specifiers.retain(|_| {
-                        let keep = !specifiers_to_remove.contains(&(stmt_idx, current_idx));
-                        current_idx += 1;
-                        keep
-                    });
-                }
+            if let Statement::ImportDeclaration(import_decl) = stmt
+                && let Some(specifiers) = &mut import_decl.specifiers
+            {
+                let mut current_idx = 0;
+                specifiers.retain(|_| {
+                    let keep = !specifiers_to_remove.contains(&(stmt_idx, current_idx));
+                    current_idx += 1;
+                    keep
+                });
             }
         }
     }
@@ -397,12 +389,11 @@ pub fn transform_code(source: &str, options: TagShakeOptions) -> TagShakeResult 
             continue;
         }
 
-        if let Statement::ImportDeclaration(ref import_decl) = stmt {
-            if let Some(specifiers) = &import_decl.specifiers {
-                if specifiers.is_empty() {
-                    continue;
-                }
-            }
+        if let Statement::ImportDeclaration(ref import_decl) = stmt
+            && let Some(specifiers) = &import_decl.specifiers
+            && specifiers.is_empty()
+        {
+            continue;
         }
 
         new_body.push(stmt);
@@ -436,15 +427,11 @@ fn find_local_class_stmt_index(program: &Program, cls_name: &str) -> Option<usiz
                 cls.id.as_ref().map(|i| i.name.as_str()) == Some(cls_name)
             }
             Statement::VariableDeclaration(var_decl) => var_decl.declarations.iter().any(|d| {
-                if let BindingPattern::BindingIdentifier(id) = &d.id {
-                    if id.name == cls_name {
-                        if let Some(init) = &d.init {
-                            return matches!(
-                                init.without_parentheses(),
-                                Expression::ClassExpression(_)
-                            );
-                        }
-                    }
+                if let BindingPattern::BindingIdentifier(id) = &d.id
+                    && id.name == cls_name
+                    && let Some(init) = &d.init
+                {
+                    return matches!(init.without_parentheses(), Expression::ClassExpression(_));
                 }
                 false
             }),
@@ -454,15 +441,14 @@ fn find_local_class_stmt_index(program: &Program, cls_name: &str) -> Option<usiz
                 }
                 Declaration::VariableDeclaration(var_decl) => {
                     var_decl.declarations.iter().any(|d| {
-                        if let BindingPattern::BindingIdentifier(id) = &d.id {
-                            if id.name == cls_name {
-                                if let Some(init) = &d.init {
-                                    return matches!(
-                                        init.without_parentheses(),
-                                        Expression::ClassExpression(_)
-                                    );
-                                }
-                            }
+                        if let BindingPattern::BindingIdentifier(id) = &d.id
+                            && id.name == cls_name
+                            && let Some(init) = &d.init
+                        {
+                            return matches!(
+                                init.without_parentheses(),
+                                Expression::ClassExpression(_)
+                            );
                         }
                         false
                     })
@@ -537,44 +523,38 @@ fn is_auxiliary_class_stmt(stmt: &Statement, cls_name: &str, resolver: &SymbolRe
     let expr = expr_stmt.expression.without_parentheses();
     match expr {
         Expression::CallExpression(call) => {
-            if resolver.is_decorator_helper_callee(&call.callee) {
-                if let Some(arg1) = call.arguments.get(1).and_then(|a| a.as_expression()) {
-                    match arg1.without_parentheses() {
-                        Expression::Identifier(id) if id.name == cls_name => return true,
-                        Expression::StaticMemberExpression(mem)
-                            if mem.property.name == "prototype" =>
+            if resolver.is_decorator_helper_callee(&call.callee)
+                && let Some(arg1) = call.arguments.get(1).and_then(|a| a.as_expression())
+            {
+                match arg1.without_parentheses() {
+                    Expression::Identifier(id) if id.name == cls_name => return true,
+                    Expression::StaticMemberExpression(mem) if mem.property.name == "prototype" => {
+                        if let Expression::Identifier(id) = mem.object.without_parentheses()
+                            && id.name == cls_name
                         {
-                            if let Expression::Identifier(id) = mem.object.without_parentheses() {
-                                if id.name == cls_name {
-                                    return true;
-                                }
-                            }
+                            return true;
                         }
-                        _ => {}
                     }
+                    _ => {}
                 }
             }
-            if let Expression::StaticMemberExpression(mem) = call.callee.without_parentheses() {
-                if let Expression::Identifier(id) = mem.object.without_parentheses() {
-                    if id.name == cls_name
-                        && mem.property.name != "define"
-                        && mem.property.name != "register"
-                    {
-                        return true;
-                    }
-                }
+            if let Expression::StaticMemberExpression(mem) = call.callee.without_parentheses()
+                && let Expression::Identifier(id) = mem.object.without_parentheses()
+                && id.name == cls_name
+                && mem.property.name != "define"
+                && mem.property.name != "register"
+            {
+                return true;
             }
             false
         }
         Expression::ChainExpression(chain) => {
-            if let ChainElement::CallExpression(call) = &chain.expression {
-                if let Expression::StaticMemberExpression(mem) = call.callee.without_parentheses() {
-                    if let Expression::Identifier(id) = mem.object.without_parentheses() {
-                        if id.name == cls_name {
-                            return true;
-                        }
-                    }
-                }
+            if let ChainElement::CallExpression(call) = &chain.expression
+                && let Expression::StaticMemberExpression(mem) = call.callee.without_parentheses()
+                && let Expression::Identifier(id) = mem.object.without_parentheses()
+                && id.name == cls_name
+            {
+                return true;
             }
             false
         }
@@ -596,10 +576,10 @@ fn is_export_or_alias_of_class(stmt: &Statement, cls_name: &str) -> bool {
     match stmt {
         Statement::ExportNamedDeclaration(_) | Statement::ExportDefaultDeclaration(_) => true,
         Statement::VariableDeclaration(var_decl) => var_decl.declarations.iter().all(|d| {
-            if let Some(init) = &d.init {
-                if let Expression::Identifier(id) = init.without_parentheses() {
-                    return id.name == cls_name;
-                }
+            if let Some(init) = &d.init
+                && let Expression::Identifier(id) = init.without_parentheses()
+            {
+                return id.name == cls_name;
             }
             false
         }),
@@ -610,56 +590,53 @@ fn is_export_or_alias_of_class(stmt: &Statement, cls_name: &str) -> bool {
 fn clear_shaken_class_in_stmt(stmt: &mut Statement, shaken_classes: &HashSet<String>) {
     match stmt {
         Statement::ClassDeclaration(cls) => {
-            if let Some(id) = &cls.id {
-                if shaken_classes.contains(id.name.as_str()) {
+            if let Some(id) = &cls.id
+                && shaken_classes.contains(id.name.as_str())
+            {
+                cls.heritage = None;
+                cls.body.body.clear();
+            }
+        }
+        Statement::VariableDeclaration(var_decl) => {
+            for decl in &mut var_decl.declarations {
+                if let BindingPattern::BindingIdentifier(id) = &decl.id
+                    && shaken_classes.contains(id.name.as_str())
+                    && let Some(Expression::ClassExpression(cls)) = &mut decl.init
+                {
                     cls.heritage = None;
                     cls.body.body.clear();
                 }
             }
         }
-        Statement::VariableDeclaration(var_decl) => {
-            for decl in &mut var_decl.declarations {
-                if let BindingPattern::BindingIdentifier(id) = &decl.id {
-                    if shaken_classes.contains(id.name.as_str()) {
-                        if let Some(Expression::ClassExpression(cls)) = &mut decl.init {
-                            cls.heritage = None;
-                            cls.body.body.clear();
-                        }
-                    }
-                }
-            }
-        }
         Statement::ExportDeclaration(exp) => match &mut exp.declaration {
             Declaration::ClassDeclaration(cls) => {
-                if let Some(id) = &cls.id {
-                    if shaken_classes.contains(id.name.as_str()) {
-                        cls.heritage = None;
-                        cls.body.body.clear();
-                    }
+                if let Some(id) = &cls.id
+                    && shaken_classes.contains(id.name.as_str())
+                {
+                    cls.heritage = None;
+                    cls.body.body.clear();
                 }
             }
             Declaration::VariableDeclaration(var_decl) => {
                 for decl in &mut var_decl.declarations {
-                    if let BindingPattern::BindingIdentifier(id) = &decl.id {
-                        if shaken_classes.contains(id.name.as_str()) {
-                            if let Some(Expression::ClassExpression(cls)) = &mut decl.init {
-                                cls.heritage = None;
-                                cls.body.body.clear();
-                            }
-                        }
+                    if let BindingPattern::BindingIdentifier(id) = &decl.id
+                        && shaken_classes.contains(id.name.as_str())
+                        && let Some(Expression::ClassExpression(cls)) = &mut decl.init
+                    {
+                        cls.heritage = None;
+                        cls.body.body.clear();
                     }
                 }
             }
             _ => {}
         },
         Statement::ExportDefaultDeclaration(exp) => {
-            if let ExportDefaultDeclarationKind::ClassDeclaration(cls) = &mut exp.declaration {
-                if let Some(id) = &cls.id {
-                    if shaken_classes.contains(id.name.as_str()) {
-                        cls.heritage = None;
-                        cls.body.body.clear();
-                    }
-                }
+            if let ExportDefaultDeclarationKind::ClassDeclaration(cls) = &mut exp.declaration
+                && let Some(id) = &cls.id
+                && shaken_classes.contains(id.name.as_str())
+            {
+                cls.heritage = None;
+                cls.body.body.clear();
             }
         }
         _ => {}
@@ -685,9 +662,10 @@ mod tests {
             },
         );
         assert_eq!(res.shaken_registrations_count, 0);
-        assert!(res
-            .code
-            .contains("customElements.define('my-element', MyElement)"));
+        assert!(
+            res.code
+                .contains("customElements.define('my-element', MyElement)")
+        );
     }
 
     #[test]

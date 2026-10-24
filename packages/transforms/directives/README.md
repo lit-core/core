@@ -45,19 +45,20 @@ flowchart TD
 
 #### 1. Directive lowering specifications
 
-| Directive | Input expression | Lowered compiled target | Runtime benefit |
-| :--- | :--- | :--- | :--- |
-| `classMap` | `classMap({ 'btn': true, 'active': this.on })` | `"btn" + (this.on ? " active" : "")` | Eliminates object iteration & wrapper allocation |
-| `styleMap` | `styleMap({ color: this.color })` | `"color:" + this.color` | Direct CSS string concatenation |
-| `ifDefined` | `ifDefined(this.value)` | `this.value ?? nothing` | Native nullish coalescing to Lit `nothing` |
-| `when` | `when(this.ok, () => tplA, () => tplB)` | `this.ok ? tplA : tplB` | Native ternary conditional branching |
-| `choose` | `choose(this.val, [[1, () => A]], () => B)` | `this.val === 1 ? A : B` | Inline conditional expression |
-| `map` | `map(this.items, item => tpl)` | `this.items?.map(item => tpl)` | Direct array mapping |
-| `guard` | `guard([this.dep], () => tpl)` | Inline reference equality check | Bypasses `GuardDirective` instance creation |
-| `live` | `live(this.prop)` | Direct property binding pass-through | Eliminates wrapper sentinel |
-| `keyed` | `keyed(key, tpl)` | Direct template expression | Preserves template identity without wrapper |
+| Directive   | Input expression                               | Lowered compiled target              | Runtime benefit                                  |
+| :---------- | :--------------------------------------------- | :----------------------------------- | :----------------------------------------------- |
+| `classMap`  | `classMap({ 'btn': true, 'active': this.on })` | `"btn" + (this.on ? " active" : "")` | Eliminates object iteration & wrapper allocation |
+| `styleMap`  | `styleMap({ color: this.color })`              | `"color:" + this.color`              | Direct CSS string concatenation                  |
+| `ifDefined` | `ifDefined(this.value)`                        | `this.value ?? nothing`              | Native nullish coalescing to Lit `nothing`       |
+| `when`      | `when(this.ok, () => tplA, () => tplB)`        | `this.ok ? tplA : tplB`              | Native ternary conditional branching             |
+| `choose`    | `choose(this.val, [[1, () => A]], () => B)`    | `this.val === 1 ? A : B`             | Inline conditional expression                    |
+| `map`       | `map(this.items, item => tpl)`                 | `this.items?.map(item => tpl)`       | Direct array mapping                             |
+| `guard`     | `guard([this.dep], () => tpl)`                 | Inline reference equality check      | Bypasses `GuardDirective` instance creation      |
+| `live`      | `live(this.prop)`                              | Direct property binding pass-through | Eliminates wrapper sentinel                      |
+| `keyed`     | `keyed(key, tpl)`                              | Direct template expression           | Preserves template identity without wrapper      |
 
 #### 2. Import pruning and tree-shaking
+
 Standard bundlers cannot tree-shake directive runtime code if import specifiers remain in the source module. `directives` reconciles the file's AST after lowering:
 - Scans `ImportDeclaration` nodes referencing `lit/directives/*` or `lit-html/directives/*`.
 - Verifies if any imported directive identifier retains remaining references in the AST.
@@ -88,7 +89,6 @@ export default defineConfig({
     }),
   ],
 });
-
 ```
 
 ### Via `@lit-core/webpack-plugin`
@@ -125,13 +125,13 @@ console.log(`Lowered ${result.loweredCount} directives`);
 
 Evaluated across canonical component suites (standalone `directives` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
 
-| Design system | Baseline mount latency | With `directives` | Mount speedup | Reactive update speedup | Script eval latency |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 96.0 ms | 60.4 ms | +37.1% | +50.0% (2.3 ms vs 4.6 ms) | 3.7 ms (vs 4.4 ms, +15.9%) |
-| Spectrum Web Components | 52.3 ms | 28.1 ms | +46.3% | +9.5% (1.9 ms vs 2.1 ms) | 12.6 ms (vs 10.5 ms) |
-| Web Awesome | 41.0 ms | 53.4 ms | -30.2% | +43.8% (0.9 ms vs 1.6 ms) | 4.2 ms (vs 6.2 ms, +32.3%) |
-| Momentum Design | 39.6 ms | 44.8 ms | -13.1% | 0.0% (1.1 ms vs 1.1 ms) | 5.0 ms (vs 4.3 ms) |
-| Material Web | 45.1 ms | 39.4 ms | +12.6% | +28.6% (1.5 ms vs 2.1 ms) | 5.4 ms (vs 6.8 ms, +20.6%) |
+| Design system           | Baseline mount latency | With `directives` | Mount speedup |   Reactive update speedup |        Script eval latency |
+| :---------------------- | ---------------------: | ----------------: | ------------: | ------------------------: | -------------------------: |
+| Carbon Web Components   |                96.0 ms |           60.4 ms |        +37.1% | +50.0% (2.3 ms vs 4.6 ms) | 3.7 ms (vs 4.4 ms, +15.9%) |
+| Spectrum Web Components |                52.3 ms |           28.1 ms |        +46.3% |  +9.5% (1.9 ms vs 2.1 ms) |       12.6 ms (vs 10.5 ms) |
+| Web Awesome             |                41.0 ms |           53.4 ms |        -30.2% | +43.8% (0.9 ms vs 1.6 ms) | 4.2 ms (vs 6.2 ms, +32.3%) |
+| Momentum Design         |                39.6 ms |           44.8 ms |        -13.1% |   0.0% (1.1 ms vs 1.1 ms) |         5.0 ms (vs 4.3 ms) |
+| Material Web            |                45.1 ms |           39.4 ms |        +12.6% | +28.6% (1.5 ms vs 2.1 ms) | 5.4 ms (vs 6.8 ms, +20.6%) |
 
 > Compiling Lit directives ahead of time replaces dynamic directive wrapper instances (`DirectiveResult`) with direct inline expression handlers, cutting update cycle overhead by up to **50%** and saving heap allocations during component rendering.
 

@@ -48,12 +48,14 @@ flowchart TD
 ### In-depth technical details
 
 #### 1. General-purpose design principles
+
 `tag-shake` contains strictly zero hardcoded heuristics:
 - Zero library-specific prefixes (`cds-*`, `sp-*`, `wa-*`, `md-*`).
 - Zero hardcoded folder paths or file naming conventions.
 - Works identically across any Web Component library.
 
 #### 2. Conservative safety invariants
+
 - **Dynamic registrations**: If a tag name is dynamically computed (e.g., `customElements.define(prefix + '-btn', Cls)`), `tag-shake` safely bails out and preserves the registration.
 - **Exported symbols**: If a component class is exported for subclassing or programmatic instantiation, `tag-shake` removes the global custom element registration while preserving the class export.
 - **AST fidelity**: All AST mutations are constructed via `oxc_allocator` and emitted via `oxc_codegen`, guaranteeing deterministic output without string splicing.
@@ -83,7 +85,6 @@ export default defineConfig({
     }),
   ],
 });
-
 ```
 
 ### Programmatic API
@@ -116,23 +117,23 @@ Evaluated across production suites in both full component bundles (from `package
 
 ### Full component bundle matrix (`results/manifest.json`)
 
-| Design system | Baseline bundle size | With `tag-shake` | Raw bundle delta | First render speedup | Update speedup |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 1,438,781 B | 1,438,781 B | 0.0% (0 B) | +20.9% (75.9 ms vs 96.0 ms) | +54.3% (2.1 ms vs 4.6 ms) |
-| Spectrum Web Components | 819,006 B | 804,248 B | -1.8% (-14,758 B) | +1.7% (51.4 ms vs 52.3 ms) | +14.3% (1.8 ms vs 2.1 ms) |
-| Web Awesome | 370,946 B | 370,946 B | 0.0% (0 B) | -46.6% (60.1 ms vs 41.0 ms) | 0.0% (1.6 ms vs 1.6 ms) |
-| Momentum Design | 346,579 B | 346,579 B | 0.0% (0 B) | +24.7% (29.8 ms vs 39.6 ms) | +9.1% (1.0 ms vs 1.1 ms) |
-| Material Web | 269,272 B | 269,272 B | 0.0% (0 B) | +14.0% (38.8 ms vs 45.1 ms) | +14.3% (1.8 ms vs 2.1 ms) |
+| Design system           | Baseline bundle size | With `tag-shake` |  Raw bundle delta |        First render speedup |            Update speedup |
+| :---------------------- | -------------------: | ---------------: | ----------------: | --------------------------: | ------------------------: |
+| Carbon Web Components   |          1,438,781 B |      1,438,781 B |        0.0% (0 B) | +20.9% (75.9 ms vs 96.0 ms) | +54.3% (2.1 ms vs 4.6 ms) |
+| Spectrum Web Components |            819,006 B |        804,248 B | -1.8% (-14,758 B) |  +1.7% (51.4 ms vs 52.3 ms) | +14.3% (1.8 ms vs 2.1 ms) |
+| Web Awesome             |            370,946 B |        370,946 B |        0.0% (0 B) | -46.6% (60.1 ms vs 41.0 ms) |   0.0% (1.6 ms vs 1.6 ms) |
+| Momentum Design         |            346,579 B |        346,579 B |        0.0% (0 B) | +24.7% (29.8 ms vs 39.6 ms) |  +9.1% (1.0 ms vs 1.1 ms) |
+| Material Web            |            269,272 B |        269,272 B |        0.0% (0 B) | +14.0% (38.8 ms vs 45.1 ms) | +14.3% (1.8 ms vs 2.1 ms) |
 
 ### Selective barrel import scenario (5 components used)
 
-| Design system | Unshaken barrel bundle | With `tag-shake` | Dead code eliminated |
-| :--- | ---: | ---: | ---: |
-| Carbon Web Components | 842.1 KB | 114.6 KB | -86.4% (-727.5 KB) |
-| Spectrum Web Components | 512.4 KB | 88.2 KB | -82.8% (-424.2 KB) |
-| Web Awesome | 398.2 KB | 76.4 KB | -80.8% (-321.8 KB) |
-| Momentum Design | 640.8 KB | 102.5 KB | -84.0% (-538.3 KB) |
-| Material Web | 245.0 KB | 62.0 KB | -74.7% (-183.0 KB) |
+| Design system           | Unshaken barrel bundle | With `tag-shake` | Dead code eliminated |
+| :---------------------- | ---------------------: | ---------------: | -------------------: |
+| Carbon Web Components   |               842.1 KB |         114.6 KB |   -86.4% (-727.5 KB) |
+| Spectrum Web Components |               512.4 KB |          88.2 KB |   -82.8% (-424.2 KB) |
+| Web Awesome             |               398.2 KB |          76.4 KB |   -80.8% (-321.8 KB) |
+| Momentum Design         |               640.8 KB |         102.5 KB |   -84.0% (-538.3 KB) |
+| Material Web            |               245.0 KB |          62.0 KB |   -74.7% (-183.0 KB) |
 
 ---
 

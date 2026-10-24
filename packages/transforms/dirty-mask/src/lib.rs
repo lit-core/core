@@ -3,7 +3,7 @@ pub mod builder;
 pub mod masker;
 pub mod transform;
 
-use crate::transform::{transform_code, DirtyMaskOptions, DirtyMaskResult};
+use crate::transform::{DirtyMaskOptions, DirtyMaskResult, transform_code};
 use napi_derive::napi;
 
 #[napi]

@@ -1,5 +1,5 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = [
     "crates/lit-analysis",
     "packages/transforms/css-fuse",
@@ -23,9 +23,9 @@ members = [
 
 [workspace.dependencies]
 # NAPI-RS native bindings
-napi = { version = "3.10.5", features = ["serde-json"] }
-napi-derive = "3.5.10"
-napi-build = "2.3.2"
+napi = { version = "3.13.0", features = ["serde-json"] }
+napi-derive = "3.6.9"
+napi-build = "2.5.0"
 
 # Core serialization & error handling
 serde = { version = "1.0", features = ["derive"] }
@@ -34,12 +34,12 @@ thiserror = "2.0"
 
 # File matching & hashing
 glob = "0.3"
-blake3 = "1.5"
+blake3 = "1.8"
 
 # CLI & diagnostics
-clap = { version = "4.5", features = ["derive"] }
+clap = { version = "4.6", features = ["derive"] }
 miette = { version = "7.6", features = ["fancy"] }
-insta = { version = "1.41", features = ["json", "redactions"] }
+insta = { version = "1.48", features = ["json", "redactions"] }
 
 # Internal shared analysis crate
 lit_analysis = { path = "crates/lit-analysis", default-features = false }

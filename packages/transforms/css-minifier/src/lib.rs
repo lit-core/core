@@ -4,7 +4,7 @@ use lit_analysis::symbol::SymbolProofContext;
 use napi_derive::napi;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
-use oxc_ast_visit::{walk_mut::*, VisitMut};
+use oxc_ast_visit::{VisitMut, walk_mut::*};
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
 use oxc_semantic::SemanticBuilder;
@@ -123,14 +123,14 @@ impl<'a> VisitMut<'a> for CssMinifierMutVisitor<'a> {
                 // Common case: template literal with no expressions (pure CSS)
                 if let Some(quasi) = node.quasi.quasis.first_mut() {
                     let raw_css = quasi.value.raw.as_str();
-                    if let Some(minified) = minify_css_string(raw_css) {
-                        if minified.len() < raw_css.len() {
-                            self.bytes_saved += (raw_css.len() - minified.len()) as u32;
-                            self.minified_templates += 1;
-                            let str_arena = Str::from_str_in(&minified, &self.allocator);
-                            quasi.value.raw = str_arena;
-                            quasi.value.cooked = Some(str_arena);
-                        }
+                    if let Some(minified) = minify_css_string(raw_css)
+                        && minified.len() < raw_css.len()
+                    {
+                        self.bytes_saved += (raw_css.len() - minified.len()) as u32;
+                        self.minified_templates += 1;
+                        let str_arena = Str::from_str_in(&minified, &self.allocator);
+                        quasi.value.raw = str_arena;
+                        quasi.value.cooked = Some(str_arena);
                     }
                 }
             } else if quasis_end_at_rule_boundaries(&node.quasi.quasis) {
@@ -138,14 +138,14 @@ impl<'a> VisitMut<'a> for CssMinifierMutVisitor<'a> {
                 // stylesheet and can be minified without touching the expressions.
                 for quasi in node.quasi.quasis.iter_mut() {
                     let raw_css = quasi.value.raw.as_str();
-                    if let Some(minified) = minify_css_string(raw_css) {
-                        if minified.len() < raw_css.len() {
-                            self.bytes_saved += (raw_css.len() - minified.len()) as u32;
-                            self.minified_templates += 1;
-                            let str_arena = Str::from_str_in(&minified, &self.allocator);
-                            quasi.value.raw = str_arena;
-                            quasi.value.cooked = Some(str_arena);
-                        }
+                    if let Some(minified) = minify_css_string(raw_css)
+                        && minified.len() < raw_css.len()
+                    {
+                        self.bytes_saved += (raw_css.len() - minified.len()) as u32;
+                        self.minified_templates += 1;
+                        let str_arena = Str::from_str_in(&minified, &self.allocator);
+                        quasi.value.raw = str_arena;
+                        quasi.value.cooked = Some(str_arena);
                     }
                 }
             }
@@ -160,12 +160,12 @@ impl<'a> VisitMut<'a> for CssMinifierMutVisitor<'a> {
                     match expr {
                         Expression::StringLiteral(lit) => {
                             let raw_css = lit.value.as_str();
-                            if let Some(minified) = minify_css_string(raw_css) {
-                                if minified.len() < raw_css.len() {
-                                    self.bytes_saved += (raw_css.len() - minified.len()) as u32;
-                                    self.minified_templates += 1;
-                                    lit.value = Str::from_str_in(&minified, &self.allocator);
-                                }
+                            if let Some(minified) = minify_css_string(raw_css)
+                                && minified.len() < raw_css.len()
+                            {
+                                self.bytes_saved += (raw_css.len() - minified.len()) as u32;
+                                self.minified_templates += 1;
+                                lit.value = Str::from_str_in(&minified, &self.allocator);
                             }
                         }
                         Expression::ArrayExpression(arr) => {
@@ -174,14 +174,12 @@ impl<'a> VisitMut<'a> for CssMinifierMutVisitor<'a> {
                                     elem.as_expression_mut()
                                 {
                                     let raw_css = lit.value.as_str();
-                                    if let Some(minified) = minify_css_string(raw_css) {
-                                        if minified.len() < raw_css.len() {
-                                            self.bytes_saved +=
-                                                (raw_css.len() - minified.len()) as u32;
-                                            self.minified_templates += 1;
-                                            lit.value =
-                                                Str::from_str_in(&minified, &self.allocator);
-                                        }
+                                    if let Some(minified) = minify_css_string(raw_css)
+                                        && minified.len() < raw_css.len()
+                                    {
+                                        self.bytes_saved += (raw_css.len() - minified.len()) as u32;
+                                        self.minified_templates += 1;
+                                        lit.value = Str::from_str_in(&minified, &self.allocator);
                                     }
                                 }
                             }
@@ -244,10 +242,10 @@ pub fn transform_embedded_css(source: &str, options: MinifyCssOptions) -> Minify
     }
 
     let mut codegen_options = CodegenOptions::default();
-    if options.sourcemap.unwrap_or(false) {
-        if let Some(ref filename) = options.filename {
-            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
-        }
+    if options.sourcemap.unwrap_or(false)
+        && let Some(ref filename) = options.filename
+    {
+        codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
     }
 
     let codegen_result = Codegen::new().with_options(codegen_options).build(&program);

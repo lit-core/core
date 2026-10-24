@@ -22,7 +22,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=26.0.0"
   },
   "scripts": {
     "build": "tsc",
@@ -66,7 +66,7 @@
     "@types/webpack": "^5.28.5",
     "lit": "^3.3.3",
     "typescript": "^7.0.2",
-    "webpack": "^5.112.0"
+    "webpack": "^5.112.1"
   },
   "peerDependencies": {
     "webpack": "^5.0.0"

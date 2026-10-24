@@ -24,15 +24,15 @@ pub fn try_transform_query<'a>(
         if symbol_ctx.resolve_decorator(dec) == Some(CanonicalLitSymbol::QueryDecorator) {
             has_query = true;
             if let Expression::CallExpression(call) = &dec.expression {
-                if let Some(arg0) = call.arguments.first() {
-                    if let Some(Expression::StringLiteral(lit)) = arg0.as_expression() {
-                        selector = Some(lit.value.as_str().to_string());
-                    }
+                if let Some(arg0) = call.arguments.first()
+                    && let Some(Expression::StringLiteral(lit)) = arg0.as_expression()
+                {
+                    selector = Some(lit.value.as_str().to_string());
                 }
-                if let Some(arg1) = call.arguments.get(1) {
-                    if let Some(Expression::BooleanLiteral(b)) = arg1.as_expression() {
-                        cache = b.value;
-                    }
+                if let Some(arg1) = call.arguments.get(1)
+                    && let Some(Expression::BooleanLiteral(b)) = arg1.as_expression()
+                {
+                    cache = b.value;
                 }
             }
             break;

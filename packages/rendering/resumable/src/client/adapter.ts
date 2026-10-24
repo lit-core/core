@@ -596,11 +596,10 @@ function patchReactivePrototype(targetProto: any): void {
 
     if (isFirstUpdate) {
       const hasSsrContent =
-        root &&
-        root.childNodes &&
+        root?.childNodes &&
         root.childNodes.length > 0 &&
         Array.from(root.childNodes as NodeListOf<ChildNode>).some(
-          (n: any) => (n.nodeType === 1 && (!n.tagName || n.tagName.toLowerCase() !== 'style')) || (n.nodeType === 3 && n.textContent && n.textContent.trim().length > 0),
+          (n: any) => (n.nodeType === 1 && n.tagName?.toLowerCase() !== 'style') || (n.nodeType === 3 && n.textContent && n.textContent.trim().length > 0),
         );
       if (hasSsrContent) {
         this.hasUpdated = true;

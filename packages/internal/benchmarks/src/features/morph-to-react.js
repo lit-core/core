@@ -10,6 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../../../..');
 const docsDir = path.resolve(rootDir, 'packages/internal/benchmarks/docs');
+const DummyComp = () => React.createElement('div', { className: 'benchmark-sample' }, 'Content');
 
 const SUITES = [
   {
@@ -341,7 +342,6 @@ export async function runMorphToReactBenchmarks() {
 
     // Measure SSR latency for 1,000 instances
     const ssrStart = performance.now();
-    const DummyComp = () => React.createElement('div', { className: 'benchmark-sample' }, 'Content');
     const items = Array.from({ length: 1000 }, (_, i) => React.createElement(DummyComp, { key: i }));
     renderToString(React.createElement(StrictMode, null, React.createElement('div', null, items)));
     const ssrDurationMs = Math.round((performance.now() - ssrStart) * 100) / 100;

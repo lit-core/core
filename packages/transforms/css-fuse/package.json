@@ -40,7 +40,7 @@
     "lightningcss"
   ],
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=26.0.0"
   },
   "napi": {
     "binaryName": "css-fuse",
@@ -63,6 +63,6 @@
     "test": "node tests/fuse.test.js"
   },
   "devDependencies": {
-    "@napi-rs/cli": "^3.10.8"
+    "@napi-rs/cli": "^3.10.9"
   }
 }

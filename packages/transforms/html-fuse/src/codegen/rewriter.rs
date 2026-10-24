@@ -4,7 +4,7 @@ use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::Codegen;
 use oxc_parser::Parser;
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 use std::collections::HashMap;
 use std::path::Path;
 

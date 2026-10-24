@@ -5,11 +5,13 @@
 ---
 
 ## Writing style reminder
+
 Remember to use sentence case for all documentation, table headers, and descriptions. Do not uppercase every word.
 
 ---
 
 ## Core architecture
+
 - **Parser**: Uses `oxc` for JS/TS AST parsing and `lightningcss` for CSS normalization, rule parsing, and minification.
 - **Extractor**:
   - Scans `TaggedTemplateExpression` matching `css` template tags and their local imports/aliases.
@@ -21,6 +23,7 @@ Remember to use sentence case for all documentation, table headers, and descript
 ---
 
 ## Critical rules and invariants
+
 1. **Cascade preservation**:
    - Always prepend shared sheets before local overrides: `static styles = [shared_0, local_styles]`. Never append them after.
 2. **Selector specificity**:

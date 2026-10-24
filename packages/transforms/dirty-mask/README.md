@@ -25,6 +25,7 @@ In standard Lit applications:
 3. Computes a dependency bitmask for each template expression.
 4. Rewrites `update(changedProperties)` to calculate an active `__litDirtyMask` integer from Lit's native `changedProperties` map.
 5. Rewrites template expressions to short-circuit via Lit's `noChange` sentinel:
+
    ```typescript
    ${(this.__litDirtyMask & mask) ? (originalExpression) : noChange}
    ```
@@ -49,17 +50,20 @@ flowchart TD
 ### In-depth technical details
 
 #### 1. Bitmask allocation and tracing
+
 During compilation with `oxc`:
 - Properties declared via `@property()`, `@state()`, or `static properties` receive sequential bit positions: `0x01`, `0x02`, `0x04`, `0x08`, etc.
 - Expressions inside `html` template literals are visited to identify property accesses on `this`.
 - If an expression references `this.propA` and `this.propB`, its bitmask becomes `0x01 | 0x02 = 0x03`.
 
 #### 2. Conservative fallback for purity
+
 To guarantee that side effects or external values are never improperly skipped:
 - Expressions referencing global variables, external functions, or non-reactive class fields receive a fallback mask of `-1` (all bits dirty).
 - Complex method calls with unknown side effects are always evaluated on every render cycle.
 
 #### 3. Native Lit sentinel synergy
+
 `dirty-mask` does not alter Lit's runtime library:
 - Uses Lit's official `noChange` sentinel symbol exported from `lit`.
 - Conforms directly to Lit's template part diffing protocol, ensuring 100% interoperability with all Lit directives and custom part implementations.
@@ -89,7 +93,6 @@ export default defineConfig({
     }),
   ],
 });
-
 ```
 
 ### Via `@lit-core/webpack-plugin`
@@ -124,13 +127,13 @@ console.log(result.code);
 
 Evaluated across canonical component suites (standalone `dirty-mask` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
 
-| Design system | Baseline update latency | With `dirty-mask` | Update speedup | Baseline first render | With `dirty-mask` | Mount speedup |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 4.6 ms | 2.5 ms | +45.7% | 96.0 ms | 45.1 ms | +53.0% |
-| Spectrum Web Components | 2.1 ms | 2.1 ms | 0.0% | 52.3 ms | 28.5 ms | +45.5% |
-| Web Awesome | 1.6 ms | 1.5 ms | +6.3% | 41.0 ms | 44.1 ms | -7.6% |
-| Momentum Design | 1.1 ms | 1.2 ms | -9.1% | 39.6 ms | 25.5 ms | +35.6% |
-| Material Web | 2.1 ms | 1.6 ms | +23.8% | 45.1 ms | 18.7 ms | +58.5% |
+| Design system           | Baseline update latency | With `dirty-mask` | Update speedup | Baseline first render | With `dirty-mask` | Mount speedup |
+| :---------------------- | ----------------------: | ----------------: | -------------: | --------------------: | ----------------: | ------------: |
+| Carbon Web Components   |                  4.6 ms |            2.5 ms |         +45.7% |               96.0 ms |           45.1 ms |        +53.0% |
+| Spectrum Web Components |                  2.1 ms |            2.1 ms |           0.0% |               52.3 ms |           28.5 ms |        +45.5% |
+| Web Awesome             |                  1.6 ms |            1.5 ms |          +6.3% |               41.0 ms |           44.1 ms |         -7.6% |
+| Momentum Design         |                  1.1 ms |            1.2 ms |          -9.1% |               39.6 ms |           25.5 ms |        +35.6% |
+| Material Web            |                  2.1 ms |            1.6 ms |         +23.8% |               45.1 ms |           18.7 ms |        +58.5% |
 
 > Property-to-part dependency bitmasking traces which properties affect which dynamic bindings in template literals, short-circuiting unchanged DOM parts during reactive updates.
 

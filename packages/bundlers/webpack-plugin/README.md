@@ -44,12 +44,14 @@ flowchart TD
 ### In-depth technical details
 
 #### 1. Webpack compilation lifecycle hooks
+
 The plugin taps into standard Webpack 5 hooks:
 - `compiler.hooks.compilation`: Initializes per-compilation AST caches and options.
 - `NormalModule.getCompilationHooks(compilation).loader`: Intercepts JavaScript and TypeScript files matching target component paths.
 - `compilation.hooks.processAssets`: Finalizes chunk-level deduplication and asset injection.
 
 #### 2. Native Rust acceleration
+
 File transforms are executed via NAPI-RS bindings powered by `oxc` and `lightningcss`:
 - Processes thousands of lines of component code in sub-millisecond durations.
 - Preserves accurate source maps for debugging.
@@ -90,15 +92,15 @@ module.exports = {
 
 ### Options reference
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `cssFuse` | `boolean \| object` | `true` | Enables cross-component CSS AST deduplication into shared constructable sheets |
-| `propsLower` | `boolean \| object` | `true` | Lowers Lit decorators (`@property`, `@state`, `@query`) to static properties |
-| `directives` | `boolean` | `true` | Lowers built-in Lit directives and prunes dead imports |
-| `memoize` | `boolean` | `true` | Auto-memoizes pure array transformations inside `render()` |
-| `elemProxy` | `boolean \| object` | `false` | Enables deferred Custom Element proxy stubs |
-| `cssMinifier` | `boolean` | `true` | Embedded CSS template minification via `lightningcss` |
-| `htmlMinifier` | `boolean` | `true` | Embedded HTML template minification via `oxc` |
+| Option         | Type                | Default | Description                                                                    |
+| :------------- | :------------------ | :------ | :----------------------------------------------------------------------------- |
+| `cssFuse`      | `boolean \| object` | `true`  | Enables cross-component CSS AST deduplication into shared constructable sheets |
+| `propsLower`   | `boolean \| object` | `true`  | Lowers Lit decorators (`@property`, `@state`, `@query`) to static properties   |
+| `directives`   | `boolean`           | `true`  | Lowers built-in Lit directives and prunes dead imports                         |
+| `memoize`      | `boolean`           | `true`  | Auto-memoizes pure array transformations inside `render()`                     |
+| `elemProxy`    | `boolean \| object` | `false` | Enables deferred Custom Element proxy stubs                                    |
+| `cssMinifier`  | `boolean`           | `true`  | Embedded CSS template minification via `lightningcss`                          |
+| `htmlMinifier` | `boolean`           | `true`  | Embedded HTML template minification via `oxc`                                  |
 
 ---
 

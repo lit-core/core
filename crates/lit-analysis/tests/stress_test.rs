@@ -64,9 +64,11 @@ fn stress_test_unquoted_prefixed_attribute_hole() {
         match &attr.value {
             AttributeValue::Mixed(parts) => {
                 println!("Unquoted mixed parts: {:?}", parts);
-                assert!(parts
-                    .iter()
-                    .any(|p| matches!(p, AttributePart::Expression(0))));
+                assert!(
+                    parts
+                        .iter()
+                        .any(|p| matches!(p, AttributePart::Expression(0)))
+                );
             }
             other => {
                 panic!("Expected Mixed attribute value, got {:?}", other);
@@ -188,7 +190,7 @@ fn stress_test_dozens_of_holes() {
 #[test]
 fn stress_test_svg_mathml_casing() {
     let quasis = [
-        "<svg viewBox=\"0 0 100 100\" strokeWidth=\"1.5\" strokeLinecap=\"round\" clipPath=\"url(#p)\">\n  <clipPath id=\"p\"><rect /></clipPath>\n</svg>\n<math display=\"block\"><mrow><mi>x</mi><mo>=</mo><mn>1</mn></mrow></math>"
+        "<svg viewBox=\"0 0 100 100\" strokeWidth=\"1.5\" strokeLinecap=\"round\" clipPath=\"url(#p)\">\n  <clipPath id=\"p\"><rect /></clipPath>\n</svg>\n<math display=\"block\"><mrow><mi>x</mi><mo>=</mo><mn>1</mn></mrow></math>",
     ];
     let ir = TemplateParser::parse_lit_template(&quasis, 0).expect("SVG and MathML should parse");
 
@@ -222,7 +224,10 @@ fn stress_test_p_div_implied_end_tag() {
             .children
             .iter()
             .any(|c| matches!(c, TemplateNode::Element(e) if e.tag_name == "div"));
-        assert!(!has_child_div, "Spec-compliant parser must NOT nest <div> inside <p>; <p> is closed by block elements!");
+        assert!(
+            !has_child_div,
+            "Spec-compliant parser must NOT nest <div> inside <p>; <p> is closed by block elements!"
+        );
     }
 }
 
@@ -509,10 +514,11 @@ fn stress_test_nested_directive_expressions_bailout() {
             other
         ),
     }
-    assert!(res
-        .diagnostics
-        .iter()
-        .any(|d| d.code == lit_analysis::DiagnosticCode::LitBailUnsupportedDirective));
+    assert!(
+        res.diagnostics
+            .iter()
+            .any(|d| d.code == lit_analysis::DiagnosticCode::LitBailUnsupportedDirective)
+    );
 
     // 2. Logical expression with unsupported directive
     let logical_code = r#"
@@ -594,10 +600,12 @@ fn stress_test_escaping_this_statements_bailout() {
         &res_ret.components[0].tier,
         lit_analysis::classify::ClassificationTier::Bailout { .. }
     ));
-    assert!(res_ret
-        .diagnostics
-        .iter()
-        .any(|d| d.code == lit_analysis::DiagnosticCode::LitBailEscapingThis));
+    assert!(
+        res_ret
+            .diagnostics
+            .iter()
+            .any(|d| d.code == lit_analysis::DiagnosticCode::LitBailEscapingThis)
+    );
 
     // 2. Escaping this in variable declaration
     let var_code = r#"
@@ -615,10 +623,12 @@ fn stress_test_escaping_this_statements_bailout() {
         &res_var.components[0].tier,
         lit_analysis::classify::ClassificationTier::Bailout { .. }
     ));
-    assert!(res_var
-        .diagnostics
-        .iter()
-        .any(|d| d.code == lit_analysis::DiagnosticCode::LitBailEscapingThis));
+    assert!(
+        res_var
+            .diagnostics
+            .iter()
+            .any(|d| d.code == lit_analysis::DiagnosticCode::LitBailEscapingThis)
+    );
 
     // 3. Escaping this in ternary inside method
     let ternary_this_code = r#"

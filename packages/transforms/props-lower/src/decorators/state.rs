@@ -5,7 +5,7 @@ use oxc_ast::builder::AstBuilder;
 use oxc_span::SPAN;
 
 use crate::ast_helpers::AstHelper;
-use crate::decorators::property::{extract_options, PropertyTransformResult};
+use crate::decorators::property::{PropertyTransformResult, extract_options};
 use crate::static_properties::ReactiveProp;
 
 pub fn try_transform_state<'a>(

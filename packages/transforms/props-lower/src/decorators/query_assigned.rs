@@ -109,32 +109,31 @@ pub fn extract_query_assigned_options<'a>(
     let mut flatten = None;
     let mut selector = None;
 
-    if let Expression::CallExpression(call) = expr {
-        if let Some(arg0) = call.arguments.first() {
-            if let Some(Expression::ObjectExpression(obj)) = arg0.as_expression() {
-                for prop in &obj.properties {
-                    if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                        if let Some(key_name) = p.key.static_name() {
-                            match key_name.as_ref() {
-                                "slot" => {
-                                    if let Expression::StringLiteral(s) = &p.value {
-                                        slot_name = Some(s.value.as_str().to_string());
-                                    }
-                                }
-                                "flatten" => {
-                                    if let Expression::BooleanLiteral(b) = &p.value {
-                                        flatten = Some(b.value);
-                                    }
-                                }
-                                "selector" => {
-                                    if let Expression::StringLiteral(s) = &p.value {
-                                        selector = Some(s.value.as_str().to_string());
-                                    }
-                                }
-                                _ => {}
-                            }
+    if let Expression::CallExpression(call) = expr
+        && let Some(arg0) = call.arguments.first()
+        && let Some(Expression::ObjectExpression(obj)) = arg0.as_expression()
+    {
+        for prop in &obj.properties {
+            if let ObjectPropertyKind::ObjectProperty(p) = prop
+                && let Some(key_name) = p.key.static_name()
+            {
+                match key_name.as_ref() {
+                    "slot" => {
+                        if let Expression::StringLiteral(s) = &p.value {
+                            slot_name = Some(s.value.as_str().to_string());
                         }
                     }
+                    "flatten" => {
+                        if let Expression::BooleanLiteral(b) = &p.value {
+                            flatten = Some(b.value);
+                        }
+                    }
+                    "selector" => {
+                        if let Expression::StringLiteral(s) = &p.value {
+                            selector = Some(s.value.as_str().to_string());
+                        }
+                    }
+                    _ => {}
                 }
             }
         }

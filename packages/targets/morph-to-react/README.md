@@ -50,9 +50,9 @@ export default defineConfig({
 
 ## Architecture
 
-| Tier | Characteristics | Output |
-| :--- | :--- | :--- |
-| Tier 0 pure | Leaf elements without state, lifecycle, or `this` escape | Pure React functional component, zero runtime, RSC safe |
-| Tier 1 hosted | Stateful properties, lifecycle effects, DOM queries, events | `MorphHost` class, `useMorphHost` hook, forwardRef |
-| Tier 2 facade | Slot projection inspection, form controls, `ElementInternals` | Tier 1 plus `<slot-boundary>` and proxy `<input>` |
-| Bailout | Unsupported dynamic patterns | Fallback wrapper wrapping original custom element |
+| Tier          | Characteristics                                               | Output                                                  |
+| :------------ | :------------------------------------------------------------ | :------------------------------------------------------ |
+| Tier 0 pure   | Leaf elements without state, lifecycle, or `this` escape      | Pure React functional component, zero runtime, RSC safe |
+| Tier 1 hosted | Stateful properties, lifecycle effects, DOM queries, events   | `MorphHost` class, `useMorphHost` hook, forwardRef      |
+| Tier 2 facade | Slot projection inspection, form controls, `ElementInternals` | Tier 1 plus `<slot-boundary>` and proxy `<input>`       |
+| Bailout       | Unsupported dynamic patterns                                  | Fallback wrapper wrapping original custom element       |

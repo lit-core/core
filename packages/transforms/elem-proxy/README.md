@@ -49,6 +49,7 @@ sequenceDiagram
 ### In-depth technical details
 
 #### 1. Registration proxy generation
+
 During compilation with `oxc`, `elem-proxy` isolates the component registration site:
 - Identifies `customElements.define('tag-name', ComponentClass)` and `@customElement('tag-name')`.
 - Synthesizes a proxy stub extending `HTMLElement` that captures:
@@ -57,12 +58,14 @@ During compilation with `oxc`, `elem-proxy` isolates the component registration 
   - Lifecycle hooks (`connectedCallback`, `attributeChangedCallback`).
 
 #### 2. Prototype fidelity and transparent upgrade
+
 The proxy stub guarantees full compatibility with existing code:
 - **`instanceof` checks**: The proxy stub defines `Symbol.hasInstance` so checks against the original class constructor evaluate accurately.
 - **Pre-mount property access**: Getters and setters on the proxy trigger an immediate synchronous class upgrade before returning or setting values.
 - **Zero layout shift**: Because the tag name is registered with `customElements` upfront, the browser recognizes the tag as a valid Custom Element, eliminating unstyled content flash or unexpected DOM reflows.
 
 #### 3. Heap and CPU optimization breakdown
+
 By deferring unrendered component classes:
 - V8 avoids compiling class constructor methods, reactive property metadata, and render functions until needed.
 - Constructable stylesheets for unrendered components are not instantiated into browser memory.
@@ -95,7 +98,6 @@ export default defineConfig({
     }),
   ],
 });
-
 ```
 
 ### Via `@lit-core/webpack-plugin`
@@ -133,13 +135,13 @@ console.log(`Generated proxy for: ${result.registeredTags.join(', ')}`);
 
 Evaluated across canonical component suites (standalone `elem-proxy` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
 
-| Design system | Baseline mount latency | With `elem-proxy` | First render speedup | Baseline script eval | With `elem-proxy` | Eval speedup |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Carbon Web Components | 96.0 ms | 44.0 ms | +54.2% | 4.4 ms | 3.1 ms | +29.5% |
-| Spectrum Web Components | 52.3 ms | 22.3 ms | +57.4% | 10.5 ms | 10.4 ms | +1.0% |
-| Web Awesome | 41.0 ms | 27.7 ms | +32.4% | 6.2 ms | 2.6 ms | +58.1% |
-| Momentum Design | 39.6 ms | 19.0 ms | +52.0% | 4.3 ms | 4.3 ms | 0.0% |
-| Material Web | 45.1 ms | 23.8 ms | +47.2% | 6.8 ms | 5.8 ms | +14.7% |
+| Design system           | Baseline mount latency | With `elem-proxy` | First render speedup | Baseline script eval | With `elem-proxy` | Eval speedup |
+| :---------------------- | ---------------------: | ----------------: | -------------------: | -------------------: | ----------------: | -----------: |
+| Carbon Web Components   |                96.0 ms |           44.0 ms |               +54.2% |               4.4 ms |            3.1 ms |       +29.5% |
+| Spectrum Web Components |                52.3 ms |           22.3 ms |               +57.4% |              10.5 ms |           10.4 ms |        +1.0% |
+| Web Awesome             |                41.0 ms |           27.7 ms |               +32.4% |               6.2 ms |            2.6 ms |       +58.1% |
+| Momentum Design         |                39.6 ms |           19.0 ms |               +52.0% |               4.3 ms |            4.3 ms |         0.0% |
+| Material Web            |                45.1 ms |           23.8 ms |               +47.2% |               6.8 ms |            5.8 ms |       +14.7% |
 
 > By replacing immediate component class definition with lightweight proxy stubs that upgrade on-demand upon first connection, `@lit-core/elem-proxy` eliminates upfront class initialization overhead, delivering up to **58.1% faster script evaluation** and **32% to 57% faster initial rendering**.
 

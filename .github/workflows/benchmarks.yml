@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       suite:
-        description: 'Benchmark suite to execute'
+        description: "Benchmark suite to execute"
         required: true
-        default: 'all'
+        default: "all"
         type: choice
         options:
           - all
@@ -17,7 +17,7 @@ on:
           - momentum
   schedule:
     # Weekly benchmark check on Sunday at 02:00 UTC
-    - cron: '0 2 * * 0'
+    - cron: "0 2 * * 0"
 
 permissions:
   contents: read
@@ -42,8 +42,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 24
-          cache: 'pnpm'
+          node-version: 26
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -45,20 +45,21 @@ flowchart TD
 
 #### 1. Real component coverage matrix
 
-| Feature under test | Package | Test file | Verified tests |
-| :--- | :--- | :--- | ---: |
-| CSS deduplication | [`@lit-core/css-fuse`](../css-fuse/README.md) | `src/css-fuse.test.ts` | 260 |
-| Decorator lowering | [`@lit-core/props-lower`](../props-lower/README.md) | `src/props-lower.test.ts` | 255 |
-| CSS minification | [`@lit-core/css-minifier`](../css-minifier/README.md) | `src/css-minifier.test.ts` | 255 |
-| HTML minification | [`@lit-core/html-minifier`](../html-minifier/README.md) | `src/html-minifier.test.ts` | 255 |
-| Static HTML/SVG clustering | [`@lit-core/html-fuse`](../html-fuse/README.md) | `src/html-fuse.test.ts` | 260 |
-| Lazy element proxies | [`@lit-core/elem-proxy`](../elem-proxy/README.md) | `src/elem-proxy.test.ts` | 255 |
-| ShadowRoot event delegation | [`@lit-core/event-hoist`](../event-hoist/README.md) | `src/event-hoist.test.ts` | 255 |
-| Ahead-of-time template compilation | [`@lit-core/html-aot`](../html-aot/README.md) | `src/html-aot.test.ts` | 255 |
-| Resumable SSR and hydration | [`@lit-core/resumable`](../resumable/README.md) | `src/resumable.test.ts` | 255 |
-| **Total** | **9 packages** | **9 files** | **2,305** |
+| Feature under test                 | Package                                                 | Test file                   | Verified tests |
+| :--------------------------------- | :------------------------------------------------------ | :-------------------------- | -------------: |
+| CSS deduplication                  | [`@lit-core/css-fuse`](../css-fuse/README.md)           | `src/css-fuse.test.ts`      |            260 |
+| Decorator lowering                 | [`@lit-core/props-lower`](../props-lower/README.md)     | `src/props-lower.test.ts`   |            255 |
+| CSS minification                   | [`@lit-core/css-minifier`](../css-minifier/README.md)   | `src/css-minifier.test.ts`  |            255 |
+| HTML minification                  | [`@lit-core/html-minifier`](../html-minifier/README.md) | `src/html-minifier.test.ts` |            255 |
+| Static HTML/SVG clustering         | [`@lit-core/html-fuse`](../html-fuse/README.md)         | `src/html-fuse.test.ts`     |            260 |
+| Lazy element proxies               | [`@lit-core/elem-proxy`](../elem-proxy/README.md)       | `src/elem-proxy.test.ts`    |            255 |
+| ShadowRoot event delegation        | [`@lit-core/event-hoist`](../event-hoist/README.md)     | `src/event-hoist.test.ts`   |            255 |
+| Ahead-of-time template compilation | [`@lit-core/html-aot`](../html-aot/README.md)           | `src/html-aot.test.ts`      |            255 |
+| Resumable SSR and hydration        | [`@lit-core/resumable`](../resumable/README.md)         | `src/resumable.test.ts`     |            255 |
+| **Total**                          | **9 packages**                                          | **9 files**                 |      **2,305** |
 
 #### 2. Evaluated design systems
+
 The suite validates 601 production components in total:
 - **Carbon Web Components** (`@carbon/web-components`): 284 components
 - **Adobe Spectrum Web Components** (`@spectrum-web-components`): 93 components

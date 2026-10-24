@@ -48,10 +48,9 @@ pub fn collect_named_classes<'a, 'b>(stmts: &'b [Statement<'a>]) -> Vec<(&'a str
             Statement::ExportDefaultDeclaration(export_decl) => {
                 if let ExportDefaultDeclarationKind::ClassDeclaration(class) =
                     &export_decl.declaration
+                    && let Some(name) = get_class_name(class)
                 {
-                    if let Some(name) = get_class_name(class) {
-                        out.push((name, class.as_ref()));
-                    }
+                    out.push((name, class.as_ref()));
                 }
             }
             Statement::VariableDeclaration(var_decl) => {
@@ -113,15 +112,15 @@ pub fn analyze_expr_dependencies_with_locals(
     match expr {
         Expression::Identifier(ident) => {
             let name = ident.name.as_str();
-            if let Some(locals) = local_var_masks {
-                if let Some(&mask) = locals.get(name) {
-                    if mask > 0 {
-                        *accessed_bits |= mask as u32;
-                    } else {
-                        *has_unknown = true;
-                    }
-                    return;
+            if let Some(locals) = local_var_masks
+                && let Some(&mask) = locals.get(name)
+            {
+                if mask > 0 {
+                    *accessed_bits |= mask as u32;
+                } else {
+                    *has_unknown = true;
                 }
+                return;
             }
             let is_safe_global = matches!(
                 name,
@@ -174,15 +173,15 @@ pub fn analyze_expr_dependencies_with_locals(
                 }
             } else if let Expression::Identifier(ident) = &mem.object {
                 let name = ident.name.as_str();
-                if let Some(locals) = local_var_masks {
-                    if let Some(&mask) = locals.get(name) {
-                        if mask > 0 {
-                            *accessed_bits |= mask as u32;
-                        } else {
-                            *has_unknown = true;
-                        }
-                        return;
+                if let Some(locals) = local_var_masks
+                    && let Some(&mask) = locals.get(name)
+                {
+                    if mask > 0 {
+                        *accessed_bits |= mask as u32;
+                    } else {
+                        *has_unknown = true;
                     }
+                    return;
                 }
                 if !matches!(name, "Math" | "Number" | "JSON" | "Intl") {
                     *has_unknown = true;
@@ -529,10 +528,10 @@ pub fn collect_reactive_properties(
                 if is_static_properties {
                     if let Some(Expression::ObjectExpression(obj)) = &prop_def.value {
                         for prop in &obj.properties {
-                            if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                                if let Some(name) = p.key.static_name() {
-                                    add_prop(name.to_string());
-                                }
+                            if let ObjectPropertyKind::ObjectProperty(p) = prop
+                                && let Some(name) = p.key.static_name()
+                            {
+                                add_prop(name.to_string());
                             }
                         }
                     }
@@ -542,10 +541,8 @@ pub fn collect_reactive_properties(
                         .iter()
                         .any(|d| check_decorator(&d.expression));
 
-                    if has_reactive_decorator {
-                        if let Some(name) = prop_def.key.static_name() {
-                            add_prop(name.to_string());
-                        }
+                    if has_reactive_decorator && let Some(name) = prop_def.key.static_name() {
+                        add_prop(name.to_string());
                     }
                 }
             }
@@ -555,10 +552,8 @@ pub fn collect_reactive_properties(
                     .iter()
                     .any(|d| check_decorator(&d.expression));
 
-                if has_reactive_decorator {
-                    if let Some(name) = accessor_def.key.static_name() {
-                        add_prop(name.to_string());
-                    }
+                if has_reactive_decorator && let Some(name) = accessor_def.key.static_name() {
+                    add_prop(name.to_string());
                 }
             }
             ClassElement::MethodDefinition(method_def) => {
@@ -573,14 +568,14 @@ pub fn collect_reactive_properties(
                 if is_static_get_properties {
                     if let Some(body) = &method_def.value.body {
                         for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(Expression::ObjectExpression(obj)) = &ret.argument {
-                                    for prop in &obj.properties {
-                                        if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                                            if let Some(name) = p.key.static_name() {
-                                                add_prop(name.to_string());
-                                            }
-                                        }
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(Expression::ObjectExpression(obj)) = &ret.argument
+                            {
+                                for prop in &obj.properties {
+                                    if let ObjectPropertyKind::ObjectProperty(p) = prop
+                                        && let Some(name) = p.key.static_name()
+                                    {
+                                        add_prop(name.to_string());
                                     }
                                 }
                             }
@@ -592,10 +587,8 @@ pub fn collect_reactive_properties(
                         .iter()
                         .any(|d| check_decorator(&d.expression));
 
-                    if has_reactive_decorator {
-                        if let Some(name) = method_def.key.static_name() {
-                            add_prop(name.to_string());
-                        }
+                    if has_reactive_decorator && let Some(name) = method_def.key.static_name() {
+                        add_prop(name.to_string());
                     }
                 }
             }
@@ -667,11 +660,11 @@ pub fn collect_reactive_properties_with_inheritance_named<'a>(
         for (prop_name, _) in anc_sorted {
             add_prop(prop_name);
         }
-        if let Some(ext) = external_props {
-            if let Some(extra) = ext.get(anc_name) {
-                for prop_name in extra {
-                    add_prop(prop_name.clone());
-                }
+        if let Some(ext) = external_props
+            && let Some(extra) = ext.get(anc_name)
+        {
+            for prop_name in extra {
+                add_prop(prop_name.clone());
             }
         }
     }
@@ -681,13 +674,12 @@ pub fn collect_reactive_properties_with_inheritance_named<'a>(
     for (prop_name, _) in own_sorted {
         add_prop(prop_name);
     }
-    if let Some(ext) = external_props {
-        if let Some(name) = effective_name {
-            if let Some(extra) = ext.get(name) {
-                for prop_name in extra {
-                    add_prop(prop_name.clone());
-                }
-            }
+    if let Some(ext) = external_props
+        && let Some(name) = effective_name
+        && let Some(extra) = ext.get(name)
+    {
+        for prop_name in extra {
+            add_prop(prop_name.clone());
         }
     }
 

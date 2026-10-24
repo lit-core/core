@@ -6,18 +6,18 @@ use oxc_ast_visit::Visit;
 use oxc_codegen::Codegen;
 use oxc_parser::Parser;
 use oxc_semantic::SemanticBuilder;
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 pub use crate::analyzer::{
-    analyze_candidate, CandidateInfo, DOM_QUERY_METHODS, IMPURE_GLOBALS, MUTATING_ARRAY_METHODS,
-    PURE_ARRAY_METHODS,
+    CandidateInfo, DOM_QUERY_METHODS, IMPURE_GLOBALS, MUTATING_ARRAY_METHODS, PURE_ARRAY_METHODS,
+    analyze_candidate,
 };
 pub use crate::builder::{
     build_memo_block, collect_classes_mut, replace_candidate_exprs, replace_candidates_in_stmt,
 };
-pub use crate::finder::{collect_stmt_candidates, CandidateItem, StmtCandidateGroup};
+pub use crate::finder::{CandidateItem, StmtCandidateGroup, collect_stmt_candidates};
 use lit_analysis::symbol::SymbolProofContext;
 
 struct BindingCollector {
@@ -102,11 +102,12 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
                     _ => None,
                 };
 
-                if method_name == Some("render") && !method.r#static {
-                    if let Some(body) = &mut method.value.body {
-                        render_body = Some(body);
-                        break;
-                    }
+                if method_name == Some("render")
+                    && !method.r#static
+                    && let Some(body) = &mut method.value.body
+                {
+                    render_body = Some(body);
+                    break;
                 }
             }
         }
@@ -214,10 +215,10 @@ pub fn transform_code(source: &str, options: MemoizeOptions) -> MemoizeResult {
             // undeclared properties on `this` at runtime and de-optimizing V8 hidden classes.
             let mut existing_class_props: HashSet<String> = HashSet::new();
             for elem in &class.body.body {
-                if let ClassElement::PropertyDefinition(prop) = elem {
-                    if let Some(name) = prop.key.static_name() {
-                        existing_class_props.insert(name.to_string());
-                    }
+                if let ClassElement::PropertyDefinition(prop) = elem
+                    && let Some(name) = prop.key.static_name()
+                {
+                    existing_class_props.insert(name.to_string());
                 }
             }
 

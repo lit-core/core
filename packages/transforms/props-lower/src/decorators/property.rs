@@ -98,12 +98,11 @@ pub fn try_transform_property<'a>(
 }
 
 pub fn extract_options<'a>(expr: &Expression<'a>, ast: &AstBuilder<'a>) -> Option<Expression<'a>> {
-    if let Expression::CallExpression(call) = expr {
-        if let Some(arg) = call.arguments.first() {
-            if let Some(expr) = arg.as_expression() {
-                return Some(expr.clone_in(ast.allocator()));
-            }
-        }
+    if let Expression::CallExpression(call) = expr
+        && let Some(arg) = call.arguments.first()
+        && let Some(expr) = arg.as_expression()
+    {
+        return Some(expr.clone_in(ast.allocator()));
     }
     None
 }

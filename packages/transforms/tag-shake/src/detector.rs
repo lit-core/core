@@ -54,14 +54,12 @@ impl RegistrationDetector {
             }
             Statement::VariableDeclaration(var_decl) => {
                 for decl in &var_decl.declarations {
-                    if let Some(init) = &decl.init {
-                        if let Expression::ClassExpression(class) = init.without_parentheses() {
-                            if let Some(reg) =
-                                Self::detect_class_decorators(class, stmt_index, resolver)
-                            {
-                                return Some(reg);
-                            }
-                        }
+                    if let Some(init) = &decl.init
+                        && let Expression::ClassExpression(class) = init.without_parentheses()
+                        && let Some(reg) =
+                            Self::detect_class_decorators(class, stmt_index, resolver)
+                    {
+                        return Some(reg);
                     }
                 }
                 None
@@ -72,14 +70,12 @@ impl RegistrationDetector {
                 }
                 Declaration::VariableDeclaration(var_decl) => {
                     for decl in &var_decl.declarations {
-                        if let Some(init) = &decl.init {
-                            if let Expression::ClassExpression(class) = init.without_parentheses() {
-                                if let Some(reg) =
-                                    Self::detect_class_decorators(class, stmt_index, resolver)
-                                {
-                                    return Some(reg);
-                                }
-                            }
+                        if let Some(init) = &decl.init
+                            && let Expression::ClassExpression(class) = init.without_parentheses()
+                            && let Some(reg) =
+                                Self::detect_class_decorators(class, stmt_index, resolver)
+                        {
+                            return Some(reg);
                         }
                     }
                     None
@@ -137,100 +133,93 @@ impl RegistrationDetector {
         }
 
         // 2. Check static component registration via Component.define('tag')
-        if let Expression::StaticMemberExpression(mem) = &call.callee {
-            if mem.property.name == "define" {
-                if let Expression::Identifier(cls_ident) = &mem.object {
-                    if cls_ident.name != "customElements"
-                        && cls_ident.name != "window"
-                        && cls_ident.name != "globalThis"
-                        && resolver.is_component_reference(cls_ident)
-                    {
-                        if let Some(first_arg) = call.arguments.first() {
-                            let (tag, is_dynamic) = match first_arg
-                                .as_expression()
+        if let Expression::StaticMemberExpression(mem) = &call.callee
+            && mem.property.name == "define"
+            && let Expression::Identifier(cls_ident) = &mem.object
+            && cls_ident.name != "customElements"
+            && cls_ident.name != "window"
+            && cls_ident.name != "globalThis"
+            && resolver.is_component_reference(cls_ident)
+            && let Some(first_arg) = call.arguments.first()
+        {
+            let (tag, is_dynamic) = match first_arg
+                .as_expression()
+                .and_then(lit_analysis::SymbolProofContext::extract_static_string)
+            {
+                Some(s) => (s, false),
+                None => ("".to_string(), true),
+            };
+
+            // Ensure static define calls are only shaken if tag name contains a hyphen
+            if !is_dynamic && !tag.contains('-') {
+                return None;
+            }
+
+            return Some(DetectedRegistration {
+                tag,
+                kind: RegistrationKind::StaticMethodDefine {
+                    component_name: cls_ident.name.as_str().to_string(),
+                    component_span: cls_ident.span,
+                },
+                statement_index: stmt_index,
+                is_dynamic,
+            });
+        }
+
+        // 3. Check transpiled decorators: __decorate([customElement('tag')], Component)
+        if resolver.is_decorator_helper_callee(&call.callee)
+            && call.arguments.len() >= 2
+            && let (Some(Expression::ArrayExpression(arr)), Some(second_arg)) = (
+                call.arguments.first().and_then(|a| a.as_expression()),
+                call.arguments.get(1).and_then(|a| a.as_expression()),
+            )
+        {
+            for elem in &arr.elements {
+                if let Some(dec_expr) = elem.as_expression()
+                    && let Expression::CallExpression(dec_call) = dec_expr.without_parentheses()
+                {
+                    let matched_tag = if resolver.is_custom_element_decorator(&dec_call.callee) {
+                        Some(
+                            match dec_call
+                                .arguments
+                                .first()
+                                .and_then(|a| a.as_expression())
                                 .and_then(lit_analysis::SymbolProofContext::extract_static_string)
                             {
                                 Some(s) => (s, false),
                                 None => ("".to_string(), true),
-                            };
+                            },
+                        )
+                    } else {
+                        resolver
+                            .symbol_ctx
+                            .is_class_custom_element_decorator_call(dec_expr)
+                            .map(|t| (t, false))
+                    };
 
-                            // Ensure static define calls are only shaken if tag name contains a hyphen
-                            if !is_dynamic && !tag.contains('-') {
-                                return None;
+                    if let Some((tag, is_dynamic)) = matched_tag {
+                        let (comp_name, comp_span) = match second_arg.without_parentheses() {
+                            Expression::Identifier(ident) => {
+                                (ident.name.as_str().to_string(), ident.span)
                             }
+                            _ => ("".to_string(), Span::default()),
+                        };
 
-                            return Some(DetectedRegistration {
-                                tag,
-                                kind: RegistrationKind::StaticMethodDefine {
-                                    component_name: cls_ident.name.as_str().to_string(),
-                                    component_span: cls_ident.span,
-                                },
-                                statement_index: stmt_index,
-                                is_dynamic,
-                            });
-                        }
-                    }
-                }
-            }
-        }
+                        let dec_name = match dec_call.callee.without_parentheses() {
+                            Expression::Identifier(id) => id.name.as_str().to_string(),
+                            _ => String::new(),
+                        };
 
-        // 3. Check transpiled decorators: __decorate([customElement('tag')], Component)
-        if resolver.is_decorator_helper_callee(&call.callee) && call.arguments.len() >= 2 {
-            if let (Some(Expression::ArrayExpression(arr)), Some(second_arg)) = (
-                call.arguments.first().and_then(|a| a.as_expression()),
-                call.arguments.get(1).and_then(|a| a.as_expression()),
-            ) {
-                for elem in &arr.elements {
-                    if let Some(dec_expr) = elem.as_expression() {
-                        if let Expression::CallExpression(dec_call) = dec_expr.without_parentheses()
-                        {
-                            let matched_tag =
-                                if resolver.is_custom_element_decorator(&dec_call.callee) {
-                                    Some(
-                                    match dec_call
-                                        .arguments
-                                        .first()
-                                        .and_then(|a| a.as_expression())
-                                        .and_then(
-                                            lit_analysis::SymbolProofContext::extract_static_string,
-                                        ) {
-                                        Some(s) => (s, false),
-                                        None => ("".to_string(), true),
-                                    },
-                                )
-                                } else {
-                                    resolver
-                                        .symbol_ctx
-                                        .is_class_custom_element_decorator_call(dec_expr)
-                                        .map(|t| (t, false))
-                                };
-
-                            if let Some((tag, is_dynamic)) = matched_tag {
-                                let (comp_name, comp_span) = match second_arg.without_parentheses()
-                                {
-                                    Expression::Identifier(ident) => {
-                                        (ident.name.as_str().to_string(), ident.span)
-                                    }
-                                    _ => ("".to_string(), Span::default()),
-                                };
-
-                                let dec_name = match dec_call.callee.without_parentheses() {
-                                    Expression::Identifier(id) => id.name.as_str().to_string(),
-                                    _ => String::new(),
-                                };
-
-                                return Some(DetectedRegistration {
-                                    tag,
-                                    kind: RegistrationKind::TranspiledDecorate {
-                                        component_name: comp_name,
-                                        component_span: comp_span,
-                                        decorator_name: dec_name,
-                                    },
-                                    statement_index: stmt_index,
-                                    is_dynamic,
-                                });
-                            }
-                        }
+                        return Some(DetectedRegistration {
+                            tag,
+                            kind: RegistrationKind::TranspiledDecorate {
+                                component_name: comp_name,
+                                component_span: comp_span,
+                                decorator_name: dec_name,
+                            },
+                            statement_index: stmt_index,
+                            is_dynamic,
+                        });
                     }
                 }
             }

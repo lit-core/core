@@ -19,6 +19,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../../../..');
 const nodeRequire = createRequire(import.meta.url);
+const AppBadgeMock = (props: any) => React.createElement('span', { className: 'app-badge' }, props.count);
 
 async function transpileJsxToCjs(code: string): Promise<string> {
   const oxc = await transformWithOxc(code, 'component.tsx', {
@@ -3056,7 +3057,6 @@ describe('morph-to-react comprehensive opaque-box E2E test suite (84 features)',
         };
 
       try {
-        const AppBadgeMock = (props: any) => React.createElement('span', { className: 'app-badge' }, props.count);
         const Component = await evalComponent(res.code, 'ActionPanel', { './app-badge.js': { AppBadge: AppBadgeMock } });
         const htmlOutput = renderToString(React.createElement(Component, { title: 'Workflow Actions', count: 12 }));
         expect(htmlOutput).toContain('Workflow Actions');

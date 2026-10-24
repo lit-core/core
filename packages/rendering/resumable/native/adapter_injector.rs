@@ -3,11 +3,11 @@ use napi_derive::napi;
 use oxc_allocator::{Allocator, ArenaVec};
 use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
-use oxc_ast_visit::{walk, Visit};
+use oxc_ast_visit::{Visit, walk};
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
 use oxc_semantic::SemanticBuilder;
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 use serde::{Deserialize, Serialize};
 
 const DEFAULT_VIRTUAL_MODULE: &str = "virtual:lit-core/resumable-adapter";
@@ -92,11 +92,11 @@ impl<'a, 's, 'ast> Visit<'ast> for ResumableElementDetector<'a, 's> {
             self.found = true;
             return;
         }
-        if let Some(heritage) = &class.heritage {
-            if extends_unshadowed_html_element(&heritage.expression, self.symbol_ctx) {
-                self.found = true;
-                return;
-            }
+        if let Some(heritage) = &class.heritage
+            && extends_unshadowed_html_element(&heritage.expression, self.symbol_ctx)
+        {
+            self.found = true;
+            return;
         }
         walk::walk_class(self, class);
     }
@@ -133,10 +133,10 @@ fn has_adapter_import(program: &Program, virtual_module: &str) -> bool {
         }
         if let Some(specifiers) = &import_decl.specifiers {
             for spec in specifiers {
-                if let ImportDeclarationSpecifier::ImportSpecifier(named) = spec {
-                    if named.imported.name() == ADAPTER_EXPORT {
-                        return true;
-                    }
+                if let ImportDeclarationSpecifier::ImportSpecifier(named) = spec
+                    && named.imported.name() == ADAPTER_EXPORT
+                {
+                    return true;
                 }
             }
         }

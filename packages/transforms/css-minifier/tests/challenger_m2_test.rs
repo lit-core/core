@@ -1,4 +1,4 @@
-use css_minifier::{transform_embedded_css, MinifyCssOptions};
+use css_minifier::{MinifyCssOptions, transform_embedded_css};
 
 #[test]
 fn test_challenge_css_minifier_aliased_import() {

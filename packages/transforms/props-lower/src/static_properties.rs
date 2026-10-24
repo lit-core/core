@@ -34,10 +34,10 @@ pub fn can_merge_static_properties(class: &Class<'_>) -> bool {
                     && method_def.kind == MethodDefinitionKind::Get
                     && method_def.key.is_specific_static_name("properties") =>
             {
-                if let Some(ref body) = method_def.value.body {
-                    if let Some(Statement::ReturnStatement(ret_stmt)) = body.statements.first() {
-                        return matches!(ret_stmt.argument, Some(Expression::ObjectExpression(_)));
-                    }
+                if let Some(ref body) = method_def.value.body
+                    && let Some(Statement::ReturnStatement(ret_stmt)) = body.statements.first()
+                {
+                    return matches!(ret_stmt.argument, Some(Expression::ObjectExpression(_)));
                 }
                 return false;
             }
@@ -67,14 +67,15 @@ pub fn class_has_reactive_properties(
                     }
                 }
             }
-        } else if let ClassElement::MethodDefinition(method_def) = element {
-            if method_def.kind == MethodDefinitionKind::Get && !method_def.r#static {
-                for dec in &method_def.decorators {
-                    if symbol_ctx.resolve_decorator(dec)
-                        == Some(lit_analysis::symbol::CanonicalLitSymbol::PropertyDecorator)
-                    {
-                        return true;
-                    }
+        } else if let ClassElement::MethodDefinition(method_def) = element
+            && method_def.kind == MethodDefinitionKind::Get
+            && !method_def.r#static
+        {
+            for dec in &method_def.decorators {
+                if symbol_ctx.resolve_decorator(dec)
+                    == Some(lit_analysis::symbol::CanonicalLitSymbol::PropertyDecorator)
+                {
+                    return true;
                 }
             }
         }
@@ -111,14 +112,12 @@ pub fn inject_or_merge_static_properties<'a>(
                     && method_def.kind == MethodDefinitionKind::Get
                     && method_def.key.is_specific_static_name("properties") =>
             {
-                if let Some(ref mut body) = method_def.value.body {
-                    if let Some(Statement::ReturnStatement(ret_stmt)) = body.statements.first_mut()
-                    {
-                        if let Some(Expression::ObjectExpression(ref mut obj)) = ret_stmt.argument {
-                            append_props_to_object(obj, reactive_props, ast);
-                            return true;
-                        }
-                    }
+                if let Some(ref mut body) = method_def.value.body
+                    && let Some(Statement::ReturnStatement(ret_stmt)) = body.statements.first_mut()
+                    && let Some(Expression::ObjectExpression(ref mut obj)) = ret_stmt.argument
+                {
+                    append_props_to_object(obj, reactive_props, ast);
+                    return true;
                 }
                 // Complex or non-object return getter cannot be safely merged
                 return false;

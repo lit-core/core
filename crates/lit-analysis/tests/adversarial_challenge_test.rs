@@ -125,21 +125,20 @@ fn test_mixed_aliased_and_third_party_imports() {
                     let method_name = method.key.static_name().unwrap();
                     if let Some(body) = &method.value.body {
                         for s in &body.statements {
-                            if let Statement::ReturnStatement(ret) = s {
-                                if let Some(Expression::TaggedTemplateExpression(tagged)) =
+                            if let Statement::ReturnStatement(ret) = s
+                                && let Some(Expression::TaggedTemplateExpression(tagged)) =
                                     &ret.argument
-                                {
-                                    if method_name == "renderLit" {
-                                        assert!(
-                                            ctx.is_lit_html_tag(&tagged.tag),
-                                            "litHtml should be recognized as Lit HTML tag"
-                                        );
-                                    } else if method_name == "renderUHtml" {
-                                        assert!(
-                                            !ctx.is_lit_html_tag(&tagged.tag),
-                                            "uHtml must NOT be recognized as Lit HTML tag"
-                                        );
-                                    }
+                            {
+                                if method_name == "renderLit" {
+                                    assert!(
+                                        ctx.is_lit_html_tag(&tagged.tag),
+                                        "litHtml should be recognized as Lit HTML tag"
+                                    );
+                                } else if method_name == "renderUHtml" {
+                                    assert!(
+                                        !ctx.is_lit_html_tag(&tagged.tag),
+                                        "uHtml must NOT be recognized as Lit HTML tag"
+                                    );
                                 }
                             }
                         }
@@ -223,21 +222,20 @@ fn test_parameter_shadowed_identifiers() {
                     if let ClassElement::MethodDefinition(method) = element {
                         let name = method.key.static_name().unwrap();
                         let body = method.value.body.as_ref().unwrap();
-                        if let Statement::ReturnStatement(ret) = &body.statements[0] {
-                            if let Some(Expression::TaggedTemplateExpression(tagged)) =
+                        if let Statement::ReturnStatement(ret) = &body.statements[0]
+                            && let Some(Expression::TaggedTemplateExpression(tagged)) =
                                 &ret.argument
-                            {
-                                if name == "renderCustom" {
-                                    assert!(
-                                        !ctx.is_lit_html_tag(&tagged.tag),
-                                        "Method parameter-shadowed html must NOT be recognized"
-                                    );
-                                } else if name == "render" {
-                                    assert!(
-                                        ctx.is_lit_html_tag(&tagged.tag),
-                                        "Top-level imported html in render() MUST be recognized"
-                                    );
-                                }
+                        {
+                            if name == "renderCustom" {
+                                assert!(
+                                    !ctx.is_lit_html_tag(&tagged.tag),
+                                    "Method parameter-shadowed html must NOT be recognized"
+                                );
+                            } else if name == "render" {
+                                assert!(
+                                    ctx.is_lit_html_tag(&tagged.tag),
+                                    "Top-level imported html in render() MUST be recognized"
+                                );
                             }
                         }
                     }
@@ -278,26 +276,24 @@ fn test_block_shadowed_identifiers() {
             };
             let body = method.value.body.as_ref().unwrap();
 
-            if let Statement::BlockStatement(block) = &body.statements[0] {
-                if let Statement::VariableDeclaration(var) = &block.body[1] {
-                    if let Some(Expression::TaggedTemplateExpression(tagged)) =
-                        &var.declarations[0].init
-                    {
-                        assert!(
-                            !ctx.is_lit_html_tag(&tagged.tag),
-                            "Block-scoped shadowed html must NOT be recognized as Lit tag"
-                        );
-                    }
-                }
+            if let Statement::BlockStatement(block) = &body.statements[0]
+                && let Statement::VariableDeclaration(var) = &block.body[1]
+                && let Some(Expression::TaggedTemplateExpression(tagged)) =
+                    &var.declarations[0].init
+            {
+                assert!(
+                    !ctx.is_lit_html_tag(&tagged.tag),
+                    "Block-scoped shadowed html must NOT be recognized as Lit tag"
+                );
             }
 
-            if let Statement::ReturnStatement(ret) = &body.statements[1] {
-                if let Some(Expression::TaggedTemplateExpression(tagged)) = &ret.argument {
-                    assert!(
-                        ctx.is_lit_html_tag(&tagged.tag),
-                        "Outer imported html must be recognized as genuine Lit tag"
-                    );
-                }
+            if let Statement::ReturnStatement(ret) = &body.statements[1]
+                && let Some(Expression::TaggedTemplateExpression(tagged)) = &ret.argument
+            {
+                assert!(
+                    ctx.is_lit_html_tag(&tagged.tag),
+                    "Outer imported html must be recognized as genuine Lit tag"
+                );
             }
         }
     }
@@ -468,18 +464,18 @@ fn test_deep_mixin_and_intermediate_classes() {
     let ctx = SymbolProofContext::scan(&parsed.program, &scoping, source);
 
     for stmt in &parsed.program.body {
-        if let Statement::ClassDeclaration(cls) = stmt {
-            if cls.id.as_ref().unwrap().name == "DeepElement" {
-                let proof = ctx.prove_heritage(cls);
-                match proof {
-                    HeritageProof::ProvenLitElement { depth, mixins } => {
-                        assert!(depth >= 2, "Depth should reflect mixin wrapping");
-                        assert_eq!(mixins.len(), 2);
-                        assert_eq!(mixins[0], "MixinA");
-                        assert_eq!(mixins[1], "MixinB");
-                    }
-                    other => panic!("Expected ProvenLitElement, got {:?}", other),
+        if let Statement::ClassDeclaration(cls) = stmt
+            && cls.id.as_ref().unwrap().name == "DeepElement"
+        {
+            let proof = ctx.prove_heritage(cls);
+            match proof {
+                HeritageProof::ProvenLitElement { depth, mixins } => {
+                    assert!(depth >= 2, "Depth should reflect mixin wrapping");
+                    assert_eq!(mixins.len(), 2);
+                    assert_eq!(mixins[0], "MixinA");
+                    assert_eq!(mixins[1], "MixinB");
                 }
+                other => panic!("Expected ProvenLitElement, got {:?}", other),
             }
         }
     }

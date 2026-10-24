@@ -2,7 +2,7 @@ use lit_analysis::symbol::SymbolProofContext;
 use napi_derive::napi;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
-use oxc_ast_visit::{walk_mut::*, VisitMut};
+use oxc_ast_visit::{VisitMut, walk_mut::*};
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
 use oxc_semantic::SemanticBuilder;
@@ -127,10 +127,10 @@ pub fn collapse_code(source: &str, options: CollapseOptions) -> CollapseResult {
     }
 
     let mut codegen_options = CodegenOptions::default();
-    if options.sourcemap.unwrap_or(false) {
-        if let Some(ref filename) = options.filename {
-            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
-        }
+    if options.sourcemap.unwrap_or(false)
+        && let Some(ref filename) = options.filename
+    {
+        codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
     }
 
     let codegen_result = Codegen::new()

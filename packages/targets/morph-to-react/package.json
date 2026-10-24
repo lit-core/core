@@ -49,13 +49,16 @@
       "x86_64-unknown-linux-gnu"
     ]
   },
+  "engines": {
+    "node": ">=26.0.0"
+  },
   "scripts": {
     "build": "node ../../../scripts/build-native.mjs morph-to-react --release --tsc",
     "build:debug": "node ../../../scripts/build-native.mjs morph-to-react --tsc",
     "test": "vitest run"
   },
   "dependencies": {
-    "@carbon/web-components": "^2.65.0",
+    "@carbon/web-components": "^2.66.0",
     "lit": "^3.3.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"

@@ -44,6 +44,7 @@ flowchart TD
 ### In-depth technical details
 
 #### 1. Sandbox-safe browser flags
+
 `SANDBOX_SAFE_CHROMIUM_ARGS` includes:
 - `--single-process`: Avoids multi-process fork restrictions in containerized sandboxes.
 - `--no-sandbox` & `--disable-setuid-sandbox`: Disables Linux namespace isolation requirements.
@@ -51,6 +52,7 @@ flowchart TD
 - `--disable-gpu`: Disables hardware acceleration dependencies.
 
 #### 2. Shadow DOM inspection utilities
+
 - `mountElement(page, tagName, htmlContent)`: Mounts a custom element and waits for component update lifecycle completion.
 - `getShadowComputedStyle(page, hostSelector, targetSelector, property)`: Pierces the host component's Shadow DOM to read computed CSS values directly from encapsulated nodes.
 - `getShadowText(page, hostSelector, targetSelector)`: Extracts text content from encapsulated elements inside shadow roots.
@@ -69,13 +71,7 @@ pnpm add -D @lit-core/test-kit
 
 ```typescript
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import {
-  getSharedBrowser,
-  closeSharedBrowser,
-  createTestPage,
-  mountElement,
-  getShadowComputedStyle,
-} from '@lit-core/test-kit';
+import { getSharedBrowser, closeSharedBrowser, createTestPage, mountElement, getShadowComputedStyle } from '@lit-core/test-kit';
 
 describe('Button component integration', () => {
   let browser;

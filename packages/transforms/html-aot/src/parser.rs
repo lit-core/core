@@ -277,10 +277,10 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
         // At expression boundary between quasi k and k+1:
         if k < num_exprs {
             // Check if inside raw text element
-            if let Some(cur_open) = open_tags.last() {
-                if is_raw_text(cur_open) {
-                    return None;
-                }
+            if let Some(cur_open) = open_tags.last()
+                && is_raw_text(cur_open)
+            {
+                return None;
             }
 
             if let Some(ref mut attr) = active_attr {

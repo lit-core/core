@@ -381,10 +381,10 @@ impl<'a> SymbolProofContext<'a> {
     }
 
     pub fn map_lit_default_import(source: &str) -> Option<CanonicalLitSymbol> {
-        if let Some(slug) = Self::extract_directive_slug(source) {
-            if let Some(d) = CanonicalDirective::from_slug(slug) {
-                return Some(CanonicalLitSymbol::Directive(d));
-            }
+        if let Some(slug) = Self::extract_directive_slug(source)
+            && let Some(d) = CanonicalDirective::from_slug(slug)
+        {
+            return Some(CanonicalLitSymbol::Directive(d));
         }
         None
     }
@@ -471,10 +471,9 @@ impl<'a> SymbolProofContext<'a> {
                                                     def.local.name.as_str().into(),
                                                 )
                                             })
+                                            && let Some(c) = Self::map_lit_default_import(source)
                                         {
-                                            if let Some(c) = Self::map_lit_default_import(source) {
-                                                lit_symbols.insert(sym_id, c);
-                                            }
+                                            lit_symbols.insert(sym_id, c);
                                         }
                                     }
                                     ImportDeclarationSpecifier::ImportSpecifier(named) => {
@@ -486,13 +485,12 @@ impl<'a> SymbolProofContext<'a> {
                                                     named.local.name.as_str().into(),
                                                 )
                                             })
-                                        {
-                                            if let Some(c) = Self::map_lit_named_import(
+                                            && let Some(c) = Self::map_lit_named_import(
                                                 source,
                                                 imported_name.as_str(),
-                                            ) {
-                                                lit_symbols.insert(sym_id, c);
-                                            }
+                                            )
+                                        {
+                                            lit_symbols.insert(sym_id, c);
                                         }
                                     }
                                     ImportDeclarationSpecifier::ImportNamespaceSpecifier(ns) => {
@@ -627,11 +625,10 @@ impl<'a> SymbolProofContext<'a> {
                                 let sym_id = id.symbol_id.get().or_else(|| {
                                     scoping.get_binding(root_scope, id.name.as_str().into())
                                 });
-                                if let Some(sym_id) = sym_id {
-                                    if let Some(h) = Self::map_helper_named_import(id.name.as_str())
-                                    {
-                                        helper_symbols.insert(sym_id, h);
-                                    }
+                                if let Some(sym_id) = sym_id
+                                    && let Some(h) = Self::map_helper_named_import(id.name.as_str())
+                                {
+                                    helper_symbols.insert(sym_id, h);
                                 }
                                 if let Some(init) = &decl.init {
                                     if let Some(cls) = Self::find_class_expr(init) {
@@ -659,17 +656,14 @@ impl<'a> SymbolProofContext<'a> {
                                 scoping.get_binding(root_scope, id.name.as_str().into())
                             });
                             if let Some(init) = &decl.init {
-                                if let Some(sym_id) = sym_id {
-                                    if matches!(
+                                if let Some(sym_id) = sym_id
+                                    && matches!(
                                         init.without_parentheses(),
                                         Expression::LogicalExpression(_)
-                                    ) {
-                                        if let Some(h) =
-                                            Self::map_helper_named_import(id.name.as_str())
-                                        {
-                                            helper_symbols.insert(sym_id, h);
-                                        }
-                                    }
+                                    )
+                                    && let Some(h) = Self::map_helper_named_import(id.name.as_str())
+                                {
+                                    helper_symbols.insert(sym_id, h);
                                 }
                                 if let Some(cls) = Self::find_class_expr(init) {
                                     class_span_names.insert(
@@ -749,13 +743,11 @@ impl<'a> SymbolProofContext<'a> {
                 self.scan_helper_call(call, decorated_classes);
             }
             Expression::AssignmentExpression(assign) => {
-                if let AssignmentTarget::StaticMemberExpression(mem) = &assign.left {
-                    if mem.property.name == "styles" || mem.property.name == "css" {
-                        if let Expression::Identifier(target_id) = mem.object.without_parentheses()
-                        {
-                            styled_classes.insert(target_id.name.as_str().to_string());
-                        }
-                    }
+                if let AssignmentTarget::StaticMemberExpression(mem) = &assign.left
+                    && (mem.property.name == "styles" || mem.property.name == "css")
+                    && let Expression::Identifier(target_id) = mem.object.without_parentheses()
+                {
+                    styled_classes.insert(target_id.name.as_str().to_string());
                 }
                 if let Expression::CallExpression(call) = assign.right.without_parentheses() {
                     self.scan_helper_call(call, decorated_classes);
@@ -794,41 +786,33 @@ impl<'a> SymbolProofContext<'a> {
         }
 
         // Form A: __decorate([decorators], TargetClass.prototype, "prop", ...)
-        if call.arguments.len() >= 3 {
-            if let Some(Expression::StaticMemberExpression(mem)) = call.arguments[1].as_expression()
-            {
-                if mem.property.name == "prototype" {
-                    if let Expression::Identifier(target_id) = mem.object.without_parentheses() {
-                        if let Some(Expression::ArrayExpression(arr)) =
-                            call.arguments[0].as_expression()
-                        {
-                            if arr.elements.iter().any(|el| {
-                                el.as_expression()
-                                    .and_then(|e| self.is_proven_decorator(e))
-                                    .is_some()
-                            }) {
-                                decorated_classes.insert(target_id.name.as_str().to_string());
-                            }
-                        }
-                    }
-                }
-            }
+        if call.arguments.len() >= 3
+            && let Some(Expression::StaticMemberExpression(mem)) = call.arguments[1].as_expression()
+            && mem.property.name == "prototype"
+            && let Expression::Identifier(target_id) = mem.object.without_parentheses()
+            && let Some(Expression::ArrayExpression(arr)) = call.arguments[0].as_expression()
+            && arr.elements.iter().any(|el| {
+                el.as_expression()
+                    .and_then(|e| self.is_proven_decorator(e))
+                    .is_some()
+            })
+        {
+            decorated_classes.insert(target_id.name.as_str().to_string());
         }
 
         // Form B: TargetClass = __decorate([decorators], TargetClass)
-        if let Some(Expression::Identifier(target_id)) = call.arguments[1].as_expression() {
-            if let Some(Expression::ArrayExpression(arr)) = call.arguments[0].as_expression() {
-                if arr.elements.iter().any(|el| {
-                    el.as_expression()
-                        .map(|e| {
-                            self.is_proven_decorator(e).is_some()
-                                || self.is_class_custom_element_decorator_call(e).is_some()
-                        })
-                        .unwrap_or(false)
-                }) {
-                    decorated_classes.insert(target_id.name.as_str().to_string());
-                }
-            }
+        if let Some(Expression::Identifier(target_id)) = call.arguments[1].as_expression()
+            && let Some(Expression::ArrayExpression(arr)) = call.arguments[0].as_expression()
+            && arr.elements.iter().any(|el| {
+                el.as_expression()
+                    .map(|e| {
+                        self.is_proven_decorator(e).is_some()
+                            || self.is_class_custom_element_decorator_call(e).is_some()
+                    })
+                    .unwrap_or(false)
+            })
+        {
+            decorated_classes.insert(target_id.name.as_str().to_string());
         }
     }
 
@@ -856,14 +840,12 @@ impl<'a> SymbolProofContext<'a> {
         }
         match call.callee.without_parentheses() {
             Expression::Identifier(id) => {
-                if let Some(ref_id) = id.reference_id.get() {
-                    if let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id() {
-                        if self.imported_classes.contains_key(&sym_id)
-                            || self.lit_symbols.contains_key(&sym_id)
-                        {
-                            return Some(tag);
-                        }
-                    }
+                if let Some(ref_id) = id.reference_id.get()
+                    && let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id()
+                    && (self.imported_classes.contains_key(&sym_id)
+                        || self.lit_symbols.contains_key(&sym_id))
+                {
+                    return Some(tag);
                 }
                 None
             }
@@ -968,12 +950,11 @@ impl<'a> SymbolProofContext<'a> {
         &self,
         ident: &IdentifierReference,
     ) -> Option<CanonicalHelperSymbol> {
-        if let Some(ref_id) = ident.reference_id.get() {
-            if let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id() {
-                if let Some(h) = self.helper_symbols.get(&sym_id).copied() {
-                    return Some(h);
-                }
-            }
+        if let Some(ref_id) = ident.reference_id.get()
+            && let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id()
+            && let Some(h) = self.helper_symbols.get(&sym_id).copied()
+        {
+            return Some(h);
         }
         if self.is_unresolved_global(ident) {
             return Self::map_helper_named_import(ident.name.as_str());
@@ -987,11 +968,10 @@ impl<'a> SymbolProofContext<'a> {
                 self.resolve_symbol(ident) == Some(CanonicalLitSymbol::HtmlTag)
             }
             Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "html" {
-                    if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
-                        return self.resolve_symbol(obj_id)
-                            == Some(CanonicalLitSymbol::LitNamespace);
-                    }
+                if mem.property.name == "html"
+                    && let Expression::Identifier(obj_id) = mem.object.without_parentheses()
+                {
+                    return self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace);
                 }
                 false
             }
@@ -1006,11 +986,10 @@ impl<'a> SymbolProofContext<'a> {
                 Some(CanonicalLitSymbol::HtmlTag | CanonicalLitSymbol::StaticHtmlTag)
             ),
             Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "html" {
-                    if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
-                        return self.resolve_symbol(obj_id)
-                            == Some(CanonicalLitSymbol::LitNamespace);
-                    }
+                if mem.property.name == "html"
+                    && let Expression::Identifier(obj_id) = mem.object.without_parentheses()
+                {
+                    return self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace);
                 }
                 false
             }
@@ -1024,11 +1003,10 @@ impl<'a> SymbolProofContext<'a> {
                 self.resolve_symbol(ident) == Some(CanonicalLitSymbol::SvgTag)
             }
             Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "svg" {
-                    if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
-                        return self.resolve_symbol(obj_id)
-                            == Some(CanonicalLitSymbol::LitNamespace);
-                    }
+                if mem.property.name == "svg"
+                    && let Expression::Identifier(obj_id) = mem.object.without_parentheses()
+                {
+                    return self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace);
                 }
                 false
             }
@@ -1042,11 +1020,10 @@ impl<'a> SymbolProofContext<'a> {
                 self.resolve_symbol(ident) == Some(CanonicalLitSymbol::CssTag)
             }
             Expression::StaticMemberExpression(mem) => {
-                if mem.property.name == "css" {
-                    if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
-                        return self.resolve_symbol(obj_id)
-                            == Some(CanonicalLitSymbol::LitNamespace);
-                    }
+                if mem.property.name == "css"
+                    && let Expression::Identifier(obj_id) = mem.object.without_parentheses()
+                {
+                    return self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace);
                 }
                 false
             }
@@ -1059,26 +1036,26 @@ impl<'a> SymbolProofContext<'a> {
             Expression::Identifier(ident) => self.resolve_symbol(ident),
             Expression::StaticMemberExpression(mem) => {
                 let prop_name = mem.property.name.as_str();
-                if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
-                    if self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace) {
-                        return match prop_name {
-                            "customElement" => Some(CanonicalLitSymbol::CustomElementDecorator),
-                            "property" => Some(CanonicalLitSymbol::PropertyDecorator),
-                            "state" => Some(CanonicalLitSymbol::StateDecorator),
-                            "query" => Some(CanonicalLitSymbol::QueryDecorator),
-                            "queryAll" => Some(CanonicalLitSymbol::QueryAllDecorator),
-                            "queryAsync" => Some(CanonicalLitSymbol::QueryAsyncDecorator),
-                            "queryAssignedElements" => {
-                                Some(CanonicalLitSymbol::QueryAssignedElementsDecorator)
-                            }
-                            "queryAssignedNodes" => {
-                                Some(CanonicalLitSymbol::QueryAssignedNodesDecorator)
-                            }
-                            "eventOptions" => Some(CanonicalLitSymbol::EventOptionsDecorator),
-                            "localized" => Some(CanonicalLitSymbol::LocalizedDecorator),
-                            _ => None,
-                        };
-                    }
+                if let Expression::Identifier(obj_id) = mem.object.without_parentheses()
+                    && self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace)
+                {
+                    return match prop_name {
+                        "customElement" => Some(CanonicalLitSymbol::CustomElementDecorator),
+                        "property" => Some(CanonicalLitSymbol::PropertyDecorator),
+                        "state" => Some(CanonicalLitSymbol::StateDecorator),
+                        "query" => Some(CanonicalLitSymbol::QueryDecorator),
+                        "queryAll" => Some(CanonicalLitSymbol::QueryAllDecorator),
+                        "queryAsync" => Some(CanonicalLitSymbol::QueryAsyncDecorator),
+                        "queryAssignedElements" => {
+                            Some(CanonicalLitSymbol::QueryAssignedElementsDecorator)
+                        }
+                        "queryAssignedNodes" => {
+                            Some(CanonicalLitSymbol::QueryAssignedNodesDecorator)
+                        }
+                        "eventOptions" => Some(CanonicalLitSymbol::EventOptionsDecorator),
+                        "localized" => Some(CanonicalLitSymbol::LocalizedDecorator),
+                        _ => None,
+                    };
                 }
                 None
             }
@@ -1091,26 +1068,26 @@ impl<'a> SymbolProofContext<'a> {
             Expression::Identifier(ident) => self.resolve_symbol(ident),
             Expression::StaticMemberExpression(mem) => {
                 let prop_name = mem.property.name.as_str();
-                if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
-                    if self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace) {
-                        return match prop_name {
-                            "customElement" => Some(CanonicalLitSymbol::CustomElementDecorator),
-                            "property" => Some(CanonicalLitSymbol::PropertyDecorator),
-                            "state" => Some(CanonicalLitSymbol::StateDecorator),
-                            "query" => Some(CanonicalLitSymbol::QueryDecorator),
-                            "queryAll" => Some(CanonicalLitSymbol::QueryAllDecorator),
-                            "queryAsync" => Some(CanonicalLitSymbol::QueryAsyncDecorator),
-                            "queryAssignedElements" => {
-                                Some(CanonicalLitSymbol::QueryAssignedElementsDecorator)
-                            }
-                            "queryAssignedNodes" => {
-                                Some(CanonicalLitSymbol::QueryAssignedNodesDecorator)
-                            }
-                            "eventOptions" => Some(CanonicalLitSymbol::EventOptionsDecorator),
-                            "localized" => Some(CanonicalLitSymbol::LocalizedDecorator),
-                            _ => None,
-                        };
-                    }
+                if let Expression::Identifier(obj_id) = mem.object.without_parentheses()
+                    && self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace)
+                {
+                    return match prop_name {
+                        "customElement" => Some(CanonicalLitSymbol::CustomElementDecorator),
+                        "property" => Some(CanonicalLitSymbol::PropertyDecorator),
+                        "state" => Some(CanonicalLitSymbol::StateDecorator),
+                        "query" => Some(CanonicalLitSymbol::QueryDecorator),
+                        "queryAll" => Some(CanonicalLitSymbol::QueryAllDecorator),
+                        "queryAsync" => Some(CanonicalLitSymbol::QueryAsyncDecorator),
+                        "queryAssignedElements" => {
+                            Some(CanonicalLitSymbol::QueryAssignedElementsDecorator)
+                        }
+                        "queryAssignedNodes" => {
+                            Some(CanonicalLitSymbol::QueryAssignedNodesDecorator)
+                        }
+                        "eventOptions" => Some(CanonicalLitSymbol::EventOptionsDecorator),
+                        "localized" => Some(CanonicalLitSymbol::LocalizedDecorator),
+                        _ => None,
+                    };
                 }
                 None
             }
@@ -1258,87 +1235,87 @@ impl<'a> SymbolProofContext<'a> {
                     };
                 }
 
-                if let Some(ref_id) = ident.reference_id.get() {
-                    if let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id() {
-                        if let Some(proof) = self.local_heritage_proofs.get(&sym_id) {
-                            return match proof {
+                if let Some(ref_id) = ident.reference_id.get()
+                    && let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id()
+                {
+                    if let Some(proof) = self.local_heritage_proofs.get(&sym_id) {
+                        return match proof {
+                            HeritageProof::ProvenLitElement {
+                                depth: d,
+                                mixins: m,
+                            } => {
+                                mixins.extend(m.iter().cloned());
                                 HeritageProof::ProvenLitElement {
-                                    depth: d,
-                                    mixins: m,
-                                } => {
-                                    mixins.extend(m.iter().cloned());
-                                    HeritageProof::ProvenLitElement {
-                                        depth: depth + d,
-                                        mixins: mixins.clone(),
-                                    }
+                                    depth: depth + d,
+                                    mixins: mixins.clone(),
                                 }
+                            }
+                            HeritageProof::ProvenReactiveElement {
+                                depth: d,
+                                mixins: m,
+                            } => {
+                                mixins.extend(m.iter().cloned());
                                 HeritageProof::ProvenReactiveElement {
-                                    depth: d,
-                                    mixins: m,
-                                } => {
-                                    mixins.extend(m.iter().cloned());
-                                    HeritageProof::ProvenReactiveElement {
-                                        depth: depth + d,
-                                        mixins: mixins.clone(),
-                                    }
+                                    depth: depth + d,
+                                    mixins: mixins.clone(),
                                 }
+                            }
+                            HeritageProof::LocalSubclass {
+                                base_class_name,
+                                mixins: m,
+                            } => {
+                                mixins.extend(m.iter().cloned());
                                 HeritageProof::LocalSubclass {
-                                    base_class_name,
-                                    mixins: m,
-                                } => {
-                                    mixins.extend(m.iter().cloned());
-                                    HeritageProof::LocalSubclass {
-                                        base_class_name: base_class_name.clone(),
-                                        mixins: mixins.clone(),
-                                    }
+                                    base_class_name: base_class_name.clone(),
+                                    mixins: mixins.clone(),
                                 }
+                            }
+                            HeritageProof::CrossModuleSubclass {
+                                module_source,
+                                imported_name,
+                                mixins: m,
+                            } => {
+                                mixins.extend(m.iter().cloned());
                                 HeritageProof::CrossModuleSubclass {
-                                    module_source,
-                                    imported_name,
-                                    mixins: m,
-                                } => {
-                                    mixins.extend(m.iter().cloned());
-                                    HeritageProof::CrossModuleSubclass {
-                                        module_source: module_source.clone(),
-                                        imported_name: imported_name.clone(),
-                                        mixins: mixins.clone(),
-                                    }
+                                    module_source: module_source.clone(),
+                                    imported_name: imported_name.clone(),
+                                    mixins: mixins.clone(),
                                 }
-                                other => other.clone(),
+                            }
+                            other => other.clone(),
+                        };
+                    }
+                    if let Some(map) = expr_map
+                        && let Some(init_expr) = map.get(&sym_id)
+                    {
+                        return self.trace_heritage_expr_with_map(
+                            init_expr,
+                            expr_map,
+                            mixins,
+                            depth + 1,
+                        );
+                    }
+
+                    if let Some(imported) = self.imported_classes.get(&sym_id) {
+                        if Self::is_canonical_lit_specifier(&imported.module_source) {
+                            return HeritageProof::ProvenLitElement {
+                                depth: depth + 1,
+                                mixins: mixins.clone(),
                             };
-                        }
-                        if let Some(map) = expr_map {
-                            if let Some(init_expr) = map.get(&sym_id) {
-                                return self.trace_heritage_expr_with_map(
-                                    init_expr,
-                                    expr_map,
-                                    mixins,
-                                    depth + 1,
-                                );
-                            }
-                        }
-
-                        if let Some(imported) = self.imported_classes.get(&sym_id) {
-                            if Self::is_canonical_lit_specifier(&imported.module_source) {
-                                return HeritageProof::ProvenLitElement {
-                                    depth: depth + 1,
-                                    mixins: mixins.clone(),
-                                };
-                            } else {
-                                return HeritageProof::CrossModuleSubclass {
-                                    module_source: imported.module_source.clone(),
-                                    imported_name: imported.imported_name.clone(),
-                                    mixins: mixins.clone(),
-                                };
-                            }
-                        }
-
-                        if let Some(class_name) = self.local_classes.get(&sym_id) {
-                            return HeritageProof::LocalSubclass {
-                                base_class_name: class_name.clone(),
+                        } else {
+                            return HeritageProof::CrossModuleSubclass {
+                                module_source: imported.module_source.clone(),
+                                imported_name: imported.imported_name.clone(),
                                 mixins: mixins.clone(),
                             };
                         }
+                    }
+
+                    if let Some(class_name) = self.local_classes.get(&sym_id) {
+                        return HeritageProof::LocalSubclass {
+                            base_class_name: class_name.clone(),
+                            mixins: mixins.clone(),
+                        };
                     }
                 }
 
@@ -1375,20 +1352,20 @@ impl<'a> SymbolProofContext<'a> {
             }
             Expression::StaticMemberExpression(mem) => {
                 let prop_name = mem.property.name.as_str();
-                if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
-                    if self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace) {
-                        if prop_name == "LitElement" {
-                            return HeritageProof::ProvenLitElement {
-                                depth,
-                                mixins: mixins.clone(),
-                            };
-                        }
-                        if prop_name == "ReactiveElement" {
-                            return HeritageProof::ProvenReactiveElement {
-                                depth,
-                                mixins: mixins.clone(),
-                            };
-                        }
+                if let Expression::Identifier(obj_id) = mem.object.without_parentheses()
+                    && self.resolve_symbol(obj_id) == Some(CanonicalLitSymbol::LitNamespace)
+                {
+                    if prop_name == "LitElement" {
+                        return HeritageProof::ProvenLitElement {
+                            depth,
+                            mixins: mixins.clone(),
+                        };
+                    }
+                    if prop_name == "ReactiveElement" {
+                        return HeritageProof::ProvenReactiveElement {
+                            depth,
+                            mixins: mixins.clone(),
+                        };
                     }
                 }
                 HeritageProof::Unresolved
@@ -1410,22 +1387,21 @@ impl<'a> SymbolProofContext<'a> {
             }),
             Expression::CallExpression(call) => match call.callee.without_parentheses() {
                 Expression::Identifier(id) => {
-                    if let Some(ref_id) = id.reference_id.get() {
-                        if let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id() {
-                            if let Some(imported) = self.imported_classes.get(&sym_id) {
-                                return Self::is_canonical_lit_specifier(&imported.module_source)
-                                    && imported.imported_name == "unsafeCSS";
-                            }
-                        }
+                    if let Some(ref_id) = id.reference_id.get()
+                        && let Some(sym_id) = self.scoping.get_reference(ref_id).symbol_id()
+                        && let Some(imported) = self.imported_classes.get(&sym_id)
+                    {
+                        return Self::is_canonical_lit_specifier(&imported.module_source)
+                            && imported.imported_name == "unsafeCSS";
                     }
                     false
                 }
                 Expression::StaticMemberExpression(mem) => {
-                    if mem.property.name == "unsafeCSS" {
-                        if let Expression::Identifier(obj_id) = mem.object.without_parentheses() {
-                            return self.resolve_symbol(obj_id)
-                                == Some(CanonicalLitSymbol::LitNamespace);
-                        }
+                    if mem.property.name == "unsafeCSS"
+                        && let Expression::Identifier(obj_id) = mem.object.without_parentheses()
+                    {
+                        return self.resolve_symbol(obj_id)
+                            == Some(CanonicalLitSymbol::LitNamespace);
                     }
                     false
                 }
@@ -1436,20 +1412,20 @@ impl<'a> SymbolProofContext<'a> {
     }
 
     pub fn has_lit_styles(&self, class: &Class) -> bool {
-        if let Some(name) = self.get_class_name(class) {
-            if self.external_styled_classes.contains(name) {
-                return true;
-            }
+        if let Some(name) = self.get_class_name(class)
+            && self.external_styled_classes.contains(name)
+        {
+            return true;
         }
         for element in &class.body.body {
             match element {
                 ClassElement::PropertyDefinition(prop)
                     if prop.r#static && prop.key.is_specific_static_name("styles") =>
                 {
-                    if let Some(val) = &prop.value {
-                        if self.expr_contains_lit_css(val) {
-                            return true;
-                        }
+                    if let Some(val) = &prop.value
+                        && self.expr_contains_lit_css(val)
+                    {
+                        return true;
                     }
                 }
                 ClassElement::MethodDefinition(method)
@@ -1459,28 +1435,23 @@ impl<'a> SymbolProofContext<'a> {
                 {
                     if let Some(body) = &method.value.body {
                         for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(arg) = &ret.argument {
-                                    if self.expr_contains_lit_css(arg) {
-                                        return true;
-                                    }
-                                }
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(arg) = &ret.argument
+                                && self.expr_contains_lit_css(arg)
+                            {
+                                return true;
                             }
                         }
                     }
                 }
                 ClassElement::StaticBlock(block) => {
                     for stmt in &block.body {
-                        if let Statement::ExpressionStatement(expr_stmt) = stmt {
-                            if let Expression::AssignmentExpression(assign) = &expr_stmt.expression
-                            {
-                                if let AssignmentTarget::StaticMemberExpression(mem) = &assign.left
-                                {
-                                    if mem.property.name == "styles" || mem.property.name == "css" {
-                                        return true;
-                                    }
-                                }
-                            }
+                        if let Statement::ExpressionStatement(expr_stmt) = stmt
+                            && let Expression::AssignmentExpression(assign) = &expr_stmt.expression
+                            && let AssignmentTarget::StaticMemberExpression(mem) = &assign.left
+                            && (mem.property.name == "styles" || mem.property.name == "css")
+                        {
+                            return true;
                         }
                     }
                 }
@@ -1544,10 +1515,10 @@ impl<'a> SymbolProofContext<'a> {
                 ClassElement::PropertyDefinition(prop)
                     if prop.r#static && prop.key.is_specific_static_name("properties") =>
                 {
-                    if let Some(val) = &prop.value {
-                        if self.is_lit_static_properties_object(val) {
-                            return true;
-                        }
+                    if let Some(val) = &prop.value
+                        && self.is_lit_static_properties_object(val)
+                    {
+                        return true;
                     }
                 }
                 ClassElement::MethodDefinition(method)
@@ -1557,12 +1528,11 @@ impl<'a> SymbolProofContext<'a> {
                 {
                     if let Some(body) = &method.value.body {
                         for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(arg) = &ret.argument {
-                                    if self.is_lit_static_properties_object(arg) {
-                                        return true;
-                                    }
-                                }
+                            if let Statement::ReturnStatement(ret) = stmt
+                                && let Some(arg) = &ret.argument
+                                && self.is_lit_static_properties_object(arg)
+                            {
+                                return true;
                             }
                         }
                     }
@@ -1574,10 +1544,10 @@ impl<'a> SymbolProofContext<'a> {
     }
 
     pub fn has_proven_lit_decorators(&self, class: &Class) -> bool {
-        if let Some(name) = self.get_class_name(class) {
-            if self.transpiled_decorated_classes.contains(name) {
-                return true;
-            }
+        if let Some(name) = self.get_class_name(class)
+            && self.transpiled_decorated_classes.contains(name)
+        {
+            return true;
         }
         if class.decorators.iter().any(|d| {
             matches!(
@@ -1693,18 +1663,17 @@ impl<'a> SymbolProofContext<'a> {
 
     pub fn has_lit_render_method(&self, class: &Class) -> bool {
         for element in &class.body.body {
-            if let ClassElement::MethodDefinition(method) = element {
-                if !method.r#static && method.key.is_specific_static_name("render") {
-                    if let Some(body) = &method.value.body {
-                        for stmt in &body.statements {
-                            if let Statement::ReturnStatement(ret) = stmt {
-                                if let Some(arg) = &ret.argument {
-                                    if self.expr_contains_lit_template(arg) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
+            if let ClassElement::MethodDefinition(method) = element
+                && !method.r#static
+                && method.key.is_specific_static_name("render")
+                && let Some(body) = &method.value.body
+            {
+                for stmt in &body.statements {
+                    if let Statement::ReturnStatement(ret) = stmt
+                        && let Some(arg) = &ret.argument
+                        && self.expr_contains_lit_template(arg)
+                    {
+                        return true;
                     }
                 }
             }

@@ -366,7 +366,9 @@ mod tests {
 
     #[test]
     fn test_collapse_tag_attributes() {
-        let input = vec!["\n  <button\n    class=\"btn\"\n    type=\"button\"\n    disabled\n  >\n    Click\n  </button>\n"];
+        let input = vec![
+            "\n  <button\n    class=\"btn\"\n    type=\"button\"\n    disabled\n  >\n    Click\n  </button>\n",
+        ];
         let output = collapse_template_quasis(&input);
         assert_eq!(
             output[0],
@@ -376,7 +378,9 @@ mod tests {
 
     #[test]
     fn test_preserve_pre_code_textarea() {
-        let input = vec!["\n  <div>\n    <pre>\n      line 1\n      line 2\n    </pre>\n    <code>  let x = 1;  </code>\n    <textarea>\n      text here\n    </textarea>\n  </div>\n"];
+        let input = vec![
+            "\n  <div>\n    <pre>\n      line 1\n      line 2\n    </pre>\n    <code>  let x = 1;  </code>\n    <textarea>\n      text here\n    </textarea>\n  </div>\n",
+        ];
         let output = collapse_template_quasis(&input);
         assert!(output[0].contains("<pre>\n      line 1\n      line 2\n    </pre>"));
         assert!(output[0].contains("<code>  let x = 1;  </code>"));
@@ -386,9 +390,14 @@ mod tests {
 
     #[test]
     fn test_svg_collapse() {
-        let input = vec!["\n  <svg viewBox=\"0 0 100 100\">\n    <circle cx=\"50\" cy=\"50\" r=\"40\" />\n    <path d=\"M0 0\" />\n  </svg>\n"];
+        let input = vec![
+            "\n  <svg viewBox=\"0 0 100 100\">\n    <circle cx=\"50\" cy=\"50\" r=\"40\" />\n    <path d=\"M0 0\" />\n  </svg>\n",
+        ];
         let output = collapse_template_quasis(&input);
-        assert_eq!(output[0], "<svg viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"50\" r=\"40\"/><path d=\"M0 0\"/></svg>");
+        assert_eq!(
+            output[0],
+            "<svg viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"50\" r=\"40\"/><path d=\"M0 0\"/></svg>"
+        );
     }
 
     #[test]

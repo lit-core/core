@@ -3,7 +3,7 @@ pub mod prune;
 pub mod transform;
 pub mod utils;
 
-use crate::transform::{transform_code, DirectivesOptions, DirectivesResult};
+use crate::transform::{DirectivesOptions, DirectivesResult, transform_code};
 use napi_derive::napi;
 
 #[napi]

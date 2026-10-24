@@ -6,15 +6,15 @@ use oxc_ast::builder::AstBuilder;
 use oxc_ast_visit::Visit;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub use crate::analyzer::{
-    analyze_expr_dependencies, collect_classes_mut, collect_named_classes,
+    ReactiveProps, analyze_expr_dependencies, collect_classes_mut, collect_named_classes,
     collect_reactive_properties, collect_reactive_properties_with_inheritance,
     collect_reactive_properties_with_inheritance_named, compute_part_mask, get_class_name,
-    get_root_this_prop, get_super_class_name, ReactiveProps,
+    get_root_this_prop, get_super_class_name,
 };
 pub use crate::builder::{
     build_alias_statement, build_mask_calc_statements, build_super_update_statement,
@@ -83,11 +83,11 @@ fn compute_props_with_cache(
         }
     };
 
-    if let Some(super_name) = get_super_class_name(class) {
-        if let Some(anc_props) = inherited_cache.get(super_name) {
-            for (prop_name, _) in anc_props {
-                add_prop(prop_name.clone());
-            }
+    if let Some(super_name) = get_super_class_name(class)
+        && let Some(anc_props) = inherited_cache.get(super_name)
+    {
+        for (prop_name, _) in anc_props {
+            add_prop(prop_name.clone());
         }
     }
 
@@ -98,11 +98,11 @@ fn compute_props_with_cache(
 
     if let Some(ext) = external_props {
         let effective_name = class_name.or_else(|| get_class_name(class));
-        if let Some(name) = effective_name {
-            if let Some(extra) = ext.get(name) {
-                for prop_name in extra {
-                    add_prop(prop_name.clone());
-                }
+        if let Some(name) = effective_name
+            && let Some(extra) = ext.get(name)
+        {
+            for prop_name in extra {
+                add_prop(prop_name.clone());
             }
         }
     }
@@ -176,21 +176,16 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         if let Statement::ExpressionStatement(expr_stmt) = stmt {
             match &expr_stmt.expression {
                 Expression::CallExpression(call) => {
-                    if let Expression::StaticMemberExpression(mem) = &call.callee {
-                        if mem.property.name == "createProperty" {
-                            if let Expression::Identifier(obj_id) = &mem.object {
-                                if let Some(first_arg) = call.arguments.first() {
-                                    if let Some(Expression::StringLiteral(s)) =
-                                        first_arg.as_expression()
-                                    {
-                                        external_props
-                                            .entry(obj_id.name.as_str().to_string())
-                                            .or_default()
-                                            .push(s.value.as_str().to_string());
-                                    }
-                                }
-                            }
-                        }
+                    if let Expression::StaticMemberExpression(mem) = &call.callee
+                        && mem.property.name == "createProperty"
+                        && let Expression::Identifier(obj_id) = &mem.object
+                        && let Some(first_arg) = call.arguments.first()
+                        && let Some(Expression::StringLiteral(s)) = first_arg.as_expression()
+                    {
+                        external_props
+                            .entry(obj_id.name.as_str().to_string())
+                            .or_default()
+                            .push(s.value.as_str().to_string());
                     }
                     let is_decorate_helper = match &call.callee {
                         Expression::Identifier(id) => {
@@ -198,64 +193,56 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
                         }
                         _ => false,
                     };
-                    if is_decorate_helper && call.arguments.len() >= 3 {
-                        if let Some(Expression::StaticMemberExpression(mem)) =
+                    if is_decorate_helper
+                        && call.arguments.len() >= 3
+                        && let Some(Expression::StaticMemberExpression(mem)) =
                             call.arguments[1].as_expression()
-                        {
-                            if mem.property.name == "prototype" {
-                                if let Expression::Identifier(id) = &mem.object {
-                                    let class_name = id.name.as_str().to_string();
-                                    let has_reactive = match call.arguments[0].as_expression() {
-                                        Some(Expression::ArrayExpression(arr)) => {
-                                            arr.elements.iter().any(|elem| {
-                                                elem.as_expression().is_some_and(|e| {
-                                                    symbol_ctx.is_proven_decorator(e).is_some_and(
-                                                        |sym| {
-                                                            matches!(
-                                                            sym,
-                                                            CanonicalLitSymbol::PropertyDecorator
-                                                                | CanonicalLitSymbol::StateDecorator
-                                                        )
-                                                        },
-                                                    )
-                                                })
-                                            })
-                                        }
-                                        _ => false,
-                                    };
-                                    if has_reactive {
-                                        if let Some(Expression::StringLiteral(s)) =
-                                            call.arguments[2].as_expression()
-                                        {
-                                            external_props
-                                                .entry(class_name)
-                                                .or_default()
-                                                .push(s.value.as_str().to_string());
-                                        }
-                                    }
-                                }
+                        && mem.property.name == "prototype"
+                        && let Expression::Identifier(id) = &mem.object
+                    {
+                        let class_name = id.name.as_str().to_string();
+                        let has_reactive = match call.arguments[0].as_expression() {
+                            Some(Expression::ArrayExpression(arr)) => {
+                                arr.elements.iter().any(|elem| {
+                                    elem.as_expression().is_some_and(|e| {
+                                        symbol_ctx.is_proven_decorator(e).is_some_and(|sym| {
+                                            matches!(
+                                                sym,
+                                                CanonicalLitSymbol::PropertyDecorator
+                                                    | CanonicalLitSymbol::StateDecorator
+                                            )
+                                        })
+                                    })
+                                })
                             }
+                            _ => false,
+                        };
+                        if has_reactive
+                            && let Some(Expression::StringLiteral(s)) =
+                                call.arguments[2].as_expression()
+                        {
+                            external_props
+                                .entry(class_name)
+                                .or_default()
+                                .push(s.value.as_str().to_string());
                         }
                     }
                 }
                 Expression::AssignmentExpression(assign) => {
                     if let Some(SimpleAssignmentTarget::StaticMemberExpression(mem)) =
                         assign.left.as_simple_assignment_target()
+                        && mem.property.name == "properties"
+                        && let Expression::Identifier(obj_id) = &mem.object
+                        && let Expression::ObjectExpression(obj) = &assign.right
                     {
-                        if mem.property.name == "properties" {
-                            if let Expression::Identifier(obj_id) = &mem.object {
-                                if let Expression::ObjectExpression(obj) = &assign.right {
-                                    for prop in &obj.properties {
-                                        if let ObjectPropertyKind::ObjectProperty(p) = prop {
-                                            if let Some(name) = p.key.static_name() {
-                                                external_props
-                                                    .entry(obj_id.name.as_str().to_string())
-                                                    .or_default()
-                                                    .push(name.to_string());
-                                            }
-                                        }
-                                    }
-                                }
+                        for prop in &obj.properties {
+                            if let ObjectPropertyKind::ObjectProperty(p) = prop
+                                && let Some(name) = p.key.static_name()
+                            {
+                                external_props
+                                    .entry(obj_id.name.as_str().to_string())
+                                    .or_default()
+                                    .push(name.to_string());
                             }
                         }
                     }
@@ -372,7 +359,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         let ast = AstBuilder::new(&allocator);
 
         if let Some(idx) = existing_update_idx {
-            if let ClassElement::MethodDefinition(ref mut method) = &mut class.body.body[idx] {
+            if let ClassElement::MethodDefinition(method) = &mut class.body.body[idx] {
                 let existing_param =
                     method
                         .value
@@ -456,8 +443,7 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
         }
 
         if let Some(idx) = lit_import_idx {
-            if let Statement::ImportDeclaration(ref mut import_decl) = &mut parsed.program.body[idx]
-            {
+            if let Statement::ImportDeclaration(import_decl) = &mut parsed.program.body[idx] {
                 if let Some(ref mut current_specs) = import_decl.specifiers {
                     current_specs.push(ImportDeclarationSpecifier::ImportSpecifier(spec));
                 } else {
@@ -487,10 +473,10 @@ pub fn transform_code(source: &str, options: DirtyMaskOptions) -> DirtyMaskResul
     }
 
     let mut codegen_options = CodegenOptions::default();
-    if options.sourcemap.unwrap_or(false) {
-        if let Some(ref filename) = options.filename {
-            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
-        }
+    if options.sourcemap.unwrap_or(false)
+        && let Some(ref filename) = options.filename
+    {
+        codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
     }
 
     let codegen_result = Codegen::new()

@@ -3,6 +3,6 @@ pub mod loader_ast;
 pub mod loader_compiler;
 
 pub use adapter_injector::{
-    transform_resumable_component, TransformResumableOptions, TransformResumableResult,
+    TransformResumableOptions, TransformResumableResult, transform_resumable_component,
 };
-pub use loader_compiler::{compile_resumable_loader, ResumableLoaderOptions};
+pub use loader_compiler::{ResumableLoaderOptions, compile_resumable_loader};

@@ -1,7 +1,7 @@
 [package]
 name = "morph_to_react"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 description = "Native NAPI-RS compiler for @lit-core/morph-to-react"
 
 [lib]

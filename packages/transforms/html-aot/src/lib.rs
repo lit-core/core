@@ -1,7 +1,7 @@
 pub mod parser;
 pub mod transform;
 
-use crate::transform::{transform_code, HtmlAotOptions, HtmlAotResult};
+use crate::transform::{HtmlAotOptions, HtmlAotResult, transform_code};
 use napi_derive::napi;
 
 #[napi]

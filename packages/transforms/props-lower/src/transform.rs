@@ -5,7 +5,7 @@ use oxc_ast::ast::*;
 use oxc_ast::builder::AstBuilder;
 use oxc_codegen::{Codegen, CodegenOptions};
 use oxc_parser::Parser;
-use oxc_span::{SourceType, SPAN};
+use oxc_span::{SPAN, SourceType};
 
 use crate::clean_imports::clean_lit_import;
 use crate::constructor::{can_safely_lower_constructor, inject_constructor_statements};
@@ -23,8 +23,8 @@ use crate::decorators::query_assigned::try_transform_query_assigned;
 use crate::decorators::query_async::try_transform_query_async;
 use crate::decorators::state::try_transform_state;
 use crate::static_properties::{
-    can_merge_static_properties, class_has_reactive_properties, create_property_key,
-    inject_or_merge_static_properties, ReactiveProp,
+    ReactiveProp, can_merge_static_properties, class_has_reactive_properties, create_property_key,
+    inject_or_merge_static_properties,
 };
 
 #[napi(object)]
@@ -279,14 +279,12 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
                 for stmt in &program.body {
                     if let Statement::VariableDeclaration(var_decl) = stmt {
                         for decl in &var_decl.declarations {
-                            if let BindingPattern::BindingIdentifier(id) = &decl.id {
-                                if unused_helper_aliases.contains(id.name.as_str()) {
-                                    if let Some(Expression::Identifier(init_id)) = &decl.init {
-                                        if init_id.name == canonical_name {
-                                            alias_refs += 1;
-                                        }
-                                    }
-                                }
+                            if let BindingPattern::BindingIdentifier(id) = &decl.id
+                                && unused_helper_aliases.contains(id.name.as_str())
+                                && let Some(Expression::Identifier(init_id)) = &decl.init
+                                && init_id.name == canonical_name
+                            {
+                                alias_refs += 1;
                             }
                         }
                     }
@@ -351,10 +349,10 @@ pub fn transform_code(source: &str, options: TransformOptions) -> TransformResul
     program.body = new_statements;
 
     let mut codegen_options = CodegenOptions::default();
-    if options.sourcemap.unwrap_or(false) {
-        if let Some(ref filename) = options.filename {
-            codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
-        }
+    if options.sourcemap.unwrap_or(false)
+        && let Some(ref filename) = options.filename
+    {
+        codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
     }
 
     let codegen_result = Codegen::new().with_options(codegen_options).build(&program);
@@ -506,12 +504,11 @@ fn get_local_class_ref<'a, 'b>(stmt: &'b Statement<'a>) -> Option<(&'b str, &'b 
         Statement::VariableDeclaration(var_decl) => {
             if var_decl.declarations.len() == 1 {
                 let d = &var_decl.declarations[0];
-                if let BindingPattern::BindingIdentifier(id) = &d.id {
-                    if let Some(Expression::ClassExpression(cls)) =
+                if let BindingPattern::BindingIdentifier(id) = &d.id
+                    && let Some(Expression::ClassExpression(cls)) =
                         d.init.as_ref().map(|e| e.without_parentheses())
-                    {
-                        return Some((id.name.as_str(), cls.as_ref()));
-                    }
+                {
+                    return Some((id.name.as_str(), cls.as_ref()));
                 }
             }
             None
@@ -523,12 +520,11 @@ fn get_local_class_ref<'a, 'b>(stmt: &'b Statement<'a>) -> Option<(&'b str, &'b 
             Declaration::VariableDeclaration(var_decl) => {
                 if var_decl.declarations.len() == 1 {
                     let d = &var_decl.declarations[0];
-                    if let BindingPattern::BindingIdentifier(id) = &d.id {
-                        if let Some(Expression::ClassExpression(cls)) =
+                    if let BindingPattern::BindingIdentifier(id) = &d.id
+                        && let Some(Expression::ClassExpression(cls)) =
                             d.init.as_ref().map(|e| e.without_parentheses())
-                        {
-                            return Some((id.name.as_str(), cls.as_ref()));
-                        }
+                    {
+                        return Some((id.name.as_str(), cls.as_ref()));
                     }
                 }
                 None
@@ -550,22 +546,21 @@ fn get_local_class_mut<'a, 'b>(stmt: &'b mut Statement<'a>) -> Option<&'b mut Cl
     match stmt {
         Statement::ClassDeclaration(cls) => Some(cls.as_mut()),
         Statement::VariableDeclaration(var_decl) => {
-            if var_decl.declarations.len() == 1 {
-                if let Some(Expression::ClassExpression(cls)) = &mut var_decl.declarations[0].init {
-                    return Some(cls.as_mut());
-                }
+            if var_decl.declarations.len() == 1
+                && let Some(Expression::ClassExpression(cls)) = &mut var_decl.declarations[0].init
+            {
+                return Some(cls.as_mut());
             }
             None
         }
         Statement::ExportDeclaration(exp) => match &mut exp.declaration {
             Declaration::ClassDeclaration(cls) => Some(cls.as_mut()),
             Declaration::VariableDeclaration(var_decl) => {
-                if var_decl.declarations.len() == 1 {
-                    if let Some(Expression::ClassExpression(cls)) =
+                if var_decl.declarations.len() == 1
+                    && let Some(Expression::ClassExpression(cls)) =
                         &mut var_decl.declarations[0].init
-                    {
-                        return Some(cls.as_mut());
-                    }
+                {
+                    return Some(cls.as_mut());
                 }
                 None
             }
@@ -658,16 +653,15 @@ fn extract_define_getter_call<'a>(
         return None;
     };
     for prop in &desc_obj.properties {
-        if let ObjectPropertyKind::ObjectProperty(p) = prop {
-            if p.key.is_specific_static_name("get") {
-                if let Expression::FunctionExpression(func) = &p.value {
-                    return Some((
-                        cls_id.name.as_str().to_string(),
-                        prop_lit.value.as_str().to_string(),
-                        func.clone_in(ast.allocator()),
-                    ));
-                }
-            }
+        if let ObjectPropertyKind::ObjectProperty(p) = prop
+            && p.key.is_specific_static_name("get")
+            && let Expression::FunctionExpression(func) = &p.value
+        {
+            return Some((
+                cls_id.name.as_str().to_string(),
+                prop_lit.value.as_str().to_string(),
+                func.clone_in(ast.allocator()),
+            ));
         }
     }
     None
@@ -679,10 +673,11 @@ fn fold_lowered_decorators_into_local_classes<'a>(
 ) {
     let mut local_class_indices = std::collections::HashMap::new();
     for (idx, stmt) in stmts.iter().enumerate() {
-        if let Some((name, cls)) = get_local_class_ref(stmt) {
-            if cls.decorators.is_empty() && can_merge_static_properties(cls) {
-                local_class_indices.insert(name.to_string(), idx);
-            }
+        if let Some((name, cls)) = get_local_class_ref(stmt)
+            && cls.decorators.is_empty()
+            && can_merge_static_properties(cls)
+        {
+            local_class_indices.insert(name.to_string(), idx);
         }
     }
     if local_class_indices.is_empty() {
@@ -701,13 +696,13 @@ fn fold_lowered_decorators_into_local_classes<'a>(
             if local_class_indices.contains_key(&cls_name) {
                 class_props.entry(cls_name).or_default().push((idx, prop));
             }
-        } else if let Some((cls_name, prop_name, func)) = extract_define_getter_call(stmt, ast) {
-            if local_class_indices.contains_key(&cls_name) {
-                class_getters
-                    .entry(cls_name)
-                    .or_default()
-                    .push((idx, prop_name, func));
-            }
+        } else if let Some((cls_name, prop_name, func)) = extract_define_getter_call(stmt, ast)
+            && local_class_indices.contains_key(&cls_name)
+        {
+            class_getters
+                .entry(cls_name)
+                .or_default()
+                .push((idx, prop_name, func));
         }
     }
 
@@ -745,13 +740,12 @@ fn fold_lowered_decorators_into_local_classes<'a>(
                     });
                     if !has_conflicting_member {
                         cls.body.body.retain(|elem| {
-                            if let ClassElement::PropertyDefinition(p) = elem {
-                                if !p.r#static
-                                    && p.key.is_specific_static_name(&prop_name)
-                                    && p.value.is_none()
-                                {
-                                    return false;
-                                }
+                            if let ClassElement::PropertyDefinition(p) = elem
+                                && !p.r#static
+                                && p.key.is_specific_static_name(&prop_name)
+                                && p.value.is_none()
+                            {
+                                return false;
                             }
                             true
                         });
@@ -1067,9 +1061,10 @@ mod tests {
 
         let res = transform_code(input, TransformOptions::default());
         assert!(!res.code.contains("__decorate"));
-        assert!(res
-            .code
-            .contains("MyElement.createProperty(\"label\", { type: String })"));
+        assert!(
+            res.code
+                .contains("MyElement.createProperty(\"label\", { type: String })")
+        );
         assert!(!res.code.contains("lit/decorators.js"));
     }
 
@@ -1085,9 +1080,10 @@ mod tests {
 
         let res = transform_code(input, TransformOptions::default());
         assert!(!res.code.contains("__decorate"));
-        assert!(res
-            .code
-            .contains("customElements.define(\"my-element\", MyElement)"));
+        assert!(
+            res.code
+                .contains("customElements.define(\"my-element\", MyElement)")
+        );
         assert!(!res.code.contains("lit/decorators.js"));
     }
 
@@ -1104,9 +1100,10 @@ mod tests {
 
         let res = transform_code(input, TransformOptions::default());
         assert!(!res.code.contains("dec(["));
-        assert!(res
-            .code
-            .contains("MyElement.createProperty(\"title\", { type: String })"));
+        assert!(
+            res.code
+                .contains("MyElement.createProperty(\"title\", { type: String })")
+        );
         assert!(!res.code.contains("tslib"));
         assert!(!res.code.contains("lit/decorators.js"));
     }

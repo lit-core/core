@@ -141,16 +141,22 @@ fn test_sub_rule_extraction_and_subtraction_preserves_overrides() {
     assert_eq!(clusters.len(), 1, "Should create 1 shared cluster");
     let shared_cluster = &clusters[0];
     assert_eq!(shared_cluster.rules.len(), 1);
-    assert!(shared_cluster.rules[0]
-        .canonical_body
-        .contains("box-sizing:border-box"));
-    assert!(shared_cluster.rules[0]
-        .canonical_body
-        .contains("display:block"));
+    assert!(
+        shared_cluster.rules[0]
+            .canonical_body
+            .contains("box-sizing:border-box")
+    );
+    assert!(
+        shared_cluster.rules[0]
+            .canonical_body
+            .contains("display:block")
+    );
     assert!(!shared_cluster.rules[0].canonical_body.contains("color:red"));
-    assert!(!shared_cluster.rules[0]
-        .canonical_body
-        .contains("color:blue"));
+    assert!(
+        !shared_cluster.rules[0]
+            .canonical_body
+            .contains("color:blue")
+    );
 
     // Subtract from Component A -> color: red must remain
     let rem_a = subtract_rules_from_css(&style_a, &shared_cluster.rules)
@@ -314,24 +320,32 @@ fn test_tree_shaking_isolation() {
         .iter()
         .find(|c| c.shared_by_files.contains(&"comp-a.ts".to_string()))
         .unwrap();
-    assert!(!cluster_ab
-        .shared_by_files
-        .contains(&"comp-c.ts".to_string()));
-    assert!(!cluster_ab
-        .shared_by_files
-        .contains(&"comp-d.ts".to_string()));
+    assert!(
+        !cluster_ab
+            .shared_by_files
+            .contains(&"comp-c.ts".to_string())
+    );
+    assert!(
+        !cluster_ab
+            .shared_by_files
+            .contains(&"comp-d.ts".to_string())
+    );
 
     // Check cluster for C & D
     let cluster_cd = clusters
         .iter()
         .find(|c| c.shared_by_files.contains(&"comp-c.ts".to_string()))
         .unwrap();
-    assert!(!cluster_cd
-        .shared_by_files
-        .contains(&"comp-a.ts".to_string()));
-    assert!(!cluster_cd
-        .shared_by_files
-        .contains(&"comp-b.ts".to_string()));
+    assert!(
+        !cluster_cd
+            .shared_by_files
+            .contains(&"comp-a.ts".to_string())
+    );
+    assert!(
+        !cluster_cd
+            .shared_by_files
+            .contains(&"comp-b.ts".to_string())
+    );
 }
 
 #[test]

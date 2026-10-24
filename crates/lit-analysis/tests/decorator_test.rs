@@ -46,18 +46,26 @@ fn test_stage3_and_legacy_decorators() {
     );
 
     let member_decs = DecoratorExtractor::extract_member_decorators(class_stmt, &ctx);
-    assert!(member_decs
-        .iter()
-        .any(|d| d.target_member.as_deref() == Some("open")));
-    assert!(member_decs
-        .iter()
-        .any(|d| d.target_member.as_deref() == Some("count")));
-    assert!(member_decs
-        .iter()
-        .any(|d| d.target_member.as_deref() == Some("targetEl")));
-    assert!(member_decs
-        .iter()
-        .any(|d| d.target_member.as_deref() == Some("handleClick")));
+    assert!(
+        member_decs
+            .iter()
+            .any(|d| d.target_member.as_deref() == Some("open"))
+    );
+    assert!(
+        member_decs
+            .iter()
+            .any(|d| d.target_member.as_deref() == Some("count"))
+    );
+    assert!(
+        member_decs
+            .iter()
+            .any(|d| d.target_member.as_deref() == Some("targetEl"))
+    );
+    assert!(
+        member_decs
+            .iter()
+            .any(|d| d.target_member.as_deref() == Some("handleClick"))
+    );
 }
 
 #[test]

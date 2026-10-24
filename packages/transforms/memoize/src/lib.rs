@@ -3,7 +3,7 @@ pub mod builder;
 pub mod finder;
 pub mod transform;
 
-use crate::transform::{transform_code, MemoizeOptions, MemoizeResult};
+use crate::transform::{MemoizeOptions, MemoizeResult, transform_code};
 use napi_derive::napi;
 
 #[napi]

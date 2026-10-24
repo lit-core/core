@@ -87,8 +87,10 @@ fn test_bailout_unsupported_directive() {
         }
         other => panic!("Expected Bailout tier, got {:?}", other),
     }
-    assert!(result
-        .diagnostics
-        .iter()
-        .any(|d| d.code == lit_analysis::DiagnosticCode::LitBailUnsupportedDirective));
+    assert!(
+        result
+            .diagnostics
+            .iter()
+            .any(|d| d.code == lit_analysis::DiagnosticCode::LitBailUnsupportedDirective)
+    );
 }

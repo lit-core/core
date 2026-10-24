@@ -41,7 +41,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=26.0.0"
   },
   "scripts": {
     "build": "node ../../../scripts/build-native.mjs ssr --release --tsc",

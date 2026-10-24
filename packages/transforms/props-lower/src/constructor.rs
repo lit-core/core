@@ -5,12 +5,11 @@ use oxc_span::SPAN;
 
 pub fn has_top_level_super(body: &FunctionBody) -> bool {
     for stmt in &body.statements {
-        if let Statement::ExpressionStatement(expr_stmt) = stmt {
-            if let Expression::CallExpression(call) = &expr_stmt.expression {
-                if matches!(call.callee.without_parentheses(), Expression::Super(_)) {
-                    return true;
-                }
-            }
+        if let Statement::ExpressionStatement(expr_stmt) = stmt
+            && let Expression::CallExpression(call) = &expr_stmt.expression
+            && matches!(call.callee.without_parentheses(), Expression::Super(_))
+        {
+            return true;
         }
     }
     false
@@ -21,13 +20,13 @@ pub fn can_safely_lower_constructor(class: &Class<'_>) -> bool {
         return true;
     }
     for element in &class.body.body {
-        if let ClassElement::MethodDefinition(method_def) = element {
-            if method_def.kind == MethodDefinitionKind::Constructor {
-                if let Some(body) = &method_def.value.body {
-                    return has_top_level_super(body);
-                }
-                return false;
+        if let ClassElement::MethodDefinition(method_def) = element
+            && method_def.kind == MethodDefinitionKind::Constructor
+        {
+            if let Some(body) = &method_def.value.body {
+                return has_top_level_super(body);
             }
+            return false;
         }
     }
     true
@@ -44,36 +43,34 @@ pub fn inject_constructor_statements<'a>(
 
     // 1. Check if class already has a constructor
     for element in &mut class.body.body {
-        if let ClassElement::MethodDefinition(method_def) = element {
-            if method_def.kind == MethodDefinitionKind::Constructor {
-                if let Some(ref mut body) = method_def.value.body {
-                    let mut insert_pos = 0;
-                    let mut found_super = false;
-                    for (i, stmt) in body.statements.iter().enumerate() {
-                        if let Statement::ExpressionStatement(expr_stmt) = stmt {
-                            if let Expression::CallExpression(call) = &expr_stmt.expression {
-                                if matches!(call.callee.without_parentheses(), Expression::Super(_))
-                                {
-                                    insert_pos = i + 1;
-                                    found_super = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    // In a derived class, accessing `this` before `super()` causes a runtime ReferenceError.
-                    // If an unambiguous top-level `super()` call cannot be verified, bail out cleanly.
-                    if class.heritage.is_some() && !found_super {
-                        return;
-                    }
-
-                    for (offset, stmt) in extra_statements.into_iter().enumerate() {
-                        body.statements.insert(insert_pos + offset, stmt);
+        if let ClassElement::MethodDefinition(method_def) = element
+            && method_def.kind == MethodDefinitionKind::Constructor
+        {
+            if let Some(ref mut body) = method_def.value.body {
+                let mut insert_pos = 0;
+                let mut found_super = false;
+                for (i, stmt) in body.statements.iter().enumerate() {
+                    if let Statement::ExpressionStatement(expr_stmt) = stmt
+                        && let Expression::CallExpression(call) = &expr_stmt.expression
+                        && matches!(call.callee.without_parentheses(), Expression::Super(_))
+                    {
+                        insert_pos = i + 1;
+                        found_super = true;
+                        break;
                     }
                 }
-                return;
+
+                // In a derived class, accessing `this` before `super()` causes a runtime ReferenceError.
+                // If an unambiguous top-level `super()` call cannot be verified, bail out cleanly.
+                if class.heritage.is_some() && !found_super {
+                    return;
+                }
+
+                for (offset, stmt) in extra_statements.into_iter().enumerate() {
+                    body.statements.insert(insert_pos + offset, stmt);
+                }
             }
+            return;
         }
     }
 

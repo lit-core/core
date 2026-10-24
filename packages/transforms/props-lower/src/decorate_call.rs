@@ -54,12 +54,12 @@ pub fn try_transform_expression_statement<'a>(
             let mut out_stmts = Vec::new();
             let mut any_transformed = false;
             for expr in &seq.expressions {
-                if let Expression::CallExpression(call) = expr {
-                    if let Some(stmts) = try_transform_decorate_call(call, symbol_ctx, ast) {
-                        out_stmts.extend(stmts);
-                        any_transformed = true;
-                        continue;
-                    }
+                if let Expression::CallExpression(call) = expr
+                    && let Some(stmts) = try_transform_decorate_call(call, symbol_ctx, ast)
+                {
+                    out_stmts.extend(stmts);
+                    any_transformed = true;
+                    continue;
                 }
                 out_stmts.push(Statement::new_expression_statement(
                     SPAN,
