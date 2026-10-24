@@ -66,6 +66,9 @@ pub fn build_proxy_wrapper<'a>(
         &target.observed_attributes,
     ));
 
+    // 3b. const Name = NameProxy;
+    stmts.push(build_alias_decl(ast, class_name, proxy_name));
+
     // 4. const __props_Name = [...];
     stmts.push(build_props_decl(ast, props_var, &target.properties));
 
@@ -112,6 +115,23 @@ pub fn build_external_proxy_wrapper<'a>(
 // ---------------------------------------------------------------------------
 // Helpers for top-level statements
 // ---------------------------------------------------------------------------
+
+fn build_alias_decl<'a>(
+    ast: &AstBuilder<'a>,
+    class_name: &'a str,
+    proxy_name: &'a str,
+) -> Statement<'a> {
+    let mut decls = ArenaVec::new_in(ast);
+    decls.push(VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, class_name, ast),
+        None,
+        Some(Expression::new_identifier(SPAN, proxy_name, ast)),
+        false,
+        ast,
+    ));
+    Statement::new_variable_declaration(SPAN, VariableDeclarationKind::Const, decls, false, ast)
+}
 
 fn build_impl_var_decl<'a>(ast: &AstBuilder<'a>, impl_var: &'a str) -> Statement<'a> {
     let mut decls = ArenaVec::new_in(ast);

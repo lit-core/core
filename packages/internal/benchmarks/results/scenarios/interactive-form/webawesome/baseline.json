@@ -29,19 +29,19 @@
     "name": "Baseline (Standard Vite)",
     "isBaseline": true
   },
-  "timestamp": "2026-10-21T22:42:53.751Z",
+  "timestamp": "2026-10-24T09:42:09.773Z",
   "environment": {
-    "node": "v24.14.0",
+    "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b3e4776",
+    "gitCommit": "6c3875e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
       "vite": "8.3.1",
       "playwright": "1.63.0",
-      "node": "v24.14.0",
+      "node": "v26.12.1",
       "carbon": "2.64.0",
       "spectrum": "1.12.2",
       "webawesome": "3.14.0",
@@ -50,15 +50,15 @@
     }
   },
   "metrics": {
-    "rawBytes": 245607,
-    "gzipBytes": 61938,
-    "brotliBytes": 50649,
-    "buildTimeMs": 29.5172079999993,
-    "firstRenderMs": 20.9,
-    "updateMs": 0.2,
-    "scriptEvalMs": 2.5,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 48993,
+    "rawBytes": 245596,
+    "gzipBytes": 61936,
+    "brotliBytes": 50630,
+    "buildTimeMs": 99.35112500000002,
+    "firstRenderMs": 47.7,
+    "updateMs": 0.19,
+    "scriptEvalMs": 16,
+    "registrationMs": 2.5,
+    "heapUsedBytes": 49545,
     "scenarioSpecific": {
       "sectionsCount": 5,
       "controlsPerSection": 7,
@@ -67,11 +67,11 @@
     }
   },
   "runtime": {
-    "firstRenderMs": 20.9,
-    "updateMs": 0.2,
-    "scriptEvalMs": 2.5,
-    "registrationMs": 1.2,
-    "heapUsedBytes": 48993
+    "firstRenderMs": 47.7,
+    "updateMs": 0.19,
+    "scriptEvalMs": 16,
+    "registrationMs": 2.5,
+    "heapUsedBytes": 49545
   },
   "domSnapshot": {
     "mount": {

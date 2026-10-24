@@ -6,13 +6,13 @@
     "name": "Material Web (@material/web)",
     "packageName": "@material/web",
     "version": "2.5.0",
-    "componentCount": 6,
+    "componentCount": 20,
     "components": [
       {
-        "concept": "text-input",
-        "tag": "md-filled-text-field",
-        "path": "textfield/filled-text-field.js",
-        "importStatement": "import '@material/web/textfield/filled-text-field.js';"
+        "concept": "button",
+        "tag": "md-filled-button",
+        "path": "button/filled-button.js",
+        "importStatement": "import '@material/web/button/filled-button.js';"
       },
       {
         "concept": "checkbox",
@@ -21,16 +21,22 @@
         "importStatement": "import '@material/web/checkbox/checkbox.js';"
       },
       {
+        "concept": "radio",
+        "tag": "md-radio",
+        "path": "radio/radio.js",
+        "importStatement": "import '@material/web/radio/radio.js';"
+      },
+      {
         "concept": "switch",
         "tag": "md-switch",
         "path": "switch/switch.js",
         "importStatement": "import '@material/web/switch/switch.js';"
       },
       {
-        "concept": "radio",
-        "tag": "md-radio",
-        "path": "radio/radio.js",
-        "importStatement": "import '@material/web/radio/radio.js';"
+        "concept": "text-input",
+        "tag": "md-filled-text-field",
+        "path": "textfield/filled-text-field.js",
+        "importStatement": "import '@material/web/textfield/filled-text-field.js';"
       },
       {
         "concept": "select",
@@ -39,10 +45,88 @@
         "importStatement": "import '@material/web/select/filled-select.js';"
       },
       {
-        "concept": "button",
-        "tag": "md-filled-button",
-        "path": "button/filled-button.js",
-        "importStatement": "import '@material/web/button/filled-button.js';"
+        "concept": "dialog",
+        "tag": "md-dialog",
+        "path": "dialog/dialog.js",
+        "importStatement": "import '@material/web/dialog/dialog.js';"
+      },
+      {
+        "concept": "badge",
+        "tag": "md-badge",
+        "path": "labs/badge/badge.js",
+        "importStatement": "import '@material/web/labs/badge/badge.js';"
+      },
+      {
+        "concept": "tabs",
+        "tag": "md-tabs",
+        "path": "tabs/tabs.js",
+        "importStatement": "import '@material/web/tabs/tabs.js';"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "md-linear-progress",
+        "path": "progress/linear-progress.js",
+        "importStatement": "import '@material/web/progress/linear-progress.js';"
+      },
+      {
+        "concept": "spinner",
+        "tag": "md-circular-progress",
+        "path": "progress/circular-progress.js",
+        "importStatement": "import '@material/web/progress/circular-progress.js';"
+      },
+      {
+        "concept": "slider",
+        "tag": "md-slider",
+        "path": "slider/slider.js",
+        "importStatement": "import '@material/web/slider/slider.js';"
+      },
+      {
+        "concept": "menu",
+        "tag": "md-menu",
+        "path": "menu/menu.js",
+        "importStatement": "import '@material/web/menu/menu.js';"
+      },
+      {
+        "concept": "divider",
+        "tag": "md-divider",
+        "path": "divider/divider.js",
+        "importStatement": "import '@material/web/divider/divider.js';"
+      },
+      {
+        "concept": "icon",
+        "tag": "md-icon",
+        "path": "icon/icon.js",
+        "importStatement": "import '@material/web/icon/icon.js';"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "md-icon-button",
+        "path": "iconbutton/icon-button.js",
+        "importStatement": "import '@material/web/iconbutton/icon-button.js';"
+      },
+      {
+        "concept": "card",
+        "tag": "md-elevation",
+        "path": "elevation/elevation.js",
+        "importStatement": "import '@material/web/elevation/elevation.js';"
+      },
+      {
+        "concept": "elevation",
+        "tag": "md-focus-ring",
+        "path": "focus/md-focus-ring.js",
+        "importStatement": "import '@material/web/focus/md-focus-ring.js';"
+      },
+      {
+        "concept": "list",
+        "tag": "md-list",
+        "path": "list/list.js",
+        "importStatement": "import '@material/web/list/list.js';"
+      },
+      {
+        "concept": "chips",
+        "tag": "md-chip-set",
+        "path": "chips/chip-set.js",
+        "importStatement": "import '@material/web/chips/chip-set.js';"
       }
     ]
   },
@@ -53,24 +137,24 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "interactive-form",
-    "name": "Interactive form",
-    "description": "Dense multi-section interactive settings form with real controls testing event listener hoisting and deferred proxy registration",
-    "componentCount": 6
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "componentCount": 20
   },
-  "timestamp": "2026-10-21T22:43:14.326Z",
+  "timestamp": "2026-10-24T09:47:06.243Z",
   "environment": {
-    "node": "v24.14.0",
+    "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b3e4776",
+    "gitCommit": "6c3875e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
       "vite": "8.3.1",
       "playwright": "1.63.0",
-      "node": "v24.14.0",
+      "node": "v26.12.1",
       "carbon": "2.64.0",
       "spectrum": "1.12.2",
       "webawesome": "3.14.0",
@@ -79,58 +163,53 @@
     }
   },
   "metrics": {
-    "rawBytes": 294311,
-    "gzipBytes": 61086,
-    "brotliBytes": 49400,
-    "buildTimeMs": 24.810416999993322
+    "rawBytes": 298984,
+    "gzipBytes": 61018,
+    "brotliBytes": 49276,
+    "buildTimeMs": 33.54750000000058
   },
   "baseline": {
-    "rawBytes": 291628,
-    "gzipBytes": 60350,
-    "brotliBytes": 48824,
-    "buildTimeMs": 34.10699999999997,
-    "firstRenderMs": 38,
-    "updateMs": 0.31,
-    "scriptEvalMs": 6.9,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 28656,
-    "speedupPercent": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0
+    "rawBytes": 291622,
+    "gzipBytes": 60354,
+    "brotliBytes": 48869,
+    "buildTimeMs": 34.31066699999792,
+    "firstRenderMs": 44.9,
+    "updateMs": 0.28,
+    "scriptEvalMs": 13.2,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 28224
   },
   "deltas": {
-    "rawBytes": 2683,
-    "rawPercent": 0.92,
-    "gzipBytes": 736,
-    "gzipPercent": 1.22,
-    "brotliBytes": 576,
-    "brotliPercent": 1.18,
-    "buildTimeMs": 2.3,
-    "firstRenderMs": -0.3,
-    "speedupPercent": 0.86,
-    "updateMs": -0.05,
-    "updateSpeedupPercent": 17.86,
-    "evalSpeedupPercent": -2.94,
-    "registrationSpeedupPercent": -66.67,
-    "memorySavingsPercent": 6.78
+    "rawBytes": 7362,
+    "rawPercent": 2.52,
+    "gzipBytes": 664,
+    "gzipPercent": 1.1,
+    "brotliBytes": 407,
+    "brotliPercent": 0.83,
+    "buildTimeMs": -0.8,
+    "firstRenderMs": -11.6,
+    "speedupPercent": 25.84,
+    "updateMs": -0.09,
+    "updateSpeedupPercent": 32.14,
+    "evalSpeedupPercent": 17.42,
+    "registrationSpeedupPercent": 9.09,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 37.67,
-    "updateMs": 0.25,
-    "scriptEvalMs": 7.1,
+    "firstRenderMs": 33.3,
+    "updateMs": 0.19,
+    "scriptEvalMs": 10.9,
     "registrationMs": 1,
-    "heapUsedBytes": 26713,
-    "speedupPercent": 0.86,
-    "updateSpeedupPercent": 17.86,
-    "evalSpeedupPercent": -2.94,
-    "registrationSpeedupPercent": -66.67,
-    "memorySavingsPercent": 6.78
+    "heapUsedBytes": 28224,
+    "speedupPercent": 25.84,
+    "updateSpeedupPercent": 32.14,
+    "evalSpeedupPercent": 17.42,
+    "registrationSpeedupPercent": 9.09,
+    "memorySavingsPercent": 0
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 51,
+    "elementsCount": 73,
     "verified": true,
     "phasesMatched": {
       "mount": true,

@@ -5,14 +5,50 @@
     "id": "carbon",
     "name": "Carbon Web Components (@carbon/web-components)",
     "packageName": "@carbon/web-components",
-    "version": "2.65.0",
-    "componentCount": 4,
+    "version": "2.66.0",
+    "componentCount": 20,
     "components": [
+      {
+        "concept": "button",
+        "tag": "cds-button",
+        "path": "es/components/button/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/button/index.js';"
+      },
       {
         "concept": "checkbox",
         "tag": "cds-checkbox",
         "path": "es/components/checkbox/index.js",
         "importStatement": "import '@carbon/web-components/es/components/checkbox/index.js';"
+      },
+      {
+        "concept": "radio",
+        "tag": "cds-radio-button",
+        "path": "es/components/radio-button/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/radio-button/index.js';"
+      },
+      {
+        "concept": "switch",
+        "tag": "cds-toggle",
+        "path": "es/components/toggle/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/toggle/index.js';"
+      },
+      {
+        "concept": "text-input",
+        "tag": "cds-text-input",
+        "path": "es/components/text-input/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/text-input/index.js';"
+      },
+      {
+        "concept": "select",
+        "tag": "cds-select",
+        "path": "es/components/select/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/select/index.js';"
+      },
+      {
+        "concept": "dialog",
+        "tag": "cds-modal",
+        "path": "es/components/modal/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/modal/index.js';"
       },
       {
         "concept": "badge",
@@ -21,16 +57,76 @@
         "importStatement": "import '@carbon/web-components/es/components/tag/index.js';"
       },
       {
-        "concept": "button",
-        "tag": "cds-button",
-        "path": "es/components/button/index.js",
-        "importStatement": "import '@carbon/web-components/es/components/button/index.js';"
+        "concept": "tabs",
+        "tag": "cds-tabs",
+        "path": "es/components/tabs/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/tabs/index.js';"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "cds-progress-bar",
+        "path": "es/components/progress-bar/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/progress-bar/index.js';"
+      },
+      {
+        "concept": "spinner",
+        "tag": "cds-loading",
+        "path": "es/components/loading/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/loading/index.js';"
+      },
+      {
+        "concept": "slider",
+        "tag": "cds-slider",
+        "path": "es/components/slider/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/slider/index.js';"
+      },
+      {
+        "concept": "menu",
+        "tag": "cds-overflow-menu",
+        "path": "es/components/overflow-menu/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/overflow-menu/index.js';"
+      },
+      {
+        "concept": "divider",
+        "tag": "cds-skeleton-text",
+        "path": "es/components/skeleton-text/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/skeleton-text/index.js';"
+      },
+      {
+        "concept": "icon",
+        "tag": "cds-icon",
+        "path": "es/components/icon/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/icon/index.js';"
       },
       {
         "concept": "icon-button",
         "tag": "cds-icon-button",
         "path": "es/components/icon-button/index.js",
         "importStatement": "import '@carbon/web-components/es/components/icon-button/index.js';"
+      },
+      {
+        "concept": "card",
+        "tag": "cds-tile",
+        "path": "es/components/tile/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/tile/index.js';"
+      },
+      {
+        "concept": "elevation",
+        "tag": "cds-popover",
+        "path": "es/components/popover/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/popover/index.js';"
+      },
+      {
+        "concept": "list",
+        "tag": "cds-structured-list",
+        "path": "es/components/structured-list/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/structured-list/index.js';"
+      },
+      {
+        "concept": "chips",
+        "tag": "cds-content-switcher",
+        "path": "es/components/content-switcher/index.js",
+        "importStatement": "import '@carbon/web-components/es/components/content-switcher/index.js';"
       }
     ]
   },
@@ -41,24 +137,24 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "data-grid",
-    "name": "Data grid",
-    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
-    "componentCount": 4
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "componentCount": 20
   },
-  "timestamp": "2026-10-21T22:43:34.670Z",
+  "timestamp": "2026-10-24T09:47:31.331Z",
   "environment": {
-    "node": "v24.14.0",
+    "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b3e4776",
+    "gitCommit": "6c3875e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
       "vite": "8.3.1",
       "playwright": "1.63.0",
-      "node": "v24.14.0",
+      "node": "v26.12.1",
       "carbon": "2.64.0",
       "spectrum": "1.12.2",
       "webawesome": "3.14.0",
@@ -67,58 +163,53 @@
     }
   },
   "metrics": {
-    "rawBytes": 1486256,
-    "gzipBytes": 192932,
-    "brotliBytes": 102565,
-    "buildTimeMs": 34.002166999998735
+    "rawBytes": 1503680,
+    "gzipBytes": 194391,
+    "brotliBytes": 102137,
+    "buildTimeMs": 59.3630420000045
   },
   "baseline": {
-    "rawBytes": 1469504,
-    "gzipBytes": 190682,
-    "brotliBytes": 101349,
-    "buildTimeMs": 56.3214169999992,
-    "firstRenderMs": 57.1,
-    "updateMs": 0.33,
-    "scriptEvalMs": 3.6,
+    "rawBytes": 1502756,
+    "gzipBytes": 194194,
+    "brotliBytes": 102102,
+    "buildTimeMs": 132.68170799999643,
+    "firstRenderMs": 54.4,
+    "updateMs": 0.32,
+    "scriptEvalMs": 21.3,
     "registrationMs": 0.9,
-    "heapUsedBytes": 39700,
-    "speedupPercent": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0
+    "heapUsedBytes": 39788
   },
   "deltas": {
-    "rawBytes": 16752,
-    "rawPercent": 1.14,
-    "gzipBytes": 2250,
-    "gzipPercent": 1.18,
-    "brotliBytes": 1216,
-    "brotliPercent": 1.2,
-    "buildTimeMs": 5.5,
-    "firstRenderMs": -2.8,
-    "speedupPercent": 4.66,
-    "updateMs": -0.04,
-    "updateSpeedupPercent": 40,
-    "evalSpeedupPercent": -6.25,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": 14.5
+    "rawBytes": 924,
+    "rawPercent": 0.06,
+    "gzipBytes": 197,
+    "gzipPercent": 0.1,
+    "brotliBytes": 35,
+    "brotliPercent": 0.03,
+    "buildTimeMs": -73.3,
+    "firstRenderMs": -3.6,
+    "speedupPercent": 6.62,
+    "updateMs": -0.13,
+    "updateSpeedupPercent": 40.63,
+    "evalSpeedupPercent": 9.39,
+    "registrationSpeedupPercent": 11.11,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 54.44,
-    "updateMs": 0.2,
-    "scriptEvalMs": 3.83,
-    "registrationMs": 1.8,
-    "heapUsedBytes": 33944,
-    "speedupPercent": 4.66,
-    "updateSpeedupPercent": 40,
-    "evalSpeedupPercent": -6.25,
-    "registrationSpeedupPercent": -100,
-    "memorySavingsPercent": 14.5
+    "firstRenderMs": 50.8,
+    "updateMs": 0.19,
+    "scriptEvalMs": 19.3,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 39788,
+    "speedupPercent": 6.62,
+    "updateSpeedupPercent": 40.63,
+    "evalSpeedupPercent": 9.39,
+    "registrationSpeedupPercent": 11.11,
+    "memorySavingsPercent": 0
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 167,
+    "elementsCount": 74,
     "verified": true,
     "phasesMatched": {
       "mount": true,

@@ -6,13 +6,49 @@
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
     "version": "1.12.5",
-    "componentCount": 4,
+    "componentCount": 20,
     "components": [
+      {
+        "concept": "button",
+        "tag": "sp-button",
+        "path": "button/sp-button.js",
+        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
+      },
       {
         "concept": "checkbox",
         "tag": "sp-checkbox",
         "path": "checkbox/sp-checkbox.js",
         "importStatement": "import '@spectrum-web-components/checkbox/sp-checkbox.js';"
+      },
+      {
+        "concept": "radio",
+        "tag": "sp-radio",
+        "path": "radio/sp-radio.js",
+        "importStatement": "import '@spectrum-web-components/radio/sp-radio.js';"
+      },
+      {
+        "concept": "switch",
+        "tag": "sp-switch",
+        "path": "switch/sp-switch.js",
+        "importStatement": "import '@spectrum-web-components/switch/sp-switch.js';"
+      },
+      {
+        "concept": "text-input",
+        "tag": "sp-textfield",
+        "path": "textfield/sp-textfield.js",
+        "importStatement": "import '@spectrum-web-components/textfield/sp-textfield.js';"
+      },
+      {
+        "concept": "select",
+        "tag": "sp-picker",
+        "path": "picker/sp-picker.js",
+        "importStatement": "import '@spectrum-web-components/picker/sp-picker.js';"
+      },
+      {
+        "concept": "dialog",
+        "tag": "sp-dialog",
+        "path": "dialog/sp-dialog.js",
+        "importStatement": "import '@spectrum-web-components/dialog/sp-dialog.js';"
       },
       {
         "concept": "badge",
@@ -21,16 +57,76 @@
         "importStatement": "import '@spectrum-web-components/badge/sp-badge.js';"
       },
       {
-        "concept": "button",
-        "tag": "sp-button",
-        "path": "button/sp-button.js",
-        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
+        "concept": "tabs",
+        "tag": "sp-tabs",
+        "path": "tabs/sp-tabs.js",
+        "importStatement": "import '@spectrum-web-components/tabs/sp-tabs.js';"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "sp-progress-bar",
+        "path": "progress-bar/sp-progress-bar.js",
+        "importStatement": "import '@spectrum-web-components/progress-bar/sp-progress-bar.js';"
+      },
+      {
+        "concept": "spinner",
+        "tag": "sp-progress-circle",
+        "path": "progress-circle/sp-progress-circle.js",
+        "importStatement": "import '@spectrum-web-components/progress-circle/sp-progress-circle.js';"
+      },
+      {
+        "concept": "slider",
+        "tag": "sp-slider",
+        "path": "slider/sp-slider.js",
+        "importStatement": "import '@spectrum-web-components/slider/sp-slider.js';"
+      },
+      {
+        "concept": "menu",
+        "tag": "sp-menu",
+        "path": "menu/sp-menu.js",
+        "importStatement": "import '@spectrum-web-components/menu/sp-menu.js';"
+      },
+      {
+        "concept": "divider",
+        "tag": "sp-divider",
+        "path": "divider/sp-divider.js",
+        "importStatement": "import '@spectrum-web-components/divider/sp-divider.js';"
+      },
+      {
+        "concept": "icon",
+        "tag": "sp-icon",
+        "path": "icon/sp-icon.js",
+        "importStatement": "import '@spectrum-web-components/icon/sp-icon.js';"
       },
       {
         "concept": "icon-button",
         "tag": "sp-action-button",
         "path": "action-button/sp-action-button.js",
         "importStatement": "import '@spectrum-web-components/action-button/sp-action-button.js';"
+      },
+      {
+        "concept": "card",
+        "tag": "sp-card",
+        "path": "card/sp-card.js",
+        "importStatement": "import '@spectrum-web-components/card/sp-card.js';"
+      },
+      {
+        "concept": "elevation",
+        "tag": "sp-popover",
+        "path": "popover/sp-popover.js",
+        "importStatement": "import '@spectrum-web-components/popover/sp-popover.js';"
+      },
+      {
+        "concept": "list",
+        "tag": "sp-sidenav",
+        "path": "sidenav/sp-sidenav.js",
+        "importStatement": "import '@spectrum-web-components/sidenav/sp-sidenav.js';"
+      },
+      {
+        "concept": "chips",
+        "tag": "sp-action-group",
+        "path": "action-group/sp-action-group.js",
+        "importStatement": "import '@spectrum-web-components/action-group/sp-action-group.js';"
       }
     ]
   },
@@ -41,24 +137,24 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "data-grid",
-    "name": "Data grid",
-    "description": "High-density data grid rendering 100 rows with real component cells testing TreeWalker bypass, dependency bitmasking, and micro-runtime compilation",
-    "componentCount": 4
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "componentCount": 20
   },
-  "timestamp": "2026-10-21T22:47:39.681Z",
+  "timestamp": "2026-10-24T09:49:03.529Z",
   "environment": {
-    "node": "v24.14.0",
+    "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b3e4776",
+    "gitCommit": "6c3875e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
       "vite": "8.3.1",
       "playwright": "1.63.0",
-      "node": "v24.14.0",
+      "node": "v26.12.1",
       "carbon": "2.64.0",
       "spectrum": "1.12.2",
       "webawesome": "3.14.0",
@@ -67,58 +163,53 @@
     }
   },
   "metrics": {
-    "rawBytes": 869283,
-    "gzipBytes": 154561,
-    "brotliBytes": 116941,
-    "buildTimeMs": 32.37733300001128
+    "rawBytes": 845092,
+    "gzipBytes": 151157,
+    "brotliBytes": 114820,
+    "buildTimeMs": 90.30475000001024
   },
   "baseline": {
-    "rawBytes": 843964,
-    "gzipBytes": 150909,
-    "brotliBytes": 114502,
-    "buildTimeMs": 106.56370799999996,
-    "firstRenderMs": 38.3,
-    "updateMs": 0.32,
-    "scriptEvalMs": 10.8,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 24445,
-    "speedupPercent": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0
+    "rawBytes": 844172,
+    "gzipBytes": 150972,
+    "brotliBytes": 114744,
+    "buildTimeMs": 120.82345900000655,
+    "firstRenderMs": 46.3,
+    "updateMs": 0.34,
+    "scriptEvalMs": 24.2,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 22893
   },
   "deltas": {
-    "rawBytes": 25319,
-    "rawPercent": 3,
-    "gzipBytes": 3652,
-    "gzipPercent": 2.42,
-    "brotliBytes": 2439,
-    "brotliPercent": 2.13,
-    "buildTimeMs": 3.3,
-    "firstRenderMs": 0.5,
-    "speedupPercent": -1.81,
-    "updateMs": -0.03,
-    "updateSpeedupPercent": 27.27,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -46.41
+    "rawBytes": 920,
+    "rawPercent": 0.11,
+    "gzipBytes": 185,
+    "gzipPercent": 0.12,
+    "brotliBytes": 76,
+    "brotliPercent": 0.07,
+    "buildTimeMs": -30.5,
+    "firstRenderMs": -16,
+    "speedupPercent": 34.56,
+    "updateMs": -0.12,
+    "updateSpeedupPercent": 35.29,
+    "evalSpeedupPercent": 2.89,
+    "registrationSpeedupPercent": 55.56,
+    "memorySavingsPercent": 0.14
   },
   "runtime": {
-    "firstRenderMs": 38.99,
-    "updateMs": 0.23,
-    "scriptEvalMs": 10.8,
-    "registrationMs": 0.7,
-    "heapUsedBytes": 35790,
-    "speedupPercent": -1.81,
-    "updateSpeedupPercent": 27.27,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": -46.41
+    "firstRenderMs": 30.3,
+    "updateMs": 0.22,
+    "scriptEvalMs": 23.5,
+    "registrationMs": 0.4,
+    "heapUsedBytes": 22861,
+    "speedupPercent": 34.56,
+    "updateSpeedupPercent": 35.29,
+    "evalSpeedupPercent": 2.89,
+    "registrationSpeedupPercent": 55.56,
+    "memorySavingsPercent": 0.14
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 167,
+    "elementsCount": 73,
     "verified": true,
     "phasesMatched": {
       "mount": true,

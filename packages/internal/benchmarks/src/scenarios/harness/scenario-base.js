@@ -4,7 +4,7 @@ import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
 import { getFileSizes } from '../../metrics.js';
-import { closeBrowser, getBrowser } from '../../runtime.js';
+import { getBrowser } from '../../runtime.js';
 import { CANONICAL_COMPONENT_IDS, CANONICAL_SUITE_DEFINITIONS } from '../../suites/canonical-components.js';
 import { createBenchmarkVendorResolverPlugin } from '../../vendor-resolver.js';
 
@@ -275,35 +275,56 @@ export function compareDomSnapshots(baselineSnapshot, variantSnapshot) {
  *   equivalence: { domStructureMatch: boolean, elementsCount: number, verified: boolean, divergenceReason?: string | null, phasesMatched: { mount: boolean, update: boolean } }
  * }>}
  */
+/** @type {import('playwright').Page | null} */
+let sharedScenarioPage = null;
+
+/**
+ * @param {import('playwright').Browser} browser
+ */
+async function getSharedScenarioPage(browser) {
+  if (!sharedScenarioPage || sharedScenarioPage.isClosed() || !browser.isConnected()) {
+    sharedScenarioPage = await browser.newPage();
+  }
+  return sharedScenarioPage;
+}
+
 export async function measureScenarioRuntime({ bundlePath, scenarioName, variantName = 'Variant', baselineSnapshot = null }) {
   if (!fs.existsSync(bundlePath)) {
     throw new Error(`[Scenario benchmark error] Bundle file not found at "${bundlePath}" for ${scenarioName} (${variantName})`);
   }
 
-  let context = null;
+  /** @type {import('playwright').Page | null} */
   let page = null;
+  /** @type {((err: Error) => void) | null} */
+  let pageErrorHandler = null;
+  /** @type {((msg: any) => void) | null} */
+  let consoleHandler = null;
   try {
-    await closeBrowser();
     const browser = await getBrowser();
     if (!browser || (typeof browser.isConnected === 'function' && !browser.isConnected())) {
       throw new Error(`[Scenario benchmark error] Chromium browser is not available or disconnected for ${scenarioName} (${variantName})`);
     }
 
-    context = await browser.newContext();
-    page = await context.newPage();
+    page = await getSharedScenarioPage(browser);
+    try {
+      await page.goto('about:blank');
+    } catch {}
 
     const bundleCode = fs.readFileSync(bundlePath, 'utf-8');
     /** @type {string[]} */
     const runtimeErrors = [];
 
-    page.on('pageerror', (err) => {
+    pageErrorHandler = (err) => {
       runtimeErrors.push(`[Page error] ${err.stack || err.message}`);
-    });
-    page.on('console', (msg) => {
+    };
+    consoleHandler = (msg) => {
       if (msg.type() === 'error') {
         runtimeErrors.push(`[Console error] ${msg.text()}`);
       }
-    });
+    };
+
+    page.on('pageerror', pageErrorHandler);
+    page.on('console', consoleHandler);
 
     const htmlContent = `<!DOCTYPE html>
 <html>
@@ -358,15 +379,17 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
     if (typeof window.gc === 'function') window.gc();
     window.__heapBeforeEval = window.performance?.memory?.usedJSHeapSize || 0;
     window.__evalStart = performance.now();
-    try {
-      ${bundleCode}
-    } catch (e) {
-      window.__bundleError = e.stack || e.message;
-      throw e;
-    }
+    window.addEventListener('error', function(e) {
+      window.__bundleError = (e.error && e.error.stack) || e.message;
+    });
+  </script>
+  <script type="module">
+${bundleCode}
+//# sourceURL=${variantName.replace(/[^a-zA-Z0-9_-]/g, '_')}.scenario.bundle.js
+  </script>
+  <script type="module">
     window.__evalEnd = performance.now();
     window.__bundleReady = true;
-    //# sourceURL=${variantName.replace(/[^a-zA-Z0-9_-]/g, '_')}.scenario.bundle.js
   </script>
 </body>
 </html>`;
@@ -630,16 +653,12 @@ export async function measureScenarioRuntime({ bundlePath, scenarioName, variant
     };
   } finally {
     if (page) {
+      if (pageErrorHandler) page.off('pageerror', pageErrorHandler);
+      if (consoleHandler) page.off('console', consoleHandler);
       try {
-        await page.close();
+        await page.goto('about:blank');
       } catch {}
     }
-    if (context) {
-      try {
-        await context.close();
-      } catch {}
-    }
-    await closeBrowser();
   }
 }
 

@@ -6,7 +6,7 @@
     "name": "Material Web (@material/web)",
     "packageName": "@material/web",
     "version": "2.5.0",
-    "componentCount": 3,
+    "componentCount": 20,
     "components": [
       {
         "concept": "button",
@@ -15,16 +15,118 @@
         "importStatement": "import '@material/web/button/filled-button.js';"
       },
       {
+        "concept": "checkbox",
+        "tag": "md-checkbox",
+        "path": "checkbox/checkbox.js",
+        "importStatement": "import '@material/web/checkbox/checkbox.js';"
+      },
+      {
+        "concept": "radio",
+        "tag": "md-radio",
+        "path": "radio/radio.js",
+        "importStatement": "import '@material/web/radio/radio.js';"
+      },
+      {
+        "concept": "switch",
+        "tag": "md-switch",
+        "path": "switch/switch.js",
+        "importStatement": "import '@material/web/switch/switch.js';"
+      },
+      {
+        "concept": "text-input",
+        "tag": "md-filled-text-field",
+        "path": "textfield/filled-text-field.js",
+        "importStatement": "import '@material/web/textfield/filled-text-field.js';"
+      },
+      {
+        "concept": "select",
+        "tag": "md-filled-select",
+        "path": "select/filled-select.js",
+        "importStatement": "import '@material/web/select/filled-select.js';"
+      },
+      {
+        "concept": "dialog",
+        "tag": "md-dialog",
+        "path": "dialog/dialog.js",
+        "importStatement": "import '@material/web/dialog/dialog.js';"
+      },
+      {
         "concept": "badge",
         "tag": "md-badge",
         "path": "labs/badge/badge.js",
         "importStatement": "import '@material/web/labs/badge/badge.js';"
       },
       {
+        "concept": "tabs",
+        "tag": "md-tabs",
+        "path": "tabs/tabs.js",
+        "importStatement": "import '@material/web/tabs/tabs.js';"
+      },
+      {
+        "concept": "progress-bar",
+        "tag": "md-linear-progress",
+        "path": "progress/linear-progress.js",
+        "importStatement": "import '@material/web/progress/linear-progress.js';"
+      },
+      {
+        "concept": "spinner",
+        "tag": "md-circular-progress",
+        "path": "progress/circular-progress.js",
+        "importStatement": "import '@material/web/progress/circular-progress.js';"
+      },
+      {
+        "concept": "slider",
+        "tag": "md-slider",
+        "path": "slider/slider.js",
+        "importStatement": "import '@material/web/slider/slider.js';"
+      },
+      {
+        "concept": "menu",
+        "tag": "md-menu",
+        "path": "menu/menu.js",
+        "importStatement": "import '@material/web/menu/menu.js';"
+      },
+      {
+        "concept": "divider",
+        "tag": "md-divider",
+        "path": "divider/divider.js",
+        "importStatement": "import '@material/web/divider/divider.js';"
+      },
+      {
+        "concept": "icon",
+        "tag": "md-icon",
+        "path": "icon/icon.js",
+        "importStatement": "import '@material/web/icon/icon.js';"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "md-icon-button",
+        "path": "iconbutton/icon-button.js",
+        "importStatement": "import '@material/web/iconbutton/icon-button.js';"
+      },
+      {
         "concept": "card",
         "tag": "md-elevation",
         "path": "elevation/elevation.js",
         "importStatement": "import '@material/web/elevation/elevation.js';"
+      },
+      {
+        "concept": "elevation",
+        "tag": "md-focus-ring",
+        "path": "focus/md-focus-ring.js",
+        "importStatement": "import '@material/web/focus/md-focus-ring.js';"
+      },
+      {
+        "concept": "list",
+        "tag": "md-list",
+        "path": "list/list.js",
+        "importStatement": "import '@material/web/list/list.js';"
+      },
+      {
+        "concept": "chips",
+        "tag": "md-chip-set",
+        "path": "chips/chip-set.js",
+        "importStatement": "import '@material/web/chips/chip-set.js';"
       }
     ]
   },
@@ -35,24 +137,24 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "selective-app",
-    "name": "Selective application",
-    "description": "Enterprise application importing design system components with selective usage testing Custom Element tag shaking and dead code elimination",
-    "componentCount": 3
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "componentCount": 20
   },
-  "timestamp": "2026-10-21T22:43:17.677Z",
+  "timestamp": "2026-10-24T09:47:17.677Z",
   "environment": {
-    "node": "v24.14.0",
+    "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b3e4776",
+    "gitCommit": "6c3875e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
       "vite": "8.3.1",
       "playwright": "1.63.0",
-      "node": "v24.14.0",
+      "node": "v26.12.1",
       "carbon": "2.64.0",
       "spectrum": "1.12.2",
       "webawesome": "3.14.0",
@@ -61,62 +163,58 @@
     }
   },
   "metrics": {
-    "rawBytes": 77048,
-    "gzipBytes": 21388,
-    "brotliBytes": 19154,
-    "buildTimeMs": 19.865667000005487
+    "rawBytes": 266457,
+    "gzipBytes": 56603,
+    "brotliBytes": 45833,
+    "buildTimeMs": 44.34599999999773
   },
   "baseline": {
-    "rawBytes": 291628,
-    "gzipBytes": 60350,
-    "brotliBytes": 48824,
-    "buildTimeMs": 34.10699999999997,
-    "firstRenderMs": 38,
-    "updateMs": 0.31,
-    "scriptEvalMs": 6.9,
-    "registrationMs": 0.6,
-    "heapUsedBytes": 28656,
-    "speedupPercent": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0
+    "rawBytes": 291622,
+    "gzipBytes": 60354,
+    "brotliBytes": 48869,
+    "buildTimeMs": 34.31066699999792,
+    "firstRenderMs": 44.9,
+    "updateMs": 0.28,
+    "scriptEvalMs": 13.2,
+    "registrationMs": 1.1,
+    "heapUsedBytes": 28224
   },
   "deltas": {
-    "rawBytes": -214580,
-    "rawPercent": -73.58,
-    "gzipBytes": -38962,
-    "gzipPercent": -64.56,
-    "brotliBytes": -29670,
-    "brotliPercent": -60.77,
-    "buildTimeMs": -6.9,
-    "firstRenderMs": 3.3,
-    "speedupPercent": -46.48,
-    "updateMs": -0.04,
-    "updateSpeedupPercent": 33.33,
-    "evalSpeedupPercent": 73.44,
-    "registrationSpeedupPercent": 80,
-    "memorySavingsPercent": 24.04
+    "rawBytes": -25165,
+    "rawPercent": -8.63,
+    "gzipBytes": -3751,
+    "gzipPercent": -6.21,
+    "brotliBytes": -3036,
+    "brotliPercent": -6.21,
+    "buildTimeMs": 10,
+    "firstRenderMs": -5.5,
+    "speedupPercent": 12.25,
+    "updateMs": 0.03,
+    "updateSpeedupPercent": -10.71,
+    "evalSpeedupPercent": 25,
+    "registrationSpeedupPercent": 27.27,
+    "memorySavingsPercent": 12.51
   },
   "runtime": {
-    "firstRenderMs": 55.66,
-    "updateMs": 0.21,
-    "scriptEvalMs": 1.83,
-    "registrationMs": 0.12,
-    "heapUsedBytes": 21767,
-    "speedupPercent": -46.48,
-    "updateSpeedupPercent": 33.33,
-    "evalSpeedupPercent": 73.44,
-    "registrationSpeedupPercent": 80,
-    "memorySavingsPercent": 24.04
+    "firstRenderMs": 39.4,
+    "updateMs": 0.31,
+    "scriptEvalMs": 9.9,
+    "registrationMs": 0.8,
+    "heapUsedBytes": 24692,
+    "speedupPercent": 12.25,
+    "updateSpeedupPercent": -10.71,
+    "evalSpeedupPercent": 25,
+    "registrationSpeedupPercent": 27.27,
+    "memorySavingsPercent": 12.51
   },
   "equivalence": {
-    "domStructureMatch": true,
-    "elementsCount": 9,
-    "verified": true,
+    "domStructureMatch": false,
+    "elementsCount": 73,
+    "verified": false,
+    "divergenceReason": "Mount phase divergence: Shadow root presence mismatch at mount-root > [0] > [1] > [0] > [4] > [0] > shadowRoot > [0] > [0] (<md-filled-field>): baseline has open shadow root, variant has none",
     "phasesMatched": {
-      "mount": true,
-      "update": true
+      "mount": false,
+      "update": false
     }
   }
 }

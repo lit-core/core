@@ -6,13 +6,49 @@
     "name": "Spectrum Web Components (@spectrum-web-components)",
     "packageName": "@spectrum-web-components/bundle",
     "version": "1.12.5",
-    "componentCount": 6,
+    "componentCount": 20,
     "components": [
       {
-        "concept": "card",
-        "tag": "sp-card",
-        "path": "card/sp-card.js",
-        "importStatement": "import '@spectrum-web-components/card/sp-card.js';"
+        "concept": "button",
+        "tag": "sp-button",
+        "path": "button/sp-button.js",
+        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
+      },
+      {
+        "concept": "checkbox",
+        "tag": "sp-checkbox",
+        "path": "checkbox/sp-checkbox.js",
+        "importStatement": "import '@spectrum-web-components/checkbox/sp-checkbox.js';"
+      },
+      {
+        "concept": "radio",
+        "tag": "sp-radio",
+        "path": "radio/sp-radio.js",
+        "importStatement": "import '@spectrum-web-components/radio/sp-radio.js';"
+      },
+      {
+        "concept": "switch",
+        "tag": "sp-switch",
+        "path": "switch/sp-switch.js",
+        "importStatement": "import '@spectrum-web-components/switch/sp-switch.js';"
+      },
+      {
+        "concept": "text-input",
+        "tag": "sp-textfield",
+        "path": "textfield/sp-textfield.js",
+        "importStatement": "import '@spectrum-web-components/textfield/sp-textfield.js';"
+      },
+      {
+        "concept": "select",
+        "tag": "sp-picker",
+        "path": "picker/sp-picker.js",
+        "importStatement": "import '@spectrum-web-components/picker/sp-picker.js';"
+      },
+      {
+        "concept": "dialog",
+        "tag": "sp-dialog",
+        "path": "dialog/sp-dialog.js",
+        "importStatement": "import '@spectrum-web-components/dialog/sp-dialog.js';"
       },
       {
         "concept": "badge",
@@ -21,28 +57,76 @@
         "importStatement": "import '@spectrum-web-components/badge/sp-badge.js';"
       },
       {
-        "concept": "icon",
-        "tag": "sp-icon",
-        "path": "icon/sp-icon.js",
-        "importStatement": "import '@spectrum-web-components/icon/sp-icon.js';"
+        "concept": "tabs",
+        "tag": "sp-tabs",
+        "path": "tabs/sp-tabs.js",
+        "importStatement": "import '@spectrum-web-components/tabs/sp-tabs.js';"
       },
       {
-        "concept": "button",
-        "tag": "sp-button",
-        "path": "button/sp-button.js",
-        "importStatement": "import '@spectrum-web-components/button/sp-button.js';"
+        "concept": "progress-bar",
+        "tag": "sp-progress-bar",
+        "path": "progress-bar/sp-progress-bar.js",
+        "importStatement": "import '@spectrum-web-components/progress-bar/sp-progress-bar.js';"
       },
       {
-        "concept": "chips",
-        "tag": "sp-action-group",
-        "path": "action-group/sp-action-group.js",
-        "importStatement": "import '@spectrum-web-components/action-group/sp-action-group.js';"
+        "concept": "spinner",
+        "tag": "sp-progress-circle",
+        "path": "progress-circle/sp-progress-circle.js",
+        "importStatement": "import '@spectrum-web-components/progress-circle/sp-progress-circle.js';"
+      },
+      {
+        "concept": "slider",
+        "tag": "sp-slider",
+        "path": "slider/sp-slider.js",
+        "importStatement": "import '@spectrum-web-components/slider/sp-slider.js';"
+      },
+      {
+        "concept": "menu",
+        "tag": "sp-menu",
+        "path": "menu/sp-menu.js",
+        "importStatement": "import '@spectrum-web-components/menu/sp-menu.js';"
       },
       {
         "concept": "divider",
         "tag": "sp-divider",
         "path": "divider/sp-divider.js",
         "importStatement": "import '@spectrum-web-components/divider/sp-divider.js';"
+      },
+      {
+        "concept": "icon",
+        "tag": "sp-icon",
+        "path": "icon/sp-icon.js",
+        "importStatement": "import '@spectrum-web-components/icon/sp-icon.js';"
+      },
+      {
+        "concept": "icon-button",
+        "tag": "sp-action-button",
+        "path": "action-button/sp-action-button.js",
+        "importStatement": "import '@spectrum-web-components/action-button/sp-action-button.js';"
+      },
+      {
+        "concept": "card",
+        "tag": "sp-card",
+        "path": "card/sp-card.js",
+        "importStatement": "import '@spectrum-web-components/card/sp-card.js';"
+      },
+      {
+        "concept": "elevation",
+        "tag": "sp-popover",
+        "path": "popover/sp-popover.js",
+        "importStatement": "import '@spectrum-web-components/popover/sp-popover.js';"
+      },
+      {
+        "concept": "list",
+        "tag": "sp-sidenav",
+        "path": "sidenav/sp-sidenav.js",
+        "importStatement": "import '@spectrum-web-components/sidenav/sp-sidenav.js';"
+      },
+      {
+        "concept": "chips",
+        "tag": "sp-action-group",
+        "path": "action-group/sp-action-group.js",
+        "importStatement": "import '@spectrum-web-components/action-group/sp-action-group.js';"
       }
     ]
   },
@@ -53,24 +137,24 @@
     "isBaseline": false
   },
   "scenario": {
-    "id": "dynamic-feed",
-    "name": "Dynamic feed",
-    "description": "Dynamic reactive feed with repeated collection items testing directive lowering, expression memoization, and static HTML clustering",
-    "componentCount": 6
+    "id": "bundle",
+    "name": "Multi-component bundle",
+    "description": "Enterprise application importing 20 canonical components across routes testing cross-component CSS AST deduplication and decorator lowering",
+    "componentCount": 20
   },
-  "timestamp": "2026-10-21T22:45:09.037Z",
+  "timestamp": "2026-10-24T09:49:15.766Z",
   "environment": {
-    "node": "v24.14.0",
+    "node": "v26.12.1",
     "platform": "darwin",
     "arch": "arm64",
     "cpus": 8,
-    "gitCommit": "b3e4776",
+    "gitCommit": "6c3875e",
     "gitBranch": "main",
     "versions": {
       "lit": "3.3.3",
       "vite": "8.3.1",
       "playwright": "1.63.0",
-      "node": "v24.14.0",
+      "node": "v26.12.1",
       "carbon": "2.64.0",
       "spectrum": "1.12.2",
       "webawesome": "3.14.0",
@@ -79,58 +163,53 @@
     }
   },
   "metrics": {
-    "rawBytes": 846158,
-    "gzipBytes": 151407,
-    "brotliBytes": 115029,
-    "buildTimeMs": 33.90037499999744
+    "rawBytes": 844320,
+    "gzipBytes": 151021,
+    "brotliBytes": 114703,
+    "buildTimeMs": 81.72987499998999
   },
   "baseline": {
-    "rawBytes": 843964,
-    "gzipBytes": 150909,
-    "brotliBytes": 114502,
-    "buildTimeMs": 88.77537499999744,
-    "firstRenderMs": 43.5,
-    "updateMs": 0.3,
-    "scriptEvalMs": 11.9,
-    "registrationMs": 0.4,
-    "heapUsedBytes": 24445,
-    "speedupPercent": 0,
-    "updateSpeedupPercent": 0,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": 0,
-    "memorySavingsPercent": 0
+    "rawBytes": 844172,
+    "gzipBytes": 150972,
+    "brotliBytes": 114744,
+    "buildTimeMs": 120.82345900000655,
+    "firstRenderMs": 46.3,
+    "updateMs": 0.34,
+    "scriptEvalMs": 24.2,
+    "registrationMs": 0.9,
+    "heapUsedBytes": 22893
   },
   "deltas": {
-    "rawBytes": 2194,
-    "rawPercent": 0.26,
-    "gzipBytes": 498,
-    "gzipPercent": 0.33,
-    "brotliBytes": 527,
-    "brotliPercent": 0.46,
-    "buildTimeMs": 1.4,
-    "firstRenderMs": -0.9,
-    "speedupPercent": 2.83,
-    "updateMs": -0.07,
-    "updateSpeedupPercent": 14,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": -300,
-    "memorySavingsPercent": 8.71
+    "rawBytes": 148,
+    "rawPercent": 0.02,
+    "gzipBytes": 49,
+    "gzipPercent": 0.03,
+    "brotliBytes": -41,
+    "brotliPercent": -0.04,
+    "buildTimeMs": -39.1,
+    "firstRenderMs": -8.1,
+    "speedupPercent": 17.49,
+    "updateMs": -0.03,
+    "updateSpeedupPercent": 8.82,
+    "evalSpeedupPercent": 14.05,
+    "registrationSpeedupPercent": 44.44,
+    "memorySavingsPercent": 0
   },
   "runtime": {
-    "firstRenderMs": 42.27,
-    "updateMs": 0.26,
-    "scriptEvalMs": 11.9,
-    "registrationMs": 1.6,
-    "heapUsedBytes": 22316,
-    "speedupPercent": 2.83,
-    "updateSpeedupPercent": 14,
-    "evalSpeedupPercent": 0,
-    "registrationSpeedupPercent": -300,
-    "memorySavingsPercent": 8.71
+    "firstRenderMs": 38.2,
+    "updateMs": 0.31,
+    "scriptEvalMs": 20.8,
+    "registrationMs": 0.5,
+    "heapUsedBytes": 22893,
+    "speedupPercent": 17.49,
+    "updateSpeedupPercent": 8.82,
+    "evalSpeedupPercent": 14.05,
+    "registrationSpeedupPercent": 44.44,
+    "memorySavingsPercent": 0
   },
   "equivalence": {
     "domStructureMatch": true,
-    "elementsCount": 306,
+    "elementsCount": 73,
     "verified": true,
     "phasesMatched": {
       "mount": true,
