@@ -261,6 +261,19 @@ export function compareDomSnapshots(baselineSnapshot, variantSnapshot) {
   };
 }
 
+/** @type {import('playwright').Page | null} */
+let sharedScenarioPage = null;
+
+/**
+ * @param {import('playwright').Browser} browser
+ */
+async function getSharedScenarioPage(browser) {
+  if (!sharedScenarioPage || sharedScenarioPage.isClosed() || !browser.isConnected()) {
+    sharedScenarioPage = await browser.newPage();
+  }
+  return sharedScenarioPage;
+}
+
 /**
  * Measure runtime performance of a scenario bundle in headless Chromium via Playwright.
  * @param {Object} params
@@ -275,19 +288,6 @@ export function compareDomSnapshots(baselineSnapshot, variantSnapshot) {
  *   equivalence: { domStructureMatch: boolean, elementsCount: number, verified: boolean, divergenceReason?: string | null, phasesMatched: { mount: boolean, update: boolean } }
  * }>}
  */
-/** @type {import('playwright').Page | null} */
-let sharedScenarioPage = null;
-
-/**
- * @param {import('playwright').Browser} browser
- */
-async function getSharedScenarioPage(browser) {
-  if (!sharedScenarioPage || sharedScenarioPage.isClosed() || !browser.isConnected()) {
-    sharedScenarioPage = await browser.newPage();
-  }
-  return sharedScenarioPage;
-}
-
 export async function measureScenarioRuntime({ bundlePath, scenarioName, variantName = 'Variant', baselineSnapshot = null }) {
   if (!fs.existsSync(bundlePath)) {
     throw new Error(`[Scenario benchmark error] Bundle file not found at "${bundlePath}" for ${scenarioName} (${variantName})`);

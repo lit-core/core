@@ -109,10 +109,6 @@ async function main() {
   // Tier 2: JS unit tests on affected packages
   if (!ONLY_RUST && affected.affectedPackages.length > 0) {
     for (const pkg of affected.affectedPackages) {
-      if (pkg === 'benchmarks' && !IS_ALL) {
-        // Benchmarks run during tier 4 or on demand, not in the fast unit loop
-        continue;
-      }
       const pkgDir = findPackageDir(ROOT, pkg);
       const targetDir = pkgDir || path.join(ROOT, 'packages', pkg);
       const pkgJsonPath = path.join(targetDir, 'package.json');
