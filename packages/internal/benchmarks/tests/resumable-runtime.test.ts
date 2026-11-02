@@ -10,9 +10,7 @@ describe('resumable SSR Declarative Shadow DOM artifact verification', () => {
   let browser: Browser | null = null;
 
   beforeAll(() => {
-    if (!fs.existsSync(artifactPath)) {
-      generateResumableArtifactHtml('carbon', path.dirname(artifactPath));
-    }
+    generateResumableArtifactHtml('carbon', path.dirname(artifactPath));
   });
 
   afterAll(async () => {
@@ -40,7 +38,7 @@ describe('resumable SSR Declarative Shadow DOM artifact verification', () => {
     expect(dsdTemplates.length).toBeGreaterThanOrEqual(30);
 
     // 3. Every DSD template contains scoped CSS <style>
-    const dsdWithStyles = content.match(/<template\s+shadowrootmode=["']open["'][^>]*>[\s\S]*?<style>/gi) || [];
+    const dsdWithStyles = content.match(/<template\s+shadowrootmode=["']open["'][^>]*>[\s\S]*?<style\b[^>]*>/gi) || [];
     expect(dsdWithStyles.length).toBeGreaterThanOrEqual(30);
 
     // 4. Contains inlined bundle source for offline/local file:/// execution
