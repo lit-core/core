@@ -86,7 +86,7 @@
     "@lit-core/tag-shake": "workspace:*",
     "@lit-core/test-kit": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
-    "lucide-react": "^1.61.0"
+    "lucide-react": "^1.65.0"
   },
   "devDependencies": {
     "@awesome.me/webawesome": "^3.14.0",

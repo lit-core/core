@@ -57,7 +57,7 @@
     "@momentum-design/components": "^0.142.1",
     "@spectrum-web-components/bundle": "^1.12.5",
     "lit": "^3.3.3",
-    "lucide-react": "^1.61.0",
+    "lucide-react": "^1.65.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
