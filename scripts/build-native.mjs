@@ -143,9 +143,13 @@ function copyCrateArtifacts(crate, pkgDir) {
 function compileTypeScript(crate, pkgDir) {
   const tsconfigPath = path.resolve(pkgDir, 'tsconfig.json');
   const tscBin = path.resolve(rootDir, 'node_modules/.bin/tsc');
+  const biomeBin = path.resolve(rootDir, 'node_modules/.bin/biome');
   if ((runTsc || ['dom-paths', 'native', 'resumable', 'ssr'].includes(crate)) && fs.existsSync(tsconfigPath)) {
     try {
       execSync(`"${tscBin}" -p tsconfig.json`, { cwd: pkgDir, stdio: 'inherit' });
+      if (['dom-paths', 'native'].includes(crate) && fs.existsSync(biomeBin)) {
+        execSync(`"${biomeBin}" format --write src`, { cwd: pkgDir, stdio: 'ignore' });
+      }
     } catch (e) {
       console.error(`[build-native] tsc failed for ${crate}:`, e.message);
       process.exit(1);

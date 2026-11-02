@@ -35,6 +35,16 @@ export async function launchBrowser(options: SafeBrowserOptions = {}): Promise<B
       args: combinedArgs,
       ...rest,
     });
+    const rawClose = browser.close.bind(browser);
+    browser.close = async (closeOptions) => {
+      await Promise.race([
+        rawClose(closeOptions).catch(() => {}),
+        new Promise<void>((resolve) => {
+          const timer = setTimeout(resolve, 2000);
+          timer.unref?.();
+        }),
+      ]);
+    };
     return browser;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -58,12 +68,13 @@ export async function getSharedBrowser(options: SafeBrowserOptions = {}): Promis
  * Close the shared singleton browser instance if running.
  */
 export async function closeSharedBrowser(): Promise<void> {
-  if (sharedBrowserInstance) {
+  const browser = sharedBrowserInstance;
+  sharedBrowserInstance = null;
+  if (browser) {
     try {
-      await sharedBrowserInstance.close();
+      await browser.close();
     } catch {
       // Ignore teardown errors on already closed browser
     }
-    sharedBrowserInstance = null;
   }
 }
