@@ -11,12 +11,17 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 use crate::parser::{PartKind, PreparedTemplate, parse_lit_template};
+use crate::ssr_plan::{SsrDynamicAttribute, SsrMarkerSite, SsrOpcode, SsrTemplatePlan};
+use lit_analysis::parts::{PartAddressing, PartDescriptor};
+use lit_analysis::template_ir::ElementNamespace;
 
 #[napi(object)]
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
 pub struct HtmlAotOptions {
     pub sourcemap: Option<bool>,
     pub filename: Option<String>,
+    pub ssr: Option<bool>,
+    pub strict_ssr: Option<bool>,
 }
 
 #[napi(object)]
@@ -25,24 +30,31 @@ pub struct HtmlAotResult {
     pub code: String,
     pub map: Option<String>,
     pub templates_count: u32,
+    pub ssr_errors: Vec<String>,
+    pub has_runtime_templates: bool,
 }
 
 #[derive(Clone, Debug)]
 struct CompiledTemplateData {
     var_name: String,
     prepared: PreparedTemplate,
+    ssr_plan: Option<SsrTemplatePlan>,
 }
 
 struct ScopeIdGenerator<'a> {
     scoping: &'a Scoping,
     used_names: HashSet<String>,
+    is_ssr: bool,
+    ssr_errors: Vec<String>,
 }
 
 impl<'a> ScopeIdGenerator<'a> {
-    fn new(scoping: &'a Scoping) -> Self {
+    fn new(scoping: &'a Scoping, is_ssr: bool) -> Self {
         Self {
             scoping,
             used_names: HashSet::new(),
+            is_ssr,
+            ssr_errors: Vec::new(),
         }
     }
 
@@ -103,6 +115,36 @@ fn contains_octal_escape(quasis: &[TemplateElement]) -> bool {
     false
 }
 
+fn program_imports_static_html(program: &Program<'_>) -> bool {
+    for stmt in &program.body {
+        match stmt {
+            Statement::ImportDeclaration(decl) => {
+                if decl.import_kind.is_value()
+                    && SymbolProofContext::is_static_html_specifier(decl.source.value.as_str())
+                {
+                    return true;
+                }
+            }
+            Statement::ExportFromDeclaration(decl) => {
+                if decl.export_kind.is_value()
+                    && SymbolProofContext::is_static_html_specifier(decl.source.value.as_str())
+                {
+                    return true;
+                }
+            }
+            Statement::ExportAllDeclaration(decl) => {
+                if decl.export_kind.is_value()
+                    && SymbolProofContext::is_static_html_specifier(decl.source.value.as_str())
+                {
+                    return true;
+                }
+            }
+            _ => {}
+        }
+    }
+    false
+}
+
 pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let allocator = Allocator::default();
     let filename = options.filename.as_deref().unwrap_or("source.ts");
@@ -110,15 +152,21 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let source_type = SourceType::from_path(filename)
         .unwrap_or_default()
         .with_typescript(is_ts);
+    let is_ssr = options.ssr.unwrap_or(false);
 
     let mut parsed = Parser::new(&allocator, source, source_type).parse();
+
     if parsed.program.body.is_empty() {
         return HtmlAotResult {
             code: source.to_string(),
             map: None,
             templates_count: 0,
+            ssr_errors: Vec::new(),
+            has_runtime_templates: false,
         };
     }
+
+    let has_static_html = program_imports_static_html(&parsed.program);
 
     // 1. Build semantic model and scan Lit symbol proofs
     let semantic_ret = SemanticBuilder::new().build(&parsed.program);
@@ -131,10 +179,12 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
             code: source.to_string(),
             map: None,
             templates_count: 0,
+            ssr_errors: Vec::new(),
+            has_runtime_templates: has_static_html,
         };
     }
 
-    let mut id_gen = ScopeIdGenerator::new(&scoping);
+    let mut id_gen = ScopeIdGenerator::new(&scoping, is_ssr);
 
     // 2. Walk AST to find lit template expressions
     let mut template_matches: Vec<(Span, CompiledTemplateData)> = Vec::new();
@@ -147,10 +197,13 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     );
 
     if template_matches.is_empty() {
+        let has_runtime_templates = has_static_html || !id_gen.ssr_errors.is_empty();
         return HtmlAotResult {
             code: source.to_string(),
             map: None,
             templates_count: 0,
+            ssr_errors: id_gen.ssr_errors,
+            has_runtime_templates,
         };
     }
 
@@ -525,6 +578,20 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
             false,
             &ast,
         ));
+        if is_ssr && let Some(ref plan) = tmpl.ssr_plan {
+            let plan_expr = build_ssr_plan_ast(&ast, &allocator, plan);
+            desc_props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "ssrPlan", &ast),
+                plan_expr,
+                false,
+                false,
+                false,
+                &ast,
+            ));
+        }
+
         let desc_obj = Expression::new_object_expression(SPAN, desc_props, &ast);
 
         let var_pat =
@@ -612,10 +679,14 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
     let map_json = codegen_result.map.map(|m| m.to_json_string());
     let compacted_code = compact_parts_in_code(&codegen_result.code);
 
+    let has_runtime_templates = has_static_html || !id_gen.ssr_errors.is_empty();
+
     HtmlAotResult {
         code: compacted_code,
         map: map_json,
         templates_count: template_matches.len() as u32,
+        ssr_errors: id_gen.ssr_errors,
+        has_runtime_templates,
     }
 }
 
@@ -821,6 +892,62 @@ fn strip_ts_in_stmt<'a>(stmt: &mut Statement<'a>) {
         Statement::BlockStatement(b) => {
             strip_ts_in_stmts(&mut b.body);
         }
+        Statement::TryStatement(t) => {
+            strip_ts_in_stmts(&mut t.block.body);
+            if let Some(handler) = &mut t.handler {
+                if let Some(param) = &mut handler.param {
+                    param.type_annotation = None;
+                }
+                strip_ts_in_stmts(&mut handler.body.body);
+            }
+            if let Some(fin) = &mut t.finalizer {
+                strip_ts_in_stmts(&mut fin.body);
+            }
+        }
+        Statement::SwitchStatement(sw) => {
+            strip_ts_in_expr(&mut sw.discriminant);
+            for case in &mut sw.cases {
+                if let Some(test) = &mut case.test {
+                    strip_ts_in_expr(test);
+                }
+                strip_ts_in_stmts(&mut case.consequent);
+            }
+        }
+        Statement::ForStatement(f) => {
+            if let Some(ForStatementInit::VariableDeclaration(v)) = &mut f.init {
+                for decl in &mut v.declarations {
+                    decl.type_annotation = None;
+                    if let Some(init) = &mut decl.init {
+                        strip_ts_in_expr(init);
+                    }
+                }
+            } else if let Some(init) = f.init.as_mut().and_then(|i| i.as_expression_mut()) {
+                strip_ts_in_expr(init);
+            }
+            if let Some(test) = &mut f.test {
+                strip_ts_in_expr(test);
+            }
+            if let Some(upd) = &mut f.update {
+                strip_ts_in_expr(upd);
+            }
+            strip_ts_in_stmt(&mut f.body);
+        }
+        Statement::ForOfStatement(f) => {
+            strip_ts_in_expr(&mut f.right);
+            strip_ts_in_stmt(&mut f.body);
+        }
+        Statement::ForInStatement(f) => {
+            strip_ts_in_expr(&mut f.right);
+            strip_ts_in_stmt(&mut f.body);
+        }
+        Statement::WhileStatement(w) => {
+            strip_ts_in_expr(&mut w.test);
+            strip_ts_in_stmt(&mut w.body);
+        }
+        Statement::DoWhileStatement(w) => {
+            strip_ts_in_stmt(&mut w.body);
+            strip_ts_in_expr(&mut w.test);
+        }
         Statement::IfStatement(s) => {
             strip_ts_in_expr(&mut s.test);
             strip_ts_in_stmt(&mut s.consequent);
@@ -927,6 +1054,37 @@ fn strip_ts_in_expr<'a>(expr: &mut Expression<'a>) {
         Expression::ParenthesizedExpression(p) => {
             strip_ts_in_expr(&mut p.expression);
         }
+        Expression::AwaitExpression(aw) => {
+            strip_ts_in_expr(&mut aw.argument);
+        }
+        Expression::YieldExpression(y) => {
+            if let Some(arg) = &mut y.argument {
+                strip_ts_in_expr(arg);
+            }
+        }
+        Expression::NewExpression(n) => {
+            strip_ts_in_expr(&mut n.callee);
+            for arg in &mut n.arguments {
+                if let Some(e) = arg.as_expression_mut() {
+                    strip_ts_in_expr(e);
+                }
+            }
+        }
+        Expression::UnaryExpression(u) => {
+            strip_ts_in_expr(&mut u.argument);
+        }
+        Expression::TemplateLiteral(t) => {
+            for e in &mut t.expressions {
+                strip_ts_in_expr(e);
+            }
+        }
+        Expression::StaticMemberExpression(m) => {
+            strip_ts_in_expr(&mut m.object);
+        }
+        Expression::ComputedMemberExpression(m) => {
+            strip_ts_in_expr(&mut m.object);
+            strip_ts_in_expr(&mut m.expression);
+        }
         _ => {}
     }
 }
@@ -992,6 +1150,73 @@ fn walk_stmt_for_templates<'a>(
         Statement::ClassDeclaration(class) => {
             walk_class_for_templates(class, symbol_ctx, out, id_gen);
         }
+        Statement::FunctionDeclaration(f) => {
+            if let Some(body) = &f.body {
+                for s in &body.statements {
+                    walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
+                }
+            }
+        }
+        Statement::TryStatement(t) => {
+            for s in &t.block.body {
+                walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
+            }
+            if let Some(handler) = &t.handler {
+                for s in &handler.body.body {
+                    walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
+                }
+            }
+            if let Some(fin) = &t.finalizer {
+                for s in &fin.body {
+                    walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
+                }
+            }
+        }
+        Statement::SwitchStatement(sw) => {
+            walk_expr_for_templates(&sw.discriminant, symbol_ctx, out, id_gen);
+            for case in &sw.cases {
+                if let Some(test) = &case.test {
+                    walk_expr_for_templates(test, symbol_ctx, out, id_gen);
+                }
+                for s in &case.consequent {
+                    walk_stmt_for_templates(s, symbol_ctx, out, id_gen);
+                }
+            }
+        }
+        Statement::ForStatement(f) => {
+            if let Some(ForStatementInit::VariableDeclaration(v)) = &f.init {
+                for decl in &v.declarations {
+                    if let Some(init) = &decl.init {
+                        walk_expr_for_templates(init, symbol_ctx, out, id_gen);
+                    }
+                }
+            } else if let Some(init) = f.init.as_ref().and_then(|i| i.as_expression()) {
+                walk_expr_for_templates(init, symbol_ctx, out, id_gen);
+            }
+            if let Some(test) = &f.test {
+                walk_expr_for_templates(test, symbol_ctx, out, id_gen);
+            }
+            if let Some(upd) = &f.update {
+                walk_expr_for_templates(upd, symbol_ctx, out, id_gen);
+            }
+            walk_stmt_for_templates(&f.body, symbol_ctx, out, id_gen);
+        }
+        Statement::ForOfStatement(f) => {
+            walk_expr_for_templates(&f.right, symbol_ctx, out, id_gen);
+            walk_stmt_for_templates(&f.body, symbol_ctx, out, id_gen);
+        }
+        Statement::ForInStatement(f) => {
+            walk_expr_for_templates(&f.right, symbol_ctx, out, id_gen);
+            walk_stmt_for_templates(&f.body, symbol_ctx, out, id_gen);
+        }
+        Statement::WhileStatement(w) => {
+            walk_expr_for_templates(&w.test, symbol_ctx, out, id_gen);
+            walk_stmt_for_templates(&w.body, symbol_ctx, out, id_gen);
+        }
+        Statement::DoWhileStatement(w) => {
+            walk_stmt_for_templates(&w.body, symbol_ctx, out, id_gen);
+            walk_expr_for_templates(&w.test, symbol_ctx, out, id_gen);
+        }
         Statement::ExportDeclaration(export_decl) => match &export_decl.declaration {
             Declaration::VariableDeclaration(v) => {
                 for decl in &v.declarations {
@@ -1047,18 +1272,52 @@ fn walk_expr_for_templates<'a>(
         Expression::TaggedTemplateExpression(tagged) => {
             let is_html_tag = symbol_ctx.is_lit_html_tag(&tagged.tag);
 
-            if is_html_tag && !contains_octal_escape(&tagged.quasi.quasis) {
-                let quasis: Vec<String> = tagged
-                    .quasi
-                    .quasis
-                    .iter()
-                    .map(|q| q.value.raw.to_string())
-                    .collect();
+            if is_html_tag {
+                if contains_octal_escape(&tagged.quasi.quasis) {
+                    if id_gen.is_ssr {
+                        id_gen.ssr_errors.push(format!(
+                            "Static Lit html template at offset {}..{} contains octal escape and cannot build an SSR plan",
+                            tagged.span.start, tagged.span.end
+                        ));
+                    }
+                } else {
+                    let quasis: Vec<String> = tagged
+                        .quasi
+                        .quasis
+                        .iter()
+                        .map(|q| q.value.raw.to_string())
+                        .collect();
 
-                if let Some(prepared) = parse_lit_template(&quasis) {
-                    let var_name = id_gen.generate("lit_template_1");
+                    if let Some(prepared) = parse_lit_template(&quasis) {
+                        let var_name = id_gen.generate("lit_template_1");
+                        let ssr_plan = if id_gen.is_ssr {
+                            let plan =
+                                SsrTemplatePlan::build(&quasis, tagged.quasi.expressions.len());
+                            if plan.is_none() {
+                                id_gen.ssr_errors.push(format!(
+                                    "Static Lit html template at offset {}..{} failed to build an ahead-of-time SSR plan",
+                                    tagged.span.start, tagged.span.end
+                                ));
+                            }
+                            plan
+                        } else {
+                            None
+                        };
 
-                    out.push((tagged.span, CompiledTemplateData { var_name, prepared }));
+                        out.push((
+                            tagged.span,
+                            CompiledTemplateData {
+                                var_name,
+                                prepared,
+                                ssr_plan,
+                            },
+                        ));
+                    } else if id_gen.is_ssr {
+                        id_gen.ssr_errors.push(format!(
+                            "Static Lit html template at offset {}..{} could not be parsed into an ahead-of-time SSR plan",
+                            tagged.span.start, tagged.span.end
+                        ));
+                    }
                 }
             }
 
@@ -1134,6 +1393,49 @@ fn walk_expr_for_templates<'a>(
         Expression::ParenthesizedExpression(p) => {
             walk_expr_for_templates(&p.expression, symbol_ctx, out, id_gen);
         }
+        Expression::AwaitExpression(aw) => {
+            walk_expr_for_templates(&aw.argument, symbol_ctx, out, id_gen);
+        }
+        Expression::YieldExpression(y) => {
+            if let Some(arg) = &y.argument {
+                walk_expr_for_templates(arg, symbol_ctx, out, id_gen);
+            }
+        }
+        Expression::NewExpression(n) => {
+            walk_expr_for_templates(&n.callee, symbol_ctx, out, id_gen);
+            for arg in &n.arguments {
+                if let Some(e) = arg.as_expression() {
+                    walk_expr_for_templates(e, symbol_ctx, out, id_gen);
+                }
+            }
+        }
+        Expression::UnaryExpression(u) => {
+            walk_expr_for_templates(&u.argument, symbol_ctx, out, id_gen);
+        }
+        Expression::TemplateLiteral(t) => {
+            for e in &t.expressions {
+                walk_expr_for_templates(e, symbol_ctx, out, id_gen);
+            }
+        }
+        Expression::StaticMemberExpression(m) => {
+            walk_expr_for_templates(&m.object, symbol_ctx, out, id_gen);
+        }
+        Expression::ComputedMemberExpression(m) => {
+            walk_expr_for_templates(&m.object, symbol_ctx, out, id_gen);
+            walk_expr_for_templates(&m.expression, symbol_ctx, out, id_gen);
+        }
+        Expression::TSAsExpression(ts) => {
+            walk_expr_for_templates(&ts.expression, symbol_ctx, out, id_gen);
+        }
+        Expression::TSSatisfiesExpression(ts) => {
+            walk_expr_for_templates(&ts.expression, symbol_ctx, out, id_gen);
+        }
+        Expression::TSNonNullExpression(ts) => {
+            walk_expr_for_templates(&ts.expression, symbol_ctx, out, id_gen);
+        }
+        Expression::TSTypeAssertion(ts) => {
+            walk_expr_for_templates(&ts.expression, symbol_ctx, out, id_gen);
+        }
         _ => {}
     }
 }
@@ -1207,6 +1509,133 @@ fn replace_in_stmt<'a>(
         }
         Statement::ClassDeclaration(class) => {
             replace_in_class(class, template_matches, source, allocator, source_type);
+        }
+        Statement::FunctionDeclaration(f) => {
+            if let Some(body) = &mut f.body {
+                for s in &mut body.statements {
+                    replace_in_stmt(s, template_matches, source, allocator, source_type);
+                }
+            }
+        }
+        Statement::TryStatement(t) => {
+            for s in &mut t.block.body {
+                replace_in_stmt(s, template_matches, source, allocator, source_type);
+            }
+            if let Some(handler) = &mut t.handler {
+                for s in &mut handler.body.body {
+                    replace_in_stmt(s, template_matches, source, allocator, source_type);
+                }
+            }
+            if let Some(fin) = &mut t.finalizer {
+                for s in &mut fin.body {
+                    replace_in_stmt(s, template_matches, source, allocator, source_type);
+                }
+            }
+        }
+        Statement::SwitchStatement(sw) => {
+            replace_in_expr(
+                &mut sw.discriminant,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            for case in &mut sw.cases {
+                if let Some(test) = &mut case.test {
+                    replace_in_expr(test, template_matches, source, allocator, source_type);
+                }
+                for s in &mut case.consequent {
+                    replace_in_stmt(s, template_matches, source, allocator, source_type);
+                }
+            }
+        }
+        Statement::ForStatement(f) => {
+            if let Some(ForStatementInit::VariableDeclaration(v)) = &mut f.init {
+                for decl in &mut v.declarations {
+                    if let Some(init) = &mut decl.init {
+                        replace_in_expr(init, template_matches, source, allocator, source_type);
+                    }
+                }
+            } else if let Some(init) = f.init.as_mut().and_then(|i| i.as_expression_mut()) {
+                replace_in_expr(init, template_matches, source, allocator, source_type);
+            }
+            if let Some(test) = &mut f.test {
+                replace_in_expr(test, template_matches, source, allocator, source_type);
+            }
+            if let Some(upd) = &mut f.update {
+                replace_in_expr(upd, template_matches, source, allocator, source_type);
+            }
+            replace_in_stmt(
+                &mut f.body,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Statement::ForOfStatement(f) => {
+            replace_in_expr(
+                &mut f.right,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            replace_in_stmt(
+                &mut f.body,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Statement::ForInStatement(f) => {
+            replace_in_expr(
+                &mut f.right,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            replace_in_stmt(
+                &mut f.body,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Statement::WhileStatement(w) => {
+            replace_in_expr(
+                &mut w.test,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            replace_in_stmt(
+                &mut w.body,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Statement::DoWhileStatement(w) => {
+            replace_in_stmt(
+                &mut w.body,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            replace_in_expr(
+                &mut w.test,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
         }
         Statement::ExportDeclaration(export_decl) => match &mut export_decl.declaration {
             Declaration::VariableDeclaration(v) => {
@@ -1458,6 +1887,1100 @@ fn replace_in_expr<'a>(
                 source_type,
             );
         }
+        Expression::AwaitExpression(aw) => {
+            replace_in_expr(
+                &mut aw.argument,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::YieldExpression(y) => {
+            if let Some(arg) = &mut y.argument {
+                replace_in_expr(arg, template_matches, source, allocator, source_type);
+            }
+        }
+        Expression::NewExpression(n) => {
+            replace_in_expr(
+                &mut n.callee,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            for arg in &mut n.arguments {
+                if let Some(e) = arg.as_expression_mut() {
+                    replace_in_expr(e, template_matches, source, allocator, source_type);
+                }
+            }
+        }
+        Expression::UnaryExpression(u) => {
+            replace_in_expr(
+                &mut u.argument,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::TemplateLiteral(t) => {
+            for e in &mut t.expressions {
+                replace_in_expr(e, template_matches, source, allocator, source_type);
+            }
+        }
+        Expression::StaticMemberExpression(m) => {
+            replace_in_expr(
+                &mut m.object,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::ComputedMemberExpression(m) => {
+            replace_in_expr(
+                &mut m.object,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+            replace_in_expr(
+                &mut m.expression,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::TSAsExpression(ts) => {
+            replace_in_expr(
+                &mut ts.expression,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::TSSatisfiesExpression(ts) => {
+            replace_in_expr(
+                &mut ts.expression,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::TSNonNullExpression(ts) => {
+            replace_in_expr(
+                &mut ts.expression,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
+        Expression::TSTypeAssertion(ts) => {
+            replace_in_expr(
+                &mut ts.expression,
+                template_matches,
+                source,
+                allocator,
+                source_type,
+            );
+        }
         _ => {}
     }
+}
+
+fn build_u32_array_ast<'a>(ast: &AstBuilder<'a>, numbers: &[u32]) -> Expression<'a> {
+    let mut elements = ArenaVec::new_in(ast);
+    for n in numbers {
+        elements.push(ArrayExpressionElement::from(
+            Expression::new_numeric_literal(SPAN, *n as f64, None, NumberBase::Decimal, ast),
+        ));
+    }
+    Expression::new_array_expression(SPAN, elements, ast)
+}
+
+fn build_dynamic_attr_ast<'a>(
+    ast: &AstBuilder<'a>,
+    allocator: &'a Allocator,
+    attr: &SsrDynamicAttribute,
+) -> Expression<'a> {
+    let mut props = ArenaVec::new_in(ast);
+    match attr {
+        SsrDynamicAttribute::Attribute {
+            name,
+            index,
+            indices,
+            strings,
+        } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("attribute"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "name", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(name), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "index", ast),
+                Expression::new_numeric_literal(
+                    SPAN,
+                    *index as f64,
+                    None,
+                    NumberBase::Decimal,
+                    ast,
+                ),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            if let Some(idx_list) = indices {
+                let mut idx_elems = ArenaVec::new_in(ast);
+                for i in idx_list {
+                    idx_elems.push(ArrayExpressionElement::from(
+                        Expression::new_numeric_literal(
+                            SPAN,
+                            *i as f64,
+                            None,
+                            NumberBase::Decimal,
+                            ast,
+                        ),
+                    ));
+                }
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "indices", ast),
+                    Expression::new_array_expression(SPAN, idx_elems, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if let Some(str_list) = strings {
+                let mut str_elems = ArenaVec::new_in(ast);
+                for s in str_list {
+                    str_elems.push(ArrayExpressionElement::from(
+                        Expression::new_string_literal(SPAN, allocator.alloc_str(s), None, ast),
+                    ));
+                }
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "strings", ast),
+                    Expression::new_array_expression(SPAN, str_elems, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+        }
+        SsrDynamicAttribute::Boolean { name, index } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("boolean"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "name", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(name), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "index", ast),
+                Expression::new_numeric_literal(
+                    SPAN,
+                    *index as f64,
+                    None,
+                    NumberBase::Decimal,
+                    ast,
+                ),
+                false,
+                false,
+                false,
+                ast,
+            ));
+        }
+        SsrDynamicAttribute::Property {
+            name,
+            index,
+            indices,
+            strings,
+        } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("property"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "name", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(name), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "index", ast),
+                Expression::new_numeric_literal(
+                    SPAN,
+                    *index as f64,
+                    None,
+                    NumberBase::Decimal,
+                    ast,
+                ),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            if let Some(idx_list) = indices {
+                let mut idx_elems = ArenaVec::new_in(ast);
+                for i in idx_list {
+                    idx_elems.push(ArrayExpressionElement::from(
+                        Expression::new_numeric_literal(
+                            SPAN,
+                            *i as f64,
+                            None,
+                            NumberBase::Decimal,
+                            ast,
+                        ),
+                    ));
+                }
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "indices", ast),
+                    Expression::new_array_expression(SPAN, idx_elems, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if let Some(str_list) = strings {
+                let mut str_elems = ArenaVec::new_in(ast);
+                for s in str_list {
+                    str_elems.push(ArrayExpressionElement::from(
+                        Expression::new_string_literal(SPAN, allocator.alloc_str(s), None, ast),
+                    ));
+                }
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "strings", ast),
+                    Expression::new_array_expression(SPAN, str_elems, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+        }
+        SsrDynamicAttribute::Event { name, index } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("event"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "name", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(name), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "index", ast),
+                Expression::new_numeric_literal(
+                    SPAN,
+                    *index as f64,
+                    None,
+                    NumberBase::Decimal,
+                    ast,
+                ),
+                false,
+                false,
+                false,
+                ast,
+            ));
+        }
+        SsrDynamicAttribute::Directive { index } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("directive"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "index", ast),
+                Expression::new_numeric_literal(
+                    SPAN,
+                    *index as f64,
+                    None,
+                    NumberBase::Decimal,
+                    ast,
+                ),
+                false,
+                false,
+                false,
+                ast,
+            ));
+        }
+    }
+    Expression::new_object_expression(SPAN, props, ast)
+}
+
+fn build_opcode_ast<'a>(
+    ast: &AstBuilder<'a>,
+    allocator: &'a Allocator,
+    op: &SsrOpcode,
+) -> Expression<'a> {
+    let mut props = ArenaVec::new_in(ast);
+    match op {
+        SsrOpcode::OpenElement {
+            tag,
+            is_custom_element,
+            is_void,
+            namespace,
+            static_attrs,
+            dynamic_attrs,
+            close_index,
+        } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("open"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "tag", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(tag), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            if *is_custom_element {
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "isCustomElement", ast),
+                    Expression::new_boolean_literal(SPAN, true, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if *is_void {
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "isVoid", ast),
+                    Expression::new_boolean_literal(SPAN, true, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            match namespace {
+                ElementNamespace::Svg => {
+                    props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        PropertyKey::new_static_identifier(SPAN, "namespace", ast),
+                        Expression::new_string_literal(SPAN, allocator.alloc_str("svg"), None, ast),
+                        false,
+                        false,
+                        false,
+                        ast,
+                    ));
+                }
+                ElementNamespace::MathML => {
+                    props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        PropertyKey::new_static_identifier(SPAN, "namespace", ast),
+                        Expression::new_string_literal(
+                            SPAN,
+                            allocator.alloc_str("math"),
+                            None,
+                            ast,
+                        ),
+                        false,
+                        false,
+                        false,
+                        ast,
+                    ));
+                }
+                ElementNamespace::Html => {}
+            }
+            if !static_attrs.is_empty() {
+                let mut static_props = ArenaVec::new_in(ast);
+                for (k, v) in static_attrs {
+                    static_props.push(ObjectPropertyKind::new_object_property(
+                        SPAN,
+                        PropertyKind::Init,
+                        PropertyKey::new_string_literal(SPAN, allocator.alloc_str(k), None, ast),
+                        Expression::new_string_literal(SPAN, allocator.alloc_str(v), None, ast),
+                        false,
+                        false,
+                        false,
+                        ast,
+                    ));
+                }
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "staticAttrs", ast),
+                    Expression::new_object_expression(SPAN, static_props, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if !dynamic_attrs.is_empty() {
+                let mut dyn_elems = ArenaVec::new_in(ast);
+                for attr in dynamic_attrs {
+                    dyn_elems.push(ArrayExpressionElement::from(build_dynamic_attr_ast(
+                        ast, allocator, attr,
+                    )));
+                }
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "dynamicAttrs", ast),
+                    Expression::new_array_expression(SPAN, dyn_elems, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if let Some(close_idx) = close_index {
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "closeIndex", ast),
+                    Expression::new_numeric_literal(
+                        SPAN,
+                        *close_idx as f64,
+                        None,
+                        NumberBase::Decimal,
+                        ast,
+                    ),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+        }
+        SsrOpcode::CloseElement { tag } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("close"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "tag", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(tag), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+        }
+        SsrOpcode::Text { value } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("text"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "value", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(value), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+        }
+        SsrOpcode::Comment { value } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("comment"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "value", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(value), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+        }
+        SsrOpcode::DynamicPart { index } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("part"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "index", ast),
+                Expression::new_numeric_literal(
+                    SPAN,
+                    *index as f64,
+                    None,
+                    NumberBase::Decimal,
+                    ast,
+                ),
+                false,
+                false,
+                false,
+                ast,
+            ));
+        }
+        SsrOpcode::RangeMarkerStart { name, h } => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(
+                    SPAN,
+                    allocator.alloc_str("marker-start"),
+                    None,
+                    ast,
+                ),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "name", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(name), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            if let Some(h_val) = h {
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "h", ast),
+                    Expression::new_string_literal(SPAN, allocator.alloc_str(h_val), None, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+        }
+        SsrOpcode::RangeMarkerEnd => {
+            props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "type", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str("marker-end"), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+        }
+    }
+    Expression::new_object_expression(SPAN, props, ast)
+}
+
+fn build_marker_site_ast<'a>(
+    ast: &AstBuilder<'a>,
+    allocator: &'a Allocator,
+    site: &SsrMarkerSite,
+) -> Expression<'a> {
+    let mut props = ArenaVec::new_in(ast);
+    props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "name", ast),
+        Expression::new_string_literal(SPAN, allocator.alloc_str(&site.name), None, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+    props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "index", ast),
+        Expression::new_numeric_literal(SPAN, site.index as f64, None, NumberBase::Decimal, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+    props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "parentPath", ast),
+        build_u32_array_ast(ast, &site.parent_path),
+        false,
+        false,
+        false,
+        ast,
+    ));
+    props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "startPath", ast),
+        build_u32_array_ast(ast, &site.start_path),
+        false,
+        false,
+        false,
+        ast,
+    ));
+    Expression::new_object_expression(SPAN, props, ast)
+}
+
+fn build_part_descriptor_ast<'a>(
+    ast: &AstBuilder<'a>,
+    allocator: &'a Allocator,
+    part: &PartDescriptor,
+) -> Expression<'a> {
+    let mut props = ArenaVec::new_in(ast);
+    props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "index", ast),
+        Expression::new_numeric_literal(SPAN, part.index as f64, None, NumberBase::Decimal, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+    props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "path", ast),
+        build_u32_array_ast(ast, &part.path),
+        false,
+        false,
+        false,
+        ast,
+    ));
+    props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "isAttribute", ast),
+        Expression::new_boolean_literal(SPAN, part.is_attribute, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+    if let Some(ref tag) = part.target_tag {
+        props.push(ObjectPropertyKind::new_object_property(
+            SPAN,
+            PropertyKind::Init,
+            PropertyKey::new_static_identifier(SPAN, "targetTag", ast),
+            Expression::new_string_literal(SPAN, allocator.alloc_str(tag), None, ast),
+            false,
+            false,
+            false,
+            ast,
+        ));
+    }
+
+    let mut addr_props = ArenaVec::new_in(ast);
+    addr_props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "type", ast),
+        Expression::new_string_literal(
+            SPAN,
+            allocator.alloc_str(part.addressing.type_name()),
+            None,
+            ast,
+        ),
+        false,
+        false,
+        false,
+        ast,
+    ));
+    addr_props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "kind", ast),
+        Expression::new_string_literal(
+            SPAN,
+            allocator.alloc_str(part.addressing.kind()),
+            None,
+            ast,
+        ),
+        false,
+        false,
+        false,
+        ast,
+    ));
+    match &part.addressing {
+        PartAddressing::ElementAnchored {
+            path,
+            target_tag,
+            attr_name,
+            prefix,
+            indices,
+            strings,
+        } => {
+            addr_props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "path", ast),
+                build_u32_array_ast(ast, path),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            if let Some(tag) = target_tag {
+                addr_props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "targetTag", ast),
+                    Expression::new_string_literal(SPAN, allocator.alloc_str(tag), None, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if let Some(name) = attr_name {
+                addr_props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "attrName", ast),
+                    Expression::new_string_literal(SPAN, allocator.alloc_str(name), None, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if let Some(pre) = prefix {
+                addr_props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "prefix", ast),
+                    Expression::new_string_literal(SPAN, allocator.alloc_str(pre), None, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if let Some(idx_list) = indices {
+                let mut idx_elems = ArenaVec::new_in(ast);
+                for i in idx_list {
+                    idx_elems.push(ArrayExpressionElement::from(
+                        Expression::new_numeric_literal(
+                            SPAN,
+                            *i as f64,
+                            None,
+                            NumberBase::Decimal,
+                            ast,
+                        ),
+                    ));
+                }
+                addr_props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "indices", ast),
+                    Expression::new_array_expression(SPAN, idx_elems, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if let Some(str_list) = strings {
+                let mut str_elems = ArenaVec::new_in(ast);
+                for s in str_list {
+                    str_elems.push(ArrayExpressionElement::from(
+                        Expression::new_string_literal(SPAN, allocator.alloc_str(s), None, ast),
+                    ));
+                }
+                addr_props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "strings", ast),
+                    Expression::new_array_expression(SPAN, str_elems, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+        }
+        PartAddressing::SoleTextChild {
+            parent_path,
+            parent_tag,
+        } => {
+            addr_props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "parentPath", ast),
+                build_u32_array_ast(ast, parent_path),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            if let Some(tag) = parent_tag {
+                addr_props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "parentTag", ast),
+                    Expression::new_string_literal(SPAN, allocator.alloc_str(tag), None, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+        }
+        PartAddressing::RangeMarker {
+            name,
+            start_path,
+            parent_path,
+        } => {
+            addr_props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "name", ast),
+                Expression::new_string_literal(SPAN, allocator.alloc_str(name), None, ast),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            addr_props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "startPath", ast),
+                build_u32_array_ast(ast, start_path),
+                false,
+                false,
+                false,
+                ast,
+            ));
+            addr_props.push(ObjectPropertyKind::new_object_property(
+                SPAN,
+                PropertyKind::Init,
+                PropertyKey::new_static_identifier(SPAN, "parentPath", ast),
+                build_u32_array_ast(ast, parent_path),
+                false,
+                false,
+                false,
+                ast,
+            ));
+        }
+    }
+    props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "addressing", ast),
+        Expression::new_object_expression(SPAN, addr_props, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+
+    Expression::new_object_expression(SPAN, props, ast)
+}
+
+fn build_ssr_plan_ast<'a>(
+    ast: &AstBuilder<'a>,
+    allocator: &'a Allocator,
+    plan: &SsrTemplatePlan,
+) -> Expression<'a> {
+    let mut plan_props = ArenaVec::new_in(ast);
+
+    // v: 2
+    plan_props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "v", ast),
+        Expression::new_numeric_literal(SPAN, plan.v as f64, None, NumberBase::Decimal, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+
+    // h: "..."
+    plan_props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "h", ast),
+        Expression::new_string_literal(SPAN, allocator.alloc_str(&plan.h), None, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+
+    // opcodes: [...]
+    let mut opcode_elems = ArenaVec::new_in(ast);
+    for op in &plan.opcodes {
+        opcode_elems.push(ArrayExpressionElement::from(build_opcode_ast(
+            ast, allocator, op,
+        )));
+    }
+    plan_props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "opcodes", ast),
+        Expression::new_array_expression(SPAN, opcode_elems, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+
+    // markerSites: [...]
+    let mut marker_elems = ArenaVec::new_in(ast);
+    for site in &plan.marker_sites {
+        marker_elems.push(ArrayExpressionElement::from(build_marker_site_ast(
+            ast, allocator, site,
+        )));
+    }
+    plan_props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "markerSites", ast),
+        Expression::new_array_expression(SPAN, marker_elems, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+
+    // parts: [...]
+    let mut part_elems = ArenaVec::new_in(ast);
+    for part in &plan.parts {
+        part_elems.push(ArrayExpressionElement::from(build_part_descriptor_ast(
+            ast, allocator, part,
+        )));
+    }
+    plan_props.push(ObjectPropertyKind::new_object_property(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::new_static_identifier(SPAN, "parts", ast),
+        Expression::new_array_expression(SPAN, part_elems, ast),
+        false,
+        false,
+        false,
+        ast,
+    ));
+
+    Expression::new_object_expression(SPAN, plan_props, ast)
 }

@@ -32,6 +32,7 @@ export type {
   LitPluginOptions,
   LitPropsLowerOptions,
   LitResumableOptions,
+  LitServerElementsOptions,
   LitSsrOptions,
   LitTagShakeOptions,
   LitVitePluginOptions,
@@ -39,6 +40,7 @@ export type {
   NativeOptions,
   PropsLowerOptions,
   ResumableOptions,
+  ServerElementsOptions,
   SsrIslandsOptions,
   SsrOptions,
   SsrPrerenderOptions,
@@ -74,12 +76,24 @@ export {
   litNative,
   litPropsLower,
   litResumable,
+  litServerElements,
   litSsr,
   litTagShake,
   memoize,
   native,
   propsLower,
   resumable,
+  serverElements,
   ssr,
   tagShake,
 } from './plugin.js';
+export {
+  type DiscoveredServerElement,
+  generateWorkerEntryCode,
+  isSsrEnvironment,
+  LIT_SERVER_ELEMENTS_FAST_CHECK,
+} from './plugins/server-elements.js';
+export {
+  EXECUTOR_SOURCE,
+  getVirtualLitCoreModule,
+} from './virtual.js';

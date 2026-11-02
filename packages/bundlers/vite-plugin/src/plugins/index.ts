@@ -12,5 +12,6 @@ export { litVirtual, litVirtualPlugin } from './lit-virtual.js';
 export { litMemoize, memoize } from './memoize.js';
 export { litNative, native } from './native.js';
 export { litPropsLower, propsLower } from './props-lower.js';
+export { litServerElements, serverElements } from './server-elements.js';
 export { litSsr, ssr } from './ssr.js';
 export { litTagShake, tagShake } from './tag-shake.js';

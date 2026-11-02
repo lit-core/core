@@ -158,6 +158,59 @@ export interface CssMinifierOptions {
 
 export type LitCssMinifierOptions = CssMinifierOptions;
 
+export interface ServerElementsOptions {
+  /**
+   * Action route prefix for dev server middleware and action execution.
+   * @default '/_lit/a/'
+   */
+  actionRoutePrefix?: string;
+
+  /**
+   * HMAC secret for signing server state snapshots.
+   * @default 'lit-dev-insecure-secret-key-32b!'
+   */
+  secret?: string;
+
+  /**
+   * Target environment override ('auto' | 'client' | 'worker' | 'server').
+   * @default 'auto'
+   */
+  target?: 'auto' | 'client' | 'worker' | 'server';
+
+  /**
+   * File patterns to include.
+   * Defaults to [/\.[jt]sx?$/].
+   */
+  include?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * File patterns to exclude.
+   * Defaults to [/node_modules/].
+   */
+  exclude?: (string | RegExp)[] | string | RegExp;
+
+  /**
+   * Auto-inject client patch executor into HTML and entry modules (Invariant 8).
+   * @default true
+   */
+  autoInjectExecutor?: boolean;
+
+  /**
+   * Auto-inject official Lit Declarative Shadow DOM hydration support (`virtual:lit-core/hydrate-support`)
+   * into client entry modules.
+   * @default false (enabled automatically by `litCoreVitePlugin()`)
+   */
+  autoInjectHydrate?: boolean;
+
+  /**
+   * Emit lit-manifest.json build asset and virtual module.
+   * @default true
+   */
+  emitManifest?: boolean;
+}
+
+export type LitServerElementsOptions = ServerElementsOptions;
+
 export interface LitPluginOptions {
   /**
    * Cross-component CSS AST deduplication and constructable stylesheet sharing.
@@ -184,6 +237,19 @@ export interface LitPluginOptions {
    * Kebab-case alias for `htmlFuse`.
    */
   'html-fuse'?: boolean | HtmlFuseOptions;
+
+  /**
+   * Lit server elements ahead-of-time compiler and runtime integration.
+   * Splits components with @loader() and @action() into client and worker artifacts.
+   * Pass `true` or a `ServerElementsOptions` object.
+   * @default true
+   */
+  serverElements?: boolean | ServerElementsOptions;
+
+  /**
+   * Kebab-case alias for `serverElements`.
+   */
+  'server-elements'?: boolean | ServerElementsOptions;
 
   /**
    * Native Rust AOT AST lowering for Lit decorators and properties via OXC.
@@ -349,6 +415,13 @@ export interface LitPluginOptions {
    * Kebab-case alias for `ssr`.
    */
   'lit-ssr'?: boolean | SsrOptions;
+
+  /**
+   * Auto-inject non-destructive Declarative Shadow DOM hydration support (`virtual:lit-core/hydrate-support`)
+   * once into client entry modules (Invariant 8).
+   * @default true (unless `ssr: false` or `native: true`)
+   */
+  hydrate?: boolean;
 }
 
 export interface ResumableOptions {
@@ -464,6 +537,13 @@ export type LitElemProxyOptions = ElemProxyOptions;
 
 export interface HtmlAotOptions {
   /**
+   * Minify template whitespace before compiling. Defaults to true.
+   * Must be false whenever another pass computed DOM addresses from the original template text,
+   * as the server element split does: the SSR plan has to describe exactly the bytes that pass saw.
+   */
+  minify?: boolean;
+
+  /**
    * File patterns to include.
    * Defaults to [/\.[jt]sx?$/].
    */
@@ -480,6 +560,18 @@ export interface HtmlAotOptions {
    * @default false
    */
   sourcemap?: boolean;
+
+  /**
+   * Emit serialized `ssrPlan` bytecode on compiled templates for server and edge rendering.
+   * Defaults to `false` on client builds and `true` on SSR or worker builds.
+   */
+  ssr?: boolean;
+
+  /**
+   * Fail the build when a static `html` template cannot be compiled into an `ssrPlan`.
+   * Defaults to `true` when `ssr` is enabled.
+   */
+  strictSsr?: boolean;
 }
 
 export type LitHtmlAotOptions = HtmlAotOptions;
@@ -753,6 +845,12 @@ export interface SsrOptions {
    * @default true
    */
   sourcemap?: boolean;
+
+  /**
+   * Auto-inject `virtual:lit-core/hydrate-support` into client entry modules.
+   * @default true
+   */
+  hydrate?: boolean;
 }
 
 export type LitSsrOptions = SsrOptions;

@@ -4,7 +4,95 @@ use html5ever::driver::ParseOpts;
 use html5ever::tendril::TendrilSink;
 use html5ever::{QualName, local_name, namespace_url, ns, parse_fragment};
 use markup5ever_rcdom::{Handle, NodeData, RcDom};
-use serde::{Deserialize, Serialize};
+use serde::de::{MapAccess, Visitor};
+use serde::ser::SerializeMap;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
+
+/// Deterministic, source-ordered attribute map that serializes as a JSON object
+/// in exact insertion order without `HashMap` randomization across processes.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct OrderedAttrs(pub Vec<(String, String)>);
+
+impl OrderedAttrs {
+    pub fn new() -> Self {
+        Self(Vec::new())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn insert(&mut self, key: String, val: String) {
+        if let Some(existing) = self.0.iter_mut().find(|(k, _)| k == &key) {
+            existing.1 = val;
+        } else {
+            self.0.push((key, val));
+        }
+    }
+
+    pub fn get(&self, key: &str) -> Option<&String> {
+        self.0.iter().find(|(k, _)| k == key).map(|(_, v)| v)
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, (String, String)> {
+        self.0.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a OrderedAttrs {
+    type Item = &'a (String, String);
+    type IntoIter = std::slice::Iter<'a, (String, String)>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
+    }
+}
+
+impl Serialize for OrderedAttrs {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let mut map = serializer.serialize_map(Some(self.0.len()))?;
+        for (k, v) in &self.0 {
+            map.serialize_entry(k, v)?;
+        }
+        map.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for OrderedAttrs {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct OrderedAttrsVisitor;
+
+        impl<'de> Visitor<'de> for OrderedAttrsVisitor {
+            type Value = OrderedAttrs;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a string-to-string attribute map")
+            }
+
+            fn visit_map<M: MapAccess<'de>>(self, mut access: M) -> Result<Self::Value, M::Error> {
+                let mut entries = Vec::with_capacity(access.size_hint().unwrap_or(0));
+                while let Some((k, v)) = access.next_entry::<String, String>()? {
+                    if let Some(existing) = entries
+                        .iter_mut()
+                        .find(|(ek, _): &&mut (String, String)| ek == &k)
+                    {
+                        existing.1 = v;
+                    } else {
+                        entries.push((k, v));
+                    }
+                }
+                Ok(OrderedAttrs(entries))
+            }
+        }
+
+        deserializer.deserialize_map(OrderedAttrsVisitor)
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ElementNamespace {
@@ -537,8 +625,19 @@ impl TemplateParser {
         hole_index: usize,
         fallback_name: &str,
     ) -> (AttributePrefix, String) {
+        let (fallback_prefix, fallback_clean) =
+            if let Some(stripped) = fallback_name.strip_prefix('.') {
+                (AttributePrefix::Property, stripped)
+            } else if let Some(stripped) = fallback_name.strip_prefix('@') {
+                (AttributePrefix::Event, stripped)
+            } else if let Some(stripped) = fallback_name.strip_prefix('?') {
+                (AttributePrefix::Boolean, stripped)
+            } else {
+                (AttributePrefix::Plain, fallback_name)
+            };
+
         if hole_index >= quasis.len() {
-            return (AttributePrefix::Plain, fallback_name.to_string());
+            return (fallback_prefix, fallback_clean.to_string());
         }
 
         let quasi = quasis[hole_index];
@@ -597,16 +696,20 @@ impl TemplateParser {
         token_chars.reverse();
         let token: String = token_chars.into_iter().collect();
 
-        if let Some(stripped) = token.strip_prefix('.') {
-            (AttributePrefix::Property, stripped.to_string())
+        let (token_prefix, token_clean) = if let Some(stripped) = token.strip_prefix('.') {
+            (AttributePrefix::Property, stripped)
         } else if let Some(stripped) = token.strip_prefix('@') {
-            (AttributePrefix::Event, stripped.to_string())
+            (AttributePrefix::Event, stripped)
         } else if let Some(stripped) = token.strip_prefix('?') {
-            (AttributePrefix::Boolean, stripped.to_string())
-        } else if !token.is_empty() {
-            (AttributePrefix::Plain, token)
+            (AttributePrefix::Boolean, stripped)
         } else {
-            (AttributePrefix::Plain, fallback_name.to_string())
+            (AttributePrefix::Plain, token.as_str())
+        };
+
+        if !token_clean.is_empty() && token_clean.eq_ignore_ascii_case(fallback_clean) {
+            (token_prefix, token_clean.to_string())
+        } else {
+            (fallback_prefix, fallback_clean.to_string())
         }
     }
 

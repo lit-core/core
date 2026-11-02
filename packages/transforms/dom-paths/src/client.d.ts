@@ -25,3 +25,26 @@ export declare function resolveNodesByPaths(root: Node, paths: number[][]): Node
  * @param callback Callback invoked for each resolved part node
  */
 export declare function preparePartsWithPaths<T = Node>(root: Node, paths: number[][], callback?: (node: Node, index: number) => T): T[];
+/**
+ * Resolves the parent element for a sole text child part, enabling fast O(1)
+ * direct updates via parentEl.textContent = val without indexing child nodes.
+ *
+ * @param root The root container node (ShadowRoot or Element)
+ * @param parentPath Structural child index path to the parent element
+ * @returns The resolved parent Element
+ */
+export declare function resolveSoleTextParent(root: Node, parentPath: number[]): Element;
+/**
+ * Resolves the start and end markers (<?start name="pN"> and <?end>)
+ * for a range-addressed dynamic expression, supporting both ProcessingInstruction
+ * nodes (WHATWG HTML5 / WICG type 7) and Comment nodes (type 8).
+ *
+ * @param root The root container node (ShadowRoot or Element)
+ * @param markerName Name of the part (e.g. "p0")
+ * @param startPath Optional direct structural path to the start marker
+ * @returns Object containing the start and end marker Nodes
+ */
+export declare function resolveRangeMarkers(root: Node, markerName: string, startPath?: number[]): {
+    start: Node;
+    end: Node;
+};

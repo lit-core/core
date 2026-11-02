@@ -1,5 +1,6 @@
+import { html } from 'lit';
 import { describe, expect, it } from 'vitest';
-import { createIsolateEnvironment, getSsrEngine } from '../ssr-harness.js';
+import { buildRegisteredComponentFixture, createIsolateEnvironment, getSsrEngine } from '../ssr-harness.js';
 
 describe('@lit-core/ssr pure V8 isolate environment test suite', () => {
   // =========================================================================
@@ -192,17 +193,16 @@ describe('@lit-core/ssr pure V8 isolate environment test suite', () => {
       const engine = await getSsrEngine();
       const env = engine.createIsolateEnvironment();
 
-      class StreamComp extends env.HTMLElement {}
+      class StreamComp extends env.HTMLElement {
+        render() {
+          return html`<p>Rendered within isolate environment</p>`;
+        }
+      }
       env.customElements.define('isolate-stream-comp', StreamComp);
 
-      const stream = engine.renderToStream(
-        {
-          tagName: 'isolate-stream-comp',
-          shadowHtml: '<p>Rendered within isolate environment</p>',
-          attributes: { 'data-isolate': 'true' },
-        },
-        { customElements: env.customElements },
-      );
+      const stream = engine.renderToStream(html`<isolate-stream-comp data-isolate="true"></isolate-stream-comp>`, {
+        customElements: env.customElements,
+      });
 
       const reader = stream.getReader();
       const chunks: string[] = [];
@@ -224,46 +224,47 @@ describe('@lit-core/ssr pure V8 isolate environment test suite', () => {
     it('renders isolate custom element carrying resumable state snapshot and DOM paths', async () => {
       const engine = await getSsrEngine();
       const env = engine.createIsolateEnvironment();
-
-      const html = await engine.collectResult(
-        engine.render(
-          {
-            tagName: 'isolate-resumable-comp',
-            shadowHtml: '<button>Click</button>',
-            state: { count: 10, isolateMode: true },
-          },
-          {
-            customElements: env.customElements,
-            resumable: true,
-            domPaths: true,
-          },
-        ),
+      const fixture = buildRegisteredComponentFixture(
+        {
+          tagName: 'isolate-resumable-comp',
+          shadowHtml: '<button>Click</button>',
+          state: { count: 10, isolateMode: true },
+        },
+        env.customElements,
       );
 
-      expect(html).toContain('data-lit-paths="true"');
-      expect(html).toContain('<script type="lit/state">');
-      expect(html).toContain('"isolateMode":true');
-      expect(html).not.toContain('<!--lit-part');
+      const htmlOut = await engine.collectResult(
+        engine.render(fixture.template, {
+          ...fixture.options,
+          resumable: true,
+          domPaths: true,
+        }),
+      );
+
+      expect(htmlOut).toContain('data-lit-paths="true"');
+      expect(htmlOut).toContain('data-lit-state="');
+      expect(htmlOut).not.toContain('<script type="lit/state">');
+      expect(htmlOut).toContain('&quot;isolateMode&quot;:true');
+      expect(htmlOut).not.toContain('<!--lit-part');
     });
 
     it('renders slotted elements inside isolate environment with clean DSD emission', async () => {
       const engine = await getSsrEngine();
       const env = engine.createIsolateEnvironment();
-
-      const html = await engine.collectResult(
-        engine.render(
-          {
-            tagName: 'isolate-slot-host',
-            shadowHtml: '<div class="host-inner"><slot name="badge"></slot><slot></slot></div>',
-            lightDom: [{ slot: 'badge', content: '<span class="badge">New</span>' }, { content: '<p>Main isolate content</p>' }],
-          },
-          { customElements: env.customElements },
-        ),
+      const fixture = buildRegisteredComponentFixture(
+        {
+          tagName: 'isolate-slot-host',
+          shadowHtml: '<div class="host-inner"><slot name="badge"></slot><slot></slot></div>',
+          lightDom: [{ slot: 'badge', content: '<span class="badge">New</span>' }, { content: '<p>Main isolate content</p>' }],
+        },
+        env.customElements,
       );
 
-      expect(html).toContain('<span class="badge">New</span>');
-      expect(html).toContain('<p>Main isolate content</p>');
-      expect(html).not.toContain('<!--lit-part');
+      const htmlOut = await engine.collectResult(engine.render(fixture.template, fixture.options));
+
+      expect(htmlOut).toContain('<span slot="badge" class="badge">New</span>');
+      expect(htmlOut).toContain('<p>Main isolate content</p>');
+      expect(htmlOut).not.toContain('<!--lit-part');
     });
 
     it('executes parallel isolate stream rendering without shared state corruption', async () => {
@@ -271,13 +272,14 @@ describe('@lit-core/ssr pure V8 isolate environment test suite', () => {
       const env = engine.createIsolateEnvironment();
 
       const tasks = Array.from({ length: 5 }, async (_, i) => {
-        const stream = engine.renderToStream(
+        const fixture = buildRegisteredComponentFixture(
           {
             tagName: `parallel-isolate-${i}`,
             shadowHtml: `<span>Worker ${i}</span>`,
           },
-          { customElements: env.customElements },
+          env.customElements,
         );
+        const stream = engine.renderToStream(fixture.template, fixture.options);
 
         const reader = stream.getReader();
         const decoder = new TextDecoder();

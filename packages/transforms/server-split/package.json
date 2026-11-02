@@ -1,0 +1,37 @@
+{
+  "name": "@lit-core/server-split",
+  "version": "0.1.0",
+  "description": "Native Rust AOT server/client component splitter and schema validator for Lit server elements",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "*.node"
+  ],
+  "license": "MIT",
+  "napi": {
+    "binaryName": "server-split",
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "scripts": {
+    "build": "node ../../../scripts/build-native.mjs server-split --release",
+    "build:debug": "node ../../../scripts/build-native.mjs server-split",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.10.9",
+    "vitest": "^5.0.5"
+  }
+}

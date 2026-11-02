@@ -10,13 +10,14 @@ pub fn build_loader_program<'a>(
     events: &[String],
     idle_hydration: bool,
     idle_timeout: u32,
+    islands: bool,
 ) -> Program<'a> {
     let mut iife_stmts = ArenaVec::new_in(ast);
 
     // Statement 1: const W = window, D = document, C = customElements, R = '__lit_resumed__';
     iife_stmts.push(build_globals_decl(ast));
 
-    // Statement 2: const M = W.__LIT_RESUMABLE_MANIFEST__ || { ... }, B = [], L = {};
+    // Statement 2: const M = W.__LIT_RESUMABLE_MANIFEST__ || W.__LIT_ISLANDS_MANIFEST__ || { ... }, B = [], L = {};
     iife_stmts.push(build_state_decl(ast, manifest));
 
     // Statement 3: const uG = (t) => ...;
@@ -31,7 +32,12 @@ pub fn build_loader_program<'a>(
     // Statement 6: events.forEach((t) => { W.addEventListener(t, hI, true); });
     iife_stmts.push(build_events_listener_stmt(ast, events));
 
-    // Statement 7: idle hydration (only if idle_hydration == true)
+    // Statement 7: islands load/idle/visible triggers (only if islands == true)
+    if islands {
+        iife_stmts.push(build_islands_stmt(ast));
+    }
+
+    // Statement 8: idle hydration (only if idle_hydration == true)
     if idle_hydration {
         iife_stmts.push(build_idle_hydration_stmt(ast, idle_timeout));
     }
@@ -126,7 +132,7 @@ fn build_globals_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
 fn build_state_decl<'a>(ast: &AstBuilder<'a>, manifest: &HashMap<String, String>) -> Statement<'a> {
     let mut decls = ArenaVec::new_in(ast);
 
-    // M = W.__LIT_RESUMABLE_MANIFEST__ || { ... }
+    // M = W.__LIT_RESUMABLE_MANIFEST__ || W.__LIT_ISLANDS_MANIFEST__ || { ... }
     let w_manifest = Expression::new_static_member_expression(
         SPAN,
         Expression::new_identifier(SPAN, "W", ast),
@@ -134,8 +140,18 @@ fn build_state_decl<'a>(ast: &AstBuilder<'a>, manifest: &HashMap<String, String>
         false,
         ast,
     );
+    let w_islands_manifest = Expression::new_static_member_expression(
+        SPAN,
+        Expression::new_identifier(SPAN, "W", ast),
+        IdentifierName::new(SPAN, "__LIT_ISLANDS_MANIFEST__", ast),
+        false,
+        ast,
+    );
+    let mut sorted_entries: Vec<(&String, &String)> = manifest.iter().collect();
+    sorted_entries.sort_by(|a, b| a.0.cmp(b.0));
+
     let mut manifest_props = ArenaVec::new_in(ast);
-    for (tag, url) in manifest {
+    for (tag, url) in sorted_entries {
         let key = PropertyKey::new_string_literal(SPAN, ast.allocator().alloc_str(tag), None, ast);
         let val = Expression::new_string_literal(SPAN, ast.allocator().alloc_str(url), None, ast);
         let prop = ObjectPropertyKind::new_object_property(
@@ -151,9 +167,16 @@ fn build_state_decl<'a>(ast: &AstBuilder<'a>, manifest: &HashMap<String, String>
         manifest_props.push(prop);
     }
     let manifest_obj = Expression::new_object_expression(SPAN, manifest_props, ast);
-    let m_init = Expression::new_logical_expression(
+    let m_or_islands = Expression::new_logical_expression(
         SPAN,
         w_manifest,
+        LogicalOperator::Or,
+        w_islands_manifest,
+        ast,
+    );
+    let m_init = Expression::new_logical_expression(
+        SPAN,
+        m_or_islands,
         LogicalOperator::Or,
         manifest_obj,
         ast,
@@ -439,14 +462,14 @@ fn build_it_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
     let local_chain =
         Expression::new_chain_expression(SPAN, ChainElement::CallExpression(includes_call), ast);
 
-    // /tabindex|data-resumable|resumes-/.test(e.getAttributeNames?.())
+    // /tabindex|data-resumable|data-island|resumes-/.test(e.getAttributeNames?.())
     let re2 = Expression::new_reg_exp_literal(
         SPAN,
         RegExp {
             pattern: RegExpPattern {
                 text: ast
                     .allocator()
-                    .alloc_str("tabindex|data-resumable|resumes-")
+                    .alloc_str("tabindex|data-resumable|data-island|resumes-")
                     .into(),
                 pattern: None,
             },
@@ -610,35 +633,78 @@ fn build_hi_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
         ast,
     ));
 
-    // 4. const u = [...new Set(p.map((l) => l.localName).filter((n) => n?.includes('-') && !C.get(n)))];
-    // Arrow 1: (l) => l.localName
-    let mut l_params = ArenaVec::new_in(ast);
-    l_params.push(FormalParameter::new_plain(
+    // 4. const u = [...new Set(p.map((l) => (l?.getAttribute?.('data-island-src') && (M[l.localName] ||= l.getAttribute('data-island-src')), l?.localName)).filter((n) => n?.includes('-') && !C.get(n) && M[n]))];
+    let mut l_get_attr_args1 = ArenaVec::new_in(ast);
+    l_get_attr_args1.push(Argument::from(Expression::new_string_literal(
         SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "l", ast),
+        "data-island-src",
+        None,
         ast,
-    ));
-    let l_arrow = Expression::new_arrow_function_expression(
+    )));
+    let l_get_attr_member = MemberExpression::new_static_member_expression(
         SPAN,
-        false,
-        None,
-        FormalParameters::boxed(
-            SPAN,
-            FormalParameterKind::ArrowFormalParameters,
-            l_params,
-            None,
-            ast,
-        ),
-        None,
-        ArrowFunctionBody::from(Expression::new_static_member_expression(
-            SPAN,
-            Expression::new_identifier(SPAN, "l", ast),
-            IdentifierName::new(SPAN, "localName", ast),
-            false,
-            ast,
-        )),
+        Expression::new_identifier(SPAN, "l", ast),
+        IdentifierName::new(SPAN, "getAttribute", ast),
+        true,
         ast,
     );
+    let l_get_attr_call1 = CallExpression::boxed(
+        SPAN,
+        Expression::from(l_get_attr_member),
+        None,
+        l_get_attr_args1,
+        true,
+        ast,
+    );
+    let l_get_attr_chain =
+        Expression::new_chain_expression(SPAN, ChainElement::CallExpression(l_get_attr_call1), ast);
+
+    let l_get_attr_direct = call(
+        ast,
+        member(ast, ident(ast, "l"), "getAttribute"),
+        vec![Expression::new_string_literal(
+            SPAN,
+            "data-island-src",
+            None,
+            ast,
+        )],
+    );
+    let assign_m_src = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::LogicalOr,
+        AssignmentTarget::new_computed_member_expression(
+            SPAN,
+            ident(ast, "M"),
+            member(ast, ident(ast, "l"), "localName"),
+            false,
+            ast,
+        ),
+        l_get_attr_direct,
+        ast,
+    );
+    let maybe_assign_src = Expression::new_logical_expression(
+        SPAN,
+        l_get_attr_chain,
+        LogicalOperator::And,
+        assign_m_src,
+        ast,
+    );
+    let l_local_chain = Expression::new_chain_expression(
+        SPAN,
+        ChainElement::new_static_member_expression(
+            SPAN,
+            ident(ast, "l"),
+            IdentifierName::new(SPAN, "localName", ast),
+            true,
+            ast,
+        ),
+        ast,
+    );
+    let mut l_seq = ArenaVec::new_in(ast);
+    l_seq.push(maybe_assign_src);
+    l_seq.push(l_local_chain);
+    let l_body = Expression::new_sequence_expression(SPAN, l_seq, ast);
+    let l_arrow = arrow(ast, &["l"], l_body);
     let p_map = Expression::new_static_member_expression(
         SPAN,
         Expression::new_identifier(SPAN, "p", ast),
@@ -1910,6 +1976,290 @@ fn build_idle_hydration_stmt<'a>(ast: &AstBuilder<'a>, timeout: u32) -> Statemen
     q_args2.push(Argument::from(timeout_obj2));
     let call_q2 = Expression::new_call_expression(SPAN, q_ident2, None, q_args2, false, ast);
     stmts.push(Statement::new_expression_statement(SPAN, call_q2, ast));
+
+    Statement::new_block_statement(SPAN, stmts, ast)
+}
+
+fn build_islands_stmt<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
+    let mut stmts = ArenaVec::new_in(ast);
+
+    // const h = (l) => { const s = l.getAttribute("data-island-src"); if (s) M[l.localName] ||= s; uG(l.localName); };
+    let mut h_stmts = ArenaVec::new_in(ast);
+    let s_call = call(
+        ast,
+        member(ast, ident(ast, "l"), "getAttribute"),
+        vec![Expression::new_string_literal(
+            SPAN,
+            "data-island-src",
+            None,
+            ast,
+        )],
+    );
+    let mut s_decls = ArenaVec::new_in(ast);
+    s_decls.push(VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "s", ast),
+        None,
+        Some(s_call),
+        false,
+        ast,
+    ));
+    h_stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        s_decls,
+        false,
+        ast,
+    ));
+
+    let assign_m = Expression::new_assignment_expression(
+        SPAN,
+        AssignmentOperator::LogicalOr,
+        AssignmentTarget::new_computed_member_expression(
+            SPAN,
+            ident(ast, "M"),
+            member(ast, ident(ast, "l"), "localName"),
+            false,
+            ast,
+        ),
+        ident(ast, "s"),
+        ast,
+    );
+    h_stmts.push(Statement::new_if_statement(
+        SPAN,
+        ident(ast, "s"),
+        Statement::new_expression_statement(SPAN, assign_m, ast),
+        None,
+        ast,
+    ));
+    h_stmts.push(Statement::new_expression_statement(
+        SPAN,
+        call(
+            ast,
+            ident(ast, "uG"),
+            vec![member(ast, ident(ast, "l"), "localName")],
+        ),
+        ast,
+    ));
+
+    let mut h_params = ArenaVec::new_in(ast);
+    h_params.push(FormalParameter::new_plain(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "l", ast),
+        ast,
+    ));
+    let h_fn = Expression::new_arrow_function_expression(
+        SPAN,
+        false,
+        None,
+        FormalParameters::boxed(
+            SPAN,
+            FormalParameterKind::ArrowFormalParameters,
+            h_params,
+            None,
+            ast,
+        ),
+        None,
+        ArrowFunctionBody::FunctionBody(FunctionBody::boxed(
+            SPAN,
+            ArenaVec::new_in(ast),
+            h_stmts,
+            ast,
+        )),
+        ast,
+    );
+    let mut h_decls = ArenaVec::new_in(ast);
+    h_decls.push(VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "h", ast),
+        None,
+        Some(h_fn),
+        false,
+        ast,
+    ));
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        h_decls,
+        false,
+        ast,
+    ));
+
+    // D.querySelectorAll('[data-island="load"]').forEach(h);
+    let qsa_load = call(
+        ast,
+        member(ast, ident(ast, "D"), "querySelectorAll"),
+        vec![Expression::new_string_literal(
+            SPAN,
+            "[data-island=\"load\"]",
+            None,
+            ast,
+        )],
+    );
+    stmts.push(Statement::new_expression_statement(
+        SPAN,
+        call(ast, member(ast, qsa_load, "forEach"), vec![ident(ast, "h")]),
+        ast,
+    ));
+
+    // const q = W.requestIdleCallback || ((c) => setTimeout(c, 1));
+    let fallback_idle = arrow(
+        ast,
+        &["c"],
+        call(
+            ast,
+            ident(ast, "setTimeout"),
+            vec![
+                ident(ast, "c"),
+                Expression::new_numeric_literal(SPAN, 1.0, None, NumberBase::Decimal, ast),
+            ],
+        ),
+    );
+    let q_init = Expression::new_logical_expression(
+        SPAN,
+        member(ast, ident(ast, "W"), "requestIdleCallback"),
+        LogicalOperator::Or,
+        fallback_idle,
+        ast,
+    );
+    let mut q_decls = ArenaVec::new_in(ast);
+    q_decls.push(VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "q", ast),
+        None,
+        Some(q_init),
+        false,
+        ast,
+    ));
+    stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        q_decls,
+        false,
+        ast,
+    ));
+
+    // D.querySelectorAll('[data-island="idle"]').forEach((l) => q(() => h(l)));
+    let qsa_idle = call(
+        ast,
+        member(ast, ident(ast, "D"), "querySelectorAll"),
+        vec![Expression::new_string_literal(
+            SPAN,
+            "[data-island=\"idle\"]",
+            None,
+            ast,
+        )],
+    );
+    let idle_each = arrow(
+        ast,
+        &["l"],
+        call(
+            ast,
+            ident(ast, "q"),
+            vec![arrow(
+                ast,
+                &[],
+                call(ast, ident(ast, "h"), vec![ident(ast, "l")]),
+            )],
+        ),
+    );
+    stmts.push(Statement::new_expression_statement(
+        SPAN,
+        call(ast, member(ast, qsa_idle, "forEach"), vec![idle_each]),
+        ast,
+    ));
+
+    // if (W.IntersectionObserver) { const o = new IntersectionObserver((es) => es.forEach((n) => n.isIntersecting && (o.unobserve(n.target), h(n.target)))); D.querySelectorAll('[data-island="visible"]').forEach((l) => o.observe(l)); }
+    let mut io_stmts = ArenaVec::new_in(ast);
+    let mut vis_seq = ArenaVec::new_in(ast);
+    vis_seq.push(call(
+        ast,
+        member(ast, ident(ast, "o"), "unobserve"),
+        vec![member(ast, ident(ast, "n"), "target")],
+    ));
+    vis_seq.push(call(
+        ast,
+        ident(ast, "h"),
+        vec![member(ast, ident(ast, "n"), "target")],
+    ));
+    let on_entry = arrow(
+        ast,
+        &["n"],
+        Expression::new_logical_expression(
+            SPAN,
+            member(ast, ident(ast, "n"), "isIntersecting"),
+            LogicalOperator::And,
+            Expression::new_sequence_expression(SPAN, vis_seq, ast),
+            ast,
+        ),
+    );
+    let io_cb = arrow(
+        ast,
+        &["es"],
+        call(
+            ast,
+            member(ast, ident(ast, "es"), "forEach"),
+            vec![on_entry],
+        ),
+    );
+    let mut new_io_args = ArenaVec::new_in(ast);
+    new_io_args.push(Argument::from(io_cb));
+    let new_io = Expression::new_new_expression(
+        SPAN,
+        ident(ast, "IntersectionObserver"),
+        None,
+        new_io_args,
+        ast,
+    );
+    let mut o_decls = ArenaVec::new_in(ast);
+    o_decls.push(VariableDeclarator::new(
+        SPAN,
+        BindingPattern::new_binding_identifier(SPAN, "o", ast),
+        None,
+        Some(new_io),
+        false,
+        ast,
+    ));
+    io_stmts.push(Statement::new_variable_declaration(
+        SPAN,
+        VariableDeclarationKind::Const,
+        o_decls,
+        false,
+        ast,
+    ));
+
+    let qsa_vis = call(
+        ast,
+        member(ast, ident(ast, "D"), "querySelectorAll"),
+        vec![Expression::new_string_literal(
+            SPAN,
+            "[data-island=\"visible\"]",
+            None,
+            ast,
+        )],
+    );
+    let obs_each = arrow(
+        ast,
+        &["l"],
+        call(
+            ast,
+            member(ast, ident(ast, "o"), "observe"),
+            vec![ident(ast, "l")],
+        ),
+    );
+    io_stmts.push(Statement::new_expression_statement(
+        SPAN,
+        call(ast, member(ast, qsa_vis, "forEach"), vec![obs_each]),
+        ast,
+    ));
+
+    stmts.push(Statement::new_if_statement(
+        SPAN,
+        member(ast, ident(ast, "W"), "IntersectionObserver"),
+        Statement::new_block_statement(SPAN, io_stmts, ast),
+        None,
+        ast,
+    ));
 
     Statement::new_block_statement(SPAN, stmts, ast)
 }

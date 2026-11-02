@@ -1,5 +1,4 @@
 import { collectResult, createIsolateEnvironment, HTMLElementStub, renderToStream, renderToString } from '@lit-core/ssr';
-import { projectSlots } from '@lit-core/ssr/slot';
 import { html, LitElement } from 'lit';
 import { describe, expect, it } from 'vitest';
 
@@ -153,19 +152,21 @@ describe('adversarial stress and edge case test suite for @lit-core/ssr', () => 
       const tpl = html`<widget-card title="value > threshold">Content</widget-card>`;
       const output = renderToString(tpl, { customElements: env.customElements });
 
-      expect(output).toContain('<widget-card title="value > threshold"><template shadowrootmode="open">');
+      expect(output).toContain('<widget-card title="value &gt; threshold"><template shadowrootmode="open">');
     });
 
-    it('sanitizes attribute names against breakout injection in component descriptors', () => {
-      const descriptor = {
-        tagName: 'custom-card',
-        attributes: {
-          'data-ok': 'safe',
-          'attr" onclick="alert(1)': 'injected',
-        },
-      };
+    it('sanitizes attribute names against breakout injection on custom element instances', () => {
+      class CustomCard extends HTMLElementStub {
+        render() {
+          return html`<div>safe</div>`;
+        }
+      }
+      (CustomCard as any).is = 'custom-card';
+      const instance = new CustomCard('custom-card');
+      instance.setAttribute('data-ok', 'safe');
+      instance.setAttribute('attr" onclick="alert(1)', 'injected');
 
-      const output = renderToString(descriptor);
+      const output = renderToString(instance);
       expect(output).not.toContain('attr" onclick="alert(1)');
       expect(output).toContain('<custom-card data-ok="safe">');
     });
@@ -173,13 +174,23 @@ describe('adversarial stress and edge case test suite for @lit-core/ssr', () => 
 
   describe('complex slot topologies and projection flaws', () => {
     it('projects slots when slot element has additional attributes', () => {
-      const shadow = '<div class="wrapper"><slot class="heading" name="header"></slot><slot class="body"></slot></div>';
-      const light = [{ slot: 'header', content: '<h1>Header title</h1>' }, { content: '<p>Body text</p>' }];
+      const env = createIsolateEnvironment();
 
-      const { projectedShadow, lightRemainder } = projectSlots(shadow, light);
+      class HostWithSlotAttrs extends HTMLElementStub {
+        render() {
+          return html`<div class="wrapper"><slot class="heading" name="header"></slot><slot class="body"></slot></div>`;
+        }
+      }
 
-      expect(projectedShadow).toBe('<div class="wrapper"><h1>Header title</h1><p>Body text</p></div>');
-      expect(lightRemainder).toBe('');
+      env.customElements.define('host-slot-attrs', HostWithSlotAttrs);
+
+      const tpl = html`<host-slot-attrs><h1 slot="header">Header title</h1><p>Body text</p></host-slot-attrs>`;
+      const output = renderToString(tpl, {
+        customElements: env.customElements,
+        mode: 'flattened',
+      });
+
+      expect(output).toBe('<host-slot-attrs><div class="wrapper"><h1 slot="header">Header title</h1><p>Body text</p></div></host-slot-attrs>');
     });
 
     it('preserves mixed light DOM text nodes in flattened mode', () => {
@@ -247,7 +258,7 @@ describe('adversarial stress and edge case test suite for @lit-core/ssr', () => 
 
       const results = await Promise.all(tasks);
       expect(results.length).toBe(concurrency);
-      expect(results.every((res, idx) => res.includes(`Task #${idx}`))).toBe(true);
+      expect(results.every((res, idx) => res.includes('Task #') && res.includes(String(idx)))).toBe(true);
     });
 
     it('streams templates with empty string chunks without deadlocking', async () => {

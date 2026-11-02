@@ -8,8 +8,9 @@ import { fuse as fuseHtml } from '@lit-core/html-fuse';
 import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 import { transformLitProps } from '@lit-core/props-lower';
 import { compileResumableLoader } from '@lit-core/resumable/compiler';
-import { renderToDsd } from '@lit-core/resumable/server';
+import { createIsolateEnvironment, renderHtmlDocument } from '@lit-core/ssr';
 import { assertMounted, mountElement } from '@lit-core/test-kit';
+import { html } from 'lit';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { bundleComponentForBrowser, getCanonicalComponent } from './bundler.js';
 import type { ComponentDescriptor } from './components.js';
@@ -389,11 +390,20 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
     describe(`${frameworkName}: resumable DSD rendering and hydration`, () => {
       components.forEach((comp, index) => {
         it(`[resumable ${index + 1}/${components.length}] renders DSD for ${comp.name} and attaches in Chromium`, async () => {
-          const dsdMarkup = renderToDsd({
-            tagName: comp.tag,
-            shadowHtml: `<div class="resumable-inner"><span>${comp.name} SSR</span></div>`,
-            attributes: { 'data-resumable': 'true', id: `resumed-${index}` },
-            state: { componentIndex: index, name: comp.name },
+          const env = createIsolateEnvironment();
+          class ResumableFixture extends env.HTMLElement {
+            static properties = { componentIndex: { type: Number }, name: { type: String } };
+            componentIndex = index;
+            name = comp.name;
+            render() {
+              return html`<div class="resumable-inner"><span>${this.name} SSR</span></div>`;
+            }
+          }
+          env.customElements.define(comp.tag, ResumableFixture);
+
+          const dsdMarkup = renderHtmlDocument(`<${comp.tag} data-resumable="true" id="resumed-${index}"></${comp.tag}>`, {
+            customElements: env.customElements,
+            resumable: true,
           });
 
           expect(dsdMarkup).toContain('shadowrootmode="open"');
@@ -425,11 +435,20 @@ export function createFrameworkTestSuite(frameworkName: string, components: Comp
       it('verifies resumable interaction event recording and replay queue in Chromium', async () => {
         const loaderScript = compileResumableLoader();
 
-        const dsdMarkup = renderToDsd({
-          tagName: canonicalButton.tag,
-          shadowHtml: `<button id="ssr-action-btn" data-action="click">Trigger</button>`,
-          attributes: { id: 'resumable-comp' },
-          state: { active: true },
+        const env = createIsolateEnvironment();
+        class ResumableButtonFixture extends env.HTMLElement {
+          static properties = { active: { type: Boolean } };
+          active = true;
+          onClick() {}
+          render() {
+            return html`<button id="ssr-action-btn" data-action="click" @click=${this.onClick}>Trigger</button>`;
+          }
+        }
+        env.customElements.define(canonicalButton.tag, ResumableButtonFixture);
+
+        const dsdMarkup = renderHtmlDocument(`<${canonicalButton.tag} id="resumable-comp"></${canonicalButton.tag}>`, {
+          customElements: env.customElements,
+          resumable: true,
         });
 
         await page.evaluate(

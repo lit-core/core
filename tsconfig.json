@@ -13,6 +13,7 @@
     { "path": "./packages/rendering/ssr" },
     { "path": "./packages/internal/tests" },
     { "path": "./packages/bundlers/vite-plugin" },
-    { "path": "./packages/bundlers/webpack-plugin" }
+    { "path": "./packages/bundlers/webpack-plugin" },
+    { "path": "./packages/primitives/server-elements" }
   ]
 }

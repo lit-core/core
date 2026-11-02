@@ -1,8 +1,9 @@
 import { launchBrowser } from '@lit-core/test-kit';
+import { html } from 'lit';
 import type { Browser } from 'playwright';
 import { afterAll, describe, expect, it } from 'vitest';
+import { createIsolateEnvironment, renderToString } from '../../ssr/src/index.js';
 import { compileResumableLoader } from '../src/client/compiler.js';
-import { renderToDsd } from '../src/server/dsd-renderer.js';
 
 describe('playwright browser end-to-end resumption tests', () => {
   let browser: Browser | null = null;
@@ -17,24 +18,39 @@ describe('playwright browser end-to-end resumption tests', () => {
     browser = await launchBrowser();
 
     const page = await browser.newPage();
+    const env = createIsolateEnvironment();
 
-    // Generate nested DSD markup
-    const innerButtonDsd = renderToDsd({
-      tagName: 'resumable-button',
-      shadowHtml: `<button id="btn" data-action="onBtnClick">Options</button>`,
-      state: { clicked: false },
+    class ServerResumableButton extends env.HTMLElement {
+      clicked = false;
+      onBtnClick() {}
+      render() {
+        return html`<button id="btn" @click=${this.onBtnClick}>Options</button>`;
+      }
+    }
+
+    class ServerResumableProfile extends env.HTMLElement {
+      role = 'editor';
+      userId = 42;
+      render() {
+        return html`
+          <div class="profile-box">
+            <span class="user-name">Alex</span>
+            <resumable-button></resumable-button>
+          </div>
+        `;
+      }
+    }
+
+    env.customElements.define('resumable-button', ServerResumableButton);
+    env.customElements.define('resumable-profile', ServerResumableProfile);
+
+    const outerProfileDsd = renderToString(html`<resumable-profile></resumable-profile>`, {
+      customElements: env.customElements,
+      resumable: true,
     });
 
-    const outerProfileDsd = renderToDsd({
-      tagName: 'resumable-profile',
-      shadowHtml: `
-        <div class="profile-box">
-          <span class="user-name">Alex</span>
-          ${innerButtonDsd}
-        </div>
-      `,
-      state: { role: 'editor', userId: 42 },
-    });
+    expect(outerProfileDsd).toContain('data-lit-state=');
+    expect(outerProfileDsd).not.toContain('<script type="lit/state">');
 
     const inlineLoader = compileResumableLoader();
 
@@ -55,12 +71,12 @@ describe('playwright browser end-to-end resumption tests', () => {
   <script>
     class ResumableButton extends HTMLElement {
       connectedCallback() {
-        const s = this.querySelector('script[type="lit/state"]');
-        if (s) {
+        const raw = this.getAttribute('data-lit-state');
+        if (raw) {
           try {
-            Object.assign(this, JSON.parse(s.textContent));
+            Object.assign(this, JSON.parse(raw));
           } catch {}
-          s.remove();
+          this.removeAttribute('data-lit-state');
         }
         const btn = this.shadowRoot?.querySelector('#btn');
         btn?.addEventListener('click', () => {
@@ -100,7 +116,7 @@ describe('playwright browser end-to-end resumption tests', () => {
       btn?.click();
     });
 
-    // Verify interaction event executed
+    // Verify interaction event executed and state was hydrated from data-lit-state
     const events = await page.evaluate(() => (window as any).__resumptionEvents);
     expect(events).toContain('button-clicked');
   });

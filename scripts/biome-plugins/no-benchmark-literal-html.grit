@@ -1,0 +1,9 @@
+language js
+
+or {
+  JsStringLiteralExpression(),
+  JsTemplateExpression()
+} as $node where {
+  or { $node <: r"(?is).*<\s*template.*shadowrootmode\b.*", $node <: r"(?is).*<\?.*start\b.*", $node <: r"(?is).*<!--.*lit-part\b.*" },
+  register_diagnostic(span=$node, message="Hardcoded Declarative Shadow DOM or marker HTML literals are prohibited in benchmark feature runners.", severity="error")
+}

@@ -4,7 +4,13 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { bundleComponentForBrowser } from '../bundler.js';
 import { CARBON_COMPONENTS, MATERIAL_COMPONENTS, MOMENTUM_COMPONENTS, SPECTRUM_COMPONENTS, WEBAWESOME_COMPONENTS } from '../components.js';
 import { getTestBrowser } from '../harness.js';
-import { getSsrEngine } from '../ssr-harness.js';
+import { buildRegisteredComponentFixture, type ComponentRenderDescriptor, getSsrEngine, type RenderOptions } from '../ssr-harness.js';
+
+async function renderRegisteredDsd(spec: ComponentRenderDescriptor, extraOptions: RenderOptions = {}): Promise<string> {
+  const engine = await getSsrEngine();
+  const fixture = buildRegisteredComponentFixture(spec);
+  return engine.collectResult(engine.render(fixture.template, { ...fixture.options, ...extraOptions }));
+}
 
 describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', () => {
   let browser: any;
@@ -26,14 +32,11 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
   // =========================================================================
   describe('tier 3: browser Declarative Shadow DOM parsing and attachment', () => {
     it('parses server-rendered DSD and automatically attaches open shadow root in Chromium', async () => {
-      const engine = await getSsrEngine();
-      const dsdHtml = await engine.collectResult(
-        engine.render({
-          tagName: 'chromium-dsd-test',
-          shadowHtml: '<div class="inner-box"><p id="shadow-text">Declarative Shadow DOM attached</p></div>',
-          attributes: { id: 'test-dsd-node' },
-        }),
-      );
+      const dsdHtml = await renderRegisteredDsd({
+        tagName: 'chromium-dsd-test',
+        shadowHtml: '<div class="inner-box"><p id="shadow-text">Declarative Shadow DOM attached</p></div>',
+        attributes: { id: 'test-dsd-node' },
+      });
 
       expect(dsdHtml).toContain('shadowrootmode="open"');
       expect(dsdHtml).not.toContain('<!--lit-part');
@@ -59,14 +62,11 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
     });
 
     it('verifies 100% absence of comment markers in Chromium DOM tree', async () => {
-      const engine = await getSsrEngine();
-      const dsdHtml = await engine.collectResult(
-        engine.render({
-          tagName: 'clean-markup-host',
-          shadowHtml: '<span>No comment markers</span>',
-          attributes: { id: 'clean-host' },
-        }),
-      );
+      const dsdHtml = await renderRegisteredDsd({
+        tagName: 'clean-markup-host',
+        shadowHtml: '<span>No comment markers</span>',
+        attributes: { id: 'clean-host' },
+      });
 
       await page.setContent(`<!DOCTYPE html><html><body><div id="test-root">${dsdHtml}</div></body></html>`);
 
@@ -85,15 +85,12 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
     });
 
     it('verifies deterministic slot projection inside Chromium DOM', async () => {
-      const engine = await getSsrEngine();
-      const dsdHtml = await engine.collectResult(
-        engine.render({
-          tagName: 'slot-chromium-host',
-          shadowHtml: '<div class="shadow-container"><slot name="icon"></slot><slot></slot></div>',
-          lightDom: [{ slot: 'icon', content: '<span id="icon-node">★</span>' }, { content: '<span id="default-node">Default text</span>' }],
-          attributes: { id: 'slot-host' },
-        }),
-      );
+      const dsdHtml = await renderRegisteredDsd({
+        tagName: 'slot-chromium-host',
+        shadowHtml: '<div class="shadow-container"><slot name="icon"></slot><slot></slot></div>',
+        lightDom: [{ slot: 'icon', content: '<span id="icon-node">★</span>' }, { content: '<span id="default-node">Default text</span>' }],
+        attributes: { id: 'slot-host' },
+      });
 
       await page.setContent(`<!DOCTYPE html><html><body><div id="test-root">${dsdHtml}</div></body></html>`);
 
@@ -101,8 +98,8 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
         const host = document.getElementById('slot-host');
         if (!host?.shadowRoot) return { iconFound: false, defaultFound: false };
 
-        const iconNode = host.shadowRoot.querySelector('#icon-node');
-        const defaultNode = host.shadowRoot.querySelector('#default-node');
+        const iconNode = host.querySelector('#icon-node') || host.shadowRoot.querySelector('#icon-node');
+        const defaultNode = host.querySelector('#default-node') || host.shadowRoot.querySelector('#default-node');
 
         return {
           iconFound: Boolean(iconNode),
@@ -114,28 +111,27 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
       expect(slotResult.defaultFound).toBe(true);
     });
 
-    it('reads and parses resumable state snapshot in Chromium', async () => {
-      const engine = await getSsrEngine();
-      const dsdHtml = await engine.collectResult(
-        engine.render(
-          {
-            tagName: 'state-chromium-host',
-            shadowHtml: '<button id="btn">Click me</button>',
-            attributes: { id: 'state-host' },
-            state: { count: 99, active: true },
-          },
-          { resumable: true },
-        ),
+    it('reads and parses resumable data-lit-state snapshot in Chromium', async () => {
+      const dsdHtml = await renderRegisteredDsd(
+        {
+          tagName: 'state-chromium-host',
+          shadowHtml: '<button id="btn">Click me</button>',
+          attributes: { id: 'state-host' },
+          state: { count: 99, active: true },
+        },
+        { resumable: true },
       );
+
+      expect(dsdHtml).not.toContain('<script type="lit/state">');
 
       await page.setContent(`<!DOCTYPE html><html><body><div id="test-root">${dsdHtml}</div></body></html>`);
 
       const parsedState = await page.evaluate(() => {
         const host = document.getElementById('state-host');
-        const script = host?.querySelector('script[type="lit/state"]');
-        if (!script) return null;
+        const raw = host?.getAttribute('data-lit-state');
+        if (!raw) return null;
         try {
-          return JSON.parse(script.textContent || '{}');
+          return JSON.parse(raw);
         } catch {
           return null;
         }
@@ -145,19 +141,23 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
     });
 
     it('attaches shadow roots on nested custom elements rendered to DSD in Chromium', async () => {
-      const engine = await getSsrEngine();
-      const dsdHtml = await engine.collectResult(
-        engine.render({
-          tagName: 'outer-card',
-          shadowHtml: '<div class="outer-wrap"><slot></slot></div>',
-          lightDom: [
-            {
-              content: '<inner-badge id="nested-badge"><template shadowrootmode="open"><span id="badge-text">Badge inner</span></template></inner-badge>',
-            },
-          ],
-          attributes: { id: 'outer-host' },
-        }),
-      );
+      const env = createIsolateEnvironment();
+      class InnerBadge extends env.HTMLElement {
+        render() {
+          return html`<span id="badge-text">Badge inner</span>`;
+        }
+      }
+      class OuterCard extends env.HTMLElement {
+        render() {
+          return html`<div class="outer-wrap"><slot></slot></div>`;
+        }
+      }
+      env.customElements.define('inner-badge', InnerBadge);
+      env.customElements.define('outer-card', OuterCard);
+
+      const dsdHtml = renderToString(html`<outer-card id="outer-host"><inner-badge id="nested-badge"></inner-badge></outer-card>`, {
+        customElements: env.customElements,
+      });
 
       await page.setContent(`<!DOCTYPE html><html><body><div id="test-root">${dsdHtml}</div></body></html>`);
 
@@ -177,15 +177,12 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
     });
 
     it('verifies shadow root styles take effect inside Chromium DOM', async () => {
-      const engine = await getSsrEngine();
-      const dsdHtml = await engine.collectResult(
-        engine.render({
-          tagName: 'styled-chromium-host',
-          styles: ':host { color: rgb(255, 0, 0); } .text { font-size: 20px; }',
-          shadowHtml: '<span class="text" id="styled-target">Red text</span>',
-          attributes: { id: 'styled-host' },
-        }),
-      );
+      const dsdHtml = await renderRegisteredDsd({
+        tagName: 'styled-chromium-host',
+        styles: ':host { color: rgb(255, 0, 0); } .text { font-size: 20px; }',
+        shadowHtml: '<span class="text" id="styled-target">Red text</span>',
+        attributes: { id: 'styled-host' },
+      });
 
       await page.setContent(`<!DOCTYPE html><html><body><div id="test-root">${dsdHtml}</div></body></html>`);
 
@@ -226,6 +223,8 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
 
       expect(dsdHtml).toContain('shadowrootmode="open"');
       expect(dsdHtml).toContain('<span id="count-val">0</span>');
+      expect(dsdHtml).toContain('data-lit-state=');
+      expect(dsdHtml).not.toContain('<script type="lit/state">');
 
       const clientBundle = await bundleComponentForBrowser({
         entrySource: `
@@ -408,14 +407,11 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
 
       carbonSample.forEach((comp, index) => {
         it(`[Carbon ${index + 1}/${carbonSample.length}] server-renders ${comp.name} into clean DSD and attaches in Chromium`, async () => {
-          const engine = await getSsrEngine();
-          const dsdHtml = await engine.collectResult(
-            engine.render({
-              tagName: comp.tag,
-              shadowHtml: `<div class="carbon-inner"><span>${comp.name} rendered</span></div>`,
-              attributes: { id: `carbon-comp-${index}`, 'data-carbon': 'true' },
-            }),
-          );
+          const dsdHtml = await renderRegisteredDsd({
+            tagName: comp.tag,
+            shadowHtml: `<div class="carbon-inner"><span>${comp.name} rendered</span></div>`,
+            attributes: { id: `carbon-comp-${index}`, 'data-carbon': 'true' },
+          });
 
           expect(dsdHtml).toContain('shadowrootmode="open"');
           expect(dsdHtml).not.toContain('<!--lit-part');
@@ -443,14 +439,11 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
 
       spectrumSample.forEach((comp, index) => {
         it(`[Spectrum ${index + 1}/${spectrumSample.length}] server-renders ${comp.name} into clean DSD and attaches in Chromium`, async () => {
-          const engine = await getSsrEngine();
-          const dsdHtml = await engine.collectResult(
-            engine.render({
-              tagName: comp.tag,
-              shadowHtml: `<div class="spectrum-inner"><label>${comp.name} label</label></div>`,
-              attributes: { id: `spectrum-comp-${index}`, 'data-spectrum': 'true' },
-            }),
-          );
+          const dsdHtml = await renderRegisteredDsd({
+            tagName: comp.tag,
+            shadowHtml: `<div class="spectrum-inner"><label>${comp.name} label</label></div>`,
+            attributes: { id: `spectrum-comp-${index}`, 'data-spectrum': 'true' },
+          });
 
           expect(dsdHtml).toContain('shadowrootmode="open"');
           expect(dsdHtml).not.toContain('<!--lit-part');
@@ -478,14 +471,11 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
 
       materialSample.forEach((comp, index) => {
         it(`[Material ${index + 1}/${materialSample.length}] server-renders ${comp.name} into clean DSD and attaches in Chromium`, async () => {
-          const engine = await getSsrEngine();
-          const dsdHtml = await engine.collectResult(
-            engine.render({
-              tagName: comp.tag,
-              shadowHtml: `<div class="md-inner"><button>${comp.name} action</button></div>`,
-              attributes: { id: `material-comp-${index}`, 'data-material': 'true' },
-            }),
-          );
+          const dsdHtml = await renderRegisteredDsd({
+            tagName: comp.tag,
+            shadowHtml: `<div class="md-inner"><button>${comp.name} action</button></div>`,
+            attributes: { id: `material-comp-${index}`, 'data-material': 'true' },
+          });
 
           expect(dsdHtml).toContain('shadowrootmode="open"');
           expect(dsdHtml).not.toContain('<!--lit-part');
@@ -513,14 +503,11 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
 
       webawesomeSample.forEach((comp, index) => {
         it(`[Web Awesome ${index + 1}/${webawesomeSample.length}] server-renders ${comp.name} into clean DSD and attaches in Chromium`, async () => {
-          const engine = await getSsrEngine();
-          const dsdHtml = await engine.collectResult(
-            engine.render({
-              tagName: comp.tag,
-              shadowHtml: `<div class="wa-inner"><span>${comp.name} content</span></div>`,
-              attributes: { id: `wa-comp-${index}`, 'data-wa': 'true' },
-            }),
-          );
+          const dsdHtml = await renderRegisteredDsd({
+            tagName: comp.tag,
+            shadowHtml: `<div class="wa-inner"><span>${comp.name} content</span></div>`,
+            attributes: { id: `wa-comp-${index}`, 'data-wa': 'true' },
+          });
 
           expect(dsdHtml).toContain('shadowrootmode="open"');
           expect(dsdHtml).not.toContain('<!--lit-part');
@@ -548,14 +535,11 @@ describe('@lit-core/ssr Declarative Shadow DOM Chromium Playwright test suite', 
 
       momentumSample.forEach((comp, index) => {
         it(`[Momentum ${index + 1}/${momentumSample.length}] server-renders ${comp.name} into clean DSD and attaches in Chromium`, async () => {
-          const engine = await getSsrEngine();
-          const dsdHtml = await engine.collectResult(
-            engine.render({
-              tagName: comp.tag,
-              shadowHtml: `<div class="mdc-inner"><button>${comp.name} trigger</button></div>`,
-              attributes: { id: `momentum-comp-${index}`, 'data-momentum': 'true' },
-            }),
-          );
+          const dsdHtml = await renderRegisteredDsd({
+            tagName: comp.tag,
+            shadowHtml: `<div class="mdc-inner"><button>${comp.name} trigger</button></div>`,
+            attributes: { id: `momentum-comp-${index}`, 'data-momentum': 'true' },
+          });
 
           expect(dsdHtml).toContain('shadowrootmode="open"');
           expect(dsdHtml).not.toContain('<!--lit-part');

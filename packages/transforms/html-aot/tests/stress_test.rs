@@ -27,7 +27,7 @@ export const myTemplate = html`
 `;
 "#;
 
-    let res = transform_html_aot(code.to_string(), None);
+    let res = transform_html_aot(code.to_string(), None).unwrap();
     assert_eq!(res.templates_count, 1);
 
     // Verify allocated identifiers are bumped to _2
@@ -120,7 +120,7 @@ export const myTemplate = html`
 `;
 "#;
 
-    let res = transform_html_aot(code.to_string(), None);
+    let res = transform_html_aot(code.to_string(), None).unwrap();
     assert_eq!(res.templates_count, 1);
 
     // Verify allocated identifiers are bumped to _3
@@ -188,7 +188,7 @@ export const t2 = html`<span class="second">${val2}</span>`;
 export const t3 = html`<span class="third">${val3}</span>`;
 "#;
 
-    let res = transform_html_aot(code.to_string(), None);
+    let res = transform_html_aot(code.to_string(), None).unwrap();
     assert_eq!(res.templates_count, 3);
 
     // Descriptors should be lit_template_3, lit_template_4, lit_template_5
@@ -230,7 +230,7 @@ class E_1 {}
 export const tmpl = html`<button @click=${click} ?disabled=${disabled}>Label</button>`;
 "#;
 
-    let res = transform_html_aot(code.to_string(), None);
+    let res = transform_html_aot(code.to_string(), None).unwrap();
     assert_eq!(res.templates_count, 1);
 
     // Should avoid b_1, B_1, E_1, litHtmlPrivate_1
@@ -272,7 +272,7 @@ class Component {
 export const tmpl = html`<div>${label}</div>`;
 "#;
 
-    let res = transform_html_aot(code.to_string(), None);
+    let res = transform_html_aot(code.to_string(), None).unwrap();
     assert_eq!(res.templates_count, 1);
 
     // Verify allocated identifiers avoid the unresolved b_1 and litHtmlPrivate_1
@@ -296,7 +296,7 @@ import { html } from 'lit';
 export const tmpl = html`<div>${b_1} ${lit_template_1}</div>`;
 "#;
 
-    let res = transform_html_aot(code.to_string(), None);
+    let res = transform_html_aot(code.to_string(), None).unwrap();
     assert_eq!(res.templates_count, 1);
 
     // Verify allocated identifiers avoid b_1 and lit_template_1 from expressions

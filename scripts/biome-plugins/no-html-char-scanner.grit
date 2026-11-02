@@ -1,0 +1,24 @@
+language js
+
+or {
+  `$s.indexOf($ch)` where { $ch <: r"^['\"`]?<['\"`]?$" },
+  `$c === $ch` where { $ch <: r"^['\"`]?<['\"`]?$" },
+  `$ch === $c` where { $ch <: r"^['\"`]?<['\"`]?$" },
+  `$s.charCodeAt($_) === 60`,
+  `$s.charCodeAt($_) === 62`,
+  `$s.split($ch)` where { $ch <: r"^['\"`]?[<>]['\"`]?$" },
+  `$s.startsWith($p)` where { or { $p <: r"^['\"`]?\?>['\"`]?$", $p <: r"^['\"`]?!-[-]['\"`]?$" } },
+  JsRegexLiteralExpression() as $rx where {
+    or {
+      $rx <: r"(?s).*\^<.*",
+      $rx <: r"(?s).*<template.*",
+      $rx <: r"(?s).*<slot.*",
+      $rx <: r"(?s).*<\\/\[a-zA-Z.*",
+      $rx <: r"(?s).*<\[a-zA-Z_.*",
+      $rx <: r"(?s).*script\|style\|textarea.*",
+      $rx <: r"(?s).*area\|base\|br.*"
+    }
+  }
+} as $node where {
+  register_diagnostic(span=$node, message="Ad-hoc character-by-character or regex HTML tag scanning is prohibited; use precompiled opcodes or a spec-compliant HTML parser.", severity="error")
+}

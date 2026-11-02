@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { type LitPluginOptions, lit as viteLit } from '@lit-core/vite-plugin';
 import { LitWebpackPlugin, litWebpackLoader } from '@lit-core/webpack-plugin';
 import { build } from 'vite';
@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 // @ts-expect-error - vendor-resolver is an un-typed ESM module in packages/benchmarks
 import { createBenchmarkVendorResolverPlugin } from '../../../benchmarks/src/vendor-resolver.js';
 import { bundleComponentForBrowser, getCanonicalComponent } from '../bundler.js';
-import { CARBON_COMPONENTS } from '../components.js';
+import { CARBON_COMPONENTS, resolvePackageDir } from '../components.js';
 import { readComponentSource } from '../fixtures.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -198,25 +198,38 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
     });
 
     it('asserts zero server shim contract during SSR execution', async () => {
-      expect(globalThis.window).toBeUndefined();
-      expect(globalThis.document).toBeUndefined();
+      const priorWindow = (globalThis as any).window;
+      const priorDocument = (globalThis as any).document;
+      delete (globalThis as any).window;
+      delete (globalThis as any).document;
+      try {
+        expect(globalThis.window).toBeUndefined();
+        expect(globalThis.document).toBeUndefined();
 
-      const plugins = viteLit({ ssr: true });
-      const ssrPlugin = plugins.find((p) => p.name === 'lit-ssr' || p.name === 'ssr');
-      expect(ssrPlugin).toBeDefined();
+        const plugins = viteLit({ ssr: true });
+        const ssrPlugin = plugins.find((p) => p.name === 'lit-ssr' || p.name === 'ssr');
+        expect(ssrPlugin).toBeDefined();
 
-      const compSource = `
-        import { LitElement, html } from 'lit';
-        export class MyElement extends LitElement {
-          render() { return html\`<div>Hello</div>\`; }
+        const compSource = `
+          import { LitElement, html } from 'lit';
+          export class MyElement extends LitElement {
+            render() { return html\`<div>Hello</div>\`; }
+          }
+        `;
+
+        if (ssrPlugin?.transform) {
+          const mockContext = { error() {}, warn() {} };
+          const result = await (ssrPlugin.transform as any).call(mockContext, compSource, '/src/my-element.ts');
+          if (result && typeof result === 'object' && result.code) {
+            expect(result.code).not.toContain('@lit-labs/ssr/lib/install-global-dom-shims');
+          }
         }
-      `;
-
-      if (ssrPlugin?.transform) {
-        const mockContext = { error() {}, warn() {} };
-        const result = await (ssrPlugin.transform as any).call(mockContext, compSource, '/src/my-element.ts');
-        if (result && typeof result === 'object' && result.code) {
-          expect(result.code).not.toContain('@lit-labs/ssr/lib/install-global-dom-shims');
+      } finally {
+        if (priorWindow !== undefined) {
+          (globalThis as any).window = priorWindow;
+        }
+        if (priorDocument !== undefined) {
+          (globalThis as any).document = priorDocument;
         }
       }
     });
@@ -387,17 +400,14 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
       expect(plugins.some((p) => p.name === 'lit-ssr' || p.name === 'ssr')).toBe(true);
     });
 
-    it('combines ssr with resumable: injects state snapshot script and Declarative Shadow DOM', async () => {
+    it('combines ssr with resumable: injects data-lit-state attribute and Declarative Shadow DOM', async () => {
       const { installIsolateGlobals } = await import('@lit-core/ssr');
       installIsolateGlobals();
       await import('@carbon/web-components/es/components/button/index.js');
-      const CarbonBtnCtor = customElements.get('cds-button');
-      if (CarbonBtnCtor) {
-        CarbonBtnCtor.prototype.connectedCallback = () => {};
-      }
       const html = await simulateViteHtmlTransform(`<!DOCTYPE html><html><head></head><body><cds-button>Click</cds-button></body></html>`, { ssr: { resumable: true } });
-      expect(html).toContain('<template shadowrootmode="open">');
-      expect(html).toContain('<script type="lit/state">');
+      expect(html).toContain('<template shadowrootmode="open" shadowrootdelegatesfocus>');
+      expect(html).toContain('data-lit-state=');
+      expect(html).not.toContain('<script type="lit/state">');
       expect(html).not.toContain('<!--lit-part');
       expect(html).not.toContain('<!--lit-node');
     });
@@ -406,13 +416,9 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
       const { installIsolateGlobals } = await import('@lit-core/ssr');
       installIsolateGlobals();
       await import('@carbon/web-components/es/components/button/index.js');
-      const CarbonBtnCtor = customElements.get('cds-button');
-      if (CarbonBtnCtor) {
-        CarbonBtnCtor.prototype.connectedCallback = () => {};
-      }
       const html = await simulateViteHtmlTransform(`<!DOCTYPE html><html><head></head><body><cds-button>Submit</cds-button></body></html>`, { ssr: { domPaths: true } });
       expect(html).toContain('data-lit-paths="true"');
-      expect(html).toContain('<template shadowrootmode="open">');
+      expect(html).toContain('<template shadowrootmode="open" shadowrootdelegatesfocus>');
     });
 
     it('combines ssr with htmlAot: compiler passes coexist without collision', async () => {
@@ -439,21 +445,17 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
 
         installIsolateGlobals();
 
-        // Import real IBM Carbon Web Component
+        // Import real IBM Carbon Web Component without prototype monkey-patches
         await import('@carbon/web-components/es/components/button/index.js');
         const CarbonBtnCtor = customElements.get('cds-button');
         expect(CarbonBtnCtor).toBeDefined();
-
-        if (CarbonBtnCtor) {
-          CarbonBtnCtor.prototype.connectedCallback = () => {};
-        }
 
         const template = html`<cds-button kind="primary">Submit</cds-button>`;
         const transformedHtml = await collectResult(render(template, { customElements }));
 
         // Must emit clean Declarative Shadow DOM with authentic Carbon internal markup
         expect(transformedHtml).toContain('<cds-button');
-        expect(transformedHtml).toContain('<template shadowrootmode="open">');
+        expect(transformedHtml).toContain('<template shadowrootmode="open" shadowrootdelegatesfocus>');
         expect(transformedHtml).toContain('cds--btn');
         expect(transformedHtml).toContain('cds--btn--primary');
         expect(transformedHtml).toContain('</template>');
@@ -468,25 +470,20 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
       });
 
       it('renders real Spectrum button into clean DSD without global DOM shims', async () => {
-        const { collectResult, HTMLElementStub, installIsolateGlobals, render } = await import('@lit-core/ssr');
+        const { collectResult, installIsolateGlobals, render } = await import('@lit-core/ssr');
         const { html } = await import('lit');
 
         installIsolateGlobals();
 
-        if (!customElements.get('sp-button')) {
-          class SpButtonFallback extends HTMLElementStub {
-            render() {
-              return { strings: ['<slot></slot>'], values: [] };
-            }
-          }
-          customElements.define('sp-button', SpButtonFallback as any);
-        }
+        const spectrumButtonEntry = path.join(resolvePackageDir('@spectrum-web-components'), 'button/sp-button.js');
+        await import(pathToFileURL(spectrumButtonEntry).href);
+        expect(customElements.get('sp-button')).toBeDefined();
 
         const template = html`<sp-button variant="accent">Confirm</sp-button>`;
         const transformedHtml = await collectResult(render(template, { customElements }));
 
         expect(transformedHtml).toContain('<sp-button');
-        expect(transformedHtml).toContain('<template shadowrootmode="open">');
+        expect(transformedHtml).toContain('<template shadowrootmode="open"');
         expect(transformedHtml).not.toContain('<!--lit-part');
         expect(transformedHtml).not.toContain('<!--lit-node');
         expect(globalThis.document).toBeUndefined();
@@ -498,34 +495,10 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
 
         installIsolateGlobals();
 
-        if (typeof (globalThis.HTMLElement as any).prototype.attachInternals === 'undefined') {
-          (globalThis.HTMLElement as any).prototype.attachInternals = function () {
-            return {
-              shadowRoot: this.shadowRoot,
-              setFormValue() {},
-              setValidity() {},
-              checkValidity() {
-                return true;
-              },
-              reportValidity() {
-                return true;
-              },
-            };
-          };
-        }
-
-        // Import real Google Material Web Component
+        // Import real Google Material Web Component without any prototype monkey-patches
         await import('@material/web/button/filled-button.js');
         const MaterialBtnCtor = customElements.get('md-filled-button');
         expect(MaterialBtnCtor).toBeDefined();
-
-        if (MaterialBtnCtor) {
-          MaterialBtnCtor.prototype.connectedCallback = () => {};
-        }
-        const ElevationCtor = customElements.get('md-elevation');
-        if (ElevationCtor) {
-          ElevationCtor.prototype.connectedCallback = () => {};
-        }
 
         const template = html`<md-filled-button>Save</md-filled-button>`;
         const transformedHtml = await collectResult(render(template, { customElements }));
@@ -552,7 +525,7 @@ describe('@lit-core bundler plugins ssr verification suite', () => {
 
         expect(result.htmlFiles['index.html']).toBeDefined();
         const html = result.htmlFiles['index.html'];
-        expect(html).toContain('<template shadowrootmode="open">');
+        expect(html).toContain('<template shadowrootmode="open" shadowrootdelegatesfocus>');
         expect(html).toContain('Prerendered Button');
         expect(html).not.toContain('<!--lit-part');
         expect(html).not.toContain('<!--lit-node');

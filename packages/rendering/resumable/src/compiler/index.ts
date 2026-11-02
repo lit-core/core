@@ -62,6 +62,7 @@ export interface ResumableLoaderOptions {
   idleHydration?: boolean;
   idleTimeout?: number;
   events?: string[];
+  islands?: boolean;
 }
 
 export interface TransformResumableOptions {
@@ -94,6 +95,23 @@ export function transformResumableComponent(source: string, options: TransformRe
   const binding = getNativeBinding();
   if (binding?.transformResumableComponent) {
     return binding.transformResumableComponent(source, {
+      filename: options.filename,
+      sourcemap: options.sourcemap,
+      virtual_module: options.virtualModule,
+    });
+  }
+  throw new Error('Native @lit-core/resumable OXC compiler addon not loaded.');
+}
+
+/**
+ * Ahead-of-time OXC AST transform prepending side-effect imports (such as
+ * `virtual:lit-core/hydrate-support` or `@lit-core/server-elements/executor`)
+ * to a client entry module so they evaluate before `LitElement` class creation.
+ */
+export function injectClientEntryImports(source: string, specifiers: string[], options: TransformResumableOptions = {}): TransformResumableResult {
+  const binding = getNativeBinding();
+  if (binding?.injectClientEntryImports) {
+    return binding.injectClientEntryImports(source, specifiers, {
       filename: options.filename,
       sourcemap: options.sourcemap,
       virtual_module: options.virtualModule,

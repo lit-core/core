@@ -66,11 +66,20 @@ export function ensureNativeFresh(crates = ALL_CRATES, root = process.cwd()) {
       console.log(`[native-fresh] Stale binary detected in ${crate}, rebuilding in debug mode...`);
       const t0 = Date.now();
       try {
-        execSync('pnpm run build:debug || pnpm run build', {
-          cwd: pkgDir,
-          stdio: 'inherit',
-          env: { ...process.env, TURBO_TELEMETRY_DISABLED: '1' },
-        });
+        const buildScript = path.join(root, 'scripts', 'build-native.mjs');
+        try {
+          execSync(`node "${buildScript}" ${crate}`, {
+            cwd: root,
+            stdio: 'inherit',
+            env: { ...process.env, TURBO_TELEMETRY_DISABLED: '1' },
+          });
+        } catch {
+          execSync('pnpm run build:debug || pnpm run build', {
+            cwd: pkgDir,
+            stdio: 'inherit',
+            env: { ...process.env, TURBO_TELEMETRY_DISABLED: '1' },
+          });
+        }
         const crateUnderscore = crate.replace(/-/g, '_');
         const libExt = process.platform === 'darwin' ? '.dylib' : process.platform === 'linux' ? '.so' : '.dll';
         const libPrefix = process.platform === 'win32' ? '' : 'lib';

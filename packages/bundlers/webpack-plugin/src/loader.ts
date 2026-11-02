@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { splitServerElement } from '@lit-core/server-split';
 import type { LoaderContext } from 'webpack';
 import type {
   CssMinifierOptions,
@@ -14,10 +15,10 @@ import type {
   MemoizeOptions,
   NativeOptions,
   PropsLowerOptions,
-  ResumableOptions,
   SsrOptions,
   TagShakeOptions,
 } from './options.js';
+import { isSsrTarget } from './plugin.js';
 import {
   scanAppTags,
   transformCssMinifier,
@@ -31,10 +32,22 @@ import {
   transformMemoizePlugin,
   transformNativePlugin,
   transformPropsLower,
-  transformResumable,
   transformSsr,
   transformTagShakePlugin,
 } from './transforms.js';
+
+export const LIT_SERVER_ELEMENTS_FAST_CHECK = /@(?:loader|action)\b|\bfrom\s*['"]@lit-core\/server-elements(?:['"]|\/)/;
+
+export interface DiscoveredServerElement {
+  tagName?: string;
+  className?: string;
+  filePath: string;
+  clientChunk?: string;
+  serverChunk?: string;
+  zeroLit: boolean;
+  actions: any[];
+  loaders: any[];
+}
 
 export interface PluginState {
   transformedFiles: Map<string, string>;
@@ -43,6 +56,8 @@ export interface PluginState {
   usedTags?: Set<string>;
   isSsr?: boolean;
   options: LitPluginOptions;
+  serverElements?: Map<string, DiscoveredServerElement>;
+  actionIndex?: Map<string, { tag: string; filePath: string }>;
 }
 
 const pluginRegistry = new Map<string, PluginState>();
@@ -102,6 +117,64 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (transformed) {
         currentSource = transformed;
         currentMap = null;
+      }
+    }
+
+    // Stage 0.5: Lit server elements splitting and schema validation
+    const serverElementsOpt = options.serverElements ?? options['server-elements'];
+    if (serverElementsOpt !== false && LIT_SERVER_ELEMENTS_FAST_CHECK.test(currentSource)) {
+      const isTargetServer = pluginState ? Boolean(pluginState.isSsr) : isSsrTarget(this.target);
+      const isServer =
+        typeof serverElementsOpt === 'object' && serverElementsOpt.target && serverElementsOpt.target !== 'auto'
+          ? serverElementsOpt.target === 'server' || serverElementsOpt.target === 'worker'
+          : isTargetServer;
+
+      const actionRoutePrefix = typeof serverElementsOpt === 'object' && serverElementsOpt.actionRoutePrefix ? serverElementsOpt.actionRoutePrefix : '/_lit/a/';
+
+      const splitResult = splitServerElement(currentSource, {
+        filename: resourcePath,
+        sourcemap: Boolean((options as any).sourcemap),
+        actionRoutePrefix,
+      });
+
+      if (splitResult.hasErrors) {
+        const errorDiag = splitResult.diagnostics.find((d) => d.severity === 'error') || splitResult.diagnostics[0];
+        const msg = errorDiag ? `[${errorDiag.code}] ${errorDiag.message}` : 'Server element validation failed';
+        return callback(new Error(`[@lit-core/webpack-plugin] ${msg}`));
+      }
+
+      if (splitResult.isServerElement) {
+        if (pluginState) {
+          if (!pluginState.serverElements) {
+            pluginState.serverElements = new Map();
+          }
+          if (!pluginState.actionIndex) {
+            pluginState.actionIndex = new Map();
+          }
+          const cleanId = resourcePath.split('?')[0];
+          const isZeroLit = Boolean(splitResult.zeroLit);
+          pluginState.serverElements.set(cleanId, {
+            tagName: splitResult.tagName,
+            className: splitResult.className,
+            filePath: cleanId,
+            zeroLit: isZeroLit,
+            actions: splitResult.actions,
+            loaders: splitResult.loaders,
+          });
+          if (splitResult.tagName) {
+            for (const act of splitResult.actions) {
+              pluginState.actionIndex.set(act.hash, { tag: splitResult.tagName, filePath: cleanId });
+            }
+          }
+        }
+
+        if (isServer) {
+          currentSource = splitResult.workerCode;
+          currentMap = splitResult.workerMap ? (typeof splitResult.workerMap === 'string' ? JSON.parse(splitResult.workerMap) : splitResult.workerMap) : currentMap;
+        } else {
+          currentSource = splitResult.clientCode;
+          currentMap = splitResult.clientMap ? (typeof splitResult.clientMap === 'string' ? JSON.parse(splitResult.clientMap) : splitResult.clientMap) : currentMap;
+        }
       }
     }
 
@@ -225,10 +298,20 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       }
     }
 
-    // 11. Apply html-aot template compilation if enabled
+    // 11. Apply html-aot template compilation if enabled (or auto-enabled on client resumable builds)
+    const isServerForAot = Boolean(pluginState ? pluginState.isSsr : isSsrTarget(this.target));
+    const ssrOptForAot = options.ssr ?? options['lit-ssr'];
+    const ssrResumableForAot = typeof ssrOptForAot === 'object' && ssrOptForAot !== null && Boolean(ssrOptForAot.resumable);
+    const resumableActiveForAot = Boolean(options.resumable ?? (ssrResumableForAot && !isServerForAot ? true : undefined));
     const htmlAotOpt = options.htmlAot ?? options['html-aot'];
-    if (htmlAotOpt) {
-      const aotOpts: HtmlAotOptions = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
+    if (htmlAotOpt || (resumableActiveForAot && !isServerForAot && htmlAotOpt !== false)) {
+      const rawAotOpts: HtmlAotOptions = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
+      const effectiveAotSsr = rawAotOpts.ssr ?? isServerForAot;
+      const aotOpts: HtmlAotOptions = {
+        ...rawAotOpts,
+        ssr: effectiveAotSsr,
+        strictSsr: rawAotOpts.strictSsr ?? effectiveAotSsr,
+      };
       const result = transformHtmlAot(currentSource, resourcePath, aotOpts);
       if (result) {
         currentSource = result.code;
@@ -282,17 +365,6 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
         if (result.map) {
           currentMap = result.map;
         }
-      }
-    }
-
-    // 15. Apply resumable client adapter injection if enabled
-    const ssrResumable = typeof ssrOpt === 'object' && ssrOpt !== null && Boolean(ssrOpt.resumable);
-    const resumableOpt = options.resumable ?? (ssrResumable && !isSsr ? true : undefined);
-    if (resumableOpt && !isSsr) {
-      const resumableOpts: ResumableOptions = typeof resumableOpt === 'object' ? resumableOpt : {};
-      const result = transformResumable(currentSource, resourcePath, resumableOpts);
-      if (result) {
-        currentSource = result.code;
       }
     }
 

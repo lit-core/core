@@ -7,9 +7,9 @@ Web Components and Shadow DOM represent the web platform's native component enca
 However, rendering Web Components on the server has historically encountered architectural friction:
 - Encapsulated component styles and shadow trees are invisible to the document parser until rendered as Declarative Shadow DOM (`<template shadowrootmode="open">`).
 - Traditional server rendering engines have relied on full browser DOM emulation layers such as `jsdom` or `node:vm`. These solutions instantiate mock node trees, track synthetic event bubbling paths, and incur severe memory overhead.
-- In legacy Lit server rendering (`@lit-labs/ssr`), every dynamic expression slot is wrapped in comment markers (`<!--lit-part-->`, `<!--lit-node-->`). These comments inflate network payloads by 28% to 45% and require the browser client to execute expensive `TreeWalker` passes to locate text boundaries during hydration.
+- In legacy Lit server rendering (`@lit-labs/ssr`), every dynamic expression slot is wrapped in comment markers (`<!--lit-part-->`, `<!--lit-node-->`). These comments inflate network payloads and require the browser client to execute expensive `TreeWalker` passes to locate text boundaries during hydration.
 
-`@lit-core/ssr` resolves these limitations by executing as a stateless ahead-of-time compiler bridge and streaming engine. By leveraging precomputed AST structures from the `@lit-core` toolchain, `@lit-core/ssr` outputs 100% clean Declarative Shadow DOM with zero comment markers across standard V8 cloud edge isolates.
+`@lit-core/ssr` resolves these limitations by executing as a stateless ahead-of-time compiler bridge and streaming engine. By leveraging precomputed AST structures from the `@lit-core` toolchain, `@lit-core/ssr` outputs clean Declarative Shadow DOM with minimal comment markers (0 comment markers for element-anchored and sole-text parts) across standard V8 cloud edge isolates.
 
 ---
 
@@ -80,13 +80,13 @@ Modern web frameworks have converged on different compromises regarding server e
 - **Hydration mechanism**: Client runtime registers custom elements and attaches shadow roots or adopts light DOM children.
 - **Trade-offs**: Incompatible with pure V8 isolates due to heavyweight DOM emulation, high server memory allocation, and slow cold-start initialization.
 
-### 10. `@lit-labs/ssr` (Version 4.1.0 deep-dive)
+### 10. `@lit-labs/ssr` (version 4.1.0 deep-dive)
 
 The standard Lit server rendering engine contains multiple legacy bottlenecks:
 - **Coupling to `node:vm`**: Dynamic module loading relies on Node's `vm.createContext()` and `vm.Script`. This architecture is forbidden on Cloudflare Workers and Fastly Compute, where `node:vm` is unavailable.
 - **Heavyweight global DOM shim**: `@lit-labs/ssr-dom-shim` aggressively mutates `globalThis` with partial DOM implementations, event capturing shims, and memory-retaining listener maps.
 - **Synchronous `parse5` extraction**: Parses raw HTML strings on every render pass to identify dynamic binding boundaries.
-- **Comment marker payload inflation**: Wraps every dynamic expression in `<!--lit-part-->` and `<!--lit-node-->` markers, adding 28% to 45% duplicate byte overhead to every response.
+- **Comment marker payload inflation**: Wraps every dynamic expression in `<!--lit-part-->` and `<!--lit-node-->` markers, introducing duplicate comment byte overhead to every response.
 - **Rejection of compiled templates**: Throws an unrecoverable runtime error when encountering `CompiledTemplateResult` descriptors produced by ahead-of-time compilers.
 - **Legacy Node stream protocol**: Relies on Node.js `stream.Readable` rather than Web Standard WHATWG `ReadableStream`.
 
@@ -94,15 +94,15 @@ The standard Lit server rendering engine contains multiple legacy bottlenecks:
 
 ## Ecosystem comparative matrix
 
-| Dimension               | @lit-labs/ssr             | Marko 5/6        | Svelte 5         | RSC / Next.js  | Enhance       | Stencil Hydrate | @lit-core/ssr        |
-| :---------------------- | :------------------------ | :--------------- | :--------------- | :------------- | :------------ | :-------------- | :------------------- |
-| **Execution model**     | `node:vm` sandbox         | Compiled stream  | Compiled strings | Dual stream    | Pure function | Mock DOM        | Pure V8 isolate      |
-| **Streaming protocol**  | Node `Readable`           | Progressive HTML | WHATWG stream    | Flight + HTML  | Chunked HTTP  | Buffer batch    | WHATWG stream        |
-| **Hydration type**      | `TreeWalker` scans        | Signal resume    | Node index walk  | VDOM reconcile | Progressive   | Custom element  | Direct paths / state |
-| **Comment markers**     | Heavy (`<!--lit-part-->`) | None             | None             | None           | None          | None            | Zero comments        |
-| **Shadow DOM DSD**      | Yes (with markers)        | No               | No               | No             | Yes (clean)   | Optional        | Yes (clean DSD)      |
-| **Edge isolate ready**  | No (`node:vm` required)   | Yes              | Yes              | Yes            | Yes           | No (mock DOM)   | Yes (100% pure ESM)  |
-| **Style deduplication** | Duplicated `<style>`      | External CSS     | Hashed CSS       | Extracted CSS  | None          | Inlined CSS     | Ast-fused sheets     |
+| Dimension               | @lit-labs/ssr             | Marko 5/6        | Svelte 5         | RSC / Next.js  | Enhance       | Stencil Hydrate | @lit-core/ssr                |
+| :---------------------- | :------------------------ | :--------------- | :--------------- | :------------- | :------------ | :-------------- | :--------------------------- |
+| **Execution model**     | `node:vm` sandbox         | Compiled stream  | Compiled strings | Dual stream    | Pure function | Mock DOM        | Pure V8 isolate              |
+| **Streaming protocol**  | Node `Readable`           | Progressive HTML | WHATWG stream    | Flight + HTML  | Chunked HTTP  | Buffer batch    | WHATWG stream                |
+| **Hydration type**      | `TreeWalker` scans        | Signal resume    | Node index walk  | VDOM reconcile | Progressive   | Custom element  | Direct paths / state         |
+| **Comment markers**     | Heavy (`<!--lit-part-->`) | None             | None             | None           | None          | None            | Minimal (0 for element/text) |
+| **Shadow DOM DSD**      | Yes (with markers)        | No               | No               | No             | Yes (clean)   | Optional        | Yes (clean DSD)              |
+| **Edge isolate ready**  | No (`node:vm` required)   | Yes              | Yes              | Yes            | Yes           | No (mock DOM)   | Yes (100% pure ESM)          |
+| **Style deduplication** | Duplicated `<style>`      | External CSS     | Hashed CSS       | Extracted CSS  | None          | Inlined CSS     | AST-fused sheets             |
 
 ---
 
@@ -112,27 +112,27 @@ The standard Lit server rendering engine contains multiple legacy bottlenecks:
 
 ### 1. `@lit-core/html-aot`
 
-Build-time template pre-parsing extracts dynamic bindings and emits static `CompiledTemplateDescriptor` objects with pre-indexed part locations. On the server:
-- `WeakMap` cached chunk plans execute in nanoseconds without invoking `parse5` or scanning regexes.
-- Server CPU throughput increases by up to 300% compared to runtime template string parsing.
+Build-time template pre-parsing extracts dynamic bindings and emits static `CompiledTemplateDescriptor` objects with pre-indexed part locations (`ssrPlan` is emitted only for server builds, while client builds pass `ssr: false` to omit `ssrPlan` bytes; verified in [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts)):
+- Cached `SsrTemplatePlanV2` opcode arrays execute directly without invoking `parse5` or scanning regexes.
+- Server CPU overhead is minimized by eliminating runtime template string parsing on static `html` templates, while dynamic `lit/static-html.js` templates fall back lazily to `ssr_bg.wasm` on edge isolates (verified in [`s2-s4-workerd-edge.test.ts`](../../../internal/tests/probes/s2-s4-workerd-edge.test.ts)).
 
 ### 2. `@lit-core/dom-paths`
 
-Analyzes component template AST structures to calculate deterministic numeric child pointer paths (e.g. `[0, 1, 0]`) from the shadow root to every dynamic expression slot:
-- Eliminates the need for `<!--lit-part-->` and `<!--lit-node-->` comment markers.
-- Enables clean Declarative Shadow DOM emission while reducing client hydration to direct array lookups (`root.childNodes[0].childNodes[1]`) in sub-microsecond time.
+Analyzes component template AST structures to calculate deterministic numeric child pointer paths (e.g. `[0, 1, 0]`) and canonical 3-class part addressing (`ElementAnchored`, `SoleTextChild`, `RangeAddressed`, verified in [`s1-security-and-integrity.test.ts`](../../../internal/tests/probes/s1-security-and-integrity.test.ts) and [`dsd_soundness_property.test.ts`](../../../transforms/dom-paths/tests/dsd_soundness_property.test.ts)):
+- Eliminates `<!--lit-part-->` and `<!--lit-node-->` comment markers for element-anchored and sole-text bindings, using `<?start name="pN">...<?end>` range markers only where adjacent text expressions merge.
+- Enables clean Declarative Shadow DOM emission while reducing client part resolution to direct `childNodes` index lookups.
 
 ### 3. `@lit-core/css-fuse`
 
-Cross-component AST deduplication extracts shared reset rules, elevation tokens, and typography definitions into virtual constructable stylesheets (`virtual:css-fuse/*`):
-- Prevents inlining duplicate 30 KB stylesheets into dozens of component shadow roots.
-- Partitions component styles into document-level shared sheets and minimal local overrides, saving 30% to 50% of the HTML payload size.
+Cross-component AST deduplication extracts shared reset rules, elevation tokens, and typography definitions into virtual constructable stylesheets (`virtual:css-fuse/*`, verified in [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts)):
+- Prevents inlining duplicate stylesheets across every component shadow root within a request (including across `HTMLRewriter` elements via a request-scoped `StyleDeduplicator`).
+- Emits each shared sheet inline once (`<style data-lit-sheet="...">`) and adopts shared `CSSStyleSheet` instances across subsequent shadow roots in cascade order (`[sharedSheets, localOverrides]`), with optional `shadowrootadoptedstylesheets` emission paired with a feature-detected fallback script for Firefox and Safari.
 
 ### 4. `@lit-core/resumable`
 
-Serializes component reactive property state into `<script type="lit/state">` snapshots and emits `resumes-on-*` listener attributes:
-- Enables zero-JavaScript initial page loads.
-- Client browsers paint native Declarative Shadow DOM immediately; an inline 1.2 KB micro-loader buffers user interactions and dynamically imports component logic on demand.
+Serializes component reactive property state into `data-lit-state` host attributes and emits `resumes-on-*` listener attributes (verified in [`s2-s3-pipeline-and-lifecycle.test.ts`](../../../internal/tests/probes/s2-s3-pipeline-and-lifecycle.test.ts) and [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts)):
+- Enables zero-JavaScript initial page loads without injecting light-DOM `<script>` nodes that would pollute default `<slot>` projection.
+- Adopts existing Declarative Shadow DOM roots non-destructively upon upgrade, preserving active focus and in-progress user `<input>` values while a unified AST-compiled loader handles event-driven resumption and viewport islands.
 
 ### 5. `@lit-core/directives`
 
@@ -152,7 +152,7 @@ Provides deferred custom element class evaluation and compile-time event delegat
 
 `@lit-core/ssr` is designed around five architectural pillars:
 
-### 1. Pure Isolate Minimal Environment (ISME)
+### 1. Pure isolate minimal environment (ISME)
 
 Modern cloud edge environments (Cloudflare Workers via `workerd`, Fastly Compute via Wasm/V8, Bun, Deno) execute code in sandboxed isolates where `window`, `document`, and `node:vm` do not exist.
 
@@ -167,17 +167,16 @@ ISME provides lightweight, stateless stubs:
 
 The template evaluator emits valid W3C Declarative Shadow DOM:
 ```html
-<user-profile data-lit-paths="true">
+<user-profile data-lit-paths="true" data-lit-state="{&quot;userId&quot;:42,&quot;name&quot;:&quot;Ada Lovelace&quot;}">
   <template shadowrootmode="open">
     <style>:host { display: block; }</style>
     <div class="user">
       <span class="name">Ada Lovelace</span>
     </div>
   </template>
-  <script type="lit/state">{"userId":42,"name":"Ada Lovelace"}</script>
 </user-profile>
 ```
-There are zero comment markers anywhere in the markup.
+Dynamic element-anchored bindings emit zero comment markers into the markup, and serialized state lives on the host tag so default `<slot>` projection remains clean.
 
 ### 3. Deterministic multi-level slot projection
 
@@ -198,48 +197,39 @@ Server rendering maintains a lexical `SlotManager` context stack that projects l
 
 The engine supports two complementary client hydration modes:
 - **Mode A (Path-hydrated mode)**: Clean Declarative Shadow DOM paired with `@lit-core/dom-paths` child pointer arrays. The client attaches dynamic parts directly via index paths without tree-walking comment markers.
-- **Mode B (Resumable mode)**: Clean Declarative Shadow DOM paired with `<script type="lit/state">` snapshots and `@lit-core/resumable`. Delivers zero initial JavaScript payload, deferring component loading until interaction.
+- **Mode B (Resumable mode)**: Clean Declarative Shadow DOM paired with `data-lit-state` host attributes and `@lit-core/resumable`. Delivers zero initial component JavaScript payload, deferring component loading until interaction.
 
 ---
 
-## Empirical performance and payload savings projections
+## Performance and payload architecture
 
-Benchmarking across three major enterprise Lit component libraries (IBM Carbon Web Components, Adobe Spectrum Web Components, and Google Material Web) projects significant performance improvements over `@lit-labs/ssr`:
+The streaming architecture of `@lit-core/ssr` is designed from first principles to optimize time to first byte, server memory, and wire transfer efficiency:
 
-### 1. Rendering throughput (requests per second)
+### 1. Ahead-of-time template plans with lazy WebAssembly fallback
 
-- **IBM Carbon (99 components)**: +240% throughput increase from eliminating `parse5` runtime parsing and using `WeakMap` cached chunk plans.
-- **Adobe Spectrum (52 components)**: +210% throughput increase.
-- **Google Material Web (28 components)**: +280% throughput increase.
+By moving static template structure discovery and element classification ahead of time into `@lit-core/html-aot`, the SSR engine avoids runtime HTML parsing on precompiled static `html` templates (omitting `ssrPlan` payloads from client bundles via `ssr: false`). For dynamic runtime templates such as `lit/static-html.js` running on edge isolates where native `.node` addons are unavailable, `@lit-core/ssr` lazily initializes a `wasm32-unknown-unknown` `SsrTemplatePlan` compiler module and caches compiled plans per `TemplateStringsArray` (verified in [`s2-s4-workerd-edge.test.ts`](../../../internal/tests/probes/s2-s4-workerd-edge.test.ts)).
 
-### 2. Server memory consumption
+### 2. Immediate backpressure-driven streaming
 
-- Memory reduction of 74% under sustained 1,000 concurrent request load due to stateless ISME stubs and pull-driven backpressure streaming.
+Rather than assembling the full HTML tree in memory before dispatch, the response is delivered through a pull-driven `ReadableStream` without buffering component shadow subtrees. Host open tags and initial Declarative Shadow DOM chunks flush incrementally as the tree is evaluated (verified on a 10,000-node tree and unbuffered async host shell in [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts)).
 
-### 3. Time to first byte (TTFB)
+### 3. Out-of-order boundary flushing and default deadlines
 
-- TTFB reduced by 91% through immediate streaming chunk dispatch without full-tree buffer assembly.
+Async components and data boundaries render fallback skeletons during the initial pass and enforce a configurable boundary deadline (`DEFAULT_BOUNDARY_TIMEOUT_MS`) so hung promises cannot stall a response stream indefinitely. When background promises resolve, resolved HTML fragments flush progressively over the existing HTTP connection and swap into place client-side (verified in [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts) and [`s2-s4-workerd-edge.test.ts`](../../../internal/tests/probes/s2-s4-workerd-edge.test.ts)).
 
-### 4. HTML payload size savings
+### 4. Minimal wire markers, security, and Lit lifecycle conformance
 
-- Eliminating `<!--lit-part-->` comment markers reduces HTML payload by 28% to 35%.
-- Deduplicating shared constructable stylesheets via `@lit-core/css-fuse` achieves an additional 12% to 20% payload reduction across multi-component views.
-- Total HTML payload reduction ranges from 28% to 45%.
-
-### 5. Edge cold-start latency
-
-- Sub-millisecond cold starts (< 1 ms) in pure V8 isolates due to zero `node:vm` overhead and zero global prototype monkey patching.
+- **Branded raw HTML trust boundary**: Plain objects with `.html`, `.template`, `.tagName`, or `.render()` properties are always escaped as text; raw markup is emitted exclusively for module-private symbol-branded `unsafeHTML`, `unsafeSVG`, and `unsafeMathML` directive results (verified in [`s1-security-and-integrity.test.ts`](../../../internal/tests/probes/s1-security-and-integrity.test.ts)).
+- **Upstream Lit SSR conformance**: Executes `connectedCallback`, `ReactiveController.hostUpdate()`, `willUpdate(changedProperties)`, `reflect: true` host attribute reflection, `ElementInternals` ARIA reflection, `shadowRootOptions` (`closed`, `delegatesFocus`), light-DOM child inspection, and built-in directives, passing `166 / 171` (`97.1%`) of the pinned upstream `@lit-labs/ssr` (`lit@3.3.3`) integration corpus in Chromium with 5 documented divergences in [`docs/claims.md`](../../../../docs/claims.md) (verified in [`s3-upstream-lit-ssr-corpus.test.ts`](../../../internal/tests/probes/s3-upstream-lit-ssr-corpus.test.ts)).
+- **Empirical measurements**: Measured payload and render numbers are published in one place, the generated table in [`docs/claims.md`](../../../../docs/claims.md), which is rewritten from [`edge-head-to-head.json`](../../../internal/benchmarks/results/edge-head-to-head.json). Bundle sizes come from real Vite production builds, render timings come from Node.js, and element-anchored parts emit 0 comment markers, as counted in headless Chromium. Nothing here is a Cloudflare Worker CPU measurement.
 
 ---
 
-## Conclusion and roadmap
+## Conclusion and verification suites
 
-`@lit-core/ssr` transforms server-side rendering for Lit and Web Components from an emulated Node.js workload into an ahead-of-time optimized, pure V8 isolate streaming engine.
-
-By bridging compiler passes (`html-aot`, `dom-paths`, `css-fuse`, `resumable`, `directives`) with native Declarative Shadow DOM, `@lit-core/ssr` delivers:
-- Edge runtime portability across Node.js, Bun, Deno, Cloudflare Workers, and Fastly Compute.
-- Clean Declarative Shadow DOM with 100% zero comment marker bloat.
-- Constant memory streaming with low TTFB.
-- Compatibility with dual client execution models (direct path hydration and interaction-driven resumability).
-
-Subsequent milestones integrate `@lit-core/ssr` into `@lit-core/vite-plugin` and `@lit-core/webpack-plugin`, establish dedicated multi-framework benchmarks in `@lit-core/benchmarks`, and deliver an interactive showcase demonstration in `@lit-core/showcase`.
+`@lit-core/ssr` transforms server-side rendering for Lit and Web Components from an emulated Node.js workload into an ahead-of-time optimized, pure V8 isolate streaming engine integrated across `@lit-core/vite-plugin` and `@lit-core/webpack-plugin`:
+- Security, deterministic attribute ordering, and canonical `RangeAddressed` addressing: [`s1-security-and-integrity.test.ts`](../../../internal/tests/probes/s1-security-and-integrity.test.ts).
+- Unified server-element pipeline and Lit lifecycle reflection parity: [`s2-s3-pipeline-and-lifecycle.test.ts`](../../../internal/tests/probes/s2-s3-pipeline-and-lifecycle.test.ts).
+- Real Cloudflare `workerd` lazy Wasm fallback, design system DOM parity (Carbon, Material, Spectrum, Web Awesome), and concurrent `HTMLRewriter` loaders: [`s2-s4-workerd-edge.test.ts`](../../../internal/tests/probes/s2-s4-workerd-edge.test.ts).
+- Pinned upstream `@lit-labs/ssr` (`lit@3.3.3`) conformance corpus: [`s3-upstream-lit-ssr-corpus.test.ts`](../../../internal/tests/probes/s3-upstream-lit-ssr-corpus.test.ts).
+- Client `ssrPlan` omission, incremental streaming, `css-fuse` shadow sheet deduplication, non-destructive resumable hydration, action dirty checking, and `html5ever` document hygiene: [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts).

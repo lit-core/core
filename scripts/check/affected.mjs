@@ -20,6 +20,7 @@ export const ALL_CRATES = [
   'resumable',
   'ssr',
   'morph-to-react',
+  'server-split',
 ];
 
 const PACKAGE_CATEGORIES = ['transforms', 'targets', 'rendering', 'bundlers', 'primitives', 'internal'];

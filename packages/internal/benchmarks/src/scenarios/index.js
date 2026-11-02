@@ -423,20 +423,20 @@ export async function runScenarioBenchmark({ scenario, suite, variantId, options
 
       const standaloneSize = shouldProjectToSuiteBaseline
         ? {
-            rawBytes: Math.max(256, Math.round(refSize.rawBytes * (1 + (deltas.rawPercent || 0) / 100))),
-            gzipBytes: Math.max(128, Math.round(refSize.gzipBytes * (1 + (deltas.gzipPercent || 0) / 100))),
-            brotliBytes: Math.max(128, Math.round(refSize.brotliBytes * (1 + (deltas.brotliPercent || 0) / 100))),
+            rawBytes: Math.round(refSize.rawBytes * (1 + (deltas.rawPercent || 0) / 100)),
+            gzipBytes: Math.round(refSize.gzipBytes * (1 + (deltas.gzipPercent || 0) / 100)),
+            brotliBytes: Math.round(refSize.brotliBytes * (1 + (deltas.brotliPercent || 0) / 100)),
             buildTimeMs: variantSize.buildTimeMs,
           }
         : variantSize;
 
       const standaloneRuntime = shouldProjectToSuiteBaseline
         ? {
-            firstRenderMs: Number(Math.max(0.05, refRuntime.firstRenderMs * (1 - (deltas.speedupPercent || 0) / 100)).toFixed(2)),
-            updateMs: Number(Math.max(0.05, (refRuntime.updateMs || 1) * (1 - (deltas.updateSpeedupPercent || 0) / 100)).toFixed(2)),
-            scriptEvalMs: Number(Math.max(0.05, (refRuntime.scriptEvalMs || 1) * (1 - (deltas.evalSpeedupPercent || 0) / 100)).toFixed(2)),
-            registrationMs: Number(Math.max(0.05, (refRuntime.registrationMs || 0.5) * (1 - (deltas.registrationSpeedupPercent || 0) / 100)).toFixed(2)),
-            heapUsedBytes: Math.max(1024, Math.round((refRuntime.heapUsedBytes || 65536) * (1 - (deltas.memorySavingsPercent || 0) / 100))),
+            firstRenderMs: Number((refRuntime.firstRenderMs * (1 - (deltas.speedupPercent || 0) / 100)).toFixed(2)),
+            updateMs: Number(((refRuntime.updateMs || 1) * (1 - (deltas.updateSpeedupPercent || 0) / 100)).toFixed(2)),
+            scriptEvalMs: Number(((refRuntime.scriptEvalMs || 1) * (1 - (deltas.evalSpeedupPercent || 0) / 100)).toFixed(2)),
+            registrationMs: Number(((refRuntime.registrationMs || 0.5) * (1 - (deltas.registrationSpeedupPercent || 0) / 100)).toFixed(2)),
+            heapUsedBytes: Math.round((refRuntime.heapUsedBytes || 65536) * (1 - (deltas.memorySavingsPercent || 0) / 100)),
             speedupPercent: deltas.speedupPercent,
             updateSpeedupPercent: deltas.updateSpeedupPercent,
             evalSpeedupPercent: deltas.evalSpeedupPercent,

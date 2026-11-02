@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Universal server-side rendering engine for Lit and Web Components emitting clean Declarative Shadow DOM",
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -36,6 +37,7 @@
   "files": [
     "dist",
     "src",
+    "wasm",
     "*.node",
     "README.md",
     "LICENSE"
@@ -45,6 +47,7 @@
   },
   "scripts": {
     "build": "node ../../../scripts/build-native.mjs ssr --release --tsc",
+    "build:wasm": "cargo build --profile wasm-release --target wasm32-unknown-unknown -p ssr && wasm-bindgen --target web --out-dir wasm ../../../target/wasm32-unknown-unknown/wasm-release/ssr.wasm && wasm-opt -Oz --strip-debug --strip-dwarf --strip-producers --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types -o wasm/ssr_bg.wasm wasm/ssr_bg.wasm",
     "build:debug": "node ../../../scripts/build-native.mjs ssr --tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -76,8 +79,10 @@
     "@lit-core/test-kit": "workspace:*",
     "@types/node": "^26.6.5",
     "lit": "^3.3.3",
+    "miniflare": "^4.20260730.0",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "workerd": "^1.20261023.1"
   },
   "peerDependencies": {
     "lit": "^3.0.0"

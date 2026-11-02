@@ -1,37 +1,63 @@
+#[cfg(not(target_arch = "wasm32"))]
 use oxc_allocator::Allocator;
+#[cfg(not(target_arch = "wasm32"))]
 use oxc_parser::Parser;
+#[cfg(not(target_arch = "wasm32"))]
 use oxc_semantic::SemanticBuilder;
+#[cfg(not(target_arch = "wasm32"))]
 use oxc_span::{SourceType, Span};
+#[cfg(not(target_arch = "wasm32"))]
 use serde::{Deserialize, Serialize};
+#[cfg(not(target_arch = "wasm32"))]
 use std::path::Path;
 
+#[cfg(not(target_arch = "wasm32"))]
 pub mod classify;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod decorator;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod diagnostics;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod manifest;
+#[cfg(feature = "template-ir")]
+pub mod parts;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod property;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod symbol;
 #[cfg(feature = "template-ir")]
 pub mod template_ir;
 
+#[cfg(not(target_arch = "wasm32"))]
 pub use classify::{BailoutReason, ClassificationTier, ComponentClassifier};
+#[cfg(not(target_arch = "wasm32"))]
 pub use decorator::{DecoratorExtractor, ExtractedDecorator, LitDecoratorKind};
+#[cfg(not(target_arch = "wasm32"))]
 pub use diagnostics::{Diagnostic, DiagnosticCode, DiagnosticSeverity};
+#[cfg(not(target_arch = "wasm32"))]
 pub use manifest::{
     ComponentRef, EventInfo, LibraryManifest, LitComponentInfo, ManifestScanner, ModuleManifest,
     ShadowRootOptions, SlotInfo, StyleInfo,
 };
+#[cfg(feature = "template-ir")]
+pub use parts::{
+    PartAddressing, PartDescriptor, classify_parts_from_ir, compute_template_parts,
+    compute_template_paths,
+};
+#[cfg(not(target_arch = "wasm32"))]
 pub use property::{PropertyInfo, PropertyModelExtractor, PropertyType};
+#[cfg(not(target_arch = "wasm32"))]
 pub use symbol::{
     CanonicalDirective, CanonicalHelperSymbol, CanonicalLitSymbol, CustomElementRegistration,
     HeritageProof, ImportedClassInfo, SymbolProofContext,
 };
 #[cfg(feature = "template-ir")]
 pub use template_ir::{
-    AttributePart, AttributePrefix, AttributeValue, ElementNamespace, TemplateAttribute,
-    TemplateElement, TemplateIR, TemplateNode, TemplateParser, TemplateSlot,
+    AttributePart, AttributePrefix, AttributeValue, ElementNamespace, OrderedAttrs,
+    TemplateAttribute, TemplateElement, TemplateIR, TemplateNode, TemplateParser, TemplateSlot,
 };
 
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LitModuleAnalysis {
     pub components: Vec<LitComponentInfo>,
@@ -39,6 +65,7 @@ pub struct LitModuleAnalysis {
     pub diagnostics: Vec<Diagnostic>,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, thiserror::Error)]
 pub enum AnalysisError {
     #[error("Failed to parse JavaScript/TypeScript source: {0}")]
@@ -48,6 +75,7 @@ pub enum AnalysisError {
 }
 
 /// Primary analysis entry point for a Lit module.
+#[cfg(not(target_arch = "wasm32"))]
 pub fn analyze_lit_module(
     allocator: &Allocator,
     source_text: &str,
@@ -201,6 +229,7 @@ pub fn analyze_lit_module(
     })
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn find_class_in_expr<'a>(
     expr: &'a oxc_ast::ast::Expression<'a>,
 ) -> Option<&'a oxc_ast::ast::Class<'a>> {
@@ -218,6 +247,7 @@ fn find_class_in_expr<'a>(
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn analyze_class_node<'a>(
     program: &'a oxc_ast::ast::Program<'a>,
     class: &'a oxc_ast::ast::Class<'a>,
@@ -401,7 +431,7 @@ fn analyze_class_node<'a>(
     });
 }
 
-#[cfg(feature = "template-ir")]
+#[cfg(all(feature = "template-ir", not(target_arch = "wasm32")))]
 fn extract_component_template<'a>(
     class: &'a oxc_ast::ast::Class<'a>,
     ctx: &SymbolProofContext<'a>,

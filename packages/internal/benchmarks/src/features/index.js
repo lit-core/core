@@ -1,6 +1,7 @@
 export { runDirectivesBenchmarks } from './directives.js';
 export { runDirtyMaskBenchmarks } from './dirty-mask.js';
 export { runDomPathsBenchmarks } from './dom-paths.js';
+export { runEdgeHeadToHeadBenchmark, TARGETS as EDGE_HEAD_TO_HEAD_TARGETS } from './edge-head-to-head.js';
 export { runElemProxyBenchmarks } from './elem-proxy.js';
 export { runEventHoistBenchmarks } from './event-hoist.js';
 export { runMemoizeBenchmarks } from './memoize.js';

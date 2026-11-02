@@ -59,7 +59,7 @@ const other = someTag\`<h1>Not lit</h1>\`;
       const source = fs.readFileSync(filePath, 'utf-8');
       const expected = fs.readFileSync(goldenPath, 'utf-8').trim();
 
-      const result = compileHtmlAot(source, { filename: file });
+      const result = compileHtmlAot(source, { filename: file, ssr: false });
       const normalize = (s: string) =>
         s
           .replace(/\s+/g, ' ')
@@ -71,5 +71,25 @@ const other = someTag\`<h1>Not lit</h1>\`;
           .trim();
       expect(normalize(result.code)).toBe(normalize(expected));
     }
+  });
+
+  it('attaches SsrTemplatePlan with opcodes, parts, and custom elements', () => {
+    const input = `
+import { html } from 'lit';
+export const comp = (title: string, count: number) => html\`
+  <div class="card" ?active=\${count > 0}>
+    <h1>\${title}</h1>
+    <custom-badge count=\${count}></custom-badge>
+  </div>
+\`;
+`;
+    const result = compileHtmlAot(input, { filename: 'comp.ts', ssr: true });
+    expect(result.templatesCount).toBe(1);
+    expect(result.code).toContain('ssrPlan:');
+    expect(result.code).toContain('v: 2');
+    expect(result.code).toContain('opcodes:');
+    expect(result.code).toContain('parts:');
+    expect(result.code).toContain('markerSites:');
+    expect(result.code).toContain('custom-badge');
   });
 });

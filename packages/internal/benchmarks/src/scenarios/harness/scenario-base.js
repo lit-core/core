@@ -407,7 +407,7 @@ ${bundleCode}
         throw new Error(`Scenario bundle execution crashed: ${win.__bundleError}`);
       }
 
-      const evalMs = win.__evalStart && win.__evalEnd ? Math.max(0, win.__evalEnd - win.__evalStart) : 0;
+      const evalMs = win.__evalStart && win.__evalEnd ? (win.__evalEnd - win.__evalStart > 0 ? win.__evalEnd - win.__evalStart : 0) : 0;
       const regMs = win.__registrationMs || 0;
       const container = document.getElementById('container');
       if (!container) throw new Error('Benchmark container not found');
@@ -492,7 +492,7 @@ ${bundleCode}
         const t0 = performance.now();
         await win.__scenario.mount(container);
         void container.offsetHeight;
-        firstRenderMs = Math.max(0.1, performance.now() - t0);
+        firstRenderMs = performance.now() - t0;
         await new Promise((r) => setTimeout(r, 0));
         mountSnapshot = serializeDomTree(container);
 
@@ -517,7 +517,7 @@ ${bundleCode}
               await win.__scenario.update(container);
             }
             void container.offsetHeight;
-            updateSamples.push(Math.max(0.05, (performance.now() - t1) / UPDATE_BATCH));
+            updateSamples.push((performance.now() - t1) / UPDATE_BATCH);
           }
           updateSamples.sort((a, b) => a - b);
           updateMs = Number(updateSamples[1].toFixed(2));
@@ -563,7 +563,7 @@ ${bundleCode}
         }
         await Promise.all(mounted.map(safeUpdateComplete));
         void container.offsetHeight;
-        firstRenderMs = Math.max(0.1, performance.now() - t0);
+        firstRenderMs = performance.now() - t0;
 
         const t1 = performance.now();
         for (let i = 0; i < mounted.length; i++) {
@@ -573,7 +573,7 @@ ${bundleCode}
         }
         await Promise.all(mounted.map(safeUpdateComplete));
         void container.offsetHeight;
-        updateMs = Math.max(0.1, performance.now() - t1);
+        updateMs = performance.now() - t1;
 
         updateSnapshot = serializeDomTree(container);
 

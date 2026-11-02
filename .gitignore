@@ -59,5 +59,6 @@ blob-report
 
 # Agent autonomous state
 .agents/.goal_active.json
-.agents/teamwork
+.agents/teamwork/*
+!.agents/teamwork/protected-changes.md
 

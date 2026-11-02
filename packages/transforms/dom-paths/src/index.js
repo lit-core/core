@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { arch, platform } from 'node:os';
 import path from 'node:path';
-import { preparePartsWithPaths, resolveNodeByPath, resolveNodesByPaths } from './client.js';
+import { preparePartsWithPaths, resolveNodeByPath, resolveNodesByPaths, resolveRangeMarkers, resolveSoleTextParent } from './client.js';
 
 const require = createRequire(import.meta.url);
 
@@ -45,7 +45,7 @@ if (!nativeBinding) {
 }
 
 export { DOM_PATHS_SOURCE } from './virtual.js';
-export { preparePartsWithPaths, resolveNodeByPath, resolveNodesByPaths };
+export { preparePartsWithPaths, resolveNodeByPath, resolveNodesByPaths, resolveRangeMarkers, resolveSoleTextParent };
 
 /**
  * Computes structural DOM child paths for dynamic parts in Lit html tagged templates.
@@ -58,6 +58,20 @@ export { preparePartsWithPaths, resolveNodeByPath, resolveNodesByPaths };
 export function computeDomPaths(templateStrings, options = {}) {
   const normalizeWhitespace = options.normalizeWhitespace !== false;
   return nativeBinding.computeDomPaths(Array.from(templateStrings), normalizeWhitespace);
+}
+
+/**
+ * Computes classified DOM part descriptors with 3-class minimal marker taxonomy
+ * (ElementAnchored, SoleTextChild, RangeAddressed) for dynamic parts in Lit templates.
+ *
+ * @param {string[] | TemplateStringsArray} templateStrings
+ * @param {object} [options]
+ * @param {boolean} [options.normalizeWhitespace=true]
+ * @returns {Array<{ path: number[], isAttribute: boolean, targetTag?: string, addressing: any }>}
+ */
+export function computeDomParts(templateStrings, options = {}) {
+  const normalizeWhitespace = options.normalizeWhitespace !== false;
+  return nativeBinding.computeDomParts(Array.from(templateStrings), normalizeWhitespace);
 }
 
 /**

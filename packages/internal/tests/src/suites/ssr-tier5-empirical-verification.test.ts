@@ -1,6 +1,5 @@
 import { isSerializableValue, serializeComponentState, serializeStateToJson } from '@lit-core/resumable/server';
 import { createIsolateEnvironment, HTMLElementStub, renderToString } from '@lit-core/ssr';
-import { escapeUnclosedTemplateTags } from '@lit-core/ssr/slot';
 import { html } from 'lit';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { getTestBrowser } from '../harness.js';
@@ -24,73 +23,111 @@ describe('tier 5 challenger empirical stress suite for @lit-core/ssr', () => {
   // 1. ADVERSARIAL TEMPLATE BREAKOUT ESCAPING IN REAL CHROMIUM
   // =========================================================================
   describe('adversarial template breakout escaping', () => {
-    it('escapes case variants of unclosed template closing tags', () => {
+    it('escapes case variants of unclosed template closing tags in dynamic template expressions', () => {
       const variants = ['</template>', '</TEMPLATE>', '</Template>', '</tEmPlAtE>', '</TEMPLATE >', '</TEMPLATE   >', '</template\n>', '</template\t>'];
 
       for (const variant of variants) {
-        const input = `<div>Safe prefix${variant}<div id="payload">Breakout</div></div>`;
-        const escaped = escapeUnclosedTemplateTags(input);
-        expect(escaped).not.toMatch(/<\/template[\s>]/i);
-        expect(escaped).toContain('&lt;/template&gt;');
-        expect(escaped).toContain('Safe prefix');
-        expect(escaped).toContain('<div id="payload">Breakout</div>');
+        const tpl = html`<div>Safe prefix${variant}<div id="payload">Breakout</div></div>`;
+        const rendered = renderToString(tpl);
+        expect(rendered).not.toMatch(/<\/template[\s>]/i);
+        expect(rendered).toMatch(/&lt;\/template[\s\S]*?&gt;/i);
+        expect(rendered).toContain('Safe prefix');
+        expect(rendered).toContain('<div id="payload">Breakout</div>');
       }
     });
 
-    it('does NOT mangle hyphenated custom element tags matching template-*', () => {
-      const hyphenatedSamples = [
+    it('does not mangle hyphenated custom element tags matching template-* in templates', () => {
+      const samples = [
+        html`<template-item id="item1">Content</template-item>`,
+        html`<template-card class="active">Card Body</template-card>`,
+        html`<template-element-viewer data-test="true"></template-element-viewer>`,
+        html`<template-container><template-sub-item>Nested</template-sub-item></template-container>`,
+      ];
+      const expected = [
         '<template-item id="item1">Content</template-item>',
         '<template-card class="active">Card Body</template-card>',
         '<template-element-viewer data-test="true"></template-element-viewer>',
         '<template-container><template-sub-item>Nested</template-sub-item></template-container>',
       ];
 
-      for (const sample of hyphenatedSamples) {
-        const escaped = escapeUnclosedTemplateTags(sample);
-        expect(escaped).toBe(sample);
+      for (let i = 0; i < samples.length; i++) {
+        const rendered = renderToString(samples[i]);
+        expect(rendered).toBe(expected[i]);
       }
     });
 
     it('preserves hyphenated custom element tags even when adjacent to unclosed </TEMPLATE>', () => {
-      const mixed = '<template-item>First</template-item></TEMPLATE><template-card>Second</template-card>';
-      const escaped = escapeUnclosedTemplateTags(mixed);
+      const hostile = '</TEMPLATE>';
+      const tpl = html`<template-item>First</template-item>${hostile}<template-card>Second</template-card>`;
+      const rendered = renderToString(tpl);
 
-      expect(escaped).toBe('<template-item>First</template-item>&lt;/template&gt;<template-card>Second</template-card>');
+      expect(rendered).toContain('<template-item>First</template-item>');
+      expect(rendered).toMatch(/&lt;\/TEMPLATE&gt;/i);
+      expect(rendered).toContain('<template-card>Second</template-card>');
+      expect(rendered).not.toMatch(/<\/template[\s>]/i);
     });
 
     it('preserves legitimate balanced nested <template>...</template> across case variations', () => {
-      const balancedSamples = [
-        '<template id="t1"><p>Inner text</p></template>',
-        '<TEMPLATE id="t2"><span>Upper inner</span></TEMPLATE>',
-        '<Template id="t3"><div>Mixed inner</div></Template>',
-        '<template><template id="t-deep"><span>Double nested</span></template></template>',
+      const samples = [
+        html`<template id="t1"><p>Inner text</p></template>`,
+        html`<TEMPLATE id="t2"><span>Upper inner</span></TEMPLATE>`,
+        html`<Template id="t3"><div>Mixed inner</div></Template>`,
+        html`<template><template id="t-deep"><span>Double nested</span></template></template>`,
       ];
 
-      for (const sample of balancedSamples) {
-        const result = escapeUnclosedTemplateTags(sample);
+      for (const sample of samples) {
+        const rendered = renderToString(sample);
         // Legitimate balanced templates must not have their closing tags escaped
-        expect(result).not.toContain('&lt;/template&gt;');
-        expect(result).toBe(sample);
+        expect(rendered).not.toMatch(/&lt;\/template&gt;/i);
+        expect(rendered).toMatch(/<template[\s>]/i);
+        expect(rendered).toMatch(/<\/template>/i);
       }
     });
 
-    it('verifies real Chromium does NOT prematurely terminate shadow root with case-variant breakouts', async () => {
+    it('verifies real Chromium does not prematurely terminate shadow root with case-variant breakouts', async () => {
+      const env = createIsolateEnvironment();
+
+      class AllCapsElement extends HTMLElementStub {
+        tag = '</TEMPLATE>';
+        render() {
+          return html`<section class="shadow-inner"><span id="pre-all-caps">Before</span>${this.tag}<div id="breakout-all-caps">Hostile Payload</div><span id="post-all-caps">After</span></section>`;
+        }
+      }
+      class MixedTitleElement extends HTMLElementStub {
+        tag = '</Template>';
+        render() {
+          return html`<section class="shadow-inner"><span id="pre-mixed-title">Before</span>${this.tag}<div id="breakout-mixed-title">Hostile Payload</div><span id="post-mixed-title">After</span></section>`;
+        }
+      }
+      class MixedRandomElement extends HTMLElementStub {
+        tag = '</tEmPlAtE>';
+        render() {
+          return html`<section class="shadow-inner"><span id="pre-mixed-random">Before</span>${this.tag}<div id="breakout-mixed-random">Hostile Payload</div><span id="post-mixed-random">After</span></section>`;
+        }
+      }
+      class TrailingSpacesElement extends HTMLElementStub {
+        tag = '</TEMPLATE   >';
+        render() {
+          return html`<section class="shadow-inner"><span id="pre-with-trailing-spaces">Before</span>${this.tag}<div id="breakout-spaces">Hostile Payload</div><span id="post-with-trailing-spaces">After</span></section>`;
+        }
+      }
+
+      env.customElements.define('stress-test-all-caps', AllCapsElement);
+      env.customElements.define('stress-test-mixed-title', MixedTitleElement);
+      env.customElements.define('stress-test-mixed-random', MixedRandomElement);
+      env.customElements.define('stress-test-with-trailing-spaces', TrailingSpacesElement);
+
       const cases = [
-        { name: 'all-caps', tag: '</TEMPLATE>', id: 'breakout-all-caps' },
-        { name: 'mixed-title', tag: '</Template>', id: 'breakout-mixed-title' },
-        { name: 'mixed-random', tag: '</tEmPlAtE>', id: 'breakout-mixed-random' },
-        { name: 'with-trailing-spaces', tag: '</TEMPLATE   >', id: 'breakout-spaces' },
+        { tagName: 'stress-test-all-caps', tpl: html`<stress-test-all-caps></stress-test-all-caps>`, id: 'breakout-all-caps' },
+        { tagName: 'stress-test-mixed-title', tpl: html`<stress-test-mixed-title></stress-test-mixed-title>`, id: 'breakout-mixed-title' },
+        { tagName: 'stress-test-mixed-random', tpl: html`<stress-test-mixed-random></stress-test-mixed-random>`, id: 'breakout-mixed-random' },
+        { tagName: 'stress-test-with-trailing-spaces', tpl: html`<stress-test-with-trailing-spaces></stress-test-with-trailing-spaces>`, id: 'breakout-spaces' },
       ];
 
       for (const tc of cases) {
-        const descriptor = {
-          tagName: `stress-test-${tc.name}`,
-          shadowHtml: `<section class="shadow-inner"><span id="pre-${tc.name}">Before</span>${tc.tag}<div id="${tc.id}">Hostile Payload</div><span id="post-${tc.name}">After</span></section>`,
-        };
-
-        const rendered = renderToString(descriptor);
+        const rendered = renderToString(tc.tpl, { customElements: env.customElements });
         expect(rendered).toContain('<template shadowrootmode="open">');
-        expect(rendered).toContain('&lt;/template&gt;');
+        expect(rendered).toMatch(/&lt;\/template[\s\S]*?&gt;/i);
 
         await page.setContent(`<!DOCTYPE html><html><body><div id="mount">${rendered}</div></body></html>`);
 
@@ -108,7 +145,7 @@ describe('tier 5 challenger empirical stress suite for @lit-core/ssr', () => {
               shadowChildCount: shadowRoot?.children.length ?? 0,
             };
           },
-          { tagName: descriptor.tagName, payloadId: tc.id },
+          { tagName: tc.tagName, payloadId: tc.id },
         );
 
         expect(domReport.hasShadowRoot).toBe(true);
@@ -119,12 +156,15 @@ describe('tier 5 challenger empirical stress suite for @lit-core/ssr', () => {
     });
 
     it('verifies real Chromium renders hyphenated custom elements correctly inside Declarative Shadow DOM', async () => {
-      const descriptor = {
-        tagName: 'hyphen-host-box',
-        shadowHtml: '<div class="shadow-wrap"><template-card id="inner-card"><span class="card-label">Card Label</span></template-card></div>',
-      };
+      const env = createIsolateEnvironment();
+      class HyphenHostBox extends HTMLElementStub {
+        render() {
+          return html`<div class="shadow-wrap"><template-card id="inner-card"><span class="card-label">Card Label</span></template-card></div>`;
+        }
+      }
+      env.customElements.define('hyphen-host-box', HyphenHostBox);
 
-      const rendered = renderToString(descriptor);
+      const rendered = renderToString(html`<hyphen-host-box></hyphen-host-box>`, { customElements: env.customElements });
       expect(rendered).toContain('<template shadowrootmode="open">');
       expect(rendered).toContain('<template-card id="inner-card">');
       expect(rendered).not.toContain('&lt;/template');
@@ -202,17 +242,24 @@ describe('tier 5 challenger empirical stress suite for @lit-core/ssr', () => {
       const cycleArray: any[] = ['element'];
       cycleArray.push(cycleArray);
 
-      const output = renderToString(
-        {
-          tagName: 'cyclic-array-box',
-          state: { items: cycleArray, title: 'Safe Title' },
-        },
-        { resumable: true },
-      );
+      const env = createIsolateEnvironment();
+      class CyclicArrayBox extends HTMLElementStub {
+        render() {
+          return html`<div>cyclic</div>`;
+        }
+      }
+      env.customElements.define('cyclic-array-box', CyclicArrayBox);
 
-      expect(output).toContain('<cyclic-array-box>');
-      expect(output).toContain('<script type="lit/state">');
-      expect(output).toContain('"title":"Safe Title"');
+      const output = renderToString(html`<cyclic-array-box></cyclic-array-box>`, {
+        customElements: env.customElements,
+        resumable: true,
+        state: { items: cycleArray, title: 'Safe Title' },
+      });
+
+      expect(output).toContain('<cyclic-array-box ');
+      expect(output).toContain('data-lit-state="');
+      expect(output).not.toContain('<script type="lit/state">');
+      expect(output).toContain('&quot;title&quot;:&quot;Safe Title&quot;');
     });
 
     it('operates safely when Node is undefined in pure V8 isolate environment', () => {

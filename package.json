@@ -24,11 +24,14 @@
     "bundler"
   ],
   "scripts": {
+    "postinstall": "node scripts/link-packages.mjs",
+    "prepare": "node scripts/link-packages.mjs",
     "build:native": "node scripts/build-native.mjs --all --release",
     "build": "pnpm run build:native && turbo run build",
     "dev": "turbo run dev",
     "lint": "biome check .",
     "check": "node scripts/check/index.mjs",
+    "check:integrity": "node scripts/check/integrity.mjs",
     "check:all": "node scripts/check/index.mjs --all",
     "check:rust": "node scripts/check/index.mjs --rust",
     "check:js": "node scripts/check/index.mjs --js",
@@ -67,16 +70,19 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.2",
+    "@cloudflare/vite-plugin": "^1.65.0",
     "@momentum-design/components": "^0.142.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/webpack": "^5.28.5",
+    "miniflare": "^4.20260730.0",
     "playwright": "~1.64.1",
     "tailwindcss": "^4.3.3",
     "turbo": "^2.11.10",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5",
-    "webpack": "^5.112.1"
+    "webpack": "^5.112.1",
+    "workerd": "^1.20261023.1"
   },
   "packageManager": "pnpm@12.15.0",
   "dependencies": {

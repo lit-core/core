@@ -24,8 +24,10 @@ allowBuilds:
   "@ibm/plex-sans-thai-looped": false
   "@ibm/plex-serif": false
   esbuild: true
+  workerd: true
 
 onlyBuiltDependencies:
   - esbuild
+  - workerd
 
 verifyDepsBeforeRun: false

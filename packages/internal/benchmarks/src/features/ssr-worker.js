@@ -276,8 +276,8 @@ async function runMeasurements() {
     global.gc();
   }
   const retainedHeapBytes = process.memoryUsage().heapUsed;
-  const peakDeltaBytes = Math.max(0, peakHeapBytes - baseHeapBytes);
-  const retainedDeltaBytes = Math.max(0, retainedHeapBytes - baseHeapBytes);
+  const peakDeltaBytes = peakHeapBytes > baseHeapBytes ? peakHeapBytes - baseHeapBytes : 0;
+  const retainedDeltaBytes = retainedHeapBytes > baseHeapBytes ? retainedHeapBytes - baseHeapBytes : 0;
   const allocPer1kRendersBytes = peakDeltaBytes;
 
   // 5. Streaming TTFB and chunk metrics (multi-sample median across 20 iterations to eliminate GC/JIT spikes)

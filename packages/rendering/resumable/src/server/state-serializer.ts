@@ -10,30 +10,56 @@ export interface StateSerializerOptions {
   filter?: (key: string, value: unknown) => boolean;
 }
 
+const DEFAULT_EXCLUDED_PROPERTIES = new Set<string>([
+  'tagName',
+  'shadowRoot',
+  'isConnected',
+  'nodeType',
+  'nodeName',
+  'localName',
+  'namespaceURI',
+  'renderOptions',
+  'hasUpdated',
+  'isUpdatePending',
+  'updateComplete',
+]);
+
+const ctorCandidateKeysCache = new WeakMap<Function, readonly string[]>();
+
 /**
  * Check if a value is JSON-serializable (primitives, plain objects, arrays).
  */
-export function isSerializableValue(value: unknown, seen = new WeakSet<object>()): boolean {
+export function isSerializableValue(value: unknown, seen?: WeakSet<object>): boolean {
   if (value === null) return true;
   const t = typeof value;
-  if (t === 'string' || t === 'number' || t === 'boolean') {
-    return Number.isFinite(value as number) || t !== 'number';
+  if (t === 'string' || t === 'boolean') {
+    return true;
+  }
+  if (t === 'number') {
+    return Number.isFinite(value as number);
   }
   if (t === 'object') {
-    if (seen.has(value as object)) {
+    const visited = seen ?? new WeakSet<object>();
+    if (visited.has(value as object)) {
       return false;
     }
-    seen.add(value as object);
+    visited.add(value as object);
 
     if (Array.isArray(value)) {
-      return value.every((item) => isSerializableValue(item, seen));
+      for (let i = 0; i < value.length; i++) {
+        if (!isSerializableValue(value[i], visited)) {
+          return false;
+        }
+      }
+      return true;
     }
     // Must be a plain object, not a DOM node or class instance
     if (typeof Node !== 'undefined' && value instanceof Node) return false;
     const proto = Object.getPrototypeOf(value);
     if (proto === Object.prototype || proto === null) {
-      for (const key of Object.keys(value as Record<string, unknown>)) {
-        if (!isSerializableValue((value as Record<string, unknown>)[key], seen)) {
+      const keys = Object.keys(value as Record<string, unknown>);
+      for (let i = 0; i < keys.length; i++) {
+        if (!isSerializableValue((value as Record<string, unknown>)[keys[i]], visited)) {
           return false;
         }
       }
@@ -41,6 +67,61 @@ export function isSerializableValue(value: unknown, seen = new WeakSet<object>()
     }
   }
   return false;
+}
+
+function isWritableInstanceProperty(target: any, key: string): boolean {
+  let cur = target;
+  while (cur && cur !== Object.prototype) {
+    const desc = Object.getOwnPropertyDescriptor(cur, key);
+    if (desc) {
+      if ('value' in desc) {
+        return desc.writable !== false;
+      }
+      return typeof desc.set === 'function';
+    }
+    cur = Object.getPrototypeOf(cur);
+  }
+  return true;
+}
+
+function getStaticWritableKeysForCtor(ctor: Function): readonly string[] | null {
+  const cached = ctorCandidateKeysCache.get(ctor);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const c = ctor as any;
+  const hasElementProps = c.elementProperties instanceof Map;
+  const hasStaticProps = Boolean(c.properties && typeof c.properties === 'object');
+  if (!hasElementProps && !hasStaticProps) {
+    return null;
+  }
+
+  const rawSet = new Set<string>();
+  if (hasElementProps) {
+    for (const key of c.elementProperties.keys()) {
+      if (typeof key === 'string' && !DEFAULT_EXCLUDED_PROPERTIES.has(key)) {
+        rawSet.add(key);
+      }
+    }
+  }
+  if (hasStaticProps) {
+    for (const key of Object.keys(c.properties)) {
+      if (!DEFAULT_EXCLUDED_PROPERTIES.has(key)) {
+        rawSet.add(key);
+      }
+    }
+  }
+
+  const proto = c.prototype;
+  const writableKeys: string[] = [];
+  for (const key of rawSet) {
+    if (isWritableInstanceProperty(proto, key)) {
+      writableKeys.push(key);
+    }
+  }
+  ctorCandidateKeysCache.set(ctor, writableKeys);
+  return writableKeys;
 }
 
 /**
@@ -52,39 +133,43 @@ export function extractComponentState(instanceOrProps: any, options: StateSerial
     return state;
   }
 
-  const excludeSet = new Set(['tagName', 'shadowRoot', 'isConnected', ...(options.excludeProperties || [])]);
-
-  // Determine property keys to inspect
-  const candidateKeys = new Set<string>();
-
-  // 1. Inspect static elementProperties from LitElement / ReactiveElement
+  const extraExcluded = options.excludeProperties && options.excludeProperties.length > 0 ? new Set(options.excludeProperties) : null;
+  const filterFn = options.filter;
   const ctor = instanceOrProps.constructor;
-  if (ctor && ctor.elementProperties instanceof Map) {
-    for (const key of ctor.elementProperties.keys()) {
-      if (typeof key === 'string') {
-        candidateKeys.add(key);
+  const staticKeys = typeof ctor === 'function' && ctor !== Object ? getStaticWritableKeysForCtor(ctor) : null;
+
+  if (staticKeys !== null && staticKeys.length > 0) {
+    for (let i = 0; i < staticKeys.length; i++) {
+      const key = staticKeys[i];
+      if (extraExcluded?.has(key)) continue;
+      if (Object.hasOwn(instanceOrProps, key)) {
+        const ownDesc = Object.getOwnPropertyDescriptor(instanceOrProps, key);
+        if (ownDesc && 'value' in ownDesc && ownDesc.writable === false) continue;
+      }
+
+      let value: unknown;
+      try {
+        value = instanceOrProps[key];
+      } catch {
+        continue;
+      }
+
+      if (value === undefined) continue;
+      if (filterFn && !filterFn(key, value)) continue;
+
+      if (isSerializableValue(value)) {
+        state[key] = value;
       }
     }
+    return state;
   }
 
-  // 2. Inspect static properties object
-  if (ctor?.properties && typeof ctor.properties === 'object') {
-    for (const key of Object.keys(ctor.properties)) {
-      candidateKeys.add(key);
-    }
-  }
-
-  // 3. If no static metadata, inspect instance's own properties
-  if (candidateKeys.size === 0) {
-    for (const key of Object.keys(instanceOrProps)) {
-      if (!key.startsWith('_') && !key.startsWith('$')) {
-        candidateKeys.add(key);
-      }
-    }
-  }
-
-  for (const key of candidateKeys) {
-    if (excludeSet.has(key)) continue;
+  const ownKeys = Object.keys(instanceOrProps);
+  for (let i = 0; i < ownKeys.length; i++) {
+    const key = ownKeys[i];
+    if (key.startsWith('_') || key.startsWith('$')) continue;
+    if (DEFAULT_EXCLUDED_PROPERTIES.has(key) || extraExcluded?.has(key)) continue;
+    if (!isWritableInstanceProperty(instanceOrProps, key)) continue;
 
     let value: unknown;
     try {
@@ -94,10 +179,7 @@ export function extractComponentState(instanceOrProps: any, options: StateSerial
     }
 
     if (value === undefined) continue;
-
-    if (options.filter && !options.filter(key, value)) {
-      continue;
-    }
+    if (filterFn && !filterFn(key, value)) continue;
 
     if (isSerializableValue(value)) {
       state[key] = value;
@@ -111,19 +193,23 @@ export function extractComponentState(instanceOrProps: any, options: StateSerial
  * Safely serialize state object to JSON string, escaping '<' to prevent script breakouts.
  */
 export function serializeStateToJson(state: Record<string, unknown>): string {
-  const seen = new WeakSet<object>();
   try {
-    return JSON.stringify(state, (_key, val) => {
-      if (typeof val === 'object' && val !== null) {
-        if (seen.has(val)) {
-          return undefined;
-        }
-        seen.add(val);
-      }
-      return val;
-    }).replace(/</g, '\\u003c');
+    return JSON.stringify(state).replace(/</g, '\\u003c');
   } catch {
-    return '{}';
+    const seen = new WeakSet<object>();
+    try {
+      return JSON.stringify(state, (_key, val) => {
+        if (typeof val === 'object' && val !== null) {
+          if (seen.has(val)) {
+            return undefined;
+          }
+          seen.add(val);
+        }
+        return val;
+      }).replace(/</g, '\\u003c');
+    } catch {
+      return '{}';
+    }
   }
 }
 
@@ -138,21 +224,27 @@ export function serializeComponentState(instanceOrProps: any, options: StateSeri
   return serializeStateToJson(state);
 }
 
-/**
- * Render the <script type="lit/state"> tag for embedding inside the custom element host.
- */
-export function renderStateScript(stateJsonOrObj: string | Record<string, unknown>): string {
-  const jsonStr = typeof stateJsonOrObj === 'string' ? stateJsonOrObj : serializeStateToJson(stateJsonOrObj);
-
-  return `<script type="lit/state">${jsonStr}</script>`;
+function escapeStateAttr(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 }
 
 /**
- * Parse state from serialized script text content.
+ * Format the `data-lit-state` host attribute for serializing reactive component state on the custom element host.
  */
-export function parseComponentState(scriptContent: string): Record<string, unknown> {
-  if (!scriptContent?.trim()) {
+export function formatStateAttribute(stateJsonOrObj: string | Record<string, unknown>): string {
+  const jsonStr = typeof stateJsonOrObj === 'string' ? stateJsonOrObj : serializeStateToJson(stateJsonOrObj);
+  if (!jsonStr || jsonStr === '{}') {
+    return '';
+  }
+  return `data-lit-state="${escapeStateAttr(jsonStr)}"`;
+}
+
+/**
+ * Parse state from serialized `data-lit-state` attribute value.
+ */
+export function parseComponentState(rawState: string): Record<string, unknown> {
+  if (!rawState?.trim()) {
     return {};
   }
-  return JSON.parse(scriptContent.trim());
+  return JSON.parse(rawState.trim());
 }

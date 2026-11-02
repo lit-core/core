@@ -1,10 +1,14 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildManifest, compileResumableLoader, extractCustomElementTags } from '@lit-core/resumable';
-import { IsolateCustomElementRegistry, installIsolateGlobals, renderToString } from '@lit-core/ssr';
+import { resolveLitPrivateSsrSupportForVite } from '@lit-core/resumable/vite';
+import { handleActionRequest } from '@lit-core/server-elements/action-endpoint';
+import { compileWorkerEntry } from '@lit-core/server-split';
+import { IsolateCustomElementRegistry, renderHtmlDocument, withScopedIsolateGlobals } from '@lit-core/ssr';
 import type { Compiler } from 'webpack';
-import { registerPluginState, unregisterPluginState } from './loader.js';
+import { getPluginState, registerPluginState, unregisterPluginState } from './loader.js';
 import type {
   CssFuseOptions,
   CssMinifierOptions,
@@ -20,6 +24,7 @@ import type {
   MemoizeOptions,
   PropsLowerOptions,
   ResumableOptions,
+  ServerElementsOptions,
   SsrOptions,
   TagShakeOptions,
 } from './options.js';
@@ -37,6 +42,14 @@ import {
   VIRTUAL_LIT_CORE_PREFIX,
 } from './utils.js';
 import { getVirtualLitCoreModule } from './virtual.js';
+
+function computeDeterministicBuildId(elements: any[], explicitId?: string): string {
+  if (explicitId) return explicitId;
+  const hash = createHash('sha256');
+  const sorted = [...elements].map((e) => e.tagName || e.filePath).sort();
+  for (const s of sorted) hash.update(s);
+  return hash.digest('hex').slice(0, 16);
+}
 
 let loaderPath = fileURLToPath(new URL('./loader.js', import.meta.url));
 if (!fs.existsSync(loaderPath)) {
@@ -61,6 +74,47 @@ export function isSsrTarget(target: unknown): boolean {
     return t === 'node' || t.startsWith('node') || t === 'async-node' || t === 'webworker' || t.includes('worker') || t === 'electron-main' || t === 'electron-preload';
   }
   return false;
+}
+
+/**
+ * Augments Webpack entry configuration to prepend the client patch executor module.
+ */
+export function injectExecutorToEntry(entry: any, executorModule: string): any {
+  if (typeof entry === 'string') {
+    return [executorModule, entry];
+  }
+  if (Array.isArray(entry)) {
+    if (!entry.includes(executorModule)) {
+      return [executorModule, ...entry];
+    }
+    return entry;
+  }
+  if (typeof entry === 'function') {
+    return async () => {
+      const result = await entry();
+      return injectExecutorToEntry(result, executorModule);
+    };
+  }
+  if (typeof entry === 'object' && entry !== null) {
+    const newEntry: Record<string, any> = {};
+    for (const [key, val] of Object.entries(entry)) {
+      if (typeof val === 'string') {
+        newEntry[key] = [executorModule, val];
+      } else if (Array.isArray(val)) {
+        newEntry[key] = val.includes(executorModule) ? val : [executorModule, ...val];
+      } else if (typeof val === 'object' && val !== null && (val as any).import) {
+        const imports = Array.isArray((val as any).import) ? (val as any).import : [(val as any).import];
+        newEntry[key] = {
+          ...val,
+          import: imports.includes(executorModule) ? imports : [executorModule, ...imports],
+        };
+      } else {
+        newEntry[key] = val;
+      }
+    }
+    return newEntry;
+  }
+  return entry;
 }
 
 export class LitWebpackPlugin {
@@ -94,6 +148,127 @@ export class LitWebpackPlugin {
     };
   }
 
+  buildServerElementsManifest(compilation?: any): { version: string; buildId?: string; elements: Record<string, any>; actionIndex: Record<string, string> } {
+    const state = getPluginState(this.id);
+    const serverElementsMap = state?.serverElements;
+    const rawElements: Record<string, any> = {};
+    const rawActionIndex: Record<string, string> = {};
+
+    if (serverElementsMap) {
+      const sortedEntries = Array.from(serverElementsMap.values()).sort((a, b) => {
+        const keyA = a.tagName || a.className || a.filePath;
+        const keyB = b.tagName || b.className || b.filePath;
+        return keyA.localeCompare(keyB);
+      });
+      for (const el of sortedEntries) {
+        const tag = el.tagName || el.className || el.filePath;
+        let clientChunk = el.clientChunk;
+        let serverChunk = el.serverChunk;
+
+        if (compilation?.chunks) {
+          const isTargetServer = Boolean(state?.isSsr || isSsrTarget(compilation?.compiler?.options?.target || compilation?.options?.target));
+          for (const chunk of compilation.chunks) {
+            const chunkFiles = chunk.files ? Array.from(chunk.files) : [];
+            const chunkName = chunk.name || chunkFiles[0] || 'chunk.js';
+            if (compilation.chunkGraph) {
+              for (const mod of compilation.chunkGraph.getChunkModules(chunk)) {
+                const resource = (mod as any).resource || (mod as any).userRequest;
+                if (resource && resource === el.filePath) {
+                  if (isTargetServer || chunkName.includes('server') || chunkName.includes('worker')) {
+                    serverChunk = chunkName;
+                  } else {
+                    clientChunk = chunkName;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        const actionsObj: Record<string, any> = {};
+        const sortedActions = [...el.actions].sort((a, b) => a.hash.localeCompare(b.hash));
+        for (const act of sortedActions) {
+          actionsObj[act.hash] = {
+            name: act.name,
+            writtenProperties: Array.isArray(act.writtenProperties) ? [...act.writtenProperties].sort() : [],
+            params: act.params,
+          };
+          rawActionIndex[act.hash] = tag;
+        }
+
+        const loadersObj: Record<string, any> = {};
+        const sortedLoaders = [...el.loaders].sort((a, b) => a.name.localeCompare(b.name));
+        for (const load of sortedLoaders) {
+          loadersObj[load.name] = {
+            writtenProperties: Array.isArray(load.writtenProperties) ? [...load.writtenProperties].sort() : [],
+          };
+        }
+
+        rawElements[tag] = {
+          tagName: el.tagName,
+          className: el.className,
+          clientChunk: clientChunk || undefined,
+          serverChunk: serverChunk || undefined,
+          zeroLit: Boolean(el.zeroLit),
+          actions: actionsObj,
+          loaders: loadersObj,
+        };
+      }
+    }
+
+    const sortedElementKeys = Object.keys(rawElements).sort();
+    const elements: Record<string, any> = {};
+    for (const k of sortedElementKeys) {
+      elements[k] = rawElements[k];
+    }
+
+    const sortedActionHashes = Object.keys(rawActionIndex).sort();
+    const actionIndex: Record<string, string> = {};
+    for (const h of sortedActionHashes) {
+      actionIndex[h] = rawActionIndex[h];
+    }
+
+    const serverElementsOpt = this.options.serverElements ?? this.options['server-elements'];
+    const explicitBuildId = typeof serverElementsOpt === 'object' ? (serverElementsOpt as any).buildId : undefined;
+    const sortedList = serverElementsMap ? Array.from(serverElementsMap.values()) : [];
+    const buildId = computeDeterministicBuildId(sortedList, explicitBuildId);
+
+    return {
+      version: '1.0',
+      buildId,
+      elements,
+      actionIndex,
+    };
+  }
+
+  buildWorkerEntrySource(_compilation?: any): string {
+    const state = getPluginState(this.id);
+    const serverElementsMap = state?.serverElements;
+    const elements = serverElementsMap
+      ? Array.from(serverElementsMap.values()).sort((a, b) => {
+          const keyA = a.tagName || a.className || a.filePath;
+          const keyB = b.tagName || b.className || b.filePath;
+          return keyA.localeCompare(keyB);
+        })
+      : [];
+
+    const serverElementsOpt = this.options.serverElements ?? this.options['server-elements'];
+    const explicitBuildId = typeof serverElementsOpt === 'object' ? (serverElementsOpt as any).buildId : undefined;
+    const workerBuildId = computeDeterministicBuildId(elements, explicitBuildId);
+    const actionRoutePrefix = typeof serverElementsOpt === 'object' && serverElementsOpt.actionRoutePrefix ? serverElementsOpt.actionRoutePrefix : '/_lit/a/';
+
+    return compileWorkerEntry({
+      elements: elements.map((el) => ({
+        tagName: el.tagName,
+        className: el.className,
+        filePath: el.filePath,
+        actions: Array.isArray(el.actions) ? el.actions.map((act: any) => ({ name: act.name, hash: act.hash })) : [],
+      })),
+      buildId: workerBuildId,
+      actionRoutePrefix,
+    });
+  }
+
   apply(compiler: Compiler): void {
     const logger = compiler.getInfrastructureLogger(this.name);
     const options = this.options;
@@ -122,6 +297,126 @@ export class LitWebpackPlugin {
         ssr: ssrOpt || false,
       },
     });
+
+    // Auto-inject client patch executor and official Lit hydration support into entrypoints (Invariant 8)
+    const serverElementsOpt = options.serverElements ?? options['server-elements'];
+    const autoInjectExecutor = typeof serverElementsOpt === 'object' && serverElementsOpt.autoInjectExecutor !== undefined ? serverElementsOpt.autoInjectExecutor : true;
+
+    if (!isTargetServer && serverElementsOpt !== false && autoInjectExecutor) {
+      const EXECUTOR_MODULE = '@lit-core/server-elements/executor';
+      compiler.options.entry = injectExecutorToEntry(compiler.options.entry, EXECUTOR_MODULE);
+    }
+
+    const ssrHydrateFlag = typeof rawSsr === 'object' && rawSsr !== null ? rawSsr.hydrate : undefined;
+    const shouldAutoInjectHydrate =
+      !isTargetServer &&
+      ((this.name === 'LitWebpackPlugin' && rawSsr !== false && !options.native && !options['native-compile']) || Boolean(rawSsr) || Boolean(options.resumable)) &&
+      options.hydrate !== false &&
+      ssrHydrateFlag !== false;
+
+    if (shouldAutoInjectHydrate) {
+      compiler.options.entry = injectExecutorToEntry(compiler.options.entry, 'virtual:lit-core/hydrate-support');
+    }
+
+    // Setup devServer action routing middleware for POST /_lit/a/*
+    compiler.options.devServer = compiler.options.devServer || {};
+    const existingSetupMiddlewares = compiler.options.devServer.setupMiddlewares;
+    compiler.options.devServer.setupMiddlewares = (middlewares: any[], devServer: any) => {
+      const rawRoutePrefix = typeof serverElementsOpt === 'object' && serverElementsOpt.actionRoutePrefix ? serverElementsOpt.actionRoutePrefix : '/_lit/a/';
+      const routePrefix = rawRoutePrefix.endsWith('/') ? rawRoutePrefix : `${rawRoutePrefix}/`;
+      const devSecret = typeof serverElementsOpt === 'object' && serverElementsOpt.secret ? serverElementsOpt.secret : 'lit-dev-insecure-secret-key-32b!';
+
+      const actionMiddleware = {
+        name: 'lit-server-elements-action',
+        middleware: async (req: any, res: any, next: any) => {
+          if (req.method !== 'POST' || !req.url) {
+            return next();
+          }
+
+          const urlPath = req.url.split('?')[0];
+          if (!urlPath.startsWith(routePrefix)) {
+            return next();
+          }
+
+          const actionHash = req.url.slice(routePrefix.length).split('?')[0].replace(/\/$/, '');
+          if (!actionHash || !/^[0-9a-f]{16}$/i.test(actionHash)) {
+            res.statusCode = 400;
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({ error: 'Invalid action hash format', code: 'INVALID_HASH' }));
+          }
+
+          try {
+            const chunks: Buffer[] = [];
+            for await (const chunk of req) {
+              chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+            }
+            const rawBody = Buffer.concat(chunks).toString('utf-8');
+
+            const rawProto = req.headers['x-forwarded-proto'];
+            const forwardedProto = Array.isArray(rawProto) ? rawProto[0] : rawProto;
+            const protocol = forwardedProto ? (forwardedProto.split(',')[0].trim().toLowerCase() === 'https' ? 'https' : 'http') : (req.socket as any)?.encrypted ? 'https' : 'http';
+            const host = req.headers.host || 'localhost:8080';
+            const fullUrl = new URL(req.url, `${protocol}://${host}`);
+
+            const headers = new Headers();
+            for (const [k, v] of Object.entries(req.headers)) {
+              if (v !== undefined) {
+                if (Array.isArray(v)) {
+                  for (const item of v) headers.append(k, item);
+                } else {
+                  headers.set(k, v as string);
+                }
+              }
+            }
+
+            const webRequest = new Request(fullUrl.toString(), {
+              method: 'POST',
+              headers,
+              body: rawBody,
+            });
+
+            const webResponse = await handleActionRequest(webRequest, {
+              env: {},
+              secret: devSecret,
+              registry: (globalThis as any).customElements,
+              routePrefix,
+            });
+
+            res.statusCode = webResponse.status;
+            webResponse.headers.forEach((value, key) => {
+              res.setHeader(key, value);
+            });
+
+            if (webResponse.body) {
+              const reader = webResponse.body.getReader();
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                if (value) res.write(value);
+              }
+              res.end();
+            } else {
+              const buffer = await webResponse.arrayBuffer();
+              res.end(Buffer.from(buffer));
+            }
+          } catch (err: any) {
+            if (!res.headersSent) {
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: err?.message || 'Internal action execution error' }));
+            } else {
+              res.end();
+            }
+          }
+        },
+      };
+
+      middlewares.unshift(actionMiddleware);
+      if (existingSetupMiddlewares) {
+        return existingSetupMiddlewares(middlewares, devServer);
+      }
+      return middlewares;
+    };
 
     // Auto-inject loader into compiler module rules
     compiler.options.module = compiler.options.module || { rules: [] };
@@ -238,6 +533,14 @@ export class LitWebpackPlugin {
         hooks.readResourceForScheme.for('virtual').tapPromise(this.name, async (resource: string) => {
           if (isVirtualLitCoreId(resource) || resource.includes('lit-core')) {
             const subpath = extractLitCoreVirtualSubpath(resource);
+            if (subpath === 'manifest') {
+              const manifestObj = this.buildServerElementsManifest(compilation);
+              return Buffer.from(`export default ${JSON.stringify(manifestObj)};`);
+            }
+            if (subpath === 'worker') {
+              const workerCode = this.buildWorkerEntrySource(compilation);
+              return Buffer.from(workerCode);
+            }
             const code = getVirtualLitCoreModule(subpath);
             if (code !== undefined) {
               return Buffer.from(code);
@@ -273,12 +576,24 @@ export class LitWebpackPlugin {
     });
 
     // Redirect legacy, bare, or unprefixed imports to virtual:...
+    const resolveLitPrivateSsrSupport = (contextDir?: string): string | undefined => {
+      const isDev = compiler.options.mode === 'development';
+      return resolveLitPrivateSsrSupportForVite(contextDir || compiler.options.context, isTargetServer, isDev);
+    };
+
     compiler.hooks.normalModuleFactory.tap(this.name, (nmf) => {
       nmf.hooks.resolve.tap(this.name, (resolveData) => {
         if (!resolveData.request) return;
         const [reqBase, reqQuery] = resolveData.request.split('?');
         const querySuffix = reqQuery ? `?${reqQuery}` : '';
-        if (reqBase.startsWith('@lit-core/resumable/client')) {
+        if (reqBase === 'lit-html/private-ssr-support.js') {
+          const resolved = resolveLitPrivateSsrSupport(resolveData.context);
+          if (resolved) {
+            resolveData.request = `${resolved}${querySuffix}`;
+          }
+        } else if (reqBase === 'virtual:lit-core/hydrate-support' || reqBase === 'virtual:lit-core/hydrate-support.js') {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}hydrate-support.js${querySuffix}`;
+        } else if (reqBase.startsWith('@lit-core/resumable/client')) {
           resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}resumable-adapter.js${querySuffix}`;
         } else if (reqBase.startsWith('@lit-core/native/runtime')) {
           resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}native-runtime.js${querySuffix}`;
@@ -286,6 +601,14 @@ export class LitWebpackPlugin {
           resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}dom-paths.js${querySuffix}`;
         } else if (reqBase.startsWith('@lit-core/ssr/client') || reqBase === 'virtual:lit-core/ssr-runtime') {
           resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}ssr-runtime.js${querySuffix}`;
+        } else if (reqBase === 'virtual:lit-core/install-globals' || reqBase === 'virtual:lit-core/install-globals.js') {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}install-globals.js${querySuffix}`;
+        } else if (reqBase === 'virtual:lit-core/executor' || reqBase === 'virtual:lit-core/executor.js') {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}executor.js${querySuffix}`;
+        } else if (reqBase === 'virtual:lit-core/manifest' || reqBase === 'virtual:lit-core/manifest.js' || reqBase === 'virtual:lit-core/manifest.json') {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}manifest.js${querySuffix}`;
+        } else if (reqBase === 'virtual:lit-core/worker' || reqBase === 'virtual:lit-core/worker.js') {
+          resolveData.request = `${VIRTUAL_LIT_CORE_PREFIX}worker.js${querySuffix}`;
         } else if (BARE_HTML_FUSED_ID_REGEX.test(reqBase)) {
           const filename = reqBase.endsWith('.js') ? reqBase : `${reqBase}.js`;
           resolveData.request = `${VIRTUAL_HTML_FUSED_PREFIX}${filename}${querySuffix}`;
@@ -506,38 +829,61 @@ export class LitWebpackPlugin {
 
           // 8. Prerender HTML assets in compilation when present
           if (ssrOpt.prerender !== false) {
-            installIsolateGlobals();
-            const baseRegistry = ssrOpt.customElements ?? (globalThis as any).customElements;
-            const registry = new IsolateCustomElementRegistry(baseRegistry);
-            const islandsManifestMap: Record<string, string> = {};
-            for (const [tag, info] of Object.entries(manifest.tags)) {
-              islandsManifestMap[tag] = info.file;
-            }
-            for (const [assetName, asset] of Object.entries(assets)) {
-              if (assetName.endsWith('.html')) {
-                const rawSource = typeof asset.source === 'function' ? asset.source() : asset;
-                const htmlStr = Buffer.isBuffer(rawSource) ? rawSource.toString('utf-8') : String(rawSource);
-                let renderedHtml = renderToString(
-                  { strings: [htmlStr] as unknown as TemplateStringsArray, values: [] },
-                  {
+            const preExistingCustomElements = (globalThis as any).customElements;
+            withScopedIsolateGlobals((scopedEnv) => {
+              const baseRegistry = ssrOpt.customElements ?? preExistingCustomElements ?? scopedEnv.customElements;
+              const registry = new IsolateCustomElementRegistry(baseRegistry);
+              const islandsManifestMap: Record<string, string> = {};
+              for (const [tag, info] of Object.entries(manifest.tags)) {
+                islandsManifestMap[tag] = info.file;
+              }
+              for (const [assetName, asset] of Object.entries(assets)) {
+                if (assetName.endsWith('.html')) {
+                  const rawSource = typeof asset.source === 'function' ? asset.source() : asset;
+                  const htmlStr = Buffer.isBuffer(rawSource) ? rawSource.toString('utf-8') : String(rawSource);
+                  let renderedHtml = renderHtmlDocument(htmlStr, {
                     customElements: registry,
                     domPaths: Boolean(ssrOpt.domPaths),
                     resumable: Boolean(ssrOpt.resumable),
                     mode: 'dsd',
-                  },
-                );
-                if (Object.keys(islandsManifestMap).length > 0 && !renderedHtml.includes('__LIT_ISLANDS_MANIFEST__')) {
-                  const manifestScript = `<script>window.__LIT_ISLANDS_MANIFEST__=${JSON.stringify(islandsManifestMap).replace(/</g, '\\u003c')};</script>`;
-                  renderedHtml = renderedHtml.includes('</head>') ? renderedHtml.replace('</head>', `  ${manifestScript}\n</head>`) : `${manifestScript}${renderedHtml}`;
-                }
-                if (typeof compilation.updateAsset === 'function') {
-                  compilation.updateAsset(assetName, new RawSource(renderedHtml));
+                  });
+                  if (Object.keys(islandsManifestMap).length > 0 && !renderedHtml.includes('__LIT_ISLANDS_MANIFEST__')) {
+                    const manifestScript = `<script>window.__LIT_ISLANDS_MANIFEST__=${JSON.stringify(islandsManifestMap).replace(/</g, '\\u003c')};</script>`;
+                    renderedHtml = renderedHtml.includes('</head>') ? renderedHtml.replace('</head>', `  ${manifestScript}\n</head>`) : `${manifestScript}${renderedHtml}`;
+                  }
+                  if (typeof compilation.updateAsset === 'function') {
+                    compilation.updateAsset(assetName, new RawSource(renderedHtml));
+                  }
                 }
               }
-            }
+            });
           }
 
           logger.info(`⚡ [ssr] Emitted SSR manifest (${manifestFileName}) with ${Object.keys(manifest.tags).length} custom element tags across ${compilation.chunks.size} chunks`);
+        });
+      });
+    }
+
+    if (serverElementsOpt !== false && compilationHook) {
+      compilationHook.tap(this.name, (compilation) => {
+        if (!compiler.webpack?.Compilation || !compilation.hooks?.processAssets) return;
+        const stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS;
+        compilation.hooks.processAssets.tapPromise({ name: `${this.name}:lit-manifest`, stage }, async () => {
+          const state = getPluginState(this.id);
+          const serverElementsMap = state?.serverElements;
+
+          if (!serverElementsMap || serverElementsMap.size === 0) return;
+
+          const RawSource = compiler.webpack.sources.RawSource;
+          const manifestObj = this.buildServerElementsManifest(compilation);
+          const manifestJson = JSON.stringify(manifestObj, null, 2);
+          const source = new RawSource(manifestJson);
+          const emitOrUpdate = (file: string) => {
+            if (compilation.getAsset(file)) compilation.updateAsset(file, source);
+            else compilation.emitAsset(file, source);
+          };
+          emitOrUpdate('lit-manifest.json');
+          emitOrUpdate('.lit-core/server-manifest.json');
         });
       });
     }
@@ -739,6 +1085,32 @@ export function ssr(options: SsrOptions = {}): SsrWebpackPlugin {
 }
 
 export const litSsr = ssr;
+
+export class ServerElementsWebpackPlugin extends LitWebpackPlugin {
+  constructor(options: ServerElementsOptions = {}) {
+    super(
+      {
+        cssFuse: false,
+        htmlFuse: false,
+        propsLower: false,
+        elemProxy: false,
+        eventHoist: false,
+        dirtyMask: false,
+        htmlAot: false,
+        cssMinifier: false,
+        htmlMinifier: false,
+        serverElements: options,
+      },
+      'ServerElementsWebpackPlugin',
+    );
+  }
+}
+
+export function serverElements(options: ServerElementsOptions = {}): ServerElementsWebpackPlugin {
+  return new ServerElementsWebpackPlugin(options);
+}
+
+export const litServerElements = serverElements;
 
 export const LitCoreWebpackPlugin = LitWebpackPlugin;
 export const litCoreWebpackPlugin = lit;

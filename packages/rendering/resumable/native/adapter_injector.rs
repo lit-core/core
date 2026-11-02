@@ -233,3 +233,124 @@ pub fn transform_resumable_component(
         transformed: true,
     }
 }
+
+fn normalize_import_source(source: &str) -> &str {
+    source.strip_suffix(".js").unwrap_or(source)
+}
+
+fn program_already_imports_specifier(program: &Program<'_>, target: &str) -> bool {
+    let target_norm = normalize_import_source(target);
+    let is_hydrate_target = target_norm == "virtual:lit-core/hydrate-support";
+
+    for stmt in &program.body {
+        let Statement::ImportDeclaration(import_decl) = stmt else {
+            continue;
+        };
+        let src_norm = normalize_import_source(import_decl.source.value.as_str());
+        if src_norm == target_norm {
+            return true;
+        }
+        if is_hydrate_target
+            && (src_norm == "virtual:lit-core/resumable-adapter"
+                || src_norm == "@lit-core/resumable"
+                || src_norm == "@lit-core/resumable/client"
+                || src_norm == "@lit-labs/ssr-client/lit-element-hydrate-support")
+        {
+            return true;
+        }
+    }
+    false
+}
+
+#[napi]
+pub fn inject_client_entry_imports(
+    source: String,
+    specifiers: Vec<String>,
+    options: Option<TransformResumableOptions>,
+) -> TransformResumableResult {
+    if specifiers.is_empty() {
+        return TransformResumableResult {
+            code: source,
+            map: None,
+            transformed: false,
+        };
+    }
+
+    let opts = options.unwrap_or_default();
+    let filename = opts.filename.as_deref().unwrap_or("entry.ts");
+    let source_type = SourceType::from_path(filename).unwrap_or_else(|_| SourceType::tsx());
+
+    let allocator = Allocator::default();
+    let mut parsed = Parser::new(&allocator, &source, source_type).parse();
+
+    // Prove it or leave it alone: never reprint a module that failed to parse cleanly.
+    if !parsed.diagnostics.is_empty() {
+        return TransformResumableResult {
+            code: source,
+            map: None,
+            transformed: false,
+        };
+    }
+
+    let mut missing: Vec<&str> = Vec::new();
+    for spec in &specifiers {
+        let trimmed = spec.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        if missing
+            .iter()
+            .any(|existing| normalize_import_source(existing) == normalize_import_source(trimmed))
+        {
+            continue;
+        }
+        if !program_already_imports_specifier(&parsed.program, trimmed) {
+            missing.push(trimmed);
+        }
+    }
+
+    if missing.is_empty() {
+        return TransformResumableResult {
+            code: source,
+            map: None,
+            transformed: false,
+        };
+    }
+
+    let ast = AstBuilder::new(&allocator);
+    let mut new_body = ArenaVec::new_in(&ast);
+    for spec in missing {
+        let source_lit = StringLiteral::new(SPAN, spec, None, &ast);
+        let import_decl = ImportDeclaration::boxed(
+            SPAN,
+            None,
+            source_lit,
+            None,
+            None,
+            ImportOrExportKind::Value,
+            &ast,
+        );
+        new_body.push(Statement::ImportDeclaration(import_decl));
+    }
+    for stmt in parsed.program.body {
+        new_body.push(stmt);
+    }
+    parsed.program.body = new_body;
+
+    let mut codegen_options = CodegenOptions::default();
+    if opts.sourcemap.unwrap_or(false) {
+        codegen_options.source_map_path = Some(std::path::PathBuf::from(filename));
+    }
+
+    let codegen_result = Codegen::new()
+        .with_options(codegen_options)
+        .build(&parsed.program);
+
+    let map = codegen_result.map.map(|m| m.to_json_string());
+
+    TransformResumableResult {
+        code: codegen_result.code,
+        map,
+        transformed: true,
+    }
+}

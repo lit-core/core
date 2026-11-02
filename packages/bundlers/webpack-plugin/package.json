@@ -27,7 +27,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "node tests/unit.test.js && node tests/integration.test.js"
+    "test": "node tests/unit.test.js && node tests/integration.test.js && vitest run tests/server-elements.test.ts"
   },
   "keywords": [
     "css",
@@ -58,6 +58,8 @@
     "@lit-core/native": "workspace:*",
     "@lit-core/props-lower": "workspace:*",
     "@lit-core/resumable": "workspace:*",
+    "@lit-core/server-elements": "workspace:*",
+    "@lit-core/server-split": "workspace:*",
     "@lit-core/ssr": "workspace:*",
     "@lit-core/tag-shake": "workspace:*"
   },

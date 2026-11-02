@@ -1,0 +1,10 @@
+language js
+
+or {
+  `Math.max`,
+  `Math?.max`,
+  `Math[$k]` where { $k <: r"^['\"`]?max['\"`]?$" },
+  `max($args)`,
+  `Reflect.get($m, $k)` where { $m <: r"(?s).*\bMath\b.*", $k <: r"^['\"`]?max['\"`]?$" },
+  JsVariableDeclarator(id=$pat, initializer=$init) where { $pat <: r"(?s).*\bmax\b.*", $init <: r"(?s).*\bMath\b.*" }
+} as $node where { register_diagnostic(span=$node, message="Math.max clamping is prohibited in benchmark feature and scenario evaluation.", severity="error") }

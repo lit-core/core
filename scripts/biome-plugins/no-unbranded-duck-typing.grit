@@ -1,0 +1,10 @@
+language js
+
+or {
+  `"html" in $_`,
+  `"template" in $_`,
+  `"tagName" in $_`,
+  `"taskComplete" in $_`
+} as $node where {
+  register_diagnostic(span=$node, message="Unbranded duck-typing via 'in' for raw markup or runtime descriptors is prohibited; use symbol brands or proven AST bindings.", severity="error")
+}

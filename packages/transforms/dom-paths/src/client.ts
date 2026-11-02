@@ -63,3 +63,102 @@ export function preparePartsWithPaths<T = Node>(root: Node, paths: number[][], c
   }
   return parts;
 }
+
+/**
+ * Resolves the parent element for a sole text child part, enabling fast O(1)
+ * direct updates via parentEl.textContent = val without indexing child nodes.
+ *
+ * @param root The root container node (ShadowRoot or Element)
+ * @param parentPath Structural child index path to the parent element
+ * @returns The resolved parent Element
+ */
+export function resolveSoleTextParent(root: Node, parentPath: number[]): Element {
+  return resolveNodeByPath(root, parentPath) as Element;
+}
+
+/**
+ * Resolves the start and end markers (<?start name="pN"> and <?end>)
+ * for a range-addressed dynamic expression, supporting both ProcessingInstruction
+ * nodes (WHATWG HTML5 / WICG type 7) and Comment nodes (type 8).
+ *
+ * @param root The root container node (ShadowRoot or Element)
+ * @param markerName Name of the part (e.g. "p0")
+ * @param startPath Optional direct structural path to the start marker
+ * @returns Object containing the start and end marker Nodes
+ */
+export function resolveRangeMarkers(root: Node, markerName: string, startPath?: number[]): { start: Node; end: Node } {
+  let start: Node | null = null;
+  const targetData = `name="${markerName}"`;
+
+  if (startPath && startPath.length > 0) {
+    const candidate = resolveNodeByPath(root, startPath);
+    if (candidate) {
+      if (candidate.nodeType === 7 && (candidate as ProcessingInstruction).target === 'start' && (candidate as ProcessingInstruction).data.includes(targetData)) {
+        start = candidate;
+      } else if (candidate.nodeType === 8 && ((candidate as Comment).data.startsWith(`?start name="${markerName}"`) || (candidate as Comment).data.startsWith(`start name="${markerName}"`))) {
+        start = candidate;
+      }
+    }
+  }
+
+  if (!start) {
+    const whatToShow = (NodeFilter.SHOW_COMMENT as number) | ((NodeFilter as any).SHOW_PROCESSING_INSTRUCTION ?? 64);
+    const walker = document.createTreeWalker(root, whatToShow);
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (node.nodeType === 7) {
+        const pi = node as ProcessingInstruction;
+        if (pi.target === 'start' && pi.data.includes(targetData)) {
+          start = node;
+          break;
+        }
+      } else if (node.nodeType === 8) {
+        const comment = node as Comment;
+        if (comment.data.startsWith(`?start name="${markerName}"`) || comment.data.startsWith(`start name="${markerName}"`)) {
+          start = node;
+          break;
+        }
+      }
+    }
+  }
+
+  if (!start) {
+    throw new Error(`Range start marker '${markerName}' not found`);
+  }
+
+  let end: Node | null = null;
+  let depth = 0;
+  let cur: Node | null = start.nextSibling;
+  while (cur) {
+    if (cur.nodeType === 7) {
+      const pi = cur as ProcessingInstruction;
+      if (pi.target === 'start') {
+        depth++;
+      } else if (pi.target === 'end') {
+        if (depth === 0) {
+          end = cur;
+          break;
+        }
+        depth--;
+      }
+    } else if (cur.nodeType === 8) {
+      const data = (cur as Comment).data;
+      if (data.startsWith('?start') || data.startsWith('start name=')) {
+        depth++;
+      } else if (data === '?end' || data.startsWith('?end') || data === 'end' || data.startsWith('end')) {
+        if (depth === 0) {
+          end = cur;
+          break;
+        }
+        depth--;
+      }
+    }
+    cur = cur.nextSibling;
+  }
+
+  if (!end) {
+    throw new Error(`Range end marker for '${markerName}' not found`);
+  }
+
+  return { start, end };
+}

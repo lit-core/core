@@ -1,13 +1,25 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { RESUMABLE_ADAPTER_SOURCE } from '@lit-core/resumable';
-import { transformResumableComponent } from '@lit-core/resumable/compiler';
-import { collectResult, IsolateCustomElementRegistry, installIsolateGlobals, renderToString, transformSsrComponent } from '@lit-core/ssr';
+import process from 'node:process';
+import { pathToFileURL } from 'node:url';
+import { HYDRATE_SUPPORT_SOURCE, RESUMABLE_ADAPTER_SOURCE } from '@lit-core/resumable';
+import { injectClientEntryImports } from '@lit-core/resumable/compiler';
+import { isViteClientEntryModule, resolveLitPrivateSsrSupportForVite, trackHtmlClientEntry } from '@lit-core/resumable/vite';
+import {
+  collectResult,
+  createIsolateEnvironment,
+  extractHtmlModuleScripts,
+  IsolateCustomElementRegistry,
+  renderHtmlDocument,
+  renderToString,
+  transformSsrComponent,
+  withScopedIsolateGlobals,
+} from '@lit-core/ssr';
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { SsrOptions } from '../options.js';
 import { formatVirtualLitCoreId, isVirtualLitCoreId, matchesPattern } from '../utils.js';
-import { ISLANDS_LOADER_SOURCE, SSR_RUNTIME_SOURCE } from '../virtual.js';
+import { getIslandsLoaderSource, INSTALL_GLOBALS_SOURCE, SSR_RUNTIME_SOURCE } from '../virtual.js';
 
 export const LIT_SSR_FAST_CHECK = /(?:@customElement|customElements\.define|LitElement|ReactiveElement|HTMLElement|html`|css`)/;
 
@@ -36,122 +48,61 @@ export function sanitizePrerenderRoute(route: unknown): string | null {
 }
 
 function extractModuleScriptSrcs(html: string): string[] {
-  const srcs: string[] = [];
-  const scriptRegex = /<script\b[^>]*\btype\s*=\s*["']module["'][^>]*>/gi;
-  let match = scriptRegex.exec(html);
-  while (match !== null) {
-    const tag = match[0];
-    const srcMatch = /\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i.exec(tag);
-    const src = srcMatch?.[1] ?? srcMatch?.[2] ?? srcMatch?.[3];
-    if (src && !src.startsWith('/@vite/') && !src.startsWith('http://') && !src.startsWith('https://')) {
-      srcs.push(src);
-    }
-    match = scriptRegex.exec(html);
+  const rawSrcs = extractHtmlModuleScripts(html);
+  return rawSrcs.filter((src) => src && !src.startsWith('/@vite/') && !src.startsWith('http://') && !src.startsWith('https://'));
+}
+
+function injectHeadOrBodyScript(html: string, scriptTag: string): string {
+  const lower = html.toLowerCase();
+  const headCloseIdx = lower.indexOf('</head>');
+  if (headCloseIdx !== -1) {
+    return `${html.slice(0, headCloseIdx)}  ${scriptTag}\n${html.slice(headCloseIdx)}`;
   }
-  return srcs;
+  const bodyCloseIdx = lower.indexOf('</body>');
+  if (bodyCloseIdx !== -1) {
+    return `${html.slice(0, bodyCloseIdx)}  ${scriptTag}\n${html.slice(bodyCloseIdx)}`;
+  }
+  return `${scriptTag}${html}`;
 }
 
 /**
  * Renders custom element tags in an HTML string into genuine Declarative Shadow DOM
- * using @lit-core/ssr.
+ * using @lit-core/ssr without regex HTML rewriting or global prototype pollution.
  */
 export function transformHtmlWithSsr(html: string, options: SsrOptions & { islandsManifest?: Record<string, string> } = {}): string {
   if (typeof html !== 'string' || html.length === 0) {
     return html;
   }
 
-  installIsolateGlobals();
+  const preExistingCustomElements = (globalThis as any).customElements;
 
-  if (typeof (globalThis as any).HTMLElement?.prototype?.attachInternals === 'undefined') {
-    (globalThis as any).HTMLElement.prototype.attachInternals = function () {
-      return {
-        shadowRoot: this.shadowRoot,
-        setFormValue() {},
-        setValidity() {},
-        checkValidity() {
-          return true;
-        },
-        reportValidity() {
-          return true;
-        },
-      };
-    };
-  }
+  return withScopedIsolateGlobals((scopedEnv) => {
+    const baseRegistry = options.customElements ?? preExistingCustomElements ?? scopedEnv.customElements;
+    const registry = new IsolateCustomElementRegistry(baseRegistry);
+    const domPaths = Boolean(options.domPaths);
+    const resumable = Boolean(options.resumable);
+    const islands = Boolean(options.islands);
 
-  const baseRegistry = options.customElements ?? (globalThis as any).customElements;
-  const registry = new IsolateCustomElementRegistry(baseRegistry);
-  const domPaths = Boolean(options.domPaths);
-  const resumable = Boolean(options.resumable);
-  const islands = Boolean(options.islands);
-
-  // 1. Stash protected blocks (comments, scripts, styles)
-  const protectedBlocks: string[] = [];
-  let tokenizedHtml = html.replace(/<!--[\s\S]*?-->|<script\b[^>]*>[\s\S]*?<\/script>|<style\b[^>]*>[\s\S]*?<\/style>/gi, (match) => {
-    const token = `<!--__LIT_PROTECTED_BLOCK_${protectedBlocks.length}__-->`;
-    protectedBlocks.push(match);
-    return token;
-  });
-
-  // If domPaths is requested, ensure data-lit-paths is added to custom elements
-  if (domPaths) {
-    tokenizedHtml = tokenizedHtml.replace(/<([a-z][a-z0-9._-]*-[a-z0-9._-]*)([^>]*)>/gi, (match, tag, attrs) => {
-      if (!attrs.includes('data-lit-paths')) {
-        return `<${tag}${attrs} data-lit-paths="true">`;
-      }
-      return match;
+    let renderedHtml = renderHtmlDocument(html, {
+      customElements: registry,
+      domPaths,
+      resumable,
+      mode: 'dsd',
     });
-  }
 
-  // 2. Render HTML using @lit-core/ssr (only expanding registered custom elements in registry)
-  const templateResult = { strings: [tokenizedHtml], values: [] };
-  let renderedHtml = renderToString(templateResult, {
-    customElements: registry,
-    domPaths,
-    resumable,
-    mode: 'dsd',
+    if (options.islandsManifest && Object.keys(options.islandsManifest).length > 0 && !renderedHtml.includes('__LIT_ISLANDS_MANIFEST__')) {
+      const manifestJson = JSON.stringify(options.islandsManifest).replace(/</g, '\\u003c');
+      const manifestScript = `<script>window.__LIT_ISLANDS_MANIFEST__=${manifestJson};</script>`;
+      renderedHtml = injectHeadOrBodyScript(renderedHtml, manifestScript);
+    }
+
+    if (islands && !renderedHtml.includes('islands-loader')) {
+      const islandScript = '<script type="module" src="/@id/__x00__virtual:lit-core/islands-loader.js"></script>';
+      renderedHtml = injectHeadOrBodyScript(renderedHtml, islandScript);
+    }
+
+    return renderedHtml;
   });
-
-  // 3. Restore protected blocks
-  for (let i = 0; i < protectedBlocks.length; i++) {
-    renderedHtml = renderedHtml.replace(`<!--__LIT_PROTECTED_BLOCK_${i}__-->`, protectedBlocks[i]);
-  }
-
-  // 4. Inject islands manifest if present
-  if (options.islandsManifest && Object.keys(options.islandsManifest).length > 0 && !renderedHtml.includes('__LIT_ISLANDS_MANIFEST__')) {
-    const manifestJson = JSON.stringify(options.islandsManifest).replace(/</g, '\\u003c');
-    const manifestScript = `<script>window.__LIT_ISLANDS_MANIFEST__=${manifestJson};</script>`;
-    if (renderedHtml.includes('</head>')) {
-      renderedHtml = renderedHtml.replace('</head>', `  ${manifestScript}\n</head>`);
-    } else if (renderedHtml.includes('</body>')) {
-      renderedHtml = renderedHtml.replace('</body>', `  ${manifestScript}\n</body>`);
-    } else {
-      renderedHtml = `${manifestScript}${renderedHtml}`;
-    }
-  }
-
-  // 5. Inject islands loader microloader if islands option is enabled
-  if (islands && !renderedHtml.includes('islands-loader')) {
-    const islandScript = `<script type="module" src="/@id/__x00__virtual:lit-core/islands-loader.js"></script>`;
-    if (renderedHtml.includes('</head>')) {
-      renderedHtml = renderedHtml.replace('</head>', `  ${islandScript}\n</head>`);
-    } else if (renderedHtml.includes('</body>')) {
-      renderedHtml = renderedHtml.replace('</body>', `  ${islandScript}\n</body>`);
-    } else {
-      renderedHtml += islandScript;
-    }
-  }
-
-  // 6. Inject state snapshot if resumable mode is enabled and not already present
-  if (resumable && !renderedHtml.includes('<script type="lit/state">') && options.injectState !== false) {
-    const stateScript = '<script type="lit/state">{}</script>';
-    if (renderedHtml.includes('</body>')) {
-      renderedHtml = renderedHtml.replace('</body>', `  ${stateScript}\n</body>`);
-    } else {
-      renderedHtml += stateScript;
-    }
-  }
-
-  return renderedHtml;
 }
 
 const STATIC_ASSET_EXTENSIONS = new Set([
@@ -215,6 +166,8 @@ export function ssr(options: SsrOptions = {}): Plugin {
   let config: ResolvedConfig | undefined;
   let isServerBuild = false;
   const moduleTagsMap = new Map<string, string[]>();
+  const htmlEntryModules = new Set<string>();
+  const pluginIsolateEnv = createIsolateEnvironment();
 
   return {
     name: 'lit-ssr',
@@ -225,13 +178,30 @@ export function ssr(options: SsrOptions = {}): Plugin {
       isServerBuild = Boolean(config.build?.ssr);
     },
 
-    resolveId(id) {
+    buildStart() {
+      htmlEntryModules.clear();
+    },
+
+    resolveId(id, importer, resolveOpts) {
+      if (id === 'lit-html/private-ssr-support.js') {
+        const isSsr = Boolean(isServerBuild || resolveOpts?.ssr);
+        const conditions = config?.resolve?.conditions ?? [];
+        const isDev = Boolean(conditions.includes('development') || (!conditions.includes('production') && config?.mode === 'development'));
+        return resolveLitPrivateSsrSupportForVite(config?.root, isSsr, isDev, this as any, importer, resolveOpts as any);
+      }
+
       const cleanId = id.split('?')[0];
+      if (cleanId === 'virtual:lit-core/install-globals' || cleanId === 'virtual:lit-core/install-globals.js') {
+        return '\0virtual:lit-core/install-globals.js';
+      }
       if (cleanId === 'virtual:lit-core/ssr-runtime' || cleanId === 'virtual:lit-core/ssr-runtime.js') {
         return '\0virtual:lit-core/ssr-runtime.js';
       }
       if (cleanId === 'virtual:lit-core/islands-loader' || cleanId === 'virtual:lit-core/islands-loader.js') {
         return '\0virtual:lit-core/islands-loader.js';
+      }
+      if (cleanId === 'virtual:lit-core/hydrate-support' || cleanId === 'virtual:lit-core/hydrate-support.js') {
+        return '\0virtual:lit-core/hydrate-support.js';
       }
       if (
         cleanId === 'virtual:lit-core/resumable-adapter' ||
@@ -247,11 +217,17 @@ export function ssr(options: SsrOptions = {}): Plugin {
       if (isVirtualLitCoreId(id)) {
         return formatVirtualLitCoreId(id);
       }
-      return undefined;
+      return trackHtmlClientEntry(this as any, config?.root, htmlEntryModules, id, importer, resolveOpts as any);
     },
 
     load(id) {
       const cleanId = id.split('?')[0];
+      if (cleanId === '\0virtual:lit-core/install-globals.js' || cleanId === '\0virtual:lit-core/install-globals') {
+        return {
+          code: INSTALL_GLOBALS_SOURCE,
+          map: null,
+        };
+      }
       if (cleanId === '\0virtual:lit-core/ssr-runtime.js' || cleanId === '\0virtual:lit-core/ssr-runtime') {
         return {
           code: SSR_RUNTIME_SOURCE,
@@ -260,7 +236,13 @@ export function ssr(options: SsrOptions = {}): Plugin {
       }
       if (cleanId === '\0virtual:lit-core/islands-loader.js' || cleanId === '\0virtual:lit-core/islands-loader') {
         return {
-          code: ISLANDS_LOADER_SOURCE,
+          code: getIslandsLoaderSource(),
+          map: null,
+        };
+      }
+      if (cleanId === '\0virtual:lit-core/hydrate-support.js' || cleanId === '\0virtual:lit-core/hydrate-support') {
+        return {
+          code: HYDRATE_SUPPORT_SOURCE,
           map: null,
         };
       }
@@ -275,7 +257,7 @@ export function ssr(options: SsrOptions = {}): Plugin {
 
     transform(code: string, id: string, transformOptions?: { ssr?: boolean }) {
       const cleanId = id.split('?')[0] ?? id;
-      if (!/\.[jt]sx?$/.test(cleanId)) {
+      if (!/\.[cm]?[jt]sx?$/.test(cleanId) || cleanId.startsWith('\0virtual:lit-core/') || cleanId.startsWith('\0virtual:css-fuse/') || cleanId.startsWith('\0virtual:html-fuse/')) {
         return null;
       }
 
@@ -294,16 +276,30 @@ export function ssr(options: SsrOptions = {}): Plugin {
         if (!matched) return null;
       }
 
+      const isSsrTransform = Boolean(isServerBuild || transformOptions?.ssr);
+      const shouldInjectEntryHydrate = !isSsrTransform && options.hydrate !== false && !cleanId.includes('/node_modules/') && isViteClientEntryModule(this, id, cleanId, htmlEntryModules);
+
       // Fast check for Lit code
       if (!LIT_SSR_FAST_CHECK.test(code)) {
+        if (shouldInjectEntryHydrate) {
+          const injected = injectClientEntryImports(code, ['virtual:lit-core/hydrate-support'], {
+            filename: cleanId.replace(/^\0/, ''),
+            sourcemap: Boolean(options.sourcemap),
+          });
+          if (injected.transformed) {
+            return {
+              code: injected.code,
+              map: injected.map ? JSON.parse(injected.map) : null,
+            };
+          }
+        }
         return null;
       }
 
       try {
-        const isSsrTransform = Boolean(isServerBuild || transformOptions?.ssr);
         const islandsConfig = typeof options.islands === 'object' ? options.islands : null;
         const result = transformSsrComponent(code, {
-          filename: cleanId,
+          filename: cleanId.replace(/^\0/, ''),
           sourcemap: Boolean(options.sourcemap),
           ssrMode: isSsrTransform,
           islands: Boolean(options.islands) && !isSsrTransform,
@@ -321,17 +317,17 @@ export function ssr(options: SsrOptions = {}): Plugin {
 
         let currentCode = result.modified ? result.code : code;
         let wasModified = result.modified;
-        let currentMap = result.map ?? null;
+        let currentMap: any = result.map ?? null;
 
-        if (options.resumable && !isSsrTransform && !currentCode.includes('withResumable')) {
-          const resumableRes = transformResumableComponent(currentCode, {
-            filename: cleanId,
-            virtualModule: 'virtual:lit-core/resumable-adapter',
+        if (shouldInjectEntryHydrate) {
+          const injected = injectClientEntryImports(currentCode, ['virtual:lit-core/hydrate-support'], {
+            filename: cleanId.replace(/^\0/, ''),
+            sourcemap: Boolean(options.sourcemap),
           });
-          if (resumableRes.transformed) {
-            currentCode = resumableRes.code;
+          if (injected.transformed) {
+            currentCode = injected.code;
             wasModified = true;
-            currentMap = resumableRes.map ?? currentMap;
+            currentMap = injected.map ? JSON.parse(injected.map) : currentMap;
           }
         }
 
@@ -359,34 +355,32 @@ export function ssr(options: SsrOptions = {}): Plugin {
         }
 
         try {
-          installIsolateGlobals();
-          const rootDir = config?.root || process.cwd();
-          const indexHtmlPath = path.resolve(rootDir, 'index.html');
-          let rawHtml = fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf-8') : '<!DOCTYPE html><html><head></head><body><div id="app"></div></body></html>';
+          const renderedContent: any = await withScopedIsolateGlobals(async (scopedEnv) => {
+            const rootDir = config?.root || process.cwd();
+            const indexHtmlPath = path.resolve(rootDir, 'index.html');
+            let rawHtml = fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf-8') : '<!DOCTYPE html><html><head></head><body><div id="app"></div></body></html>';
 
-          rawHtml = await server.transformIndexHtml(url, rawHtml);
+            rawHtml = await server.transformIndexHtml(url, rawHtml);
 
-          // Automatically load discovered <script type="module" src="..."> entry modules
-          // so component definitions register into customElements before SSR runs
-          const scriptSrcs = extractModuleScriptSrcs(rawHtml);
-          for (const src of scriptSrcs) {
-            try {
+            // Load discovered <script type="module" src="..."> entry modules inside scoped isolate globals
+            const scriptSrcs = extractModuleScriptSrcs(rawHtml);
+            for (const src of scriptSrcs) {
               await server.ssrLoadModule(src);
-            } catch {}
-          }
+            }
 
-          let renderedContent: any = rawHtml;
-          if (options.entry) {
-            try {
+            if (options.entry) {
               const mod = await server.ssrLoadModule(options.entry);
               const renderFn = mod.render || mod.default;
               if (typeof renderFn === 'function') {
-                renderedContent = await renderFn(url, { req, res });
+                return await renderFn(url, { req, res });
               }
-            } catch {}
-          } else {
-            renderedContent = transformHtmlWithSsr(rawHtml, options);
-          }
+            }
+
+            return transformHtmlWithSsr(rawHtml, {
+              ...options,
+              customElements: options.customElements ?? scopedEnv.customElements,
+            });
+          }, pluginIsolateEnv);
 
           const isStreaming = options.streaming !== false;
           if (isStreaming && renderedContent && typeof renderedContent.getReader === 'function') {
@@ -409,13 +403,11 @@ export function ssr(options: SsrOptions = {}): Plugin {
             server.ssrFixStacktrace(err);
           }
           if (res.headersSent) {
-            try {
-              if (typeof (res as any).destroy === 'function') {
-                (res as any).destroy(err as any);
-              } else if (!res.writableEnded && !res.finished) {
-                res.end();
-              }
-            } catch {}
+            if (typeof (res as any).destroy === 'function') {
+              (res as any).destroy(err as any);
+            } else if (!res.writableEnded && !res.finished) {
+              res.end();
+            }
           } else {
             next(err);
           }
@@ -425,7 +417,7 @@ export function ssr(options: SsrOptions = {}): Plugin {
 
     transformIndexHtml(html: string, ctx?: any) {
       const islandsManifest: Record<string, string> = {};
-      const base = (config?.base || '/').replace(/\/$/, '') + '/';
+      const base = `${(config?.base || '/').replace(/\/$/, '')}/`;
       if (ctx?.bundle) {
         for (const item of Object.values(ctx.bundle)) {
           if ((item as any).type === 'chunk') {
@@ -464,149 +456,141 @@ export function ssr(options: SsrOptions = {}): Plugin {
       }
       if (validRoutes.length === 0) return;
 
-      installIsolateGlobals();
+      const preExistingCustomElements = (globalThis as any).customElements;
 
-      // Build tag-to-chunk URL manifest across bundle chunks
-      const islandsManifest: Record<string, string> = {};
-      const base = (config?.base || '/').replace(/\/$/, '') + '/';
-      for (const item of Object.values(bundle)) {
-        if ((item as any).type === 'chunk') {
-          const chunk = item as any;
-          const chunkUrl = `${base}${chunk.fileName.replace(/^\/+/, '')}`;
-          if (Array.isArray(chunk.moduleIds)) {
-            for (const modId of chunk.moduleIds) {
-              const cleanModId = String(modId).split('?')[0];
-              const tags = moduleTagsMap.get(cleanModId);
-              if (tags) {
-                for (const tag of tags) {
-                  islandsManifest[tag] = chunkUrl;
+      await withScopedIsolateGlobals(async (scopedEnv) => {
+        // Build tag-to-chunk URL manifest across bundle chunks
+        const islandsManifest: Record<string, string> = {};
+        const base = `${(config?.base || '/').replace(/\/$/, '')}/`;
+        for (const item of Object.values(bundle)) {
+          if ((item as any).type === 'chunk') {
+            const chunk = item as any;
+            const chunkUrl = `${base}${chunk.fileName.replace(/^\/+/, '')}`;
+            if (Array.isArray(chunk.moduleIds)) {
+              for (const modId of chunk.moduleIds) {
+                const cleanModId = String(modId).split('?')[0];
+                const tags = moduleTagsMap.get(cleanModId);
+                if (tags) {
+                  for (const tag of tags) {
+                    islandsManifest[tag] = chunkUrl;
+                  }
                 }
               }
             }
-          }
-          if (typeof chunk.code === 'string' && LIT_SSR_FAST_CHECK.test(chunk.code)) {
-            try {
+            if (typeof chunk.code === 'string' && LIT_SSR_FAST_CHECK.test(chunk.code)) {
               const scanResult = transformSsrComponent(chunk.code, { filename: chunk.fileName });
               for (const tag of scanResult.discoveredTags) {
                 if (!islandsManifest[tag]) {
                   islandsManifest[tag] = chunkUrl;
                 }
               }
-            } catch {}
+            }
           }
         }
-      }
 
-      // Locate client entry JS chunk from bundle
-      const entryChunk = Object.values(bundle).find((c: any) => c.type === 'chunk' && Boolean(c.isEntry)) || (Object.values(bundle).find((c: any) => c.type === 'chunk') as any);
-      const clientScriptTag = entryChunk ? `<script type="module" src="${base}${entryChunk.fileName.replace(/^\/+/, '')}"></script>` : '';
+        // Locate client entry JS chunk from bundle
+        const entryChunk = Object.values(bundle).find((c: any) => c.type === 'chunk' && Boolean(c.isEntry)) || (Object.values(bundle).find((c: any) => c.type === 'chunk') as any);
+        const clientScriptTag = entryChunk ? `<script type="module" src="${base}${entryChunk.fileName.replace(/^\/+/, '')}"></script>` : '';
 
-      // Base template resolution
-      const rootDir = config?.root || process.cwd();
-      const indexHtmlPath = path.resolve(rootDir, 'index.html');
-      let baseTemplate = '';
-      if (bundle['index.html'] && (bundle['index.html'] as any).source) {
-        baseTemplate = String((bundle['index.html'] as any).source);
-      } else if (fs.existsSync(indexHtmlPath)) {
-        baseTemplate = fs.readFileSync(indexHtmlPath, 'utf-8');
-      }
+        // Base template resolution
+        const rootDir = config?.root || process.cwd();
+        const indexHtmlPath = path.resolve(rootDir, 'index.html');
+        let baseTemplate = '';
+        if (bundle['index.html'] && (bundle['index.html'] as any).source) {
+          baseTemplate = String((bundle['index.html'] as any).source);
+        } else if (fs.existsSync(indexHtmlPath)) {
+          baseTemplate = fs.readFileSync(indexHtmlPath, 'utf-8');
+        }
 
-      // Automatically load discovered <script type="module" src="..."> entry modules
-      if (baseTemplate) {
-        const scriptSrcs = extractModuleScriptSrcs(baseTemplate);
-        for (const src of scriptSrcs) {
-          try {
+        // Load discovered <script type="module" src="..."> entry modules when resolvable as JS modules
+        if (baseTemplate) {
+          const scriptSrcs = extractModuleScriptSrcs(baseTemplate);
+          for (const src of scriptSrcs) {
             const cleanSrc = src.replace(/^\/+/, '');
             const resolvedSrc = path.resolve(rootDir, cleanSrc);
-            if (fs.existsSync(resolvedSrc)) {
-              await import(resolvedSrc);
+            if (fs.existsSync(resolvedSrc) && /\.(?:m?js|cjs)$/i.test(resolvedSrc)) {
+              await import(pathToFileURL(resolvedSrc).href);
             }
-          } catch {}
+          }
         }
-      }
 
-      if (entryChunk?.facadeModuleId && fs.existsSync(entryChunk.facadeModuleId)) {
-        try {
-          await import(entryChunk.facadeModuleId);
-        } catch {}
-      }
+        if (entryChunk?.facadeModuleId && fs.existsSync(entryChunk.facadeModuleId) && /\.(?:m?js|cjs)$/i.test(entryChunk.facadeModuleId)) {
+          await import(pathToFileURL(entryChunk.facadeModuleId).href);
+        }
 
-      // Check if entry module or server render function exists
-      let serverEntryMod: any = null;
-      const entryPath = options.entry || prerenderConfig.entry;
-      if (entryPath) {
-        try {
+        // Load explicit server entry module when configured (errors propagate directly)
+        let serverEntryMod: any = null;
+        const entryPath = options.entry || prerenderConfig.entry;
+        if (entryPath) {
           const resolvedEntry = path.isAbsolute(entryPath) ? entryPath : path.resolve(rootDir, entryPath);
-          serverEntryMod = await import(resolvedEntry);
-        } catch {}
-      }
-
-      const renderOptionsWithManifest = {
-        ...options,
-        islandsManifest,
-      };
-
-      for (const { raw, fileName } of validRoutes) {
-        let routeHtml = '';
-
-        if (serverEntryMod) {
-          const renderFn = serverEntryMod.render || serverEntryMod.default || serverEntryMod.template;
-          if (typeof renderFn === 'function') {
-            const renderResult = await renderFn(raw);
-            routeHtml = typeof renderResult === 'string' ? transformHtmlWithSsr(renderResult, renderOptionsWithManifest) : renderToString(renderResult, { customElements: options.customElements });
-          } else if (renderFn && typeof renderFn === 'object') {
-            routeHtml = renderToString(renderFn, { customElements: options.customElements });
-          }
+          serverEntryMod = await import(pathToFileURL(resolvedEntry).href);
         }
 
-        if (!routeHtml) {
-          if (baseTemplate) {
-            routeHtml = transformHtmlWithSsr(baseTemplate, renderOptionsWithManifest);
-          } else {
-            let bodyMarkup = '<div id="app"></div>';
-            if (entryChunk?.code) {
-              const match = /<([a-z][a-z0-9._-]*-[a-z0-9._-]*)[^>]*>([\s\S]*?)<\/\1>/i.exec(entryChunk.code);
-              if (match) {
-                bodyMarkup = transformHtmlWithSsr(match[0], renderOptionsWithManifest);
-              }
+        const mergedRegistry = {
+          get(tag: string) {
+            return scopedEnv.customElements.get(tag) ?? preExistingCustomElements?.get?.(tag);
+          },
+          define(tag: string, ctor: CustomElementConstructor) {
+            scopedEnv.customElements.define(tag, ctor);
+          },
+        };
+        const effectiveCustomElements = options.customElements ?? mergedRegistry;
+        const renderOptionsWithManifest = {
+          ...options,
+          customElements: effectiveCustomElements,
+          islandsManifest,
+        };
+
+        for (const { raw, fileName } of validRoutes) {
+          let routeHtml = '';
+
+          if (serverEntryMod) {
+            const renderFn = serverEntryMod.render || serverEntryMod.default || serverEntryMod.template;
+            if (typeof renderFn === 'function') {
+              const renderResult = await renderFn(raw);
+              routeHtml = typeof renderResult === 'string' ? transformHtmlWithSsr(renderResult, renderOptionsWithManifest) : renderToString(renderResult, { customElements: effectiveCustomElements });
+            } else if (renderFn && typeof renderFn === 'object') {
+              routeHtml = renderToString(renderFn, { customElements: effectiveCustomElements });
             }
-            routeHtml = `<!DOCTYPE html><html><head>${clientScriptTag}</head><body>${bodyMarkup}</body></html>`;
           }
-        }
 
-        if (Object.keys(islandsManifest).length > 0 && !routeHtml.includes('__LIT_ISLANDS_MANIFEST__')) {
-          const manifestJson = JSON.stringify(islandsManifest).replace(/</g, '\\u003c');
-          const manifestScript = `<script>window.__LIT_ISLANDS_MANIFEST__=${manifestJson};</script>`;
-          if (routeHtml.includes('</head>')) {
-            routeHtml = routeHtml.replace('</head>', `  ${manifestScript}\n</head>`);
-          } else if (routeHtml.includes('<body>')) {
-            routeHtml = routeHtml.replace('<body>', `<head>${manifestScript}</head><body>`);
+          if (!routeHtml) {
+            if (baseTemplate) {
+              routeHtml = transformHtmlWithSsr(baseTemplate, renderOptionsWithManifest);
+            } else {
+              let bodyMarkup = '<div id="app"></div>';
+              if (typeof entryChunk?.code === 'string') {
+                const match = /<([a-z][a-z0-9._-]*-[a-z0-9._-]*)[^>]*>([\s\S]*?)<\/\1>/i.exec(entryChunk.code);
+                if (match) {
+                  bodyMarkup = transformHtmlWithSsr(match[0], renderOptionsWithManifest);
+                }
+              }
+              routeHtml = `<!DOCTYPE html><html><head>${clientScriptTag}</head><body>${bodyMarkup}</body></html>`;
+            }
+          }
+
+          if (Object.keys(islandsManifest).length > 0 && !routeHtml.includes('__LIT_ISLANDS_MANIFEST__')) {
+            const manifestJson = JSON.stringify(islandsManifest).replace(/</g, '\\u003c');
+            const manifestScript = `<script>window.__LIT_ISLANDS_MANIFEST__=${manifestJson};</script>`;
+            routeHtml = injectHeadOrBodyScript(routeHtml, manifestScript);
+          }
+
+          if (clientScriptTag && !routeHtml.includes(entryChunk.fileName)) {
+            routeHtml = injectHeadOrBodyScript(routeHtml, clientScriptTag);
+          }
+
+          const existingAsset = bundle[fileName];
+          if (existingAsset && existingAsset.type === 'asset') {
+            existingAsset.source = routeHtml;
           } else {
-            routeHtml = `${manifestScript}${routeHtml}`;
+            this.emitFile({
+              type: 'asset',
+              fileName,
+              source: routeHtml,
+            });
           }
         }
-
-        if (clientScriptTag && !routeHtml.includes(entryChunk.fileName)) {
-          if (routeHtml.includes('</head>')) {
-            routeHtml = routeHtml.replace('</head>', `  ${clientScriptTag}\n</head>`);
-          } else if (routeHtml.includes('<body>')) {
-            routeHtml = routeHtml.replace('<body>', `<head>${clientScriptTag}</head><body>`);
-          } else {
-            routeHtml = `${clientScriptTag}${routeHtml}`;
-          }
-        }
-
-        const existingAsset = bundle[fileName];
-        if (existingAsset && existingAsset.type === 'asset') {
-          existingAsset.source = routeHtml;
-        } else {
-          this.emitFile({
-            type: 'asset',
-            fileName,
-            source: routeHtml,
-          });
-        }
-      }
+      }, pluginIsolateEnv);
     },
   };
 }

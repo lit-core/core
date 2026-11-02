@@ -1,7 +1,6 @@
 import { html } from 'lit';
 import { describe, expect, it } from 'vitest';
 import { collectResult, createIsolateEnvironment, createStreamFromIterator, HTMLElementStub, renderToStream, renderToString } from '../src/index.js';
-import { projectSlots } from '../src/slot.js';
 
 describe('tier 5 white-box adversarial hardening suite for @lit-core/ssr', () => {
   describe('stream cancellation and abort signal handling', () => {
@@ -124,16 +123,22 @@ describe('tier 5 white-box adversarial hardening suite for @lit-core/ssr', () =>
       const circularState: Record<string, unknown> = { id: 1 };
       circularState.self = circularState;
 
+      const env = createIsolateEnvironment();
+      class CircularBoxElement extends HTMLElementStub {
+        render() {
+          return html`<div>box</div>`;
+        }
+      }
+      env.customElements.define('circular-box', CircularBoxElement);
+
       // Cycle-safe serialization handles circular references safely without throwing
-      const output = renderToString(
-        {
-          tagName: 'circular-box',
-          state: circularState,
-        },
-        { resumable: true },
-      );
-      expect(output).toContain('<circular-box>');
-      expect(output).toContain('<script type="lit/state">{"id":1}</script>');
+      const output = renderToString(html`<circular-box></circular-box>`, {
+        customElements: env.customElements,
+        resumable: true,
+        state: circularState,
+      });
+      expect(output).toContain('<circular-box data-lit-state="{&quot;id&quot;:1}">');
+      expect(output).not.toContain('<script type="lit/state">');
     });
 
     it('silently drops component state when component instance has self-referential property', () => {
@@ -152,6 +157,7 @@ describe('tier 5 white-box adversarial hardening suite for @lit-core/ssr', () =>
       // isSerializableValue in state-serializer.ts detects cycles, silently dropping circular property
       const output = renderToString(instance, { resumable: true });
       expect(output).toContain('<p>Circular prop</p>');
+      expect(output).not.toContain('data-lit-state=');
       expect(output).not.toContain('<script type="lit/state">');
     });
 
@@ -229,28 +235,39 @@ describe('tier 5 white-box adversarial hardening suite for @lit-core/ssr', () =>
     });
   });
 
-  describe('nested slot tags and fallback content in projectSlots', () => {
+  describe('nested slot tags and fallback content in opcode projection', () => {
     it('replaces outer nested slot cleanly without leaving dangling closing slot tag', () => {
-      const shadow = '<div class="container"><slot name="outer"><slot name="inner">Fallback</slot></slot></div>';
-      const res = projectSlots(shadow, [
-        { slot: 'outer', content: '<div class="outer-content">Outer</div>' },
-        { slot: 'inner', content: '<span>Inner</span>' },
-      ]);
+      const env = createIsolateEnvironment();
+      class NestedSlotCe extends HTMLElementStub {
+        render() {
+          return html`<div class="container"><slot name="outer"><slot name="inner">Fallback</slot></slot></div>`;
+        }
+      }
+      env.customElements.define('nested-slot-ce', NestedSlotCe);
+      const tpl = html`<nested-slot-ce><div slot="outer" class="outer-content">Outer</div><span slot="inner">Inner</span></nested-slot-ce>`;
+      const res = renderToString(tpl, { customElements: env.customElements, mode: 'flattened' });
 
-      // Depth-balanced outer slot replacement leaves no dangling </slot>
-      expect(res.projectedShadow).toBe('<div class="container"><div class="outer-content">Outer</div></div>');
-      expect(res.lightRemainder).toBe('<span>Inner</span>');
+      expect(res).toMatch(
+        /<div class="container"><div[^>]*class="outer-content"[^>]*slot="outer"[^>]*>Outer<\/div><\/div>|<div class="container"><div[^>]*slot="outer"[^>]*class="outer-content"[^>]*>Outer<\/div><\/div>/,
+      );
     });
 
-    it('retains unprojected light DOM children in lightRemainder', () => {
-      const shadow = '<slot name="header"></slot>';
-      const light = [{ slot: 'header', content: '<h1>Header</h1>' }, { slot: 'unmatched-named', content: '<aside>Orphaned named slot</aside>' }, { content: '<p>Orphaned default content</p>' }];
+    it('retains unprojected light DOM children in host in dsd mode', () => {
+      const env = createIsolateEnvironment();
+      class HeaderCe extends HTMLElementStub {
+        render() {
+          return html`<slot name="header"></slot>`;
+        }
+      }
+      env.customElements.define('header-ce', HeaderCe);
+      const tpl = html`<header-ce><h1 slot="header">Header</h1><aside slot="unmatched-named">Orphaned named slot</aside><p>Orphaned default content</p></header-ce>`;
 
-      const { projectedShadow, lightRemainder } = projectSlots(shadow, light);
+      const out = renderToString(tpl, { customElements: env.customElements, mode: 'dsd' });
 
-      expect(projectedShadow).toBe('<h1>Header</h1>');
-      expect(lightRemainder).toContain('<aside>Orphaned named slot</aside>');
-      expect(lightRemainder).toContain('<p>Orphaned default content</p>');
+      expect(out).toContain('<template shadowrootmode="open"><slot name="header"></slot></template>');
+      expect(out).toContain('<h1 slot="header">Header</h1>');
+      expect(out).toContain('<aside slot="unmatched-named">Orphaned named slot</aside>');
+      expect(out).toContain('<p>Orphaned default content</p>');
     });
   });
 

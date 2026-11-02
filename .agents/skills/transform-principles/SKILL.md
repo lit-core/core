@@ -76,16 +76,25 @@ Every transform must operate under the assumption that the input code may be min
 - **Don't**: paper over unsupported constructs with synthetic mocks, fake speedup constants, or silent stubbing to inflate benchmark metrics.
 
 ### 11. Follow the vision, not the code next to you
-- **Do**: treat these eleven principles as the sole authoritative reference. When you see existing code in the repository that violates these principles (e.g. `format!` string synthesis or substring checks), consider it technical debt to be fixed, never a pattern to replicate.
+- **Do**: treat these principles as the sole authoritative reference. When you see existing code in the repository that violates these principles (e.g. `format!` string synthesis, regex HTML scanners, or substring checks), consider it technical debt to be fixed, never a pattern to replicate.
 - **Don't**: copy an anti-pattern simply because it already exists in a nearby file.
+
+### 12. Never write band-aids for broken boundaries
+- **Do**: if a boundary primitive, placeholder, or runtime contract breaks in specific HTML/SVG/CSS contexts (e.g. a synthetic `<span>` wrapper breaking `<table>`, `<select>`, `<svg>`, `:nth-child`, or `.parent > .child`), redesign and fix the boundary primitive itself (e.g. using `@lit-core/dom-paths` numeric `childNodes` index addressing or native `<slot>` projection) so one mechanism works uniformly everywhere.
+- **Don't**: layer tag whitelists (`TABLE_SELECT_CONTAINER_TAGS`, `TABLE_CELL_OR_NORMAL_TAGS`), regex context guessers, or special-case patches on top of a broken boundary representation.
+
+### 13. Never invent bloated fallbacks when blocked on dependencies or environment
+- **Do**: if a required package (such as `@lit/context`, `@lit/task`, or a runtime binary) is not installed or a command is blocked by the sandbox, **stop immediately and ask the user** to install the dependency or approve the command.
+- **Don't**: invent bloated hand-rolled clones, runtime duck-typing (`'taskComplete' in obj`), or monkey-patched shims (`ctrl.render = ...`) just to avoid asking for a missing package or permission.
 
 ---
 
 ## Pre-flight checklist before finishing any transform task
 
-Before concluding any work on a transform pass, ask yourself:
+Before concluding any work on a transform or runtime pass, ask yourself:
 1. **Minification check**: If every variable and local import alias in the test input was mangled to single letters (`a`, `b`, `c`), would my transform still work?
 2. **String splicing check**: Did I use `format!`, `push_str`, or `Parser::new` to create code? If yes, rewrite it using `AstBuilder`.
-3. **Substring check**: Did I use `.contains()`, `.find()`, or string slice matching on source code or AST names? If yes, replace it with semantic symbol checking or AST node pattern matching.
-4. **Generalization check**: Does my change contain any string, tag name, class name, or heuristic specific to a single component or design system library? If yes, remove it.
-5. **Bailout safety**: If the input uses an advanced or unexpected Lit feature, does the transform cleanly leave the component untouched, or does it attempt to patch or guess behavior?
+3. **Substring and regex check**: Did I use `.contains()`, `.find()`, regex tag scanners, or string slice matching on source code, HTML, or AST names? If yes, replace it with a real spec-compliant parser (`html5ever`, `oxc`, `lightningcss`) or semantic symbol checking.
+4. **Generalization and band-aid check**: Does my change contain any tag whitelist, class name check, property prefix (`__task_0`), or special-case band-aid around a flawed boundary? If yes, fix the boundary design itself.
+5. **Dependency honesty check**: Did I write a fallback clone or runtime duck-type shim because a dependency wasn't installed? If yes, delete the shim and ask the user.
+6. **Bailout safety**: If the input uses an advanced or unexpected Lit feature, does the transform cleanly leave the component untouched, or does it attempt to patch or guess behavior?

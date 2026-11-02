@@ -1,18 +1,20 @@
-import { formatAttributes } from '@lit-core/resumable/server';
+import {
+  type CustomElementRegistryLike,
+  collectResult,
+  createIsolateEnvironment,
+  HTMLElementStub,
+  IsolateCustomElementRegistry,
+  type RenderOptions,
+  render,
+  renderToStream,
+  renderToString,
+  unsafeCSS,
+  unsafeHTML,
+} from '@lit-core/ssr';
+import { html } from 'lit';
 
-export interface RenderOptions {
-  depth?: number;
-  resumable?: boolean;
-  domPaths?: boolean;
-  cssFuse?: boolean;
-  customElements?: CustomElementRegistryLike;
-  state?: Record<string, unknown>;
-}
-
-export interface CustomElementRegistryLike {
-  get(name: string): (new () => any) | undefined;
-  define(name: string, ctor: new () => any): void;
-}
+export type { CustomElementRegistryLike, RenderOptions };
+export { collectResult, createIsolateEnvironment, HTMLElementStub, IsolateCustomElementRegistry, render, renderToStream, renderToString };
 
 export interface ComponentRenderDescriptor {
   tagName: string;
@@ -25,291 +27,108 @@ export interface ComponentRenderDescriptor {
 }
 
 export interface SsrEngineModule {
-  render(value: unknown, options?: RenderOptions): IterableIterator<string>;
-  renderToStream(value: unknown, options?: RenderOptions): ReadableStream<Uint8Array>;
-  collectResult(result: Iterable<string> | AsyncIterable<string>): Promise<string>;
-  createIsolateEnvironment(): {
-    customElements: CustomElementRegistryLike;
-    HTMLElement: new (tagName?: string) => any;
-  };
+  render: typeof render;
+  renderToStream: typeof renderToStream;
+  renderToString: typeof renderToString;
+  collectResult: typeof collectResult;
+  createIsolateEnvironment: typeof createIsolateEnvironment;
+}
+
+function escapeAttrValue(val: string): string {
+  return val.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function injectSlotAttr(markup: string, slotName: string): string {
+  const match = /^(\s*<[a-zA-Z0-9-]+)([\s/>])/.exec(markup);
+  if (!match) {
+    return `<span slot="${escapeAttrValue(slotName)}">${markup}</span>`;
+  }
+  if (/\sslot\s*=/.test(markup)) {
+    return markup;
+  }
+  return `${match[1]} slot="${escapeAttrValue(slotName)}"${markup.slice(match[1].length)}`;
 }
 
 /**
- * In-memory CustomElementRegistry implementation for pure V8 isolates.
+ * Register a genuine custom element class in an isolate registry and build a Lit template invoking it.
  */
-export class IsolateCustomElementRegistry implements CustomElementRegistryLike {
-  private readonly definitions = new Map<string, new () => any>();
-
-  get(name: string): (new () => any) | undefined {
-    return this.definitions.get(name.toLowerCase());
-  }
-
-  define(name: string, ctor: new () => any): void {
-    const key = name.toLowerCase();
-    if (this.definitions.has(key)) {
-      throw new Error(`Custom element '${name}' is already defined`);
-    }
-    (ctor as any).is = key;
-    this.definitions.set(key, ctor);
-  }
-}
-
-/**
- * Minimal HTMLElement base class for pure V8 isolates without DOM globals.
- */
-export class IsolateHTMLElement {
-  tagName: string;
-  attributes: Record<string, string> = {};
-  shadowRoot: any = null;
-
-  constructor(tagName?: string) {
-    const ctor = this.constructor as any;
-    this.tagName = (tagName || ctor.is || 'custom-element').toUpperCase();
-  }
-
-  getAttribute(name: string): string | null {
-    return this.attributes[name.toLowerCase()] ?? null;
-  }
-
-  setAttribute(name: string, value: string): void {
-    this.attributes[name.toLowerCase()] = String(value);
-  }
-
-  attachShadow(options: { mode: 'open' | 'closed' }): any {
-    this.shadowRoot = {
-      mode: options.mode,
-      innerHTML: '',
-    };
-    return this.shadowRoot;
-  }
-}
-
-/**
- * Create a stateless isolate minimal environment.
- */
-export function createIsolateEnvironment(): {
+export function buildRegisteredComponentFixture(
+  spec: ComponentRenderDescriptor,
+  existingRegistry?: CustomElementRegistryLike,
+): {
+  template: unknown;
   customElements: CustomElementRegistryLike;
-  HTMLElement: new (tagName?: string) => any;
+  options: RenderOptions;
 } {
-  return {
-    customElements: new IsolateCustomElementRegistry(),
-    HTMLElement: IsolateHTMLElement as unknown as new (tagName?: string) => any,
-  };
-}
+  const customElements = existingRegistry ?? createIsolateEnvironment().customElements;
+  const tag = spec.tagName.toLowerCase();
+  const stylesArray = spec.styles ? (Array.isArray(spec.styles) ? spec.styles.map((s) => unsafeCSS(s)) : [unsafeCSS(spec.styles)]) : [];
+  const shadowMarkup = spec.shadowHtml ?? '';
+  const initialState = spec.state && typeof spec.state === 'object' ? { ...spec.state } : {};
 
-/**
- * Deterministically project light DOM nodes into shadow DOM slots.
- */
-export function projectSlots(shadowHtml: string, lightChildren: Array<{ slot?: string; content: string }>): { projectedShadow: string; lightRemainder: string } {
-  let projected = shadowHtml;
-  const assignedLightIndices = new Set<number>();
-
-  // Project named slots: <slot name="...">fallback</slot>
-  const namedSlotRegex = /<slot\s+name=["']([^"']+)["']\s*>([\s\S]*?)<\/slot>/gi;
-  projected = projected.replace(namedSlotRegex, (_match, slotName, fallback) => {
-    const matchedChildren: string[] = [];
-    lightChildren.forEach((child, index) => {
-      if (child.slot === slotName) {
-        matchedChildren.push(child.content);
-        assignedLightIndices.add(index);
+  if (!customElements.get(tag)) {
+    class TestRegisteredElement extends HTMLElementStub {
+      static styles = stylesArray;
+      constructor() {
+        super(tag);
+        Object.assign(this, initialState);
       }
-    });
-
-    return matchedChildren.length > 0 ? matchedChildren.join('') : fallback;
-  });
-
-  // Project default slot: <slot>fallback</slot>
-  const defaultSlotRegex = /<slot\s*>([\s\S]*?)<\/slot>/gi;
-  projected = projected.replace(defaultSlotRegex, (_match, fallback) => {
-    const defaultChildren: string[] = [];
-    lightChildren.forEach((child, index) => {
-      if (!child.slot && !assignedLightIndices.has(index)) {
-        defaultChildren.push(child.content);
-        assignedLightIndices.add(index);
+      render() {
+        const shadowStrings = Object.assign([shadowMarkup], { raw: [shadowMarkup] }) as unknown as TemplateStringsArray;
+        return { _$litType$: 1, strings: shadowStrings, values: [] };
       }
-    });
-
-    return defaultChildren.length > 0 ? defaultChildren.join('') : fallback;
-  });
-
-  // Light DOM elements that were not projected into slots remain as light DOM
-  const lightRemainder = lightChildren
-    .filter((_, index) => !assignedLightIndices.has(index))
-    .map((c) => c.content)
-    .join('');
-
-  return { projectedShadow: projected, lightRemainder };
-}
-
-/**
- * Render value into clean Declarative Shadow DOM chunks.
- */
-export function* render(value: unknown, options: RenderOptions = {}): IterableIterator<string> {
-  if (value === null || value === undefined) {
-    return;
+    }
+    customElements.define(tag, TestRegisteredElement);
   }
 
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    yield String(value);
-    return;
-  }
-
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      yield* render(item, options);
-    }
-    return;
-  }
-
-  // Handle Lit TemplateResult-like structures
-  if (typeof value === 'object' && value !== null) {
-    const obj = value as any;
-
-    // Check for component descriptor
-    if (obj.tagName) {
-      const tag = String(obj.tagName).toLowerCase();
-      const attrMap = { ...(obj.attributes || {}) };
-
-      if (options.domPaths || obj.domPaths) {
-        attrMap['data-lit-paths'] = 'true';
-      }
-
-      const attrStr = formatAttributes(attrMap);
-
-      let styleTag = '';
-      if (obj.styles) {
-        const cssContent = Array.isArray(obj.styles) ? obj.styles.join('\n') : String(obj.styles);
-        if (cssContent.trim()) {
-          styleTag = `<style>${cssContent.trim()}</style>`;
-        }
-      }
-
-      // Slot projection
-      let shadowContent = obj.shadowHtml ?? '';
-      let lightDomOutput = '';
-
-      if (Array.isArray(obj.lightDom)) {
-        const normalizedChildren = obj.lightDom.map((child: any) => {
-          if (typeof child === 'object' && child !== null && 'content' in child) {
-            return child;
-          }
-          return { slot: undefined, content: String(child) };
-        });
-
-        const { projectedShadow, lightRemainder } = projectSlots(shadowContent, normalizedChildren);
-        shadowContent = projectedShadow;
-        lightDomOutput = lightRemainder;
-      } else if (typeof obj.lightDom === 'string') {
-        lightDomOutput = obj.lightDom;
-      }
-
-      let stateScript = '';
-      const stateData = options.state ?? obj.state;
-      if (options.resumable && stateData && Object.keys(stateData).length > 0) {
-        stateScript = `<script type="lit/state">${JSON.stringify(stateData)}</script>`;
-      }
-
-      yield `<${tag}${attrStr}>`;
-      yield `<template shadowrootmode="open">`;
-      if (styleTag) yield styleTag;
-      if (shadowContent) yield shadowContent;
-      yield `</template>`;
-      if (lightDomOutput) yield lightDomOutput;
-      if (stateScript) yield stateScript;
-      yield `</${tag}>`;
-      return;
-    }
-
-    // Lit html template result (strings and values)
-    if (obj.strings && Array.isArray(obj.strings)) {
-      const strings = obj.strings as string[];
-      const values = (obj.values || []) as unknown[];
-
-      for (let i = 0; i < strings.length; i++) {
-        yield strings[i];
-        if (i < values.length) {
-          yield* render(values[i], options);
-        }
-      }
-      return;
-    }
-
-    // HTML-AOT pre-compiled descriptor
-    if (obj._$litType$ !== undefined || obj.template !== undefined) {
-      const html = obj.html ?? obj.template ?? '';
-      yield String(html);
-      return;
-    }
-  }
-
-  yield String(value);
-}
-
-/**
- * Render value into a Web Standard ReadableStream<Uint8Array>.
- */
-export function renderToStream(value: unknown, options: RenderOptions = {}): ReadableStream<Uint8Array> {
-  const iterator = render(value, options);
-  const encoder = new TextEncoder();
-
-  return new ReadableStream<Uint8Array>({
-    pull(controller) {
-      const { value: chunk, done } = iterator.next();
-      if (done) {
-        controller.close();
+  let attrMarkup = '';
+  if (spec.attributes) {
+    for (const [rawKey, rawVal] of Object.entries(spec.attributes)) {
+      if (!/^[a-zA-Z_:][a-zA-Z0-9_.:-]*$/.test(rawKey)) continue;
+      if (rawVal === null || rawVal === undefined || rawVal === false) continue;
+      if (rawVal === true) {
+        attrMarkup += ` ${rawKey}`;
       } else {
-        controller.enqueue(encoder.encode(chunk));
+        attrMarkup += ` ${rawKey}="${escapeAttrValue(String(rawVal))}"`;
       }
-    },
-    cancel() {
-      if (typeof (iterator as any).return === 'function') {
-        (iterator as any).return();
-      }
-    },
-  });
-}
-
-/**
- * Asynchronously collect all chunks into a complete HTML string.
- */
-export async function collectResult(result: Iterable<string> | AsyncIterable<string>): Promise<string> {
-  const parts: string[] = [];
-
-  if (Symbol.asyncIterator in result) {
-    for await (const chunk of result as AsyncIterable<string>) {
-      parts.push(chunk);
-    }
-  } else {
-    for (const chunk of result as Iterable<string>) {
-      parts.push(chunk);
     }
   }
 
-  return parts.join('');
+  let lightMarkup = '';
+  if (typeof spec.lightDom === 'string') {
+    lightMarkup = spec.lightDom;
+  } else if (Array.isArray(spec.lightDom)) {
+    lightMarkup = spec.lightDom
+      .map((entry) => {
+        if (typeof entry === 'string') return entry;
+        if (entry.slot) return injectSlotAttr(entry.content, entry.slot);
+        return entry.content;
+      })
+      .join('');
+  }
+
+  const rawHostHtml = `<${tag}${attrMarkup}>${lightMarkup}</${tag}>`;
+  const strings = Object.assign([rawHostHtml], { raw: [rawHostHtml] }) as unknown as TemplateStringsArray;
+  const template = { _$litType$: 1, strings, values: [] };
+
+  const options: RenderOptions = {
+    customElements,
+    ...(spec.domPaths ? { domPaths: true } : {}),
+    ...(spec.state && Object.keys(spec.state).length > 0 ? { state: spec.state } : {}),
+  };
+
+  return { template, customElements, options };
 }
 
 /**
- * Reference oracle implementation bundle.
- */
-const referenceOracle: SsrEngineModule = {
-  render,
-  renderToStream,
-  collectResult,
-  createIsolateEnvironment,
-};
-
-/**
- * Dynamically resolves @lit-core/ssr module if installed, or falls back to specification reference oracle.
+ * Returns the real `@lit-core/ssr` engine module.
  */
 export async function getSsrEngine(): Promise<SsrEngineModule> {
-  try {
-    const mod = await import('@lit-core/ssr' as any);
-    if (mod && typeof mod.render === 'function') {
-      return mod;
-    }
-  } catch {
-    // Falls back to reference oracle
-  }
-
-  return referenceOracle;
+  return {
+    render,
+    renderToStream,
+    renderToString,
+    collectResult,
+    createIsolateEnvironment,
+  };
 }

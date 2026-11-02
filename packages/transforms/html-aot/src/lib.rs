@@ -1,12 +1,30 @@
 pub mod parser;
+pub mod ssr_plan;
 pub mod transform;
 
 use crate::transform::{HtmlAotOptions, HtmlAotResult, transform_code};
 use napi_derive::napi;
 
 #[napi]
-pub fn transform_html_aot(source: String, options: Option<HtmlAotOptions>) -> HtmlAotResult {
-    transform_code(&source, options.unwrap_or_default())
+pub fn transform_html_aot(
+    source: String,
+    options: Option<HtmlAotOptions>,
+) -> napi::Result<HtmlAotResult> {
+    let opts = options.unwrap_or_default();
+    let strict_ssr = opts.strict_ssr.unwrap_or(false);
+    let filename = opts
+        .filename
+        .clone()
+        .unwrap_or_else(|| "source.ts".to_string());
+    let res = transform_code(&source, opts);
+    if strict_ssr && !res.ssr_errors.is_empty() {
+        return Err(napi::Error::from_reason(format!(
+            "[@lit-core/html-aot] Missing ahead-of-time SSR plan in {}: {}",
+            filename,
+            res.ssr_errors.join("; ")
+        )));
+    }
+    Ok(res)
 }
 
 #[cfg(test)]
@@ -19,7 +37,7 @@ mod tests {
 import { html } from 'lit';
 const tmpl = html`<div class="btn" id=${id}>${label}</div>`;
 "#;
-        let res = transform_html_aot(code.to_string(), None);
+        let res = transform_html_aot(code.to_string(), None).unwrap();
         assert_eq!(res.templates_count, 1);
         assert!(res.code.contains("const b_1 = (i) => i;"));
         assert!(res.code.contains("lit_template_1"));
@@ -32,7 +50,7 @@ const tmpl = html`<div class="btn" id=${id}>${label}</div>`;
 const html = (strings, ...values) => strings.join("");
 const tmpl = html`<div>${label}</div>`;
 "#;
-        let res = transform_html_aot(code.to_string(), None);
+        let res = transform_html_aot(code.to_string(), None).unwrap();
         assert_eq!(res.templates_count, 0);
         assert!(!res.code.contains("const b_1"));
     }
@@ -43,7 +61,7 @@ const tmpl = html`<div>${label}</div>`;
 import { html as myHtml } from 'lit';
 const tmpl = myHtml`<div class="btn">${label}</div>`;
 "#;
-        let res = transform_html_aot(code.to_string(), None);
+        let res = transform_html_aot(code.to_string(), None).unwrap();
         assert_eq!(res.templates_count, 1);
         assert!(res.code.contains("lit_template_1"));
     }
@@ -54,7 +72,7 @@ const tmpl = myHtml`<div class="btn">${label}</div>`;
 import * as lit from 'lit';
 const tmpl = lit.html`<div class="btn">${label}</div>`;
 "#;
-        let res = transform_html_aot(code.to_string(), None);
+        let res = transform_html_aot(code.to_string(), None).unwrap();
         assert_eq!(res.templates_count, 1);
         assert!(res.code.contains("lit_template_1"));
     }
@@ -67,7 +85,7 @@ const b_1 = "occupied";
 const lit_template_1 = "occupied";
 const tmpl = html`<div class="btn">${label}</div>`;
 "#;
-        let res = transform_html_aot(code.to_string(), None);
+        let res = transform_html_aot(code.to_string(), None).unwrap();
         assert_eq!(res.templates_count, 1);
         assert!(res.code.contains("const b_2 = (i) => i;"));
         assert!(res.code.contains("lit_template_2"));
@@ -81,7 +99,7 @@ import { html } from 'lit';
 console.log(b_1, lit_template_1);
 export const tmpl = html`<div class="btn">${label}</div>`;
 "#;
-        let res = transform_html_aot(code.to_string(), None);
+        let res = transform_html_aot(code.to_string(), None).unwrap();
         assert_eq!(res.templates_count, 1);
         assert!(res.code.contains("const b_2 = (i) => i;"));
         assert!(res.code.contains("const lit_template_2 ="));

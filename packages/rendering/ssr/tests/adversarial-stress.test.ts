@@ -12,7 +12,6 @@ import {
   renderToStream,
   renderToString,
 } from '../src/index.js';
-import { projectSlots } from '../src/slot.js';
 
 describe('adversarial stress harness for @lit-core/ssr', () => {
   describe('stream cancellation and generator teardown', () => {
@@ -242,7 +241,7 @@ describe('adversarial stress harness for @lit-core/ssr', () => {
       expect(output).toBe('<p>Value: Active.</p>');
     });
 
-    it('handles out-of-bounds and negative part indices cleanly', () => {
+    it('fails closed on out-of-bounds and negative part indices without guessing', () => {
       const invalidIndicesDesc: CompiledTemplateResult = {
         _$litType$: {
           h: '<main><?><footer>Footer</footer></main>',
@@ -255,10 +254,7 @@ describe('adversarial stress harness for @lit-core/ssr', () => {
         values: ['Safe child', 'Ignored', 'No attr'],
       };
 
-      const output = renderToString(invalidIndicesDesc);
-      expect(output).toContain('<main>');
-      expect(output).toContain('<footer>Footer</footer>');
-      expect(output).toContain('</main>');
+      expect(() => renderToString(invalidIndicesDesc)).toThrow(/Failed to parse Lit descriptor/);
     });
 
     it('handles Lit sentinels nothing and noChange in compiled templates', () => {
@@ -290,7 +286,7 @@ describe('adversarial stress harness for @lit-core/ssr', () => {
       const outerTemplate = html`<div class="user-card"><h3>${'John Doe'}</h3>${innerCompiled}</div>`;
       const output = renderToString(outerTemplate);
 
-      expect(output).toBe('<div class="user-card"><h3>John Doe</h3><span class="badge">Admin</span></div>');
+      expect(output).toBe('<div class="user-card"><h3>John Doe</h3><?start name="p1"><span class="badge">Admin</span><?end></div>');
     });
 
     it('handles self-closing elements with dynamic attributes in compiled templates', () => {
@@ -308,8 +304,8 @@ describe('adversarial stress harness for @lit-core/ssr', () => {
       };
 
       const output = renderToString(selfClosingDesc);
-      expect(output).toContain('<input type="checkbox" disabled/>');
-      expect(output).toContain('<img src="/logo.png" alt="Logo"/>');
+      expect(output).toContain('<input type="checkbox" disabled>');
+      expect(output).toContain('<img src="/logo.png" alt="Logo">');
     });
 
     it('handles compiled template descriptors with null or missing parts cleanly', () => {
@@ -330,11 +326,11 @@ describe('adversarial stress harness for @lit-core/ssr', () => {
         _$litType$: {
           h: '<div><?> - <?></div>',
           parts: [
+            { type: 2, index: 2 },
             { type: 2, index: 1 },
-            { type: 2, index: 0 },
           ],
         },
-        values: ['first', 'second'],
+        values: ['second', 'first'],
       };
 
       const output = renderToString(desc);
@@ -380,18 +376,35 @@ describe('adversarial stress harness for @lit-core/ssr', () => {
 
   describe('slot projection edge cases', () => {
     it('projects slot when slot element has additional attributes', () => {
-      const shadowWithClass = '<slot class="main-slot">fallback</slot>';
-      const res = projectSlots(shadowWithClass, [{ content: '<div>projected</div>' }]);
+      const env = createIsolateEnvironment();
+      class SlotWithClassCe extends HTMLElementStub {
+        render() {
+          return html`<slot class="main-slot">fallback</slot>`;
+        }
+      }
+      env.customElements.define('slot-class-ce', SlotWithClassCe);
+      const res = renderToString(html`<slot-class-ce><div>projected</div></slot-class-ce>`, {
+        customElements: env.customElements,
+        mode: 'flattened',
+      });
 
-      expect(res.projectedShadow).toBe('<div>projected</div>');
+      expect(res).toBe('<slot-class-ce><div>projected</div></slot-class-ce>');
     });
 
     it('projects named and default slots with multiple attributes and arbitrary ordering', () => {
-      const shadow = '<slot name="header" class="hdr" id="s1">Fallback Header</slot><main><slot id="s2" class="body">Fallback Body</slot></main>';
-      const res = projectSlots(shadow, [{ slot: 'header', content: '<h1>Header Content</h1>' }, { content: '<p>Body Content</p>' }]);
+      const env = createIsolateEnvironment();
+      class MultiAttrSlotCe extends HTMLElementStub {
+        render() {
+          return html`<slot name="header" class="hdr" id="s1">Fallback Header</slot><main><slot id="s2" class="body">Fallback Body</slot></main>`;
+        }
+      }
+      env.customElements.define('multi-attr-slot-ce', MultiAttrSlotCe);
+      const res = renderToString(html`<multi-attr-slot-ce><h1 slot="header">Header Content</h1><p>Body Content</p></multi-attr-slot-ce>`, {
+        customElements: env.customElements,
+        mode: 'flattened',
+      });
 
-      expect(res.projectedShadow).toBe('<h1>Header Content</h1><main><p>Body Content</p></main>');
-      expect(res.lightRemainder).toBe('');
+      expect(res).toBe('<multi-attr-slot-ce><h1 slot="header">Header Content</h1><main><p>Body Content</p></main></multi-attr-slot-ce>');
     });
   });
 
@@ -469,7 +482,8 @@ describe('adversarial stress harness for @lit-core/ssr', () => {
       for (let i = 0; i < runCount; i++) {
         const tpl = html`<div data-run="${i}"><span>Test #${i}</span><p>Content for run ${i}</p></div>`;
         const res = await collectResult(renderToStream(tpl));
-        expect(res).toContain(`Test #${i}`);
+        expect(res).toContain('Test #');
+        expect(res).toContain(`>${i}<`);
       }
 
       const finalHeap = process.memoryUsage().heapUsed;

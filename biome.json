@@ -8,7 +8,7 @@
   "files": {
     "ignoreUnknown": true,
     "maxSize": 10485760,
-    "includes": ["**", "!**/dist", "!**/lib", "!**/target", "!**/test_files", "!**/*.d.ts", "!**/packages/internal/benchmarks/results", "!**/.agents"]
+    "includes": ["**", "!**/dist", "!**/lib", "!**/target", "!**/wasm", "!**/vendor", "!**/test_files", "!**/.tmp*", "!**/*.d.ts", "!**/packages/internal/benchmarks/results", "!**/.agents"]
   },
   "formatter": {
     "enabled": true,
@@ -22,7 +22,8 @@
       "preset": "recommended",
       "suspicious": {
         "noTemplateCurlyInString": "off",
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noAssignInExpressions": "off"
       },
       "complexity": {
         "noThisInStatic": "off"
@@ -46,5 +47,182 @@
         "organizeImports": "on"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "packages/bundlers/*/src/**",
+        "packages/primitives/*/src/**",
+        "packages/rendering/*/src/**",
+        "packages/targets/*/src/**",
+        "packages/targets/*/runtime/**",
+        "packages/transforms/*/src/**"
+      ],
+      "plugins": ["./scripts/biome-plugins/no-stack-inspection.grit", "./scripts/biome-plugins/no-library-shims.grit"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "vitest": "Test runner imports are prohibited in production package sources.",
+                  "playwright": "Playwright imports are prohibited in production package sources.",
+                  "@playwright/test": "Playwright test imports are prohibited in production package sources.",
+                  "@lit-core/test-kit": "Internal test-kit imports are prohibited in production package sources.",
+                  "@lit-core/tests": "Internal test suite imports are prohibited in production package sources.",
+                  "@lit-core/benchmarks": "Internal benchmark imports are prohibited in production package sources."
+                },
+                "patterns": [
+                  {
+                    "group": ["vitest/*", "@playwright/*", "**/tests/**", "**/testing/**", "**/fixtures/**", "**/*simulator*"],
+                    "message": "Importing test suites, fixtures, or simulators in production package sources is prohibited."
+                  }
+                ]
+              }
+            }
+          },
+          "nursery": {
+            "noJsRestrictedProperties": {
+              "level": "error",
+              "options": {
+                "entries": [
+                  {
+                    "object": "Error",
+                    "property": "captureStackTrace",
+                    "message": "Call-stack capture is prohibited in production package sources."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "packages/bundlers/*/src/**",
+        "packages/primitives/*/src/**",
+        "packages/rendering/*/src/**",
+        "packages/targets/*/src/**",
+        "packages/targets/*/runtime/**",
+        "packages/transforms/*/src/**",
+        "!packages/rendering/ssr/src/environment.ts"
+      ],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noJsRestrictedProperties": {
+              "level": "error",
+              "options": {
+                "entries": [
+                  {
+                    "property": "_definitions",
+                    "message": "Private registry._definitions reflection is prohibited outside IsolateCustomElementRegistry."
+                  },
+                  {
+                    "object": "Error",
+                    "property": "captureStackTrace",
+                    "message": "Call-stack capture is prohibited in production package sources."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/primitives/*/src/**", "packages/rendering/*/src/**", "packages/targets/*/src/**", "packages/targets/*/runtime/**", "packages/bundlers/*/src/plugins/ssr.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noProcessEnv": "error"
+          },
+          "correctness": {
+            "noProcessGlobal": "error"
+          },
+          "suspicious": {
+            "noGlobalAssign": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "packages/bundlers/*/src/**",
+        "packages/primitives/*/src/**",
+        "packages/rendering/*/src/**",
+        "packages/targets/*/src/**",
+        "packages/targets/*/runtime/**",
+        "packages/transforms/*/src/**",
+        "!packages/rendering/resumable/src/client/hydrate-core.ts"
+      ],
+      "plugins": ["./scripts/biome-plugins/no-global-or-proto-mutation.grit"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noGlobalAssign": "error",
+            "noProto": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "packages/primitives/*/src/**",
+        "packages/rendering/*/src/**",
+        "packages/targets/*/src/**",
+        "packages/targets/*/runtime/**",
+        "packages/transforms/*/src/**",
+        "!packages/rendering/ssr/src/compiler-bridge.ts",
+        "!packages/rendering/ssr/src/environment.ts",
+        "!packages/primitives/server-elements/src/executor.ts"
+      ],
+      "plugins": ["./scripts/biome-plugins/no-unbranded-duck-typing.grit"]
+    },
+    {
+      "includes": ["packages/primitives/*/src/**", "packages/rendering/*/src/**", "packages/targets/*/src/**", "packages/transforms/*/src/**"],
+      "plugins": ["./scripts/biome-plugins/no-html-char-scanner.grit"]
+    },
+    {
+      "includes": [
+        "packages/**/*.test.ts",
+        "packages/**/*.test.js",
+        "packages/**/*.spec.ts",
+        "!packages/**/tests/unit/**",
+        "!packages/**/unit/**",
+        "!**/*.unit.test.*",
+        "!packages/internal/benchmarks/tests/**",
+        "!packages/rendering/ssr/tests/**"
+      ],
+      "plugins": ["./scripts/biome-plugins/no-handwritten-compiler-parts.grit"]
+    },
+    {
+      "includes": ["packages/internal/benchmarks/src/features/**", "packages/internal/benchmarks/src/scenarios/**"],
+      "plugins": ["./scripts/biome-plugins/no-benchmark-math-max.grit"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noJsRestrictedProperties": {
+              "level": "error",
+              "options": {
+                "entries": [
+                  {
+                    "object": "Math",
+                    "property": "max",
+                    "message": "Clamping benchmark metrics with Math.max is prohibited."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/internal/benchmarks/src/features/**"],
+      "plugins": ["./scripts/biome-plugins/no-benchmark-literal-html.grit"]
+    }
+  ]
 }

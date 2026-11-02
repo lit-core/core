@@ -1,8 +1,8 @@
 import './setup.js';
 import { html, LitElement } from 'lit';
 import { describe, expect, it } from 'vitest';
+import { createIsolateEnvironment, renderToString } from '../../ssr/src/index.js';
 import { restoreComponentState, withResumable } from '../src/client/adapter.js';
-import { renderTemplateResult, renderToDsd } from '../src/server/dsd-renderer.js';
 import { extractComponentState, serializeComponentState } from '../src/server/state-serializer.js';
 
 describe('hydration-free client adapter and state hydration', () => {
@@ -36,9 +36,9 @@ describe('hydration-free client adapter and state hydration', () => {
     expect(json).toBe('{"userId":104,"role":"editor","active":false,"permissions":["read","write"]}');
   });
 
-  it('restores state from <script type="lit/state"> and cleans DOM', () => {
+  it('restores state from data-lit-state attribute and cleans host attribute', () => {
     const host = document.createElement('div');
-    host.innerHTML = `<script type="lit/state">{"count":42,"label":"Dashboard"}</script>`;
+    host.setAttribute('data-lit-state', '{"count":42,"label":"Dashboard"}');
     document.body.appendChild(host);
 
     const state = restoreComponentState(host);
@@ -46,27 +46,46 @@ describe('hydration-free client adapter and state hydration', () => {
     expect((host as any).count).toBe(42);
     expect((host as any).label).toBe('Dashboard');
 
-    // Script element must be removed
-    const remainingScript = host.querySelector('script');
-    expect(remainingScript).toBeNull();
+    // Host attribute must be removed after restoration
+    expect(host.hasAttribute('data-lit-state')).toBe(false);
 
     host.remove();
   });
 
   it('preserves existing Declarative Shadow DOM nodes with zero recreation on upgrade', async () => {
     const tagName = 'resumable-card-widget';
+    const env = createIsolateEnvironment();
 
-    // Simulate Declarative Shadow DOM rendered on server
-    const dsdMarkup = renderToDsd({
-      tagName,
-      shadowHtml: `
-        <div class="card-body">
-          <span class="title">Original Title</span>
-          <button id="action-btn" data-action="handleClick">Click Me</button>
-        </div>
-      `,
-      state: { count: 10, title: 'Server Title' },
+    class ServerResumableCardWidget extends env.HTMLElement {
+      static properties = {
+        count: { type: Number },
+        title: { type: String },
+      };
+
+      count = 10;
+      title = 'Server Title';
+
+      handleClick() {}
+
+      render() {
+        return html`
+          <div class="card-body">
+            <span class="title">${this.title}</span>
+            <button id="action-btn" @click=${this.handleClick}>Click Me</button>
+          </div>
+        `;
+      }
+    }
+
+    env.customElements.define(tagName, ServerResumableCardWidget);
+
+    const dsdMarkup = renderToString(html`<resumable-card-widget></resumable-card-widget>`, {
+      customElements: env.customElements,
+      resumable: true,
     });
+
+    expect(dsdMarkup).toContain('data-lit-state=');
+    expect(dsdMarkup).not.toContain('<script type="lit/state">');
 
     const container = document.createElement('div');
     container.innerHTML = dsdMarkup;
@@ -75,7 +94,7 @@ describe('hydration-free client adapter and state hydration', () => {
     const host = container.firstElementChild as HTMLElement;
     expect(host).not.toBeNull();
 
-    // Attach shadow root if in standard JSDOM where template shadowrootmode isn't automatically parsed
+    // Attach shadow root in mock DOM where template shadowrootmode is not automatically parsed
     if (!host.shadowRoot) {
       const template = host.querySelector('template[shadowrootmode="open"]') as HTMLTemplateElement;
       if (template) {
@@ -111,7 +130,7 @@ describe('hydration-free client adapter and state hydration', () => {
         return html`
           <div class="card-body">
             <span class="title">${this.title}</span>
-            <button id="action-btn" data-action="handleClick">Click Me</button>
+            <button id="action-btn" @click=${this.handleClick}>Click Me</button>
           </div>
         `;
       }
@@ -123,19 +142,28 @@ describe('hydration-free client adapter and state hydration', () => {
       (host as any).update(new Map());
     }
 
-    // 1. Verify property state restored from <script type="lit/state">
+    // 1. Verify property state restored from data-lit-state
     expect((host as any).count).toBe(10);
+    expect((host as any).title).toBe('Server Title');
 
-    // 2. CRITICAL INVARIANT: Exact reference equality of DOM nodes (ZERO DOM recreation)
+    // 2. Exact reference equality of DOM nodes (zero DOM recreation)
     const btnAfterUpgrade = host.shadowRoot?.querySelector('#action-btn');
     const titleAfterUpgrade = host.shadowRoot?.querySelector('.title');
 
     expect(btnAfterUpgrade).toBe(btnBeforeUpgrade);
     expect(titleAfterUpgrade).toBe(titleBeforeUpgrade);
 
-    // 3. Verify event handler executes
+    // 3. Verify event handler bound via hydrateTemplateRoot executes
     btnAfterUpgrade?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(actionTriggered).toBe(true);
+
+    // 4. Verify subsequent reactive updates mutate text in place without replacing nodes
+    (host as any).title = 'Updated Title';
+    if (typeof (host as any).update === 'function') {
+      (host as any).update(new Map([['title', 'Server Title']]));
+    }
+    expect(host.shadowRoot?.querySelector('.title')).toBe(titleBeforeUpgrade);
+    expect(host.shadowRoot?.querySelector('.title')?.textContent).toBe('Updated Title');
 
     container.remove();
   });
@@ -144,7 +172,6 @@ describe('hydration-free client adapter and state hydration', () => {
     const fn1 = () => {};
     const fn2 = () => {};
 
-    // Standard Lit tagged template
     const template = html`
       <div class="container">
         <button @click=${fn1} class="primary">Submit</button>
@@ -153,7 +180,7 @@ describe('hydration-free client adapter and state hydration', () => {
       </div>
     `;
 
-    const output = renderTemplateResult(template);
+    const output = renderToString(template, { resumable: true });
 
     expect(output).toContain('resumes-on-click');
     expect(output).toContain('resumes-on-input');

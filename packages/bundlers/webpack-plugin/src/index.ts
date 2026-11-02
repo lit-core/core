@@ -1,6 +1,7 @@
 /// <reference types="node" />
 
 export {
+  type DiscoveredServerElement,
   default as litWebpackLoader,
   getPluginState,
   registerPluginState,
@@ -32,12 +33,14 @@ export type {
   LitPluginOptions,
   LitPropsLowerOptions,
   LitResumableOptions,
+  LitServerElementsOptions,
   LitSsrOptions,
   LitTagShakeOptions,
   LitWebpackPluginOptions,
   MemoizeOptions,
   PropsLowerOptions,
   ResumableOptions,
+  ServerElementsOptions,
   SsrIslandsOptions,
   SsrManifestOptions,
   SsrOptions,
@@ -65,6 +68,7 @@ export {
   htmlAot,
   htmlFuse,
   htmlMinifier,
+  injectExecutorToEntry,
   isSsrTarget,
   LitCoreWebpackPlugin,
   LitWebpackPlugin,
@@ -85,6 +89,7 @@ export {
   litMemoize,
   litPropsLower,
   litResumable,
+  litServerElements,
   litSsr,
   litTagShake,
   MemoizeWebpackPlugin,
@@ -93,9 +98,16 @@ export {
   propsLower,
   ResumableWebpackPlugin,
   resumable,
+  ServerElementsWebpackPlugin,
   SsrWebpackPlugin,
+  serverElements,
   ssr,
   TagShakeWebpackPlugin,
   tagShake,
 } from './plugin.js';
 export { TransformError } from './transforms/index.js';
+export {
+  EXECUTOR_SOURCE,
+  getVirtualLitCoreModule,
+  WORKER_SOURCE,
+} from './virtual.js';

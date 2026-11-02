@@ -25,6 +25,7 @@ import {
   litMemoize,
   litNative,
   litPropsLower,
+  litServerElements,
   litSsr,
   litTagShake,
   litVirtual,
@@ -32,6 +33,7 @@ import {
   memoize,
   native,
   propsLower,
+  serverElements,
   ssr,
   tagShake,
 } from './plugins/index.js';
@@ -56,6 +58,22 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
   if (htmlFuseOpt) {
     const fuseOpts = typeof htmlFuseOpt === 'object' ? htmlFuseOpt : {};
     plugins.push(htmlFuse(fuseOpts));
+  }
+
+  // Stage 1.5: Server elements splitting and schema validation (enforce: 'pre')
+  const ssrOpt = options.ssr ?? options['lit-ssr'];
+  const nativeOpt = options.native ?? options['native-compile'];
+  const autoInjectHydrateDefault = ssrOpt !== false && !nativeOpt && options.hydrate !== false;
+
+  const serverElementsOpt = options.serverElements ?? options['server-elements'] ?? true;
+  if (serverElementsOpt !== false) {
+    const seOpts = typeof serverElementsOpt === 'object' ? serverElementsOpt : {};
+    plugins.push(
+      ...serverElements({
+        ...seOpts,
+        autoInjectHydrate: seOpts.autoInjectHydrate ?? autoInjectHydrateDefault,
+      }),
+    );
   }
 
   // Stage 2: Primitives and syntax normalization
@@ -116,13 +134,15 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(htmlMinifier(minifierOpts));
   }
 
+  const ssrResumable = typeof ssrOpt === 'object' && ssrOpt !== null && Boolean(ssrOpt.resumable);
+  const resumableOpt = options.resumable ?? (ssrResumable ? true : undefined);
+
   const htmlAotOpt = options.htmlAot ?? options['html-aot'];
-  if (htmlAotOpt) {
+  if (htmlAotOpt || (resumableOpt && htmlAotOpt !== false)) {
     const aotOpts = typeof htmlAotOpt === 'object' ? htmlAotOpt : {};
     plugins.push(htmlAot(aotOpts));
   }
 
-  const nativeOpt = options.native;
   if (nativeOpt) {
     const nativeOpts = typeof nativeOpt === 'object' ? nativeOpt : {};
     plugins.push(native(nativeOpts));
@@ -135,14 +155,11 @@ export function litCoreVitePlugin(options: LitPluginOptions = {}): Plugin[] {
     plugins.push(tagShake(shakeOpts));
   }
 
-  const ssrOpt = options.ssr ?? options['lit-ssr'];
   if (ssrOpt) {
     const ssrOpts = typeof ssrOpt === 'object' ? ssrOpt : {};
     plugins.push(ssr(ssrOpts));
   }
 
-  const ssrResumable = typeof ssrOpt === 'object' && ssrOpt !== null && Boolean(ssrOpt.resumable);
-  const resumableOpt = options.resumable ?? (ssrResumable ? true : undefined);
   if (resumableOpt) {
     const resumableOpts = typeof resumableOpt === 'object' ? resumableOpt : {};
     plugins.push(litResumablePlugin(resumableOpts));
@@ -181,6 +198,7 @@ export {
   litMemoize,
   litNative,
   litPropsLower,
+  litServerElements,
   litSsr,
   litTagShake,
   litVirtual,
@@ -188,6 +206,7 @@ export {
   memoize,
   native,
   propsLower,
+  serverElements,
   ssr,
   tagShake,
 };

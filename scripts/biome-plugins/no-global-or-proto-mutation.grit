@@ -1,0 +1,120 @@
+language js
+
+or {
+  `$target.prototype.$prop = $_`,
+  `$target.prototype[$key] = $_`,
+  `delete $target.prototype.$prop`,
+  `delete $target.prototype[$key]`,
+  `Object.defineProperty($target.prototype, $_, $_)`,
+  `Object.defineProperties($target.prototype, $_)`,
+  `Object.assign($target.prototype, $_)`,
+  `Reflect.set($target.prototype, $_, $_)`,
+  `Reflect.defineProperty($target.prototype, $_, $_)`,
+  `Reflect.deleteProperty($target.prototype, $_)`,
+  `$proto.$prop = $_` where { $proto <: r"^[a-zA-Z0-9_$]*[Pp]roto$" },
+  `$proto[$key] = $_` where { $proto <: r"^[a-zA-Z0-9_$]*[Pp]roto$" },
+  `delete $proto.$prop` where { $proto <: r"^[a-zA-Z0-9_$]*[Pp]roto$" },
+  `$g.document = $_` where {
+    $g <: or {
+      `globalThis`,
+      `window`,
+      `self`,
+      `($inner as $_)` where {
+        $inner <: or {
+          `globalThis`,
+          `window`,
+          `self`
+        }
+      }
+    }
+  },
+  `$g[$doc] = $_` where {
+    $doc <: r"^['\"`]document['\"`]$",
+    $g <: or {
+      `globalThis`,
+      `window`,
+      `self`,
+      `($inner as $_)` where {
+        $inner <: or {
+          `globalThis`,
+          `window`,
+          `self`
+        }
+      }
+    }
+  },
+  `delete $g.document` where {
+    $g <: or {
+      `globalThis`,
+      `window`,
+      `self`,
+      `($inner as $_)` where {
+        $inner <: or {
+          `globalThis`,
+          `window`,
+          `self`
+        }
+      }
+    }
+  },
+  `Object.defineProperty($g, $doc, $_)` where {
+    $doc <: r"^['\"`]document['\"`]$",
+    $g <: or {
+      `globalThis`,
+      `window`,
+      `self`,
+      `($inner as $_)` where {
+        $inner <: or {
+          `globalThis`,
+          `window`,
+          `self`
+        }
+      }
+    }
+  },
+  `Reflect.set($g, $doc, $_)` where {
+    $doc <: r"^['\"`]document['\"`]$",
+    $g <: or {
+      `globalThis`,
+      `window`,
+      `self`,
+      `($inner as $_)` where {
+        $inner <: or {
+          `globalThis`,
+          `window`,
+          `self`
+        }
+      }
+    }
+  },
+  `Reflect.defineProperty($g, $doc, $_)` where {
+    $doc <: r"^['\"`]document['\"`]$",
+    $g <: or {
+      `globalThis`,
+      `window`,
+      `self`,
+      `($inner as $_)` where {
+        $inner <: or {
+          `globalThis`,
+          `window`,
+          `self`
+        }
+      }
+    }
+  },
+  `Reflect.deleteProperty($g, $doc)` where {
+    $doc <: r"^['\"`]document['\"`]$",
+    $g <: or {
+      `globalThis`,
+      `window`,
+      `self`,
+      `($inner as $_)` where {
+        $inner <: or {
+          `globalThis`,
+          `window`,
+          `self`
+        }
+      }
+    }
+  }
+} as $node where { register_diagnostic(span=$node, message="Mutating prototypes or globalThis.document is prohibited in production runtime and compiler packages.", severity="error") }

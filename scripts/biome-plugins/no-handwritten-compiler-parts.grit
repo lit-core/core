@@ -1,0 +1,14 @@
+language js
+
+or {
+  JsPropertyClassMember(name=$cname) where { $cname <: r"^__litParts$" },
+  JsPropertyObjectMember(name=$oname, value=JsArrayExpression()) where { $oname <: r"^['\"]?__litParts['\"]?$" },
+  `$obj.__litParts = $_`,
+  `$obj[$k] = $_` where { $k <: r"^['\"`]?__litParts['\"`]?$" },
+  or {
+    JsStringLiteralExpression(),
+    JsTemplateExpression()
+  } as $str where { $str <: r"(?is).*<\?.*?start\b.*", not $str <: within `$callee($_)` where { $callee <: r"(?s)^expect\b.*" } }
+} as $node where {
+  register_diagnostic(span=$node, message="Hand-authored __litParts tables or <?start markers are prohibited outside unit tests; run the real compiler or renderer.", severity="error")
+}

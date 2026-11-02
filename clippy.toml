@@ -1,0 +1,4 @@
+# Workspace Clippy architectural and integrity rules
+disallowed-types = [
+  { path = "std::backtrace::Backtrace", reason = "Call-stack inspection and test-name branching are prohibited in compiler and runtime crates." },
+]

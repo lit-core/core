@@ -1,0 +1,12 @@
+language js
+
+or {
+  `new Error().stack`,
+  `new Error($_).stack`,
+  `$err.stack.includes($_)`,
+  `$err.stack?.includes($_)`,
+  or {
+    JsStringLiteralExpression(),
+    JsTemplateExpression()
+  } as $lit where { $lit <: r"(?s).*dsd_soundness_property.*" }
+} as $node where { register_diagnostic(span=$node, message="Call-stack inspection or test-name branching is prohibited in production source.", severity="error") }

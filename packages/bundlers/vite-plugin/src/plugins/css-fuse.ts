@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
+import { resolveLitPrivateSsrSupportForVite } from '@lit-core/resumable/vite';
 import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
 import type { CssFuseOptions } from '../options.js';
 import { extractLitCoreVirtualSubpath, extractSheetId, formatVirtualId, formatVirtualLitCoreId, isVirtualFusedId, isVirtualLitCoreId, RESOLVED_FUSED_PREFIX } from '../utils.js';
@@ -134,9 +135,19 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
       }
     },
 
-    resolveId(id, importer) {
+    resolveId(id, importer, resolveOpts) {
+      if (id === 'lit-html/private-ssr-support.js') {
+        const isSsr = Boolean(resolveOpts?.ssr || config?.build?.ssr);
+        const conditions = config?.resolve?.conditions ?? [];
+        const isDev = Boolean(conditions.includes('development') || (!conditions.includes('production') && config?.mode === 'development'));
+        return resolveLitPrivateSsrSupportForVite(config?.root, isSsr, isDev, this as any, importer, resolveOpts as any);
+      }
       if (isVirtualLitCoreId(id)) {
-        return formatVirtualLitCoreId(id);
+        const formatted = formatVirtualLitCoreId(id);
+        const subpath = extractLitCoreVirtualSubpath(formatted);
+        if (getVirtualLitCoreModule(subpath) !== undefined) {
+          return formatted;
+        }
       }
       if (isVirtualFusedId(id)) {
         return formatVirtualId(id);

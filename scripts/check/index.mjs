@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { ensureWorkspaceSymlinks } from '../link-packages.mjs';
 import { ALL_CRATES, findPackageDir, getAffected } from './affected.mjs';
 
 const ROOT = process.cwd();
@@ -66,6 +67,7 @@ function runStep(name, cmd, cwd = ROOT) {
 }
 
 async function main() {
+  ensureWorkspaceSymlinks();
   const affected = getAffected({ all: IS_ALL });
   log(`\n=== lit-core fast validation loop ===`);
   log(`Changed files: ${affected.changedFiles.length}`);
@@ -74,15 +76,22 @@ async function main() {
 
   let allPassed = true;
 
-  // Tier 0: Format & lint check (skipped if only rust)
+  // Tier 0: Repository integrity guard (runs unconditionally)
+  const integrityPassed = runStep('tier 0: repository integrity check', 'node scripts/check/integrity.mjs');
+  if (!integrityPassed) allPassed = false;
+
+  // Tier 0: Biome format & lint check (skipped if only rust)
   if (!ONLY_RUST) {
     const passed = runStep('tier 0: biome format & lint check', './node_modules/.bin/biome check .');
     if (!passed) allPassed = false;
   }
 
-  // Tier 1: Rust unit tests on affected crates
+  // Tier 1: Rust Clippy integrity lints & unit tests on affected crates
   if (!ONLY_JS && affected.affectedCrates.length > 0) {
+    const clippyFlags = '--all-targets -- -D clippy::disallowed_types -D clippy::disallowed_methods';
     if (affected.affectedCrates.length === ALL_CRATES.length) {
+      const clippyPassed = runStep('tier 1: cargo clippy workspace integrity rules', `cargo clippy --workspace ${clippyFlags}`);
+      if (!clippyPassed) allPassed = false;
       const passed = runStep('tier 1: cargo test workspace', 'cargo test --workspace');
       if (!passed) allPassed = false;
     } else {
@@ -94,6 +103,8 @@ async function main() {
             ? path.join(pkgDir, 'Cargo.toml')
             : path.join(ROOT, 'packages', crate, 'Cargo.toml');
         if (fs.existsSync(manifestPath)) {
+          const clippyPassed = runStep(`tier 1: cargo clippy for ${crate}`, `cargo clippy --manifest-path ${manifestPath} ${clippyFlags}`);
+          if (!clippyPassed) allPassed = false;
           const passed = runStep(`tier 1: cargo test for ${crate}`, `cargo test --manifest-path ${manifestPath}`);
           if (!passed) allPassed = false;
         }

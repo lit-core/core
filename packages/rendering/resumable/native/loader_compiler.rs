@@ -15,6 +15,7 @@ pub struct ResumableLoaderOptions {
     pub idle_hydration: Option<bool>,
     pub idle_timeout: Option<u32>,
     pub events: Option<Vec<String>>,
+    pub islands: Option<bool>,
 }
 
 #[napi]
@@ -27,6 +28,7 @@ pub fn compile_resumable_loader(options: Option<ResumableLoaderOptions>) -> Stri
     let preload_on_hover = opts.preload_on_hover.unwrap_or(true);
     let idle_hydration = opts.idle_hydration.unwrap_or(false);
     let idle_timeout = opts.idle_timeout.unwrap_or(2000);
+    let islands = opts.islands.unwrap_or(false);
 
     let mut events_list = opts.events.clone().unwrap_or_else(|| {
         vec![
@@ -50,6 +52,7 @@ pub fn compile_resumable_loader(options: Option<ResumableLoaderOptions>) -> Stri
         &events_list,
         idle_hydration,
         idle_timeout,
+        islands,
     );
 
     let codegen_options = CodegenOptions {

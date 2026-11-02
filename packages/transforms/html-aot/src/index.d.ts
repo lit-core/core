@@ -33,12 +33,56 @@ export type TemplatePart =
 export interface HtmlAotOptions {
   filename?: string;
   sourcemap?: boolean;
+  ssr?: boolean;
+  strictSsr?: boolean;
 }
 
 export interface HtmlAotResult {
   code: string;
   map?: string;
   templatesCount: number;
+  ssrErrors: string[];
+  hasRuntimeTemplates: boolean;
+}
+
+export interface SsrMarkerSite {
+  name: string;
+  index: number;
+  parentPath: number[];
+  startPath: number[];
+}
+
+export type SsrDynamicAttribute =
+  | { type: 'attribute'; name: string; index: number; indices?: number[]; strings?: string[] }
+  | { type: 'boolean'; name: string; index: number }
+  | { type: 'property'; name: string; index: number }
+  | { type: 'event'; name: string; index: number }
+  | { type: 'directive'; index: number };
+
+export type SsrOpcode =
+  | {
+      type: 'open';
+      tag: string;
+      isCustomElement?: boolean;
+      isVoid?: boolean;
+      namespace?: string;
+      staticAttrs?: Record<string, string>;
+      dynamicAttrs?: SsrDynamicAttribute[];
+      closeIndex?: number;
+    }
+  | { type: 'close'; tag: string }
+  | { type: 'text'; value: string }
+  | { type: 'comment'; value: string }
+  | { type: 'part'; index: number }
+  | { type: 'marker-start'; name: string; h?: string }
+  | { type: 'marker-end' };
+
+export interface SsrTemplatePlan {
+  v: 2;
+  h: string;
+  opcodes: SsrOpcode[];
+  markerSites: SsrMarkerSite[];
+  parts: unknown[];
 }
 
 /**

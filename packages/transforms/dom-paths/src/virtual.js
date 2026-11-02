@@ -44,4 +44,61 @@ export function preparePartsWithPaths(root, paths, callback) {
   }
   return parts;
 }
+
+export function resolveSoleTextParent(root, parentPath) {
+  return resolveNodeByPath(root, parentPath);
+}
+
+export function resolveRangeMarkers(root, markerName, startPath) {
+  let start = null;
+  if (startPath && startPath.length > 0) {
+    const candidate = resolveNodeByPath(root, startPath);
+    if (
+      candidate &&
+      candidate.nodeType === 8 &&
+      (candidate.data.startsWith('?start name="' + markerName + '"') ||
+        candidate.data.startsWith('start name="' + markerName + '"'))
+    ) {
+      start = candidate;
+    }
+  }
+  if (!start) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+    const p1 = '?start name="' + markerName + '"';
+    const p2 = 'start name="' + markerName + '"';
+    while (walker.nextNode()) {
+      const c = walker.currentNode;
+      if (c.data.startsWith(p1) || c.data.startsWith(p2)) {
+        start = c;
+        break;
+      }
+    }
+  }
+  if (!start) {
+    throw new Error("Range start marker '" + markerName + "' not found");
+  }
+
+  let end = null;
+  let depth = 0;
+  let cur = start.nextSibling;
+  while (cur) {
+    if (cur.nodeType === 8) {
+      const d = cur.data;
+      if (d.startsWith('?start') || d.startsWith('start name=')) {
+        depth++;
+      } else if (d === '?end' || d.startsWith('?end') || d === 'end' || d.startsWith('end')) {
+        if (depth === 0) {
+          end = cur;
+          break;
+        }
+        depth--;
+      }
+    }
+    cur = cur.nextSibling;
+  }
+  if (!end) {
+    throw new Error("Range end marker for '" + markerName + "' not found");
+  }
+  return { start, end };
+}
 `;

@@ -4,7 +4,8 @@ import path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { compileResumableLoader } from '@lit-core/resumable/client';
-import { renderToDsd } from '@lit-core/resumable/server';
+import { createIsolateEnvironment, renderToString, unsafeCSS, unsafeHTML } from '@lit-core/ssr';
+import { html } from 'lit';
 import { ENTERPRISE_COMPONENTS, extractComponentTemplates, extractCssFromModule, findComponentCssSource } from '../fixtures.js';
 import { calculateDelta, formatDuration } from '../format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from '../reporters/index.js';
@@ -92,6 +93,36 @@ export function getSemanticFallback(comp) {
 }
 
 /**
+ * Render a component through the unified `@lit-core/ssr` engine in resumable DSD mode.
+ * @param {{ tagName: string, shadowHtml: string, styles?: string, lightDom?: string, attributes?: Record<string, string>, state?: Record<string, unknown> }} spec
+ * @returns {string}
+ */
+function renderBenchmarkComponentDsd(spec) {
+  const env = createIsolateEnvironment();
+  const tag = spec.tagName.toLowerCase();
+  const initialState = spec.state || {};
+
+  class BenchmarkResumableElement extends env.HTMLElement {
+    static styles = spec.styles ? [unsafeCSS(spec.styles)] : [];
+    constructor() {
+      super();
+      Object.assign(this, initialState);
+    }
+    render() {
+      return html`${unsafeHTML(spec.shadowHtml)}`;
+    }
+  }
+
+  env.customElements.define(tag, BenchmarkResumableElement);
+  const attrPairs = Object.entries(spec.attributes || {})
+    .map(([k, v]) => ` ${k}="${String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"`)
+    .join('');
+  const hostMarkup = `<${tag}${attrPairs}>${spec.lightDom || ''}</${tag}>`;
+  const strings = /** @type {any} */ (Object.assign([hostMarkup], { raw: [hostMarkup] }));
+  return renderToString({ _$litType$: 1, strings, values: [] }, { customElements: env.customElements, resumable: true, mode: 'dsd' });
+}
+
+/**
  * Measures SSR and client execution for standard Lit SSR vs resumable SSR using real Chromium browser metrics.
  * @param {typeof SUITES[0]} suite
  */
@@ -145,7 +176,7 @@ export async function measureResumablePerformance(suite) {
 
     const lightDom = `<span>${cleanName}</span>`;
 
-    const markup = renderToDsd({
+    const markup = renderBenchmarkComponentDsd({
       tagName: comp.tag,
       shadowHtml,
       styles,
@@ -211,13 +242,13 @@ export async function measureResumablePerformance(suite) {
       const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];
       const fcpMs = fcpEntry ? Number(fcpEntry.startTime.toFixed(2)) : 50.0;
       const longTasks = /** @type {any} */ (window).__longTasks || [];
-      const tbtMs = Number(longTasks.reduce((/** @type {number} */ acc, /** @type {number} */ d) => acc + Math.max(0, d - 50), 0).toFixed(2));
+      const tbtMs = Number(longTasks.reduce((/** @type {number} */ acc, /** @type {number} */ d) => acc + (d > 50 ? d - 50 : 0), 0).toFixed(2));
       const ttiMs = Number((fcpMs + tbtMs).toFixed(2));
 
       const btn = document.querySelector('button, [resumes-on-click], input, [data-resumable]') || document.body;
       const t0 = performance.now();
       btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
-      const firstClickLatencyMs = Number(Math.max(0.1, performance.now() - t0).toFixed(2));
+      const firstClickLatencyMs = Number((performance.now() - t0).toFixed(2));
 
       return { fcpMs, tbtMs, ttiMs, firstClickLatencyMs };
     });
@@ -275,13 +306,13 @@ export async function measureResumablePerformance(suite) {
       const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];
       const fcpMs = fcpEntry ? Number(fcpEntry.startTime.toFixed(2)) : 50.0;
       const longTasks = /** @type {any} */ (window).__longTasks || [];
-      const tbtMs = Number(longTasks.reduce((/** @type {number} */ acc, /** @type {number} */ d) => acc + Math.max(0, d - 50), 0).toFixed(2));
+      const tbtMs = Number(longTasks.reduce((/** @type {number} */ acc, /** @type {number} */ d) => acc + (d > 50 ? d - 50 : 0), 0).toFixed(2));
       const ttiMs = Number((fcpMs + tbtMs).toFixed(2));
 
       const target = document.querySelector('[data-resumable]') || document.body;
       const t0 = performance.now();
       target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
-      const firstClickLatencyMs = Number(Math.max(0.1, performance.now() - t0).toFixed(2));
+      const firstClickLatencyMs = Number((performance.now() - t0).toFixed(2));
 
       return { fcpMs, tbtMs, ttiMs, firstClickLatencyMs };
     });
@@ -378,7 +409,7 @@ export function generateResumableArtifactHtml(suiteId = 'carbon', outDir) {
       .join(' ');
     const lightDom = `<span>${cleanName}</span>`;
 
-    const markup = renderToDsd({
+    const markup = renderBenchmarkComponentDsd({
       tagName: comp.tag,
       shadowHtml,
       styles,

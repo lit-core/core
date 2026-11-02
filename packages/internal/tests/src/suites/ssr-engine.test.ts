@@ -1,5 +1,12 @@
+import { html } from 'lit';
 import { describe, expect, it } from 'vitest';
-import { getSsrEngine } from '../ssr-harness.js';
+import { buildRegisteredComponentFixture, type ComponentRenderDescriptor, createIsolateEnvironment, getSsrEngine, type RenderOptions } from '../ssr-harness.js';
+
+async function renderSpec(spec: ComponentRenderDescriptor, extraOptions: RenderOptions = {}): Promise<string> {
+  const engine = await getSsrEngine();
+  const fixture = buildRegisteredComponentFixture(spec);
+  return engine.collectResult(engine.render(fixture.template, { ...fixture.options, ...extraOptions }));
+}
 
 describe('@lit-core/ssr engine core test suite', () => {
   // =========================================================================
@@ -8,32 +15,32 @@ describe('@lit-core/ssr engine core test suite', () => {
   describe('tier 1: primary feature coverage', () => {
     it('[F3] render yields clean Declarative Shadow DOM without comment markers', async () => {
       const engine = await getSsrEngine();
-      const chunks = Array.from(
-        engine.render({
-          tagName: 'test-card',
-          shadowHtml: '<div class="card-inner">Hello SSR</div>',
-        }),
-      );
-      const html = chunks.join('');
+      const fixture = buildRegisteredComponentFixture({
+        tagName: 'test-card',
+        shadowHtml: '<div class="card-inner">Hello SSR</div>',
+      });
+      const chunks = Array.from(engine.render(fixture.template, fixture.options));
+      const htmlOut = chunks.join('');
 
-      expect(html).toContain('<test-card>');
-      expect(html).toContain('<template shadowrootmode="open">');
-      expect(html).toContain('<div class="card-inner">Hello SSR</div>');
-      expect(html).toContain('</template>');
-      expect(html).toContain('</test-card>');
+      expect(htmlOut).toContain('<test-card>');
+      expect(htmlOut).toContain('<template shadowrootmode="open">');
+      expect(htmlOut).toContain('<div class="card-inner">Hello SSR</div>');
+      expect(htmlOut).toContain('</template>');
+      expect(htmlOut).toContain('</test-card>');
 
       // Zero comment marker invariant (R2, F3)
-      expect(html).not.toContain('<!--lit-part');
-      expect(html).not.toContain('<!--lit-node');
-      expect(html).not.toContain('<!--');
+      expect(htmlOut).not.toContain('<!--lit-part');
+      expect(htmlOut).not.toContain('<!--lit-node');
+      expect(htmlOut).not.toContain('<!--');
     });
 
     it('[F3] renderToStream returns a valid WHATWG ReadableStream delivering binary chunks', async () => {
       const engine = await getSsrEngine();
-      const stream = engine.renderToStream({
+      const fixture = buildRegisteredComponentFixture({
         tagName: 'test-stream-widget',
         shadowHtml: '<p>Streaming content</p>',
       });
+      const stream = engine.renderToStream(fixture.template, fixture.options);
 
       expect(stream).toBeInstanceOf(ReadableStream);
 
@@ -56,10 +63,11 @@ describe('@lit-core/ssr engine core test suite', () => {
 
     it('[F3] collectResult asynchronously joins all string chunks into unified HTML', async () => {
       const engine = await getSsrEngine();
-      const resultIterator = engine.render({
+      const fixture = buildRegisteredComponentFixture({
         tagName: 'test-collector',
         shadowHtml: '<span>Collector inner</span>',
       });
+      const resultIterator = engine.render(fixture.template, fixture.options);
 
       const fullHtml = await engine.collectResult(resultIterator);
       expect(typeof fullHtml).toBe('string');
@@ -67,154 +75,129 @@ describe('@lit-core/ssr engine core test suite', () => {
     });
 
     it('[F3] render includes static styles within template shadow root', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'styled-box',
-          styles: ':host { display: block; color: blue; }',
-          shadowHtml: '<p>Styled content</p>',
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'styled-box',
+        styles: ':host { display: block; color: blue; }',
+        shadowHtml: '<p>Styled content</p>',
+      });
 
-      expect(html).toContain('<template shadowrootmode="open"><style>:host { display: block; color: blue; }</style><p>Styled content</p></template>');
+      expect(htmlOut).toContain('<template shadowrootmode="open"><style>:host { display: block; color: blue; }</style><p>Styled content</p></template>');
     });
 
     it('[F3] render handles array of static stylesheets inside shadow root', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'multi-styled-box',
-          styles: [':host { margin: 0; }', '.content { padding: 8px; }'],
-          shadowHtml: '<div class="content">Multi-styled</div>',
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'multi-styled-box',
+        styles: [':host { margin: 0; }', '.content { padding: 8px; }'],
+        shadowHtml: '<div class="content">Multi-styled</div>',
+      });
 
-      expect(html).toContain('<style>:host { margin: 0; }\n.content { padding: 8px; }</style>');
+      expect(htmlOut).toContain('<style>:host { margin: 0; }\n.content { padding: 8px; }</style>');
     });
 
     it('[F4] slot projection correctly maps default slot content', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'test-slot-host',
-          shadowHtml: '<div class="wrapper"><slot></slot></div>',
-          lightDom: [{ content: '<span class="light-child">Slotted Text</span>' }],
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'test-slot-host',
+        shadowHtml: '<div class="wrapper"><slot></slot></div>',
+        lightDom: [{ content: '<span class="light-child">Slotted Text</span>' }],
+      });
 
-      expect(html).toContain('<template shadowrootmode="open"><div class="wrapper"><span class="light-child">Slotted Text</span></div></template>');
-      expect(html).not.toContain('<!--lit-part');
+      expect(htmlOut).toContain('<template shadowrootmode="open"><div class="wrapper"><slot></slot></div></template>');
+      expect(htmlOut).toContain('<span class="light-child">Slotted Text</span></test-slot-host>');
+      expect(htmlOut).not.toContain('<!--lit-part');
     });
 
     it('[F4] slot projection correctly maps named slot content', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'test-named-slot-host',
-          shadowHtml: '<header><slot name="header"></slot></header><main><slot></slot></main>',
-          lightDom: [{ slot: 'header', content: '<h1>Page title</h1>' }, { content: '<p>Main body content</p>' }],
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'test-named-slot-host',
+        shadowHtml: '<header><slot name="header"></slot></header><main><slot></slot></main>',
+        lightDom: [{ slot: 'header', content: '<h1>Page title</h1>' }, { content: '<p>Main body content</p>' }],
+      });
 
-      expect(html).toContain('<header><h1>Page title</h1></header>');
-      expect(html).toContain('<main><p>Main body content</p></main>');
+      expect(htmlOut).toContain('<template shadowrootmode="open"><header><slot name="header"></slot></header><main><slot></slot></main></template>');
+      expect(htmlOut).toContain('<h1 slot="header">Page title</h1><p>Main body content</p></test-named-slot-host>');
     });
 
     it('[F4] slot projection retains fallback content when no light DOM child matches slot', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'test-fallback-slot',
-          shadowHtml: '<div class="action-bar"><slot name="action"><button>Default action</button></slot></div>',
-          lightDom: [],
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'test-fallback-slot',
+        shadowHtml: '<div class="action-bar"><slot name="action"><button>Default action</button></slot></div>',
+        lightDom: [],
+      });
 
-      expect(html).toContain('<button>Default action</button>');
+      expect(htmlOut).toContain('<button>Default action</button>');
     });
 
     it('[F4] slot projection forwards multiple light DOM children into single slot target', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'multi-item-list',
-          shadowHtml: '<nav><slot name="links"></slot></nav>',
-          lightDom: [
-            { slot: 'links', content: '<a href="/home">Home</a>' },
-            { slot: 'links', content: '<a href="/about">About</a>' },
-          ],
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'multi-item-list',
+        shadowHtml: '<nav><slot name="links"></slot></nav>',
+        lightDom: [
+          { slot: 'links', content: '<a href="/home">Home</a>' },
+          { slot: 'links', content: '<a href="/about">About</a>' },
+        ],
+      });
 
-      expect(html).toContain('<nav><a href="/home">Home</a><a href="/about">About</a></nav>');
+      expect(htmlOut).toContain('<template shadowrootmode="open"><nav><slot name="links"></slot></nav></template>');
+      expect(htmlOut).toContain('<a slot="links" href="/home">Home</a><a slot="links" href="/about">About</a></multi-item-list>');
     });
 
-    it('[F7] resumable state serialization outputs state script tag', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render(
-          {
-            tagName: 'test-stateful-component',
-            shadowHtml: '<button>Increment</button>',
-            state: { count: 42, active: true, user: { name: 'Alice' } },
-          },
-          { resumable: true },
-        ),
+    it('[F7] resumable state serialization outputs data-lit-state attribute', async () => {
+      const htmlOut = await renderSpec(
+        {
+          tagName: 'test-stateful-component',
+          shadowHtml: '<button>Increment</button>',
+          state: { count: 42, active: true, user: { name: 'Alice' } },
+        },
+        { resumable: true },
       );
 
-      expect(html).toContain('<script type="lit/state">');
-      expect(html).toContain('"count":42');
-      expect(html).toContain('"active":true');
-      expect(html).toContain('"name":"Alice"');
-      expect(html).toContain('</script>');
+      expect(htmlOut).toContain('data-lit-state="');
+      expect(htmlOut).not.toContain('<script type="lit/state">');
+      expect(htmlOut).toContain('&quot;count&quot;:42');
+      expect(htmlOut).toContain('&quot;active&quot;:true');
+      expect(htmlOut).toContain('&quot;name&quot;:&quot;Alice&quot;');
     });
 
     it('[F7] DOM path metadata attributes are emitted when domPaths option is enabled', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render(
-          {
-            tagName: 'test-dom-path-comp',
-            shadowHtml: '<p>Target item</p>',
-          },
-          { domPaths: true },
-        ),
+      const htmlOut = await renderSpec(
+        {
+          tagName: 'test-dom-path-comp',
+          shadowHtml: '<p>Target item</p>',
+        },
+        { domPaths: true },
       );
 
-      expect(html).toContain('data-lit-paths="true"');
+      expect(htmlOut).toContain('data-lit-paths="true"');
     });
 
     it('[F6] monorepo compiler integration ingests pre-compiled template descriptors', async () => {
       const engine = await getSsrEngine();
       const precompiledDescriptor = {
-        _$litType$: 1,
-        html: '<div class="precompiled">Compiled template static fragment</div>',
+        _$litType$: {
+          h: '<div class="precompiled">Compiled template static fragment</div>',
+          parts: [],
+        },
+        values: [],
       };
 
-      const html = await engine.collectResult(engine.render(precompiledDescriptor));
-      expect(html).toContain('Compiled template static fragment');
-      expect(html).not.toContain('<!--lit-part');
+      const htmlOut = await engine.collectResult(engine.render(precompiledDescriptor));
+      expect(htmlOut).toContain('Compiled template static fragment');
+      expect(htmlOut).not.toContain('<!--lit-part');
     });
 
     it('[F6] monorepo compiler integration ingests tagged template strings and values', async () => {
       const engine = await getSsrEngine();
-      const taggedTemplate = {
-        strings: ['<div class="user-greeting">Welcome, ', '! Score: ', '</div>'],
-        values: ['Bob', 100],
-      };
+      const taggedTemplate = html`<div class="user-greeting">Welcome, ${'Bob'}! Score: ${100}</div>`;
 
-      const html = await engine.collectResult(engine.render(taggedTemplate));
-      expect(html).toBe('<div class="user-greeting">Welcome, Bob! Score: 100</div>');
+      const htmlOut = await engine.collectResult(engine.render(taggedTemplate));
+      expect(htmlOut).toBe('<div class="user-greeting">Welcome, <?start name="p0">Bob<?end>! Score: <?start name="p1">100<?end></div>');
     });
 
     it('[F1] ecosystem research specifications enforce zero comment markers and isolate execution', async () => {
-      const engine = await getSsrEngine();
-      const result = await engine.collectResult(
-        engine.render({
-          tagName: 'whitepaper-spec-check',
-          shadowHtml: '<article>Universal SSR specification</article>',
-        }),
-      );
+      const result = await renderSpec({
+        tagName: 'whitepaper-spec-check',
+        shadowHtml: '<article>Universal SSR specification</article>',
+      });
 
       expect(result).not.toContain('<!--lit-part');
       expect(result).not.toContain('<!--lit-node');
@@ -297,14 +280,11 @@ describe('@lit-core/ssr engine core test suite', () => {
     });
 
     it('handles empty template strings and empty components', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'empty-box',
-          shadowHtml: '',
-        }),
-      );
-      expect(html).toBe('<empty-box><template shadowrootmode="open"></template></empty-box>');
+      const htmlOut = await renderSpec({
+        tagName: 'empty-box',
+        shadowHtml: '',
+      });
+      expect(htmlOut).toBe('<empty-box><template shadowrootmode="open"></template></empty-box>');
     });
 
     it('handles empty array inputs yielding empty string', async () => {
@@ -313,155 +293,148 @@ describe('@lit-core/ssr engine core test suite', () => {
     });
 
     it('omits null, undefined, and false attributes according to HTML rules', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'attr-comp',
-          shadowHtml: '<div></div>',
-          attributes: {
-            title: 'Valid title',
-            disabled: false,
-            hidden: null,
-            'aria-expanded': undefined,
-          },
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'attr-comp',
+        shadowHtml: '<div></div>',
+        attributes: {
+          title: 'Valid title',
+          disabled: false,
+          hidden: null,
+          'aria-expanded': undefined,
+        },
+      });
 
-      expect(html).toContain('title="Valid title"');
-      expect(html).not.toContain('disabled');
-      expect(html).not.toContain('hidden');
-      expect(html).not.toContain('aria-expanded');
+      expect(htmlOut).toContain('title="Valid title"');
+      expect(htmlOut).not.toContain('disabled');
+      expect(htmlOut).not.toContain('hidden');
+      expect(htmlOut).not.toContain('aria-expanded');
     });
 
     it('emits boolean attributes without values when true', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'boolean-host',
-          shadowHtml: '<div></div>',
-          attributes: {
-            required: true,
-            autofocus: true,
-          },
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'boolean-host',
+        shadowHtml: '<div></div>',
+        attributes: {
+          required: true,
+          autofocus: true,
+        },
+      });
 
-      expect(html).toContain('<boolean-host required autofocus>');
+      expect(htmlOut).toContain('<boolean-host required autofocus>');
     });
 
     it('formats numeric attributes correctly as quoted string values', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'numeric-host',
-          shadowHtml: '<div></div>',
-          attributes: {
-            tabindex: 0,
-            width: 120,
-            'aria-valuenow': 75,
-          },
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'numeric-host',
+        shadowHtml: '<div></div>',
+        attributes: {
+          tabindex: 0,
+          width: 120,
+          'aria-valuenow': 75,
+        },
+      });
 
-      expect(html).toContain('tabindex="0"');
-      expect(html).toContain('width="120"');
-      expect(html).toContain('aria-valuenow="75"');
+      expect(htmlOut).toContain('tabindex="0"');
+      expect(htmlOut).toContain('width="120"');
+      expect(htmlOut).toContain('aria-valuenow="75"');
     });
 
     it('properly escapes special characters in attribute values', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'escape-test',
-          shadowHtml: '<div></div>',
-          attributes: {
-            'data-xss': '<script>alert("xss")</script>',
-            'data-quote': 'Value with "double" & \'single\' quotes',
-            'data-amp': 'Tom & Jerry & <friends>',
-          },
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'escape-test',
+        shadowHtml: '<div></div>',
+        attributes: {
+          'data-xss': '<script>alert("xss")</script>',
+          'data-quote': 'Value with "double" & \'single\' quotes',
+          'data-amp': 'Tom & Jerry & <friends>',
+        },
+      });
 
-      expect(html).toContain('data-xss="&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;"');
-      expect(html).toContain('data-quote="Value with &quot;double&quot; &amp; \'single\' quotes"');
-      expect(html).toContain('data-amp="Tom &amp; Jerry &amp; &lt;friends&gt;"');
-      expect(html).not.toContain('<script>alert');
+      expect(htmlOut).toContain('data-xss="&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;"');
+      expect(htmlOut).toContain('data-quote="Value with &quot;double&quot; &amp; \'single\' quotes"');
+      expect(htmlOut).toContain('data-amp="Tom &amp; Jerry &amp; &lt;friends&gt;"');
+      expect(htmlOut).not.toContain('<script>alert');
     });
 
     it('renders unicode and emoji characters in shadow DOM without byte corruption', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'unicode-widget',
-          shadowHtml: '<p>Unicode: 日本語 🌟 🚀 Äpfel & Bananen</p>',
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'unicode-widget',
+        shadowHtml: '<p>Unicode: 日本語 🌟 🚀 Äpfel & Bananen</p>',
+      });
 
-      expect(html).toContain('日本語 🌟 🚀 Äpfel & Bananen');
+      expect(htmlOut).toContain('日本語 🌟 🚀 Äpfel &amp; Bananen');
     });
 
     it('handles deep component nesting up to 10 levels without stack exhaustion', async () => {
       const engine = await getSsrEngine();
+      const env = createIsolateEnvironment();
 
-      function buildNested(depth: number): any {
-        if (depth === 0) {
-          return { tagName: `nest-leaf`, shadowHtml: '<span>Leaf</span>' };
+      class NestLeaf extends env.HTMLElement {
+        render() {
+          return html`<span>Leaf</span>`;
         }
-        return {
-          tagName: `nest-level-${depth}`,
-          shadowHtml: `<div class="level-${depth}">Inner level ${depth}</div>`,
-          lightDom: [{ content: `<nest-level-${depth - 1}><template shadowrootmode="open">Inner</template></nest-level-${depth - 1}>` }],
-        };
+      }
+      env.customElements.define('nest-leaf', NestLeaf);
+
+      for (let d = 1; d <= 10; d++) {
+        const level = d;
+        class NestLevel extends env.HTMLElement {
+          render() {
+            return html`<div class="level-${level}">Inner level ${level}</div><slot></slot>`;
+          }
+        }
+        env.customElements.define(`nest-level-${level}`, NestLevel);
       }
 
-      const deepTree = buildNested(10);
-      const html = await engine.collectResult(engine.render(deepTree));
+      let rawMarkup = '<nest-leaf></nest-leaf>';
+      for (let d = 1; d <= 10; d++) {
+        rawMarkup = `<nest-level-${d}>${rawMarkup}</nest-level-${d}>`;
+      }
+      const strings = Object.assign([rawMarkup], { raw: [rawMarkup] }) as unknown as TemplateStringsArray;
+      const htmlOut = await engine.collectResult(engine.render({ _$litType$: 1, strings, values: [] }, { customElements: env.customElements }));
 
-      expect(html).toContain('nest-level-10');
-      expect(html).toContain('nest-level-1');
-      expect(html).not.toContain('<!--lit-part');
+      expect(htmlOut).toContain('nest-level-10');
+      expect(htmlOut).toContain('nest-level-1');
+      expect(htmlOut).toContain('<span>Leaf</span>');
+      expect(htmlOut).not.toContain('<!--lit-part');
     });
 
     it('retains unprojected light DOM elements in light DOM remainder', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'unprojected-host',
-          shadowHtml: '<div class="shadow-box"><slot name="target"></slot></div>',
-          lightDom: [
-            { slot: 'target', content: '<span>Projected</span>' },
-            { slot: 'unknown', content: '<span class="orphan">Unmatched orphan</span>' },
-          ],
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'unprojected-host',
+        shadowHtml: '<div class="shadow-box"><slot name="target"></slot></div>',
+        lightDom: [
+          { slot: 'target', content: '<span>Projected</span>' },
+          { slot: 'unknown', content: '<span class="orphan">Unmatched orphan</span>' },
+        ],
+      });
 
-      expect(html).toContain('<div class="shadow-box"><span>Projected</span></div>');
-      expect(html).toContain('</template><span class="orphan">Unmatched orphan</span></unprojected-host>');
+      expect(htmlOut).toContain('<div class="shadow-box"><slot name="target"></slot></div>');
+      expect(htmlOut).toContain('</template><span slot="target">Projected</span><span slot="unknown" class="orphan">Unmatched orphan</span></unprojected-host>');
     });
 
     it('handles multiple light DOM children targeted to the same named slot', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render({
-          tagName: 'multi-child-slot-host',
-          shadowHtml: '<ul><slot name="items"></slot></ul>',
-          lightDom: [
-            { slot: 'items', content: '<li>Item 1</li>' },
-            { slot: 'items', content: '<li>Item 2</li>' },
-            { slot: 'items', content: '<li>Item 3</li>' },
-          ],
-        }),
-      );
+      const htmlOut = await renderSpec({
+        tagName: 'multi-child-slot-host',
+        shadowHtml: '<ul><slot name="items"></slot></ul>',
+        lightDom: [
+          { slot: 'items', content: '<li>Item 1</li>' },
+          { slot: 'items', content: '<li>Item 2</li>' },
+          { slot: 'items', content: '<li>Item 3</li>' },
+        ],
+      });
 
-      expect(html).toContain('<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>');
+      expect(htmlOut).toContain('<ul><slot name="items"></slot></ul>');
+      expect(htmlOut).toContain('</template><li slot="items">Item 1</li><li slot="items">Item 2</li><li slot="items">Item 3</li></multi-child-slot-host>');
     });
 
     it('stream reader can be cancelled without throwing or corrupting stream state', async () => {
       const engine = await getSsrEngine();
-      const stream = engine.renderToStream({
+      const fixture = buildRegisteredComponentFixture({
         tagName: 'stream-cancellation-comp',
         shadowHtml: '<div>Cancelled midway</div>',
       });
+      const stream = engine.renderToStream(fixture.template, fixture.options);
 
       const reader = stream.getReader();
       const firstChunk = await reader.read();
@@ -473,29 +446,34 @@ describe('@lit-core/ssr engine core test suite', () => {
     });
 
     it('handles empty component state when resumable is enabled', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render(
-          {
-            tagName: 'empty-state-comp',
-            shadowHtml: '<p>No state</p>',
-            state: {},
-          },
-          { resumable: true },
-        ),
+      const htmlOut = await renderSpec(
+        {
+          tagName: 'empty-state-comp',
+          shadowHtml: '<p>No state</p>',
+          state: {},
+        },
+        { resumable: true },
       );
 
-      expect(html).not.toContain('<script type="lit/state">');
+      expect(htmlOut).not.toContain('data-lit-state=');
+      expect(htmlOut).not.toContain('<script type="lit/state">');
     });
 
     it('streams large payloads (>50KB) sequentially without buffer exhaustion', async () => {
       const engine = await getSsrEngine();
-      const largePayload = Array.from({ length: 50 }, (_, i) => ({
-        tagName: `large-item-${i}`,
-        shadowHtml: `<div class="payload-chunk-${i}">${'A'.repeat(1000)}</div>`,
-      }));
+      const env = createIsolateEnvironment();
+      const largePayload = Array.from({ length: 50 }, (_, i) => {
+        const fixture = buildRegisteredComponentFixture(
+          {
+            tagName: `large-item-${i}`,
+            shadowHtml: `<div class="payload-chunk-${i}">${'A'.repeat(1000)}</div>`,
+          },
+          env.customElements,
+        );
+        return fixture.template;
+      });
 
-      const stream = engine.renderToStream(largePayload);
+      const stream = engine.renderToStream(largePayload, { customElements: env.customElements });
       const reader = stream.getReader();
       let totalBytes = 0;
 
@@ -521,17 +499,23 @@ describe('@lit-core/ssr engine core test suite', () => {
   describe('tier 3: cross-feature combinations', () => {
     it('streams nested custom element hierarchies across chunk boundaries', async () => {
       const engine = await getSsrEngine();
-      const stream = engine.renderToStream([
-        {
-          tagName: 'parent-container',
-          shadowHtml: '<div class="parent"><slot></slot></div>',
-          lightDom: [
-            {
-              content: '<child-widget><template shadowrootmode="open"><span>Child</span></template></child-widget>',
-            },
-          ],
-        },
-      ]);
+      const env = createIsolateEnvironment();
+      class ChildWidget extends env.HTMLElement {
+        render() {
+          return html`<span>Child</span>`;
+        }
+      }
+      class ParentContainer extends env.HTMLElement {
+        render() {
+          return html`<div class="parent"><slot></slot></div>`;
+        }
+      }
+      env.customElements.define('child-widget', ChildWidget);
+      env.customElements.define('parent-container', ParentContainer);
+
+      const stream = engine.renderToStream([html`<parent-container><child-widget></child-widget></parent-container>`], {
+        customElements: env.customElements,
+      });
 
       const reader = stream.getReader();
       const chunks: string[] = [];
@@ -551,32 +535,31 @@ describe('@lit-core/ssr engine core test suite', () => {
     });
 
     it('combines slot projection with resumable state snapshot and DOM paths', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render(
-          {
-            tagName: 'combo-component',
-            shadowHtml: '<div class="layout"><slot name="content"></slot></div>',
-            lightDom: [{ slot: 'content', content: '<p>Interactive body</p>' }],
-            state: { userId: 101, permissions: ['read', 'write'] },
-          },
-          { resumable: true, domPaths: true },
-        ),
+      const htmlOut = await renderSpec(
+        {
+          tagName: 'combo-component',
+          shadowHtml: '<div class="layout"><slot name="content"></slot></div>',
+          lightDom: [{ slot: 'content', content: '<p>Interactive body</p>' }],
+          state: { userId: 101, permissions: ['read', 'write'] },
+        },
+        { resumable: true, domPaths: true },
       );
 
-      expect(html).toContain('data-lit-paths="true"');
-      expect(html).toContain('<div class="layout"><p>Interactive body</p></div>');
-      expect(html).toContain('<script type="lit/state">');
-      expect(html).toContain('"userId":101');
-      expect(html).not.toContain('<!--lit-part');
+      expect(htmlOut).toContain('data-lit-paths="true"');
+      expect(htmlOut).toContain('<div class="layout"><slot name="content"></slot></div>');
+      expect(htmlOut).toContain('</template><p slot="content">Interactive body</p>');
+      expect(htmlOut).toContain('data-lit-state="');
+      expect(htmlOut).not.toContain('<script type="lit/state">');
+      expect(htmlOut).toContain('&quot;userId&quot;:101');
+      expect(htmlOut).not.toContain('<!--lit-part');
     });
 
     it('streams pre-compiled html-aot template descriptors via renderToStream', async () => {
       const engine = await getSsrEngine();
       const descriptors = [
-        { _$litType$: 1, html: '<header class="site-header">Header</header>' },
-        { _$litType$: 1, html: '<main class="site-main">Content</main>' },
-        { _$litType$: 1, html: '<footer class="site-footer">Footer</footer>' },
+        { _$litType$: { h: '<header class="site-header">Header</header>', parts: [] }, values: [] },
+        { _$litType$: { h: '<main class="site-main">Content</main>', parts: [] }, values: [] },
+        { _$litType$: { h: '<footer class="site-footer">Footer</footer>', parts: [] }, values: [] },
       ];
 
       const stream = engine.renderToStream(descriptors);
@@ -596,37 +579,36 @@ describe('@lit-core/ssr engine core test suite', () => {
       expect(joined).toContain('<footer class="site-footer">Footer</footer>');
     });
 
-    it('combines custom element styles, slot projection, and state script in single render', async () => {
-      const engine = await getSsrEngine();
-      const html = await engine.collectResult(
-        engine.render(
-          {
-            tagName: 'all-inclusive-card',
-            styles: ':host { border-radius: 8px; }',
-            shadowHtml: '<div class="card"><slot name="title"></slot><slot></slot></div>',
-            lightDom: [{ slot: 'title', content: '<h2>Card title</h2>' }, { content: '<p>Body text</p>' }],
-            state: { loaded: true, viewCount: 1500 },
-          },
-          { resumable: true, domPaths: true },
-        ),
+    it('combines custom element styles, slot projection, and data-lit-state in single render', async () => {
+      const htmlOut = await renderSpec(
+        {
+          tagName: 'all-inclusive-card',
+          styles: ':host { border-radius: 8px; }',
+          shadowHtml: '<div class="card"><slot name="title"></slot><slot></slot></div>',
+          lightDom: [{ slot: 'title', content: '<h2>Card title</h2>' }, { content: '<p>Body text</p>' }],
+          state: { loaded: true, viewCount: 1500 },
+        },
+        { resumable: true, domPaths: true },
       );
 
-      expect(html).toContain('<style>:host { border-radius: 8px; }</style>');
-      expect(html).toContain('<h2>Card title</h2>');
-      expect(html).toContain('<p>Body text</p>');
-      expect(html).toContain('"viewCount":1500');
-      expect(html).toContain('data-lit-paths="true"');
+      expect(htmlOut).toContain('<style>:host { border-radius: 8px; }</style>');
+      expect(htmlOut).toContain('<h2 slot="title">Card title</h2>');
+      expect(htmlOut).toContain('<p>Body text</p>');
+      expect(htmlOut).toContain('&quot;viewCount&quot;:1500');
+      expect(htmlOut).toContain('data-lit-paths="true"');
+      expect(htmlOut).not.toContain('<script type="lit/state">');
     });
 
     it('streams multiple sibling custom elements each containing clean DSD', async () => {
       const engine = await getSsrEngine();
+      const env = createIsolateEnvironment();
       const siblings = [
-        { tagName: 'sibling-one', shadowHtml: '<span>One</span>' },
-        { tagName: 'sibling-two', shadowHtml: '<span>Two</span>' },
-        { tagName: 'sibling-three', shadowHtml: '<span>Three</span>' },
+        buildRegisteredComponentFixture({ tagName: 'sibling-one', shadowHtml: '<span>One</span>' }, env.customElements).template,
+        buildRegisteredComponentFixture({ tagName: 'sibling-two', shadowHtml: '<span>Two</span>' }, env.customElements).template,
+        buildRegisteredComponentFixture({ tagName: 'sibling-three', shadowHtml: '<span>Three</span>' }, env.customElements).template,
       ];
 
-      const stream = engine.renderToStream(siblings);
+      const stream = engine.renderToStream(siblings, { customElements: env.customElements });
       const reader = stream.getReader();
       const chunks: string[] = [];
       const decoder = new TextDecoder();

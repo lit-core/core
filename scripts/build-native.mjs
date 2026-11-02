@@ -26,6 +26,7 @@ const CRATE_PATHS = {
   resumable: 'packages/rendering/resumable',
   ssr: 'packages/rendering/ssr',
   'morph-to-react': 'packages/targets/morph-to-react',
+  'server-split': 'packages/transforms/server-split',
 };
 
 const ALL_CRATES = Object.keys(CRATE_PATHS);

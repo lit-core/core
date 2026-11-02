@@ -1,0 +1,11 @@
+{
+  "name": "@lit-core/example-edge-ssr",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deployable Cloudflare Workers edge SSR reference application using @lit-core/vite-plugin",
+  "scripts": {
+    "build": "vite build --outDir dist/client && vite build --ssr virtual:lit-core/worker --outDir dist/worker",
+    "preview:workerd": "workerd serve workerd.capnp"
+  }
+}

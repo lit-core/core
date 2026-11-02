@@ -197,6 +197,12 @@ Packages are organized into six architectural categories under `packages/<catego
    - Never start local HTTP servers on loopback (`127.0.0.1`), as standard sandbox mode restricts local socket binding and triggers permission prompts.
    - Always launch Playwright Chromium through `@lit-core/test-kit` which configures verified `--single-process` flags.
    - Never run recursive searches across `node_modules`. Use `pnpm run vendor:where <suite> [component]` to resolve canonical component source files directly.
+10. **Zero band-aids and zero bloated dependency fallbacks**:
+    - Never paper over a broken boundary or abstraction with HTML tag whitelists (`TABLE_CELL_OR_NORMAL_TAGS`), regex HTML scanners, synthetic wrapper elements (`<span style="display:contents">`), or runtime duck-typing (`'taskComplete' in obj`). If a boundary design breaks in tables, SVG, or CSS selectors, fix the boundary mechanism itself (e.g. using `@lit-core/dom-paths` numeric child-node index addressing or native Shadow DOM `<slot>` projection).
+    - Never invent bloated hand-rolled clones or monkey-patched shims when a dependency (`@lit/context`, `@lit/task`, `workerd`, etc.) is not installed or a tool is blocked by the sandbox. Stop immediately and ask the user for help or permission to install the dependency.
+11. **Cloudflare `HTMLRewriter` (`lol-html`) non-blocking and recursive DSD invariants**:
+    - Never return a `Promise` from an `HTMLRewriter` `element(el)` handler for async component data—`lol-html` pauses the HTML tokenizer at that exact byte until the Promise settles, causing a sequential head-of-line blocking waterfall across components. Keep `element(el)` synchronous, dispatch async tasks in parallel into a per-request multiplexer, and emit `<slot name="pending">` DSD skeletons immediately.
+    - Never assume `HTMLRewriter` recursively parses strings passed to `el.prepend(shadowHtml, { html: true })` or `el.replace(..., { html: true })`. Nested custom elements inside Shadow DOM templates must be AOT-flattened or recursively expanded in a single pass before handing the markup to `HTMLRewriter`, and out-of-order completions must stream right before `</body>` (`onEndTag` / stream tail).
 
 ---
 

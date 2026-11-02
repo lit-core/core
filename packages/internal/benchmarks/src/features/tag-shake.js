@@ -92,7 +92,7 @@ function evaluateSuiteTagShake(suiteId, components) {
     optimized: {
       rawBytes: totalRawBytesAfter,
       gzipBytes: gzipBytesAfter,
-      activeRegistrations: Math.max(1, totalComponents - shakenRegistrations),
+      activeRegistrations: totalComponents - shakenRegistrations,
     },
   };
 }

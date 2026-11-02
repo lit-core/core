@@ -4,7 +4,7 @@ import { shouldProcessFile, TransformError, type TransformResult } from './commo
 import { LIT_HTML_FAST_CHECK } from './minifiers.js';
 
 export function transformHtmlAot(code: string, id: string, options: HtmlAotOptions = {}): TransformResult | null {
-  const { sourcemap = false } = options;
+  const { sourcemap = false, ssr = false, strictSsr = ssr } = options;
   const cleanId = id.split('?')[0] ?? id;
 
   if (!shouldProcessFile(cleanId, options)) {
@@ -19,6 +19,8 @@ export function transformHtmlAot(code: string, id: string, options: HtmlAotOptio
     const result = compileHtmlAot(code, {
       filename: cleanId,
       sourcemap,
+      ssr,
+      strictSsr,
     });
 
     if (result.templatesCount === 0) {

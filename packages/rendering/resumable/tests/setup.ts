@@ -124,48 +124,187 @@ class MockFocusEvent extends MockEvent {
   }
 }
 
+const VOID_HTML_TAGS = new Set(['AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG', 'INPUT', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR']);
+
+function decodeHtmlEntities(raw: string): string {
+  return raw
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+}
+
 function parseAttributesString(attrStr: string): Map<string, string> {
   const map = new Map<string, string>();
-  const attrRegex = /([a-zA-Z0-9_-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^>\s]+)))?/g;
+  const attrRegex = /([a-zA-Z0-9_:$@.?-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^>\s]+)))?/g;
   let match = attrRegex.exec(attrStr);
   while (match !== null) {
     const key = match[1];
     const val = match[2] ?? match[3] ?? match[4] ?? '';
-    map.set(key, val);
+    map.set(key, decodeHtmlEntities(val));
     match = attrRegex.exec(attrStr);
   }
   return map;
 }
 
-function parseHtmlIntoNode(html: string, parentNode: any): void {
-  const tagRegex = /<([a-zA-Z0-9_-]+)((?:\s+[a-zA-Z0-9_-]+(?:=(?:"[^"]*"|'[^']*'|[^>\s]+))?)*)\s*(?:\/>|>([\s\S]*?)<\/\1>|>)/gi;
-  let match = tagRegex.exec(html);
+function parseHtmlIntoNode(html: string, rootParent: any): void {
+  const stack: any[] = [rootParent];
+  let i = 0;
+  const len = html.length;
 
-  while (match !== null) {
-    const tagName = match[1].toUpperCase();
-    const attrStr = match[2] || '';
-    const inner = match[3] || '';
+  while (i < len) {
+    const currentParent = stack[stack.length - 1];
+    const lt = html.indexOf('<', i);
+    if (lt === -1) {
+      const text = decodeHtmlEntities(html.slice(i));
+      if (text.length > 0) {
+        currentParent.appendChild(documentMock.createTextNode(text));
+      }
+      break;
+    }
 
-    const el = tagName === 'TEMPLATE' ? new MockTemplateElement() : customElements.get(tagName.toLowerCase()) ? new (customElements.get(tagName.toLowerCase()))() : new MockElement();
+    if (lt > i) {
+      const text = decodeHtmlEntities(html.slice(i, lt));
+      if (text.length > 0) {
+        currentParent.appendChild(documentMock.createTextNode(text));
+      }
+    }
 
+    // Comment <!-- ... -->
+    if (html.startsWith('<!--', lt)) {
+      const endComment = html.indexOf('-->', lt + 4);
+      if (endComment === -1) {
+        currentParent.appendChild(documentMock.createComment(html.slice(lt + 4)));
+        break;
+      }
+      currentParent.appendChild(documentMock.createComment(html.slice(lt + 4, endComment)));
+      i = endComment + 3;
+      continue;
+    }
+
+    // Bogus comment / processing instruction <?...> (HTML5 parses <?...> as a comment node!)
+    if (html.startsWith('<?', lt)) {
+      const gt = html.indexOf('>', lt + 2);
+      if (gt === -1) {
+        currentParent.appendChild(documentMock.createComment(html.slice(lt + 1)));
+        break;
+      }
+      currentParent.appendChild(documentMock.createComment(html.slice(lt + 1, gt)));
+      i = gt + 1;
+      continue;
+    }
+
+    // Closing tag </tag>
+    if (html.startsWith('</', lt)) {
+      const gt = html.indexOf('>', lt + 2);
+      if (gt === -1) break;
+      const closeTag = html
+        .slice(lt + 2, gt)
+        .trim()
+        .toUpperCase();
+      for (let s = stack.length - 1; s >= 1; s--) {
+        if (stack[s].tagName === closeTag) {
+          stack.length = s;
+          break;
+        }
+      }
+      i = gt + 1;
+      continue;
+    }
+
+    // Opening tag <tag ...>
+    let cursor = lt + 1;
+    let quote: string | null = null;
+    while (cursor < len) {
+      const ch = html[cursor];
+      if (quote) {
+        if (ch === quote) quote = null;
+      } else if (ch === '"' || ch === "'") {
+        quote = ch;
+      } else if (ch === '>') {
+        break;
+      }
+      cursor++;
+    }
+    if (cursor >= len) break;
+
+    const rawTagContent = html.slice(lt + 1, cursor);
+    const selfClosing = rawTagContent.trimEnd().endsWith('/');
+    const cleanTagContent = selfClosing ? rawTagContent.trimEnd().slice(0, -1) : rawTagContent;
+    const spaceIdx = cleanTagContent.search(/\s/);
+    const rawTagName = spaceIdx === -1 ? cleanTagContent : cleanTagContent.slice(0, spaceIdx);
+    const attrStr = spaceIdx === -1 ? '' : cleanTagContent.slice(spaceIdx);
+    const tagName = rawTagName.toUpperCase();
+
+    if (!tagName || !/^[A-Z0-9_-]+$/.test(tagName)) {
+      currentParent.appendChild(documentMock.createTextNode(html[lt]));
+      i = lt + 1;
+      continue;
+    }
+
+    const lowerTag = tagName.toLowerCase();
+    const ctor = customElements.get(lowerTag);
+    const el = tagName === 'TEMPLATE' ? new MockTemplateElement() : ctor ? new ctor() : new MockElement();
     el.tagName = tagName;
+
     const attrs = parseAttributesString(attrStr);
     for (const [k, v] of attrs) {
       el.setAttribute(k, v);
     }
 
-    if (tagName === 'TEMPLATE') {
-      (el as MockTemplateElement).content.innerHTML = inner;
-    } else if (tagName === 'SCRIPT' || tagName === 'STYLE') {
-      el.textContent = inner;
-    } else if (inner.includes('<')) {
-      el.innerHTML = inner;
-    } else {
-      el.textContent = inner;
+    currentParent.appendChild(el);
+    i = cursor + 1;
+
+    if (selfClosing || VOID_HTML_TAGS.has(tagName)) {
+      continue;
     }
 
-    parentNode.appendChild(el);
-    match = tagRegex.exec(html);
+    if (tagName === 'SCRIPT' || tagName === 'STYLE') {
+      const closeRe = new RegExp(`</${tagName}\\s*>`, 'gi');
+      closeRe.lastIndex = i;
+      const closeMatch = closeRe.exec(html);
+      if (closeMatch) {
+        el.textContent = html.slice(i, closeMatch.index);
+        i = closeMatch.index + closeMatch[0].length;
+      } else {
+        el.textContent = html.slice(i);
+        break;
+      }
+      continue;
+    }
+
+    if (tagName === 'TEMPLATE') {
+      // Find balanced closing </template>
+      let depth = 1;
+      let scan = i;
+      let endStart = len;
+      let afterEnd = len;
+      const tmplRe = /<\/?template(?:\s[^>]*)?>/gi;
+      tmplRe.lastIndex = scan;
+      let m = tmplRe.exec(html);
+      while (m !== null) {
+        if (m[0].startsWith('</')) {
+          depth--;
+          if (depth === 0) {
+            endStart = m.index;
+            afterEnd = m.index + m[0].length;
+            break;
+          }
+        } else if (!m[0].endsWith('/>')) {
+          depth++;
+        }
+        scan = m.index + m[0].length;
+        tmplRe.lastIndex = scan;
+        m = tmplRe.exec(html);
+      }
+      const inner = html.slice(i, endStart);
+      (el as MockTemplateElement).content.innerHTML = inner;
+      i = afterEnd;
+      continue;
+    }
+
+    stack.push(el);
   }
 }
 
@@ -173,22 +312,101 @@ class MockNode {
   nodeType = 1;
   parentNode: any = null;
   childNodes: any[] = [];
+  _nodeValue = '';
+
+  get ownerDocument(): any {
+    return documentMock;
+  }
+
   get isConnected(): boolean {
     return true;
   }
+
+  get firstChild(): any {
+    return this.childNodes[0] ?? null;
+  }
+
+  get lastChild(): any {
+    return this.childNodes[this.childNodes.length - 1] ?? null;
+  }
+
+  get previousSibling(): any {
+    if (!this.parentNode) return null;
+    const idx = this.parentNode.childNodes.indexOf(this);
+    return idx > 0 ? this.parentNode.childNodes[idx - 1] : null;
+  }
+
+  get nextSibling(): any {
+    if (!this.parentNode) return null;
+    const idx = this.parentNode.childNodes.indexOf(this);
+    return idx !== -1 && idx + 1 < this.parentNode.childNodes.length ? this.parentNode.childNodes[idx + 1] : null;
+  }
+
+  get data(): string {
+    return this._nodeValue;
+  }
+  set data(val: string) {
+    this._nodeValue = String(val);
+  }
+
+  get textContent(): string {
+    if (this.nodeType === 3 || this.nodeType === 8) {
+      return this._nodeValue;
+    }
+    return this.childNodes.map((c) => (c.nodeType === 8 ? '' : c.textContent)).join('');
+  }
+  set textContent(val: string) {
+    if (this.nodeType === 3 || this.nodeType === 8) {
+      this._nodeValue = String(val);
+      return;
+    }
+    this.childNodes = [];
+    if (val) {
+      this.appendChild(documentMock.createTextNode(String(val)));
+    }
+  }
+
+  splitText(offset: number): MockNode {
+    const current = this._nodeValue;
+    this._nodeValue = current.slice(0, offset);
+    const tail = documentMock.createTextNode(current.slice(offset));
+    if (this.parentNode) {
+      this.parentNode.insertBefore(tail, this.nextSibling);
+    }
+    return tail;
+  }
+
   appendChild(child: any) {
+    return this.insertBefore(child, null);
+  }
+
+  insertBefore(child: any, refNode: any) {
     if (child.nodeType === 11) {
       const children = [...child.childNodes];
-      for (const c of children) {
-        this.appendChild(c);
-      }
       child.childNodes = [];
+      for (const c of children) {
+        c.parentNode = null;
+        this.insertBefore(c, refNode);
+      }
       return child;
     }
+    if (child.parentNode) {
+      child.parentNode.removeChild(child);
+    }
     child.parentNode = this;
-    this.childNodes.push(child);
+    if (refNode == null) {
+      this.childNodes.push(child);
+    } else {
+      const idx = this.childNodes.indexOf(refNode);
+      if (idx === -1) {
+        this.childNodes.push(child);
+      } else {
+        this.childNodes.splice(idx, 0, child);
+      }
+    }
     return child;
   }
+
   removeChild(child: any) {
     const idx = this.childNodes.indexOf(child);
     if (idx !== -1) {
@@ -197,20 +415,33 @@ class MockNode {
     }
     return child;
   }
+
   remove() {
     if (this.parentNode) {
       this.parentNode.removeChild(this);
     }
   }
+
   cloneNode(deep = false): any {
+    if (this instanceof MockTemplateElement) {
+      const clone = new MockTemplateElement();
+      clone.attributes = new Map(this.attributes);
+      if (deep) {
+        clone.content = this.content.cloneNode(true);
+      }
+      return clone;
+    }
     const clone = Object.create(Object.getPrototypeOf(this));
     clone.nodeType = this.nodeType;
+    clone.parentNode = null;
     clone.childNodes = [];
+    clone._nodeValue = this._nodeValue;
     if (this instanceof MockElement) {
       clone.tagName = this.tagName;
-      clone.attributes = new Map((this as any).attributes);
+      clone.attributes = new Map(this.attributes);
       clone.listeners = new Map();
-      clone._textContent = (this as any)._textContent;
+      clone.shadowRoot = null;
+      clone._innerHTML = this._innerHTML;
     }
     if (deep) {
       for (const c of this.childNodes) {
@@ -230,19 +461,7 @@ class MockElement extends MockNode {
     return this.tagName.toLowerCase();
   }
   shadowRoot: any = null;
-  _textContent = '';
   _innerHTML = '';
-
-  get textContent(): string {
-    if (this.childNodes.length > 0) {
-      return this.childNodes.map((c) => c.textContent).join('');
-    }
-    return this._textContent;
-  }
-  set textContent(val: string) {
-    this._textContent = val;
-    this.childNodes = [];
-  }
 
   get innerHTML(): string {
     return this._innerHTML;
@@ -276,14 +495,28 @@ class MockElement extends MockNode {
   removeAttribute(name: string) {
     this.attributes.delete(name);
   }
+  toggleAttribute(name: string, force?: boolean): boolean {
+    const has = this.hasAttribute(name);
+    const shouldHave = force !== undefined ? force : !has;
+    if (shouldHave) {
+      if (!has) this.setAttribute(name, '');
+      return true;
+    }
+    if (has) this.removeAttribute(name);
+    return false;
+  }
 
   attachShadow(init: any = { mode: 'open' }) {
+    if (this.shadowRoot) {
+      this.shadowRoot.childNodes = [];
+      return this.shadowRoot;
+    }
     const shadow = new MockShadowRoot(this, init);
     this.shadowRoot = shadow;
     return shadow;
   }
 
-  addEventListener(type: string, fn: (...args: any[]) => any, opts: any = false) {
+  addEventListener(type: string, fn: any, opts: any = false) {
     const capture = typeof opts === 'boolean' ? opts : (opts?.capture ?? false);
     if (!this.listeners.has(type)) {
       this.listeners.set(type, []);
@@ -291,7 +524,7 @@ class MockElement extends MockNode {
     this.listeners.get(type)?.push({ fn, capture });
   }
 
-  removeEventListener(type: string, fn: (...args: any[]) => any, opts: any = false) {
+  removeEventListener(type: string, fn: any, opts: any = false) {
     const capture = typeof opts === 'boolean' ? opts : (opts?.capture ?? false);
     const list = this.listeners.get(type);
     if (!list) return;
@@ -308,12 +541,17 @@ class MockElement extends MockNode {
     event.currentTarget = this;
     const list = this.listeners.get(event.type) || [];
     for (const item of [...list]) {
-      item.fn.call(this, event);
+      if (typeof item.fn === 'function') {
+        item.fn.call(this, event);
+      } else if (item.fn && typeof item.fn.handleEvent === 'function') {
+        item.fn.handleEvent(event);
+      }
       if (event.immediatePropagationStopped) break;
     }
 
-    if (event.bubbles && !event.propagationStopped && this.parentNode && typeof this.parentNode.dispatchEvent === 'function') {
-      this.parentNode.dispatchEvent(event);
+    const nextParent = this.parentNode || (this as any).host;
+    if (event.bubbles && !event.propagationStopped && nextParent && typeof nextParent.dispatchEvent === 'function') {
+      nextParent.dispatchEvent(event);
     }
     return !event.defaultPrevented;
   }
@@ -330,10 +568,14 @@ class MockElement extends MockNode {
       if (child?.nodeType !== 1) return false;
       if (clean === '*') return true;
       if (clean.startsWith('.')) {
-        return Boolean(child.getAttribute('class')?.includes(clean.slice(1)));
+        return Boolean(child.getAttribute('class')?.split(/\s+/).includes(clean.slice(1)));
       }
       if (clean.startsWith('#')) {
         return child.getAttribute('id') === clean.slice(1);
+      }
+      const tagIdMatch = /^([a-zA-Z0-9_-]+)#([a-zA-Z0-9_-]+)$/.exec(clean);
+      if (tagIdMatch) {
+        return child.tagName?.toLowerCase() === tagIdMatch[1].toLowerCase() && child.getAttribute('id') === tagIdMatch[2];
       }
       const attrMatch = /^(?:([a-zA-Z0-9_-]+))?\[([a-zA-Z0-9_-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^\]]+)))?\]$/.exec(clean);
       if (attrMatch) {
@@ -383,6 +625,10 @@ class MockDocumentFragment extends MockNode {
     parseHtmlIntoNode(html, this);
   }
 
+  get children(): any[] {
+    return this.childNodes.filter((n) => n.nodeType === 1);
+  }
+
   querySelector(selector: string): any {
     return MockElement.prototype.querySelector.call(this, selector);
   }
@@ -403,16 +649,33 @@ class MockDocumentFragment extends MockNode {
 class MockShadowRoot extends MockDocumentFragment {
   host: any;
   mode: string;
+  listeners = new Map<string, Array<{ fn: (...args: any[]) => any; capture: boolean }>>();
   constructor(host: any, init: any) {
     super();
     this.host = host;
     this.mode = init?.mode || 'open';
+  }
+  addEventListener(type: string, fn: (...args: any[]) => any, opts: any = false) {
+    return MockElement.prototype.addEventListener.call(this, type, fn, opts);
+  }
+  removeEventListener(type: string, fn: (...args: any[]) => any, opts: any = false) {
+    return MockElement.prototype.removeEventListener.call(this, type, fn, opts);
+  }
+  dispatchEvent(event: any): boolean {
+    return MockElement.prototype.dispatchEvent.call(this, event);
   }
 }
 
 class MockTemplateElement extends MockElement {
   tagName = 'TEMPLATE';
   content = new MockDocumentFragment();
+  override get innerHTML(): string {
+    return this.content.innerHTML;
+  }
+  override set innerHTML(html: string) {
+    this._innerHTML = html;
+    this.content.innerHTML = html;
+  }
 }
 
 class CustomElementRegistry {
@@ -458,8 +721,17 @@ class CustomElementRegistry {
       });
       this.promises.set(lower, { resolve, promise });
     }
-    return this.promises.get(lower)?.promise;
+    return this.promises.get(lower)?.promise as Promise<void>;
   }
+}
+
+function nodeTypeMatchesFilter(nodeType: number, whatToShow: number): boolean {
+  if (whatToShow === 0xffffffff || whatToShow === -1) return true;
+  if (nodeType === 1 && (whatToShow & 1) !== 0) return true;
+  if (nodeType === 3 && (whatToShow & 4) !== 0) return true;
+  if (nodeType === 8 && (whatToShow & 128) !== 0) return true;
+  if (nodeType === 11 && (whatToShow & 1024) !== 0) return true;
+  return false;
 }
 
 // Setup globals
@@ -485,17 +757,36 @@ const documentMock = {
   createTextNode(str = '') {
     const n = new MockNode();
     n.nodeType = 3;
-    (n as any).textContent = str;
+    n.data = str;
     return n;
   },
   createComment(str = '') {
     const n = new MockNode();
     n.nodeType = 8;
-    (n as any).textContent = str;
+    n.data = str;
     return n;
   },
-  createTreeWalker() {
-    return { nextNode: () => null };
+  createTreeWalker(root: any, whatToShow = 0xffffffff) {
+    const nodes: any[] = [];
+    function collect(n: any, isRoot: boolean) {
+      if (!isRoot && nodeTypeMatchesFilter(n.nodeType, whatToShow)) {
+        nodes.push(n);
+      }
+      for (const c of n.childNodes || []) {
+        collect(c, false);
+      }
+    }
+    collect(root, true);
+    let cursor = -1;
+    return {
+      get currentNode() {
+        return cursor >= 0 && cursor < nodes.length ? nodes[cursor] : root;
+      },
+      nextNode() {
+        cursor++;
+        return cursor < nodes.length ? nodes[cursor] : null;
+      },
+    };
   },
   querySelector(sel: string) {
     return body.querySelector(sel);

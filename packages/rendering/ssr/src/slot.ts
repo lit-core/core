@@ -1,14 +1,21 @@
 /**
- * Deterministic server-side slot projection engine for @lit-core/ssr.
- * Resolves default slots, named slots, and fallback content across nested custom element boundaries.
+ * Opcode-driven server-side slot projection engine for @lit-core/ssr.
+ * Resolves default slots, named slots, and fallback content across nested custom element boundaries
+ * operating strictly over AST opcode ranges without regex or character-scanning loops.
  */
+
+import type { SsrOpcode } from './compiler-bridge.js';
 
 export interface SlottedNode {
   slotName: string; // "" for default slot, otherwise slot attribute value
-  content: unknown;
-  tagName?: string;
-  attributes?: Record<string, string>;
+  content?: unknown;
+  opcodes?: SsrOpcode[];
+  values?: unknown[];
+  startIndex?: number;
+  endIndex?: number;
 }
+
+export type SlottedOpcodeNode = SlottedNode;
 
 export interface SlotDistribution {
   defaultSlot: SlottedNode[];
@@ -17,8 +24,8 @@ export interface SlotDistribution {
 
 export class SlotProjectionContext {
   readonly hostTagName: string;
-  readonly distribution: SlotDistribution;
   readonly parentContext: SlotProjectionContext | null;
+  readonly distribution: SlotDistribution;
 
   constructor(hostTagName: string, parentContext: SlotProjectionContext | null = null) {
     this.hostTagName = hostTagName;
@@ -44,7 +51,7 @@ export class SlotProjectionContext {
   }
 
   getAssignedNodes(slotName: string = ''): SlottedNode[] {
-    const name = slotName.trim();
+    const name = (slotName || '').trim();
     if (!name) {
       return this.distribution.defaultSlot;
     }
@@ -80,252 +87,122 @@ export class SlotManager {
 }
 
 /**
- * Parse an HTML tag's attribute string into a key-value Map.
+ * Find the index of the matching close opcode for an open tag,
+ * preferring closeIndex if valid, or scanning AST opcodes by tag depth.
  */
-export function parseAttributes(attrString: string): Map<string, string> {
-  const attrs = new Map<string, string>();
-  const attrRegex = /([\w\-.:?@]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
-  let match = attrRegex.exec(attrString);
-  while (match !== null) {
-    attrs.set(match[1].toLowerCase(), match[2] ?? match[3] ?? match[4] ?? '');
-    match = attrRegex.exec(attrString);
+export function findMatchingCloseTag(opcodes: SsrOpcode[], openIndex: number, maxEnd: number = opcodes.length): number {
+  const openOp = opcodes[openIndex];
+  if (openOp.type !== 'open' || openOp.isVoid || openOp.isSelfClosing) {
+    return openIndex;
   }
-  return attrs;
-}
-
-/**
- * Extract the name attribute value from a slot tag's attributes.
- */
-export function extractNameFromSlotTag(attrString: string): string | null {
-  const attrs = parseAttributes(attrString);
-  return attrs.get('name') ?? null;
-}
-
-/**
- * Extract slot attribute value from an HTML tag string (e.g. `<span slot="header">`).
- */
-export function extractSlotNameFromTag(tagString: string): string | null {
-  const attrs = parseAttributes(tagString);
-  return attrs.get('slot') ?? null;
-}
-
-/**
- * Escape unclosed </template> tags in projected content or shadow HTML to prevent
- * premature termination of Declarative Shadow DOM.
- * Legitimate balanced nested <template>...</template> pairs are preserved.
- */
-export function escapeUnclosedTemplateTags(html: string): string {
-  if (!html || !/<\/template(?=[\s>/])/i.test(html)) {
-    return html;
-  }
-
-  const tagRegex = /<(\/)?template(?=[\s>/])((?:[^>"']|"[^"]*"|'[^']*')*)>/gi;
-  let depth = 0;
-  let result = '';
-  let lastIndex = 0;
-  let match = tagRegex.exec(html);
-
-  while (match !== null) {
-    const isClosing = Boolean(match[1]);
-    const attrs = match[2] ?? '';
-    const matchIndex = match.index;
-
-    result += html.slice(lastIndex, matchIndex);
-
-    if (isClosing) {
-      if (depth > 0) {
-        depth--;
-        result += match[0];
-      } else {
-        // Unclosed </template> would break out of Declarative Shadow DOM
-        result += '&lt;/template&gt;';
-      }
-    } else {
-      const isSelfClosing = attrs.trim().endsWith('/');
-      if (!isSelfClosing) {
-        depth++;
-      }
-      result += match[0];
-    }
-
-    lastIndex = matchIndex + match[0].length;
-    match = tagRegex.exec(html);
-  }
-
-  result += html.slice(lastIndex);
-  return result;
-}
-
-export interface SlotMatch {
-  matchIndex: number;
-  fullLength: number;
-  attrsStr: string;
-  fallbackContent: string;
-  isSelfClosing: boolean;
-}
-
-/**
- * Scan for next <slot> element with depth balancing for nested slot tags.
- */
-export function findNextSlot(html: string, startIndex = 0): SlotMatch | null {
-  const slotTokenRegex = /<slot\b/gi;
-  slotTokenRegex.lastIndex = startIndex;
-  const match = slotTokenRegex.exec(html);
-  if (!match) return null;
-
-  const pos = match.index;
-  const attrStart = pos + 5; // length of '<slot'
-
-  // Scan for closing > of opening tag
-  let inQuote: '"' | "'" | null = null;
-  let tagEnd = -1;
-  let isSelfClosing = false;
-
-  for (let i = attrStart; i < html.length; i++) {
-    const ch = html[i];
-    if (inQuote) {
-      if (ch === inQuote) inQuote = null;
-    } else if (ch === '"' || ch === "'") {
-      inQuote = ch;
-    } else if (ch === '>') {
-      tagEnd = i;
-      if (i > attrStart && html[i - 1] === '/') {
-        isSelfClosing = true;
-      }
-      break;
+  if (openOp.closeIndex !== undefined && openOp.closeIndex < maxEnd && openOp.closeIndex > openIndex) {
+    const candidate = opcodes[openOp.closeIndex];
+    if (candidate.type === 'close' && candidate.tag === openOp.tag) {
+      return openOp.closeIndex;
     }
   }
-
-  if (tagEnd === -1) return null;
-
-  const attrsStr = isSelfClosing ? html.slice(attrStart, tagEnd - 1) : html.slice(attrStart, tagEnd);
-
-  if (isSelfClosing) {
-    return {
-      matchIndex: pos,
-      fullLength: tagEnd + 1 - pos,
-      attrsStr,
-      fallbackContent: '',
-      isSelfClosing: true,
-    };
-  }
-
-  // Scan for matching </slot> with depth balancing
   let depth = 1;
-  const scanPos = tagEnd + 1;
-  const tokenRegex = /<(\/)?slot\b((?:[^>"']|"[^"]*"|'[^']*')*)>/gi;
-  tokenRegex.lastIndex = scanPos;
-
-  let tokenMatch = tokenRegex.exec(html);
-  let closeTagEnd = -1;
-  let closeTagStart = -1;
-
-  while (tokenMatch !== null) {
-    const isClose = tokenMatch[1] === '/';
-    const isInnerSelfClosing = tokenMatch[2]?.trim().endsWith('/') ?? false;
-
-    if (isClose) {
+  for (let j = openIndex + 1; j < maxEnd; j++) {
+    const cur = opcodes[j];
+    if (cur.type === 'open' && cur.tag === openOp.tag && !cur.isVoid && !cur.isSelfClosing) {
+      depth++;
+    } else if (cur.type === 'close' && cur.tag === openOp.tag) {
       depth--;
       if (depth === 0) {
-        closeTagStart = tokenMatch.index;
-        closeTagEnd = tokenMatch.index + tokenMatch[0].length;
-        break;
+        return j;
       }
-    } else if (!isInnerSelfClosing) {
-      depth++;
     }
-
-    tokenMatch = tokenRegex.exec(html);
   }
-
-  if (closeTagEnd !== -1) {
-    return {
-      matchIndex: pos,
-      fullLength: closeTagEnd - pos,
-      attrsStr,
-      fallbackContent: html.slice(tagEnd + 1, closeTagStart),
-      isSelfClosing: false,
-    };
-  }
-
-  return {
-    matchIndex: pos,
-    fullLength: tagEnd + 1 - pos,
-    attrsStr,
-    fallbackContent: '',
-    isSelfClosing: false,
-  };
+  return openIndex;
 }
 
 /**
- * Deterministically project light DOM nodes into shadow DOM slots.
+ * Partition and distribute the host custom element's child opcodes
+ * from start to end into the slot projection context based on their static
+ * or dynamic slot attribute values.
  */
-export function projectSlots(shadowHtml: string, lightChildren: Array<{ slot?: string; content: string }>): { projectedShadow: string; lightRemainder: string } {
-  let projected = shadowHtml;
-  const assignedLightIndices = new Set<number>();
+export function distributeHostChildren(opcodes: SsrOpcode[], values: unknown[], start: number, end: number, context: SlotProjectionContext): void {
+  let k = start;
+  while (k < end) {
+    const op = opcodes[k];
+    switch (op.type) {
+      case 'open': {
+        let slotName = '';
+        if (op.staticAttrs && 'slot' in op.staticAttrs) {
+          slotName = (op.staticAttrs.slot || '').trim();
+        } else if (op.dynamicAttrs) {
+          const dynSlot = op.dynamicAttrs.find((d) => d.type === 'attribute' && d.name === 'slot');
+          if (dynSlot) {
+            const raw = dynSlot.index < values.length ? values[dynSlot.index] : undefined;
+            if (raw !== null && raw !== undefined) {
+              slotName = String(raw).trim();
+            }
+          }
+        }
 
-  let iterations = 0;
-  const maxIterations = 5;
+        const closeIdx = findMatchingCloseTag(opcodes, k, end);
+        const childEnd = op.isVoid ? k + 1 : closeIdx > k ? closeIdx + 1 : k + 1;
 
-  while (iterations < maxIterations) {
-    let replaced = false;
-    let scanPos = 0;
-    let nextHtml = '';
+        context.addNode({
+          slotName,
+          opcodes,
+          values,
+          startIndex: k,
+          endIndex: childEnd,
+        });
 
-    while (scanPos < projected.length) {
-      const slotMatch = findNextSlot(projected, scanPos);
-      if (!slotMatch) {
-        nextHtml += projected.slice(scanPos);
+        k = childEnd;
         break;
       }
-
-      nextHtml += projected.slice(scanPos, slotMatch.matchIndex);
-      replaced = true;
-
-      const attrs = slotMatch.attrsStr.trim();
-      const rawSlotName = extractNameFromSlotTag(attrs);
-      const slotName = rawSlotName ? rawSlotName.trim() : '';
-      const fallbackContent = slotMatch.fallbackContent || '';
-
-      const matchedChildren: string[] = [];
-
-      if (slotName) {
-        // Named slot: match light children with matching slot attribute
-        lightChildren.forEach((child, index) => {
-          if (child.slot === slotName && !assignedLightIndices.has(index)) {
-            matchedChildren.push(child.content);
-            assignedLightIndices.add(index);
-          }
-        });
-      } else {
-        // Default slot: match light children with no slot attribute or empty slot attribute
-        lightChildren.forEach((child, index) => {
-          const childSlot = (child.slot || '').trim();
-          if (!childSlot && !assignedLightIndices.has(index)) {
-            matchedChildren.push(child.content);
-            assignedLightIndices.add(index);
-          }
-        });
+      case 'text': {
+        if (op.value.trim().length > 0) {
+          context.addNode({
+            slotName: '',
+            opcodes,
+            values,
+            startIndex: k,
+            endIndex: k + 1,
+          });
+        }
+        k++;
+        break;
       }
-
-      const replacement = matchedChildren.length > 0 ? escapeUnclosedTemplateTags(matchedChildren.join('')) : fallbackContent;
-
-      nextHtml += replacement;
-      scanPos = slotMatch.matchIndex + slotMatch.fullLength;
-    }
-
-    projected = nextHtml;
-    iterations++;
-    if (!replaced || !/<slot\b/i.test(projected)) {
-      break;
+      case 'part': {
+        context.addNode({
+          slotName: '',
+          opcodes,
+          values,
+          startIndex: k,
+          endIndex: k + 1,
+        });
+        k++;
+        break;
+      }
+      case 'marker-start': {
+        let markerEnd = k + 1;
+        let depth = 1;
+        while (markerEnd < end && depth > 0) {
+          if (opcodes[markerEnd].type === 'marker-start') {
+            depth++;
+          } else if (opcodes[markerEnd].type === 'marker-end') {
+            depth--;
+          }
+          markerEnd++;
+        }
+        context.addNode({
+          slotName: '',
+          opcodes,
+          values,
+          startIndex: k,
+          endIndex: markerEnd,
+        });
+        k = markerEnd;
+        break;
+      }
+      default: {
+        k++;
+        break;
+      }
     }
   }
-
-  // Light DOM elements that were not projected into slots remain as light DOM
-  const lightRemainder = lightChildren
-    .filter((_, index) => !assignedLightIndices.has(index))
-    .map((c) => c.content)
-    .join('');
-
-  return { projectedShadow: projected, lightRemainder };
 }

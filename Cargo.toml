@@ -14,6 +14,7 @@ members = [
     "packages/transforms/html-minifier",
     "packages/transforms/memoize",
     "packages/transforms/props-lower",
+    "packages/transforms/server-split",
     "packages/transforms/tag-shake",
     "packages/targets/morph-to-react",
     "packages/targets/native",
@@ -62,10 +63,23 @@ oxc_span = "0.151.0"
 oxc_syntax = "0.151.0"
 oxc_traverse = "0.151.0"
 
+[workspace.lints.clippy]
+disallowed_types = "deny"
+disallowed_methods = "deny"
+
 [profile.release]
 opt-level = 2
 codegen-units = 256
 lto = false
 debug = false
 strip = "debuginfo"
+
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
 

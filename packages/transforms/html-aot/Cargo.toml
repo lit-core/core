@@ -13,7 +13,10 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 
 # Shared Lit analysis
-lit_analysis = { workspace = true, default-features = false }
+lit_analysis = { workspace = true, features = ["template-ir"] }
+
+blake3 = { workspace = true }
+
 
 # OXC stack
 oxc_allocator = { workspace = true }

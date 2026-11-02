@@ -137,7 +137,7 @@ export function extractLitCoreVirtualSubpath(resolvedId: string): string {
   } else if (subpath.startsWith(VIRTUAL_LIT_CORE_PREFIX)) {
     subpath = subpath.slice(VIRTUAL_LIT_CORE_PREFIX.length);
   }
-  return subpath.replace(/^\/+/, '').replace(/\.[jt]s$/, '');
+  return subpath.replace(/^\/+/, '').replace(/\.(?:[jt]s|json)$/, '');
 }
 
 const globRegexCache = new Map<string, RegExp>();

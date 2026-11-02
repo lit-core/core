@@ -16,9 +16,11 @@ import litDefault, {
   litElemProxy,
   litHtmlMinifier,
   litPropsLower,
+  litServerElements,
   litSsr,
   propsLower,
   reportTransformError,
+  serverElements,
   ssr,
   tagShake,
 } from '../dist/index.js';
@@ -34,6 +36,8 @@ assert.strictEqual(lit, litCoreVitePlugin, 'lit must be an alias for litCoreVite
 
 assert.strictEqual(typeof cssFuse, 'function', 'cssFuse must be a function');
 assert.strictEqual(typeof litCssFuse, 'function', 'litCssFuse must be an alias');
+assert.strictEqual(typeof serverElements, 'function', 'serverElements must be a function');
+assert.strictEqual(typeof litServerElements, 'function', 'litServerElements must be an alias');
 assert.strictEqual(typeof propsLower, 'function', 'propsLower must be a function');
 assert.strictEqual(typeof litPropsLower, 'function', 'litPropsLower must be an alias');
 assert.strictEqual(typeof elemProxy, 'function', 'elemProxy must be a function');
@@ -48,62 +52,67 @@ assert.strictEqual(typeof ssr, 'function', 'ssr must be a function');
 assert.strictEqual(typeof litSsr, 'function', 'litSsr must be an alias');
 assert.strictEqual(litSsr, ssr, 'litSsr must equal ssr');
 
-// Test lit() default options: includes css-fuse
+// Test lit() default options: includes css-fuse and server-elements
 const defaultPlugins = lit();
 assert(Array.isArray(defaultPlugins), 'lit() must return an array of plugins');
-assert.strictEqual(defaultPlugins.length, 1, 'lit() by default includes 1 plugin (css-fuse)');
+assert.strictEqual(defaultPlugins.length, 2, 'lit() by default includes 2 plugins (css-fuse, server-elements)');
 assert.strictEqual(defaultPlugins[0].name, 'css-fuse');
+assert.strictEqual(defaultPlugins[1].name, 'lit-server-elements');
 
-// Test lit({ cssFuse: false }): disables css-fuse
-const disabledPlugins = lit({ cssFuse: false });
+// Test lit({ serverElements: false }): disables server-elements
+const noServerElements = lit({ serverElements: false });
+assert.strictEqual(noServerElements.length, 1);
+assert.strictEqual(noServerElements[0].name, 'css-fuse');
+
+// Test lit({ cssFuse: false, serverElements: false }): disables both defaults
+const disabledPlugins = lit({ cssFuse: false, serverElements: false });
 assert(Array.isArray(disabledPlugins));
-assert.strictEqual(disabledPlugins.length, 0, 'lit({ cssFuse: false }) should not include css-fuse');
+assert.strictEqual(disabledPlugins.length, 0, 'lit({ cssFuse: false, serverElements: false }) should not include plugins');
 
 // Test lit({ propsLower: true }): includes props-lower
-const propsPlugins = lit({ cssFuse: false, propsLower: true });
+const propsPlugins = lit({ cssFuse: false, serverElements: false, propsLower: true });
 assert.strictEqual(propsPlugins.length, 1);
 assert.strictEqual(propsPlugins[0].name, 'props-lower');
 
 // Test lit({ htmlMinifier: true }): includes html-minifier
-const minifierPlugins = lit({ cssFuse: false, htmlMinifier: true });
+const minifierPlugins = lit({ cssFuse: false, serverElements: false, htmlMinifier: true });
 assert.strictEqual(minifierPlugins.length, 1);
 assert.strictEqual(minifierPlugins[0].name, 'html-minifier');
 
 // Test lit({ 'html-minifier': true }): kebab-case option
-const kebabMinifierPlugins = lit({ cssFuse: false, 'html-minifier': true });
+const kebabMinifierPlugins = lit({ cssFuse: false, serverElements: false, 'html-minifier': true });
 assert.strictEqual(kebabMinifierPlugins.length, 1);
 assert.strictEqual(kebabMinifierPlugins[0].name, 'html-minifier');
 
 // Test lit with all active
-// Test lit with all active
-const allPlugins = lit({ propsLower: true, htmlMinifier: true });
+const allPlugins = lit({ serverElements: false, propsLower: true, htmlMinifier: true });
 assert.strictEqual(allPlugins.length, 3);
 assert.strictEqual(allPlugins[0].name, 'css-fuse');
 assert.strictEqual(allPlugins[1].name, 'props-lower');
 assert.strictEqual(allPlugins[2].name, 'html-minifier');
 
 // Test Stage 3 ordering: dom-paths before dirty-mask
-const stage3Plugins = lit({ cssFuse: false, dirtyMask: true, domPaths: true });
+const stage3Plugins = lit({ cssFuse: false, serverElements: false, dirtyMask: true, domPaths: true });
 assert.strictEqual(stage3Plugins.length, 2);
 assert.strictEqual(stage3Plugins[0].name, 'dom-paths');
 assert.strictEqual(stage3Plugins[1].name, 'dirty-mask');
 // Test lit({ dirtyMask: true }): includes dirty-mask
-const dirtyMaskPlugins = lit({ cssFuse: false, dirtyMask: true });
+const dirtyMaskPlugins = lit({ cssFuse: false, serverElements: false, dirtyMask: true });
 assert.strictEqual(dirtyMaskPlugins.length, 1);
 assert.strictEqual(dirtyMaskPlugins[0].name, 'dirty-mask');
 
 // Test lit({ 'dirty-mask': true }): kebab-case option
-const kebabDirtyMaskPlugins = lit({ cssFuse: false, 'dirty-mask': true });
+const kebabDirtyMaskPlugins = lit({ cssFuse: false, serverElements: false, 'dirty-mask': true });
 assert.strictEqual(kebabDirtyMaskPlugins.length, 1);
 assert.strictEqual(kebabDirtyMaskPlugins[0].name, 'dirty-mask');
 
 // Test lit({ domPaths: true }): includes dom-paths
-const domPathsPlugins = lit({ cssFuse: false, domPaths: true });
+const domPathsPlugins = lit({ cssFuse: false, serverElements: false, domPaths: true });
 assert.strictEqual(domPathsPlugins.length, 1);
 assert.strictEqual(domPathsPlugins[0].name, 'dom-paths');
 
 // Test lit({ 'dom-paths': true }): kebab-case option
-const kebabDomPathsPlugins = lit({ cssFuse: false, 'dom-paths': true });
+const kebabDomPathsPlugins = lit({ cssFuse: false, serverElements: false, 'dom-paths': true });
 assert.strictEqual(kebabDomPathsPlugins.length, 1);
 assert.strictEqual(kebabDomPathsPlugins[0].name, 'dom-paths');
 
@@ -118,7 +127,8 @@ const fullPipelinePlugins = lit({
   htmlMinifier: true,
 });
 const pluginNames = fullPipelinePlugins.map((p) => p.name);
-assert(pluginNames.indexOf('css-fuse') < pluginNames.indexOf('props-lower'), 'css-fuse must precede props-lower');
+assert(pluginNames.indexOf('css-fuse') < pluginNames.indexOf('lit-server-elements'), 'css-fuse must precede lit-server-elements');
+assert(pluginNames.indexOf('lit-server-elements') < pluginNames.indexOf('props-lower'), 'lit-server-elements must precede props-lower');
 assert(pluginNames.indexOf('props-lower') < pluginNames.indexOf('elem-proxy'), 'props-lower must precede elem-proxy');
 assert(pluginNames.indexOf('elem-proxy') < pluginNames.indexOf('directives'), 'elem-proxy must precede directives');
 assert(pluginNames.indexOf('directives') < pluginNames.indexOf('dom-paths'), 'directives must precede dom-paths');
@@ -400,12 +410,12 @@ const vBareDomPaths = plugin.resolveId.call({}, '@lit-core/dom-paths/client');
 assert.strictEqual(vBareDomPaths, '\0virtual:lit-core/dom-paths.js');
 
 // Test SSR plugin inclusion via lit({ ssr: true })
-const ssrPlugins = lit({ cssFuse: false, ssr: true });
+const ssrPlugins = lit({ cssFuse: false, serverElements: false, ssr: true });
 assert.strictEqual(ssrPlugins.length, 1);
 assert.strictEqual(ssrPlugins[0].name, 'lit-ssr');
 
 // Test SSR plugin inclusion via kebab-case
-const kebabSsrPlugins = lit({ cssFuse: false, 'lit-ssr': true });
+const kebabSsrPlugins = lit({ cssFuse: false, serverElements: false, 'lit-ssr': true });
 assert.strictEqual(kebabSsrPlugins.length, 1);
 assert.strictEqual(kebabSsrPlugins[0].name, 'lit-ssr');
 
@@ -428,7 +438,7 @@ assert(loadedSsr?.code.includes('render'), 'ssr runtime code loaded');
 const vIslands = standaloneSsr.resolveId.call({}, 'virtual:lit-core/islands-loader');
 assert.strictEqual(vIslands, '\0virtual:lit-core/islands-loader.js');
 const loadedIslands = standaloneSsr.load.call({}, '\0virtual:lit-core/islands-loader.js');
-assert(loadedIslands?.code.includes('hydrate'), 'islands loader code loaded');
+assert(loadedIslands?.code.includes('data-island') && loadedIslands?.code.includes('__LIT_ISLANDS_MANIFEST__'), 'islands loader code loaded');
 
 const vBareSsr = standaloneSsr.resolveId.call({}, '@lit-core/ssr/client');
 assert.strictEqual(vBareSsr, '\0virtual:lit-core/ssr-runtime.js');

@@ -1,0 +1,9 @@
+language js
+
+or {
+  `__swc`,
+  `$obj.__swc`,
+  `CloudflareHtmlRewriterSimulator`
+} as $node where {
+  register_diagnostic(span=$node, message="Library-specific runtime shims (__swc) and test simulators (CloudflareHtmlRewriterSimulator) are prohibited in production packages.", severity="error")
+}
