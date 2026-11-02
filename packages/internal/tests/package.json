@@ -53,7 +53,7 @@
     "@lit-core/vite-plugin": "workspace:*",
     "@lit-core/webpack-plugin": "workspace:*",
     "@material/web": "^2.5.0",
-    "@momentum-design/components": "^0.142.1",
+    "@momentum-design/components": "^0.142.5",
     "@spectrum-web-components/bundle": "^1.12.5",
     "lit": "^3.3.3",
     "playwright": "~1.64.1",
@@ -61,9 +61,15 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
+    "@lit-labs/ssr": "^4.1.0",
+    "@lit-labs/ssr-dom-shim": "^1.6.0",
+    "@lit/reactive-element": "^2.1.2",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "lit-element": "^4.2.2",
+    "lit-html": "^3.3.3",
+    "tslib": "^2.9.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"

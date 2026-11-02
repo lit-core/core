@@ -60,11 +60,13 @@
     "@lit-core/tag-shake": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.65.0",
-    "@types/node": "^26.6.5",
+    "@cloudflare/vite-plugin": "^1.66.0",
+    "@lit-core/webpack-plugin": "workspace:*",
+    "@types/node": "^26.6.6",
     "lit": "^3.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0"

@@ -60,7 +60,9 @@
   "devDependencies": {
     "@lit-core/test-kit": "workspace:*",
     "@napi-rs/cli": "^3.10.9",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
+    "lit": "^3.3.3",
+    "playwright": "~1.64.1",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
   }
