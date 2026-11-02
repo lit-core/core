@@ -69,7 +69,7 @@
     "pnpm": ">=12.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.2",
+    "@biomejs/biome": "^2.6.4",
     "@cloudflare/vite-plugin": "^1.65.0",
     "@momentum-design/components": "^0.142.1",
     "@tailwindcss/vite": "^4.3.3",
