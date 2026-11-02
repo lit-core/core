@@ -424,10 +424,8 @@ fn has_binding_inside_inert_template(nodes: &[TemplateNode]) -> bool {
                     return true;
                 }
             }
-            TemplateNode::Slot(slot) => {
-                if has_binding_inside_inert_template(&slot.fallback) {
-                    return true;
-                }
+            TemplateNode::Slot(slot) if has_binding_inside_inert_template(&slot.fallback) => {
+                return true;
             }
             _ => {}
         }

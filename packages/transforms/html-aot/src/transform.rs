@@ -118,26 +118,23 @@ fn contains_octal_escape(quasis: &[TemplateElement]) -> bool {
 fn program_imports_static_html(program: &Program<'_>) -> bool {
     for stmt in &program.body {
         match stmt {
-            Statement::ImportDeclaration(decl) => {
+            Statement::ImportDeclaration(decl)
                 if decl.import_kind.is_value()
-                    && SymbolProofContext::is_static_html_specifier(decl.source.value.as_str())
-                {
-                    return true;
-                }
+                    && SymbolProofContext::is_static_html_specifier(decl.source.value.as_str()) =>
+            {
+                return true;
             }
-            Statement::ExportFromDeclaration(decl) => {
+            Statement::ExportFromDeclaration(decl)
                 if decl.export_kind.is_value()
-                    && SymbolProofContext::is_static_html_specifier(decl.source.value.as_str())
-                {
-                    return true;
-                }
+                    && SymbolProofContext::is_static_html_specifier(decl.source.value.as_str()) =>
+            {
+                return true;
             }
-            Statement::ExportAllDeclaration(decl) => {
+            Statement::ExportAllDeclaration(decl)
                 if decl.export_kind.is_value()
-                    && SymbolProofContext::is_static_html_specifier(decl.source.value.as_str())
-                {
-                    return true;
-                }
+                    && SymbolProofContext::is_static_html_specifier(decl.source.value.as_str()) =>
+            {
+                return true;
             }
             _ => {}
         }
