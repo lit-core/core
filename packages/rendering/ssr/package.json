@@ -77,7 +77,7 @@
   "devDependencies": {
     "@lit-core/html-aot": "workspace:*",
     "@lit-core/test-kit": "workspace:*",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "lit": "^3.3.3",
     "miniflare": "^4.20260730.0",
     "typescript": "^7.0.2",
