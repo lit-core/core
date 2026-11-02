@@ -174,8 +174,8 @@ importers:
         specifier: ^1.65.0
         version: 1.65.0(@types/node@26.6.5)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2))(workerd@1.20261023.1)(wrangler@4.152.0(@types/node@26.6.5))
       '@momentum-design/components':
-        specifier: ^0.142.1
-        version: 0.142.1(@types/react@19.3.0)
+        specifier: ^0.142.5
+        version: 0.142.5(@types/react@19.3.0)
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2))
@@ -432,8 +432,8 @@ importers:
         specifier: ^2.5.0
         version: 2.5.0
       '@momentum-design/components':
-        specifier: ^0.142.1
-        version: 0.142.1(@types/react@19.3.0)
+        specifier: ^0.142.5
+        version: 0.142.5(@types/react@19.3.0)
       '@spectrum-web-components/bundle':
         specifier: ^1.12.5
         version: 1.12.5
@@ -537,8 +537,8 @@ importers:
         specifier: ^2.5.0
         version: 2.5.0
       '@momentum-design/components':
-        specifier: ^0.142.1
-        version: 0.142.1(@types/react@19.3.0)
+        specifier: ^0.142.5
+        version: 0.142.5(@types/react@19.3.0)
       '@spectrum-web-components/bundle':
         specifier: ^1.12.5
         version: 1.12.5
@@ -673,8 +673,8 @@ importers:
         specifier: ^2.5.0
         version: 2.5.0
       '@momentum-design/components':
-        specifier: ^0.142.1
-        version: 0.142.1(@types/react@19.3.0)
+        specifier: ^0.142.5
+        version: 0.142.5(@types/react@19.3.0)
       '@spectrum-web-components/bundle':
         specifier: ^1.12.5
         version: 1.12.5
@@ -1942,8 +1942,8 @@ packages:
   '@momentum-design/brand-visuals@0.40.1':
     resolution: {integrity: sha512-dwoyOzNKkV1kyHfmnHz6DTLqyHfAOoi6NMhwD9pzmsSoTnrfAWwcTUbeV0/P6o0SUyFHlQyFw+c5cPk4tL180A==}
 
-  '@momentum-design/components@0.142.1':
-    resolution: {integrity: sha512-d8GWT5w8yfCLgD6IJlR7VGN4H7de2J1L2jNlRTZqqWSmsLc3NJ7HKd05k0TrLtKWQcQpUAXzn8bB9m1851qDtA==}
+  '@momentum-design/components@0.142.5':
+    resolution: {integrity: sha512-EOG08yiyhQhLEH0JDPBwuRdAAhn1L0NXFPKGUPkCxHYqSkepml193vcccLMcla0fa6UgerpEa6XCw0me5v9FMw==}
     engines: {node: '>=24.0.0', npm: '>=8.0.0'}
 
   '@momentum-design/fonts@0.2.6':
@@ -4813,7 +4813,7 @@ snapshots:
 
   '@momentum-design/brand-visuals@0.40.1': {}
 
-  '@momentum-design/components@0.142.1(@types/react@19.3.0)':
+  '@momentum-design/components@0.142.5(@types/react@19.3.0)':
     dependencies:
       '@floating-ui/dom': 1.8.0
       '@lit/context': 1.1.6

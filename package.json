@@ -71,7 +71,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.6.2",
     "@cloudflare/vite-plugin": "^1.65.0",
-    "@momentum-design/components": "^0.142.1",
+    "@momentum-design/components": "^0.142.5",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/webpack": "^5.28.5",

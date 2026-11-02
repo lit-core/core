@@ -54,7 +54,7 @@
     "@lit-core/ssr": "workspace:*",
     "@lit-core/vite-plugin": "workspace:*",
     "@material/web": "^2.5.0",
-    "@momentum-design/components": "^0.142.1",
+    "@momentum-design/components": "^0.142.5",
     "@spectrum-web-components/bundle": "^1.12.5",
     "lit": "^3.3.3",
     "lucide-react": "^1.61.0",

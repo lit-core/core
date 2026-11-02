@@ -92,7 +92,7 @@
     "@awesome.me/webawesome": "^3.14.0",
     "@carbon/web-components": "^2.66.0",
     "@material/web": "^2.5.0",
-    "@momentum-design/components": "^0.142.1",
+    "@momentum-design/components": "^0.142.5",
     "@spectrum-web-components/bundle": "^1.12.5",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.5",
