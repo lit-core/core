@@ -666,7 +666,8 @@ if (mode === 'core') {
 
   console.log(JSON.stringify({ plain, targetARender, targetAAction }));
 } else {
-  await import(benchReq.resolve('@lit-labs/ssr/lib/install-global-dom-shim.js'));
+  const waReq = createRequire(benchReq.resolve('@awesome.me/webawesome/package.json'));
+  await import(waReq.resolve('@lit-labs/ssr/lib/install-global-dom-shim.js'));
   const ssr = await import(benchReq.resolve('@lit-core/ssr'));
   if (typeof globalThis.window === 'undefined') {
     globalThis.window = globalThis;
@@ -674,7 +675,7 @@ if (mode === 'core') {
   if (!globalThis.CSS) {
     globalThis.CSS = { supports: () => false, escape: (s) => s };
   }
-  const labs = await import(benchReq.resolve('@lit-labs/ssr'));
+  const labs = await import(waReq.resolve('@lit-labs/ssr'));
   const { html } = await import(benchReq.resolve('lit'));
   const specPkgReq = createRequire(benchReq.resolve('@spectrum-web-components/bundle/package.json'));
   const spButtonPath = specPkgReq.resolve('@spectrum-web-components/button/sp-button.js');
@@ -909,7 +910,7 @@ delete globalThis.__prevLabsDoc;
           conditions: ['production', 'workerd', 'worker', 'node', 'import'],
           mainFields: ['module', 'main'],
           absWorkingDir: benchPkgDir,
-          nodePaths: [path.join(benchPkgDir, 'node_modules'), path.join(monorepoRoot, 'node_modules')],
+          nodePaths: [path.join(benchPkgDir, 'node_modules'), path.join(monorepoRoot, 'node_modules'), path.join(monorepoRoot, 'node_modules/.pnpm/node_modules')],
           tsconfigRaw: {
             compilerOptions: {
               experimentalDecorators: true,

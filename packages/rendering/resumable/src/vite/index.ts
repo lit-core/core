@@ -57,6 +57,18 @@ function resolveLitPrivateSsrSupportStatic(rootDir: string | undefined, isSsr: b
   return undefined;
 }
 
+export function resolveLitPrivateSsrSupportForVite(rootDir: string | undefined, isSsr: boolean, isDev: boolean): string | undefined;
+export function resolveLitPrivateSsrSupportForVite(
+  rootDir: string | undefined,
+  isSsr: boolean,
+  isDev: boolean,
+  pluginCtx?: {
+    resolve?: (source: string, importer?: string, options?: { skipSelf?: boolean } & Record<string, unknown>) => Promise<{ id: string; external?: boolean | 'absolute' | 'relative' } | null>;
+    environment?: { config?: { resolve?: { conditions?: readonly string[] } } };
+  },
+  importer?: string,
+  resolveOpts?: Record<string, unknown>,
+): string | Promise<string | undefined> | undefined;
 export function resolveLitPrivateSsrSupportForVite(
   rootDir: string | undefined,
   isSsr: boolean,

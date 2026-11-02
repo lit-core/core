@@ -578,7 +578,8 @@ export class LitWebpackPlugin {
     // Redirect legacy, bare, or unprefixed imports to virtual:...
     const resolveLitPrivateSsrSupport = (contextDir?: string): string | undefined => {
       const isDev = compiler.options.mode === 'development';
-      return resolveLitPrivateSsrSupportForVite(contextDir || compiler.options.context, isTargetServer, isDev);
+      const resolved = resolveLitPrivateSsrSupportForVite(contextDir || compiler.options.context, isTargetServer, isDev);
+      return typeof resolved === 'string' ? resolved : undefined;
     };
 
     compiler.hooks.normalModuleFactory.tap(this.name, (nmf) => {
