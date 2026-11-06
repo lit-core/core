@@ -33,8 +33,6 @@ In large enterprise design systems like IBM Carbon Web Components, this encapsul
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
     A["Lit component sources (.ts / .js)"] --> B["OXC JavaScript AST visitor"]
@@ -46,7 +44,7 @@ flowchart TD
     G --> H["Browser runtime: single CSSStyleSheet shared across shadow roots"]
 ```
 
-### In-depth technical details
+### Technical details
 
 #### 1. AST extraction with `oxc`
 
@@ -135,55 +133,43 @@ module.exports = {
 ### Programmatic API
 
 ```typescript
-import { fuseCss } from '@lit-core/css-fuse';
+import { fuse, analyze, auditScoping } from '@lit-core/css-fuse';
 
-const result = fuseCss(modules, {
+const result = fuse({
+  include: ['src/**/*.ts'],
   threshold: 2,
-  minNetSavings: 30,
+  minSavings: 200,
 });
 
-for (const [virtualId, cssCode] of Object.entries(result.virtualModules)) {
-  console.log(`Generated virtual module: ${virtualId}`);
+for (const sheet of result.fusedSheets) {
+  console.log(`Generated shared sheet: ${sheet.id} (${sheet.rulesCount} rules)`);
 }
 
-for (const mod of result.rewrittenModules) {
-  console.log(`Rewritten module: ${mod.filename}`);
+for (const file of result.rewrittenFiles) {
+  console.log(`Rewritten component: ${file.filePath}`);
 }
 ```
 
 ### Options reference
 
-| Option          | Type                 | Default     | Description                                                                   |
-| :-------------- | :------------------- | :---------- | :---------------------------------------------------------------------------- |
-| `threshold`     | `number`             | `2`         | Minimum number of component occurrences required to cluster a CSS rule        |
-| `minNetSavings` | `number`             | `30`        | Minimum net byte savings required after accounting for module import overhead |
-| `include`       | `string \| string[]` | `undefined` | Glob pattern of source files to include in deduplication analysis             |
-| `exclude`       | `string \| string[]` | `undefined` | Glob pattern of source files to exclude                                       |
-| `applyInDev`    | `boolean`            | `false`     | Whether to run CSS deduplication during local development server mode         |
-
----
-
-## Empirical performance
-
-Evaluated across canonical components from production design systems (standalone `css-fuse` vs baseline in `packages/internal/benchmarks/results/`):
-
-| Design system           | Baseline bundle size | `css-fuse` bundle size |  Raw byte reduction |     Gzip reduction |        Fused constructable sheets |
-| :---------------------- | -------------------: | ---------------------: | ------------------: | -----------------: | --------------------------------: |
-| Carbon Web Components   |          1,438,781 B |              924,632 B | -35.7% (-514,149 B) | -23.6% (-43,957 B) | 170 sheets (14,896 rules deduped) |
-| Spectrum Web Components |            819,006 B |              821,875 B |    +0.4% (+2,869 B) |   +1.5% (+2,243 B) | 571 sheets (10,033 rules deduped) |
-| Web Awesome             |            370,946 B |              366,050 B |    -1.3% (-4,896 B) |     -0.9% (-762 B) |     86 sheets (205 rules deduped) |
-| Momentum Design         |            346,579 B |              343,877 B |    -0.8% (-2,702 B) |     -0.1% (-111 B) |     70 sheets (227 rules deduped) |
-| Material Web            |            269,272 B |              271,126 B |    +0.7% (+1,854 B) |     +1.0% (+596 B) |     82 sheets (212 rules deduped) |
-
-> In design systems with extensive cross-component CSS duplication like IBM Carbon, `css-fuse` extracts 14,896 duplicate rules across 102 component modules, reducing the raw production bundle by **514 KB (-35.7%)** and gzip by **43.9 KB (-23.6%)**. In libraries with minimal duplication, module boundary overhead is protected by `minNetSavings`.
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `threshold` | `number` | `2` | Minimum number of component occurrences required to cluster a CSS rule |
+| `minSavings` | `number` | `200` | Minimum net byte savings required after accounting for module import overhead |
+| `include` | `string[]` | `['packages/components/**/src/**/*.ts', 'src/**/*.ts']` | Glob patterns of source files to include in deduplication analysis |
+| `exclude` | `string[]` | `['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**']` | Glob patterns of source files to exclude |
+| `outputDir` | `string` | `'.fused'` | Directory for generated fused sheet files when emitted to disk |
+| `virtualImports` | `boolean` | `false` | Emit `virtual:css-fuse/*` module specifiers instead of relative paths |
+| `scopingAudit` | `boolean` | `true` | Enable Shadow DOM scoping and contract audit diagnostics (via bundler plugin) |
+| `applyInDev` | `boolean` | `false` | Whether to run CSS deduplication during local development server mode (via bundler plugin) |
 
 ---
 
 ## Cross references
 
 - Companion transform: [`@lit-core/css-minifier`](../css-minifier/README.md)
-- Bundler plugins: [`@lit-core/vite-plugin`](../vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../webpack-plugin/README.md)
-- Benchmark harness: [`@lit-core/benchmarks`](../benchmarks/README.md)
+- Bundler plugins: [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)
+- Benchmark harness: [`@lit-core/benchmarks`](../../internal/benchmarks/README.md)
 
 ---
 

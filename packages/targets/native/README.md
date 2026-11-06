@@ -32,8 +32,6 @@ Enterprise design systems contain hundreds of atomic leaf components (buttons, i
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
     A["Lit component source (.ts / .js)"] --> B["OXC AST component classifier"]
@@ -45,7 +43,7 @@ flowchart TD
     F & G --> H["Zero Lit runtime imports in output bundle"]
 ```
 
-### In-depth technical details
+### Technical details
 
 #### 1. Mode A compilation output
 
@@ -167,36 +165,13 @@ console.log(`Vanilla: ${result.vanillaCount}, Micro: ${result.microCount}`);
 
 ---
 
-## Empirical performance
-
-Evaluated across production design system component suites (from `packages/internal/benchmarks/results/manifest.json`):
-
-### Production component suites (`results/manifest.json`)
-
-| Design system           | Baseline mount latency | With `@lit-core/native` | Mount acceleration |   Reactive update speedup |        Script eval latency |
-| :---------------------- | ---------------------: | ----------------------: | -----------------: | ------------------------: | -------------------------: |
-| Carbon Web Components   |                96.0 ms |                 48.6 ms |             +49.4% | +17.4% (3.8 ms vs 4.6 ms) | 3.4 ms (vs 4.4 ms, +22.7%) |
-| Spectrum Web Components |                52.3 ms |                 22.3 ms |             +57.4% |  +9.5% (1.9 ms vs 2.1 ms) |       11.2 ms (vs 10.5 ms) |
-| Web Awesome             |                41.0 ms |                 28.4 ms |             +30.7% | +43.8% (0.9 ms vs 1.6 ms) | 2.7 ms (vs 6.2 ms, +56.5%) |
-| Momentum Design         |                39.6 ms |                 18.8 ms |             +52.5% | +27.3% (0.8 ms vs 1.1 ms) |  4.2 ms (vs 4.3 ms, +2.3%) |
-| Material Web            |                45.1 ms |                 18.4 ms |             +59.2% | +38.1% (1.3 ms vs 2.1 ms) | 5.6 ms (vs 6.8 ms, +17.6%) |
-
-### Isolated leaf component compilation (Mode A vanilla target)
-
-| Metric                         | Lit standard build | With `@lit-core/native` Mode A | Reduction |
-| :----------------------------- | -----------------: | -----------------------------: | --------: |
-| Lit runtime dependencies       |            18.2 KB |                         0.0 KB |     -100% |
-| Initial script evaluation time |            18.4 ms |                         1.8 ms |    -90.2% |
-| First mount latency            |             2.4 ms |                         0.4 ms |    -83.3% |
-
----
-
 ## Cross references
 
-- Lit decorator lowering: [`@lit-core/props-lower`](../props-lower/README.md)
-- Dead code elimination: [`@lit-core/tag-shake`](../tag-shake/README.md)
-- Bundler plugins: [`@lit-core/vite-plugin`](../vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../webpack-plugin/README.md)
-- Benchmark harness: [`@lit-core/benchmarks`](../benchmarks/README.md)
+- React target compiler: [`@lit-core/morph-to-react`](../morph-to-react/README.md)
+- Lit decorator lowering: [`@lit-core/props-lower`](../../transforms/props-lower/README.md)
+- Dead code elimination: [`@lit-core/tag-shake`](../../transforms/tag-shake/README.md)
+- Bundler plugins: [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)
+- Benchmark harness: [`@lit-core/benchmarks`](../../internal/benchmarks/README.md)
 
 ---
 

@@ -123,26 +123,32 @@ pnpm add lit@^3.0.0
 
 ### Main entry point (`@lit-core/ssr`)
 
-| Export                         | Kind     | Signature                                                                                                                               | Purpose                                            |
-| :----------------------------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------- |
-| `render`                       | Function | `(value: unknown, options?: RenderOptions) => IterableIterator<string>`                                                                 | Main synchronous string chunk iterator             |
-| `renderToStream`               | Function | `(value: unknown, options?: StreamRenderOptions) => ReadableStream<Uint8Array>`                                                         | WHATWG binary streaming with backpressure          |
-| `collectResult`                | Function | `(result: Iterable<string> \| AsyncIterable<string> \| ReadableStream<Uint8Array>) => Promise<string>`                                  | Unified asynchronous string accumulator            |
-| `renderToString`               | Function | `(value: unknown, options?: RenderOptions) => string`                                                                                   | Synchronous HTML string collector                  |
-| `createIsolateEnvironment`     | Function | `(parentRegistry?: CustomElementRegistryLike) => SsrEnvironment`                                                                        | Creates pure V8 isolate stubs and registry         |
-| `installIsolateGlobals`        | Function | `() => void`                                                                                                                            | Installs stubs on `globalThis` if undefined        |
-| `projectSlots`                 | Function | `(shadowHtml: string, lightChildren: Array<{ slot?: string; content: string }>) => { projectedShadow: string; lightRemainder: string }` | Deterministic slot projection helper               |
-| `SlotManager`                  | Class    | `class SlotManager`                                                                                                                     | Lexical slot projection context stack manager      |
-| `StyleDeduplicator`            | Class    | `class StyleDeduplicator`                                                                                                               | Extracts and deduplicates component styles         |
-| `CompilerBridge`               | Class    | `class CompilerBridge`                                                                                                                  | Integrates `html-aot`, `css-fuse`, and `resumable` |
-| `HTMLElementStub`              | Class    | `class HTMLElementStub`                                                                                                                 | Minimal `HTMLElement` implementation for SSR       |
-| `CustomEventStub`              | Class    | `class CustomEventStub<T>`                                                                                                              | Minimal `CustomEvent` stub                         |
-| `CSSStyleSheetStub`            | Class    | `class CSSStyleSheetStub`                                                                                                               | Minimal `CSSStyleSheet` stub with `replaceSync`    |
-| `DocumentStub`                 | Class    | `class DocumentStub`                                                                                                                    | Referentially stable document stub                 |
-| `KeyboardEventStub`            | Class    | `class KeyboardEventStub`                                                                                                               | Minimal `KeyboardEvent` stub                       |
-| `IsolateCustomElementRegistry` | Class    | `class IsolateCustomElementRegistry`                                                                                                    | Scoped custom elements registry                    |
-| `LIT_NOTHING`                  | Constant | `Symbol.for('lit-nothing')`                                                                                                             | Sentinel for empty template parts                  |
-| `LIT_NO_CHANGE`                | Constant | `Symbol.for('lit-noChange')`                                                                                                            | Sentinel for unchanged template parts              |
+| Export | Kind | Signature | Purpose |
+| :--- | :--- | :--- | :--- |
+| `render` | Function | `(value: unknown, options?: RenderOptions) => IterableIterator<string>` | Synchronous string chunk iterator |
+| `renderAsync` | Function | `(value: unknown, options?: RenderOptions) => AsyncGenerator<string>` | Asynchronous chunk iterator supporting out-of-order async boundaries |
+| `renderToStream` | Function | `(value: unknown, options?: StreamRenderOptions) => ReadableStream<Uint8Array>` | WHATWG binary streaming with backpressure |
+| `renderToResponse` | Function | `(value: unknown, options?: EdgeResponseOptions) => Response` | Creates a streaming HTTP `Response` with `text/html; charset=utf-8` |
+| `renderToString` | Function | `(value: unknown, options?: RenderOptions) => string` | Synchronous HTML string collector |
+| `renderToStringAsync` | Function | `(value: unknown, options?: RenderOptions) => Promise<string>` | Asynchronous HTML string collector |
+| `renderHtmlDocument` | Function | `(htmlDoc: string, options?: RenderOptions) => string` | Expands custom elements inside a complete HTML document string |
+| `renderHtmlDocumentAsync` | Function | `(htmlDoc: string, options?: RenderOptions) => Promise<string>` | Asynchronously expands custom elements inside an HTML document |
+| `transformWithHtmlRewriter` | Function | `(input: Response \| string, options?: HtmlRewriterSsrOptions) => Response` | Non-blocking streaming expansion via Cloudflare `HTMLRewriter` |
+| `collectResult` | Function | `(result: Iterable<string> \| AsyncIterable<string> \| ReadableStream<Uint8Array>) => Promise<string>` | Unified asynchronous string accumulator |
+| `createIsolateEnvironment` | Function | `(parentRegistry?: CustomElementRegistryLike) => IsolateEnvironment` | Creates pure V8 isolate stubs and registry |
+| `installIsolateGlobals` | Function | `() => void` | Installs stubs on `globalThis` if undefined |
+| `withScopedIsolateGlobals` | Function | `<T>(env: IsolateEnvironment, fn: () => T) => T` | Runs a callback with scoped isolate globals |
+| `SlotManager` | Class | `class SlotManager` | Lexical slot projection context stack manager |
+| `StyleDeduplicator` | Class | `class StyleDeduplicator` | Extracts and deduplicates component styles |
+| `CompilerBridge` | Class | `class CompilerBridge` | Integrates `html-aot`, `css-fuse`, and `resumable` |
+| `HTMLElementStub` | Class | `class HTMLElementStub` | Minimal `HTMLElement` implementation for SSR |
+| `CustomEventStub` | Class | `class CustomEventStub<T>` | Minimal `CustomEvent` stub |
+| `CSSStyleSheetStub` | Class | `class CSSStyleSheetStub` | Minimal `CSSStyleSheet` stub with `replaceSync` |
+| `DocumentStub` | Class | `class DocumentStub` | Referentially stable document stub |
+| `KeyboardEventStub` | Class | `class KeyboardEventStub` | Minimal `KeyboardEvent` stub |
+| `IsolateCustomElementRegistry` | Class | `class IsolateCustomElementRegistry` | Scoped custom elements registry |
+| `LIT_NOTHING` | Constant | `Symbol.for('lit-nothing')` | Sentinel for empty template parts |
+| `LIT_NO_CHANGE` | Constant | `Symbol.for('lit-noChange')` | Sentinel for unchanged template parts |
 
 #### `render(value, options?)`
 
@@ -331,10 +337,10 @@ module.exports = {
 | Architectural dimension   | @lit-labs/ssr (4.1.0)                                                     | @lit-core/ssr                                                                                   | Migration benefit                                                                     |
 | :------------------------ | :------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
 | **Execution environment** | Mutates `globalThis` via `install-global-dom-shim.js`; requires `node:vm` | Pure V8 Isolate Minimal Environment (ISME); zero `window`, `document`, or `node:vm`             | Unlocks Cloudflare Workers, Fastly Compute, Bun, Deno, and multi-tenant isolates      |
-| **HTML markup output**    | Verbose comment markers (`<!--lit-part-->`, `<!--lit-node-->`)            | Clean Declarative Shadow DOM (`<template shadowrootmode="open">`)                               | Eliminates 28% to 45% markup bloat; removes comment-stripping regex scripts           |
+| **HTML markup output**    | Verbose comment markers (`<!--lit-part-->`, `<!--lit-node-->`)            | Clean Declarative Shadow DOM (`<template shadowrootmode="open">`)                               | Eliminates comment marker bloat; removes comment-stripping regex scripts              |
 | **Streaming interface**   | Node.js `stream.Readable` (`RenderResultReadable`)                        | Web Standard WHATWG `ReadableStream<Uint8Array>` (`renderToStream`)                             | Native compatibility with `Response(stream)`; true backpressure handling              |
-| **Stylesheet handling**   | Duplicates inline `<style>` inside every component shadow root            | Integrated with `@lit-core/css-fuse` constructable sheets                                       | Up to 99% reduction in duplicated CSS byte payloads across multi-instance pages       |
-| **Template processing**   | Runtime HTML string parsing via `parse5` on every request                 | Ahead-of-time AST pre-indexing via `@lit-core/html-aot` with `WeakMap` cached plans             | 2.2x to 3.3x higher rendering throughput (requests per second)                        |
+| **Stylesheet handling**   | Duplicates inline `<style>` inside every component shadow root            | Integrated with `@lit-core/css-fuse` constructable sheets                                       | Deduplicates shared CSS across multi-instance pages                                   |
+| **Template processing**   | Runtime HTML string parsing via `parse5` on every request                 | Ahead-of-time AST pre-indexing via `@lit-core/html-aot` with `WeakMap` cached plans             | Eliminates per-request HTML string parsing overhead                                   |
 | **Client hydration**      | `TreeWalker` scanning comments via `@lit-labs/ssr-client`                 | Direct array index lookup (`@lit-core/dom-paths`) or zero-JS resumption (`@lit-core/resumable`) | Sub-microsecond hydration or zero initial client JavaScript                           |
 | **Bundler integration**   | Manual build orchestration or custom server loading scripts               | First-class `@lit-core/vite-plugin` and `@lit-core/webpack-plugin`                              | Single-flag configuration (`ssr: true`) with automated dev server and prerender hooks |
 
@@ -610,45 +616,6 @@ export default {
 
 ---
 
-## Empirical performance benchmarks
-
-Evaluated across canonical component suites in `packages/internal/benchmarks/results/ssr.json` comparing `@lit-core/ssr` against baseline `@lit-labs/ssr` on Node.js 24 and Apple Silicon:
-
-### Verified benchmark results
-
-| Design system                     | Metric           | Baseline (@lit-labs/ssr) | Optimized (@lit-core/ssr) | Improvement delta            |
-| :-------------------------------- | :--------------- | -----------------------: | ------------------------: | :--------------------------- |
-| **IBM Carbon Web Components**     | Throughput       |            2,398.2 req/s |             7,856.7 req/s | **+227.6% (3.28x higher)**   |
-|                                   | Streaming TTFB   |                0.2094 ms |                 0.0060 ms | **-97.1% (34.9x faster)**    |
-|                                   | Raw payload      |                374,743 B |                   3,905 B | **-99.0% (-370.8 KB saved)** |
-|                                   | Gzip payload     |                 35,983 B |                     950 B | **-97.4% (-35.0 KB saved)**  |
-|                                   | Memory footprint |                  36.8 MB |                   21.4 MB | **-41.8% lower memory**      |
-|                                   | Comment markers  |               49 markers |                 0 markers | **-100% (eliminated)**       |
-| **Adobe Spectrum Web Components** | Throughput       |            3,232.1 req/s |             7,714.7 req/s | **+138.7% (2.39x higher)**   |
-|                                   | Streaming TTFB   |                0.3207 ms |                 0.0075 ms | **-97.7% (42.8x faster)**    |
-|                                   | Raw payload      |                120,423 B |                   3,880 B | **-96.8% (-116.5 KB saved)** |
-|                                   | Gzip payload     |                 12,102 B |                   1,097 B | **-90.9% (-11.0 KB saved)**  |
-|                                   | Memory footprint |                  37.8 MB |                   25.1 MB | **-33.7% lower memory**      |
-|                                   | Comment markers  |               54 markers |                 0 markers | **-100% (eliminated)**       |
-| **Google Material Web**           | Throughput       |            4,099.2 req/s |             9,076.7 req/s | **+121.4% (2.21x higher)**   |
-|                                   | Streaming TTFB   |                0.4063 ms |                 0.0064 ms | **-98.4% (63.5x faster)**    |
-|                                   | Raw payload      |                 38,784 B |                   3,134 B | **-91.9% (-35.7 KB saved)**  |
-|                                   | Gzip payload     |                  5,372 B |                     812 B | **-84.9% (-4.6 KB saved)**   |
-|                                   | Memory footprint |                  10.6 MB |                    8.1 MB | **-23.7% lower memory**      |
-|                                   | Comment markers  |               62 markers |                 0 markers | **-100% (eliminated)**       |
-
-### Overall benchmark highlights
-
-1. **Rendering throughput**: Delivers **2.2x to 3.3x higher request throughput** by executing pre-indexed chunk plans and eliminating runtime `parse5` template parsing.
-2. **Streaming TTFB**: Delivers **34x to 63x faster streaming TTFB (< 0.01 ms)** via immediate first-chunk dispatch.
-3. **Payload reduction**: Achieves **91.9% to 99.0% raw payload reduction** and **84.9% to 97.4% gzip payload reduction** by eliminating comment markers and extracting constructable stylesheets.
-4. **Markup cleanliness**: Eliminates **100% of comment markers** (165 markers eliminated to exactly 0).
-5. **Memory efficiency**: Reduces peak heap memory by **23.7% to 41.8%** under sustained load due to stateless stubs and streaming backpressure.
-
-For complete reproducible benchmarks and raw JSON outputs, refer to the [monorepo benchmark overview](../benchmarks/README.md) and the [SSR benchmark results](../benchmarks/results/ssr.json).
-
----
-
 ## Frequently asked questions
 
 ### Q1: I see `window is not defined` when importing a third-party component. How do I fix it?
@@ -689,13 +656,13 @@ const html = renderToString(template, {
 
 ## Related packages
 
-- Template AOT compiler: [`@lit-core/html-aot`](../html-aot/README.md)
-- Deterministic DOM paths: [`@lit-core/dom-paths`](../dom-paths/README.md)
-- Constructable CSS deduplication: [`@lit-core/css-fuse`](../css-fuse/README.md)
+- Template AOT compiler: [`@lit-core/html-aot`](../../transforms/html-aot/README.md)
+- Deterministic DOM paths: [`@lit-core/dom-paths`](../../transforms/dom-paths/README.md)
+- Constructable CSS deduplication: [`@lit-core/css-fuse`](../../transforms/css-fuse/README.md)
 - Zero-JavaScript resumption: [`@lit-core/resumable`](../resumable/README.md)
-- Ahead-of-time directives: [`@lit-core/directives`](../directives/README.md)
-- Bundler plugins: [`@lit-core/vite-plugin`](../vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../webpack-plugin/README.md)
-- Empirical benchmark suite: [`@lit-core/benchmarks`](../benchmarks/README.md)
+- Ahead-of-time directives: [`@lit-core/directives`](../../transforms/directives/README.md)
+- Bundler plugins: [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)
+- Empirical benchmark suite: [`@lit-core/benchmarks`](../../internal/benchmarks/README.md)
 
 ---
 

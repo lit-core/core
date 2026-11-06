@@ -29,15 +29,13 @@ Running browser integration tests for Web Components inside restricted CI/CD con
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
     A["Vitest / Playwright test runner"] --> B["test-kit launcher: SANDBOX_SAFE_CHROMIUM_ARGS"]
     B --> C["Headless Chromium process (single-process sandbox mode)"]
     C --> D["Managed test page context (createTestPage)"]
-    D --> E["mountElement: inject component definition & mount in DOM"]
-    E --> F["Shadow DOM inspection: getShadowComputedStyle, getShadowText"]
+    D --> E["mountElement: instantiate element, apply props, wait for updateComplete"]
+    E --> F["Shadow DOM inspection: assertMounted, getShadowComputedStyle, getShadowText"]
     F --> G["Assertion evaluation & sourcemap error translation (mapStackTrace)"]
 ```
 
@@ -46,16 +44,19 @@ flowchart TD
 #### 1. Sandbox-safe browser flags
 
 `SANDBOX_SAFE_CHROMIUM_ARGS` includes:
-- `--single-process`: Avoids multi-process fork restrictions in containerized sandboxes.
+- `--single-process`: Avoids multi-process fork and macOS sandbox Mach port rendezvous restrictions.
 - `--no-sandbox` & `--disable-setuid-sandbox`: Disables Linux namespace isolation requirements.
 - `--disable-dev-shm-usage`: Uses `/tmp` instead of `/dev/shm` to avoid container memory limits.
 - `--disable-gpu`: Disables hardware acceleration dependencies.
+- `--enable-precise-memory-info` & `--js-flags=--expose-gc`: Enables deterministic heap memory measurement and manual garbage collection during tests.
 
 #### 2. Shadow DOM inspection utilities
 
-- `mountElement(page, tagName, htmlContent)`: Mounts a custom element and waits for component update lifecycle completion.
-- `getShadowComputedStyle(page, hostSelector, targetSelector, property)`: Pierces the host component's Shadow DOM to read computed CSS values directly from encapsulated nodes.
-- `getShadowText(page, hostSelector, targetSelector)`: Extracts text content from encapsulated elements inside shadow roots.
+- `createTestPage(browser, options)`: Creates or reuses an isolated test page with `pageerror` and `console` error listeners, optional inline `bundleCode`, `importMap`, `html`, and `css`, returning a `ManagedTestPage` (`{ page, errors, getErrors, clearErrors, close }`).
+- `mountElement(page, tagName, props)`: Creates an instance of `tagName`, assigns `props`, appends it to `#test-root` (or `document.body`), awaits `el.updateComplete`, and returns a `MountResult` (`{ tag, success, hasShadowRoot, childElementCount, renderedText, updateCompleteMs, error }`).
+- `assertMounted(result)`: Verifies that a `MountResult` succeeded, created a shadow root, and rendered child elements.
+- `getShadowComputedStyle(page, hostSelector, innerSelector, propertyName)`: Pierces the host component's Shadow DOM to read computed CSS values directly from encapsulated nodes.
+- `getShadowText(page, hostSelector, innerSelector)`: Extracts text content from encapsulated elements inside shadow roots.
 
 ---
 
@@ -71,24 +72,36 @@ pnpm add -D @lit-core/test-kit
 
 ```typescript
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { getSharedBrowser, closeSharedBrowser, createTestPage, mountElement, getShadowComputedStyle } from '@lit-core/test-kit';
+import {
+  assertMounted,
+  closeSharedBrowser,
+  createTestPage,
+  getShadowComputedStyle,
+  getSharedBrowser,
+  mountElement,
+} from '@lit-core/test-kit';
 
 describe('Button component integration', () => {
   let browser;
-  let page;
+  let managed;
 
   beforeAll(async () => {
     browser = await getSharedBrowser();
-    page = await createTestPage(browser);
+    managed = await createTestPage(browser, {
+      html: '<my-button label="Submit"></my-button>',
+    });
   });
 
   afterAll(async () => {
+    await managed?.close();
     await closeSharedBrowser();
   });
 
-  it('renders styled button in Shadow DOM', async () => {
-    await mountElement(page, 'my-button', '<my-button label="Submit"></my-button>');
-    const display = await getShadowComputedStyle(page, 'my-button', 'button', 'display');
+  it('mounts and styles button in Shadow DOM', async () => {
+    const result = await mountElement(managed.page, 'my-button', { label: 'Submit' });
+    assertMounted(result);
+
+    const display = await getShadowComputedStyle(managed.page, 'my-button', 'button', 'display');
     expect(display).toBe('inline-flex');
   });
 });

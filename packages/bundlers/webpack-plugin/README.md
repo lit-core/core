@@ -28,20 +28,18 @@ Many enterprise Web Component applications and micro-frontend architectures are 
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
     A["Webpack entry & component modules"] --> B["NormalModule compilation hook"]
-    B --> C["AOT file-level transforms: props-lower, directives, memoize, minifiers"]
+    B --> C["AOT file-level transforms: server-split, props-lower, directives, memoize, minifiers"]
     C --> D["Webpack module graph & chunk grouping"]
     D --> E["processAssets compilation hook: cross-module analysis"]
-    E --> F["css-fuse cross-component stylesheet extraction"]
-    F --> G["Virtual constructable stylesheet emission"]
+    E --> F["css-fuse & html-fuse cross-component extraction"]
+    F --> G["Virtual constructable stylesheet & manifest emission"]
     G --> H["Optimized Webpack production chunks"]
 ```
 
-### In-depth technical details
+### Technical details
 
 #### 1. Webpack compilation lifecycle hooks
 
@@ -92,24 +90,35 @@ module.exports = {
 
 ### Options reference
 
-| Option         | Type                | Default | Description                                                                    |
-| :------------- | :------------------ | :------ | :----------------------------------------------------------------------------- |
-| `cssFuse`      | `boolean \| object` | `true`  | Enables cross-component CSS AST deduplication into shared constructable sheets |
-| `propsLower`   | `boolean \| object` | `true`  | Lowers Lit decorators (`@property`, `@state`, `@query`) to static properties   |
-| `directives`   | `boolean`           | `true`  | Lowers built-in Lit directives and prunes dead imports                         |
-| `memoize`      | `boolean`           | `true`  | Auto-memoizes pure array transformations inside `render()`                     |
-| `elemProxy`    | `boolean \| object` | `false` | Enables deferred Custom Element proxy stubs                                    |
-| `cssMinifier`  | `boolean`           | `true`  | Embedded CSS template minification via `lightningcss`                          |
-| `htmlMinifier` | `boolean`           | `true`  | Embedded HTML template minification via `oxc`                                  |
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `cssFuse` | `boolean \| CssFuseOptions` | `true` | Enables cross-component CSS AST deduplication into shared constructable sheets |
+| `serverElements` | `boolean \| ServerElementsOptions` | `true` | Splits components with `@loader()` and `@action()` into client and worker artifacts |
+| `hydrate` | `boolean` | `true` | Auto-injects Declarative Shadow DOM hydration support into client entrypoints |
+| `htmlFuse` | `boolean \| HtmlFuseOptions` | `false` | Enables static HTML and SVG fragment clustering into shared template constants |
+| `propsLower` | `boolean \| PropsLowerOptions` | `false` | Lowers Lit decorators (`@property`, `@state`, `@query`) to static `properties` |
+| `directives` | `boolean \| DirectivesOptions` | `false` | Lowers built-in Lit directives and prunes dead imports |
+| `memoize` | `boolean \| MemoizeOptions` | `false` | Auto-memoizes pure array transformations inside `render()` |
+| `domPaths` | `boolean \| DomPathsOptions` | `false` | Precomputes hierarchical child pointer paths, replacing `TreeWalker` traversal |
+| `eventHoist` | `boolean \| EventHoistOptions` | `false` | Hoists child event bindings to a single delegated listener on ShadowRoot |
+| `dirtyMask` | `boolean \| DirtyMaskOptions` | `false` | Traces property dependencies and short-circuits unchanged parts via `noChange` |
+| `htmlAot` | `boolean \| HtmlAotOptions` | `false` | Compiles `html` templates into static `CompiledTemplateResult` descriptors |
+| `native` | `boolean \| NativeOptions` | `false` | Compiles components into zero-dependency vanilla `HTMLElement` classes |
+| `tagShake` | `boolean \| TagShakeOptions` | `false` | Purges unreferenced Custom Element registrations from vendor bundles |
+| `elemProxy` | `boolean \| ElemProxyOptions` | `false` | Enables deferred Custom Element proxy stubs |
+| `cssMinifier` | `boolean \| CssMinifierOptions` | `false` | Embedded CSS template minification via `lightningcss` |
+| `htmlMinifier` | `boolean \| HtmlMinifierOptions` | `false` | Embedded HTML template minification via `oxc` |
+| `ssr` | `boolean \| SsrOptions` | `false` (auto on `node` target) | Enables streaming Declarative Shadow DOM SSR, prerendering, or islands mode |
+| `resumable` | `boolean \| ResumableOptions` | `false` | Enables Declarative Shadow DOM SSR with interaction-driven resumption |
 
 ---
 
 ## Cross references
 
 - Vite counterpart: [`@lit-core/vite-plugin`](../vite-plugin/README.md)
-- CSS deduplication engine: [`@lit-core/css-fuse`](../css-fuse/README.md)
-- Decorator lowering engine: [`@lit-core/props-lower`](../props-lower/README.md)
-- Benchmark harness: [`@lit-core/benchmarks`](../benchmarks/README.md)
+- CSS deduplication engine: [`@lit-core/css-fuse`](../../transforms/css-fuse/README.md)
+- Decorator lowering engine: [`@lit-core/props-lower`](../../transforms/props-lower/README.md)
+- Benchmark harness: [`@lit-core/benchmarks`](../../internal/benchmarks/README.md)
 
 ---
 

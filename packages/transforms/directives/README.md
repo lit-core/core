@@ -29,8 +29,6 @@ Built-in Lit directives are ubiquitous across Web Component design systems, prov
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
     A["Lit component source (.ts / .js)"] --> B["OXC semantic parser & import resolver"]
@@ -41,7 +39,7 @@ flowchart TD
     F --> G["Zero runtime directive allocations & tree-shaken vendor bundle"]
 ```
 
-### In-depth technical details
+### Technical details
 
 #### 1. Directive lowering specifications
 
@@ -121,28 +119,12 @@ console.log(`Lowered ${result.loweredCount} directives`);
 
 ---
 
-## Empirical performance
-
-Evaluated across canonical component suites (standalone `directives` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
-
-| Design system           | Baseline mount latency | With `directives` | Mount speedup |   Reactive update speedup |        Script eval latency |
-| :---------------------- | ---------------------: | ----------------: | ------------: | ------------------------: | -------------------------: |
-| Carbon Web Components   |                96.0 ms |           60.4 ms |        +37.1% | +50.0% (2.3 ms vs 4.6 ms) | 3.7 ms (vs 4.4 ms, +15.9%) |
-| Spectrum Web Components |                52.3 ms |           28.1 ms |        +46.3% |  +9.5% (1.9 ms vs 2.1 ms) |       12.6 ms (vs 10.5 ms) |
-| Web Awesome             |                41.0 ms |           53.4 ms |        -30.2% | +43.8% (0.9 ms vs 1.6 ms) | 4.2 ms (vs 6.2 ms, +32.3%) |
-| Momentum Design         |                39.6 ms |           44.8 ms |        -13.1% |   0.0% (1.1 ms vs 1.1 ms) |         5.0 ms (vs 4.3 ms) |
-| Material Web            |                45.1 ms |           39.4 ms |        +12.6% | +28.6% (1.5 ms vs 2.1 ms) | 5.4 ms (vs 6.8 ms, +20.6%) |
-
-> Compiling Lit directives ahead of time replaces dynamic directive wrapper instances (`DirectiveResult`) with direct inline expression handlers, cutting update cycle overhead by up to **50%** and saving heap allocations during component rendering.
-
----
-
 ## Cross references
 
 - Template auto-memoization: [`@lit-core/memoize`](../memoize/README.md)
 - Dependency bitmasking: [`@lit-core/dirty-mask`](../dirty-mask/README.md)
-- Bundler plugins: [`@lit-core/vite-plugin`](../vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../webpack-plugin/README.md)
-- Benchmark harness: [`@lit-core/benchmarks`](../benchmarks/README.md)
+- Bundler plugins: [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)
+- Benchmark harness: [`@lit-core/benchmarks`](../../internal/benchmarks/README.md)
 
 ---
 

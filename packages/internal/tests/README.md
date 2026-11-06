@@ -23,13 +23,11 @@ The test harness runs an end-to-end verification pipeline:
 1. Reads authentic component source files directly from `node_modules` for IBM Carbon, Adobe Spectrum, Web Awesome, Material Web, and Cisco Momentum.
 2. Applies `@lit-core` compiler passes (such as `css-fuse`, `props-lower`, `html-aot`, `event-hoist`, `dom-paths`, `resumable`) to the real component source.
 3. Launches headless Chromium using `@lit-core/test-kit` under sandbox-safe execution flags.
-4. Mounts the compiled components into isolated page contexts and executes assertions covering DOM tree structure, computed CSS styles, reactive property updates, and event propagation across 2,305 automated test cases.
+4. Mounts the compiled components into isolated page contexts and executes assertions covering DOM tree structure, computed CSS styles, reactive property updates, and event propagation across all suites.
 
 ---
 
 ## Architecture
-
-### Big picture
 
 ```mermaid
 flowchart TD
@@ -38,25 +36,21 @@ flowchart TD
     C --> D["@lit-core/test-kit: launch headless Chromium"]
     D --> E["Mount components into isolated DOM execution contexts"]
     E --> F["Automated assertion matrix: DOM structure, computed CSS, events, hydration"]
-    F --> G["2,305 passing browser integration tests"]
+    F --> G["Browser & edge runtime integration tests"]
 ```
 
 ### In-depth technical details
 
-#### 1. Real component coverage matrix
+#### 1. Test suites and coverage matrix
 
-| Feature under test                 | Package                                                 | Test file                   | Verified tests |
-| :--------------------------------- | :------------------------------------------------------ | :-------------------------- | -------------: |
-| CSS deduplication                  | [`@lit-core/css-fuse`](../css-fuse/README.md)           | `src/css-fuse.test.ts`      |            260 |
-| Decorator lowering                 | [`@lit-core/props-lower`](../props-lower/README.md)     | `src/props-lower.test.ts`   |            255 |
-| CSS minification                   | [`@lit-core/css-minifier`](../css-minifier/README.md)   | `src/css-minifier.test.ts`  |            255 |
-| HTML minification                  | [`@lit-core/html-minifier`](../html-minifier/README.md) | `src/html-minifier.test.ts` |            255 |
-| Static HTML/SVG clustering         | [`@lit-core/html-fuse`](../html-fuse/README.md)         | `src/html-fuse.test.ts`     |            260 |
-| Lazy element proxies               | [`@lit-core/elem-proxy`](../elem-proxy/README.md)       | `src/elem-proxy.test.ts`    |            255 |
-| ShadowRoot event delegation        | [`@lit-core/event-hoist`](../event-hoist/README.md)     | `src/event-hoist.test.ts`   |            255 |
-| Ahead-of-time template compilation | [`@lit-core/html-aot`](../html-aot/README.md)           | `src/html-aot.test.ts`      |            255 |
-| Resumable SSR and hydration        | [`@lit-core/resumable`](../resumable/README.md)         | `src/resumable.test.ts`     |            255 |
-| **Total**                          | **9 packages**                                          | **9 files**                 |      **2,305** |
+| Suite category                   | Packages verified                                                                                                                                                            | Test files                                                                                                             |
+| :------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
+| Design system verification       | [`@lit-core/css-fuse`](../../transforms/css-fuse/README.md), [`@lit-core/props-lower`](../../transforms/props-lower/README.md), [`@lit-core/html-aot`](../../transforms/html-aot/README.md), [`@lit-core/event-hoist`](../../transforms/event-hoist/README.md), [`@lit-core/dom-paths`](../../transforms/dom-paths/README.md), [`@lit-core/dirty-mask`](../../transforms/dirty-mask/README.md), [`@lit-core/memoize`](../../transforms/memoize/README.md), [`@lit-core/directives`](../../transforms/directives/README.md), [`@lit-core/elem-proxy`](../../transforms/elem-proxy/README.md), [`@lit-core/html-fuse`](../../transforms/html-fuse/README.md), [`@lit-core/css-minifier`](../../transforms/css-minifier/README.md), [`@lit-core/html-minifier`](../../transforms/html-minifier/README.md), [`@lit-core/tag-shake`](../../transforms/tag-shake/README.md) | `src/suites/carbon.test.ts`, `src/suites/spectrum.test.ts`, `src/suites/webawesome.test.ts`, `src/suites/material.test.ts`, `src/suites/momentum.test.ts` |
+| Bundler plugin pipelines         | [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md), [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)                                       | `src/suites/plugins.test.ts`, `src/suites/plugins-ssr.test.ts`                                                         |
+| AOT compilation targets          | [`@lit-core/native`](../../targets/native/README.md), [`@lit-core/morph-to-react`](../../targets/morph-to-react/README.md)                                                   | `src/suites/native.test.ts`, `src/suites/morph-to-react.test.ts`                                                       |
+| Streaming SSR & resumability     | [`@lit-core/ssr`](../../rendering/ssr/README.md), [`@lit-core/resumable`](../../rendering/resumable/README.md)                                                               | `src/suites/ssr-engine.test.ts`, `src/suites/ssr-isolate.test.ts`, `src/suites/ssr-dsd-chromium.test.ts`, `src/suites/ssr-adversarial.test.ts`, `src/suites/resumable-e2e.test.ts` |
+| Server elements & edge splitting | [`@lit-core/server-elements`](../../primitives/server-elements/README.md), [`@lit-core/server-split`](../../transforms/server-split/README.md)                               | `src/suites/server-elements-e2e.test.ts`, `src/suites/server-elements-workerd.test.ts`, `src/suites/server-elements-vendor.test.ts`, `src/suites/server-elements-minified.test.ts`, `src/suites/server-elements-adversarial.test.ts` |
+| Visual showcase verification     | [`@lit-core/showcase`](../showcase/README.md)                                                                                                                                | `src/suites/showcase.test.ts`                                                                                          |
 
 #### 2. Evaluated design systems
 
@@ -71,18 +65,24 @@ The suite validates 601 production components in total:
 
 ## Running the tests
 
-Run the complete test suite across all packages:
+Run the complete test suite across all suites:
 
 ```bash
 pnpm --filter @lit-core/tests test
 ```
 
-Run a specific feature test file:
+Run a specific design system or feature suite:
 
 ```bash
-npx vitest run packages/internal/tests/src/css-fuse.test.ts
-npx vitest run packages/internal/tests/src/props-lower.test.ts
-npx vitest run packages/internal/tests/src/event-hoist.test.ts
+pnpm --filter @lit-core/tests run test:carbon
+pnpm --filter @lit-core/tests run test:spectrum
+pnpm --filter @lit-core/tests run test:webawesome
+pnpm --filter @lit-core/tests run test:material
+pnpm --filter @lit-core/tests run test:momentum
+pnpm --filter @lit-core/tests run test:plugins
+pnpm --filter @lit-core/tests run test:native
+pnpm --filter @lit-core/tests run test:ssr
+pnpm --filter @lit-core/tests run test:showcase
 ```
 
 ---

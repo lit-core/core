@@ -23,20 +23,18 @@ While Lit caches prepared templates after their first run, the preparation step 
 ### How does it work?
 
 `html-aot` eliminates the runtime prepare phase by executing it ahead of time:
-1. Parses template literals during bundling using `parse5`.
+1. Parses template literals during bundling using `oxc` and `html5ever`.
 2. Analyzes dynamic expression slots to precalculate exact node paths, attribute binding offsets, and event handler indices.
-3. Replaces runtime `html` tagged template calls with static JavaScript descriptors conforming to Lit's compiled template contract.
+3. Replaces runtime `html` tagged template calls with static JavaScript descriptors conforming to Lit's compiled template contract (and optionally emits serialized `ssrPlan` opcodes for edge/server rendering).
 4. In the browser, Lit loads the pre-computed descriptor directly, skipping `innerHTML` parsing and DOM traversal to begin immediate DOM cloning and part binding.
 
 ---
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
-    A["Lit component with html`...` or svg`...`"] --> B["parse5 static HTML/SVG AST parser"]
+    A["Lit component with html`...` or svg`...`"] --> B["oxc & html5ever static HTML/SVG AST parser"]
     B --> C["Analyze dynamic expression slots & bindings"]
     C --> D["Precompute part indices, child node paths & attribute offsets"]
     D --> E["Generate static CompiledTemplateResult descriptor"]
@@ -44,13 +42,13 @@ flowchart TD
     F --> G["Browser runtime: zero innerHTML parsing & zero TreeWalker preparation"]
 ```
 
-### In-depth technical details
+### Technical details
 
-#### 1. Static HTML parsing with `parse5`
+#### 1. Static HTML parsing with `html5ever`
 
 During the bundling pass, `html-aot` inspects tagged template literals:
 - Divides template quasis and expressions into structured tokens.
-- Constructs an in-memory HTML document fragment via `parse5`.
+- Constructs an in-memory HTML document fragment via `html5ever`.
 - Identifies element boundaries, attribute names, text nodes, and interpolation points.
 
 #### 2. Pre-computed part descriptor schema
@@ -87,8 +85,8 @@ export const _compiled_tpl = {
 
 #### 4. Trade-off characteristics
 
-- **First render latency**: Accelerates initial mount by +35% to +38% across production design systems.
-- **Bundle size**: Because precomputed part descriptors are serialized into JavaScript objects, raw bundle size increases slightly (~1.5% to ~3.5%). For applications where initial render responsiveness is critical, this trade-off is advantageous.
+- **First render latency**: Accelerates initial mount by eliminating runtime HTML parsing and `TreeWalker` template preparation.
+- **Bundle size**: Because precomputed part descriptors are serialized into JavaScript objects, raw bundle size increases slightly. For applications where initial render responsiveness is critical, this trade-off is advantageous.
 
 ---
 
@@ -134,28 +132,15 @@ module.exports = {
 ### Programmatic API
 
 ```typescript
-import { compileTemplate } from '@lit-core/html-aot';
+import { compileHtmlAot } from '@lit-core/html-aot';
 
-const descriptor = compileTemplate('<div><h1>${title}</h1><p>${content}</p></div>');
-console.log(descriptor.h);
-console.log(descriptor.parts);
+const result = compileHtmlAot(`
+  import { html } from 'lit';
+  export const view = (title, content) => html\`<div><h1>\${title}</h1><p>\${content}</p></div>\`;
+`);
+console.log(result.code);
+console.log(`Compiled ${result.templatesCount} templates`);
 ```
-
----
-
-## Empirical performance
-
-Evaluated across canonical component suites (standalone `html-aot` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
-
-| Design system           | First render mount latency (baseline) | With `html-aot` | Mount acceleration |   Reactive update speedup |
-| :---------------------- | ------------------------------------: | --------------: | -----------------: | ------------------------: |
-| Carbon Web Components   |                               96.0 ms |         53.5 ms |             +44.3% | +28.3% (3.3 ms vs 4.6 ms) |
-| Spectrum Web Components |                               52.3 ms |         24.6 ms |             +53.0% |   0.0% (2.1 ms vs 2.1 ms) |
-| Web Awesome             |                               41.0 ms |         28.4 ms |             +30.7% | +43.8% (0.9 ms vs 1.6 ms) |
-| Momentum Design         |                               39.6 ms |         19.2 ms |             +51.5% |  +9.1% (1.0 ms vs 1.1 ms) |
-| Material Web            |                               45.1 ms |         19.1 ms |             +57.6% | +19.0% (1.7 ms vs 2.1 ms) |
-
-> Pre-compiling Lit `html` templates into static descriptors ahead of time eliminates the browser template preparation phase (`<template>` creation and `TreeWalker` traversal), cutting initial mount latency by **30.7% to 57.6%**.
 
 ---
 
@@ -164,7 +149,7 @@ Evaluated across canonical component suites (standalone `html-aot` vs baseline i
 - Companion optimization: [`@lit-core/dom-paths`](../dom-paths/README.md)
 - Fragment clustering: [`@lit-core/html-fuse`](../html-fuse/README.md)
 - Template minification: [`@lit-core/html-minifier`](../html-minifier/README.md)
-- Bundler plugins: [`@lit-core/vite-plugin`](../vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../webpack-plugin/README.md)
+- Bundler plugins: [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)
 
 ---
 

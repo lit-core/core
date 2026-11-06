@@ -41,8 +41,6 @@ Standard JavaScript minifiers (Terser, esbuild) treat template literals as opaqu
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
     A["Lit component with html`...` & svg`...` templates"] --> B["OXC AST visitor: locate HTML/SVG template literals"]
@@ -54,7 +52,7 @@ flowchart TD
     G --> H["Compact production bundle with zero unneeded markup bytes"]
 ```
 
-### In-depth technical details
+### Technical details
 
 #### 1. Context-aware whitespace collapsing
 
@@ -121,33 +119,20 @@ module.exports = {
 ### Programmatic API
 
 ```typescript
-import { minifyHtmlTemplate } from '@lit-core/html-minifier';
+import { minifyHtmlTemplates } from '@lit-core/html-minifier';
 
-const minified = minifyHtmlTemplate(`
-  <div class="container">
-    <!-- Header -->
-    <h1>  Title  </h1>
-  </div>
+const result = minifyHtmlTemplates(`
+  import { html } from 'lit';
+  export const tpl = html\`
+    <div class="container">
+      <!-- Header -->
+      <h1>  Title  </h1>
+    </div>
+  \`;
 `);
-console.log(minified);
-// Output: <div class="container"><h1> Title </h1></div>
+console.log(result.code);
+// Output: import { html } from 'lit'; export const tpl = html`<div class="container"><h1> Title </h1></div>`;
 ```
-
----
-
-## Empirical performance
-
-Evaluated across canonical component suites (standalone `html-minifier` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
-
-| Design system           | Baseline bundle size | With `html-minifier` | Raw bundle reduction |   Gzip reduction |        First render speedup |
-| :---------------------- | -------------------: | -------------------: | -------------------: | ---------------: | --------------------------: |
-| Carbon Web Components   |          1,438,781 B |          1,424,282 B |    -1.0% (-14,499 B) | -0.9% (-1,728 B) | +53.9% (44.3 ms vs 96.0 ms) |
-| Spectrum Web Components |            819,006 B |            808,454 B |    -1.3% (-10,552 B) |   -0.7% (-994 B) | +50.3% (26.0 ms vs 52.3 ms) |
-| Web Awesome             |            370,946 B |            360,978 B |     -2.7% (-9,968 B) | -1.5% (-1,307 B) | +29.0% (29.1 ms vs 41.0 ms) |
-| Momentum Design         |            346,579 B |            340,175 B |     -1.8% (-6,404 B) |   -1.3% (-987 B) | +46.2% (21.3 ms vs 39.6 ms) |
-| Material Web            |            269,272 B |            264,534 B |     -1.8% (-4,738 B) |   -1.1% (-641 B) | +59.4% (18.3 ms vs 45.1 ms) |
-
-> High-speed embedded HTML minification via `oxc` strips redundant whitespace and comments from Lit `html` template literals ahead of time, reducing bundle transfer size while accelerating browser parsing.
 
 ---
 
@@ -155,8 +140,8 @@ Evaluated across canonical component suites (standalone `html-minifier` vs basel
 
 - Static markup clustering: [`@lit-core/html-fuse`](../html-fuse/README.md)
 - CSS template minification: [`@lit-core/css-minifier`](../css-minifier/README.md)
-- Bundler plugins: [`@lit-core/vite-plugin`](../vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../webpack-plugin/README.md)
-- Benchmark harness: [`@lit-core/benchmarks`](../benchmarks/README.md)
+- Bundler plugins: [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)
+- Benchmark harness: [`@lit-core/benchmarks`](../../internal/benchmarks/README.md)
 
 ---
 

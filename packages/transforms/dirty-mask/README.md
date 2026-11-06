@@ -35,8 +35,6 @@ In standard Lit applications:
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
     A["Lit component AST with reactive properties & render() template"] --> B["OXC dependency analyzer"]
@@ -47,7 +45,7 @@ flowchart TD
     F --> G["Runtime render: Lit skips unchanged parts in 0ms via noChange"]
 ```
 
-### In-depth technical details
+### Technical details
 
 #### 1. Bitmask allocation and tracing
 
@@ -123,28 +121,12 @@ console.log(result.code);
 
 ---
 
-## Empirical performance
-
-Evaluated across canonical component suites (standalone `dirty-mask` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
-
-| Design system           | Baseline update latency | With `dirty-mask` | Update speedup | Baseline first render | With `dirty-mask` | Mount speedup |
-| :---------------------- | ----------------------: | ----------------: | -------------: | --------------------: | ----------------: | ------------: |
-| Carbon Web Components   |                  4.6 ms |            2.5 ms |         +45.7% |               96.0 ms |           45.1 ms |        +53.0% |
-| Spectrum Web Components |                  2.1 ms |            2.1 ms |           0.0% |               52.3 ms |           28.5 ms |        +45.5% |
-| Web Awesome             |                  1.6 ms |            1.5 ms |          +6.3% |               41.0 ms |           44.1 ms |         -7.6% |
-| Momentum Design         |                  1.1 ms |            1.2 ms |          -9.1% |               39.6 ms |           25.5 ms |        +35.6% |
-| Material Web            |                  2.1 ms |            1.6 ms |         +23.8% |               45.1 ms |           18.7 ms |        +58.5% |
-
-> Property-to-part dependency bitmasking traces which properties affect which dynamic bindings in template literals, short-circuiting unchanged DOM parts during reactive updates.
-
----
-
 ## Cross references
 
 - Reactive expression auto-memoization: [`@lit-core/memoize`](../memoize/README.md)
 - Lit directive lowering: [`@lit-core/directives`](../directives/README.md)
-- Bundler plugins: [`@lit-core/vite-plugin`](../vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../webpack-plugin/README.md)
-- Benchmark harness: [`@lit-core/benchmarks`](../benchmarks/README.md)
+- Bundler plugins: [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)
+- Benchmark harness: [`@lit-core/benchmarks`](../../internal/benchmarks/README.md)
 
 ---
 

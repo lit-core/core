@@ -31,8 +31,6 @@ In complex enterprise components with deeply nested DOM structures, this recursi
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
     A["Lit template with dynamic expressions: ${val}"] --> B["OXC parser: extract template quasis & expression slots"]
@@ -40,10 +38,10 @@ flowchart TD
     C --> D["Account for HTML whitespace normalization & text merging"]
     D --> E["Synthesize static __litPartPaths array on component class"]
     E --> F["Runtime component mount: direct .childNodes[i] pointer resolution"]
-    F --> G["Zero TreeWalker traversal & up to 42% faster initial mount"]
+    F --> G["Zero TreeWalker traversal during initial mount"]
 ```
 
-### In-depth technical details
+### Technical details
 
 #### 1. Path precomputation algorithm
 
@@ -119,11 +117,14 @@ module.exports = {
 ### Programmatic API
 
 ```typescript
-import { computeDomPaths, transformDomPaths } from '@lit-core/dom-paths';
+import { computeDomPaths, computeDomParts, transformDomPaths } from '@lit-core/dom-paths';
 
 // Direct path computation
 const paths = computeDomPaths(['<div><h1>Title</h1><p>Count: ', '</p><button @click=', '>+</button></div>']);
 // Output: [[0, 1, 1], [0, 2]]
+
+// Classified part descriptors (ElementAnchored, SoleTextChild, RangeAddressed)
+const parts = computeDomParts(['<div><p>', '</p></div>']);
 
 // Source code transformation
 const result = transformDomPaths(sourceCode, {
@@ -134,28 +135,12 @@ console.log(result.code);
 
 ---
 
-## Empirical performance
-
-Evaluated across canonical component suites (standalone `dom-paths` vs baseline in `packages/internal/benchmarks/results/manifest.json`):
-
-| Design system           | First render mount latency (baseline) | With `dom-paths` | Mount acceleration |   Reactive update speedup |        Script eval latency |
-| :---------------------- | ------------------------------------: | ---------------: | -----------------: | ------------------------: | -------------------------: |
-| Carbon Web Components   |                               96.0 ms |          44.1 ms |             +54.1% | +50.0% (2.3 ms vs 4.6 ms) | 3.5 ms (vs 4.4 ms, +20.5%) |
-| Spectrum Web Components |                               52.3 ms |          21.9 ms |             +58.1% | +14.3% (1.8 ms vs 2.1 ms) |       10.5 ms (vs 10.5 ms) |
-| Web Awesome             |                               41.0 ms |          33.2 ms |             +19.0% | +12.5% (1.4 ms vs 1.6 ms) | 3.3 ms (vs 6.2 ms, +46.8%) |
-| Momentum Design         |                               39.6 ms |          21.7 ms |             +45.2% |  +9.1% (1.0 ms vs 1.1 ms) |  4.2 ms (vs 4.3 ms, +2.3%) |
-| Material Web            |                               45.1 ms |          19.5 ms |             +56.8% | +23.8% (1.6 ms vs 2.1 ms) |  6.2 ms (vs 6.8 ms, +8.8%) |
-
-> Precomputing structural DOM child pointer paths eliminates runtime DOM `TreeWalker` traversal during element attachment, boosting initial mount speed by **19.0% to 58.1%**.
-
----
-
 ## Cross references
 
 - Template compilation: [`@lit-core/html-aot`](../html-aot/README.md)
 - Event hoisting: [`@lit-core/event-hoist`](../event-hoist/README.md)
-- Bundler plugins: [`@lit-core/vite-plugin`](../vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../webpack-plugin/README.md)
-- Benchmark harness: [`@lit-core/benchmarks`](../benchmarks/README.md)
+- Bundler plugins: [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)
+- Benchmark harness: [`@lit-core/benchmarks`](../../internal/benchmarks/README.md)
 
 ---
 

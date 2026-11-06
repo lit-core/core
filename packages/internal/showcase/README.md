@@ -29,8 +29,6 @@ Evaluating compiler optimizations purely through terminal statistics and byte co
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 flowchart TD
     A["5 Enterprise design systems: Carbon, Spectrum, Web Awesome, Material, Momentum"] --> B["Canonical component registry: maps 20 canonical UI concepts"]
@@ -53,7 +51,7 @@ Each design system applies custom base styles to `:root` and `body` (e.g. IBM Pl
 #### 2. Canonical registry mapping
 
 `canonical-registry.ts` bridges disparate component naming schemes across design systems into a unified conceptual catalog:
-- Concept `button` maps to `cds-button`, `sp-button`, `wa-button`, `md-elevated-button`, and `momentum-button`.
+- Concept `button` maps to `cds-button`, `sp-button`, `wa-button`, `md-filled-button`, and `mdc-button`.
 - Allows instantaneous framework switching while preserving the selected component view and configuration state.
 
 ---
@@ -71,6 +69,19 @@ pnpm run showcase:dev
 ```bash
 pnpm run showcase:build
 pnpm run showcase:preview
+```
+
+### Public exports
+
+`@lit-core/showcase` also exports its component registry and React viewer components for shared testing and dashboard integration:
+
+```ts
+import {
+  ALL_CANONICAL_COMPONENTS,
+  CONCEPTS,
+  LIBRARIES,
+  ShowcaseViewer,
+} from '@lit-core/showcase';
 ```
 
 ---

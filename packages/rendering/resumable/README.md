@@ -29,8 +29,6 @@ Standard Server-Side Rendering (SSR) for Web Components solves visual paint late
 
 ## Architecture
 
-### Big picture
-
 ```mermaid
 sequenceDiagram
     autonumber
@@ -49,7 +47,7 @@ sequenceDiagram
     Loader->>Component: Replay buffered user event in FIFO order
 ```
 
-### In-depth technical details
+### Technical details
 
 #### 1. Server-side rendering (`@lit-core/resumable/server`)
 
@@ -118,37 +116,13 @@ module.exports = {
 
 ---
 
-## Empirical performance
-
-Evaluated across production design system component suites (from `packages/internal/benchmarks/results/manifest.json`) and full SSR interaction-driven hydration scenarios:
-
-### Production component suites (`results/manifest.json`)
-
-| Design system           | Baseline mount latency | With `@lit-core/resumable` | Mount acceleration |   Reactive update speedup |        Script eval latency |
-| :---------------------- | ---------------------: | -------------------------: | -----------------: | ------------------------: | -------------------------: |
-| Carbon Web Components   |                96.0 ms |                    44.6 ms |             +53.5% | +50.0% (2.3 ms vs 4.6 ms) | 3.4 ms (vs 4.4 ms, +22.7%) |
-| Spectrum Web Components |                52.3 ms |                    24.1 ms |             +53.9% | +14.3% (1.8 ms vs 2.1 ms) |       10.7 ms (vs 10.5 ms) |
-| Web Awesome             |                41.0 ms |                    34.0 ms |             +17.1% | +12.5% (1.4 ms vs 1.6 ms) | 3.3 ms (vs 6.2 ms, +46.8%) |
-| Momentum Design         |                39.6 ms |                    18.8 ms |             +52.5% | +36.4% (0.7 ms vs 1.1 ms) |  4.1 ms (vs 4.3 ms, +4.7%) |
-| Material Web            |                45.1 ms |                    18.8 ms |             +58.3% | +28.6% (1.5 ms vs 2.1 ms) | 5.8 ms (vs 6.8 ms, +14.7%) |
-
-### Dynamic SSR resumption scenario (`ssr` benchmark)
-
-| Metric                                | Standard SSR with Lit hydration | With `@lit-core/resumable` |       Improvement |
-| :------------------------------------ | ------------------------------: | -------------------------: | ----------------: |
-| Initial JavaScript downloaded on boot |                        420.5 KB |                     1.2 KB |            -99.6% |
-| Total Blocking Time (TBT)             |                          340 ms |                       4 ms |            -98.8% |
-| First Input Delay (FID) / INP         |                           65 ms |                      12 ms |            -81.5% |
-| DOM element recreation                |            Recreated on hydrate |          0 nodes recreated | Zero layout shift |
-
----
-
 ## Cross references
 
-- Deferred Custom Element proxies: [`@lit-core/elem-proxy`](../elem-proxy/README.md)
-- Dead code elimination: [`@lit-core/tag-shake`](../tag-shake/README.md)
-- Bundler plugins: [`@lit-core/vite-plugin`](../vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../webpack-plugin/README.md)
-- Benchmark harness: [`@lit-core/benchmarks`](../benchmarks/README.md)
+- Server-side rendering engine: [`@lit-core/ssr`](../ssr/README.md)
+- Deferred Custom Element proxies: [`@lit-core/elem-proxy`](../../transforms/elem-proxy/README.md)
+- Dead code elimination: [`@lit-core/tag-shake`](../../transforms/tag-shake/README.md)
+- Bundler plugins: [`@lit-core/vite-plugin`](../../bundlers/vite-plugin/README.md) and [`@lit-core/webpack-plugin`](../../bundlers/webpack-plugin/README.md)
+- Benchmark harness: [`@lit-core/benchmarks`](../../internal/benchmarks/README.md)
 
 ---
 
