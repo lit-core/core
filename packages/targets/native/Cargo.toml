@@ -20,6 +20,7 @@ lit_analysis = { path = "../../../crates/lit-analysis" }
 oxc_allocator = { workspace = true }
 oxc_parser = { workspace = true }
 oxc_ast = { workspace = true }
+oxc_ast_visit = { workspace = true }
 oxc_span = { workspace = true }
 oxc_codegen = { workspace = true }
 oxc_traverse = { workspace = true }
@@ -27,3 +28,6 @@ oxc_semantic = { workspace = true }
 
 [build-dependencies]
 napi-build = { workspace = true }
+
+[lints]
+workspace = true

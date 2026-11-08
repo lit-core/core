@@ -141,26 +141,26 @@ export default defineConfig({
 
 ### Options reference
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `cssFuse` | `boolean \| CssFuseOptions` | `true` | Enables cross-component CSS AST deduplication into shared constructable sheets |
-| `serverElements` | `boolean \| ServerElementsOptions` | `true` | Splits components with `@loader()` and `@action()` into client and worker artifacts |
-| `hydrate` | `boolean` | `true` | Auto-injects Declarative Shadow DOM hydration support into client entry modules |
-| `htmlFuse` | `boolean \| HtmlFuseOptions` | `false` | Enables static HTML and SVG fragment clustering into shared template constants |
-| `propsLower` | `boolean \| PropsLowerOptions` | `false` | Lowers Lit decorators (`@property`, `@state`, `@query`) to static `properties` |
-| `directives` | `boolean \| DirectivesOptions` | `false` | Compiles built-in Lit directives ahead of time and prunes dead imports |
-| `memoize` | `boolean \| MemoizeOptions` | `false` | Auto-memoizes pure array transformations inside `render()` |
-| `domPaths` | `boolean \| DomPathsOptions` | `false` | Precomputes hierarchical child pointer paths, replacing `TreeWalker` traversal |
-| `eventHoist` | `boolean \| EventHoistOptions` | `false` | Hoists child event bindings to a single delegated listener on ShadowRoot |
-| `dirtyMask` | `boolean \| DirtyMaskOptions` | `false` | Traces property dependencies and short-circuits unchanged parts via `noChange` |
-| `htmlAot` | `boolean \| HtmlAotOptions` | `false` | Compiles `html` templates into static `CompiledTemplateResult` descriptors |
-| `native` | `boolean \| NativeOptions` | `false` | Compiles components into zero-dependency vanilla `HTMLElement` classes |
-| `tagShake` | `boolean \| TagShakeOptions` | `false` | Purges unreferenced Custom Element registrations from vendor bundles |
-| `elemProxy` | `boolean \| ElemProxyOptions` | `false` | Replaces eager Custom Element registrations with deferred proxy stubs |
-| `cssMinifier` | `boolean \| CssMinifierOptions` | `false` | Native Rust embedded CSS minification via `lightningcss` |
-| `htmlMinifier` | `boolean \| HtmlMinifierOptions` | `false` | Native Rust embedded HTML minification via `oxc` |
-| `ssr` | `boolean \| SsrOptions` | `false` | Enables streaming Declarative Shadow DOM SSR, static prerendering, or islands mode |
-| `resumable` | `boolean \| ResumableOptions` | `false` | Enables Declarative Shadow DOM SSR with interaction-driven resumption |
+| Option           | Type                               | Default | Description                                                                         |
+| :--------------- | :--------------------------------- | :------ | :---------------------------------------------------------------------------------- |
+| `cssFuse`        | `boolean \| CssFuseOptions`        | `true`  | Enables cross-component CSS AST deduplication into shared constructable sheets      |
+| `serverElements` | `boolean \| ServerElementsOptions` | `true`  | Splits components with `@loader()` and `@action()` into client and worker artifacts |
+| `hydrate`        | `boolean`                          | `true`  | Auto-injects Declarative Shadow DOM hydration support into client entry modules     |
+| `htmlFuse`       | `boolean \| HtmlFuseOptions`       | `false` | Enables static HTML and SVG fragment clustering into shared template constants      |
+| `propsLower`     | `boolean \| PropsLowerOptions`     | `false` | Lowers Lit decorators (`@property`, `@state`, `@query`) to static `properties`      |
+| `directives`     | `boolean \| DirectivesOptions`     | `false` | Compiles built-in Lit directives ahead of time and prunes dead imports              |
+| `memoize`        | `boolean \| MemoizeOptions`        | `false` | Auto-memoizes pure array transformations inside `render()`                          |
+| `domPaths`       | `boolean \| DomPathsOptions`       | `false` | Precomputes hierarchical child pointer paths, replacing `TreeWalker` traversal      |
+| `eventHoist`     | `boolean \| EventHoistOptions`     | `false` | Hoists child event bindings to a single delegated listener on ShadowRoot            |
+| `dirtyMask`      | `boolean \| DirtyMaskOptions`      | `false` | Traces property dependencies and short-circuits unchanged parts via `noChange`      |
+| `htmlAot`        | `boolean \| HtmlAotOptions`        | `false` | Compiles `html` templates into static `CompiledTemplateResult` descriptors          |
+| `native`         | `boolean \| NativeOptions`         | `false` | Compiles components into zero-dependency vanilla `HTMLElement` classes              |
+| `tagShake`       | `boolean \| TagShakeOptions`       | `false` | Purges unreferenced Custom Element registrations from vendor bundles                |
+| `elemProxy`      | `boolean \| ElemProxyOptions`      | `false` | Replaces eager Custom Element registrations with deferred proxy stubs               |
+| `cssMinifier`    | `boolean \| CssMinifierOptions`    | `false` | Native Rust embedded CSS minification via `lightningcss`                            |
+| `htmlMinifier`   | `boolean \| HtmlMinifierOptions`   | `false` | Native Rust embedded HTML minification via `oxc`                                    |
+| `ssr`            | `boolean \| SsrOptions`            | `false` | Enables streaming Declarative Shadow DOM SSR, static prerendering, or islands mode  |
+| `resumable`      | `boolean \| ResumableOptions`      | `false` | Enables Declarative Shadow DOM SSR with interaction-driven resumption               |
 
 ---
 

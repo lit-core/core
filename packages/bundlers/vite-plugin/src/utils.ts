@@ -1,3 +1,9 @@
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { createFilter } from '@rollup/pluginutils';
+
+export { createFilter };
+
 export const VIRTUAL_FUSED_PREFIX = 'virtual:css-fuse/';
 export const RESOLVED_FUSED_PREFIX = '\0virtual:css-fuse/';
 
@@ -140,42 +146,17 @@ export function extractLitCoreVirtualSubpath(resolvedId: string): string {
   return subpath.replace(/^\/+/, '').replace(/\.[jt]s$/, '');
 }
 
-const globRegexCache = new Map<string, RegExp>();
+const globFilterCache = new Map<string, (id: unknown) => boolean>();
 
-export function globToRegex(glob: string): RegExp {
-  const cached = globRegexCache.get(glob);
-  if (cached) return cached;
-
-  let regexStr = '';
-  for (let i = 0; i < glob.length; i++) {
-    const c = glob[i];
-    if (c === '/' || c === '\\') {
-      regexStr += '[/\\\\]';
-    } else if (c === '*') {
-      if (glob[i + 1] === '*') {
-        i++;
-        if (glob[i + 1] === '/' || glob[i + 1] === '\\') {
-          i++;
-          regexStr += '(?:.*[/\\\\])?';
-        } else {
-          regexStr += '.*';
-        }
-      } else {
-        regexStr += '[^/\\\\]*';
-      }
-    } else if (c === '?') {
-      regexStr += '[^/\\\\]';
-    } else if (['.', '+', '^', '$', '(', ')', '|', '{', '}'].includes(c)) {
-      regexStr += `\\${c}`;
-    } else {
-      regexStr += c;
-    }
+export function globToRegex(glob: string): { test(str: string): boolean } {
+  let filter = globFilterCache.get(glob);
+  if (!filter) {
+    const normalized = glob.replace(/\\/g, '/');
+    const effectiveGlob = normalized.startsWith('*') || normalized.startsWith('/') ? normalized : `**/${normalized}`;
+    filter = createFilter([effectiveGlob], null, { resolve: false });
+    globFilterCache.set(glob, filter);
   }
-
-  const prefix = glob.startsWith('*') || glob.startsWith('/') || glob.startsWith('\\') ? '^' : '(?:^|[/\\\\])';
-  const re = new RegExp(`${prefix}${regexStr}$`);
-  globRegexCache.set(glob, re);
-  return re;
+  return { test: (str: string) => filter(str.replace(/\\/g, '/')) };
 }
 
 export function matchesPattern(cleanId: string, pattern: string | RegExp): boolean {
@@ -203,4 +184,36 @@ export function matchesPattern(cleanId: string, pattern: string | RegExp): boole
     return cleanId.includes(pattern);
   }
   return false;
+}
+
+export function resolveFromVirtualOrigin(specifier: string, originFile?: string, rootDir?: string): string | undefined {
+  const effectiveRoot = rootDir || process.cwd();
+  const candidateRoots = [originFile ? path.dirname(path.isAbsolute(originFile) ? originFile : path.resolve(effectiveRoot, originFile)) : null, rootDir, process.cwd()].filter(Boolean) as string[];
+
+  for (const cRoot of candidateRoots) {
+    let dir = cRoot;
+    while (true) {
+      try {
+        const req = createRequire(path.join(dir, 'package.json'));
+        const resolved = req.resolve(specifier);
+        if (resolved) return resolved;
+      } catch {}
+      const parent = path.dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  }
+  try {
+    const fallbackReq = createRequire(import.meta.url);
+    try {
+      const resolved = fallbackReq.resolve(specifier);
+      if (resolved) return resolved;
+    } catch {
+      const ssrResolved = fallbackReq.resolve('@lit-core/ssr');
+      const ssrReq = createRequire(ssrResolved);
+      const resolved = ssrReq.resolve(specifier);
+      if (resolved) return resolved;
+    }
+  } catch {}
+  return undefined;
 }

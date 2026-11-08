@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import remapping from '@jridgewell/remapping';
 import { compileHtmlAot } from '@lit-core/html-aot';
 import { transformLitProps } from '@lit-core/props-lower';
 import { HYDRATE_SUPPORT_SOURCE } from '@lit-core/resumable';
@@ -10,6 +11,7 @@ import { injectClientEntryImports, transformResumableComponent } from '@lit-core
 import { isViteClientEntryModule, resolveLitPrivateSsrSupportForVite, trackHtmlClientEntry } from '@lit-core/resumable/vite';
 import { handleActionRequest } from '@lit-core/server-elements/action-endpoint';
 import { type ActionMetadata, compileWorkerEntry, type LoaderMetadata, splitServerElement } from '@lit-core/server-split';
+import { globSync } from 'tinyglobby';
 import type { Plugin, ResolvedConfig, UserConfig, ViteDevServer } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { ServerElementsOptions } from '../options.js';
@@ -210,34 +212,21 @@ function serverElementsCore(options: ServerElementsOptions = {}, wasmState: Work
   }
 
   function scanSourceDirectoryRecursive(dirPath: string): void {
-    let entries: fs.Dirent[];
+    let matchedFiles: string[];
     try {
-      entries = fs.readdirSync(dirPath, { withFileTypes: true });
+      matchedFiles = globSync(['**/*.{ts,tsx,js,jsx,mts,cts,mjs,cjs}'], {
+        cwd: dirPath,
+        absolute: true,
+        ignore: ['**/*.d.ts', '**/*.{test,spec}.*', ...Array.from(IGNORED_SCAN_DIRS, (d) => `**/${d}/**`), '**/.wrangler/**'],
+      });
     } catch {
       return;
     }
 
-    const sortedEntries = [...entries].sort((a, b) => a.name.localeCompare(b.name));
+    const sortedFiles = [...matchedFiles].sort((a, b) => a.localeCompare(b));
     const actionRoutePrefix = options.actionRoutePrefix || '/_lit/a/';
 
-    for (const entry of sortedEntries) {
-      if (entry.name.startsWith('.') && entry.isDirectory()) {
-        continue;
-      }
-      const fullPath = path.join(dirPath, entry.name);
-      if (entry.isDirectory()) {
-        if (!IGNORED_SCAN_DIRS.has(entry.name)) {
-          scanSourceDirectoryRecursive(fullPath);
-        }
-        continue;
-      }
-      if (!entry.isFile()) {
-        continue;
-      }
-      if (entry.name.endsWith('.d.ts') || /\.(?:test|spec)\.[cm]?[jt]sx?$/.test(entry.name) || !/\.[cm]?[jt]sx?$/.test(entry.name)) {
-        continue;
-      }
-
+    for (const fullPath of sortedFiles) {
       const normPath = fullPath.replace(/\\/g, '/');
       if (isExcludedByUserOptions(normPath) || !isIncludedByUserOptions(normPath)) {
         continue;
@@ -755,13 +744,29 @@ function serverElementsCore(options: ServerElementsOptions = {}, wasmState: Work
           const aotCompiled = compileSsrTemplatesIfNeeded(this, selectedCode, cleanId, selectedMap);
           if (aotCompiled) {
             selectedCode = aotCompiled.code;
-            selectedMap = aotCompiled.map ?? selectedMap;
+            if (aotCompiled.map && selectedMap) {
+              try {
+                selectedMap = remapping([aotCompiled.map as any, selectedMap as any], () => null);
+              } catch {
+                selectedMap = aotCompiled.map;
+              }
+            } else {
+              selectedMap = aotCompiled.map ?? selectedMap;
+            }
           }
         } else {
           const injectedEntry = maybeInjectEntryImports(selectedCode, true);
           if (injectedEntry) {
             selectedCode = injectedEntry.code;
-            selectedMap = injectedEntry.map ?? selectedMap;
+            if (injectedEntry.map && selectedMap) {
+              try {
+                selectedMap = remapping([injectedEntry.map as any, selectedMap as any], () => null);
+              } catch {
+                selectedMap = injectedEntry.map;
+              }
+            } else {
+              selectedMap = injectedEntry.map ?? selectedMap;
+            }
           }
         }
 

@@ -7,9 +7,9 @@
  * Converts a DOM event type to a React prop callback name.
  * Examples:
  * - 'click' -> 'onClick'
- * - 'cds-button-click' -> 'onCdsButtonClick'
- * - 'cds-checkbox-changed' -> 'onCdsCheckboxChanged'
- * - 'cds-tabs-selected' -> 'onCdsTabsSelected'
+ * - 'my-button-click' -> 'onMyButtonClick'
+ * - 'app-checkbox-changed' -> 'onAppCheckboxChanged'
+ * - 'ui-tabs-selected' -> 'onUiTabsSelected'
  */
 export function toEventPropName(eventType: string): string {
   if (!eventType) return '';

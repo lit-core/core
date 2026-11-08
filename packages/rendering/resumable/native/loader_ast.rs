@@ -23,10 +23,7 @@ pub fn build_loader_program<'a>(
     // Statement 3: const uG = (t) => ...;
     iife_stmts.push(build_ug_decl(ast));
 
-    // Statement 4: const iT = (e) => ...;
-    iife_stmts.push(build_it_decl(ast));
-
-    // Statement 5: const hI = async (e) => { ... };
+    // Statement 4: const hI = async (e) => { ... };
     iife_stmts.push(build_hi_decl(ast));
 
     // Statement 6: events.forEach((t) => { W.addEventListener(t, hI, true); });
@@ -361,194 +358,6 @@ fn arrow<'a>(
     )
 }
 
-// const iT = (e) => e?.nodeType === 1 && (/^(BUTTON|INPUT|SELECT|A)$/i.test(e.tagName) || e.tabIndex >= 0 || e.localName?.includes('-') || /tabindex|data-resumable|resumes-/.test(e.getAttributeNames?.()));
-fn build_it_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
-    // e?.nodeType === 1
-    let e_chain = Expression::new_chain_expression(
-        SPAN,
-        ChainElement::new_static_member_expression(
-            SPAN,
-            Expression::new_identifier(SPAN, "e", ast),
-            IdentifierName::new(SPAN, "nodeType", ast),
-            true,
-            ast,
-        ),
-        ast,
-    );
-    let eq_1 = Expression::new_binary_expression(
-        SPAN,
-        e_chain,
-        BinaryOperator::StrictEquality,
-        Expression::new_numeric_literal(SPAN, 1.0, None, NumberBase::Decimal, ast),
-        ast,
-    );
-
-    // /^(BUTTON|INPUT|SELECT|A)$/i.test(e.tagName)
-    let re1 = Expression::new_reg_exp_literal(
-        SPAN,
-        RegExp {
-            pattern: RegExpPattern {
-                text: ast
-                    .allocator()
-                    .alloc_str("^(BUTTON|INPUT|SELECT|A)$")
-                    .into(),
-                pattern: None,
-            },
-            flags: RegExpFlags::I,
-        },
-        None,
-        ast,
-    );
-    let re1_test = Expression::new_static_member_expression(
-        SPAN,
-        re1,
-        IdentifierName::new(SPAN, "test", ast),
-        false,
-        ast,
-    );
-    let mut re1_args = ArenaVec::new_in(ast);
-    re1_args.push(Argument::from(Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "e", ast),
-        IdentifierName::new(SPAN, "tagName", ast),
-        false,
-        ast,
-    )));
-    let call_re1 = Expression::new_call_expression(SPAN, re1_test, None, re1_args, false, ast);
-
-    // e.tabIndex >= 0
-    let e_tabindex = Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "e", ast),
-        IdentifierName::new(SPAN, "tabIndex", ast),
-        false,
-        ast,
-    );
-    let tab_gte = Expression::new_binary_expression(
-        SPAN,
-        e_tabindex,
-        BinaryOperator::GreaterEqualThan,
-        Expression::new_numeric_literal(SPAN, 0.0, None, NumberBase::Decimal, ast),
-        ast,
-    );
-
-    // e.localName?.includes('-')
-    let e_local_name = MemberExpression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "e", ast),
-        IdentifierName::new(SPAN, "localName", ast),
-        false,
-        ast,
-    );
-    let includes_member = MemberExpression::new_static_member_expression(
-        SPAN,
-        Expression::from(e_local_name),
-        IdentifierName::new(SPAN, "includes", ast),
-        true,
-        ast,
-    );
-    let mut dash_args = ArenaVec::new_in(ast);
-    dash_args.push(Argument::from(Expression::new_string_literal(
-        SPAN, "-", None, ast,
-    )));
-    let includes_call = CallExpression::boxed(
-        SPAN,
-        Expression::from(includes_member),
-        None,
-        dash_args,
-        false,
-        ast,
-    );
-    let local_chain =
-        Expression::new_chain_expression(SPAN, ChainElement::CallExpression(includes_call), ast);
-
-    // /tabindex|data-resumable|data-island|resumes-/.test(e.getAttributeNames?.())
-    let re2 = Expression::new_reg_exp_literal(
-        SPAN,
-        RegExp {
-            pattern: RegExpPattern {
-                text: ast
-                    .allocator()
-                    .alloc_str("tabindex|data-resumable|data-island|resumes-")
-                    .into(),
-                pattern: None,
-            },
-            flags: RegExpFlags::empty(),
-        },
-        None,
-        ast,
-    );
-    let re2_test = Expression::new_static_member_expression(
-        SPAN,
-        re2,
-        IdentifierName::new(SPAN, "test", ast),
-        false,
-        ast,
-    );
-    let get_attr_names = MemberExpression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "e", ast),
-        IdentifierName::new(SPAN, "getAttributeNames", ast),
-        false,
-        ast,
-    );
-    let get_attr_call = CallExpression::boxed(
-        SPAN,
-        Expression::from(get_attr_names),
-        None,
-        ArenaVec::new_in(ast),
-        true,
-        ast,
-    );
-    let get_attr_chain =
-        Expression::new_chain_expression(SPAN, ChainElement::CallExpression(get_attr_call), ast);
-    let mut re2_args = ArenaVec::new_in(ast);
-    re2_args.push(Argument::from(get_attr_chain));
-    let call_re2 = Expression::new_call_expression(SPAN, re2_test, None, re2_args, false, ast);
-
-    // Compound OR
-    let or1 = Expression::new_logical_expression(SPAN, call_re1, LogicalOperator::Or, tab_gte, ast);
-    let or2 = Expression::new_logical_expression(SPAN, or1, LogicalOperator::Or, local_chain, ast);
-    let or3 = Expression::new_logical_expression(SPAN, or2, LogicalOperator::Or, call_re2, ast);
-
-    let and_all = Expression::new_logical_expression(SPAN, eq_1, LogicalOperator::And, or3, ast);
-
-    let mut param_vec = ArenaVec::new_in(ast);
-    param_vec.push(FormalParameter::new_plain(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "e", ast),
-        ast,
-    ));
-    let params = FormalParameters::boxed(
-        SPAN,
-        FormalParameterKind::ArrowFormalParameters,
-        param_vec,
-        None,
-        ast,
-    );
-    let arrow = Expression::new_arrow_function_expression(
-        SPAN,
-        false,
-        None,
-        params,
-        None,
-        ArrowFunctionBody::from(and_all),
-        ast,
-    );
-
-    let decl = VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "iT", ast),
-        None,
-        Some(arrow),
-        false,
-        ast,
-    );
-    let mut decls = ArenaVec::new_in(ast);
-    decls.push(decl);
-    Statement::new_variable_declaration(SPAN, VariableDeclarationKind::Const, decls, false, ast)
-}
-
 // const hI = async (e) => { ... };
 fn build_hi_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
     let mut stmts = ArenaVec::new_in(ast);
@@ -612,83 +421,7 @@ fn build_hi_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
         ast,
     ));
 
-    // 3. if (!p.some(iT)) return;
-    let p_some = Expression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "p", ast),
-        IdentifierName::new(SPAN, "some", ast),
-        false,
-        ast,
-    );
-    let mut some_args = ArenaVec::new_in(ast);
-    some_args.push(Argument::from(Expression::new_identifier(SPAN, "iT", ast)));
-    let call_some = Expression::new_call_expression(SPAN, p_some, None, some_args, false, ast);
-    let not_some =
-        Expression::new_unary_expression(SPAN, UnaryOperator::LogicalNot, call_some, ast);
-    stmts.push(Statement::new_if_statement(
-        SPAN,
-        not_some,
-        Statement::new_return_statement(SPAN, None, ast),
-        None,
-        ast,
-    ));
-
-    // 4. const u = [...new Set(p.map((l) => (l?.getAttribute?.('data-island-src') && (M[l.localName] ||= l.getAttribute('data-island-src')), l?.localName)).filter((n) => n?.includes('-') && !C.get(n) && M[n]))];
-    let mut l_get_attr_args1 = ArenaVec::new_in(ast);
-    l_get_attr_args1.push(Argument::from(Expression::new_string_literal(
-        SPAN,
-        "data-island-src",
-        None,
-        ast,
-    )));
-    let l_get_attr_member = MemberExpression::new_static_member_expression(
-        SPAN,
-        Expression::new_identifier(SPAN, "l", ast),
-        IdentifierName::new(SPAN, "getAttribute", ast),
-        true,
-        ast,
-    );
-    let l_get_attr_call1 = CallExpression::boxed(
-        SPAN,
-        Expression::from(l_get_attr_member),
-        None,
-        l_get_attr_args1,
-        true,
-        ast,
-    );
-    let l_get_attr_chain =
-        Expression::new_chain_expression(SPAN, ChainElement::CallExpression(l_get_attr_call1), ast);
-
-    let l_get_attr_direct = call(
-        ast,
-        member(ast, ident(ast, "l"), "getAttribute"),
-        vec![Expression::new_string_literal(
-            SPAN,
-            "data-island-src",
-            None,
-            ast,
-        )],
-    );
-    let assign_m_src = Expression::new_assignment_expression(
-        SPAN,
-        AssignmentOperator::LogicalOr,
-        AssignmentTarget::new_computed_member_expression(
-            SPAN,
-            ident(ast, "M"),
-            member(ast, ident(ast, "l"), "localName"),
-            false,
-            ast,
-        ),
-        l_get_attr_direct,
-        ast,
-    );
-    let maybe_assign_src = Expression::new_logical_expression(
-        SPAN,
-        l_get_attr_chain,
-        LogicalOperator::And,
-        assign_m_src,
-        ast,
-    );
+    // 3. const u = [...new Set(p.map((l) => l?.localName).filter((n) => n?.includes('-') && !C.get(n) && M[n]))];
     let l_local_chain = Expression::new_chain_expression(
         SPAN,
         ChainElement::new_static_member_expression(
@@ -700,11 +433,7 @@ fn build_hi_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
         ),
         ast,
     );
-    let mut l_seq = ArenaVec::new_in(ast);
-    l_seq.push(maybe_assign_src);
-    l_seq.push(l_local_chain);
-    let l_body = Expression::new_sequence_expression(SPAN, l_seq, ast);
-    let l_arrow = arrow(ast, &["l"], l_body);
+    let l_arrow = arrow(ast, &["l"], l_local_chain);
     let p_map = Expression::new_static_member_expression(
         SPAN,
         Expression::new_identifier(SPAN, "p", ast),
@@ -846,7 +575,7 @@ fn build_hi_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
         ast,
     ));
 
-    // 6. if (e.type === 'pointerover' || (/^p.*d|f.*n$/.test(e.type) && !p.some((l) => l.hasAttribute?.(`resumes-on-${e.type}`)))) return u.forEach(uG);
+    // 6. if (e.type === 'pointerover' || ((e.type === 'pointerdown' || e.type === 'focusin') && !p.some((l) => l.hasAttribute?.(`resumes-on-${e.type}`)))) return u.forEach(uG);
     let e_type_po = Expression::new_binary_expression(
         SPAN,
         Expression::new_static_member_expression(
@@ -860,34 +589,25 @@ fn build_hi_decl<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
         Expression::new_string_literal(SPAN, "pointerover", None, ast),
         ast,
     );
-    let re3 = Expression::new_reg_exp_literal(
+    let e_type_pd = Expression::new_binary_expression(
         SPAN,
-        RegExp {
-            pattern: RegExpPattern {
-                text: ast.allocator().alloc_str("^p.*d|f.*n$").into(),
-                pattern: None,
-            },
-            flags: RegExpFlags::empty(),
-        },
-        None,
+        member(ast, ident(ast, "e"), "type"),
+        BinaryOperator::StrictEquality,
+        Expression::new_string_literal(SPAN, "pointerdown", None, ast),
         ast,
     );
-    let re3_test = Expression::new_static_member_expression(
+    let e_type_fi = Expression::new_binary_expression(
         SPAN,
-        re3,
-        IdentifierName::new(SPAN, "test", ast),
-        false,
+        member(ast, ident(ast, "e"), "type"),
+        BinaryOperator::StrictEquality,
+        Expression::new_string_literal(SPAN, "focusin", None, ast),
         ast,
     );
-    let mut re3_args = ArenaVec::new_in(ast);
-    re3_args.push(Argument::from(Expression::new_static_member_expression(
+    let call_re3 = Expression::new_parenthesized_expression(
         SPAN,
-        Expression::new_identifier(SPAN, "e", ast),
-        IdentifierName::new(SPAN, "type", ast),
-        false,
+        Expression::new_logical_expression(SPAN, e_type_pd, LogicalOperator::Or, e_type_fi, ast),
         ast,
-    )));
-    let call_re3 = Expression::new_call_expression(SPAN, re3_test, None, re3_args, false, ast);
+    );
 
     // (l) => l.hasAttribute?.(`resumes-on-${e.type}`)
     let mut quasis_res = ArenaVec::new_in(ast);
@@ -1983,90 +1703,15 @@ fn build_idle_hydration_stmt<'a>(ast: &AstBuilder<'a>, timeout: u32) -> Statemen
 fn build_islands_stmt<'a>(ast: &AstBuilder<'a>) -> Statement<'a> {
     let mut stmts = ArenaVec::new_in(ast);
 
-    // const h = (l) => { const s = l.getAttribute("data-island-src"); if (s) M[l.localName] ||= s; uG(l.localName); };
-    let mut h_stmts = ArenaVec::new_in(ast);
-    let s_call = call(
+    // const h = (l) => uG(l.localName);
+    let h_fn = arrow(
         ast,
-        member(ast, ident(ast, "l"), "getAttribute"),
-        vec![Expression::new_string_literal(
-            SPAN,
-            "data-island-src",
-            None,
-            ast,
-        )],
-    );
-    let mut s_decls = ArenaVec::new_in(ast);
-    s_decls.push(VariableDeclarator::new(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "s", ast),
-        None,
-        Some(s_call),
-        false,
-        ast,
-    ));
-    h_stmts.push(Statement::new_variable_declaration(
-        SPAN,
-        VariableDeclarationKind::Const,
-        s_decls,
-        false,
-        ast,
-    ));
-
-    let assign_m = Expression::new_assignment_expression(
-        SPAN,
-        AssignmentOperator::LogicalOr,
-        AssignmentTarget::new_computed_member_expression(
-            SPAN,
-            ident(ast, "M"),
-            member(ast, ident(ast, "l"), "localName"),
-            false,
-            ast,
-        ),
-        ident(ast, "s"),
-        ast,
-    );
-    h_stmts.push(Statement::new_if_statement(
-        SPAN,
-        ident(ast, "s"),
-        Statement::new_expression_statement(SPAN, assign_m, ast),
-        None,
-        ast,
-    ));
-    h_stmts.push(Statement::new_expression_statement(
-        SPAN,
+        &["l"],
         call(
             ast,
             ident(ast, "uG"),
             vec![member(ast, ident(ast, "l"), "localName")],
         ),
-        ast,
-    ));
-
-    let mut h_params = ArenaVec::new_in(ast);
-    h_params.push(FormalParameter::new_plain(
-        SPAN,
-        BindingPattern::new_binding_identifier(SPAN, "l", ast),
-        ast,
-    ));
-    let h_fn = Expression::new_arrow_function_expression(
-        SPAN,
-        false,
-        None,
-        FormalParameters::boxed(
-            SPAN,
-            FormalParameterKind::ArrowFormalParameters,
-            h_params,
-            None,
-            ast,
-        ),
-        None,
-        ArrowFunctionBody::FunctionBody(FunctionBody::boxed(
-            SPAN,
-            ArenaVec::new_in(ast),
-            h_stmts,
-            ast,
-        )),
-        ast,
     );
     let mut h_decls = ArenaVec::new_in(ast);
     h_decls.push(VariableDeclarator::new(

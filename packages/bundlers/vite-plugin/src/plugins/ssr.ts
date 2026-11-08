@@ -18,7 +18,7 @@ import {
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { SsrOptions } from '../options.js';
-import { formatVirtualLitCoreId, isVirtualLitCoreId, matchesPattern } from '../utils.js';
+import { formatVirtualLitCoreId, isVirtualLitCoreId, matchesPattern, resolveFromVirtualOrigin } from '../utils.js';
 import { getIslandsLoaderSource, INSTALL_GLOBALS_SOURCE, SSR_RUNTIME_SOURCE } from '../virtual.js';
 
 export const LIT_SSR_FAST_CHECK = /(?:@customElement|customElements\.define|LitElement|ReactiveElement|HTMLElement|html`|css`)/;
@@ -166,6 +166,7 @@ export function ssr(options: SsrOptions = {}): Plugin {
   let config: ResolvedConfig | undefined;
   let isServerBuild = false;
   const moduleTagsMap = new Map<string, string[]>();
+  const moduleTemplatesMap = new Map<string, string[]>();
   const htmlEntryModules = new Set<string>();
   const pluginIsolateEnv = createIsolateEnvironment();
 
@@ -216,6 +217,10 @@ export function ssr(options: SsrOptions = {}): Plugin {
       }
       if (isVirtualLitCoreId(id)) {
         return formatVirtualLitCoreId(id);
+      }
+      if (importer?.startsWith('\0') && !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('\0') && !id.startsWith('virtual:')) {
+        const resolved = resolveFromVirtualOrigin(id, undefined, config?.root);
+        if (resolved) return resolved;
       }
       return trackHtmlClientEntry(this as any, config?.root, htmlEntryModules, id, importer, resolveOpts as any);
     },
@@ -314,6 +319,9 @@ export function ssr(options: SsrOptions = {}): Plugin {
         if (result.discoveredTags && result.discoveredTags.length > 0) {
           moduleTagsMap.set(cleanId, result.discoveredTags);
         }
+        if (result.staticTemplates && result.staticTemplates.length > 0) {
+          moduleTemplatesMap.set(cleanId, result.staticTemplates);
+        }
 
         let currentCode = result.modified ? result.code : code;
         let wasModified = result.modified;
@@ -358,7 +366,7 @@ export function ssr(options: SsrOptions = {}): Plugin {
           const renderedContent: any = await withScopedIsolateGlobals(async (scopedEnv) => {
             const rootDir = config?.root || process.cwd();
             const indexHtmlPath = path.resolve(rootDir, 'index.html');
-            let rawHtml = fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf-8') : '<!DOCTYPE html><html><head></head><body><div id="app"></div></body></html>';
+            let rawHtml = fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf-8') : '<!DOCTYPE html><html><head></head><body></body></html>';
 
             rawHtml = await server.transformIndexHtml(url, rawHtml);
 
@@ -541,6 +549,33 @@ export function ssr(options: SsrOptions = {}): Plugin {
           islandsManifest,
         };
 
+        let discoveredStaticTemplate = '';
+        if (entryChunk?.facadeModuleId) {
+          const cleanFacade = String(entryChunk.facadeModuleId).split('?')[0];
+          const tpls = moduleTemplatesMap.get(cleanFacade);
+          if (tpls && tpls.length > 0) {
+            discoveredStaticTemplate = tpls[0];
+          }
+        }
+        if (!discoveredStaticTemplate && Array.isArray(entryChunk?.moduleIds)) {
+          for (const modId of entryChunk.moduleIds) {
+            const cleanModId = String(modId).split('?')[0];
+            const tpls = moduleTemplatesMap.get(cleanModId);
+            if (tpls && tpls.length > 0) {
+              discoveredStaticTemplate = tpls[0];
+              break;
+            }
+          }
+        }
+        if (!discoveredStaticTemplate) {
+          for (const tpls of moduleTemplatesMap.values()) {
+            if (tpls.length > 0) {
+              discoveredStaticTemplate = tpls[0];
+              break;
+            }
+          }
+        }
+
         for (const { raw, fileName } of validRoutes) {
           let routeHtml = '';
 
@@ -558,13 +593,8 @@ export function ssr(options: SsrOptions = {}): Plugin {
             if (baseTemplate) {
               routeHtml = transformHtmlWithSsr(baseTemplate, renderOptionsWithManifest);
             } else {
-              let bodyMarkup = '<div id="app"></div>';
-              if (typeof entryChunk?.code === 'string') {
-                const match = /<([a-z][a-z0-9._-]*-[a-z0-9._-]*)[^>]*>([\s\S]*?)<\/\1>/i.exec(entryChunk.code);
-                if (match) {
-                  bodyMarkup = transformHtmlWithSsr(match[0], renderOptionsWithManifest);
-                }
-              }
+              const sourceMarkup = discoveredStaticTemplate || (typeof entryChunk?.code === 'string' && entryChunk.code.trim().startsWith('<') ? entryChunk.code : '');
+              const bodyMarkup = sourceMarkup ? transformHtmlWithSsr(sourceMarkup, renderOptionsWithManifest) : '';
               routeHtml = `<!DOCTYPE html><html><head>${clientScriptTag}</head><body>${bodyMarkup}</body></html>`;
             }
           }

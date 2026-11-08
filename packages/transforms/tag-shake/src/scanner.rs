@@ -1,3 +1,13 @@
+use html5ever::tendril::StrTendril;
+use html5ever::tokenizer::{
+    BufferQueue, TagKind, Token, TokenSink, TokenSinkResult, Tokenizer, TokenizerOpts, states,
+};
+use lightningcss::selector::{Component, Selector};
+use lightningcss::stylesheet::{ParserOptions, StyleSheet};
+use lightningcss::{
+    visit_types,
+    visitor::{Visit as CssVisit, VisitTypes, Visitor as CssVisitor},
+};
 use oxc_allocator::Allocator;
 use oxc_ast::ast::*;
 use oxc_ast_visit::{Visit, walk};
@@ -48,180 +58,74 @@ pub fn is_valid_custom_element_name(name: &str) -> bool {
     )
 }
 
-#[derive(Debug, PartialEq, Eq)]
-enum HtmlParserState {
-    Text,
-    TagInside,
-    AttrDouble,
-    AttrSingle,
-    AttrUnquoted,
-    Comment,
-    Script,
-    Style,
+struct HtmlTagScanner<'a> {
+    tags: &'a mut HashSet<String>,
 }
 
-/// Tokenize an HTML string or template fragment using a spec-compliant state machine.
-/// Properly handles comments, quoted attributes, and embedded script/style tags.
-pub fn scan_html_tags_into(html: &str, tags: &mut HashSet<String>) {
-    let bytes = html.as_bytes();
-    let len = bytes.len();
-    let mut i = 0;
-    let mut state = HtmlParserState::Text;
+impl TokenSink for HtmlTagScanner<'_> {
+    type Handle = ();
 
-    while i < len {
-        match state {
-            HtmlParserState::Text => {
-                // Check for HTML comment <!--
-                if i + 3 < len && &bytes[i..i + 4] == b"<!--" {
-                    state = HtmlParserState::Comment;
-                    i += 4;
-                    continue;
+    fn process_token(&mut self, token: Token, _line_number: u64) -> TokenSinkResult<()> {
+        if let Token::TagToken(tag) = token
+            && tag.kind == TagKind::StartTag
+        {
+            let tag_lower = tag.name.as_ref().to_ascii_lowercase();
+            if matches!(
+                tag_lower.as_str(),
+                "script" | "style" | "textarea" | "title"
+            ) {
+                if !tag.self_closing {
+                    return TokenSinkResult::RawData(states::RawKind::ScriptData);
                 }
-
-                // Check for closing tag </
-                if i + 1 < len && &bytes[i..i + 2] == b"</" {
-                    i += 2;
-                    while i < len && bytes[i] != b'>' {
-                        i += 1;
-                    }
-                    if i < len && bytes[i] == b'>' {
-                        i += 1;
-                    }
-                    continue;
-                }
-
-                // Check for opening tag <
-                if bytes[i] == b'<' {
-                    i += 1;
-                    while i < len && bytes[i].is_ascii_whitespace() {
-                        i += 1;
-                    }
-                    if i < len && bytes[i].is_ascii_alphabetic() {
-                        let start = i;
-                        while i < len
-                            && (bytes[i].is_ascii_alphanumeric()
-                                || bytes[i] == b'-'
-                                || bytes[i] == b'_'
-                                || bytes[i] == b'.')
-                        {
-                            i += 1;
-                        }
-                        let raw_tag = &html[start..i];
-                        let tag_lower = raw_tag.to_ascii_lowercase();
-
-                        if tag_lower == "script" {
-                            state = HtmlParserState::Script;
-                        } else if tag_lower == "style" {
-                            state = HtmlParserState::Style;
-                        } else {
-                            if is_valid_custom_element_name(&tag_lower) {
-                                tags.insert(tag_lower);
-                            }
-                            state = HtmlParserState::TagInside;
-                        }
-                        continue;
-                    }
-                }
-                i += 1;
-            }
-            HtmlParserState::TagInside => {
-                let b = bytes[i];
-                if b == b'"' {
-                    state = HtmlParserState::AttrDouble;
-                    i += 1;
-                } else if b == b'\'' {
-                    state = HtmlParserState::AttrSingle;
-                    i += 1;
-                } else if b == b'='
-                    && i + 1 < len
-                    && !bytes[i + 1].is_ascii_whitespace()
-                    && bytes[i + 1] != b'\''
-                    && bytes[i + 1] != b'"'
-                {
-                    state = HtmlParserState::AttrUnquoted;
-                    i += 1;
-                } else if b == b'>' {
-                    state = HtmlParserState::Text;
-                    i += 1;
-                } else {
-                    i += 1;
-                }
-            }
-            HtmlParserState::AttrDouble => {
-                if bytes[i] == b'"' {
-                    state = HtmlParserState::TagInside;
-                }
-                i += 1;
-            }
-            HtmlParserState::AttrSingle => {
-                if bytes[i] == b'\'' {
-                    state = HtmlParserState::TagInside;
-                }
-                i += 1;
-            }
-            HtmlParserState::AttrUnquoted => {
-                if bytes[i].is_ascii_whitespace() || bytes[i] == b'>' || bytes[i] == b'/' {
-                    if bytes[i] == b'>' {
-                        state = HtmlParserState::Text;
-                    } else {
-                        state = HtmlParserState::TagInside;
-                    }
-                }
-                i += 1;
-            }
-            HtmlParserState::Comment => {
-                if i + 2 < len && &bytes[i..i + 3] == b"-->" {
-                    state = HtmlParserState::Text;
-                    i += 3;
-                } else {
-                    i += 1;
-                }
-            }
-            HtmlParserState::Script => {
-                if i + 8 <= len && html[i..i + 8].eq_ignore_ascii_case("</script") {
-                    i += 8;
-                    while i < len && bytes[i] != b'>' {
-                        i += 1;
-                    }
-                    if i < len && bytes[i] == b'>' {
-                        i += 1;
-                    }
-                    state = HtmlParserState::Text;
-                } else {
-                    i += 1;
-                }
-            }
-            HtmlParserState::Style => {
-                if i + 7 <= len && html[i..i + 7].eq_ignore_ascii_case("</style") {
-                    i += 7;
-                    while i < len && bytes[i] != b'>' {
-                        i += 1;
-                    }
-                    if i < len && bytes[i] == b'>' {
-                        i += 1;
-                    }
-                    state = HtmlParserState::Text;
-                } else {
-                    i += 1;
-                }
+            } else if is_valid_custom_element_name(&tag_lower) {
+                self.tags.insert(tag_lower);
             }
         }
+        TokenSinkResult::Continue
     }
 }
 
-/// Tokenize and extract custom element tags from CSS selector strings.
-fn extract_tags_from_css_selector(selector: &str, tags: &mut HashSet<String>) {
-    for token in selector.split(|c: char| {
-        c.is_ascii_whitespace()
-            || matches!(
-                c,
-                '>' | '+' | '~' | '[' | ']' | '(' | ')' | '.' | '#' | ':' | ',' | '|'
-            )
-    }) {
-        let trimmed = token.trim().to_ascii_lowercase();
-        if is_valid_custom_element_name(&trimmed) {
-            tags.insert(trimmed);
+/// Tokenize an HTML string or template fragment using `html5ever`'s WHATWG HTML5 tokenizer.
+/// Properly handles comments, quoted attributes, and embedded script/style/textarea rawdata tags.
+pub fn scan_html_tags_into(html: &str, tags: &mut HashSet<String>) {
+    let sink = HtmlTagScanner { tags };
+    let mut tokenizer = Tokenizer::new(sink, TokenizerOpts::default());
+    let mut input = BufferQueue::default();
+    input.push_back(StrTendril::from_slice(html));
+    let _ = tokenizer.feed(&mut input);
+    tokenizer.end();
+}
+
+struct SelectorTagExtractor<'a> {
+    tags: &'a mut HashSet<String>,
+}
+
+impl<'i> CssVisitor<'i> for SelectorTagExtractor<'_> {
+    type Error = std::convert::Infallible;
+
+    fn visit_types(&self) -> VisitTypes {
+        visit_types!(SELECTORS)
+    }
+
+    fn visit_selector(&mut self, selector: &mut Selector<'i>) -> Result<(), Self::Error> {
+        for component in selector.iter_raw_match_order() {
+            if let Component::LocalName(local) = component {
+                let name = local.lower_name.as_ref();
+                if is_valid_custom_element_name(name) {
+                    self.tags.insert(name.to_string());
+                }
+            }
         }
+        selector.visit_children(self)
+    }
+}
+
+/// Tokenize and extract custom element tags from CSS selector strings using `lightningcss`.
+fn extract_tags_from_css_selector(selector: &str, tags: &mut HashSet<String>) {
+    let wrapped = format!("{selector}{{}}");
+    if let Ok(mut sheet) = StyleSheet::parse(&wrapped, ParserOptions::default()) {
+        let mut extractor = SelectorTagExtractor { tags };
+        let _ = sheet.visit(&mut extractor);
     }
 }
 
@@ -235,7 +139,7 @@ fn get_callee_method_name<'a>(expr: &'a Expression<'a>) -> Option<&'a str> {
 
 /// AST visitor scanning JavaScript / TypeScript AST for custom element references:
 /// - Lit `html` and `svg` tagged template expressions
-/// - JSX / TSX elements (<cds-button ...>)
+/// - JSX / TSX elements (<my-button ...>)
 /// - DOM APIs: `document.createElement('tag')`, `querySelector('tag')`, `customElements.get('tag')`
 /// - Untagged template strings containing HTML markup
 pub struct CustomElementAstVisitor<'a> {
@@ -279,18 +183,26 @@ impl<'a> Visit<'a> for CustomElementAstVisitor<'a> {
     }
 
     fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
-        for quasi in &tagged.quasi.quasis {
-            scan_html_tags_into(quasi.value.raw.as_str(), &mut self.tags);
-        }
+        let joined: String = tagged
+            .quasi
+            .quasis
+            .iter()
+            .map(|q| q.value.raw.as_str())
+            .collect::<Vec<_>>()
+            .join("__lit_hole__");
+        scan_html_tags_into(&joined, &mut self.tags);
         walk::walk_tagged_template_expression(self, tagged);
     }
 
     fn visit_template_literal(&mut self, lit: &TemplateLiteral<'a>) {
-        for quasi in &lit.quasis {
-            let s = quasi.value.raw.as_str();
-            if s.contains('<') && s.contains('-') {
-                scan_html_tags_into(s, &mut self.tags);
-            }
+        let joined: String = lit
+            .quasis
+            .iter()
+            .map(|q| q.value.raw.as_str())
+            .collect::<Vec<_>>()
+            .join("__lit_hole__");
+        if joined.contains('<') && joined.contains('-') {
+            scan_html_tags_into(&joined, &mut self.tags);
         }
         walk::walk_template_literal(self, lit);
     }
@@ -401,17 +313,14 @@ mod tests {
         let source = r#"
             import { html } from 'lit';
             const template = html`
-                <cds-button size="sm">Click</cds-button>
-                <sp-action-button active></sp-action-button>
+                <my-button size="sm">Click</my-button>
+                <ui-action-button active></ui-action-button>
                 <div>Not a custom element</div>
-                <wa-icon-button name="heart"></wa-icon-button>
+                <x-icon-button name="heart"></x-icon-button>
             `;
         "#;
         let tags = scan_custom_element_tags(source, Some("app.ts"));
-        assert_eq!(
-            tags,
-            vec!["cds-button", "sp-action-button", "wa-icon-button"]
-        );
+        assert_eq!(tags, vec!["my-button", "ui-action-button", "x-icon-button"]);
     }
 
     #[test]
@@ -420,15 +329,15 @@ mod tests {
             export function MyView() {
                 return (
                     <div>
-                        <cds-modal open>
-                            <cds-button>Confirm</cds-button>
-                        </cds-modal>
+                        <ui-modal open>
+                            <my-button>Confirm</my-button>
+                        </ui-modal>
                     </div>
                 );
             }
         "#;
         let tags = scan_custom_element_tags(source, Some("view.tsx"));
-        assert_eq!(tags, vec!["cds-button", "cds-modal"]);
+        assert_eq!(tags, vec!["my-button", "ui-modal"]);
     }
 
     #[test]
@@ -436,14 +345,14 @@ mod tests {
         let source = r#"
             import { html } from 'lit';
             const template = html`
-                <!-- <cds-commented-out></cds-commented-out> -->
-                <div title="<cds-in-attribute>">
-                    <cds-real-button></cds-real-button>
+                <!-- <my-commented-out></my-commented-out> -->
+                <div title="<my-in-attribute>">
+                    <my-real-button></my-real-button>
                 </div>
             `;
         "#;
         let tags = scan_custom_element_tags(source, Some("app.ts"));
-        assert_eq!(tags, vec!["cds-real-button"]);
+        assert_eq!(tags, vec!["my-real-button"]);
     }
 
     #[test]
@@ -463,20 +372,20 @@ mod tests {
     #[test]
     fn test_scan_dom_apis() {
         let source = r#"
-            const btn = document.createElement('cds-button');
-            const modal = document.querySelector('cds-modal.active');
-            customElements.whenDefined('sp-picker');
+            const btn = document.createElement('my-button');
+            const modal = document.querySelector('ui-modal.active');
+            customElements.whenDefined('ui-picker');
         "#;
         let tags = scan_custom_element_tags(source, Some("dom.js"));
-        assert_eq!(tags, vec!["cds-button", "cds-modal", "sp-picker"]);
+        assert_eq!(tags, vec!["my-button", "ui-modal", "ui-picker"]);
     }
 
     #[test]
     fn test_valid_custom_element_rules() {
-        assert!(is_valid_custom_element_name("cds-button"));
+        assert!(is_valid_custom_element_name("my-button"));
         assert!(is_valid_custom_element_name("my-element-1"));
         assert!(!is_valid_custom_element_name("div"));
         assert!(!is_valid_custom_element_name("font-face")); // Reserved
-        assert!(!is_valid_custom_element_name("CDS-BUTTON")); // No uppercase
+        assert!(!is_valid_custom_element_name("MY-BUTTON")); // No uppercase
     }
 }

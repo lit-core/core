@@ -123,32 +123,32 @@ pnpm add lit@^3.0.0
 
 ### Main entry point (`@lit-core/ssr`)
 
-| Export | Kind | Signature | Purpose |
-| :--- | :--- | :--- | :--- |
-| `render` | Function | `(value: unknown, options?: RenderOptions) => IterableIterator<string>` | Synchronous string chunk iterator |
-| `renderAsync` | Function | `(value: unknown, options?: RenderOptions) => AsyncGenerator<string>` | Asynchronous chunk iterator supporting out-of-order async boundaries |
-| `renderToStream` | Function | `(value: unknown, options?: StreamRenderOptions) => ReadableStream<Uint8Array>` | WHATWG binary streaming with backpressure |
-| `renderToResponse` | Function | `(value: unknown, options?: EdgeResponseOptions) => Response` | Creates a streaming HTTP `Response` with `text/html; charset=utf-8` |
-| `renderToString` | Function | `(value: unknown, options?: RenderOptions) => string` | Synchronous HTML string collector |
-| `renderToStringAsync` | Function | `(value: unknown, options?: RenderOptions) => Promise<string>` | Asynchronous HTML string collector |
-| `renderHtmlDocument` | Function | `(htmlDoc: string, options?: RenderOptions) => string` | Expands custom elements inside a complete HTML document string |
-| `renderHtmlDocumentAsync` | Function | `(htmlDoc: string, options?: RenderOptions) => Promise<string>` | Asynchronously expands custom elements inside an HTML document |
-| `transformWithHtmlRewriter` | Function | `(input: Response \| string, options?: HtmlRewriterSsrOptions) => Response` | Non-blocking streaming expansion via Cloudflare `HTMLRewriter` |
-| `collectResult` | Function | `(result: Iterable<string> \| AsyncIterable<string> \| ReadableStream<Uint8Array>) => Promise<string>` | Unified asynchronous string accumulator |
-| `createIsolateEnvironment` | Function | `(parentRegistry?: CustomElementRegistryLike) => IsolateEnvironment` | Creates pure V8 isolate stubs and registry |
-| `installIsolateGlobals` | Function | `() => void` | Installs stubs on `globalThis` if undefined |
-| `withScopedIsolateGlobals` | Function | `<T>(env: IsolateEnvironment, fn: () => T) => T` | Runs a callback with scoped isolate globals |
-| `SlotManager` | Class | `class SlotManager` | Lexical slot projection context stack manager |
-| `StyleDeduplicator` | Class | `class StyleDeduplicator` | Extracts and deduplicates component styles |
-| `CompilerBridge` | Class | `class CompilerBridge` | Integrates `html-aot`, `css-fuse`, and `resumable` |
-| `HTMLElementStub` | Class | `class HTMLElementStub` | Minimal `HTMLElement` implementation for SSR |
-| `CustomEventStub` | Class | `class CustomEventStub<T>` | Minimal `CustomEvent` stub |
-| `CSSStyleSheetStub` | Class | `class CSSStyleSheetStub` | Minimal `CSSStyleSheet` stub with `replaceSync` |
-| `DocumentStub` | Class | `class DocumentStub` | Referentially stable document stub |
-| `KeyboardEventStub` | Class | `class KeyboardEventStub` | Minimal `KeyboardEvent` stub |
-| `IsolateCustomElementRegistry` | Class | `class IsolateCustomElementRegistry` | Scoped custom elements registry |
-| `LIT_NOTHING` | Constant | `Symbol.for('lit-nothing')` | Sentinel for empty template parts |
-| `LIT_NO_CHANGE` | Constant | `Symbol.for('lit-noChange')` | Sentinel for unchanged template parts |
+| Export                         | Kind     | Signature                                                                                              | Purpose                                                              |
+| :----------------------------- | :------- | :----------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------- |
+| `render`                       | Function | `(value: unknown, options?: RenderOptions) => IterableIterator<string>`                                | Synchronous string chunk iterator                                    |
+| `renderAsync`                  | Function | `(value: unknown, options?: RenderOptions) => AsyncGenerator<string>`                                  | Asynchronous chunk iterator supporting out-of-order async boundaries |
+| `renderToStream`               | Function | `(value: unknown, options?: StreamRenderOptions) => ReadableStream<Uint8Array>`                        | WHATWG binary streaming with backpressure                            |
+| `renderToResponse`             | Function | `(value: unknown, options?: EdgeResponseOptions) => Response`                                          | Creates a streaming HTTP `Response` with `text/html; charset=utf-8`  |
+| `renderToString`               | Function | `(value: unknown, options?: RenderOptions) => string`                                                  | Synchronous HTML string collector                                    |
+| `renderToStringAsync`          | Function | `(value: unknown, options?: RenderOptions) => Promise<string>`                                         | Asynchronous HTML string collector                                   |
+| `renderHtmlDocument`           | Function | `(htmlDoc: string, options?: RenderOptions) => string`                                                 | Expands custom elements inside a complete HTML document string       |
+| `renderHtmlDocumentAsync`      | Function | `(htmlDoc: string, options?: RenderOptions) => Promise<string>`                                        | Asynchronously expands custom elements inside an HTML document       |
+| `transformWithHtmlRewriter`    | Function | `(input: Response \| string, options?: HtmlRewriterSsrOptions) => Response`                            | Non-blocking streaming expansion via Cloudflare `HTMLRewriter`       |
+| `collectResult`                | Function | `(result: Iterable<string> \| AsyncIterable<string> \| ReadableStream<Uint8Array>) => Promise<string>` | Unified asynchronous string accumulator                              |
+| `createIsolateEnvironment`     | Function | `(parentRegistry?: CustomElementRegistryLike) => IsolateEnvironment`                                   | Creates pure V8 isolate stubs and registry                           |
+| `installIsolateGlobals`        | Function | `() => void`                                                                                           | Installs stubs on `globalThis` if undefined                          |
+| `withScopedIsolateGlobals`     | Function | `<T>(env: IsolateEnvironment, fn: () => T) => T`                                                       | Runs a callback with scoped isolate globals                          |
+| `SlotManager`                  | Class    | `class SlotManager`                                                                                    | Lexical slot projection context stack manager                        |
+| `StyleDeduplicator`            | Class    | `class StyleDeduplicator`                                                                              | Extracts and deduplicates component styles                           |
+| `CompilerBridge`               | Class    | `class CompilerBridge`                                                                                 | Integrates `html-aot`, `css-fuse`, and `resumable`                   |
+| `HTMLElementStub`              | Class    | `class HTMLElementStub`                                                                                | Minimal `HTMLElement` implementation for SSR                         |
+| `CustomEventStub`              | Class    | `class CustomEventStub<T>`                                                                             | Minimal `CustomEvent` stub                                           |
+| `CSSStyleSheetStub`            | Class    | `class CSSStyleSheetStub`                                                                              | Minimal `CSSStyleSheet` stub with `replaceSync`                      |
+| `DocumentStub`                 | Class    | `class DocumentStub`                                                                                   | Referentially stable document stub                                   |
+| `KeyboardEventStub`            | Class    | `class KeyboardEventStub`                                                                              | Minimal `KeyboardEvent` stub                                         |
+| `IsolateCustomElementRegistry` | Class    | `class IsolateCustomElementRegistry`                                                                   | Scoped custom elements registry                                      |
+| `LIT_NOTHING`                  | Constant | `Symbol.for('lit-nothing')`                                                                            | Sentinel for empty template parts                                    |
+| `LIT_NO_CHANGE`                | Constant | `Symbol.for('lit-noChange')`                                                                           | Sentinel for unchanged template parts                                |
 
 #### `render(value, options?)`
 

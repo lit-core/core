@@ -67,25 +67,25 @@ Every component is resolved from production package exports, guaranteeing unifor
 
 #### 3. Evaluated optimization passes
 
-| Optimization pass | Primary mechanism |
-| :--- | :--- |
-| `css-fuse` | Cross-component CSS AST deduplication into constructable sheets |
-| `props-lower` | Lowers `@property` / `@state` decorators to static class `properties` |
-| `html-fuse` | Clusters repeated static HTML and SVG subtrees into shared constants |
-| `directives` | Ahead-of-time lowering of built-in Lit directives, pruning runtime imports |
-| `memoize` | Auto-memoizes pure array pipelines (`.map()`, `.filter()`) in `render()` |
-| `dom-paths` | Replaces `TreeWalker` mounting traversal with direct child pointers |
-| `event-hoist` | ShadowRoot event delegation with composed path dispatch |
-| `dirty-mask` | Property-to-part dependency bitmasking with `noChange` short-circuiting |
-| `elem-proxy` | Deferred proxy stubs and JIT Custom Element class upgrade |
-| `html-aot` | Ahead-of-time Lit template compilation into static descriptors |
-| `native` | Compiles leaf components into zero-dependency vanilla `HTMLElement` classes |
-| `css-minifier` | Embedded CSS template literal minification via `lightningcss` |
-| `html-minifier` | Embedded HTML template literal minification via `oxc` |
-| `tag-shake` | Ahead-of-time Custom Element registration dead code elimination |
-| `resumable` | Declarative Shadow DOM SSR with interaction-driven resumption |
-| `ssr` / `edge` | Universal Declarative Shadow DOM streaming and `HTMLRewriter` edge rendering |
-| `all` | Complete `@lit-core` optimization suite combined |
+| Optimization pass | Primary mechanism                                                            |
+| :---------------- | :--------------------------------------------------------------------------- |
+| `css-fuse`        | Cross-component CSS AST deduplication into constructable sheets              |
+| `props-lower`     | Lowers `@property` / `@state` decorators to static class `properties`        |
+| `html-fuse`       | Clusters repeated static HTML and SVG subtrees into shared constants         |
+| `directives`      | Ahead-of-time lowering of built-in Lit directives, pruning runtime imports   |
+| `memoize`         | Auto-memoizes pure array pipelines (`.map()`, `.filter()`) in `render()`     |
+| `dom-paths`       | Replaces `TreeWalker` mounting traversal with direct child pointers          |
+| `event-hoist`     | ShadowRoot event delegation with composed path dispatch                      |
+| `dirty-mask`      | Property-to-part dependency bitmasking with `noChange` short-circuiting      |
+| `elem-proxy`      | Deferred proxy stubs and JIT Custom Element class upgrade                    |
+| `html-aot`        | Ahead-of-time Lit template compilation into static descriptors               |
+| `native`          | Compiles leaf components into zero-dependency vanilla `HTMLElement` classes  |
+| `css-minifier`    | Embedded CSS template literal minification via `lightningcss`                |
+| `html-minifier`   | Embedded HTML template literal minification via `oxc`                        |
+| `tag-shake`       | Ahead-of-time Custom Element registration dead code elimination              |
+| `resumable`       | Declarative Shadow DOM SSR with interaction-driven resumption                |
+| `ssr` / `edge`    | Universal Declarative Shadow DOM streaming and `HTMLRewriter` edge rendering |
+| `all`             | Complete `@lit-core` optimization suite combined                             |
 
 ---
 

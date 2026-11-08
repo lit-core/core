@@ -48,12 +48,25 @@ fn parse_rules_recursive<F>(
                     Err(_) => continue,
                 };
 
-                let raw_body_str = match style_rule.declarations.to_css_string(printer_opts()) {
-                    Ok(s) => s,
-                    Err(_) => continue,
-                };
-
-                let declarations = split_and_canonicalize_declarations(&raw_body_str);
+                let mut declarations = Vec::new();
+                for decl in &style_rule.declarations.declarations {
+                    if let Ok(s) = decl.to_css_string(false, printer_opts()) {
+                        let trimmed = s.trim().trim_end_matches(';').trim().to_string();
+                        if !trimmed.is_empty() {
+                            declarations.push(trimmed);
+                        }
+                    }
+                }
+                for decl in &style_rule.declarations.important_declarations {
+                    if let Ok(s) = decl.to_css_string(true, printer_opts()) {
+                        let trimmed = s.trim().trim_end_matches(';').trim().to_string();
+                        if !trimmed.is_empty() {
+                            declarations.push(trimmed);
+                        }
+                    }
+                }
+                declarations.sort();
+                declarations.dedup();
                 if declarations.is_empty() {
                     continue;
                 }

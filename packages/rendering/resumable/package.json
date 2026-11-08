@@ -47,6 +47,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "devalue": "^6.0.3",
     "lit": "^3.3.3",
     "lit-html": "^3.3.3"
   },

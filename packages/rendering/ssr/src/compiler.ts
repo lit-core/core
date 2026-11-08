@@ -15,6 +15,7 @@ export interface TransformSsrResult {
   map?: string | null;
   modified: boolean;
   discoveredTags: string[];
+  staticTemplates?: string[];
   syntaxError?: string | null;
 }
 

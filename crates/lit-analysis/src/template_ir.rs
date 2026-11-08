@@ -3,96 +3,13 @@
 use html5ever::driver::ParseOpts;
 use html5ever::tendril::TendrilSink;
 use html5ever::{QualName, local_name, namespace_url, ns, parse_fragment};
+use indexmap::IndexMap;
 use markup5ever_rcdom::{Handle, NodeData, RcDom};
-use serde::de::{MapAccess, Visitor};
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt;
+use serde::{Deserialize, Serialize};
 
 /// Deterministic, source-ordered attribute map that serializes as a JSON object
 /// in exact insertion order without `HashMap` randomization across processes.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct OrderedAttrs(pub Vec<(String, String)>);
-
-impl OrderedAttrs {
-    pub fn new() -> Self {
-        Self(Vec::new())
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    pub fn insert(&mut self, key: String, val: String) {
-        if let Some(existing) = self.0.iter_mut().find(|(k, _)| k == &key) {
-            existing.1 = val;
-        } else {
-            self.0.push((key, val));
-        }
-    }
-
-    pub fn get(&self, key: &str) -> Option<&String> {
-        self.0.iter().find(|(k, _)| k == key).map(|(_, v)| v)
-    }
-
-    pub fn iter(&self) -> std::slice::Iter<'_, (String, String)> {
-        self.0.iter()
-    }
-}
-
-impl<'a> IntoIterator for &'a OrderedAttrs {
-    type Item = &'a (String, String);
-    type IntoIter = std::slice::Iter<'a, (String, String)>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.iter()
-    }
-}
-
-impl Serialize for OrderedAttrs {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let mut map = serializer.serialize_map(Some(self.0.len()))?;
-        for (k, v) in &self.0 {
-            map.serialize_entry(k, v)?;
-        }
-        map.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for OrderedAttrs {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        struct OrderedAttrsVisitor;
-
-        impl<'de> Visitor<'de> for OrderedAttrsVisitor {
-            type Value = OrderedAttrs;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str("a string-to-string attribute map")
-            }
-
-            fn visit_map<M: MapAccess<'de>>(self, mut access: M) -> Result<Self::Value, M::Error> {
-                let mut entries = Vec::with_capacity(access.size_hint().unwrap_or(0));
-                while let Some((k, v)) = access.next_entry::<String, String>()? {
-                    if let Some(existing) = entries
-                        .iter_mut()
-                        .find(|(ek, _): &&mut (String, String)| ek == &k)
-                    {
-                        existing.1 = v;
-                    } else {
-                        entries.push((k, v));
-                    }
-                }
-                Ok(OrderedAttrs(entries))
-            }
-        }
-
-        deserializer.deserialize_map(OrderedAttrsVisitor)
-    }
-}
+pub type OrderedAttrs = IndexMap<String, String>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ElementNamespace {

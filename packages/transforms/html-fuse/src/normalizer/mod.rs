@@ -1,97 +1,19 @@
 pub mod hasher;
 
 use crate::normalizer::hasher::compute_fragment_hash;
+use lit_analysis::html_collapse::collapse_template_quasis;
 
 /// Normalizes raw HTML or SVG template fragments into a canonical representation.
 /// Minor formatting, whitespace and indentation differences across components
 /// are collapsed so identical static trees map to the same cluster.
 pub fn normalize_fragment(raw: &str) -> (String, String) {
-    let trimmed = raw.trim();
-    let mut normalized = String::with_capacity(trimmed.len());
-
-    let mut in_tag = false;
-    let mut in_quote = None; // Some('"') or Some('\'')
-    let mut prev_char = ' ';
-    let chars: Vec<char> = trimmed.chars().collect();
-    let len = chars.len();
-    let mut i = 0;
-
-    while i < len {
-        let ch = chars[i];
-
-        if !in_tag {
-            if ch == '<' {
-                in_tag = true;
-                // If previous char was whitespace, trim it if preceded by '>'
-                if normalized.ends_with(' ') && normalized.trim_end().ends_with('>') {
-                    let trimmed_end = normalized.trim_end();
-                    normalized.truncate(trimmed_end.len());
-                }
-                normalized.push('<');
-                prev_char = '<';
-            } else if ch == '>' {
-                normalized.push('>');
-                prev_char = '>';
-            } else if ch.is_whitespace() {
-                // If we are between tags (e.g. >\s+<), avoid accumulating spaces
-                if !normalized.ends_with('>') && !normalized.ends_with(' ') {
-                    normalized.push(' ');
-                    prev_char = ' ';
-                }
-            } else {
-                normalized.push(ch);
-                prev_char = ch;
-            }
-            i += 1;
-        } else {
-            // Inside a tag
-            if let Some(q) = in_quote {
-                normalized.push(ch);
-                if ch == q && (i == 0 || chars[i - 1] != '\\') {
-                    in_quote = None;
-                }
-                prev_char = ch;
-                i += 1;
-            } else {
-                if ch == '"' || ch == '\'' {
-                    in_quote = Some(ch);
-                    normalized.push(ch);
-                    prev_char = ch;
-                    i += 1;
-                } else if ch == '>' {
-                    in_tag = false;
-                    // Normalize " />" to "/>"
-                    if normalized.ends_with(" /") {
-                        normalized.pop();
-                    }
-                    normalized.push('>');
-                    prev_char = '>';
-                    i += 1;
-                } else if ch == '/' && i + 1 < len && chars[i + 1] == '>' {
-                    // Self closing "/>"
-                    if normalized.ends_with(' ') {
-                        normalized.pop();
-                    }
-                    normalized.push_str("/>");
-                    in_tag = false;
-                    prev_char = '>';
-                    i += 2;
-                } else if ch.is_whitespace() {
-                    if prev_char != ' ' && prev_char != '<' {
-                        normalized.push(' ');
-                        prev_char = ' ';
-                    }
-                    i += 1;
-                } else {
-                    normalized.push(ch);
-                    prev_char = ch;
-                    i += 1;
-                }
-            }
-        }
-    }
-
-    let canonical = normalized.trim().to_string();
+    let collapsed = collapse_template_quasis(&[raw.trim()]);
+    let canonical = collapsed
+        .into_iter()
+        .next()
+        .unwrap_or_default()
+        .trim()
+        .to_string();
     let hash = compute_fragment_hash(&canonical);
     (canonical, hash)
 }

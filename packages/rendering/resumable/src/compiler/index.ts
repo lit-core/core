@@ -119,3 +119,15 @@ export function injectClientEntryImports(source: string, specifiers: string[], o
   }
   throw new Error('Native @lit-core/resumable OXC compiler addon not loaded.');
 }
+
+/**
+ * Ahead-of-time OXC AST scanner extracting custom element tag names defined via
+ * `@customElement(...)` or `customElements.define(...)`.
+ */
+export function extractCustomElementTagsAst(source: string, filename?: string): string[] {
+  const binding = getNativeBinding();
+  if (binding?.extractCustomElementTags) {
+    return binding.extractCustomElementTags(source, filename);
+  }
+  throw new Error('Native @lit-core/resumable OXC compiler addon not loaded.');
+}

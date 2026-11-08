@@ -20,99 +20,31 @@ pub fn scan_queries<'a>(
 ) -> Vec<QueryLoweringInfo> {
     let mut queries = Vec::new();
 
-    if let Some(c) = class {
-        if let Some(ctx) = symbol_ctx {
-            let member_decs = lit_analysis::DecoratorExtractor::extract_member_decorators(c, ctx);
-            for dec in member_decs {
-                let prop_name = match dec.target_member {
-                    Some(name) => name,
-                    None => continue,
-                };
-                match dec.kind {
-                    lit_analysis::LitDecoratorKind::Query { selector } => {
-                        queries.push(QueryLoweringInfo {
-                            ref_var_name: format!("{}Ref", prop_name),
-                            property_name: prop_name,
-                            selector,
-                            is_all: false,
-                        });
-                    }
-                    lit_analysis::LitDecoratorKind::QueryAll { selector } => {
-                        queries.push(QueryLoweringInfo {
-                            ref_var_name: format!("{}Ref", prop_name),
-                            property_name: prop_name,
-                            selector,
-                            is_all: true,
-                        });
-                    }
-                    _ => {}
+    if let (Some(c), Some(ctx)) = (class, symbol_ctx) {
+        let member_decs = lit_analysis::DecoratorExtractor::extract_member_decorators(c, ctx);
+        for dec in member_decs {
+            let prop_name = match dec.target_member {
+                Some(name) => name,
+                None => continue,
+            };
+            match dec.kind {
+                lit_analysis::LitDecoratorKind::Query { selector } => {
+                    queries.push(QueryLoweringInfo {
+                        ref_var_name: format!("{}Ref", prop_name),
+                        property_name: prop_name,
+                        selector,
+                        is_all: false,
+                    });
                 }
-            }
-        } else {
-            for element in &c.body.body {
-                match element {
-                    ClassElement::PropertyDefinition(prop) => {
-                        let prop_name = prop.key.static_name().unwrap_or_default();
-                        for dec in &prop.decorators {
-                            if let Expression::CallExpression(call) = &dec.expression {
-                                let callee_name = match &call.callee {
-                                    Expression::Identifier(id) => Some(id.name.as_str()),
-                                    Expression::StaticMemberExpression(mem) => {
-                                        Some(mem.property.name.as_str())
-                                    }
-                                    _ => None,
-                                };
-                                if let Some(name) = callee_name
-                                    && (name == "query" || name == "queryAll")
-                                {
-                                    let is_all = name == "queryAll";
-                                    if let Some(arg0) = call.arguments.first()
-                                        && let Some(Expression::StringLiteral(lit)) =
-                                            arg0.as_expression()
-                                    {
-                                        queries.push(QueryLoweringInfo {
-                                            property_name: prop_name.to_string(),
-                                            selector: lit.value.as_str().to_string(),
-                                            ref_var_name: format!("{}Ref", prop_name),
-                                            is_all,
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    ClassElement::AccessorProperty(prop) => {
-                        let prop_name = prop.key.static_name().unwrap_or_default();
-                        for dec in &prop.decorators {
-                            if let Expression::CallExpression(call) = &dec.expression {
-                                let callee_name = match &call.callee {
-                                    Expression::Identifier(id) => Some(id.name.as_str()),
-                                    Expression::StaticMemberExpression(mem) => {
-                                        Some(mem.property.name.as_str())
-                                    }
-                                    _ => None,
-                                };
-                                if let Some(name) = callee_name
-                                    && (name == "query" || name == "queryAll")
-                                {
-                                    let is_all = name == "queryAll";
-                                    if let Some(arg0) = call.arguments.first()
-                                        && let Some(Expression::StringLiteral(lit)) =
-                                            arg0.as_expression()
-                                    {
-                                        queries.push(QueryLoweringInfo {
-                                            property_name: prop_name.to_string(),
-                                            selector: lit.value.as_str().to_string(),
-                                            ref_var_name: format!("{}Ref", prop_name),
-                                            is_all,
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    _ => {}
+                lit_analysis::LitDecoratorKind::QueryAll { selector } => {
+                    queries.push(QueryLoweringInfo {
+                        ref_var_name: format!("{}Ref", prop_name),
+                        property_name: prop_name,
+                        selector,
+                        is_all: true,
+                    });
                 }
+                _ => {}
             }
         }
     }

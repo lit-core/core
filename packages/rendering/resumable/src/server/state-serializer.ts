@@ -1,3 +1,7 @@
+import { parse as devalueParse, stringify as devalueStringify } from 'devalue';
+
+export { devalueParse as parseDevalueState, devalueStringify as stringifyDevalueState };
+
 export interface StateSerializerOptions {
   /**
    * Property keys to explicitly exclude from serialization.
@@ -190,9 +194,41 @@ export function extractComponentState(instanceOrProps: any, options: StateSerial
 }
 
 /**
- * Safely serialize state object to JSON string, escaping '<' to prevent script breakouts.
+ * Check if a value contains rich non-JSON types supported by `devalue` (Date, Map, Set, RegExp, URL, BigInt).
+ */
+function hasRichDevalueTypes(value: unknown, seen?: WeakSet<object>): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'bigint') return true;
+  if (typeof value === 'object') {
+    if (value instanceof Date || value instanceof RegExp || value instanceof Map || value instanceof Set || (typeof URL !== 'undefined' && value instanceof URL)) {
+      return true;
+    }
+    const visited = seen ?? new WeakSet<object>();
+    if (visited.has(value as object)) return false;
+    visited.add(value as object);
+    if (Array.isArray(value)) {
+      return value.some((item) => hasRichDevalueTypes(item, visited));
+    }
+    const proto = Object.getPrototypeOf(value);
+    if (proto === Object.prototype || proto === null) {
+      return Object.values(value as Record<string, unknown>).some((v) => hasRichDevalueTypes(v, visited));
+    }
+  }
+  return false;
+}
+
+/**
+ * Safely serialize state object to JSON string (or devalue format when rich types are present),
+ * escaping '<' to prevent script breakouts.
  */
 export function serializeStateToJson(state: Record<string, unknown>): string {
+  if (hasRichDevalueTypes(state)) {
+    try {
+      return devalueStringify(state).replace(/</g, '\\u003c');
+    } catch {
+      // Fall through to JSON fallback
+    }
+  }
   try {
     return JSON.stringify(state).replace(/</g, '\\u003c');
   } catch {
@@ -240,11 +276,19 @@ export function formatStateAttribute(stateJsonOrObj: string | Record<string, unk
 }
 
 /**
- * Parse state from serialized `data-lit-state` attribute value.
+ * Parse state from serialized `data-lit-state` attribute value (supporting both plain JSON and `devalue` payloads).
  */
 export function parseComponentState(rawState: string): Record<string, unknown> {
-  if (!rawState?.trim()) {
+  const trimmed = rawState?.trim();
+  if (!trimmed) {
     return {};
   }
-  return JSON.parse(rawState.trim());
+  if (trimmed.startsWith('[')) {
+    try {
+      return devalueParse(trimmed) as Record<string, unknown>;
+    } catch {
+      // Fallback to JSON.parse
+    }
+  }
+  return JSON.parse(trimmed);
 }

@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 /// Configuration options for scoped CSS transformation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ScopedCssOptions {
-    /// Custom element host tag name (e.g. "cds-button", "scoped-badge").
+    /// Custom element host tag name (e.g. "my-button", "scoped-badge").
     pub host_tag: String,
     /// Selector identifying slot boundary elements.
     /// Defaults to "slot, [data-slot-boundary], slot-boundary".
@@ -45,9 +45,9 @@ impl Default for ScopedCssOptions {
 pub struct ScopedCssResult {
     /// Transformed and minified CSS string containing @scope blocks.
     pub scoped_css: String,
-    /// Content-hashed stylesheet identifier (e.g. "style-cds-button-c4a7e2b109df").
+    /// Content-hashed stylesheet identifier (e.g. "style-my-button-c4a7e2b109df").
     pub stylesheet_id: String,
-    /// Suggested external file name when emit_external_file is true (e.g. "cds-button.css").
+    /// Suggested external file name when emit_external_file is true (e.g. "my-button.css").
     pub external_file_name: Option<String>,
     /// Whether the stylesheet contains rules targeting projected slot content.
     pub has_slotted_rules: bool,
@@ -737,7 +737,7 @@ mod tests {
         }];
 
         let opts = ScopedCssOptions {
-            host_tag: "cds-button".to_string(),
+            host_tag: "my-button".to_string(),
             has_slots: true,
             ..Default::default()
         };
@@ -745,7 +745,7 @@ mod tests {
         let res = transform_component_styles(&styles, &opts).unwrap();
         assert!(
             res.scoped_css
-                .contains("@scope(cds-button) to (slot,[data-slot-boundary],slot-boundary)")
+                .contains("@scope(my-button) to (slot,[data-slot-boundary],slot-boundary)")
         );
         assert!(res.scoped_css.contains(":scope{display:block}"));
         assert!(res.scoped_css.contains(":scope[disabled]{opacity:.5}"));
@@ -756,8 +756,8 @@ mod tests {
         );
         assert!(!res.scoped_css.contains(":host"));
         assert!(!res.scoped_css.contains(":host-context"));
-        assert!(res.stylesheet_id.starts_with("style-cds-button-"));
-        assert_eq!(res.stylesheet_id.len(), "style-cds-button-".len() + 12);
+        assert!(res.stylesheet_id.starts_with("style-my-button-"));
+        assert_eq!(res.stylesheet_id.len(), "style-my-button-".len() + 12);
     }
 
     #[test]

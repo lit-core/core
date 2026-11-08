@@ -72,14 +72,7 @@ pnpm add -D @lit-core/test-kit
 
 ```typescript
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import {
-  assertMounted,
-  closeSharedBrowser,
-  createTestPage,
-  getShadowComputedStyle,
-  getSharedBrowser,
-  mountElement,
-} from '@lit-core/test-kit';
+import { assertMounted, closeSharedBrowser, createTestPage, getShadowComputedStyle, getSharedBrowser, mountElement } from '@lit-core/test-kit';
 
 describe('Button component integration', () => {
   let browser;

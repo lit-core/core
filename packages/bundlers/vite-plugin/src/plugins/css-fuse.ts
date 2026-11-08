@@ -1,11 +1,19 @@
 import fs from 'node:fs';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { auditScoping, type FuseResult, fuse } from '@lit-core/css-fuse';
 import { resolveLitPrivateSsrSupportForVite } from '@lit-core/resumable/vite';
 import type { HmrContext, Plugin, ResolvedConfig } from 'vite';
 import type { CssFuseOptions } from '../options.js';
-import { extractLitCoreVirtualSubpath, extractSheetId, formatVirtualId, formatVirtualLitCoreId, isVirtualFusedId, isVirtualLitCoreId, RESOLVED_FUSED_PREFIX } from '../utils.js';
+import {
+  extractLitCoreVirtualSubpath,
+  extractSheetId,
+  formatVirtualId,
+  formatVirtualLitCoreId,
+  isVirtualFusedId,
+  isVirtualLitCoreId,
+  RESOLVED_FUSED_PREFIX,
+  resolveFromVirtualOrigin,
+} from '../utils.js';
 import { getVirtualLitCoreModule } from '../virtual.js';
 
 export function cssFuse(options: CssFuseOptions = {}): Plugin {
@@ -155,22 +163,7 @@ export function cssFuse(options: CssFuseOptions = {}): Plugin {
       if (importer && isVirtualFusedId(importer)) {
         const sheetId = extractSheetId(importer);
         const originFile = sheetOrigins.get(sheetId) || Array.from(transformedFiles.keys())[0];
-        const candidateRoots = [
-          originFile ? path.dirname(path.isAbsolute(originFile) ? originFile : path.resolve(config?.root || process.cwd(), originFile)) : null,
-          config?.root,
-          path.resolve(config?.root || process.cwd(), 'packages/internal/benchmarks'),
-          path.resolve(config?.root || process.cwd(), 'packages/internal/showcase'),
-          path.resolve(config?.root || process.cwd(), 'packages/internal/tests'),
-          process.cwd(),
-        ].filter(Boolean) as string[];
-
-        for (const cRoot of candidateRoots) {
-          try {
-            const req = createRequire(path.join(cRoot, 'package.json'));
-            const resolved = req.resolve(id);
-            if (resolved) return resolved;
-          } catch {}
-        }
+        return resolveFromVirtualOrigin(id, originFile, config?.root);
       }
       return undefined;
     },

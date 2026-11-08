@@ -76,12 +76,7 @@ pnpm run showcase:preview
 `@lit-core/showcase` also exports its component registry and React viewer components for shared testing and dashboard integration:
 
 ```ts
-import {
-  ALL_CANONICAL_COMPONENTS,
-  CONCEPTS,
-  LIBRARIES,
-  ShowcaseViewer,
-} from '@lit-core/showcase';
+import { ALL_CANONICAL_COMPONENTS, CONCEPTS, LIBRARIES, ShowcaseViewer } from '@lit-core/showcase';
 ```
 
 ---

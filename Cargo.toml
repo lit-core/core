@@ -28,10 +28,15 @@ napi = { version = "3.13.0", features = ["serde-json"] }
 napi-derive = "3.6.9"
 napi-build = "2.5.0"
 
-# Core serialization & error handling
+# Core serialization, collections & error handling
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "2.0"
+indexmap = { version = "2.14", features = ["serde"] }
+dashmap = "5.5"
+pathdiff = "0.2"
+globset = "0.4"
+oxc_resolver = "11"
 
 # File matching & hashing
 glob = "0.3"
@@ -50,7 +55,7 @@ html5ever = "0.27"
 markup5ever_rcdom = "0.3"
 
 # CSS processing
-lightningcss = "1.0.0-alpha.72"
+lightningcss = { version = "1.0.0-alpha.72", features = ["visitor", "serde"] }
 
 # OXC compiler stack
 oxc_allocator = "0.151.0"

@@ -1,4 +1,5 @@
 import { type CustomElementRegistryLike, installIsolateGlobals, isCompiledTemplateResult, isStandardTemplateResult, type RenderOptions, renderToString } from '@lit-core/ssr';
+import { parse as parseCookieHeader, serialize as serializeCookieHeader } from 'cookie';
 import type { ActionContext, Env } from './context.js';
 import { canonicalizeJson, createSignedStateSnapshot, hasPrototypePollution, verifyStateSignature } from './crypto.js';
 import { executeServerAction, executeServerLoader } from './edge.js';
@@ -39,36 +40,24 @@ function createJsonResponse(status: number, body: { error?: string; message?: st
 }
 
 function serializeCookie(name: string, value: string, opts?: CookieOptions): string {
-  let cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
-  if (opts?.maxAge !== undefined) cookie += `; Max-Age=${opts.maxAge}`;
-  if (opts?.domain) cookie += `; Domain=${opts.domain}`;
-  if (opts?.path) cookie += `; Path=${opts.path}`;
-  if (opts?.expires) cookie += `; Expires=${opts.expires.toUTCString()}`;
-  if (opts?.httpOnly) cookie += `; HttpOnly`;
-  if (opts?.secure) cookie += `; Secure`;
-  if (opts?.sameSite) {
-    cookie += `; SameSite=${opts.sameSite.charAt(0).toUpperCase() + opts.sameSite.slice(1)}`;
-  }
-  return cookie;
+  return serializeCookieHeader(name, value, {
+    maxAge: opts?.maxAge,
+    domain: opts?.domain,
+    path: opts?.path,
+    expires: opts?.expires,
+    httpOnly: opts?.httpOnly,
+    secure: opts?.secure,
+    sameSite: opts?.sameSite ? (opts.sameSite.toLowerCase() as 'lax' | 'strict' | 'none') : undefined,
+  });
 }
 
 function parseCookies(cookieHeader: string | null): Map<string, string> {
   const map = new Map<string, string>();
   if (!cookieHeader) return map;
-  for (const rawPair of cookieHeader.split(';')) {
-    const pair = rawPair.trim();
-    const idx = pair.indexOf('=');
-    if (idx > 0) {
-      const k = pair.slice(0, idx).trim();
-      if (k) {
-        let v = pair.slice(idx + 1).trim();
-        try {
-          v = decodeURIComponent(v);
-        } catch {
-          // Fallback to raw value on malformed URI sequences
-        }
-        map.set(k, v);
-      }
+  const parsed = parseCookieHeader(cookieHeader);
+  for (const [k, v] of Object.entries(parsed)) {
+    if (k && v !== undefined) {
+      map.set(k, v);
     }
   }
   return map;

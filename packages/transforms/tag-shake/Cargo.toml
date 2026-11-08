@@ -14,6 +14,8 @@ serde_json = { workspace = true }
 
 # Shared Lit analysis engine
 lit_analysis = { workspace = true }
+html5ever = { workspace = true }
+lightningcss = { workspace = true }
 
 # OXC stack
 oxc_allocator = { workspace = true }
@@ -31,3 +33,6 @@ thiserror = { workspace = true }
 
 [build-dependencies]
 napi-build = { workspace = true }
+
+[lints]
+workspace = true

@@ -34,3 +34,6 @@ wasm-bindgen = "0.2.129"
 
 [build-dependencies]
 napi-build = { workspace = true }
+
+[lints]
+workspace = true

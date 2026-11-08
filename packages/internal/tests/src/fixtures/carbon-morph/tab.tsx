@@ -1,7 +1,6 @@
+import { MorphHost, useMorphHost } from '@lit-core/morph-to-react/runtime';
 import type React from 'react';
 import { createContext, forwardRef, useContext, useLayoutEffect, useRef } from 'react';
-import { MorphHost } from '../../runtime/morph-host.js';
-import { useMorphHost } from '../../runtime/use-morph-host.js';
 
 export interface TabsContextValue {
   activeValue: string;
@@ -187,9 +186,9 @@ export const CdsTab = forwardRef<HTMLElement, CdsTabProps>(function CdsTab(props
       className={className}
       {...rest}
     >
-      {/* biome-ignore lint/a11y/useValidAnchor: Carbon tabs render tab link without href per WAI-ARIA APG */}
+      {/* biome-ignore lint/a11y/useValidAnchor: Carbon tab fixture mirrors upstream anchor role="tab" markup */}
       <a
-        ref={(node) => {
+        ref={(node: HTMLAnchorElement | null) => {
           linkRef.current = node;
           host._linkNode = node;
         }}

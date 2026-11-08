@@ -13,6 +13,7 @@ import {
   StyleDeduplicator,
   transformWithHtmlRewriter,
 } from '@lit-core/ssr';
+import { parse as parseCookieHeader } from 'cookie';
 import type { ActionContext, Env, LoaderContext } from './context.js';
 import { createSignedStateSnapshot, escapeJsonForHtml, generateActionToken } from './crypto.js';
 import { CONTEXT_SYMBOL } from './symbols.js';
@@ -65,20 +66,10 @@ export function createLoaderContext<E = Env>(request?: Request, env: E = {} as E
   const cookies = new Map<string, string>();
 
   if (cookieHeader) {
-    for (const rawPair of cookieHeader.split(';')) {
-      const pair = rawPair.trim();
-      const idx = pair.indexOf('=');
-      if (idx > 0) {
-        const key = pair.slice(0, idx).trim();
-        if (key) {
-          let val = pair.slice(idx + 1).trim();
-          try {
-            val = decodeURIComponent(val);
-          } catch {
-            // Fallback to raw value on malformed URI sequences
-          }
-          cookies.set(key, val);
-        }
+    const parsed = parseCookieHeader(cookieHeader);
+    for (const [key, val] of Object.entries(parsed)) {
+      if (key && val !== undefined) {
+        cookies.set(key, val);
       }
     }
   }

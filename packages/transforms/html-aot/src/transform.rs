@@ -674,91 +674,16 @@ pub fn transform_code(source: &str, options: HtmlAotOptions) -> HtmlAotResult {
         .with_options(codegen_options)
         .build(&parsed.program);
     let map_json = codegen_result.map.map(|m| m.to_json_string());
-    let compacted_code = compact_parts_in_code(&codegen_result.code);
 
     let has_runtime_templates = has_static_html || !id_gen.ssr_errors.is_empty();
 
     HtmlAotResult {
-        code: compacted_code,
+        code: codegen_result.code,
         map: map_json,
         templates_count: template_matches.len() as u32,
         ssr_errors: id_gen.ssr_errors,
         has_runtime_templates,
     }
-}
-
-#[allow(clippy::while_let_on_iterator)]
-fn compact_parts_in_code(code: &str) -> String {
-    let mut res = String::with_capacity(code.len());
-    let mut chars = code.chars().peekable();
-
-    while let Some(ch) = chars.next() {
-        if ch == 'p' && chars.clone().take(7).collect::<String>() == "arts: [" {
-            res.push_str("parts: [");
-            for _ in 0..7 {
-                chars.next();
-            }
-
-            let mut bracket_depth = 1;
-            while let Some(c) = chars.next() {
-                if c == '[' {
-                    bracket_depth += 1;
-                    res.push(c);
-                } else if c == ']' {
-                    bracket_depth -= 1;
-                    res.push(c);
-                    if bracket_depth == 0 {
-                        break;
-                    }
-                } else if c == '{' {
-                    let mut obj_depth = 1;
-                    let mut obj_str = String::from("{");
-                    while let Some(oc) = chars.next() {
-                        obj_str.push(oc);
-                        if oc == '{' {
-                            obj_depth += 1;
-                        } else if oc == '}' {
-                            obj_depth -= 1;
-                            if obj_depth == 0 {
-                                break;
-                            }
-                        }
-                    }
-                    if obj_str.contains("//") {
-                        res.push_str(&obj_str);
-                        continue;
-                    }
-                    let mut compacted = String::new();
-                    let mut prev_is_space = false;
-                    for sc in obj_str.chars() {
-                        if sc.is_whitespace() {
-                            if !prev_is_space {
-                                compacted.push(' ');
-                                prev_is_space = true;
-                            }
-                        } else {
-                            if (sc == ':' || sc == ',') && prev_is_space {
-                                compacted.pop();
-                            }
-                            compacted.push(sc);
-                            if sc == ':' || sc == ',' {
-                                compacted.push(' ');
-                                prev_is_space = true;
-                            } else {
-                                prev_is_space = false;
-                            }
-                        }
-                    }
-                    res.push_str(compacted.trim());
-                } else {
-                    res.push(c);
-                }
-            }
-        } else {
-            res.push(ch);
-        }
-    }
-    res
 }
 
 fn strip_ts_in_stmts<'a>(stmts: &mut [Statement<'a>]) {
@@ -2297,6 +2222,7 @@ fn build_opcode_ast<'a>(
             tag,
             is_custom_element,
             is_void,
+            is_self_closing,
             namespace,
             static_attrs,
             dynamic_attrs,
@@ -2339,6 +2265,18 @@ fn build_opcode_ast<'a>(
                     SPAN,
                     PropertyKind::Init,
                     PropertyKey::new_static_identifier(SPAN, "isVoid", ast),
+                    Expression::new_boolean_literal(SPAN, true, ast),
+                    false,
+                    false,
+                    false,
+                    ast,
+                ));
+            }
+            if *is_self_closing {
+                props.push(ObjectPropertyKind::new_object_property(
+                    SPAN,
+                    PropertyKind::Init,
+                    PropertyKey::new_static_identifier(SPAN, "isSelfClosing", ast),
                     Expression::new_boolean_literal(SPAN, true, ast),
                     false,
                     false,

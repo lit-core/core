@@ -1,349 +1,4 @@
-#[derive(Clone, Debug, Default)]
-pub struct CollapserState {
-    pub in_comment: bool,
-    pub in_tag: bool,
-    pub quote: Option<char>,
-    pub is_closing_tag: bool,
-    pub tag_name: String,
-    pub tag_name_done: bool,
-    pub after_tag_close: bool,
-    pub preserve_stack: Vec<String>,
-}
-
-impl CollapserState {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn in_preserve_mode(&self) -> bool {
-        !self.preserve_stack.is_empty()
-    }
-}
-
-pub fn is_preserve_tag(tag: &str) -> bool {
-    matches!(tag, "pre" | "code" | "textarea" | "style" | "script")
-}
-
-/// Checks if '<' at position i in the quasi leads into a dynamic tag expression hole (${tag}),
-/// such as `<${tag}` or `</${tag}`.
-fn check_dynamic_tag(chars: &[char], i: usize, is_last_quasi: bool) -> Option<(bool, usize)> {
-    if is_last_quasi || chars[i] != '<' {
-        return None;
-    }
-    let len = chars.len();
-    let mut j = i + 1;
-    let mut is_closing = false;
-    if j < len && chars[j] == '/' {
-        is_closing = true;
-        j += 1;
-    }
-    while j < len && chars[j].is_whitespace() {
-        j += 1;
-    }
-    if j == len {
-        Some((is_closing, len - i))
-    } else {
-        None
-    }
-}
-
-/// Collapses whitespace across the quasis of a single tagged template expression.
-/// Preserves expression holes completely untouched.
-pub fn collapse_template_quasis(quasis: &[&str]) -> Vec<String> {
-    let mut state = CollapserState::new();
-    let num_quasis = quasis.len();
-    let mut result = Vec::with_capacity(num_quasis);
-
-    for (qi, quasi) in quasis.iter().enumerate() {
-        let is_first_quasi = qi == 0;
-        let is_last_quasi = qi == num_quasis - 1;
-
-        let chars: Vec<char> = quasi.chars().collect();
-        let len = chars.len();
-        let mut out = String::with_capacity(len);
-        let mut pending_ws = String::new();
-        let mut i = 0;
-
-        while i < len {
-            // 1. Inside comment: search for -->
-            if state.in_comment {
-                if i + 2 < len && chars[i] == '-' && chars[i + 1] == '-' && chars[i + 2] == '>' {
-                    state.in_comment = false;
-                    i += 3;
-                } else {
-                    i += 1;
-                }
-                continue;
-            }
-
-            // 2. Preserve mode: pre, code, textarea, style, script
-            if state.in_preserve_mode() {
-                if !state.in_tag {
-                    if chars[i] == '<' {
-                        state.in_tag = true;
-                        state.quote = None;
-                        state.tag_name.clear();
-                        state.tag_name_done = false;
-                        state.is_closing_tag = i + 1 < len && chars[i + 1] == '/';
-                        out.push('<');
-                        i += 1;
-                    } else {
-                        out.push(chars[i]);
-                        i += 1;
-                    }
-                } else {
-                    // Inside tag while in preserve mode
-                    if state.quote.is_none() {
-                        if chars[i] == '"' || chars[i] == '\'' {
-                            state.quote = Some(chars[i]);
-                            out.push(chars[i]);
-                            i += 1;
-                        } else if chars[i] == '>' {
-                            state.in_tag = false;
-                            out.push('>');
-                            i += 1;
-                            let tag_lower = state.tag_name.to_ascii_lowercase();
-                            if state.is_closing_tag {
-                                if let Some(pos) =
-                                    state.preserve_stack.iter().rposition(|t| t == &tag_lower)
-                                {
-                                    state.preserve_stack.truncate(pos);
-                                }
-                            } else if is_preserve_tag(&tag_lower) && !out.ends_with("/>") {
-                                state.preserve_stack.push(tag_lower);
-                            }
-                        } else {
-                            if !state.tag_name_done {
-                                if chars[i].is_alphanumeric()
-                                    || chars[i] == '-'
-                                    || chars[i] == '_'
-                                    || chars[i] == ':'
-                                {
-                                    state.tag_name.push(chars[i]);
-                                } else if chars[i] != '/' {
-                                    state.tag_name_done = true;
-                                }
-                            }
-                            out.push(chars[i]);
-                            i += 1;
-                        }
-                    } else {
-                        if chars[i] == state.quote.unwrap() {
-                            state.quote = None;
-                        }
-                        out.push(chars[i]);
-                        i += 1;
-                    }
-                }
-                continue;
-            }
-
-            // 3. Normal HTML / SVG minification
-            if !state.in_tag {
-                // Mode: Outside tag (Text mode)
-
-                // Check for HTML comment start: <!--
-                if i + 3 < len
-                    && chars[i] == '<'
-                    && chars[i + 1] == '!'
-                    && chars[i + 2] == '-'
-                    && chars[i + 3] == '-'
-                {
-                    state.in_comment = true;
-                    i += 4;
-                    continue;
-                }
-
-                // Check for dynamic tag start: <${tag} or </${tag}
-                if let Some((is_closing, consumed)) = check_dynamic_tag(&chars, i, is_last_quasi) {
-                    if state.after_tag_close || (is_first_quasi && out.is_empty()) || is_closing {
-                        pending_ws.clear();
-                    } else if !pending_ws.is_empty() {
-                        out.push(' ');
-                        pending_ws.clear();
-                    }
-
-                    state.after_tag_close = false;
-                    state.in_tag = true;
-                    state.quote = None;
-                    state.tag_name.clear();
-                    state.tag_name_done = true;
-                    state.is_closing_tag = is_closing;
-                    out.push('<');
-                    if is_closing {
-                        out.push('/');
-                    }
-                    i += consumed;
-                    continue;
-                }
-
-                // Check for tag start: <tag or </tag or <! or <?
-                if chars[i] == '<'
-                    && i + 1 < len
-                    && (chars[i + 1] == '/'
-                        || chars[i + 1].is_ascii_alphabetic()
-                        || chars[i + 1] == '!'
-                        || chars[i + 1] == '?'
-                        || chars[i + 1] == ':'
-                        || chars[i + 1] == '_')
-                {
-                    // We are starting a tag!
-                    let is_closing = chars[i + 1] == '/';
-                    if state.after_tag_close || (is_first_quasi && out.is_empty()) || is_closing {
-                        pending_ws.clear();
-                    } else if !pending_ws.is_empty() {
-                        out.push(' ');
-                        pending_ws.clear();
-                    }
-
-                    state.after_tag_close = false;
-                    state.in_tag = true;
-                    state.quote = None;
-                    state.tag_name.clear();
-                    state.tag_name_done = false;
-                    state.is_closing_tag = is_closing;
-                    out.push('<');
-                    i += 1;
-                    continue;
-                }
-
-                // Check for whitespace
-                if chars[i].is_whitespace() {
-                    pending_ws.push(chars[i]);
-                    i += 1;
-                    continue;
-                }
-
-                // Non-whitespace character
-                if !pending_ws.is_empty() {
-                    // Output exists either in this quasi or, for later quasis, as the preceding
-                    // expression hole, so whitespace after a hole collapses to one space.
-                    if !is_first_quasi || !out.is_empty() {
-                        out.push(' ');
-                    }
-                    pending_ws.clear();
-                }
-                state.after_tag_close = false;
-                out.push(chars[i]);
-                i += 1;
-            } else {
-                // Mode: Inside tag (<...>)
-                if state.quote.is_none() {
-                    if chars[i] == '"' || chars[i] == '\'' {
-                        state.quote = Some(chars[i]);
-                        out.push(chars[i]);
-                        i += 1;
-                    } else if chars[i] == '>' {
-                        // Tag closing with >
-                        while out.ends_with(' ') {
-                            out.pop();
-                        }
-                        out.push('>');
-                        i += 1;
-                        state.in_tag = false;
-                        state.after_tag_close = true;
-
-                        let tag_lower = state.tag_name.to_ascii_lowercase();
-                        if state.is_closing_tag {
-                            if let Some(pos) =
-                                state.preserve_stack.iter().rposition(|t| t == &tag_lower)
-                            {
-                                state.preserve_stack.truncate(pos);
-                            }
-                        } else {
-                            let is_self_closing = out.ends_with("/>");
-                            if !is_self_closing && is_preserve_tag(&tag_lower) {
-                                state.preserve_stack.push(tag_lower);
-                            }
-                        }
-                    } else if chars[i] == '/' && i + 1 < len && chars[i + 1] == '>' {
-                        // Self closing />
-                        while out.ends_with(' ') {
-                            out.pop();
-                        }
-                        out.push('/');
-                        out.push('>');
-                        i += 2;
-                        state.in_tag = false;
-                        state.after_tag_close = true;
-                    } else if chars[i].is_whitespace() {
-                        // Collapse whitespace inside tag to a single space
-                        if !out.ends_with(' ') && !out.ends_with('=') && !out.ends_with('<') {
-                            out.push(' ');
-                        }
-                        i += 1;
-                    } else if chars[i] == '=' {
-                        // Strip whitespace immediately before =
-                        while out.ends_with(' ') {
-                            out.pop();
-                        }
-                        out.push('=');
-                        i += 1;
-                    } else {
-                        // Read tag name or attribute characters
-                        if !state.tag_name_done {
-                            if chars[i].is_alphanumeric()
-                                || chars[i] == '-'
-                                || chars[i] == '_'
-                                || chars[i] == ':'
-                            {
-                                state.tag_name.push(chars[i]);
-                            } else if chars[i] != '/' {
-                                state.tag_name_done = true;
-                            }
-                        }
-                        out.push(chars[i]);
-                        i += 1;
-                    }
-                } else {
-                    // Inside attribute quote
-                    if chars[i] == state.quote.unwrap() {
-                        state.quote = None;
-                    }
-                    out.push(chars[i]);
-                    i += 1;
-                }
-            }
-        }
-
-        // End of quasi handling
-        if is_last_quasi {
-            // Last quasi: discard trailing whitespace if at end of template
-            // Only keep pending_ws if not after a tag close and out has content
-            if !state.after_tag_close && !out.is_empty() && !pending_ws.is_empty() {
-                out.push(' ');
-            }
-            pending_ws.clear();
-        } else {
-            // Non-last quasi: followed by an expression hole ${...}
-            if !pending_ws.is_empty() {
-                if !state.in_tag {
-                    // In text mode: collapse multiple whitespace to single space
-                    // If immediately after tag close (e.g. >\n  ${expr}), preserve single space if needed.
-                    // A later quasi is always preceded by an expression hole, which counts as content.
-                    if !is_first_quasi || !out.is_empty() {
-                        out.push(' ');
-                    }
-                } else {
-                    // In tag mode: preserve single space between attributes if not after = or <
-                    if !out.ends_with(' ') && !out.ends_with('=') && !out.ends_with('<') {
-                        out.push(' ');
-                    }
-                }
-                pending_ws.clear();
-            }
-            state.after_tag_close = false;
-        }
-
-        result.push(out);
-    }
-
-    if state.in_comment || state.quote.is_some() {
-        return quasis.iter().map(|s| s.to_string()).collect();
-    }
-
-    result
-}
+pub use lit_analysis::html_collapse::*;
 
 #[cfg(test)]
 mod tests {
@@ -402,7 +57,6 @@ mod tests {
 
     #[test]
     fn test_expression_holes_preserved() {
-        // html`<div class="${cls}">\n  <span>${name}</span>\n</div>`
         let input = vec![
             "\n  <div class=\"",
             "\">\n    <span>",
@@ -416,7 +70,6 @@ mod tests {
 
     #[test]
     fn test_preserve_across_holes() {
-        // html`<pre>${code}</pre>`
         let input = vec!["<pre>  ", "  </pre>"];
         let output = collapse_template_quasis(&input);
         assert_eq!(output[0], "<pre>  ");
@@ -425,7 +78,6 @@ mod tests {
 
     #[test]
     fn test_dynamic_tag_with_attributes() {
-        // html`<${tag}\n  part="btn"\n  class=${cls}\n></${tag}>`
         let input = vec!["\n  <", "\n    part=\"btn\"\n    class=", "\n  ></", ">\n"];
         let output = collapse_template_quasis(&input);
         assert_eq!(output[0], "<");
@@ -436,7 +88,6 @@ mod tests {
 
     #[test]
     fn test_dynamic_tag_self_contained() {
-        // html`<${tag}>${content}</${tag}>`
         let input = vec!["<", ">", "</", ">"];
         let output = collapse_template_quasis(&input);
         assert_eq!(output[0], "<");
@@ -447,12 +98,10 @@ mod tests {
 
     #[test]
     fn test_ambiguous_context_bailout() {
-        // Unclosed comment
         let input_comment = vec!["<div><!-- unclosed comment \n  <span>test</span>"];
         let output_comment = collapse_template_quasis(&input_comment);
         assert_eq!(output_comment[0], input_comment[0]);
 
-        // Unclosed quote in attribute
         let input_quote = vec!["<div class=\"unclosed string \n  here>"];
         let output_quote = collapse_template_quasis(&input_quote);
         assert_eq!(output_quote[0], input_quote[0]);

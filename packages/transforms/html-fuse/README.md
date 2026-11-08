@@ -155,14 +155,14 @@ for (const tpl of result.fusedTemplates) {
 
 ### Options reference
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `threshold` | `number` | `2` | Minimum number of component occurrences required to cluster a markup subtree |
-| `minFragmentLength` | `number` | `15` | Minimum character length for candidate subtrees |
-| `minSavings` | `number` | `80` | Minimum net byte savings required after accounting for module import overhead |
-| `include` | `string[]` | `['packages/components/**/src/**/*.ts', 'src/**/*.ts']` | Glob patterns of files to analyze |
-| `exclude` | `string[]` | `['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**']` | Glob patterns of files to exclude |
-| `outputDir` | `string` | `'.fused-html'` | Directory for generated fused template files when emitted to disk |
+| Option              | Type       | Default                                                                | Description                                                                   |
+| :------------------ | :--------- | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| `threshold`         | `number`   | `2`                                                                    | Minimum number of component occurrences required to cluster a markup subtree  |
+| `minFragmentLength` | `number`   | `15`                                                                   | Minimum character length for candidate subtrees                               |
+| `minSavings`        | `number`   | `80`                                                                   | Minimum net byte savings required after accounting for module import overhead |
+| `include`           | `string[]` | `['packages/components/**/src/**/*.ts', 'src/**/*.ts']`                | Glob patterns of files to analyze                                             |
+| `exclude`           | `string[]` | `['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**']` | Glob patterns of files to exclude                                             |
+| `outputDir`         | `string`   | `'.fused-html'`                                                        | Directory for generated fused template files when emitted to disk             |
 
 ---
 

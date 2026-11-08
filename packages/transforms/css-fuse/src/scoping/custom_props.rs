@@ -1,71 +1,50 @@
 use crate::diagnostics::make_diagnostic;
 use crate::models::{Diagnostic, ExtractedStyle};
+use lightningcss::properties::custom::Variable;
+use lightningcss::stylesheet::{ParserOptions, StyleSheet};
+use lightningcss::{
+    visit_types,
+    visitor::{Visit, VisitTypes, Visitor},
+};
 
-pub fn audit_custom_properties(extracted: &ExtractedStyle) -> Vec<Diagnostic> {
-    let mut diagnostics = Vec::new();
-    let css = &extracted.css_text;
+struct CustomPropertyAuditor<'a> {
+    extracted: &'a ExtractedStyle,
+    diagnostics: Vec<Diagnostic>,
+}
 
-    // Search for var(--...)
-    let mut idx = 0;
-    while let Some(found) = css[idx..].find("var(") {
-        let var_start = idx + found + 4;
-        // Find matching closing parenthesis handling nested var()
-        let mut depth = 1;
-        let mut end_pos = var_start;
+impl<'i> Visitor<'i> for CustomPropertyAuditor<'_> {
+    type Error = std::convert::Infallible;
 
-        for (char_idx, ch) in css[var_start..].char_indices() {
-            if ch == '(' {
-                depth += 1;
-            } else if ch == ')' {
-                depth -= 1;
-                if depth == 0 {
-                    end_pos = var_start + char_idx;
-                    break;
-                }
-            }
-        }
-
-        if depth == 0 {
-            let var_content = &css[var_start..end_pos].trim();
-
-            // Check if it's a CSS custom property
-            if var_content.starts_with("--") {
-                // If there's no comma at depth 1, there is no fallback
-                let mut top_level_comma = false;
-                let mut inner_depth = 0;
-                for ch in var_content.chars() {
-                    if ch == '(' {
-                        inner_depth += 1;
-                    } else if ch == ')' {
-                        inner_depth -= 1;
-                    } else if ch == ',' && inner_depth == 0 {
-                        top_level_comma = true;
-                        break;
-                    }
-                }
-
-                if !top_level_comma {
-                    let prefix = &css[..var_start];
-                    let line = prefix.lines().count() as u32;
-
-                    diagnostics.push(make_diagnostic(
-            "warning",
-            "DESIGN_CONTRACT_NO_FALLBACK",
-            &format!(
-              "CSS Custom Property '{var_content}' is consumed without a fallback: var({var_content}, <fallback>).",
-            ),
-            Some(&extracted.file_path),
-            Some(extracted.span.line as u32 + line.saturating_sub(1)),
-            Some(1),
-          ));
-                }
-            }
-
-            idx = end_pos + 1;
-        } else {
-            break;
-        }
+    fn visit_types(&self) -> VisitTypes {
+        visit_types!(VARIABLES)
     }
 
-    diagnostics
+    fn visit_variable(&mut self, var: &mut Variable<'i>) -> Result<(), Self::Error> {
+        let var_content = var.name.ident.0.as_ref();
+        if var.fallback.is_none() {
+            self.diagnostics.push(make_diagnostic(
+                "warning",
+                "DESIGN_CONTRACT_NO_FALLBACK",
+                &format!(
+                    "CSS Custom Property '{var_content}' is consumed without a fallback: var({var_content}, <fallback>).",
+                ),
+                Some(&self.extracted.file_path),
+                Some(self.extracted.span.line as u32),
+                Some(1),
+            ));
+        }
+        var.visit_children(self)
+    }
+}
+
+pub fn audit_custom_properties(extracted: &ExtractedStyle) -> Vec<Diagnostic> {
+    let Ok(mut sheet) = StyleSheet::parse(&extracted.css_text, ParserOptions::default()) else {
+        return Vec::new();
+    };
+    let mut auditor = CustomPropertyAuditor {
+        extracted,
+        diagnostics: Vec::new(),
+    };
+    let _ = sheet.visit(&mut auditor);
+    auditor.diagnostics
 }

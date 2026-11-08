@@ -16,7 +16,7 @@ export const sayHello = (name: string) => html\`<h1>Hello \${name}!</h1>\`;
     const result = compileHtmlAot(input, { filename: 'hello.ts' });
     expect(result.templatesCount).toBe(1);
     expect(result.code).toContain('_$litType$');
-    expect(result.code).toContain('parts: [{ type: 2, index: 1 }]');
+    expect(result.code.replace(/\s+/g, ' ')).toContain('parts: [{ type: 2, index: 1 }]');
   });
 
   it('compiles attribute, property, boolean and event bindings', () => {

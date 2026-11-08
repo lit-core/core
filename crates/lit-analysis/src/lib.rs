@@ -17,12 +17,17 @@ pub mod classify;
 pub mod decorator;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod diagnostics;
+pub mod html_collapse;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod manifest;
 #[cfg(feature = "template-ir")]
 pub mod parts;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod property;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod resolver;
+#[cfg(feature = "template-ir")]
+pub mod ssr_plan;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod symbol;
 #[cfg(feature = "template-ir")]
@@ -46,6 +51,11 @@ pub use parts::{
 };
 #[cfg(not(target_arch = "wasm32"))]
 pub use property::{PropertyInfo, PropertyModelExtractor, PropertyType};
+#[cfg(feature = "template-ir")]
+pub use ssr_plan::{
+    RawDescriptorPart, SsrDynamicAttribute, SsrMarkerSite, SsrOpcode, SsrTemplatePlan,
+    compute_template_id, extract_module_script_srcs,
+};
 #[cfg(not(target_arch = "wasm32"))]
 pub use symbol::{
     CanonicalDirective, CanonicalHelperSymbol, CanonicalLitSymbol, CustomElementRegistration,

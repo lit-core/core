@@ -1,10 +1,9 @@
 import fs from 'node:fs';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fuse as fuseHtml, type HtmlFuseResult, type RewrittenFileInfo, transformHtmlFuseCode } from '@lit-core/html-fuse';
 import type { Plugin, ResolvedConfig } from 'vite';
 import type { HtmlFuseOptions } from '../options.js';
-import { extractHtmlTemplateId, formatVirtualHtmlId, isVirtualHtmlFusedId } from '../utils.js';
+import { extractHtmlTemplateId, formatVirtualHtmlId, isVirtualHtmlFusedId, resolveFromVirtualOrigin } from '../utils.js';
 
 export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
   let config: ResolvedConfig;
@@ -115,22 +114,7 @@ export function htmlFuse(options: HtmlFuseOptions = {}): Plugin {
       if (importer && isVirtualHtmlFusedId(importer)) {
         const tplId = extractHtmlTemplateId(importer);
         const originFile = templateOrigins.get(tplId) || Array.from(transformedFiles.keys())[0];
-        const candidateRoots = [
-          originFile ? path.dirname(path.isAbsolute(originFile) ? originFile : path.resolve(config?.root || process.cwd(), originFile)) : null,
-          config?.root,
-          path.resolve(config?.root || process.cwd(), 'packages/internal/benchmarks'),
-          path.resolve(config?.root || process.cwd(), 'packages/internal/showcase'),
-          path.resolve(config?.root || process.cwd(), 'packages/internal/tests'),
-          process.cwd(),
-        ].filter(Boolean) as string[];
-
-        for (const cRoot of candidateRoots) {
-          try {
-            const req = createRequire(path.join(cRoot, 'package.json'));
-            const resolved = req.resolve(id);
-            if (resolved) return resolved;
-          } catch {}
-        }
+        return resolveFromVirtualOrigin(id, originFile, config?.root);
       }
       return undefined;
     },

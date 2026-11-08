@@ -70,7 +70,8 @@
     "directory": "packages/primitives/server-elements"
   },
   "dependencies": {
-    "@lit-core/ssr": "workspace:*"
+    "@lit-core/ssr": "workspace:*",
+    "cookie": "^1.1.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

@@ -102,9 +102,11 @@ impl<'a, 's, 'ast> Visit<'ast> for ResumableElementDetector<'a, 's> {
     }
 }
 
-fn has_custom_element_definition(program: &Program, source: &str) -> bool {
-    let semantic = SemanticBuilder::new().build(program).semantic;
-    let scoping = semantic.scoping();
+fn has_custom_element_definition(
+    program: &Program,
+    scoping: &oxc_semantic::Scoping,
+    source: &str,
+) -> bool {
     let symbol_ctx = SymbolProofContext::scan(program, scoping, source);
     let mut detector = ResumableElementDetector {
         symbol_ctx: &symbol_ctx,
@@ -114,8 +116,71 @@ fn has_custom_element_definition(program: &Program, source: &str) -> bool {
     detector.found
 }
 
-/// True when the module already imports the adapter, resolved by import source and
-/// canonical export name rather than by substring matching on the specifier text.
+struct CustomElementTagExtractor<'a, 's> {
+    symbol_ctx: &'a SymbolProofContext<'s>,
+    tags: Vec<String>,
+}
+
+impl<'a, 's> CustomElementTagExtractor<'a, 's> {
+    fn record_tag(&mut self, raw: &str) {
+        let tag = raw.trim().to_ascii_lowercase();
+        if tag.contains('-') && !self.tags.contains(&tag) {
+            self.tags.push(tag);
+        }
+    }
+
+    fn extract_static_str(expr: &Expression<'_>) -> Option<String> {
+        match expr.without_parentheses() {
+            Expression::StringLiteral(lit) => Some(lit.value.as_str().to_string()),
+            Expression::TemplateLiteral(tpl)
+                if tpl.expressions.is_empty() && tpl.quasis.len() == 1 =>
+            {
+                Some(tpl.quasis[0].value.raw.as_str().to_string())
+            }
+            _ => None,
+        }
+    }
+}
+
+impl<'a, 's, 'ast> Visit<'ast> for CustomElementTagExtractor<'a, 's> {
+    fn visit_call_expression(&mut self, call: &CallExpression<'ast>) {
+        if let Some(reg) = self.symbol_ctx.is_custom_elements_define(call)
+            && let Some(tag) = reg.tag
+        {
+            self.record_tag(&tag);
+        } else if self.symbol_ctx.is_proven_decorator(&call.callee)
+            == Some(CanonicalLitSymbol::CustomElementDecorator)
+            && let Some(first_arg) = call.arguments.first().and_then(|a| a.as_expression())
+            && let Some(tag) = Self::extract_static_str(first_arg)
+        {
+            self.record_tag(&tag);
+        }
+        walk::walk_call_expression(self, call);
+    }
+}
+
+#[napi]
+pub fn extract_custom_element_tags(source: String, filename: Option<String>) -> Vec<String> {
+    let fname = filename.as_deref().unwrap_or("module.ts");
+    let source_type = SourceType::from_path(fname).unwrap_or_else(|_| SourceType::tsx());
+    let allocator = Allocator::default();
+    let parsed = Parser::new(&allocator, &source, source_type).parse();
+    if parsed.program.body.is_empty() {
+        return Vec::new();
+    }
+    let semantic = SemanticBuilder::new().build(&parsed.program).semantic;
+    let scoping = semantic.scoping();
+    let symbol_ctx = SymbolProofContext::scan(&parsed.program, scoping, &source);
+    let mut extractor = CustomElementTagExtractor {
+        symbol_ctx: &symbol_ctx,
+        tags: Vec::new(),
+    };
+    extractor.visit_program(&parsed.program);
+    extractor.tags
+}
+
+/// True when the module already imports the adapter, resolved by import source rather than
+/// substring matching or unverified specifier spelling from unrelated modules.
 fn has_adapter_import(program: &Program, virtual_module: &str) -> bool {
     let is_adapter_source = |source: &str| {
         let source = source.strip_suffix(".js").unwrap_or(source);
@@ -130,15 +195,6 @@ fn has_adapter_import(program: &Program, virtual_module: &str) -> bool {
         };
         if is_adapter_source(import_decl.source.value.as_str()) {
             return true;
-        }
-        if let Some(specifiers) = &import_decl.specifiers {
-            for spec in specifiers {
-                if let ImportDeclarationSpecifier::ImportSpecifier(named) = spec
-                    && named.imported.name() == ADAPTER_EXPORT
-                {
-                    return true;
-                }
-            }
         }
     }
     false
@@ -170,8 +226,11 @@ pub fn transform_resumable_component(
         .as_deref()
         .unwrap_or(DEFAULT_VIRTUAL_MODULE);
 
+    let semantic = SemanticBuilder::new().build(&parsed.program).semantic;
+    let scoping = semantic.scoping();
+
     if has_adapter_import(&parsed.program, virtual_module)
-        || !has_custom_element_definition(&parsed.program, &source)
+        || !has_custom_element_definition(&parsed.program, scoping, &source)
     {
         return TransformResumableResult {
             code: source,
@@ -180,14 +239,30 @@ pub fn transform_resumable_component(
         };
     }
 
+    let root_scope = scoping.root_scope_id();
+    let is_available = |name: &str| {
+        scoping.get_binding(root_scope, name.into()).is_none()
+            && !scoping.root_unresolved_references().contains_key(name)
+    };
+    let local_name = if is_available(ADAPTER_EXPORT) {
+        ADAPTER_EXPORT.to_string()
+    } else {
+        let mut idx = 1usize;
+        loop {
+            let candidate = format!("_{}_{}", ADAPTER_EXPORT, idx);
+            if is_available(&candidate) {
+                break candidate;
+            }
+            idx += 1;
+        }
+    };
+    let local_name_ref = allocator.alloc_str(&local_name);
+
     let ast = AstBuilder::new(&allocator);
 
-    let imported = ModuleExportName::IdentifierName(IdentifierName::new(
-        SPAN,
-        "installResumableAdapter",
-        &ast,
-    ));
-    let local = BindingIdentifier::new(SPAN, "installResumableAdapter", &ast);
+    let imported =
+        ModuleExportName::IdentifierName(IdentifierName::new(SPAN, ADAPTER_EXPORT, &ast));
+    let local = BindingIdentifier::new(SPAN, local_name_ref, &ast);
     let spec = ImportSpecifier::boxed(SPAN, imported, local, ImportOrExportKind::Value, &ast);
     let mut specs = ArenaVec::new_in(&ast);
     specs.push(ImportDeclarationSpecifier::ImportSpecifier(spec));
@@ -203,7 +278,7 @@ pub fn transform_resumable_component(
     );
     let import_stmt = Statement::ImportDeclaration(import_decl);
 
-    let callee = Expression::new_identifier(SPAN, "installResumableAdapter", &ast);
+    let callee = Expression::new_identifier(SPAN, local_name_ref, &ast);
     let call_expr =
         Expression::new_call_expression(SPAN, callee, None, ArenaVec::new_in(&ast), false, &ast);
     let call_stmt = Statement::new_expression_statement(SPAN, call_expr, &ast);

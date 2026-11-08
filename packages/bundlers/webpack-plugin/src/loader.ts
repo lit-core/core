@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import remapping from '@jridgewell/remapping';
 import { splitServerElement } from '@lit-core/server-split';
 import type { LoaderContext } from 'webpack';
 import type {
@@ -79,6 +80,18 @@ export interface LitLoaderOptions {
   options?: LitPluginOptions;
 }
 
+function chainSourceMap(nextMap: any, prevMap: any): any {
+  if (!nextMap) return prevMap;
+  const parsedNext = typeof nextMap === 'string' ? JSON.parse(nextMap) : nextMap;
+  if (!prevMap) return parsedNext;
+  const parsedPrev = typeof prevMap === 'string' ? JSON.parse(prevMap) : prevMap;
+  try {
+    return remapping([parsedNext, parsedPrev], () => null);
+  } catch {
+    return parsedNext;
+  }
+}
+
 export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, source: string, inputSourceMap?: any) {
   const callback = this.async();
   const loaderOptions = this.getOptions() || {};
@@ -91,7 +104,8 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
   let currentMap = inputSourceMap;
 
   try {
-    if (pluginState) {
+    const tagShakeEnabled = Boolean(options.tagShake ?? options['tag-shake']);
+    if (pluginState && tagShakeEnabled) {
       if (!pluginState.usedTags) {
         pluginState.usedTags = new Set();
       }
@@ -170,10 +184,10 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
 
         if (isServer) {
           currentSource = splitResult.workerCode;
-          currentMap = splitResult.workerMap ? (typeof splitResult.workerMap === 'string' ? JSON.parse(splitResult.workerMap) : splitResult.workerMap) : currentMap;
+          currentMap = chainSourceMap(splitResult.workerMap, currentMap);
         } else {
           currentSource = splitResult.clientCode;
-          currentMap = splitResult.clientMap ? (typeof splitResult.clientMap === 'string' ? JSON.parse(splitResult.clientMap) : splitResult.clientMap) : currentMap;
+          currentMap = chainSourceMap(splitResult.clientMap, currentMap);
         }
       }
     }
@@ -187,7 +201,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -200,7 +214,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -213,12 +227,11 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
 
-    // Stage 3: Reactive template AST optimizations
     // Stage 3: Reactive template AST optimizations
     // 5. Apply dom-paths AOT structural DOM path compilation if enabled
     const domPathsOpt = options.domPaths ?? options['dom-paths'];
@@ -228,7 +241,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -241,7 +254,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -253,7 +266,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -266,7 +279,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -280,7 +293,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -293,7 +306,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -316,7 +329,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -329,7 +342,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -349,7 +362,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }
@@ -363,7 +376,7 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
       if (result) {
         currentSource = result.code;
         if (result.map) {
-          currentMap = result.map;
+          currentMap = chainSourceMap(result.map, currentMap);
         }
       }
     }

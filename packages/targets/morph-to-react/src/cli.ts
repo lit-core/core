@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { parseArgs as nodeParseArgs } from 'node:util';
+import { globSync } from 'tinyglobby';
 import { compileModule } from './index.js';
 
 export interface CliOptions {
@@ -17,83 +19,44 @@ export interface CliOptions {
 }
 
 export function parseArgs(args: string[]): CliOptions & { help?: boolean; version?: boolean } {
-  const inputs: string[] = [];
-  let outDir = 'dist/react';
-  let suffix: string | undefined;
-  let emitCss = false;
-  let emitDts = true;
-  let tsconfig: string | undefined;
-  let stripPrefix: string | undefined;
-  let targetTier: CliOptions['targetTier'];
-  let noCache = false;
-  let help = false;
-  let version = false;
+  const effectiveArgs = args[0] === 'build' ? args.slice(1) : args;
+  const { values, positionals } = nodeParseArgs({
+    args: effectiveArgs,
+    allowPositionals: true,
+    allowNegative: true,
+    strict: false,
+    options: {
+      help: { type: 'boolean', short: 'h', default: false },
+      version: { type: 'boolean', short: 'v', default: false },
+      'out-dir': { type: 'string', short: 'o', default: 'dist/react' },
+      suffix: { type: 'string' },
+      'emit-css': { type: 'boolean' },
+      css: { type: 'boolean' },
+      'emit-dts': { type: 'boolean' },
+      dts: { type: 'boolean' },
+      tsconfig: { type: 'string', short: 'p' },
+      'strip-prefix': { type: 'string' },
+      'target-tier': { type: 'string' },
+      cache: { type: 'boolean', default: true },
+    },
+  });
 
-  let i = 0;
-  // If first argument is 'build', skip command name
-  if (args[0] === 'build') {
-    i = 1;
-  }
-
-  while (i < args.length) {
-    const arg = args[i];
-    if (arg === '--help' || arg === '-h') {
-      help = true;
-    } else if (arg === '--version' || arg === '-v') {
-      version = true;
-    } else if (arg === '--out-dir' || arg === '-o') {
-      i++;
-      if (args[i]) outDir = args[i];
-    } else if (arg.startsWith('--out-dir=')) {
-      outDir = arg.slice('--out-dir='.length);
-    } else if (arg === '--suffix') {
-      i++;
-      if (args[i]) suffix = args[i];
-    } else if (arg.startsWith('--suffix=')) {
-      suffix = arg.slice('--suffix='.length);
-    } else if (arg === '--emit-css') {
-      emitCss = true;
-    } else if (arg === '--no-css') {
-      emitCss = false;
-    } else if (arg === '--emit-dts' || arg === '--dts') {
-      emitDts = true;
-    } else if (arg === '--no-dts') {
-      emitDts = false;
-    } else if (arg === '--tsconfig' || arg === '-p') {
-      i++;
-      if (args[i]) tsconfig = args[i];
-    } else if (arg.startsWith('--tsconfig=')) {
-      tsconfig = arg.slice('--tsconfig='.length);
-    } else if (arg === '--strip-prefix') {
-      i++;
-      if (args[i]) stripPrefix = args[i];
-    } else if (arg.startsWith('--strip-prefix=')) {
-      stripPrefix = arg.slice('--strip-prefix='.length);
-    } else if (arg === '--target-tier') {
-      i++;
-      if (args[i]) targetTier = args[i] as CliOptions['targetTier'];
-    } else if (arg.startsWith('--target-tier=')) {
-      targetTier = arg.slice('--target-tier='.length) as CliOptions['targetTier'];
-    } else if (arg === '--no-cache') {
-      noCache = true;
-    } else if (!arg.startsWith('-')) {
-      inputs.push(arg);
-    }
-    i++;
-  }
+  const emitCss = values['emit-css'] !== undefined ? Boolean(values['emit-css']) : values.css !== undefined ? Boolean(values.css) : false;
+  const emitDts = values['emit-dts'] !== undefined ? Boolean(values['emit-dts']) : values.dts !== undefined ? Boolean(values.dts) : true;
+  const noCache = values.cache === false;
 
   return {
-    inputs: inputs.length > 0 ? inputs : ['src/**/*.{ts,tsx,js,jsx}'],
-    outDir,
-    suffix,
+    inputs: positionals.length > 0 ? positionals : ['src/**/*.{ts,tsx,js,jsx}'],
+    outDir: (values['out-dir'] as string) || 'dist/react',
+    suffix: values.suffix as string | undefined,
     emitCss,
     emitDts,
-    tsconfig,
-    stripPrefix,
-    targetTier,
+    tsconfig: values.tsconfig as string | undefined,
+    stripPrefix: values['strip-prefix'] as string | undefined,
+    targetTier: values['target-tier'] as CliOptions['targetTier'],
     noCache,
-    help,
-    version,
+    help: Boolean(values.help),
+    version: Boolean(values.version),
   };
 }
 
@@ -121,46 +84,19 @@ function resolveFiles(patterns: string[]): string[] {
   const files: string[] = [];
 
   for (const pattern of patterns) {
-    if (pattern.includes('*')) {
-      // Use node:fs globSync if available, otherwise manual match
-      if (typeof fs.globSync === 'function') {
-        const matches = fs.globSync(pattern);
-        for (const m of matches) {
-          if (typeof m === 'string') files.push(m);
-        }
-      } else {
-        // Fallback simple traversal
-        const baseDir = pattern.split('*')[0] || '.';
-        if (fs.existsSync(baseDir)) {
-          const scan = (dir: string) => {
-            const entries = fs.readdirSync(dir, { withFileTypes: true });
-            for (const entry of entries) {
-              const full = path.join(dir, entry.name);
-              if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '.git') {
-                scan(full);
-              } else if (entry.isFile() && /\.[jt]sx?$/.test(entry.name)) {
-                files.push(full);
-              }
-            }
-          };
-          scan(baseDir);
-        }
-      }
+    if (pattern.includes('*') || pattern.includes('?') || pattern.includes('{')) {
+      const matches = globSync(pattern, {
+        ignore: ['**/node_modules/**', '**/.git/**'],
+      });
+      files.push(...matches);
     } else if (fs.existsSync(pattern)) {
       const stat = fs.statSync(pattern);
       if (stat.isDirectory()) {
-        const scan = (dir: string) => {
-          const entries = fs.readdirSync(dir, { withFileTypes: true });
-          for (const entry of entries) {
-            const full = path.join(dir, entry.name);
-            if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '.git') {
-              scan(full);
-            } else if (entry.isFile() && /\.[jt]sx?$/.test(entry.name)) {
-              files.push(full);
-            }
-          }
-        };
-        scan(pattern);
+        const matches = globSync('**/*.{ts,tsx,js,jsx}', {
+          cwd: pattern,
+          ignore: ['**/node_modules/**', '**/.git/**'],
+        }).map((m) => path.join(pattern, m));
+        files.push(...matches);
       } else {
         files.push(pattern);
       }

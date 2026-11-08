@@ -8,7 +8,6 @@ pub mod models;
 pub mod normalizer;
 pub mod scoping;
 
-use glob::glob;
 use napi_derive::napi;
 use std::collections::HashSet;
 use std::fs;
@@ -21,68 +20,13 @@ use crate::models::{Diagnostic, FuseConfig, FuseResult, FuseStats, NormalizedRul
 use crate::normalizer::normalize_css;
 use crate::scoping::ScopingAuditor;
 
-use crate::extractor::import_resolver::normalize_path;
-
 fn resolve_input_files(config: &FuseConfig) -> Vec<String> {
-    if let Some(explicit_files) = &config.files {
-        let mut files: Vec<String> = explicit_files
-            .iter()
-            .map(|f| normalize_path(Path::new(f)).to_string_lossy().to_string())
-            .collect();
-        files.sort();
-        files.dedup();
-        return files;
-    }
-
-    let default_includes = vec![
-        "packages/components/**/src/**/*.ts".to_string(),
-        "src/**/*.ts".to_string(),
-    ];
-    let includes = config.include.as_ref().unwrap_or(&default_includes);
-    let mut default_excludes = vec![
-        "**/*.test.ts".to_string(),
-        "**/*.spec.ts".to_string(),
-        "**/*.test.js".to_string(),
-        "**/*.spec.js".to_string(),
-    ];
-    let any_targets_node_modules = includes.iter().any(|p| p.contains("node_modules"));
-    if !any_targets_node_modules {
-        default_excludes.push("**/node_modules/**".to_string());
-    }
-    let any_targets_dist = includes
-        .iter()
-        .any(|p| p.contains("/dist/") || p.contains("dist/**"));
-    if !any_targets_dist {
-        default_excludes.push("**/dist/**".to_string());
-    }
-    let excludes = config.exclude.as_ref().unwrap_or(&default_excludes);
-
-    let mut matched_files: HashSet<String> = HashSet::new();
-
-    for pattern in includes {
-        if let Ok(entries) = glob(pattern) {
-            for entry in entries.flatten() {
-                let norm = normalize_path(&entry);
-                let path_str = norm.to_string_lossy().to_string();
-
-                let is_excluded = excludes.iter().any(|exc| {
-                    if let Ok(pat) = glob::Pattern::new(exc) {
-                        pat.matches(&path_str)
-                    } else {
-                        path_str.contains(exc)
-                    }
-                });
-
-                if !is_excluded && entry.is_file() {
-                    matched_files.insert(path_str);
-                }
-            }
-        }
-    }
-
-    let mut files: Vec<String> = matched_files.into_iter().collect();
-    files.sort();
-    files
+    lit_analysis::resolver::resolve_project_files(
+        config.files.as_deref(),
+        config.include.as_deref(),
+        config.exclude.as_deref(),
+        true,
+    )
 }
 
 pub fn run_fuse_pipeline(config: &FuseConfig, dry_run: bool) -> FuseResult {

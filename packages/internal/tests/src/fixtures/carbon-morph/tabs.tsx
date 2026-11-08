@@ -1,9 +1,7 @@
 import tabsStylesRaw from '@carbon/web-components/es/components/tabs/tabs.scss.js';
+import { MorphHost, transformHostCss, useMorphHost } from '@lit-core/morph-to-react/runtime';
 import type React from 'react';
 import { forwardRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
-import { transformHostCss } from '../../runtime/css.js';
-import { MorphHost } from '../../runtime/morph-host.js';
-import { useMorphHost } from '../../runtime/use-morph-host.js';
 import { TabsContext, type TabsContextValue } from './tab.js';
 
 export const tabsStyles = transformHostCss((tabsStylesRaw as any).cssText, 'cds-tabs').replace(/::slotted\(([^)]+)\)/g, 'slot-boundary > $1');

@@ -152,16 +152,16 @@ for (const file of result.rewrittenFiles) {
 
 ### Options reference
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `threshold` | `number` | `2` | Minimum number of component occurrences required to cluster a CSS rule |
-| `minSavings` | `number` | `200` | Minimum net byte savings required after accounting for module import overhead |
-| `include` | `string[]` | `['packages/components/**/src/**/*.ts', 'src/**/*.ts']` | Glob patterns of source files to include in deduplication analysis |
-| `exclude` | `string[]` | `['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**']` | Glob patterns of source files to exclude |
-| `outputDir` | `string` | `'.fused'` | Directory for generated fused sheet files when emitted to disk |
-| `virtualImports` | `boolean` | `false` | Emit `virtual:css-fuse/*` module specifiers instead of relative paths |
-| `scopingAudit` | `boolean` | `true` | Enable Shadow DOM scoping and contract audit diagnostics (via bundler plugin) |
-| `applyInDev` | `boolean` | `false` | Whether to run CSS deduplication during local development server mode (via bundler plugin) |
+| Option           | Type       | Default                                                                | Description                                                                                |
+| :--------------- | :--------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| `threshold`      | `number`   | `2`                                                                    | Minimum number of component occurrences required to cluster a CSS rule                     |
+| `minSavings`     | `number`   | `200`                                                                  | Minimum net byte savings required after accounting for module import overhead              |
+| `include`        | `string[]` | `['packages/components/**/src/**/*.ts', 'src/**/*.ts']`                | Glob patterns of source files to include in deduplication analysis                         |
+| `exclude`        | `string[]` | `['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**']` | Glob patterns of source files to exclude                                                   |
+| `outputDir`      | `string`   | `'.fused'`                                                             | Directory for generated fused sheet files when emitted to disk                             |
+| `virtualImports` | `boolean`  | `false`                                                                | Emit `virtual:css-fuse/*` module specifiers instead of relative paths                      |
+| `scopingAudit`   | `boolean`  | `true`                                                                 | Enable Shadow DOM scoping and contract audit diagnostics (via bundler plugin)              |
+| `applyInDev`     | `boolean`  | `false`                                                                | Whether to run CSS deduplication during local development server mode (via bundler plugin) |
 
 ---
 

@@ -72,7 +72,8 @@
     "directory": "packages/rendering/ssr"
   },
   "dependencies": {
-    "@lit-core/resumable": "workspace:*"
+    "@lit-core/resumable": "workspace:*",
+    "css-select": "^7.0.0"
   },
   "devDependencies": {
     "@lit-core/html-aot": "workspace:*",

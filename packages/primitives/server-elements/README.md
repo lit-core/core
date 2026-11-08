@@ -31,16 +31,12 @@ export class ProductStock extends ServerElement {
 
   @loader()
   async load(env: Env) {
-    this.stock = await env.DB.prepare('SELECT qty FROM inventory WHERE sku = ?')
-      .bind(this.sku)
-      .first('qty');
+    this.stock = await env.DB.prepare('SELECT qty FROM inventory WHERE sku = ?').bind(this.sku).first('qty');
   }
 
   @action()
   async reserve(qty: number) {
-    await this.env.DB.prepare('UPDATE inventory SET qty = qty - ? WHERE sku = ?')
-      .bind(qty, this.sku)
-      .run();
+    await this.env.DB.prepare('UPDATE inventory SET qty = qty - ? WHERE sku = ?').bind(qty, this.sku).run();
     this.stock -= qty;
   }
 
@@ -62,11 +58,7 @@ customElements.define('product-stock', ProductStock);
 Use the edge and action endpoint helpers to render components to Declarative Shadow DOM and handle `POST /_lit/a/<actionHash>` RPC mutations:
 
 ```ts
-import {
-  handleActionRequest,
-  renderToResponse,
-  transformServerElementsWithHtmlRewriter,
-} from '@lit-core/server-elements';
+import { handleActionRequest, renderToResponse, transformServerElementsWithHtmlRewriter } from '@lit-core/server-elements';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -91,14 +83,14 @@ export default {
 
 ## Subpath exports
 
-| Export path | Purpose |
-| :--- | :--- |
-| `@lit-core/server-elements` | Main entry point exporting `ServerElement`, `ServerElementMixin`, `@loader()`, `@action()`, edge renderers, and action handlers |
-| `@lit-core/server-elements/edge` | Edge rendering utilities (`renderServerElement`, `renderToResponse`, `transformServerElementsWithHtmlRewriter`, `createLoaderContext`) |
+| Export path                                 | Purpose                                                                                                                                 |
+| :------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `@lit-core/server-elements`                 | Main entry point exporting `ServerElement`, `ServerElementMixin`, `@loader()`, `@action()`, edge renderers, and action handlers         |
+| `@lit-core/server-elements/edge`            | Edge rendering utilities (`renderServerElement`, `renderToResponse`, `transformServerElementsWithHtmlRewriter`, `createLoaderContext`)  |
 | `@lit-core/server-elements/action-endpoint` | Server action RPC handler (`handleActionRequest`, `computeSurgicalPatches`) with CSRF, HMAC state verification, and argument validation |
-| `@lit-core/server-elements/client` | Client RPC dispatcher and event binder (`dispatchServerAction`, `bindFormAction`, `executePatches`) |
-| `@lit-core/server-elements/executor` | Low-level DOM patch executor and keyed list reconciler (`executePatches`, `reconcileKeyedList`) |
-| `@lit-core/server-elements/crypto` | HMAC-SHA256 state signing and verification (`createSignedStateSnapshot`, `verifyStateSignature`, `generateActionToken`) |
+| `@lit-core/server-elements/client`          | Client RPC dispatcher and event binder (`dispatchServerAction`, `bindFormAction`, `executePatches`)                                     |
+| `@lit-core/server-elements/executor`        | Low-level DOM patch executor and keyed list reconciler (`executePatches`, `reconcileKeyedList`)                                         |
+| `@lit-core/server-elements/crypto`          | HMAC-SHA256 state signing and verification (`createSignedStateSnapshot`, `verifyStateSignature`, `generateActionToken`)                 |
 
 ## Compilation requirements
 

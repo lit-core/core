@@ -33,6 +33,7 @@ mod native {
         pub map: Option<String>,
         pub modified: bool,
         pub discovered_tags: Vec<String>,
+        pub static_templates: Vec<String>,
         pub syntax_error: Option<String>,
     }
 
@@ -40,6 +41,7 @@ mod native {
         symbol_ctx: SymbolProofContext<'a>,
         class_to_tag: HashMap<String, String>,
         discovered_tags: Vec<String>,
+        static_templates: Vec<String>,
         custom_element_symbols: HashSet<SymbolId>,
     }
 
@@ -196,6 +198,7 @@ mod native {
 
         let mut class_to_tag = HashMap::new();
         let mut discovered_tags = Vec::new();
+        let mut static_templates = Vec::new();
         let mut custom_element_symbols = HashSet::new();
 
         for stmt in &program.body {
@@ -205,6 +208,28 @@ mod native {
                 &mut class_to_tag,
                 &mut discovered_tags,
             );
+            let var_decl = match stmt {
+                Statement::VariableDeclaration(v) => Some(v.as_ref()),
+                Statement::ExportDeclaration(e) => match &e.declaration {
+                    Declaration::VariableDeclaration(v) => Some(v.as_ref()),
+                    _ => None,
+                },
+                _ => None,
+            };
+            if let Some(v) = var_decl {
+                for decl in &v.declarations {
+                    if let Some(Expression::TaggedTemplateExpression(tagged)) = &decl.init
+                        && symbol_ctx.is_lit_html_or_static_tag(&tagged.tag)
+                        && tagged.quasi.expressions.is_empty()
+                        && tagged.quasi.quasis.len() == 1
+                    {
+                        let raw = tagged.quasi.quasis[0].value.raw.as_str().trim();
+                        if !raw.is_empty() {
+                            static_templates.push(raw.to_string());
+                        }
+                    }
+                }
+            }
         }
 
         // Direct element discovery
@@ -251,6 +276,7 @@ mod native {
             symbol_ctx,
             class_to_tag,
             discovered_tags,
+            static_templates,
             custom_element_symbols,
         }
     }
@@ -443,6 +469,7 @@ mod native {
                 map: None,
                 modified: false,
                 discovered_tags: Vec::new(),
+                static_templates: Vec::new(),
                 syntax_error: Some(first_msg),
             };
         }
@@ -492,6 +519,7 @@ mod native {
         }
 
         let discovered_tags = analysis.discovered_tags;
+        let static_templates = analysis.static_templates;
         drop(analysis.symbol_ctx);
 
         if !modified {
@@ -500,6 +528,7 @@ mod native {
                 map: None,
                 modified: false,
                 discovered_tags,
+                static_templates,
                 syntax_error: None,
             };
         }
@@ -519,6 +548,7 @@ mod native {
             map,
             modified: true,
             discovered_tags,
+            static_templates,
             syntax_error: None,
         }
     }

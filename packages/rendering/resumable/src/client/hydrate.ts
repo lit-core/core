@@ -39,3 +39,7 @@ export const parseComponentStateInternal: (rawState: string) => Record<string, u
 export const withResumableInternal: <T extends new (...args: any[]) => any>(Base: T) => T = runtime.withResumable;
 export const bindTemplateEventHandlersInternal: (shadowRoot: DocumentFragment | HTMLElement | Element, templateResult: any, host: any) => HydratedTemplateRoot | null =
   runtime.bindTemplateEventHandlers;
+export const RESUMED_EVENT_FLAG_INTERNAL: string = runtime.RESUMED_EVENT_FLAG;
+export const createReplayedEventInternal: (origEvent: Event) => Event = runtime.createReplayedEvent;
+export const replayEventInternal: (buffered: any) => boolean = runtime.replayEvent;
+export const replayQueueInternal: (queue: any[]) => void = runtime.replayQueue;

@@ -11,7 +11,6 @@ napi = { workspace = true }
 napi-derive = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-glob = { workspace = true }
 
 # Shared Lit analysis
 lit_analysis = { workspace = true, default-features = false }
@@ -47,3 +46,6 @@ path = "src/bin.rs"
 
 [build-dependencies]
 napi-build = { workspace = true }
+
+[lints]
+workspace = true

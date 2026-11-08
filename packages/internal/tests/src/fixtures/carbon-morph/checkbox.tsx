@@ -1,9 +1,7 @@
 import checkboxStylesRaw from '@carbon/web-components/es/components/checkbox/checkbox.scss.js';
+import { MorphHost, transformHostCss, useMorphHost } from '@lit-core/morph-to-react/runtime';
 import type React from 'react';
 import { Children, forwardRef, isValidElement, type MouseEvent, type ReactNode, useCallback, useId, useLayoutEffect } from 'react';
-import { transformHostCss } from '../../runtime/css.js';
-import { MorphHost } from '../../runtime/morph-host.js';
-import { useMorphHost } from '../../runtime/use-morph-host.js';
 
 export const checkboxStyles = transformHostCss((checkboxStylesRaw as any).cssText, 'cds-checkbox').replace(/::slotted\(([^)]+)\)/g, '$1');
 

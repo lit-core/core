@@ -1,3 +1,5 @@
+use lit_analysis::template_ir::is_void_element;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PartKind {
     Attribute {
@@ -449,25 +451,4 @@ pub fn parse_lit_template(quasis: &[String]) -> Option<PreparedTemplate> {
         prepared_html,
         parts,
     })
-}
-
-fn is_void_element(tag: &str) -> bool {
-    let lower = tag.to_ascii_lowercase();
-    matches!(
-        lower.as_str(),
-        "area"
-            | "base"
-            | "br"
-            | "col"
-            | "embed"
-            | "hr"
-            | "img"
-            | "input"
-            | "link"
-            | "meta"
-            | "param"
-            | "source"
-            | "track"
-            | "wbr"
-    )
 }

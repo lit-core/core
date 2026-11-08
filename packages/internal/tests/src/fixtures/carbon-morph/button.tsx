@@ -1,10 +1,7 @@
 import buttonStylesRaw from '@carbon/web-components/es/components/button/button.scss.js';
+import { MorphHost, partitionSlots, transformHostCss, useMorphHost } from '@lit-core/morph-to-react/runtime';
 import type React from 'react';
 import { forwardRef, useId, useRef } from 'react';
-import { transformHostCss } from '../../runtime/css.js';
-import { MorphHost } from '../../runtime/morph-host.js';
-import { partitionSlots } from '../../runtime/slots.js';
-import { useMorphHost } from '../../runtime/use-morph-host.js';
 
 export const buttonStyles = transformHostCss((buttonStylesRaw as any).cssText, 'cds-button').replace(/::slotted\(([^)]+)\)/g, '$1');
 
@@ -368,7 +365,7 @@ export const CdsButton = forwardRef<HTMLElement, CdsButtonProps>(function CdsBut
           id="button"
           part="button"
           className={classes}
-          // biome-ignore lint/a11y/noAutofocus: Carbon button specification preserves autofocus attribute
+          // biome-ignore lint/a11y/noAutofocus: Carbon button fixture forwards native autofocus prop
           autoFocus={autofocus}
           disabled={disabled}
           tabIndex={tabIndex}
@@ -394,7 +391,7 @@ export const CdsButton = forwardRef<HTMLElement, CdsButtonProps>(function CdsBut
           id="button"
           part="button"
           className={classes}
-          // biome-ignore lint/a11y/noAutofocus: Carbon button specification preserves autofocus attribute
+          // biome-ignore lint/a11y/noAutofocus: Carbon button fixture forwards native autofocus prop
           autoFocus={autofocus}
           disabled={disabled}
           tabIndex={tabIndex}

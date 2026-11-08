@@ -3,7 +3,6 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { analyzeLitModule, clearCompileCache, compileModule, getCompileCacheSize } from '@lit-core/morph-to-react';
-import { buttonStyles, CdsButton, CdsCheckbox, CdsCheckboxHost, CdsTab, CdsTabs, checkboxStyles, tabsStyles } from '@lit-core/morph-to-react/carbon';
 import { parseArgs } from '@lit-core/morph-to-react/cli';
 import * as morphRuntime from '@lit-core/morph-to-react/runtime';
 import { MorphHost, partitionSlots, SlotBoundary, useMorphHost } from '@lit-core/morph-to-react/runtime';
@@ -13,6 +12,7 @@ import { renderToString } from 'react-dom/server';
 import { transformWithOxc } from 'vite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { bundleComponentForBrowser } from '../bundler.js';
+import { buttonStyles, CdsButton, CdsCheckbox, CdsCheckboxHost, CdsTab, CdsTabs, checkboxStyles, tabsStyles } from '../fixtures/carbon-morph/index.js';
 import { getTestBrowser } from '../harness.js';
 
 const __filename = fileURLToPath(import.meta.url);

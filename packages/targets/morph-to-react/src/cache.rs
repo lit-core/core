@@ -1,8 +1,13 @@
 use crate::{CompileOptionsDto, CompileResultDto};
-use std::collections::HashMap;
-use std::sync::RwLock;
+use dashmap::DashMap;
+use std::sync::OnceLock;
 
-static COMPILE_CACHE: RwLock<Option<HashMap<String, CompileResultDto>>> = RwLock::new(None);
+const MAX_CACHE_ENTRIES: usize = 2048;
+
+fn compile_cache() -> &'static DashMap<String, CompileResultDto> {
+    static COMPILE_CACHE: OnceLock<DashMap<String, CompileResultDto>> = OnceLock::new();
+    COMPILE_CACHE.get_or_init(DashMap::new)
+}
 
 /// Computes a deterministic 64-character hex BLAKE3 content hash key
 /// from the source code, file path, and relevant compiler options.
@@ -72,36 +77,26 @@ pub fn compute_cache_key(source: &str, file_path: &str, opts: &CompileOptionsDto
 
 /// Retrieves a cached compilation result by its content-hashed key.
 pub fn get_cached(key: &str) -> Option<CompileResultDto> {
-    let guard = COMPILE_CACHE.read().ok()?;
-    let map = guard.as_ref()?;
-    map.get(key).cloned()
+    compile_cache().get(key).map(|entry| entry.value().clone())
 }
 
 /// Stores a compilation result in the global cache.
 pub fn put_cached(key: String, result: CompileResultDto) {
-    if let Ok(mut guard) = COMPILE_CACHE.write() {
-        let map = guard.get_or_insert_with(HashMap::new);
-        map.insert(key, result);
+    let cache = compile_cache();
+    if cache.len() >= MAX_CACHE_ENTRIES {
+        cache.clear();
     }
+    cache.insert(key, result);
 }
 
 /// Clears the global compilation cache.
 pub fn clear_cache() {
-    if let Ok(mut guard) = COMPILE_CACHE.write()
-        && let Some(map) = guard.as_mut()
-    {
-        map.clear();
-    }
+    compile_cache().clear();
 }
 
 /// Returns the current number of cached module compilations.
 pub fn cache_size() -> usize {
-    if let Ok(guard) = COMPILE_CACHE.read()
-        && let Some(map) = guard.as_ref()
-    {
-        return map.len();
-    }
-    0
+    compile_cache().len()
 }
 
 #[cfg(test)]

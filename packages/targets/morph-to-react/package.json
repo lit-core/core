@@ -22,11 +22,6 @@
       "import": "./runtime/index.ts",
       "default": "./runtime/index.ts"
     },
-    "./carbon": {
-      "types": "./src/carbon/index.ts",
-      "import": "./src/carbon/index.ts",
-      "default": "./src/carbon/index.ts"
-    },
     "./cli": {
       "types": "./src/cli.ts",
       "import": "./src/cli.js",
@@ -58,10 +53,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@carbon/web-components": "^2.66.0",
     "lit": "^3.3.3",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "tinyglobby": "^0.2.17"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

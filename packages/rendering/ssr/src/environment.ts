@@ -6,6 +6,8 @@
  * (including window, aliased to globalThis) and never replaces existing ones.
  */
 
+import { type Options as CssSelectOptions, is as cssIs, selectAll as cssSelectAll, selectOne as cssSelectOne } from 'css-select';
+
 export interface CustomElementRegistryLike {
   get(name: string): (new () => any) | undefined;
   define(name: string, ctor: new () => any): void;
@@ -208,16 +210,29 @@ export class ShadowRootStub {
     (this._childNodes ??= []).unshift(...nodes);
   }
 
-  querySelector(_selector: string): any {
-    return null;
+  querySelector(selector: string): any {
+    const children = this.children.length > 0 ? this.children : this.childNodes;
+    if (!selector || !selector.trim() || children.length === 0) return null;
+    try {
+      return cssSelectOne(selector, children, { adapter: ssrDomAdapter });
+    } catch {
+      return null;
+    }
   }
 
-  querySelectorAll(_selector: string): any[] {
-    return [];
+  querySelectorAll(selector: string): any[] {
+    const children = this.children.length > 0 ? this.children : this.childNodes;
+    if (!selector || !selector.trim() || children.length === 0) return [];
+    try {
+      return cssSelectAll(selector, children, { adapter: ssrDomAdapter });
+    } catch {
+      return [];
+    }
   }
 
-  getElementById(_id: string): any {
-    return null;
+  getElementById(id: string): any {
+    if (!id) return null;
+    return this.querySelector(`#${id}`);
   }
 
   addEventListener(_type: string, _listener: any, _options?: any): void {}
@@ -227,33 +242,52 @@ export class ShadowRootStub {
   }
 }
 
-function matchesSimpleSelector(el: HTMLElementStub, selector: string): boolean {
-  const trimmed = selector.trim();
-  if (!trimmed) return false;
-  if (trimmed === '*') return true;
-  if (trimmed.startsWith('#')) {
-    return el.getAttribute('id') === trimmed.slice(1);
-  }
-  if (trimmed.startsWith('.')) {
-    const cls = trimmed.slice(1);
-    const attr = el.getAttribute('class') || '';
-    return attr.split(/\s+/).includes(cls);
-  }
-  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-    const inner = trimmed.slice(1, -1).trim();
-    const eqIdx = inner.indexOf('=');
-    if (eqIdx === -1) {
-      return el.hasAttribute(inner);
+const ssrDomAdapter: NonNullable<CssSelectOptions<any, HTMLElementStub>['adapter']> = {
+  isTag: (node: any): node is HTMLElementStub => node instanceof HTMLElementStub && node.nodeType === 1,
+  getAttributeValue: (el: HTMLElementStub, name: string) => el.getAttribute(name) ?? undefined,
+  getChildren: (node: any) => {
+    if (node instanceof HTMLElementStub) {
+      return node._ssrLightChildNodes.length > 0 ? node._ssrLightChildNodes : node._ssrLightChildren;
     }
-    const attrName = inner.slice(0, eqIdx).trim();
-    let expected = inner.slice(eqIdx + 1).trim();
-    if ((expected.startsWith('"') && expected.endsWith('"')) || (expected.startsWith("'") && expected.endsWith("'"))) {
-      expected = expected.slice(1, -1);
+    if (node instanceof ShadowRootStub) {
+      return node.children.length > 0 ? node.children : node.childNodes;
     }
-    return el.getAttribute(attrName) === expected;
-  }
-  return el.tagName.toLowerCase() === trimmed.toLowerCase();
-}
+    return [];
+  },
+  getName: (el: HTMLElementStub) => el.localName,
+  getParent: (el: HTMLElementStub) => el._ssrParentHost,
+  getSiblings: (node: any) => {
+    if (node instanceof HTMLElementStub && node._ssrParentHost) {
+      const parent = node._ssrParentHost;
+      return parent._ssrLightChildNodes.length > 0 ? parent._ssrLightChildNodes : parent._ssrLightChildren;
+    }
+    return [node];
+  },
+  getText: (node: any) => {
+    if (!node) return '';
+    if (node.nodeType === 3) return node.data ?? node.textContent ?? '';
+    return typeof node.textContent === 'string' ? node.textContent : '';
+  },
+  hasAttrib: (el: HTMLElementStub, name: string) => el.hasAttribute(name),
+  removeSubsets: (nodes: any[]) => {
+    const out: any[] = [];
+    for (let i = 0; i < nodes.length; i++) {
+      const candidate = nodes[i];
+      if (out.includes(candidate)) continue;
+      let hasAncestor = false;
+      for (let j = 0; j < nodes.length; j++) {
+        if (i === j) continue;
+        const other = nodes[j];
+        if (other instanceof HTMLElementStub && other !== candidate && other.contains(candidate)) {
+          hasAncestor = true;
+          break;
+        }
+      }
+      if (!hasAncestor) out.push(candidate);
+    }
+    return out;
+  },
+};
 
 export const HYDRATE_INTERNALS_ATTR_PREFIX = 'hydrate-internals-';
 
@@ -621,28 +655,39 @@ export class HTMLElementStub {
   }
 
   querySelector(selector: string): HTMLElementStub | null {
-    const found = this.querySelectorAll(selector);
-    return found[0] ?? null;
+    if (!selector || !selector.trim() || this._ssrLightChildren.length === 0) return null;
+    try {
+      return cssSelectOne(selector, this._ssrLightChildren, { adapter: ssrDomAdapter, context: this });
+    } catch {
+      return null;
+    }
   }
 
   querySelectorAll(selector: string): HTMLElementStub[] {
-    const results: HTMLElementStub[] = [];
-    const groups = selector.split(',');
-    const walk = (nodes: HTMLElementStub[]) => {
-      for (const child of nodes) {
-        if (groups.some((g) => matchesSimpleSelector(child, g))) {
-          results.push(child);
-        }
-        if (child._ssrLightChildren.length > 0) {
-          walk(child._ssrLightChildren);
-        }
-      }
-    };
-    walk(this._ssrLightChildren);
-    return results;
+    if (!selector || !selector.trim() || this._ssrLightChildren.length === 0) return [];
+    try {
+      return cssSelectAll(selector, this._ssrLightChildren, { adapter: ssrDomAdapter, context: this });
+    } catch {
+      return [];
+    }
   }
 
-  closest(_selector: string): null {
+  matches(selector: string): boolean {
+    if (!selector || !selector.trim()) return false;
+    try {
+      return cssIs(this, selector, { adapter: ssrDomAdapter });
+    } catch {
+      return false;
+    }
+  }
+
+  closest(selector: string): HTMLElementStub | null {
+    if (!selector || !selector.trim()) return null;
+    let curr: HTMLElementStub | null = this;
+    while (curr) {
+      if (curr.matches(selector)) return curr;
+      curr = curr._ssrParentHost;
+    }
     return null;
   }
 

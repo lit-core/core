@@ -1,7 +1,7 @@
-use crate::extractor::import_resolver::ImportResolver;
 use crate::models::{ExtractedFragment, SourceSpan};
 use crate::normalizer::normalize_fragment;
-use oxc_ast::ast::{Expression, Program, Statement, TaggedTemplateExpression};
+use lit_analysis::symbol::SymbolProofContext;
+use oxc_ast::ast::{Expression, Program, TaggedTemplateExpression};
 use oxc_ast_visit::Visit;
 use oxc_semantic::Scoping;
 use oxc_span::Span;
@@ -10,8 +10,8 @@ pub struct TemplateVisitor<'a> {
     pub source_code: &'a str,
     pub file_path: &'a str,
     pub min_fragment_length: usize,
-    pub resolver: ImportResolver,
     pub scoping: &'a Scoping,
+    pub symbol_ctx: Option<SymbolProofContext<'a>>,
     pub extracted_fragments: Vec<ExtractedFragment>,
     pub templates_scanned: u32,
 }
@@ -27,19 +27,19 @@ impl<'a> TemplateVisitor<'a> {
             source_code,
             file_path,
             min_fragment_length,
-            resolver: ImportResolver::new(),
             scoping,
+            symbol_ctx: None,
             extracted_fragments: Vec::new(),
             templates_scanned: 0,
         }
     }
 
-    pub fn scan_imports(&mut self, program: &Program) {
-        for stmt in &program.body {
-            if let Statement::ImportDeclaration(import_decl) = stmt {
-                self.resolver.process_import(import_decl, self.scoping);
-            }
-        }
+    pub fn scan_imports(&mut self, program: &'a Program<'a>) {
+        self.symbol_ctx = Some(SymbolProofContext::scan(
+            program,
+            self.scoping,
+            self.source_code,
+        ));
     }
 
     fn compute_span(&self, span: Span) -> SourceSpan {
@@ -69,44 +69,21 @@ impl<'a> TemplateVisitor<'a> {
         }
     }
 
-    fn get_target_tag(&self, expr: &Expression) -> Option<(String, bool)> {
-        match expr {
-            Expression::Identifier(ident) => {
-                if let Some(ref_id) = ident.reference_id.get() {
-                    let reference = self.scoping.get_reference(ref_id);
-                    if let Some(sym_id) = reference.symbol_id()
-                        && self.resolver.lit_html_symbols.contains(&sym_id)
-                    {
-                        let is_svg = self.resolver.lit_svg_symbols.contains(&sym_id);
-                        return Some((ident.name.to_string(), is_svg));
-                    }
-                }
-                None
-            }
-            Expression::StaticMemberExpression(member) => {
-                let prop_name = member.property.name.as_str();
-                if (prop_name == "html" || prop_name == "svg")
-                    && let Expression::Identifier(obj) = &member.object
-                    && let Some(ref_id) = obj.reference_id.get()
-                {
-                    let reference = self.scoping.get_reference(ref_id);
-                    if let Some(sym_id) = reference.symbol_id()
-                        && self.resolver.lit_namespaces.contains(&sym_id)
-                    {
-                        let is_svg = prop_name == "svg";
-                        return Some((prop_name.to_string(), is_svg));
-                    }
-                }
-                None
-            }
-            _ => None,
+    fn get_target_tag(&self, expr: &Expression<'a>) -> Option<bool> {
+        let ctx = self.symbol_ctx.as_ref()?;
+        if ctx.is_lit_svg_tag(expr) {
+            Some(true)
+        } else if ctx.is_lit_html_tag(expr) {
+            Some(false)
+        } else {
+            None
         }
     }
 }
 
 impl<'a> Visit<'a> for TemplateVisitor<'a> {
     fn visit_tagged_template_expression(&mut self, tagged: &TaggedTemplateExpression<'a>) {
-        if let Some((_tag_name, is_template_svg)) = self.get_target_tag(&tagged.tag) {
+        if let Some(is_template_svg) = self.get_target_tag(&tagged.tag) {
             self.templates_scanned += 1;
 
             // Target A: Full static template candidate
@@ -184,7 +161,7 @@ mod tests {
 
         let source = r#"
             import { html } from 'hyperhtml';
-            const tmpl = html`<div>hello</div>`;
+            const tmpl = html`<div><span>hello world</span></div>`;
         "#;
         let allocator = Allocator::default();
         let parsed = Parser::new(&allocator, source, SourceType::ts()).parse();
@@ -192,9 +169,10 @@ mod tests {
         let scoping = semantic_ret.semantic.into_scoping();
         let mut visitor = TemplateVisitor::new(source, "test.ts", 10, &scoping);
         visitor.scan_imports(&parsed.program);
+        visitor.visit_program(&parsed.program);
 
         assert!(
-            !visitor.resolver.is_target_tag("html"),
+            visitor.extracted_fragments.is_empty(),
             "html from non-Lit library must not be considered a target tag"
         );
     }

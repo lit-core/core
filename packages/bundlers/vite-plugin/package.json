@@ -40,6 +40,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@jridgewell/remapping": "^2.3.5",
     "@lit-core/css-fuse": "workspace:*",
     "@lit-core/css-minifier": "workspace:*",
     "@lit-core/directives": "workspace:*",
@@ -57,7 +58,9 @@
     "@lit-core/server-elements": "workspace:*",
     "@lit-core/server-split": "workspace:*",
     "@lit-core/ssr": "workspace:*",
-    "@lit-core/tag-shake": "workspace:*"
+    "@lit-core/tag-shake": "workspace:*",
+    "@rollup/pluginutils": "^5.5.1",
+    "tinyglobby": "^0.2.17"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.66.0",
