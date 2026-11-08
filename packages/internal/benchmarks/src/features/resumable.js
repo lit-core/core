@@ -9,7 +9,7 @@ import { html } from 'lit';
 import { ENTERPRISE_COMPONENTS, extractComponentTemplates, extractCssFromModule, findComponentCssSource } from '../fixtures.js';
 import { calculateDelta, formatDuration } from '../format.js';
 import { printBenchmarkFooter, printBenchmarkHeader, saveBenchmarkResult } from '../reporters/index.js';
-import { getBrowser } from '../runtime.js';
+import { closeBrowser, getBrowser } from '../runtime.js';
 import { createBenchmarkResult } from '../schema.js';
 
 export const SUITES = [
@@ -201,13 +201,12 @@ export async function measureResumablePerformance(suite) {
     throw new Error(`[Resumable benchmark error] Chromium browser is not available for ${suite.name}`);
   }
 
-  const context = await browser.newContext();
-  let pageStandard = null;
-  let pageResumable = null;
+  let page = null;
 
   try {
     // 1. Measure standard SSR in Chromium
-    pageStandard = await context.newPage();
+    page = browser.contexts()[0]?.pages()[0] || (await browser.newPage());
+    await page.goto('about:blank');
     const standardHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -235,10 +234,10 @@ export async function measureResumablePerformance(suite) {
 </body>
 </html>`;
 
-    await pageStandard.setContent(standardHtml, { waitUntil: 'domcontentloaded' });
-    await pageStandard.waitForFunction(() => /** @type {any} */ (window).__standardReady === true, { timeout: 15000 });
+    await page.setContent(standardHtml, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /** @type {any} */ (window).__standardReady === true, { timeout: 15000 });
 
-    const standardMetrics = await pageStandard.evaluate(async () => {
+    const standardMetrics = await page.evaluate(async () => {
       const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];
       const fcpMs = fcpEntry ? Number(fcpEntry.startTime.toFixed(2)) : 50.0;
       const longTasks = /** @type {any} */ (window).__longTasks || [];
@@ -254,7 +253,7 @@ export async function measureResumablePerformance(suite) {
     });
 
     // 2. Measure resumable SSR in Chromium
-    pageResumable = await context.newPage();
+    await page.goto('about:blank');
     const resumableHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -299,10 +298,10 @@ export async function measureResumablePerformance(suite) {
 </body>
 </html>`;
 
-    await pageResumable.setContent(resumableHtml, { waitUntil: 'domcontentloaded' });
-    await pageResumable.waitForFunction(() => /** @type {any} */ (window).__resumableReady === true, { timeout: 15000 });
+    await page.setContent(resumableHtml, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /** @type {any} */ (window).__resumableReady === true, { timeout: 15000 });
 
-    const resumableMetrics = await pageResumable.evaluate(async () => {
+    const resumableMetrics = await page.evaluate(async () => {
       const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];
       const fcpMs = fcpEntry ? Number(fcpEntry.startTime.toFixed(2)) : 50.0;
       const longTasks = /** @type {any} */ (window).__longTasks || [];
@@ -339,19 +338,9 @@ export async function measureResumablePerformance(suite) {
 
     return { suite, standard, resumable };
   } finally {
-    if (pageStandard) {
+    if (page && !page.isClosed()) {
       try {
-        await pageStandard.close();
-      } catch {}
-    }
-    if (pageResumable) {
-      try {
-        await pageResumable.close();
-      } catch {}
-    }
-    if (context) {
-      try {
-        await context.close();
+        await page.goto('about:blank');
       } catch {}
     }
   }
@@ -772,39 +761,43 @@ export async function runResumableBenchmark(options = {}) {
 
   const suites = [];
 
-  for (const suite of targetSuites) {
-    if (options.verbose) {
-      console.log(`  Evaluating design system: ${suite.name}...`);
+  try {
+    for (const suite of targetSuites) {
+      if (options.verbose) {
+        console.log(`  Evaluating design system: ${suite.name}...`);
+      }
+      const { standard, resumable } = await measureResumablePerformance(suite);
+
+      const jsDelta = calculateDelta(standard.initialJsKb, resumable.initialJsKb);
+      const tbtDelta = calculateDelta(standard.tbtMs, resumable.tbtMs);
+      const ttiDelta = calculateDelta(standard.ttiMs, resumable.ttiMs);
+
+      suites.push({
+        id: suite.id,
+        name: suite.name,
+        shortName: suite.shortName,
+        packageName: suite.packageName,
+        version: suite.version,
+        componentCount: suite.elements,
+        baseline: standard,
+        optimized: resumable,
+        deltas: {
+          initialJs: jsDelta,
+          tbt: tbtDelta,
+          tti: ttiDelta,
+        },
+        diagnostics: {
+          totalComponents: suite.elements,
+          initialJsReduction: jsDelta.formattedPercent,
+          tbtReduction: tbtDelta.formattedPercent,
+          ttiImprovement: formatDuration(Math.abs(ttiDelta.diff)),
+          deferredCount: `${suite.elements} / ${suite.elements} (100%)`,
+          buildOverhead: 'Fast native pass',
+        },
+      });
     }
-    const { standard, resumable } = await measureResumablePerformance(suite);
-
-    const jsDelta = calculateDelta(standard.initialJsKb, resumable.initialJsKb);
-    const tbtDelta = calculateDelta(standard.tbtMs, resumable.tbtMs);
-    const ttiDelta = calculateDelta(standard.ttiMs, resumable.ttiMs);
-
-    suites.push({
-      id: suite.id,
-      name: suite.name,
-      shortName: suite.shortName,
-      packageName: suite.packageName,
-      version: suite.version,
-      componentCount: suite.elements,
-      baseline: standard,
-      optimized: resumable,
-      deltas: {
-        initialJs: jsDelta,
-        tbt: tbtDelta,
-        tti: ttiDelta,
-      },
-      diagnostics: {
-        totalComponents: suite.elements,
-        initialJsReduction: jsDelta.formattedPercent,
-        tbtReduction: tbtDelta.formattedPercent,
-        ttiImprovement: formatDuration(Math.abs(ttiDelta.diff)),
-        deferredCount: `${suite.elements} / ${suite.elements} (100%)`,
-        buildOverhead: 'Fast native pass',
-      },
-    });
+  } finally {
+    await closeBrowser();
   }
 
   return createBenchmarkResult({

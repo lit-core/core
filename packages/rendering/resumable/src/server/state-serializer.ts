@@ -28,7 +28,7 @@ const DEFAULT_EXCLUDED_PROPERTIES = new Set<string>([
   'updateComplete',
 ]);
 
-const ctorCandidateKeysCache = new WeakMap<Function, readonly string[]>();
+const ctorCandidateKeysCache = new WeakMap<object, readonly string[]>();
 
 /**
  * Check if a value is JSON-serializable (primitives, plain objects, arrays).
@@ -88,7 +88,7 @@ function isWritableInstanceProperty(target: any, key: string): boolean {
   return true;
 }
 
-function getStaticWritableKeysForCtor(ctor: Function): readonly string[] | null {
+function getStaticWritableKeysForCtor(ctor: object): readonly string[] | null {
   const cached = ctorCandidateKeysCache.get(ctor);
   if (cached !== undefined) {
     return cached;

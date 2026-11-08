@@ -212,7 +212,7 @@ export class ShadowRootStub {
 
   querySelector(selector: string): any {
     const children = this.children.length > 0 ? this.children : this.childNodes;
-    if (!selector || !selector.trim() || children.length === 0) return null;
+    if (!selector?.trim() || children.length === 0) return null;
     try {
       return cssSelectOne(selector, children, { adapter: ssrDomAdapter });
     } catch {
@@ -222,7 +222,7 @@ export class ShadowRootStub {
 
   querySelectorAll(selector: string): any[] {
     const children = this.children.length > 0 ? this.children : this.childNodes;
-    if (!selector || !selector.trim() || children.length === 0) return [];
+    if (!selector?.trim() || children.length === 0) return [];
     try {
       return cssSelectAll(selector, children, { adapter: ssrDomAdapter });
     } catch {
@@ -655,7 +655,7 @@ export class HTMLElementStub {
   }
 
   querySelector(selector: string): HTMLElementStub | null {
-    if (!selector || !selector.trim() || this._ssrLightChildren.length === 0) return null;
+    if (!selector?.trim() || this._ssrLightChildren.length === 0) return null;
     try {
       return cssSelectOne(selector, this._ssrLightChildren, { adapter: ssrDomAdapter, context: this });
     } catch {
@@ -664,7 +664,7 @@ export class HTMLElementStub {
   }
 
   querySelectorAll(selector: string): HTMLElementStub[] {
-    if (!selector || !selector.trim() || this._ssrLightChildren.length === 0) return [];
+    if (!selector?.trim() || this._ssrLightChildren.length === 0) return [];
     try {
       return cssSelectAll(selector, this._ssrLightChildren, { adapter: ssrDomAdapter, context: this });
     } catch {
@@ -673,7 +673,7 @@ export class HTMLElementStub {
   }
 
   matches(selector: string): boolean {
-    if (!selector || !selector.trim()) return false;
+    if (!selector?.trim()) return false;
     try {
       return cssIs(this, selector, { adapter: ssrDomAdapter });
     } catch {
@@ -682,7 +682,7 @@ export class HTMLElementStub {
   }
 
   closest(selector: string): HTMLElementStub | null {
-    if (!selector || !selector.trim()) return null;
+    if (!selector?.trim()) return null;
     let curr: HTMLElementStub | null = this;
     while (curr) {
       if (curr.matches(selector)) return curr;

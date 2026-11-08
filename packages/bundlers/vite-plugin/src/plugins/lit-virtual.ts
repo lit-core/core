@@ -1,6 +1,6 @@
 import { resolveLitPrivateSsrSupportForVite } from '@lit-core/resumable/vite';
 import type { Plugin, ResolvedConfig } from 'vite';
-import { extractLitCoreVirtualSubpath, formatVirtualLitCoreId, isVirtualLitCoreId } from '../utils.js';
+import { extractLitCoreVirtualSubpath, formatVirtualLitCoreId, isVirtualLitCoreId, resolveFromVirtualOrigin } from '../utils.js';
 import { getVirtualLitCoreModule } from '../virtual.js';
 
 export function litVirtual(): Plugin {
@@ -23,6 +23,10 @@ export function litVirtual(): Plugin {
       }
       if (isVirtualLitCoreId(id)) {
         return formatVirtualLitCoreId(id);
+      }
+      if (importer?.startsWith('\0') && !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('\0') && !id.startsWith('virtual:')) {
+        const resolved = resolveFromVirtualOrigin(id, undefined, config?.root);
+        if (resolved) return resolved;
       }
       return undefined;
     },

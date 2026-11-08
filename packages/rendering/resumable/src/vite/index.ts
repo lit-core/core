@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import process from 'node:process';
 import type { Plugin, ResolvedConfig } from 'vite';
 import { compileResumableLoader, injectClientEntryImports } from '../compiler/index.js';
 import { HYDRATE_SUPPORT_SOURCE } from '../virtual.js';
@@ -262,6 +261,17 @@ export function resumable(options: ResumableOptions = {}): Plugin {
         id === '@lit-core/resumable/client.js'
       ) {
         return RESOLVED_VIRTUAL_HYDRATE_ID;
+      }
+      if (importer?.startsWith('\0virtual:lit-core/') && !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('\0') && !id.startsWith('virtual:')) {
+        if (config?.root) {
+          try {
+            const rootReq = createRequire(path.join(config.root, 'package.json'));
+            return rootReq.resolve(id);
+          } catch {}
+        }
+        try {
+          return esmRequire.resolve(id);
+        } catch {}
       }
       return trackHtmlClientEntry(this as any, config?.root, htmlEntryModules, id, importer, resolveOpts as any);
     },

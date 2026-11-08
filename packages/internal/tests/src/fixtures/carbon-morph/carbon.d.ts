@@ -1,5 +1,3 @@
-import type * as React from 'react';
-
 declare module '@carbon/web-components/es/components/button/button.scss.js' {
   const styles: { cssText: string };
   export default styles;
@@ -15,7 +13,7 @@ declare module '@carbon/web-components/es/components/tabs/tabs.scss.js' {
   export default styles;
 }
 
-declare module 'react' {
+declare namespace React {
   namespace JSX {
     interface IntrinsicElements {
       'cds-button': any;

@@ -319,7 +319,7 @@ export async function computeSurgicalPatches(
     if (body.attrs && Object.hasOwn(body.attrs, prop)) {
       return body.attrs[prop];
     }
-    if (preActionInitialDefaults && preActionInitialDefaults.has(prop)) {
+    if (preActionInitialDefaults?.has(prop)) {
       return preActionInitialDefaults.get(prop);
     }
     return undefined;

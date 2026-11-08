@@ -173,6 +173,9 @@ importers:
       '@cloudflare/vite-plugin':
         specifier: ^1.66.0
         version: 1.66.0(@types/node@26.6.6)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2))(workerd@1.20261101.1)(wrangler@4.156.0(@types/node@26.6.6))
+      '@jridgewell/remapping':
+        specifier: ^2.3.5
+        version: 2.3.5
       '@momentum-design/components':
         specifier: ^0.142.5
         version: 0.142.5(@types/react@19.3.0)
@@ -188,9 +191,9 @@ importers:
       '@types/webpack':
         specifier: ^5.28.5
         version: 5.28.5(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.35.5(@types/node@26.6.6))
-      '@whatwg-node/server':
-        specifier: ^0.13.2
-        version: 0.13.2
+      cookie:
+        specifier: ^1.1.1
+        version: 1.1.1
       css-select:
         specifier: ^7.0.0
         version: 7.0.0
@@ -206,15 +209,15 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
+      tinyglobby:
+        specifier: ^0.2.17
+        version: 0.2.17
       turbo:
         specifier: ^2.11.10
         version: 2.11.10
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
-      unplugin:
-        specifier: ^3.7.0
-        version: 3.7.0(esbuild@0.28.2)(rolldown@1.2.16)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2))(webpack@5.112.2(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.35.5(@types/node@26.6.6)))
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.6)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2))
@@ -227,6 +230,9 @@ importers:
 
   packages/bundlers/vite-plugin:
     dependencies:
+      '@jridgewell/remapping':
+        specifier: ^2.3.5
+        version: 2.3.5
       '@lit-core/css-fuse':
         specifier: workspace:*
         version: link:../../transforms/css-fuse
@@ -281,6 +287,12 @@ importers:
       '@lit-core/tag-shake':
         specifier: workspace:*
         version: link:../../transforms/tag-shake
+      '@rollup/pluginutils':
+        specifier: ^5.5.1
+        version: 5.5.1
+      tinyglobby:
+        specifier: ^0.2.17
+        version: 0.2.17
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.66.0
@@ -306,6 +318,9 @@ importers:
 
   packages/bundlers/webpack-plugin:
     dependencies:
+      '@jridgewell/remapping':
+        specifier: ^2.3.5
+        version: 2.3.5
       '@lit-core/css-fuse':
         specifier: workspace:*
         version: link:../../transforms/css-fuse
@@ -360,6 +375,12 @@ importers:
       '@lit-core/tag-shake':
         specifier: workspace:*
         version: link:../../transforms/tag-shake
+      '@rollup/pluginutils':
+        specifier: ^5.5.1
+        version: 5.5.1
+      tinyglobby:
+        specifier: ^0.2.17
+        version: 0.2.17
     devDependencies:
       '@types/node':
         specifier: ^26.6.6
@@ -898,6 +919,9 @@ importers:
       '@lit-core/ssr':
         specifier: workspace:*
         version: link:../../rendering/ssr
+      cookie:
+        specifier: ^1.1.1
+        version: 1.1.1
     devDependencies:
       '@types/node':
         specifier: ^26.6.6
@@ -914,6 +938,9 @@ importers:
 
   packages/rendering/resumable:
     dependencies:
+      devalue:
+        specifier: ^6.0.3
+        version: 6.0.3
       lit:
         specifier: ^3.3.3
         version: 3.3.3
@@ -945,6 +972,9 @@ importers:
       '@lit-core/resumable':
         specifier: workspace:*
         version: link:../resumable
+      css-select:
+        specifier: ^7.0.0
+        version: 7.0.0
     devDependencies:
       '@lit-core/html-aot':
         specifier: workspace:*
@@ -985,6 +1015,9 @@ importers:
       react-dom:
         specifier: ^19.3.1
         version: 19.3.1(react@19.3.1)
+      tinyglobby:
+        specifier: ^0.2.17
+        version: 0.2.17
     devDependencies:
       '@types/node':
         specifier: ^26.6.6
@@ -1440,10 +1473,6 @@ packages:
   '@emnapi/wasi-threads@1.2.2':
     resolution: {integrity: sha512-c95qOXkHdydNKhscBTebqEC1CVAZpyqOfVfBzQ1qgzyl3gfeldUjIggDbIZgDKsHLgnsM+igH7TJ/eAasaVuMA==}
 
-  '@envelop/instrumentation@2.0.0':
-    resolution: {integrity: sha512-nXW9DAHfJ7Fh5nTnvr0uDUvCvMw017Agvk3MiE58u8Eby6mTwuiCFp16as2sPVODLLeCBs6rmKs0F1tkpbAXYQ==}
-    engines: {node: '>=22.15.0'}
-
   '@esbuild/aix-ppc64@0.28.2':
     resolution: {integrity: sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==}
     engines: {node: '>=18'}
@@ -1599,9 +1628,6 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
-
-  '@fastify/busboy@3.2.5':
-    resolution: {integrity: sha512-y8MTAeBlEQUNVnskmZQwpseZN3EgCksQNOULlfxWY6o6VEqh01+oExMgbM7gN6YLQ8pNDYeweNPKJRt8jQm2ZQ==}
 
   '@floating-ui/core@1.8.0':
     resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
@@ -3335,26 +3361,6 @@ packages:
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
 
-  '@whatwg-node/disposablestack@0.1.0':
-    resolution: {integrity: sha512-ok0A9+D+mdeb3w1GNCpVr+2gVVLRWKo9Ywm/whNsoWSNfNg3jNxS0/wUF6NSUYbfOtFGu2wZgJnLjasbaQEfvA==}
-    engines: {node: '>=22.15.0'}
-
-  '@whatwg-node/fetch@0.12.1':
-    resolution: {integrity: sha512-MjSXerFVxhWwPXZMNp4b4Q3WZMEIqzinHVWuH5tF2LNGy4hHypqPJCNpaR6bEZbaGdlH+r5dRAmQ8bxowcetjQ==}
-    engines: {node: '>=22.15.0'}
-
-  '@whatwg-node/node-fetch@0.9.3':
-    resolution: {integrity: sha512-Ekx4MfF76yzQTphPf1Qr8N2hbxlTaI/hZ4TSmRGWqmEjQrRlkrtiIT107mS0gds4SisAtAXaU8jXhffipowlGw==}
-    engines: {node: '>=22.15.0'}
-
-  '@whatwg-node/promise-helpers@2.0.1':
-    resolution: {integrity: sha512-ziVgm01A9irPLVBaUFei64qp771BrDXldbv5pY6kgFgNtA+7zq8ux6nj/6w8bELGH/+Ttnc76ox04HIjU8nqvg==}
-    engines: {node: '>=22.15.0'}
-
-  '@whatwg-node/server@0.13.2':
-    resolution: {integrity: sha512-Ujh+gD274sDqs3s8JbxdMMl8x7dhexFbuxoBAJgPZZMWP/uITAW4IqJuK8D83Yg93yQ5Kgq6jrpuhZqUV+bTlg==}
-    engines: {node: '>=22.15.0'}
-
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
 
@@ -4125,50 +4131,11 @@ packages:
   universal-user-agent@7.0.3:
     resolution: {integrity: sha512-TmnEAEAsBJVZM/AADELsK76llnwcf9vMKuPz8JflO1frO8Lchitr0fNaN9d+Ap0BjKtqWqd/J17qeDnXh8CL2A==}
 
-  unplugin@3.7.0:
-    resolution: {integrity: sha512-GrM2uq3DQo3hvLU2FjeYhooJ8BY9N6j1Fbzgx7Pta3VVJevsD3VP4dPjZkZOS0mLvN8w9zzr9OlP+31bSMyuLw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    peerDependencies:
-      '@farmfe/core': '*'
-      '@rsbuild/core': '*'
-      '@rspack/core': '*'
-      bun-types-no-globals: '*'
-      esbuild: '*'
-      rolldown: '*'
-      rollup: '*'
-      unloader: '*'
-      vite: '*'
-      webpack: '*'
-    peerDependenciesMeta:
-      '@farmfe/core':
-        optional: true
-      '@rsbuild/core':
-        optional: true
-      '@rspack/core':
-        optional: true
-      bun-types-no-globals:
-        optional: true
-      esbuild:
-        optional: true
-      rolldown:
-        optional: true
-      rollup:
-        optional: true
-      unloader:
-        optional: true
-      vite:
-        optional: true
-      webpack:
-        optional: true
-
   update-browserslist-db@1.3.4:
     resolution: {integrity: sha512-t8wonIOdQyOjtPd2VktlBu6QjTVTks6v8bSi7kd0r2Vll8TK1JYDZtRRdbmCHOAMphkZgrzK+L+vXK4pyZ8t4A==}
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
-
-  urlpattern-polyfill@10.1.0:
-    resolution: {integrity: sha512-IGjKp/o0NL3Bso1PymYURCJxMPNAf/ILOpendP9f5B6e1rTJgdgiOvgfoT8VxCAdY+Wisb9uhGaJJf3yZ2V9nw==}
 
   uuid@11.1.1:
     resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
@@ -4269,9 +4236,6 @@ packages:
   webpack-sources@3.7.0:
     resolution: {integrity: sha512-PdUhbCycwEgiS1hB/FBDksWKg/ashAIuJKqwdbPn8/dFVgU5LxQiBvG0js6VRRIzPujMrStYCczywp82P0KWng==}
     engines: {node: '>=10.13.0'}
-
-  webpack-virtual-modules@0.6.2:
-    resolution: {integrity: sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==}
 
   webpack@5.112.2:
     resolution: {integrity: sha512-B2tp1LI9D8GVpPDqprdt12ukTkXXahj9MzqSWJq4faSPgOUM7CdZaGAB6HrL/8E6UwbBpdj4vzWDbKoFnVoU6g==}
@@ -4608,11 +4572,6 @@ snapshots:
       tslib: 2.9.1
     optional: true
 
-  '@envelop/instrumentation@2.0.0':
-    dependencies:
-      '@whatwg-node/promise-helpers': 2.0.1
-      tslib: 2.9.1
-
   '@esbuild/aix-ppc64@0.28.2':
     optional: true
 
@@ -4690,8 +4649,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
-
-  '@fastify/busboy@3.2.5': {}
 
   '@floating-ui/core@1.8.0':
     dependencies:
@@ -6568,35 +6525,6 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
-  '@whatwg-node/disposablestack@0.1.0':
-    dependencies:
-      '@whatwg-node/promise-helpers': 2.0.1
-      tslib: 2.9.1
-
-  '@whatwg-node/fetch@0.12.1':
-    dependencies:
-      '@whatwg-node/node-fetch': 0.9.3
-      urlpattern-polyfill: 10.1.0
-
-  '@whatwg-node/node-fetch@0.9.3':
-    dependencies:
-      '@fastify/busboy': 3.2.5
-      '@whatwg-node/disposablestack': 0.1.0
-      '@whatwg-node/promise-helpers': 2.0.1
-      tslib: 2.9.1
-
-  '@whatwg-node/promise-helpers@2.0.1':
-    dependencies:
-      tslib: 2.9.1
-
-  '@whatwg-node/server@0.13.2':
-    dependencies:
-      '@envelop/instrumentation': 2.0.0
-      '@whatwg-node/disposablestack': 0.1.0
-      '@whatwg-node/fetch': 0.12.1
-      '@whatwg-node/promise-helpers': 2.0.1
-      tslib: 2.9.1
-
   '@xtuc/ieee754@1.2.0': {}
 
   '@xtuc/long@4.2.2': {}
@@ -7299,25 +7227,11 @@ snapshots:
 
   universal-user-agent@7.0.3: {}
 
-  unplugin@3.7.0(esbuild@0.28.2)(rolldown@1.2.16)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2))(webpack@5.112.2(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.35.5(@types/node@26.6.6))):
-    dependencies:
-      '@jridgewell/remapping': 2.3.5
-      '@rolldown/pluginutils': 1.0.1
-      picomatch: 4.0.7
-      webpack-virtual-modules: 0.6.2
-    optionalDependencies:
-      esbuild: 0.28.2
-      rolldown: 1.2.16
-      vite: 8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)
-      webpack: 5.112.2(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.35.5(@types/node@26.6.6))
-
   update-browserslist-db@1.3.4(browserslist@4.29.5):
     dependencies:
       browserslist: 4.29.5
       escalade: 3.2.0
       picocolors: 1.1.1
-
-  urlpattern-polyfill@10.1.0: {}
 
   uuid@11.1.1: {}
 
@@ -7363,8 +7277,6 @@ snapshots:
   web-streams-polyfill@3.3.3: {}
 
   webpack-sources@3.7.0: {}
-
-  webpack-virtual-modules@0.6.2: {}
 
   webpack@5.112.2(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.35.5(@types/node@26.6.6)):
     dependencies:

@@ -209,10 +209,14 @@ export function resolveFromVirtualOrigin(specifier: string, originFile?: string,
       const resolved = fallbackReq.resolve(specifier);
       if (resolved) return resolved;
     } catch {
-      const ssrResolved = fallbackReq.resolve('@lit-core/ssr');
-      const ssrReq = createRequire(ssrResolved);
-      const resolved = ssrReq.resolve(specifier);
-      if (resolved) return resolved;
+      for (const pkg of ['@lit-core/resumable', '@lit-core/ssr']) {
+        try {
+          const pkgResolved = fallbackReq.resolve(pkg);
+          const pkgReq = createRequire(pkgResolved);
+          const resolved = pkgReq.resolve(specifier);
+          if (resolved) return resolved;
+        } catch {}
+      }
     }
   } catch {}
   return undefined;
