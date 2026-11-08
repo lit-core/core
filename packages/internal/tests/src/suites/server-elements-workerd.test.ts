@@ -20,7 +20,8 @@ import { LitElement, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { loader, action } from '@lit-core/server-elements';
 
-export const loaderTimings: Record<string, { start: number; end: number }> = {};
+export const loaderTimings: Record<string, { start: number; end: number; inFlight?: number }> = {};
+export const loaderConcurrency = { active: 0, maxActive: 0 };
 
 export class ServerProductCounter extends LitElement {
   @property({ type: String }) title = 'Workerd Counter';
@@ -30,10 +31,18 @@ export class ServerProductCounter extends LitElement {
   @loader()
   async load() {
     const start = Date.now();
-    await new Promise((resolve) => setTimeout(resolve, 70));
-    this.count = 0;
-    this.status = 'loaded';
-    loaderTimings['counter'] = { start, end: Date.now() };
+    loaderConcurrency.active += 1;
+    if (loaderConcurrency.active > loaderConcurrency.maxActive) {
+      loaderConcurrency.maxActive = loaderConcurrency.active;
+    }
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 70));
+      this.count = 0;
+      this.status = 'loaded';
+      loaderTimings['counter'] = { start, end: Date.now(), inFlight: loaderConcurrency.maxActive };
+    } finally {
+      loaderConcurrency.active -= 1;
+    }
   }
 
   @action()
@@ -64,7 +73,7 @@ const INVENTORY_COMPONENT_FIXTURE = `
 import { LitElement, html } from 'lit';
 import { state } from 'lit/decorators.js';
 import { loader, action } from '@lit-core/server-elements';
-import { loaderTimings } from './component.ts';
+import { loaderConcurrency, loaderTimings } from './component.ts';
 
 export class ServerInventoryBadge extends LitElement {
   @state() stock = 0;
@@ -73,10 +82,18 @@ export class ServerInventoryBadge extends LitElement {
   @loader()
   async load() {
     const start = Date.now();
-    await new Promise((resolve) => setTimeout(resolve, 70));
-    this.stock = 10;
-    this.warehouse = 'eu-west';
-    loaderTimings['inventory'] = { start, end: Date.now() };
+    loaderConcurrency.active += 1;
+    if (loaderConcurrency.active > loaderConcurrency.maxActive) {
+      loaderConcurrency.maxActive = loaderConcurrency.active;
+    }
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 70));
+      this.stock = 10;
+      this.warehouse = 'eu-west';
+      loaderTimings['inventory'] = { start, end: Date.now(), inFlight: loaderConcurrency.maxActive };
+    } finally {
+      loaderConcurrency.active -= 1;
+    }
   }
 
   @action()
@@ -228,9 +245,10 @@ export const testHtmlRewriterConcurrentLoaders = {
       throw new Error('Expected both @loader() methods to execute in HTMLRewriter pipeline');
     }
 
-    // Both 70ms loaders must overlap in time (parallel execution, not sequential 140ms+ waterfall)
+    // Both 70ms loaders must overlap in time and execute concurrently in-flight (not a sequential waterfall)
     const overlapped = tCounter.start < tInventory.end && tInventory.start < tCounter.end;
-    if (!overlapped || elapsedMs >= 135) {
+    const maxInFlight = Math.max(tCounter.inFlight ?? 0, tInventory.inFlight ?? 0);
+    if (!overlapped || maxInFlight < 2) {
       throw new Error('Expected concurrent @loader() execution in HTMLRewriter pipeline, got elapsedMs=' + elapsedMs + ' timings=' + JSON.stringify(loaderTimings));
     }
 
