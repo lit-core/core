@@ -224,7 +224,7 @@ export const collectCoreArtifacts = {
     const actionRes = await handleActionRequest(makeActionRequest(signed), {
       env: { LIT_ACTION_SECRET: SECRET },
       secret: SECRET,
-      registry: globalThis.customElements,
+      customElements: globalThis.customElements,
     });
     const actionWireText = await actionRes.text();
     const initialHtml = await renderResolvedTargetADocument();
@@ -290,7 +290,7 @@ export default {
         const res = await handleActionRequest(makeActionRequest(signed), {
           env: { LIT_ACTION_SECRET: SECRET },
           secret: SECRET,
-          registry: globalThis.customElements,
+          customElements: globalThis.customElements,
         });
         b.blackBox(await res.text());
       },
@@ -588,7 +588,8 @@ async function measureAsync(fn, warmup = 20, iterations = 50) {
 if (mode === 'core') {
   const ssr = await import(benchReq.resolve('@lit-core/ssr'));
   ssr.installIsolateGlobals();
-  const se = await import(benchReq.resolve('@lit-core/server-elements'));
+  const seEdge = await import(benchReq.resolve('@lit-core/server-elements/edge'));
+  const seEndpoint = await import(benchReq.resolve('@lit-core/server-elements/action-endpoint'));
   if (!globalThis.CSS) {
     globalThis.CSS = { supports: () => false, escape: (s) => s };
   }
@@ -625,7 +626,7 @@ if (mode === 'core') {
   const targetARender = await measureAsync(async () => {
     await ssr.renderHtmlDocumentAsync(
       PAGE_SHELL,
-      se.createServerElementsRewriterOptions({
+      seEdge.createServerElementsRewriterOptions({
         secret: SECRET,
         env: { latencyMs: 0 },
         customElements: globalThis.customElements,
@@ -633,7 +634,7 @@ if (mode === 'core') {
     );
   });
 
-  const signed = await se.renderServerElement('cart-action', { sku: 'APX-9800' }, {
+  const signed = await seEdge.renderServerElement('cart-action', { sku: 'APX-9800' }, {
     mode: 'dsd',
     secret: SECRET,
     customElements: globalThis.customElements,
@@ -656,10 +657,10 @@ if (mode === 'core') {
         seq: 0,
       }),
     });
-    const res = await se.handleActionRequest(req, {
+    const res = await seEndpoint.handleActionRequest(req, {
       env: { LIT_ACTION_SECRET: SECRET },
       secret: SECRET,
-      registry: globalThis.customElements,
+      customElements: globalThis.customElements,
     });
     await res.text();
   });

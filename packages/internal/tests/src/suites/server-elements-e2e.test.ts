@@ -224,7 +224,7 @@ describe('golden end-to-end acceptance test: lit server elements', () => {
         const webRes = await handleActionRequest(webReq, {
           env: {},
           secret: TEST_SECRET,
-          registry: (globalThis as any).customElements,
+          customElements: (globalThis as any).customElements,
         });
 
         const resBody = await webRes.text();
@@ -320,7 +320,7 @@ describe('golden end-to-end acceptance test: lit server elements', () => {
       const res = await handleActionRequest(actionReq, {
         env: {},
         secret: TEST_SECRET,
-        registry: (globalThis as any).customElements,
+        customElements: (globalThis as any).customElements,
       });
       streamText = await res.text();
     }
@@ -451,7 +451,7 @@ describe('golden end-to-end acceptance test: lit server elements', () => {
     const res = await handleActionRequest(tamperedReq, {
       env: {},
       secret: TEST_SECRET,
-      registry: (globalThis as any).customElements,
+      customElements: (globalThis as any).customElements,
     });
 
     expect(res.status).toBe(403);
@@ -474,7 +474,7 @@ describe('golden end-to-end acceptance test: lit server elements', () => {
     const emptyRes = await handleActionRequest(emptyStateReq, {
       env: {},
       secret: TEST_SECRET,
-      registry: (globalThis as any).customElements,
+      customElements: (globalThis as any).customElements,
     });
 
     expect(emptyRes.status).toBe(403);
@@ -497,42 +497,35 @@ describe('golden end-to-end acceptance test: lit server elements', () => {
     expect(parsed.code).toBe('STATE_TAMPERED');
   });
 
-  it('drops out-of-order stale sequence responses without rolling back DOM state', async () => {
-    // Configure network race: delay seq=1 until seq=2 completes
+  it('queues rapid actions so the second starts from the first response snapshot', async () => {
+    // Hold the first action's response at the network layer.
     shouldDelaySeq1 = true;
-
-    // Trigger action 1 (will be held by network router)
     await page.click('server-counter button.set10-btn');
     await page.waitForTimeout(200);
 
-    // Trigger action 2 (will complete first)
     shouldDelaySeq1 = false;
     await page.click('server-counter button.set20-btn');
+    await page.waitForTimeout(300);
 
-    // Wait for the second click (seq=2) to update the DOM
+    // While the first is held, the second must not have been sent: it would start from stale state.
+    expect(recordedActionBodies).toHaveLength(1);
+
+    delaySeq1Resolver?.();
+    delaySeq1Resolver = null;
     await page.waitForFunction(
       () => {
         const host = document.querySelector('server-counter');
-        const countEl = host?.shadowRoot?.querySelector('.sole-count');
-        const adjEl = host?.shadowRoot?.querySelector('.adjacent-text');
-        return countEl?.textContent?.trim() === '20' && adjEl?.textContent?.trim() === 'Value: 20 items (set)';
+        return host?.shadowRoot?.querySelector('.sole-count')?.textContent?.trim() === '20';
       },
       undefined,
       { timeout: 3000 },
     );
 
-    // Release delayed action 1
-    if (delaySeq1Resolver) {
-      delaySeq1Resolver();
-      delaySeq1Resolver = null;
-    }
-
-    await page.waitForTimeout(500);
-
-    // The DOM must remain at seq=2's state (not rolled back to count 10)
-    const text = await getShadowText(page, 'server-counter', '.sole-count');
-    const adjacentText = await getShadowText(page, 'server-counter', '.adjacent-text');
-    expect(text).toBe('20');
-    expect(adjacentText).toBe('Value: 20 items (set)');
+    // Both ran, in order, and the second carried the snapshot the first one returned.
+    expect(recordedActionBodies).toHaveLength(2);
+    expect(recordedActionBodies.map((body) => body.seq)).toEqual([1, 2]);
+    expect(recordedActionBodies[1].snapshotSeq).toBe(1);
+    expect(recordedActionBodies[1].sig).not.toBe(recordedActionBodies[0].sig);
+    expect(await getShadowText(page, 'server-counter', '.adjacent-text')).toBe('Value: 20 items (set)');
   });
 });

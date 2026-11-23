@@ -464,7 +464,7 @@ fn build_schema_check<'a>(
             let msg = ast
                 .allocator()
                 .alloc_str(&format!("Invalid argument '{}': expected boolean", label));
-            stmts.push(build_throw_type_error(ast, test, msg));
+            stmts.push(build_throw_type_error(ast, test, msg, label));
         }
         ValidationSchema::String => {
             // if (typeof var !== "string") throw new TypeError("Invalid argument '<label>': expected string");
@@ -484,7 +484,7 @@ fn build_schema_check<'a>(
             let msg = ast
                 .allocator()
                 .alloc_str(&format!("Invalid argument '{}': expected string", label));
-            stmts.push(build_throw_type_error(ast, test, msg));
+            stmts.push(build_throw_type_error(ast, test, msg, label));
         }
         ValidationSchema::Number => {
             // if (!Number.isFinite(var)) throw new TypeError("Invalid argument '<label>': expected number");
@@ -517,7 +517,7 @@ fn build_schema_check<'a>(
             let msg = ast
                 .allocator()
                 .alloc_str(&format!("Invalid argument '{}': expected number", label));
-            stmts.push(build_throw_type_error(ast, not_finite, msg));
+            stmts.push(build_throw_type_error(ast, not_finite, msg, label));
         }
         ValidationSchema::BigInt => {
             let typeof_expr = Expression::new_unary_expression(
@@ -536,7 +536,7 @@ fn build_schema_check<'a>(
             let msg = ast
                 .allocator()
                 .alloc_str(&format!("Invalid argument '{}': expected bigint", label));
-            stmts.push(build_throw_type_error(ast, test, msg));
+            stmts.push(build_throw_type_error(ast, test, msg, label));
         }
         ValidationSchema::LiteralUnion(lits) => {
             // if (var !== lit1 && var !== lit2 ...) throw ...
@@ -568,7 +568,7 @@ fn build_schema_check<'a>(
                     "Invalid argument '{}': value not in literal union",
                     label
                 ));
-                stmts.push(build_throw_type_error(ast, test, msg));
+                stmts.push(build_throw_type_error(ast, test, msg, label));
             }
         }
         ValidationSchema::Array(elem_schema) => {
@@ -602,7 +602,7 @@ fn build_schema_check<'a>(
             let msg = ast
                 .allocator()
                 .alloc_str(&format!("Invalid argument '{}': expected array", label));
-            stmts.push(build_throw_type_error(ast, not_arr, msg));
+            stmts.push(build_throw_type_error(ast, not_arr, msg, label));
 
             // 2. for (let __i_depth = 0; __i_depth < var.length; __i_depth++) { ... }
             let i_name = ast.allocator().alloc_str(&format!("__i_{}", depth));
@@ -667,7 +667,7 @@ fn build_schema_check<'a>(
                 "Invalid argument '{}': sparse arrays with holes are not allowed",
                 label
             ));
-            loop_stmts.push(build_throw_type_error(ast, not_in, hole_msg));
+            loop_stmts.push(build_throw_type_error(ast, not_in, hole_msg, label));
 
             // const __elem_depth = var[__i_depth];
             let mut elem_decls = ArenaVec::new_in(ast);
@@ -770,7 +770,7 @@ fn build_schema_check<'a>(
                 "Invalid argument '{}': expected plain object",
                 label
             ));
-            stmts.push(build_throw_type_error(ast, not_plain_obj, msg));
+            stmts.push(build_throw_type_error(ast, not_plain_obj, msg, label));
 
             // 2. Prototype pollution defense:
             // if (Object.prototype.hasOwnProperty.call(var, "__proto__") || Object.prototype.hasOwnProperty.call(var, "constructor") || Object.prototype.hasOwnProperty.call(var, "prototype"))
@@ -791,7 +791,12 @@ fn build_schema_check<'a>(
                 ast,
             );
             let pollution_msg = ast.allocator().alloc_str("Prototype pollution rejected");
-            stmts.push(build_throw_type_error(ast, proto_pollution, pollution_msg));
+            stmts.push(build_throw_type_error(
+                ast,
+                proto_pollution,
+                pollution_msg,
+                label,
+            ));
 
             // 3. Strict mode: reject extra unlisted keys
             if *strict {
@@ -938,7 +943,12 @@ fn build_schema_check<'a>(
                     "Invalid argument '{}': unexpected unlisted property",
                     label
                 ));
-                loop_stmts.push(build_throw_type_error(ast, unexpected_test, unexpected_msg));
+                loop_stmts.push(build_throw_type_error(
+                    ast,
+                    unexpected_test,
+                    unexpected_msg,
+                    label,
+                ));
 
                 let loop_body = Statement::new_block_statement(SPAN, loop_stmts, ast);
                 stmts.push(Statement::new_for_statement(
@@ -995,7 +1005,12 @@ fn build_schema_check<'a>(
                     let missing_msg = ast
                         .allocator()
                         .alloc_str(&format!("Missing required property '{}'", prop_label));
-                    stmts.push(build_throw_type_error(ast, is_undef, missing_msg));
+                    stmts.push(build_throw_type_error(
+                        ast,
+                        is_undef,
+                        missing_msg,
+                        &prop_label,
+                    ));
 
                     // Recursively validate prop.schema
                     let prop_checks = build_schema_check(
@@ -1033,15 +1048,45 @@ fn build_schema_check<'a>(
     stmts
 }
 
+/// `{ [key]: value }` as an object literal.
+fn object_with<'a>(
+    ast: &AstBuilder<'a>,
+    key: &'static str,
+    value: Expression<'a>,
+) -> Expression<'a> {
+    let mut props = ArenaVec::new_in(ast);
+    props.push(ObjectPropertyKind::ObjectProperty(ObjectProperty::boxed(
+        SPAN,
+        PropertyKind::Init,
+        PropertyKey::StaticIdentifier(IdentifierName::boxed(SPAN, key, ast)),
+        value,
+        false,
+        false,
+        false,
+        ast,
+    )));
+    Expression::new_object_expression(SPAN, props, ast)
+}
+
+/// Emits `if (test) throw new TypeError(message, { cause: { path } })`.
+///
+/// `path` names the argument or nested property that failed (`qty`, `opts.gift`, `tags[*]`), so the
+/// server can report which field of a form was wrong without parsing the message text.
 fn build_throw_type_error<'a>(
     ast: &AstBuilder<'a>,
     test: Expression<'a>,
     message: &'a str,
+    path: &str,
 ) -> Statement<'a> {
+    let path_literal =
+        Expression::new_string_literal(SPAN, ast.allocator().alloc_str(path), None, ast);
+    let cause = object_with(ast, "cause", object_with(ast, "path", path_literal));
+
     let mut args = ArenaVec::new_in(ast);
     args.push(Argument::from(Expression::new_string_literal(
         SPAN, message, None, ast,
     )));
+    args.push(Argument::from(cause));
     let new_err = Expression::new_new_expression(
         SPAN,
         Expression::new_identifier(SPAN, "TypeError", ast),

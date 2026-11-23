@@ -93,14 +93,14 @@ describe('secret handling fails closed', () => {
     const previous = process.env.NODE_ENV;
     delete process.env.NODE_ENV;
     try {
-      await expect(handleActionRequest(request(), { env: {}, secret: undefined as any, registry: { get: () => Counter } })).rejects.toThrow(/Missing mandatory secret/);
+      await expect(handleActionRequest(request(), { env: {}, secret: undefined as any, customElements: { get: () => Counter } })).rejects.toThrow(/Missing mandatory secret/);
     } finally {
       if (previous !== undefined) process.env.NODE_ENV = previous;
     }
   });
 
   it('only uses the development secret when devMode is explicitly true', async () => {
-    const res = await handleActionRequest(request(), { env: {}, secret: undefined as any, devMode: true, registry: { get: () => Counter } });
+    const res = await handleActionRequest(request(), { env: {}, secret: undefined as any, devMode: true, customElements: { get: () => Counter } });
     expect(res.status).toBe(403);
   });
 
@@ -145,7 +145,7 @@ describe('secret handling fails closed', () => {
     const resState = await handleActionRequest(tamperedStateReq, {
       env: {},
       secret: SECRET,
-      registry: { get: (name: string) => (name === TAG ? BoundCounter : undefined) },
+      customElements: { get: (name: string) => (name === TAG ? BoundCounter : undefined) },
     });
     expect(resState.status).toBe(403);
     expect((await resState.json()).code).toBe('STATE_TAMPERED');
@@ -170,7 +170,7 @@ describe('secret handling fails closed', () => {
     const resSeq = await handleActionRequest(replayedSeqReq, {
       env: {},
       secret: SECRET,
-      registry: { get: (name: string) => (name === TAG ? BoundCounter : undefined) },
+      customElements: { get: (name: string) => (name === TAG ? BoundCounter : undefined) },
     });
     expect(resSeq.status).toBe(403);
     expect((await resSeq.json()).code).toBe('STATE_TAMPERED');

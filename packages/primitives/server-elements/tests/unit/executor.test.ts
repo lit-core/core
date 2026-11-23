@@ -333,7 +333,7 @@ describe('client Declarative Shadow DOM patch executor', () => {
     host.shadowRoot = shadow;
 
     // Define part descriptor on constructor
-    (host.constructor as any).__litParts = [{ k: 'element', path: [0], attr: 'value', prefix: '.' }];
+    (host.constructor as any).__litParts = [{ kind: 'element', path: [0], attr: 'value', prefix: '.' }];
 
     executePatches(host as any, { p: 0, v: 'updated text' });
 
@@ -350,8 +350,8 @@ describe('client Declarative Shadow DOM patch executor', () => {
     host.shadowRoot = shadow;
 
     (host.constructor as any).__litParts = [
-      { k: 'element', path: [0], attr: 'disabled', prefix: '?' },
-      { k: 'element', path: [0], attr: 'aria-label', prefix: '' },
+      { kind: 'element', path: [0], attr: 'disabled', prefix: '?' },
+      { kind: 'element', path: [0], attr: 'aria-label', prefix: '' },
     ];
 
     // Set boolean true and aria-label
@@ -379,7 +379,7 @@ describe('client Declarative Shadow DOM patch executor', () => {
     shadow.appendChild(span);
     host.shadowRoot = shadow;
 
-    (host.constructor as any).__litParts = [{ k: 'sole-text', path: [0] }];
+    (host.constructor as any).__litParts = [{ kind: 'sole-text', path: [0] }];
 
     executePatches(host as any, { p: 0, v: 'New text' });
     expect(span.textContent).toBe('New text');
@@ -397,7 +397,7 @@ describe('client Declarative Shadow DOM patch executor', () => {
     shadow.appendChild(end);
     host.shadowRoot = shadow;
 
-    (host.constructor as any).__litParts = [{ k: 'range', name: 'p0', startPath: [0] }];
+    (host.constructor as any).__litParts = [{ kind: 'range', name: 'p0', startPath: [0] }];
 
     executePatches(host as any, { p: 0, v: 43 });
 
@@ -420,12 +420,11 @@ describe('client Declarative Shadow DOM patch executor', () => {
     shadow.appendChild(end);
     host.shadowRoot = shadow;
 
-    (host.constructor as any).__litParts = [{ k: 'range', name: 'p0', startPath: [0] }];
+    (host.constructor as any).__litParts = [{ kind: 'range', name: 'p0', startPath: [0] }];
 
     executePatches(host as any, {
       p: 0,
-      f: '<p class="content">Content loaded</p>',
-      h: 'hash-abc',
+      f: { p: 0, h: 'hash-abc', html: '<p class="content">Content loaded</p>', v: [] },
     });
 
     expect(oldNode.parentNode).toBeNull();
@@ -436,55 +435,121 @@ describe('client Declarative Shadow DOM patch executor', () => {
     expect(inserted.nextSibling).toBe(end);
   });
 
-  it('reconciles keyed list reusing DOM elements and updating order', () => {
-    const host = doc.createElement('list-comp') as any;
+  describe('keyed list ops', () => {
+    const html = (key: string, label = key.toUpperCase()) => `<li data-lit-key="${key}">${label}</li>`;
+    const labels = (host: MockElement, start: MockNode, end: MockNode) => {
+      const out: string[] = [];
+      for (let n = start.nextSibling; n && n !== end; n = n.nextSibling) out.push((n as MockElement).getAttribute('data-lit-key') ?? '');
+      return out;
+    };
+
+    function mountList(stale: string[] = []) {
+      const host = doc.createElement('list-comp') as any;
+      const shadow = doc.createElement('div');
+      const start = doc.createComment('?start name="p0"');
+      const end = doc.createComment('?end');
+      shadow.appendChild(start);
+      for (const text of stale) shadow.appendChild(doc.createTextNode(text));
+      shadow.appendChild(end);
+      host.shadowRoot = shadow;
+      (host.constructor as any).__litParts = [{ kind: 'range', name: 'p0', startPath: [0] }];
+      return { host, shadow, start, end };
+    }
+
+    const keyed = (ops: unknown[]) => ({ p: 0, k: { p: 0, ops } }) as any;
+
+    it('replace clears server-rendered nodes and renders every item', () => {
+      const { host, start, end } = mountList(['stale-one', 'stale-two']);
+      executePatches(
+        host,
+        keyed([
+          {
+            op: 'replace',
+            items: [
+              { key: 'a', html: html('a') },
+              { key: 'b', html: html('b') },
+            ],
+          },
+        ]),
+      );
+
+      expect(labels(host, start, end)).toEqual(['a', 'b']);
+      expect(host.shadowRoot.textContent).not.toContain('stale');
+    });
+
+    it('reuses DOM nodes across remove, insert and reorder', () => {
+      const { host, start, end } = mountList();
+      executePatches(host, keyed([{ op: 'replace', items: ['a', 'b', 'c'].map((key) => ({ key, html: html(key) })) }]));
+      const nodeA = start.nextSibling as MockElement;
+      const nodeB = nodeA.nextSibling as MockElement;
+      const nodeC = nodeB.nextSibling as MockElement;
+
+      executePatches(
+        host,
+        keyed([
+          { op: 'remove', key: 'b' },
+          { op: 'insert', key: 'd', index: 2, html: html('d') },
+          { op: 'reorder', order: ['c', 'a', 'd'] },
+        ]),
+      );
+
+      expect(labels(host, start, end)).toEqual(['c', 'a', 'd']);
+      expect(start.nextSibling).toBe(nodeC);
+      expect(nodeC.nextSibling).toBe(nodeA);
+      expect(nodeB.parentNode).toBeNull();
+    });
+
+    it('update swaps the node for the changed item only', () => {
+      const { host, start, end } = mountList();
+      executePatches(host, keyed([{ op: 'replace', items: ['a', 'b'].map((key) => ({ key, html: html(key) })) }]));
+      const nodeA = start.nextSibling as MockElement;
+      const nodeB = nodeA.nextSibling as MockElement;
+
+      executePatches(host, keyed([{ op: 'update', key: 'a', html: html('a', 'Alpha') }]));
+
+      expect(start.nextSibling).not.toBe(nodeA);
+      expect((start.nextSibling as MockElement).textContent).toBe('Alpha');
+      expect(start.nextSibling?.nextSibling).toBe(nodeB);
+      expect(labels(host, start, end)).toEqual(['a', 'b']);
+    });
+
+    it('skips a keyed frame when the part has no compiled descriptor', () => {
+      const { host, start, end } = mountList(['keep']);
+      (host.constructor as any).__litParts = [];
+      executePatches(host, keyed([{ op: 'replace', items: [{ key: 'a', html: html('a') }] }]));
+
+      expect(start.nextSibling?.nodeType).toBe(3);
+      expect(end.previousSibling?.nodeType).toBe(3);
+    });
+  });
+
+  it('does not guess a target for a scalar frame without a part descriptor', () => {
+    const host = doc.createElement('guess-comp') as any;
     const shadow = doc.createElement('div');
-    const start = doc.createComment('?start name="p0"');
-    const end = doc.createComment('?end');
-
-    shadow.appendChild(start);
-    shadow.appendChild(end);
+    const input = doc.createElement('input');
+    input.value = 'untouched';
+    shadow.appendChild(input);
     host.shadowRoot = shadow;
+    (host.constructor as any).__litParts = [];
 
-    (host.constructor as any).__litParts = [{ k: 'range', name: 'p0', startPath: [0] }];
+    executePatches(host, { p: 0, v: 'changed' });
 
-    // Initial list: items A, B, C
-    executePatches(host as any, {
-      p: 0,
-      k: [
-        { key: 'a', html: '<li data-lit-key="a">A</li>' },
-        { key: 'b', html: '<li data-lit-key="b">B</li>' },
-        { key: 'c', html: '<li data-lit-key="c">C</li>' },
-      ],
-    });
+    expect(input.value).toBe('untouched');
+  });
 
-    const nodeA = start.nextSibling as MockElement;
-    const nodeB = nodeA.nextSibling as MockElement;
-    const nodeC = nodeB.nextSibling as MockElement;
+  it('ignores range markers whose name only shares a prefix with the target', () => {
+    const root = doc.createElement('div');
+    root.appendChild(doc.createComment('?start name="p10"'));
+    root.appendChild(doc.createComment('?end'));
 
-    expect(nodeA.getAttribute('data-lit-key')).toBe('a');
-    expect(nodeB.getAttribute('data-lit-key')).toBe('b');
-    expect(nodeC.getAttribute('data-lit-key')).toBe('c');
-    expect(nodeC.nextSibling).toBe(end);
+    expect(resolveRangeMarkers(root, 'p1')).toBeNull();
+  });
 
-    // Reorder: C, A, D (B is removed, D is added)
-    executePatches(host as any, {
-      p: 0,
-      k: [
-        { key: 'c', html: '<li data-lit-key="c">C</li>' },
-        { key: 'a', html: '<li data-lit-key="a">A</li>' },
-        { key: 'd', html: '<li data-lit-key="d">D</li>' },
-      ],
-    });
+  it('does not treat unrelated comments as end markers', () => {
+    const root = doc.createElement('div');
+    root.appendChild(doc.createComment('?start name="p0"'));
+    root.appendChild(doc.createComment('endpoint notes'));
 
-    // Check that existing instances of A and C were reused!
-    const newFirst = start.nextSibling as MockElement;
-    const newSecond = newFirst.nextSibling as MockElement;
-    const newThird = newSecond.nextSibling as MockElement;
-
-    expect(newFirst).toBe(nodeC);
-    expect(newSecond).toBe(nodeA);
-    expect(newThird.getAttribute('data-lit-key')).toBe('d');
-    expect(nodeB.parentNode).toBeNull(); // Node B was unmounted
+    expect(resolveRangeMarkers(root, 'p0')).toBeNull();
   });
 });

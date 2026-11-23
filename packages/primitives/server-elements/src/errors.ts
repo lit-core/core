@@ -20,9 +20,12 @@ export class UncompiledServerElementError extends Error {
 export class ServerActionError extends Error {
   readonly code: string;
   readonly status: number;
+  /** Per-field messages from a deliberate server `ActionError`, keyed by input name. */
+  readonly fields?: Readonly<Record<string, string>>;
 
-  constructor(message: string, code = 'ACTION_FAILED', status = 500) {
+  constructor(message: string, code = 'ACTION_FAILED', status = 500, fields?: Record<string, string>) {
     super(message);
+    this.fields = fields;
     this.name = 'ServerActionError';
     this.code = code;
     this.status = status;

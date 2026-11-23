@@ -91,6 +91,39 @@ impl<'a> WorkerBuilder<'a> {
         Statement::new_expression_statement(SPAN, assign_expr, self.ast)
     }
 
+    fn push_property(
+        &self,
+        props: &mut ArenaVec<'a, ObjectPropertyKind<'a>>,
+        name: &'static str,
+        value: Expression<'a>,
+    ) {
+        props.push(ObjectPropertyKind::ObjectProperty(ObjectProperty::boxed(
+            SPAN,
+            PropertyKind::Init,
+            PropertyKey::StaticIdentifier(IdentifierName::boxed(SPAN, name, self.ast)),
+            value,
+            false,
+            false,
+            false,
+            self.ast,
+        )));
+    }
+
+    fn string_array(&self, items: &[String]) -> Expression<'a> {
+        let mut elements = ArenaVec::new_in(self.ast);
+        for item in items {
+            elements.push(ArrayExpressionElement::from(
+                Expression::new_string_literal(
+                    SPAN,
+                    self.ast.allocator().alloc_str(item),
+                    None,
+                    self.ast,
+                ),
+            ));
+        }
+        Expression::new_array_expression(SPAN, elements, self.ast)
+    }
+
     /// Builds:
     /// ```js
     /// ClassName.__lit_actions = {
@@ -183,6 +216,14 @@ impl<'a> WorkerBuilder<'a> {
                 self.ast,
             )));
 
+            if let Some(revalidate) = act.revalidate {
+                self.push_property(
+                    &mut act_props,
+                    "revalidate",
+                    Expression::new_boolean_literal(SPAN, revalidate, self.ast),
+                );
+            }
+
             let act_obj = Expression::new_object_expression(SPAN, act_props, self.ast);
             action_entries.push(ObjectPropertyKind::ObjectProperty(ObjectProperty::boxed(
                 SPAN,
@@ -266,6 +307,11 @@ impl<'a> WorkerBuilder<'a> {
                 false,
                 self.ast,
             )));
+
+            if let Some(dependencies) = &ldr.dependencies {
+                let deps = self.string_array(dependencies);
+                self.push_property(&mut ldr_props, "dependencies", deps);
+            }
 
             let ldr_obj = Expression::new_object_expression(SPAN, ldr_props, self.ast);
             loader_entries.push(ObjectPropertyKind::ObjectProperty(ObjectProperty::boxed(

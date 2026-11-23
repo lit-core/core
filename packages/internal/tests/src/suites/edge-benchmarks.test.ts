@@ -1,20 +1,36 @@
-import fs from 'node:fs';
-import { createSignedStateSnapshot, executePatches, handleActionRequest } from '@lit-core/server-elements';
+import { fileURLToPath } from 'node:url';
+import { handleActionRequest } from '@lit-core/server-elements/action-endpoint';
+import { executePatches } from '@lit-core/server-elements/client';
+import { createSignedStateSnapshot } from '@lit-core/server-elements/crypto';
 import { splitServerElement } from '@lit-core/server-split';
 import { installIsolateGlobals, renderToString } from '@lit-core/ssr';
 import { html } from 'lit';
+import { build } from 'vite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { countMarkers, evaluateTargetA, evaluateTargetC, evaluateTargetD, runEdgeHeadToHeadBenchmark, verifyEdgeDesignSystemSsr } from '../../../benchmarks/src/features/edge-head-to-head.js';
 import { closeTestBrowser, getShadowText, getTestBrowser, setupTestPage } from '../harness.js';
 
-const executorDistPath = new URL('../../../../primitives/server-elements/dist/executor.js', import.meta.url);
-const genuineExecutorScript = fs.readFileSync(executorDistPath, 'utf-8').replace(/^export\s+/gm, '');
+const executorEntry = fileURLToPath(new URL('../../../../primitives/server-elements/dist/executor.js', import.meta.url));
+
+/** Bundles the real browser executor into a self-contained script that registers `window.__litExecutePatches`. */
+async function bundleExecutor(): Promise<string> {
+  const result = await build({
+    logLevel: 'silent',
+    configFile: false,
+    build: { write: false, minify: false, lib: { entry: executorEntry, formats: ['iife'], name: 'LitExecutor' } },
+  });
+  const output = (Array.isArray(result) ? result[0] : (result as any)).output;
+  return output.find((chunk: any) => chunk.type === 'chunk').code;
+}
 
 describe('edge SSR and server elements head-to-head benchmark suite', () => {
   let browser: any;
 
+  let genuineExecutorScript = '';
+
   beforeAll(async () => {
     browser = await getTestBrowser();
+    genuineExecutorScript = await bundleExecutor();
   });
 
   afterAll(async () => {
@@ -31,7 +47,9 @@ describe('edge SSR and server elements head-to-head benchmark suite', () => {
         `,
         script: `
           ${genuineExecutorScript}
-          class CartAction extends HTMLElement {}
+          class CartAction extends HTMLElement {
+            static __litParts = [{ kind: 'sole-text', path: [0, 0] }, { kind: 'sole-text', path: [0, 2] }];
+          }
           if (!customElements.get('cart-action')) {
             customElements.define('cart-action', CartAction);
           }
@@ -71,7 +89,9 @@ describe('edge SSR and server elements head-to-head benchmark suite', () => {
         `,
         script: `
           ${genuineExecutorScript}
-          class CartFocusAction extends HTMLElement {}
+          class CartFocusAction extends HTMLElement {
+            static __litParts = [{ kind: 'element', path: [0, 0], attr: 'value', prefix: '.' }, { kind: 'sole-text', path: [0, 1] }, { kind: 'sole-text', path: [0, 2] }];
+          }
           if (!customElements.get('cart-focus-action')) {
             customElements.define('cart-focus-action', CartFocusAction);
           }

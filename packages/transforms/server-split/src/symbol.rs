@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use oxc_ast::ast::*;
 use oxc_semantic::{Scoping, SymbolId};
-use oxc_span::Span;
+use oxc_span::{GetSpan, Span};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CanonicalServerSymbol {
@@ -17,6 +17,15 @@ pub enum CanonicalServerSymbol {
 pub enum ServerDecoratorKind {
     Loader,
     Action,
+}
+
+/// Statically evaluated options of an `@loader({...})` or `@action({...})` call.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ServerMethodOptions {
+    /// `@loader({ dependencies: ['a', 'b'] })`
+    pub dependencies: Option<Vec<String>>,
+    /// `@action({ revalidate: false })`
+    pub revalidate: Option<bool>,
 }
 
 #[derive(Debug, Clone)]
@@ -37,6 +46,9 @@ pub struct ExtractedServerMethod<'a> {
     pub span: Span,
     pub body_span: Option<Span>,
     pub method_def: &'a MethodDefinition<'a>,
+    pub options: ServerMethodOptions,
+    /// Problems found while evaluating the decorator options, reported as SE107.
+    pub option_errors: Vec<(String, Span)>,
 }
 
 pub struct ServerSymbolContext<'a> {
@@ -175,11 +187,16 @@ impl<'a> ServerSymbolContext<'a> {
         for element in &class.body.body {
             if let ClassElement::MethodDefinition(method) = element {
                 let mut method_kind = None;
+                let mut decorator_call = None;
 
                 // 1. Direct decorators on the method
                 for dec in &method.decorators {
                     if let Some(kind) = self.resolve_server_decorator(&dec.expression) {
                         method_kind = Some(kind);
+                        decorator_call = match dec.expression.without_parentheses() {
+                            Expression::CallExpression(call) => Some(call),
+                            _ => None,
+                        };
                         break;
                     }
                 }
@@ -205,6 +222,7 @@ impl<'a> ServerSymbolContext<'a> {
                         };
 
                         let optional = param.optional
+                            || param.initializer.is_some()
                             || matches!(&param.pattern, BindingPattern::AssignmentPattern(_));
                         let ts_type_annotation = param.type_annotation.as_deref();
 
@@ -217,6 +235,10 @@ impl<'a> ServerSymbolContext<'a> {
                         });
                     }
 
+                    let (options, option_errors) = decorator_call
+                        .map(|call| parse_decorator_options(call, kind))
+                        .unwrap_or_default();
+
                     results.push(ExtractedServerMethod {
                         kind,
                         name,
@@ -225,6 +247,8 @@ impl<'a> ServerSymbolContext<'a> {
                         span: method.span,
                         body_span,
                         method_def: method,
+                        options,
+                        option_errors,
                     });
                 }
             }
@@ -341,4 +365,86 @@ fn extract_binding_names<'a>(pattern: &'a BindingPattern<'a>, out: &mut Vec<Stri
             extract_binding_names(&assign.left, out);
         }
     }
+}
+
+/// Evaluates the literal options of a server decorator call.
+///
+/// Only object literals with literal values are accepted, because the result is baked into the
+/// compiled descriptors. Anything else is reported instead of being silently ignored.
+fn parse_decorator_options(
+    call: &CallExpression<'_>,
+    kind: ServerDecoratorKind,
+) -> (ServerMethodOptions, Vec<(String, Span)>) {
+    let mut options = ServerMethodOptions::default();
+    let mut errors = Vec::new();
+    let decorator = match kind {
+        ServerDecoratorKind::Loader => "@loader()",
+        ServerDecoratorKind::Action => "@action()",
+    };
+
+    let Some(first) = call.arguments.first() else {
+        return (options, errors);
+    };
+    let Some(Expression::ObjectExpression(object)) =
+        first.as_expression().map(|e| e.without_parentheses())
+    else {
+        errors.push((
+            format!("{decorator} options must be an object literal."),
+            first.span(),
+        ));
+        return (options, errors);
+    };
+
+    for property in &object.properties {
+        let ObjectPropertyKind::ObjectProperty(prop) = property else {
+            errors.push((
+                format!("{decorator} options cannot use spread elements."),
+                property.span(),
+            ));
+            continue;
+        };
+        let Some(key) = prop.key.static_name() else {
+            errors.push((
+                format!("{decorator} option names must be static."),
+                prop.span,
+            ));
+            continue;
+        };
+        let value = prop.value.without_parentheses();
+
+        match (kind, key.as_ref()) {
+            (ServerDecoratorKind::Loader, "dependencies") => match string_array(value) {
+                Some(names) => options.dependencies = Some(names),
+                None => errors.push((
+                    "@loader() option 'dependencies' must be an array of string literals."
+                        .to_string(),
+                    prop.span,
+                )),
+            },
+            (ServerDecoratorKind::Action, "revalidate") => match value {
+                Expression::BooleanLiteral(flag) => options.revalidate = Some(flag.value),
+                _ => errors.push((
+                    "@action() option 'revalidate' must be a boolean literal.".to_string(),
+                    prop.span,
+                )),
+            },
+            _ => errors.push((format!("Unknown {decorator} option '{key}'."), prop.span)),
+        }
+    }
+
+    (options, errors)
+}
+
+fn string_array(expr: &Expression<'_>) -> Option<Vec<String>> {
+    let Expression::ArrayExpression(array) = expr else {
+        return None;
+    };
+    array
+        .elements
+        .iter()
+        .map(|element| match element {
+            ArrayExpressionElement::StringLiteral(s) => Some(s.value.as_str().to_string()),
+            _ => None,
+        })
+        .collect()
 }

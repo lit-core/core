@@ -46,7 +46,7 @@ describe('cryptographic state utilities', () => {
     const stateB = { a: 20, z: 10 };
     const ttl = 60000;
 
-    const resA = await createSignedStateSnapshot('test-el', stateA, secret, ttl);
+    const resA = await createSignedStateSnapshot('test-el', stateA, secret, { ttlMs: ttl });
 
     // Verify stateB verifies against stateA signature
     const isValid = await verifyStateSignature('test-el', stateB, resA.sig, secret, { token: resA.token });
@@ -85,7 +85,7 @@ describe('cryptographic state utilities', () => {
   it('rejects expired state snapshots', async () => {
     const state = { count: 1 };
     // TTL of -100ms
-    const { sig, token } = await createSignedStateSnapshot('counter-element', state, secret, -100);
+    const { sig, token } = await createSignedStateSnapshot('counter-element', state, secret, { ttlMs: -100 });
 
     const isValid = await verifyStateSignature('counter-element', state, sig, secret, { token });
     expect(isValid).toBe(false);

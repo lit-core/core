@@ -861,7 +861,7 @@ function serverElementsCore(options: ServerElementsOptions = {}, wasmState: Work
           const webResponse = await handleActionRequest(webRequest, {
             env: (server.config as any)?.env || {},
             secret: devSecret,
-            registry: (globalThis as any).customElements,
+            customElements: (globalThis as any).customElements,
             routePrefix,
           });
 

@@ -167,7 +167,7 @@ impl<'a> ClientBuilder<'a> {
             new_elements.push(self.build_lit_build_id_property(build_id));
 
             // If template has event bindings, emit connectedCallback calling __litBindEvents
-            if !event_descriptors.is_empty() {
+            if !event_descriptors.is_empty() || has_action_form(parts) {
                 let descriptors_array = self.build_event_descriptors_array(event_descriptors);
                 new_elements.push(self.build_connected_callback(descriptors_array));
             }
@@ -1116,4 +1116,25 @@ impl<'a> ClientBuilder<'a> {
             new_decl, self.ast,
         )))
     }
+}
+
+/// True when the template binds a `<form>`'s `action` attribute, which is how a server element
+/// declares a form that posts to an `@action()` (`action=${this.actionUrl('name')}`).
+///
+/// Such forms need the client runtime even without event bindings: it intercepts their `submit`
+/// so pages with JavaScript patch in place instead of reloading.
+pub fn has_action_form(parts: &[PartDescriptor]) -> bool {
+    parts.iter().any(|part| match &part.addressing {
+        PartAddressing::ElementAnchored {
+            target_tag: Some(tag),
+            attr_name: Some(attr),
+            prefix,
+            ..
+        } => {
+            tag.eq_ignore_ascii_case("form")
+                && attr == "action"
+                && prefix.as_deref().unwrap_or("").is_empty()
+        }
+        _ => false,
+    })
 }

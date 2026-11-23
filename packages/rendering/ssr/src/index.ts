@@ -4,6 +4,8 @@
  * emitting clean Declarative Shadow DOM with zero comment markers.
  */
 
+export { collectResult, createSyncAndAsyncBoundaryIterators, drainPendingBoundariesOutOfOrder, renderAsync, renderHtmlDocumentAsync, renderToStringAsync } from './async-render.js';
+export { createAsyncRenderState } from './async-state.js';
 export {
   compileHtmlDocumentPlan,
   compileLitDescriptorPlan,
@@ -19,6 +21,8 @@ export {
   transformSsrComponent,
 } from './compiler.js';
 export {
+  type AsyncBoundaryOptions,
+  type BoundaryGroup,
   type CompiledTemplateDescriptor,
   type CompiledTemplatePart,
   type CompiledTemplateResult,
@@ -39,6 +43,7 @@ export {
   LIT_NO_CHANGE,
   LIT_NOTHING,
   type ResolvedComponentStyles,
+  type RevealOrder,
   resolveDirectiveValue,
   SSR_ASYNC_BOUNDARY,
   type SsrAsyncBoundaryDescriptor,
@@ -57,12 +62,15 @@ export {
   unsafeMathML,
   unsafeSVG,
 } from './compiler-bridge.js';
+export { readLiveHostAttributesMap } from './component/host-attributes.js';
+export { type ComponentLifecycleInput, executeComponentLifecycleAndReflection, prepareAndRunComponentLifecycle, prepareComponentBindings } from './component/lifecycle.js';
 export {
   ARIA_MIXIN_ATTRIBUTES,
   type Context,
   type ContextCallback,
   ContextRequestEvent,
   CSSStyleSheetStub,
+  type CustomElementLookup,
   type CustomElementRegistryLike,
   CustomEventStub,
   createContext,
@@ -100,34 +108,12 @@ export {
   transformWithHtmlRewriter,
 } from './html-rewriter.js';
 export { reflectedAttributeName } from './reflected-attributes.js';
-export {
-  buildShadowStyleAndTemplateOpen,
-  type ComponentLifecycleInput,
-  CSS_ADOPT_SCRIPT,
-  collectResult,
-  createAsyncRenderState,
-  createSsrRenderContext,
-  createSyncAndAsyncBoundaryIterators,
-  DEFAULT_BOUNDARY_TIMEOUT_MS,
-  drainPendingBoundariesOutOfOrder,
-  executeComponentLifecycleAndReflection,
-  formatAdoptedUrlFallbackScript,
-  formatCssAdoptScript,
-  formatSdsdBootstrapScript,
-  formatSdsdTailChunk,
-  prepareAndRunComponentLifecycle,
-  prepareComponentBindings,
-  type RenderOptions,
-  readLiveHostAttributesMap,
-  render,
-  renderAsync,
-  renderHtmlDocument,
-  renderHtmlDocumentAsync,
-  renderToString,
-  renderToStringAsync,
-  renderWithPendingBoundaries,
-  SDSD_SWAP_SCRIPT,
-} from './renderer.js';
+export { renderHtmlDocument, renderToString, renderWithPendingBoundaries } from './render-api.js';
+export { DEFAULT_BOUNDARY_TIMEOUT_MS } from './render-constants.js';
+export type { RenderOptions } from './render-options.js';
+export { createSsrRenderContext, render } from './renderer.js';
+export { CSS_ADOPT_SCRIPT, formatAdoptedUrlFallbackScript, formatCssAdoptScript, formatSdsdBootstrapScript, formatSdsdTailChunk, SDSD_SWAP_SCRIPT } from './sdsd-scripts.js';
+export { buildShadowStyleAndTemplateOpen } from './shadow-template.js';
 
 export {
   distributeHostChildren,

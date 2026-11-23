@@ -6,3 +6,5 @@ export const ACTION_SYMBOL: unique symbol = Symbol.for('@lit-core/server-element
 export const ELEMENT_SYMBOL: unique symbol = Symbol.for('@lit-core/server-elements/element') as any;
 export const ACTION_STATE_SYMBOL: unique symbol = Symbol.for('@lit-core/server-elements/action-state') as any;
 export const CONTEXT_SYMBOL: unique symbol = Symbol.for('@lit-core/server-elements/context') as any;
+/** Holds the signed snapshot an element embeds in its no-JavaScript form fields while it renders. */
+export const FORM_SNAPSHOT_SYMBOL: unique symbol = Symbol.for('@lit-core/server-elements/form-snapshot') as any;

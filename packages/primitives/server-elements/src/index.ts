@@ -1,84 +1,20 @@
-export {
-  type ActionEndpointOptions,
-  computeSurgicalPatches,
-  handleActionRequest,
-  type ServerElementRegistry,
-} from './action-endpoint.js';
+/**
+ * Authoring surface: what component files import. Server runtime and browser runtime live behind
+ * their own entry points so a component bundle never pulls in the other side:
+ *
+ * - `@lit-core/server-elements/edge`: rendering and `HTMLRewriter` integration
+ * - `@lit-core/server-elements/action-endpoint`: the action RPC handler
+ * - `@lit-core/server-elements/crypto`: state signing
+ * - `@lit-core/server-elements/client`: browser action dispatch and patch executor
+ */
+
+export { ACTION_ERROR_STATUS, ActionError, type ActionErrorCode, type ActionErrorOptions, isActionError } from './action-error.js';
 export { ActionStateController } from './action-state.js';
-export {
-  __litActionRpc,
-  __litBindEvents,
-  bindFormAction,
-  dispatchServerAction,
-  executePatches as executeClientPatches,
-} from './client.js';
 export type { ActionContext, Env, LoaderContext } from './context.js';
-export {
-  canonicalizeJson,
-  createSignedStateSnapshot,
-  generateActionToken,
-  getHmacKey,
-  hasPrototypePollution,
-  type SignedStateResult,
-  signStateSnapshot,
-  type VerifyStateResult,
-  verifyStateSignature,
-  verifyStateSnapshot,
-} from './crypto.js';
 export { action } from './decorators/action.js';
 export { loader } from './decorators/loader.js';
-export {
-  createLoaderContext,
-  createServerElementRewriterAdapter,
-  createServerElementsRewriterOptions,
-  executeServerAction,
-  executeServerLoader,
-  isServerElementConstructor,
-  renderServerElement,
-  renderTemplateToString,
-  renderToResponse,
-  type ServerElementsHtmlRewriterOptions,
-  transformServerElementsWithHtmlRewriter,
-} from './edge.js';
-export { ServerElement, ServerElementMixin } from './element.js';
+export { ServerElement, type ServerElementInterface, ServerElementMixin } from './element.js';
 export { ServerActionError, UncompiledServerElementError } from './errors.js';
-export {
-  type ClientPartDescriptor,
-  type ElementPartDescriptor,
-  executePatches,
-  type RangePartDescriptor,
-  reconcileKeyedList,
-  resolveNodeByPath,
-  resolveRangeMarkers,
-  type SoleTextPartDescriptor,
-} from './executor.js';
-export {
-  ACTION_STATE_SYMBOL,
-  ACTION_SYMBOL,
-  CONTEXT_SYMBOL,
-  ELEMENT_SYMBOL,
-  LOADER_SYMBOL,
-} from './symbols.js';
-export type {
-  ActionErrorPatchFrame,
-  ActionOptions,
-  ActionRequestBody,
-  ActionResultPatchFrame,
-  ActionState,
-  ActionStatus,
-  Constructor,
-  CookieOptions,
-  EdgeResponseOptions,
-  ErrorPatchFrame,
-  KeyedChildrenPatchFrame,
-  KeyedListPatchFrame,
-  LoaderOptions,
-  PartTemplatePatchFrame,
-  PartValuePatchFrame,
-  PatchFrame,
-  ScalarPatchFrame,
-  ServerElementRenderOptions,
-  ServerElementRenderResult,
-  StateSnapshotPatchFrame,
-  StructuralPatchFrame,
-} from './types.js';
+export type { ActionMeta, LoaderMeta, ServerElementClass, ServerElementRegistry } from './metadata.js';
+export { ACTION_STATE_SYMBOL, ACTION_SYMBOL, CONTEXT_SYMBOL, ELEMENT_SYMBOL, LOADER_SYMBOL } from './symbols.js';
+export type * from './types.js';

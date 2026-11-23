@@ -92,4 +92,25 @@ export const comp = (title: string, count: number) => html\`
     expect(result.code).toContain('markerSites:');
     expect(result.code).toContain('custom-badge');
   });
+
+  it('omits ssrPlan descriptors from client builds (ssr: false) while keeping the compiled template', () => {
+    const input = `
+import { html } from 'lit';
+export const comp = (title: string, count: number) => html\`
+  <div class="card" ?active=\${count > 0}>
+    <h1>\${title}</h1>
+    <custom-badge count=\${count}></custom-badge>
+  </div>
+\`;
+`;
+    const server = compileHtmlAot(input, { filename: 'comp.ts', ssr: true });
+    const client = compileHtmlAot(input, { filename: 'comp.ts', ssr: false });
+
+    expect(client.templatesCount).toBe(1);
+    expect(client.code).not.toContain('ssrPlan');
+    expect(client.code).not.toContain('opcodes');
+    expect(client.code).not.toContain('markerSites');
+    expect(server.code).toContain('ssrPlan:');
+    expect(client.code.length).toBeLessThan(server.code.length);
+  });
 });

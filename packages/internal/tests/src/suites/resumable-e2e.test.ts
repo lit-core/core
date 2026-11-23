@@ -225,9 +225,11 @@ describe('resumable end to end with real Lit components, a real Vite build and r
 
     const after = await page.evaluate(() => {
       const shadow = document.getElementById('greeter')?.shadowRoot;
-      return { sameInput: shadow?.querySelector('input') === (window as any).__input, inputs: shadow?.querySelectorAll('input').length };
+      const input = shadow?.querySelector('input');
+      return { sameInput: input === (window as any).__input, inputs: shadow?.querySelectorAll('input').length, focused: shadow?.activeElement === input, value: (input as HTMLInputElement).value };
     });
-    expect(after).toEqual({ sameInput: true, inputs: 1 });
+    // Resuming the component must not blur the field the user is typing in, or drop what they typed.
+    expect(after).toEqual({ sameInput: true, inputs: 1, focused: true, value: 'lit' });
     expect(chunkRequests().some((p) => p.includes('x-greeter'))).toBe(true);
   });
 });

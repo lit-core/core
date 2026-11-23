@@ -207,7 +207,7 @@ describe('milestone m6 tier d acceptance test: real design-system vendor integra
         const webRes = await handleActionRequest(webReq, {
           env: {},
           secret: TEST_SECRET,
-          registry: (globalThis as any).customElements,
+          customElements: (globalThis as any).customElements,
         });
 
         const resBody = await webRes.text();

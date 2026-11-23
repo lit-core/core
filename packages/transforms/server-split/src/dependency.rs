@@ -11,7 +11,8 @@ use crate::symbol::{ExtractedServerMethod, ServerDecoratorKind};
 
 pub struct PropertyDependencyAuditor<'a> {
     pub declared_reactive_props: HashSet<String>,
-    pub loader_written_props: HashSet<String>,
+    /// Properties assigned by each loader, keyed by loader method name.
+    pub loader_written_props: HashMap<String, Vec<String>>,
     pub action_written_props: HashMap<String, Vec<String>>,
     pub diagnostics: Vec<ServerSplitDiagnostic>,
     _phantom: std::marker::PhantomData<&'a ()>,
@@ -65,7 +66,7 @@ impl<'a> PropertyDependencyAuditor<'a> {
 
         Self {
             declared_reactive_props,
-            loader_written_props: HashSet::new(),
+            loader_written_props: HashMap::new(),
             action_written_props: HashMap::new(),
             diagnostics: Vec::new(),
             _phantom: std::marker::PhantomData,
@@ -89,8 +90,11 @@ impl<'a> PropertyDependencyAuditor<'a> {
 
                 match method.kind {
                     ServerDecoratorKind::Loader => {
+                        let mut written = Vec::new();
                         for (prop, span) in &scanner.written_props {
-                            self.loader_written_props.insert(prop.clone());
+                            if !written.contains(prop) {
+                                written.push(prop.clone());
+                            }
                             if !self.declared_reactive_props.contains(prop) {
                                 self.diagnostics.push(warning_diagnostic(
                                     DiagnosticCode::SE103,
@@ -102,6 +106,8 @@ impl<'a> PropertyDependencyAuditor<'a> {
                                 ));
                             }
                         }
+                        self.loader_written_props
+                            .insert(method.name.clone(), written);
                     }
                     ServerDecoratorKind::Action => {
                         let mut written = Vec::new();

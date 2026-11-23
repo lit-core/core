@@ -319,6 +319,17 @@ pub fn transform_code(source: &str, options: ServerSplitOptions) -> ServerSplitR
         }
     }
 
+    // Statically evaluated decorator options must be literals; report anything else.
+    for m in &extracted_methods {
+        for (message, span) in &m.option_errors {
+            diagnostics.push(error_diagnostic(
+                DiagnosticCode::SE107,
+                message.clone(),
+                *span,
+            ));
+        }
+    }
+
     // 3. Process actions: validate parameter schemas, synthesize validator AST, and compute hashes
     let mut action_metadata_list = Vec::new();
     let mut action_metadata_map = HashMap::new();
@@ -379,6 +390,7 @@ pub fn transform_code(source: &str, options: ServerSplitOptions) -> ServerSplitR
                 hash: hash.clone(),
                 params: param_metas,
                 written_properties: writes,
+                revalidate: m.options.revalidate,
             };
 
             action_metadata_map.insert(m.name.clone(), act_meta.clone());
@@ -394,10 +406,15 @@ pub fn transform_code(source: &str, options: ServerSplitOptions) -> ServerSplitR
     let mut loader_metadata_list = Vec::new();
     for m in &extracted_methods {
         if m.kind == ServerDecoratorKind::Loader {
-            let writes: Vec<String> = dep_auditor.loader_written_props.iter().cloned().collect();
+            let writes = dep_auditor
+                .loader_written_props
+                .get(&m.name)
+                .cloned()
+                .unwrap_or_default();
             loader_metadata_list.push(LoaderMetadata {
                 name: m.name.clone(),
                 written_properties: writes,
+                dependencies: m.options.dependencies.clone(),
             });
         }
     }
@@ -859,7 +876,9 @@ pub fn transform_code(source: &str, options: ServerSplitOptions) -> ServerSplitR
 
     // Stage 3: Prune imports using reference set
     let mut client_imports = ArenaVec::new_in(&ast);
-    client_imports.push(client_builder.build_client_rpc_import(!event_descriptors.is_empty()));
+    client_imports.push(client_builder.build_client_rpc_import(
+        !event_descriptors.is_empty() || crate::client_builder::has_action_form(&template_parts),
+    ));
 
     for stmt in &program.body {
         if let Statement::ImportDeclaration(import_decl) = stmt

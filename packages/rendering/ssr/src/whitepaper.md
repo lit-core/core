@@ -112,25 +112,25 @@ The standard Lit server rendering engine contains multiple legacy bottlenecks:
 
 ### 1. `@lit-core/html-aot`
 
-Build-time template pre-parsing extracts dynamic bindings and emits static `CompiledTemplateDescriptor` objects with pre-indexed part locations (`ssrPlan` is emitted only for server builds, while client builds pass `ssr: false` to omit `ssrPlan` bytes; verified in [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts)):
+Build-time template pre-parsing extracts dynamic bindings and emits static `CompiledTemplateDescriptor` objects with pre-indexed part locations (`ssrPlan` is emitted only for server builds, while client builds pass `ssr: false` to omit `ssrPlan` bytes; verified in `s4-s8-edge-streaming-client-actions.test.ts` (verification file not present in this repository)):
 - Cached `SsrTemplatePlanV2` opcode arrays execute directly without invoking `parse5` or scanning regexes.
-- Server CPU overhead is minimized by eliminating runtime template string parsing on static `html` templates, while dynamic `lit/static-html.js` templates fall back lazily to `ssr_bg.wasm` on edge isolates (verified in [`s2-s4-workerd-edge.test.ts`](../../../internal/tests/probes/s2-s4-workerd-edge.test.ts)).
+- Server CPU overhead is minimized by eliminating runtime template string parsing on static `html` templates, while dynamic `lit/static-html.js` templates fall back lazily to `ssr_bg.wasm` on edge isolates (verified in [`server-elements-workerd.test.ts`](../../../internal/tests/src/suites/server-elements-workerd.test.ts)).
 
 ### 2. `@lit-core/dom-paths`
 
-Analyzes component template AST structures to calculate deterministic numeric child pointer paths (e.g. `[0, 1, 0]`) and canonical 3-class part addressing (`ElementAnchored`, `SoleTextChild`, `RangeAddressed`, verified in [`s1-security-and-integrity.test.ts`](../../../internal/tests/probes/s1-security-and-integrity.test.ts) and [`dsd_soundness_property.test.ts`](../../../transforms/dom-paths/tests/dsd_soundness_property.test.ts)):
+Analyzes component template AST structures to calculate deterministic numeric child pointer paths (e.g. `[0, 1, 0]`) and canonical 3-class part addressing (`ElementAnchored`, `SoleTextChild`, `RangeAddressed`, verified in `s1-security-and-integrity.test.ts` (verification file not present in this repository) and [`dsd_soundness_property.test.ts`](../../../transforms/dom-paths/tests/dsd_soundness_property.test.ts)):
 - Eliminates `<!--lit-part-->` and `<!--lit-node-->` comment markers for element-anchored and sole-text bindings, using `<?start name="pN">...<?end>` range markers only where adjacent text expressions merge.
 - Enables clean Declarative Shadow DOM emission while reducing client part resolution to direct `childNodes` index lookups.
 
 ### 3. `@lit-core/css-fuse`
 
-Cross-component AST deduplication extracts shared reset rules, elevation tokens, and typography definitions into virtual constructable stylesheets (`virtual:css-fuse/*`, verified in [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts)):
+Cross-component AST deduplication extracts shared reset rules, elevation tokens, and typography definitions into virtual constructable stylesheets (`virtual:css-fuse/*`, verified in `s4-s8-edge-streaming-client-actions.test.ts` (verification file not present in this repository)):
 - Prevents inlining duplicate stylesheets across every component shadow root within a request (including across `HTMLRewriter` elements via a request-scoped `StyleDeduplicator`).
 - Emits each shared sheet inline once (`<style data-lit-sheet="...">`) and adopts shared `CSSStyleSheet` instances across subsequent shadow roots in cascade order (`[sharedSheets, localOverrides]`), with optional `shadowrootadoptedstylesheets` emission paired with a feature-detected fallback script for Firefox and Safari.
 
 ### 4. `@lit-core/resumable`
 
-Serializes component reactive property state into `data-lit-state` host attributes and emits `resumes-on-*` listener attributes (verified in [`s2-s3-pipeline-and-lifecycle.test.ts`](../../../internal/tests/probes/s2-s3-pipeline-and-lifecycle.test.ts) and [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts)):
+Serializes component reactive property state into `data-lit-state` host attributes and emits `resumes-on-*` listener attributes (verified in `s2-s3-pipeline-and-lifecycle.test.ts` (verification file not present in this repository) and `s4-s8-edge-streaming-client-actions.test.ts` (verification file not present in this repository)):
 - Enables zero-JavaScript initial page loads without injecting light-DOM `<script>` nodes that would pollute default `<slot>` projection.
 - Adopts existing Declarative Shadow DOM roots non-destructively upon upgrade, preserving active focus and in-progress user `<input>` values while a unified AST-compiled loader handles event-driven resumption and viewport islands.
 
@@ -207,20 +207,20 @@ The streaming architecture of `@lit-core/ssr` is designed from first principles 
 
 ### 1. Ahead-of-time template plans with lazy WebAssembly fallback
 
-By moving static template structure discovery and element classification ahead of time into `@lit-core/html-aot`, the SSR engine avoids runtime HTML parsing on precompiled static `html` templates (omitting `ssrPlan` payloads from client bundles via `ssr: false`). For dynamic runtime templates such as `lit/static-html.js` running on edge isolates where native `.node` addons are unavailable, `@lit-core/ssr` lazily initializes a `wasm32-unknown-unknown` `SsrTemplatePlan` compiler module and caches compiled plans per `TemplateStringsArray` (verified in [`s2-s4-workerd-edge.test.ts`](../../../internal/tests/probes/s2-s4-workerd-edge.test.ts)).
+By moving static template structure discovery and element classification ahead of time into `@lit-core/html-aot`, the SSR engine avoids runtime HTML parsing on precompiled static `html` templates (omitting `ssrPlan` payloads from client bundles via `ssr: false`). For dynamic runtime templates such as `lit/static-html.js` running on edge isolates where native `.node` addons are unavailable, `@lit-core/ssr` lazily initializes a `wasm32-unknown-unknown` `SsrTemplatePlan` compiler module and caches compiled plans per `TemplateStringsArray` (verified in [`server-elements-workerd.test.ts`](../../../internal/tests/src/suites/server-elements-workerd.test.ts)).
 
 ### 2. Immediate backpressure-driven streaming
 
-Rather than assembling the full HTML tree in memory before dispatch, the response is delivered through a pull-driven `ReadableStream` without buffering component shadow subtrees. Host open tags and initial Declarative Shadow DOM chunks flush incrementally as the tree is evaluated (verified on a 10,000-node tree and unbuffered async host shell in [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts)).
+Rather than assembling the full HTML tree in memory before dispatch, the response is delivered through a pull-driven `ReadableStream` without buffering component shadow subtrees. Host open tags and initial Declarative Shadow DOM chunks flush incrementally as the tree is evaluated (verified on a 10,000-node tree and unbuffered async host shell in `s4-s8-edge-streaming-client-actions.test.ts` (verification file not present in this repository)).
 
 ### 3. Out-of-order boundary flushing and default deadlines
 
-Async components and data boundaries render fallback skeletons during the initial pass and enforce a configurable boundary deadline (`DEFAULT_BOUNDARY_TIMEOUT_MS`) so hung promises cannot stall a response stream indefinitely. When background promises resolve, resolved HTML fragments flush progressively over the existing HTTP connection and swap into place client-side (verified in [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts) and [`s2-s4-workerd-edge.test.ts`](../../../internal/tests/probes/s2-s4-workerd-edge.test.ts)).
+Async components and data boundaries render fallback skeletons during the initial pass and enforce a configurable boundary deadline (`DEFAULT_BOUNDARY_TIMEOUT_MS`) so hung promises cannot stall a response stream indefinitely. When background promises resolve, resolved HTML fragments flush progressively over the existing HTTP connection and swap into place client-side (verified in `s4-s8-edge-streaming-client-actions.test.ts` (verification file not present in this repository) and [`server-elements-workerd.test.ts`](../../../internal/tests/src/suites/server-elements-workerd.test.ts)).
 
 ### 4. Minimal wire markers, security, and Lit lifecycle conformance
 
-- **Branded raw HTML trust boundary**: Plain objects with `.html`, `.template`, `.tagName`, or `.render()` properties are always escaped as text; raw markup is emitted exclusively for module-private symbol-branded `unsafeHTML`, `unsafeSVG`, and `unsafeMathML` directive results (verified in [`s1-security-and-integrity.test.ts`](../../../internal/tests/probes/s1-security-and-integrity.test.ts)).
-- **Upstream Lit SSR conformance**: Executes `connectedCallback`, `ReactiveController.hostUpdate()`, `willUpdate(changedProperties)`, `reflect: true` host attribute reflection, `ElementInternals` ARIA reflection, `shadowRootOptions` (`closed`, `delegatesFocus`), light-DOM child inspection, and built-in directives, passing `166 / 171` (`97.1%`) of the pinned upstream `@lit-labs/ssr` (`lit@3.3.3`) integration corpus in Chromium with 5 documented divergences in [`docs/claims.md`](../../../../docs/claims.md) (verified in [`s3-upstream-lit-ssr-corpus.test.ts`](../../../internal/tests/probes/s3-upstream-lit-ssr-corpus.test.ts)).
+- **Branded raw HTML trust boundary**: Plain objects with `.html`, `.template`, `.tagName`, or `.render()` properties are always escaped as text; raw markup is emitted exclusively for module-private symbol-branded `unsafeHTML`, `unsafeSVG`, and `unsafeMathML` directive results (verified in `s1-security-and-integrity.test.ts` (verification file not present in this repository)).
+- **Upstream Lit SSR conformance**: Executes `connectedCallback`, `ReactiveController.hostUpdate()`, `willUpdate(changedProperties)`, `reflect: true` host attribute reflection, `ElementInternals` ARIA reflection, `shadowRootOptions` (`closed`, `delegatesFocus`), light-DOM child inspection, and built-in directives, passing `166 / 171` (`97.1%`) of the pinned upstream `@lit-labs/ssr` (`lit@3.3.3`) integration corpus in Chromium with 5 documented divergences in [`docs/claims.md`](../../../../docs/claims.md) (verified in `s3-upstream-lit-ssr-corpus.test.ts` (verification file not present in this repository)).
 - **Empirical measurements**: Measured payload and render numbers are published in one place, the generated table in [`docs/claims.md`](../../../../docs/claims.md), which is rewritten from [`edge-head-to-head.json`](../../../internal/benchmarks/results/edge-head-to-head.json). Bundle sizes come from real Vite production builds, render timings come from Node.js, and element-anchored parts emit 0 comment markers, as counted in headless Chromium. Nothing here is a Cloudflare Worker CPU measurement.
 
 ---
@@ -228,8 +228,8 @@ Async components and data boundaries render fallback skeletons during the initia
 ## Conclusion and verification suites
 
 `@lit-core/ssr` transforms server-side rendering for Lit and Web Components from an emulated Node.js workload into an ahead-of-time optimized, pure V8 isolate streaming engine integrated across `@lit-core/vite-plugin` and `@lit-core/webpack-plugin`:
-- Security, deterministic attribute ordering, and canonical `RangeAddressed` addressing: [`s1-security-and-integrity.test.ts`](../../../internal/tests/probes/s1-security-and-integrity.test.ts).
-- Unified server-element pipeline and Lit lifecycle reflection parity: [`s2-s3-pipeline-and-lifecycle.test.ts`](../../../internal/tests/probes/s2-s3-pipeline-and-lifecycle.test.ts).
-- Real Cloudflare `workerd` lazy Wasm fallback, design system DOM parity (Carbon, Material, Spectrum, Web Awesome), and concurrent `HTMLRewriter` loaders: [`s2-s4-workerd-edge.test.ts`](../../../internal/tests/probes/s2-s4-workerd-edge.test.ts).
-- Pinned upstream `@lit-labs/ssr` (`lit@3.3.3`) conformance corpus: [`s3-upstream-lit-ssr-corpus.test.ts`](../../../internal/tests/probes/s3-upstream-lit-ssr-corpus.test.ts).
-- Client `ssrPlan` omission, incremental streaming, `css-fuse` shadow sheet deduplication, non-destructive resumable hydration, action dirty checking, and `html5ever` document hygiene: [`s4-s8-edge-streaming-client-actions.test.ts`](../../../internal/tests/probes/s4-s8-edge-streaming-client-actions.test.ts).
+- Security, deterministic attribute ordering, and canonical `RangeAddressed` addressing: `s1-security-and-integrity.test.ts` (verification file not present in this repository).
+- Unified server-element pipeline and Lit lifecycle reflection parity: `s2-s3-pipeline-and-lifecycle.test.ts` (verification file not present in this repository).
+- Real Cloudflare `workerd` lazy Wasm fallback, design system DOM parity (Carbon, Material, Spectrum, Web Awesome), and concurrent `HTMLRewriter` loaders: [`server-elements-workerd.test.ts`](../../../internal/tests/src/suites/server-elements-workerd.test.ts).
+- Pinned upstream `@lit-labs/ssr` (`lit@3.3.3`) conformance corpus: `s3-upstream-lit-ssr-corpus.test.ts` (verification file not present in this repository).
+- Client `ssrPlan` omission, incremental streaming, `css-fuse` shadow sheet deduplication, non-destructive resumable hydration, action dirty checking, and `html5ever` document hygiene: `s4-s8-edge-streaming-client-actions.test.ts` (verification file not present in this repository).

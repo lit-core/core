@@ -15,6 +15,8 @@ pub enum DiagnosticCode {
     SE105,
     /// Server element cannot be lowered to zero-Lit HTMLElement stub or contains unsupported client closures.
     SE106,
+    /// Invalid or unsupported option passed to @loader() or @action().
+    SE107,
 }
 
 impl DiagnosticCode {
@@ -26,6 +28,7 @@ impl DiagnosticCode {
             Self::SE104 => "SE104",
             Self::SE105 => "SE105",
             Self::SE106 => "SE106",
+            Self::SE107 => "SE107",
         }
     }
 }

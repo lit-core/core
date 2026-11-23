@@ -1,16 +1,12 @@
+import type { ServerElementRegistry } from './metadata.js';
+
 /**
  * Options for configuring @loader() decorators.
  */
 export interface LoaderOptions {
   /**
-   * Revalidation policy.
-   * - 'always': Re-run loader on every action execution (default).
-   * - 'action': Re-run loader only when actions explicitly trigger it.
-   * - number: Time-to-live cache duration in milliseconds.
-   */
-  revalidate?: 'always' | 'action' | number;
-  /**
-   * Explicit list of reactive properties whose modification triggers this loader.
+   * Reactive properties this loader depends on. After an action, the loader re-runs only when the
+   * action wrote at least one of them. Omit to re-run after every action. Must be a literal array.
    */
   dependencies?: string[];
 }
@@ -20,11 +16,8 @@ export interface LoaderOptions {
  */
 export interface ActionOptions {
   /**
-   * Optional custom action identifier name (defaults to class method name).
-   */
-  name?: string;
-  /**
    * Whether to re-run component loaders after this action completes (default: true).
+   * Must be a boolean literal.
    */
   revalidate?: boolean;
 }
@@ -62,13 +55,18 @@ export interface CookieOptions {
 /**
  * Wire protocol request payload for action invocations.
  */
+/**
+ * State as it crosses the wire: readable JSON, or an opaque ciphertext string when `encryptState` is on.
+ */
+export type WireState = Record<string, unknown> | string;
+
 export interface ActionRequestBody {
   tag: string;
   attrs: Record<string, string>;
-  state: Record<string, unknown>;
+  state: WireState;
   sig: string;
   args: unknown[];
-  /** Client request counter, used only to order responses and drop stale ones. Not signed. */
+  /** Client request counter, exposed to actions as `ActionContext.seq`. Not signed. */
   seq: number;
   /**
    * Sequence number of the signed snapshot (`sig`) the client holds. Bound into the signature;
@@ -86,12 +84,44 @@ export interface ScalarPatchFrame {
 }
 
 /**
- * Structural range branch swap frame with template fingerprint ({p, f, h}).
+ * Structural range branch swap frame ({p, f}). `f` carries the template fingerprint, the
+ * rendered fragment, and the nested binding values.
  */
 export interface StructuralPatchFrame {
   p: number;
-  f: string;
-  h: string;
+  f: {
+    p: number;
+    /** Template fingerprint (build-time id for compiled templates, content hash otherwise). */
+    h: string;
+    html: string;
+    v: unknown[];
+  };
+}
+
+/**
+ * One keyed list reconciliation operation.
+ */
+export type KeyedOp =
+  | { op: 'remove'; key: string | number }
+  | { op: 'insert'; key: string | number; index: number; html?: string; text?: string }
+  | { op: 'update'; key: string | number; html?: string; text?: string }
+  | { op: 'reorder'; order: Array<string | number> }
+  /** Clears the whole range and re-renders every item. Sent when the client holds no acknowledged key state for the part. */
+  | { op: 'replace'; items: KeyedItem[] };
+
+/** One rendered keyed list item: raw markup for template items, text otherwise. */
+export interface KeyedItem {
+  key: string | number;
+  html?: string;
+  text?: string;
+}
+
+/**
+ * Keys and item fingerprints of a keyed list part, as last acknowledged by the client.
+ */
+export interface KeyedPartState {
+  keys: Array<string | number>;
+  fingerprints: Record<string | number, string>;
 }
 
 /**
@@ -99,14 +129,14 @@ export interface StructuralPatchFrame {
  */
 export interface KeyedListPatchFrame {
   p: number;
-  k: unknown;
+  k: { p: number; ops: KeyedOp[] };
 }
 
 /**
  * Signed state snapshot frame ({s, sig}).
  */
 export interface StateSnapshotPatchFrame {
-  s: Record<string, unknown>;
+  s: WireState;
   sig: string;
   /** Sequence number this snapshot was signed with; send it back as `snapshotSeq`. */
   sq: number;
@@ -118,6 +148,8 @@ export interface StateSnapshotPatchFrame {
 export interface ErrorPatchFrame {
   e: string;
   code?: string;
+  /** Per-field messages from an `ActionError`, keyed by input name. */
+  fields?: Record<string, string>;
 }
 
 /**
@@ -126,14 +158,6 @@ export interface ErrorPatchFrame {
 export interface ActionResultPatchFrame {
   r: unknown;
 }
-
-/**
- * Aliases for patch frame types adhering to alternate naming conventions.
- */
-export type PartValuePatchFrame = ScalarPatchFrame;
-export type PartTemplatePatchFrame = StructuralPatchFrame;
-export type KeyedChildrenPatchFrame = KeyedListPatchFrame;
-export type ActionErrorPatchFrame = ErrorPatchFrame;
 
 /**
  * Union of all streamed action response patch frames.
@@ -154,14 +178,15 @@ export interface ServerElementRenderOptions {
   params?: Record<string, string>;
   secret?: string | CryptoKey;
   ttlMs?: number;
-  customElements?: any;
-  registry?: any;
+  customElements?: ServerElementRegistry;
   mode?: 'dsd' | 'flattened';
   devMode?: boolean;
   token?: string;
   hostId?: number;
   /** Rethrow errors from `connectedCallback` instead of reporting them through `onError`. */
   strict?: boolean;
+  /** Encrypt state in the page and in action responses. Needs a string `secret`; the action endpoint must enable it too. */
+  encryptState?: boolean;
   /** Receives non-fatal lifecycle errors raised while rendering. */
   onError?: (error: unknown, info: { tagName?: string; phase: string }) => void;
 }
@@ -185,5 +210,4 @@ export interface EdgeResponseOptions extends ServerElementRenderOptions {
   status?: number;
   statusText?: string;
   headers?: HeadersInit;
-  streamingMode?: 'out-of-order' | 'in-order' | 'sync';
 }

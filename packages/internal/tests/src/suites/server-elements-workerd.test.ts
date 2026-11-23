@@ -125,7 +125,7 @@ import '@carbon/web-components/es/components/button/index.js';
 import '@material/web/button/filled-button.js';
 import ${JSON.stringify(spectrumButtonEntry)};
 import '@awesome.me/webawesome/dist/components/button/button.js';
-import { loaderTimings, ServerProductCounter } from './component.ts';
+import { loaderConcurrency, loaderTimings, ServerProductCounter } from './component.ts';
 import { ServerInventoryBadge } from './inventory-badge.ts';
 
 initSsrWasmSync(ssrWasmModule);
@@ -137,7 +137,7 @@ export async function executeWorkerdAction(url, headers, body) {
   const res = await handleActionRequest(req, {
     env: {},
     secret: TEST_SECRET,
-    registry: globalThis.customElements,
+    customElements: globalThis.customElements,
   });
   return {
     status: res.status,
@@ -228,6 +228,8 @@ export const testHtmlRewriterConcurrentLoaders = {
   async test(ctrl, env, ctx) {
     delete loaderTimings['counter'];
     delete loaderTimings['inventory'];
+    loaderConcurrency.active = 0;
+    loaderConcurrency.maxActive = 0;
 
     const pageHtml = '<!DOCTYPE html><html><head></head><body><main><server-product-counter id="counter-el"></server-product-counter><server-inventory-badge id="inventory-el"></server-inventory-badge></main></body></html>';
     const t0 = Date.now();
@@ -295,8 +297,7 @@ export const testActionEndpointExecution = {
       'server-product-counter',
       { count: 5, status: 'loaded' },
       TEST_SECRET,
-      900_000,
-      { seq: 0, buildId: 'dev' }
+      { ttlMs: 900_000, seq: 0, buildId: 'dev' }
     );
 
     const actionReq = new Request('http://worker.local/_lit/a/' + actionHash, {
@@ -318,7 +319,7 @@ export const testActionEndpointExecution = {
     const res = await handleActionRequest(actionReq, {
       env: {},
       secret: TEST_SECRET,
-      registry: (globalThis).customElements,
+      customElements: (globalThis).customElements,
     });
 
     if (res.status !== 200) {
@@ -353,7 +354,7 @@ export const testActionEndpointExecution = {
     const emptyRes = await handleActionRequest(emptyReq, {
       env: {},
       secret: TEST_SECRET,
-      registry: (globalThis).customElements,
+      customElements: (globalThis).customElements,
     });
     if (emptyRes.status !== 403) {
       throw new Error('Expected 403 for empty-state bypass, got ' + emptyRes.status);
@@ -384,7 +385,7 @@ export const testActionEndpointExecution = {
       const staleRes = await handleActionRequest(staleReq, {
         env: {},
         secret: TEST_SECRET,
-        registry: (globalThis).customElements,
+        customElements: (globalThis).customElements,
         buildId: 'build-v2.0.0',
       });
       if (staleRes.status !== 409) {
@@ -435,7 +436,7 @@ export const testRenderAndActionRoundTrip = {
           snapshotSeq,
         }),
       });
-      return handleActionRequest(req, { env: {}, secret: TEST_SECRET, registry: globalThis.customElements });
+      return handleActionRequest(req, { env: {}, secret: TEST_SECRET, customElements: globalThis.customElements });
     };
 
     // 1. First action consumes the SSR snapshot (snapshot sequence 0) and returns snapshot sequence 1.
@@ -516,7 +517,7 @@ export const testSecurityTamperRejection = {
     const res = await handleActionRequest(tamperedReq, {
       env: {},
       secret: TEST_SECRET,
-      registry: (globalThis).customElements,
+      customElements: (globalThis).customElements,
     });
 
     if (res.status !== 403) {

@@ -67,7 +67,7 @@ describe('server action endpoint handler', () => {
   const defaultOptions: ActionEndpointOptions = {
     env: { DB: {} },
     secret,
-    registry,
+    customElements: registry,
   };
 
   it('rejects non-POST HTTP methods with 405 Method Not Allowed', async () => {
@@ -408,7 +408,7 @@ describe('server action endpoint handler', () => {
 
     const res = await handleActionRequest(req, {
       ...defaultOptions,
-      registry: customRegistry,
+      customElements: customRegistry,
     });
 
     expect(res.status).toBe(200);

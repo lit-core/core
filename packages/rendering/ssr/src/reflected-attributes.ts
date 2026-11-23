@@ -207,7 +207,7 @@ const wildcardAttributes = reflectedAttributes.get('*') ?? new Map<string, strin
 export function reflectedAttributeName(elementName: string, propertyName: string): string | undefined {
   const upper = elementName.toUpperCase();
   const attributes = reflectedAttributes.get(upper);
-  if (attributes !== undefined && attributes.has(propertyName)) {
+  if (attributes?.has(propertyName)) {
     return attributes.get(propertyName);
   }
   return wildcardAttributes.get(propertyName);

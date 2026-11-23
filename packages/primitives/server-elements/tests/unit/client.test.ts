@@ -32,7 +32,7 @@ describe('client action dispatcher', () => {
       capturedUrl = String(url);
       capturedHeaders = init?.headers;
       capturedBody = JSON.parse(init?.body);
-      return new Response(JSON.stringify({ result: { reserved: 1 } }), {
+      return new Response(JSON.stringify([{ r: { reserved: 1 } }]), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -350,168 +350,189 @@ describe('client action dispatcher', () => {
     expect(result).toBe(0);
   });
 
-  it('drops stale out-of-order responses based on per-instance sequence numbers', async () => {
-    const el = {
-      tagName: 'my-counter',
-      getAttribute: () => null,
-      actionState: {
-        setPending: vi.fn(),
-        setSuccess: vi.fn(),
-        setError: vi.fn(),
-      },
-    } as any;
+  describe('action queue', () => {
+    const makeEl = () =>
+      ({
+        tagName: 'my-counter',
+        getAttribute: () => null,
+        actionState: { setPending: vi.fn(), setSuccess: vi.fn(), setError: vi.fn() },
+      }) as any;
 
-    let resolveRequest1: (res: Response) => void;
-    const promise1 = new Promise<Response>((resolve) => {
-      resolveRequest1 = resolve;
-    });
-
-    let resolveRequest2: (res: Response) => void;
-    const promise2 = new Promise<Response>((resolve) => {
-      resolveRequest2 = resolve;
-    });
-
-    let callCount = 0;
-    globalThis.fetch = vi.fn(async () => {
-      callCount++;
-      return callCount === 1 ? promise1 : promise2;
-    }) as any;
-
-    const actionPromise1 = dispatchServerAction(el as unknown as HTMLElement, 'myAction');
-    const actionPromise2 = dispatchServerAction(el as unknown as HTMLElement, 'myAction');
-
-    expect(el.__litSeq).toBe(2);
-
-    // Request 2 completes first
-    resolveRequest2?.(
-      new Response(JSON.stringify([{ s: { value: 'from_request_2' } }, { r: 'result_2' }]), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
-
-    const res2 = await actionPromise2;
-    expect(res2).toBe('result_2');
-    expect(el.__litState).toEqual({ value: 'from_request_2' });
-    expect(el.__litLastAppliedSeq).toBe(2);
-    expect(el.actionState.setSuccess).toHaveBeenCalledWith('myAction', 'result_2');
-
-    // Request 1 completes later (stale)
-    resolveRequest1?.(
-      new Response(JSON.stringify([{ s: { value: 'from_request_1_stale' } }, { r: 'result_1_stale' }]), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
-
-    const res1 = await actionPromise1;
-    expect(res1).toBeUndefined();
-    expect(el.__litState).toEqual({ value: 'from_request_2' });
-    expect(el.__litLastAppliedSeq).toBe(2);
-    expect(el.actionState.setSuccess).not.toHaveBeenCalledWith('myAction', 'result_1_stale');
-    expect(el.actionState.setSuccess).toHaveBeenCalledTimes(1);
-  });
-
-  it('drops stale errors and does not trigger actionState.setError for obsolete requests', async () => {
-    const el = {
-      tagName: 'my-counter',
-      getAttribute: () => null,
-      actionState: {
-        setPending: vi.fn(),
-        setSuccess: vi.fn(),
-        setError: vi.fn(),
-      },
-    } as any;
-
-    let rejectRequest1: (err: Error) => void;
-    const promise1 = new Promise<Response>((_, reject) => {
-      rejectRequest1 = reject;
-    });
-
-    let resolveRequest2: (res: Response) => void;
-    const promise2 = new Promise<Response>((resolve) => {
-      resolveRequest2 = resolve;
-    });
-
-    let callCount = 0;
-    globalThis.fetch = vi.fn(async () => {
-      callCount++;
-      return callCount === 1 ? promise1 : promise2;
-    }) as any;
-
-    const actionPromise1 = dispatchServerAction(el as unknown as HTMLElement, 'act');
-    const actionPromise2 = dispatchServerAction(el as unknown as HTMLElement, 'act');
-
-    resolveRequest2?.(
-      new Response(JSON.stringify([{ r: 'success_2' }]), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
-
-    await actionPromise2;
-    expect(el.__litLastAppliedSeq).toBe(2);
-    expect(el.actionState.setSuccess).toHaveBeenCalledTimes(1);
-
-    rejectRequest1?.(new Error('Network disconnected'));
-
-    await actionPromise1;
-    expect(el.actionState.setError).not.toHaveBeenCalled();
-  });
-
-  it('halts and cancels ndjson stream if a newer request completes mid-stream', async () => {
-    const el = {
-      tagName: 'my-counter',
-      getAttribute: () => null,
-    } as any;
-
-    let sendChunk1: () => void;
-    let sendChunk2: () => void;
-    const cancelSpy = vi.fn();
-
-    const stream = new ReadableStream({
-      start(controller) {
-        sendChunk1 = () => {
-          controller.enqueue(new TextEncoder().encode('{"s":{"step":1}}\n'));
-        };
-        sendChunk2 = () => {
-          controller.enqueue(new TextEncoder().encode('{"s":{"step":2}}\n{"r":"done_1"}\n'));
-        };
-      },
-      cancel: cancelSpy,
-    });
-
-    globalThis.fetch = vi.fn(async (_url, init) => {
-      const body = JSON.parse(init.body);
-      if (body.seq === 1) {
-        return new Response(stream, {
-          headers: { 'Content-Type': 'application/x-ndjson' },
-        });
-      }
-      return new Response(JSON.stringify([{ s: { step: 'newer' } }, { r: 'done_2' }]), {
-        headers: { 'Content-Type': 'application/json' },
+    const deferred = () => {
+      let resolve!: (res: Response) => void;
+      let reject!: (err: Error) => void;
+      const promise = new Promise<Response>((res, rej) => {
+        resolve = res;
+        reject = rej;
       });
-    }) as any;
+      return { promise, resolve, reject };
+    };
+    const json = (frames: unknown[]) => new Response(JSON.stringify(frames), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
-    const actionPromise1 = dispatchServerAction(el as unknown as HTMLElement, 'act');
+    it('runs actions on one element strictly in order, starting each from the previous snapshot', async () => {
+      const el = makeEl();
+      const first = deferred();
+      const bodies: any[] = [];
+      globalThis.fetch = vi.fn(async (_url, init: any) => {
+        bodies.push(JSON.parse(init.body));
+        return bodies.length === 1 ? first.promise : json([{ s: { n: 2 }, sig: 'sig-2', sq: 2 }, { r: 'second' }]);
+      }) as any;
 
-    await new Promise((r) => setTimeout(r, 10));
-    sendChunk1?.();
-    await new Promise((r) => setTimeout(r, 10));
+      const one = dispatchServerAction(el, 'act');
+      const two = dispatchServerAction(el, 'act');
+      await new Promise((r) => setTimeout(r, 10));
 
-    expect(el.__litState).toEqual({ step: 1 });
-    expect(el.__litLastAppliedSeq).toBe(1);
+      // The second request has not been sent: it must wait for the first response and its fresh snapshot.
+      expect(bodies).toHaveLength(1);
+      expect(el.actionState.setPending).toHaveBeenCalledTimes(2);
 
-    const res2 = await dispatchServerAction(el as unknown as HTMLElement, 'act');
-    expect(res2).toBe('done_2');
-    expect(el.__litState).toEqual({ step: 'newer' });
-    expect(el.__litLastAppliedSeq).toBe(2);
+      first.resolve(json([{ s: { n: 1 }, sig: 'sig-1', sq: 1 }, { r: 'first' }]));
+      expect(await one).toBe('first');
+      expect(await two).toBe('second');
 
-    sendChunk2?.();
-    const res1 = await actionPromise1;
+      expect(bodies).toHaveLength(2);
+      expect(bodies[1].state).toEqual({ n: 1 });
+      expect(bodies[1].snapshotSeq).toBe(1);
+      expect(bodies.map((b) => b.seq)).toEqual([1, 2]);
+      expect(el.__litState).toEqual({ n: 2 });
+    });
 
-    expect(res1).toBeUndefined();
-    expect(el.__litState).toEqual({ step: 'newer' });
-    expect(cancelSpy).toHaveBeenCalled();
+    it('does not let a failed action block or poison the ones queued behind it', async () => {
+      const el = makeEl();
+      let call = 0;
+      globalThis.fetch = vi.fn(async () => {
+        call++;
+        if (call === 1) throw new Error('Network disconnected');
+        return json([{ r: 'recovered' }]);
+      }) as any;
+
+      const failing = dispatchServerAction(el, 'act');
+      const following = dispatchServerAction(el, 'act');
+
+      await expect(failing).rejects.toThrow('Network disconnected');
+      expect(await following).toBe('recovered');
+      expect(el.actionState.setError).toHaveBeenCalledTimes(1);
+      expect(el.actionState.setSuccess).toHaveBeenCalledWith('act', 'recovered');
+    });
+
+    it('adopts the snapshot a failed action carries, so the next action is signed with it', async () => {
+      const el = makeEl();
+      const sent: Array<{ sig: string; snapshotSeq: number }> = [];
+      let call = 0;
+      globalThis.fetch = vi.fn(async (_url: unknown, init?: RequestInit) => {
+        sent.push(JSON.parse(String(init?.body)));
+        call++;
+        if (call === 1) {
+          return json([
+            { s: { n: 1 }, sig: 'fresh-sig', sq: 1 },
+            { e: 'Out of stock', code: 'CONFLICT' },
+          ]);
+        }
+        return json([{ r: 'ok' }]);
+      }) as any;
+
+      await expect(dispatchServerAction(el, 'act')).rejects.toThrow('Out of stock');
+      expect(await dispatchServerAction(el, 'act')).toBe('ok');
+
+      expect(sent[1]).toMatchObject({ sig: 'fresh-sig', snapshotSeq: 1 });
+    });
+
+    it('keeps separate elements independent', async () => {
+      const slow = makeEl();
+      const fast = makeEl();
+      const held = deferred();
+      globalThis.fetch = vi.fn(async (_url, init: any) => (JSON.parse(init.body).seq === 1 && !fast.__litSeq ? held.promise : json([{ r: 'fast' }]))) as any;
+
+      const blocked = dispatchServerAction(slow, 'act');
+      expect(await dispatchServerAction(fast, 'act')).toBe('fast');
+
+      held.resolve(json([{ r: 'slow' }]));
+      expect(await blocked).toBe('slow');
+    });
+  });
+
+  it('exposes field-level messages from error frames and error responses on ServerActionError', async () => {
+    const el = { tagName: 'my-form', getAttribute: () => null } as any;
+    const fields = { email: 'Already registered' };
+
+    globalThis.fetch = vi.fn(
+      async () => new Response(`${JSON.stringify({ e: 'Fix it.', code: 'UNPROCESSABLE_CONTENT', fields })}\n`, { status: 200, headers: { 'Content-Type': 'application/x-ndjson' } }),
+    ) as any;
+    await expect(dispatchServerAction(el, 'hashA')).rejects.toMatchObject({ message: 'Fix it.', code: 'UNPROCESSABLE_CONTENT', fields });
+
+    globalThis.fetch = vi.fn(
+      async () => new Response(JSON.stringify({ error: 'Fix it.', code: 'UNPROCESSABLE_CONTENT', fields }), { status: 422, headers: { 'Content-Type': 'application/json' } }),
+    ) as any;
+    await expect(dispatchServerAction(el, 'hashA')).rejects.toMatchObject({ status: 422, code: 'UNPROCESSABLE_CONTENT', fields });
+  });
+
+  it('announces settled actions with bubbling composed DOM events', async () => {
+    const events: Array<{ type: string; init: any; detail: any }> = [];
+    const el = {
+      tagName: 'my-form',
+      getAttribute: () => null,
+      dispatchEvent(event: any) {
+        events.push({ type: event.type, init: { bubbles: event.bubbles, composed: event.composed }, detail: event.detail });
+        return true;
+      },
+    } as any;
+
+    globalThis.fetch = vi.fn(async () => new Response(JSON.stringify([{ r: 'done' }]), { status: 200, headers: { 'Content-Type': 'application/json' } })) as any;
+    await dispatchServerAction(el, 'hashA', [], { actionName: 'save' });
+
+    globalThis.fetch = vi.fn(async () => new Response(JSON.stringify({ error: 'Nope', code: 'FORBIDDEN' }), { status: 403, headers: { 'Content-Type': 'application/json' } })) as any;
+    await expect(dispatchServerAction(el, 'hashA', [], { actionName: 'save' })).rejects.toThrow('Nope');
+
+    expect(events.map((e) => e.type)).toEqual(['lit-action-success', 'lit-action-error']);
+    expect(events[0].init).toEqual({ bubbles: true, composed: true });
+    expect(events[0].detail).toEqual({ action: 'save', result: 'done' });
+    expect(events[1].detail.error).toMatchObject({ code: 'FORBIDDEN', status: 403 });
+  });
+
+  describe('pending attributes', () => {
+    const makeHost = () => {
+      const attrs = new Map<string, string>();
+      return {
+        attrs,
+        el: {
+          tagName: 'my-form',
+          getAttribute: (name: string) => attrs.get(name) ?? null,
+          setAttribute: (name: string, value: string) => attrs.set(name, value),
+          removeAttribute: (name: string) => attrs.delete(name),
+        } as any,
+      };
+    };
+
+    it('marks the host while actions are outstanding and clears it when they settle', async () => {
+      const { attrs, el } = makeHost();
+      let release!: () => void;
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      globalThis.fetch = vi.fn(async () => {
+        await gate;
+        return new Response(JSON.stringify([{ r: 1 }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }) as any;
+
+      const one = dispatchServerAction(el, 'hashA', [], { actionName: 'save' });
+      const two = dispatchServerAction(el, 'hashA', [], { actionName: 'save' });
+      const other = dispatchServerAction(el, 'hashB', [], { actionName: 'remove' });
+
+      expect(attrs.get('data-lit-pending')).toBe('save remove');
+      expect(attrs.get('aria-busy')).toBe('true');
+
+      release();
+      await Promise.all([one, two, other]);
+      expect(attrs.has('data-lit-pending')).toBe(false);
+      expect(attrs.has('aria-busy')).toBe(false);
+    });
+
+    it('clears the marker after a failure too', async () => {
+      const { attrs, el } = makeHost();
+      globalThis.fetch = vi.fn(async () => new Response(JSON.stringify({ error: 'no', code: 'FORBIDDEN' }), { status: 403, headers: { 'Content-Type': 'application/json' } })) as any;
+
+      await expect(dispatchServerAction(el, 'hashA', [], { actionName: 'save' })).rejects.toThrow('no');
+      expect(attrs.has('data-lit-pending')).toBe(false);
+    });
   });
 });

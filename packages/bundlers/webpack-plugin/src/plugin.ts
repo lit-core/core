@@ -378,7 +378,7 @@ export class LitWebpackPlugin {
             const webResponse = await handleActionRequest(webRequest, {
               env: {},
               secret: devSecret,
-              registry: (globalThis as any).customElements,
+              customElements: (globalThis as any).customElements,
               routePrefix,
             });
 

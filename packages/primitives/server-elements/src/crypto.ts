@@ -18,7 +18,13 @@
  * scope for the stateless protocol; bound the exposure with a short `ttlMs`.
  */
 
+import { canonicalizeJson, hasPrototypePollution } from './canonical-json.js';
+
+export { canonicalizeJson, escapeJsonForHtml, hasPrototypePollution } from './canonical-json.js';
+
 const PAYLOAD_VERSION = 'lit-state-v1';
+/** Default lifetime of a signed snapshot: 15 minutes. */
+export const DEFAULT_STATE_TTL_MS = 900_000;
 const SIGNATURE_HEX_PATTERN = /^[0-9a-f]{64}$/;
 
 const keyCache = new Map<string, CryptoKey>();
@@ -37,56 +43,6 @@ export async function getHmacKey(secret: string | CryptoKey): Promise<CryptoKey>
     keyCache.set(secret, key);
   }
   return key;
-}
-
-/**
- * Checks recursively whether an object contains prototype-pollution keys
- * (__proto__, constructor, prototype).
- */
-export function hasPrototypePollution(value: unknown): boolean {
-  if (value === null || typeof value !== 'object') {
-    return false;
-  }
-  if (Array.isArray(value)) {
-    return value.some(hasPrototypePollution);
-  }
-  for (const key of Object.getOwnPropertyNames(value)) {
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-      return true;
-    }
-    if (hasPrototypePollution((value as Record<string, unknown>)[key])) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Serializes an object to deterministic canonical JSON with sorted keys
- * and prototype pollution properties stripped.
- */
-export function canonicalizeJson(value: unknown): string {
-  if (value === null || typeof value !== 'object') {
-    return JSON.stringify(value);
-  }
-  if (value instanceof Date) {
-    return JSON.stringify(value.toISOString());
-  }
-  if (Array.isArray(value)) {
-    return `[${value.map(canonicalizeJson).join(',')}]`;
-  }
-  const sortedKeys = Object.keys(value as Record<string, unknown>).sort();
-  const parts: string[] = [];
-  for (const k of sortedKeys) {
-    if (k === '__proto__' || k === 'constructor' || k === 'prototype') {
-      continue;
-    }
-    const v = (value as Record<string, unknown>)[k];
-    if (v !== undefined && typeof v !== 'function' && typeof v !== 'symbol') {
-      parts.push(`${JSON.stringify(k)}:${canonicalizeJson(v)}`);
-    }
-  }
-  return `{${parts.join(',')}}`;
 }
 
 /**
@@ -181,19 +137,6 @@ export function buildHmacPayload(
   ]);
 }
 
-/**
- * Escapes sensitive HTML and Unicode control characters from JSON strings
- * before embedding in HTML attributes or scripts.
- */
-export function escapeJsonForHtml(jsonStr: string): string {
-  return jsonStr
-    .replace(/</g, '\\u003c')
-    .replace(/>/g, '\\u003e')
-    .replace(/&/g, '\\u0026')
-    .replace(/\u2028/g, '\\u2028')
-    .replace(/\u2029/g, '\\u2029');
-}
-
 function toHex(buffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(buffer), (b) => b.toString(16).padStart(2, '0')).join('');
 }
@@ -210,19 +153,12 @@ function fromHex(hex: string): Uint8Array {
  * Signs a component state dictionary using HMAC-SHA256 with timestamp expiry.
  * Signature format: `${expiresAt}.${sigHex}`.
  */
-export async function createSignedStateSnapshot(
-  tag: string,
-  state: Record<string, unknown>,
-  secret: string | CryptoKey,
-  ttlMsOrOptions?: number | SignedStateSnapshotOptions,
-  maybeOptions?: SignedStateSnapshotOptions,
-): Promise<SignedStateResult> {
+export async function createSignedStateSnapshot(tag: string, state: Record<string, unknown>, secret: string | CryptoKey, options: SignedStateSnapshotOptions = {}): Promise<SignedStateResult> {
   if (hasPrototypePollution(state)) {
     throw new Error('Prototype pollution detected in state payload');
   }
 
-  const options: SignedStateSnapshotOptions = typeof ttlMsOrOptions === 'object' && ttlMsOrOptions !== null ? ttlMsOrOptions : maybeOptions || {};
-  const ttlMs = typeof ttlMsOrOptions === 'number' ? ttlMsOrOptions : (options.ttlMs ?? 900_000);
+  const ttlMs = options.ttlMs ?? DEFAULT_STATE_TTL_MS;
 
   const token = options.token || generateActionToken();
   const expiresAt = Date.now() + ttlMs;
@@ -232,11 +168,6 @@ export async function createSignedStateSnapshot(
   const sigBuffer = await crypto.subtle.sign('HMAC', key, data as BufferSource);
   return { state, sig: `${expiresAt}.${toHex(sigBuffer)}`, token };
 }
-
-/**
- * Alias for createSignedStateSnapshot adhering to alternate naming convention.
- */
-export const signStateSnapshot = createSignedStateSnapshot;
 
 /**
  * Verifies an HMAC-SHA256 state signature and timestamp expiry against exactly the

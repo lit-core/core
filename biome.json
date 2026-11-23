@@ -107,7 +107,7 @@
         "packages/targets/*/src/**",
         "packages/targets/*/runtime/**",
         "packages/transforms/*/src/**",
-        "!packages/rendering/ssr/src/environment.ts"
+        "!packages/rendering/ssr/src/environment/registry.ts"
       ],
       "linter": {
         "rules": {
@@ -176,8 +176,7 @@
         "packages/targets/*/runtime/**",
         "packages/transforms/*/src/**",
         "!packages/rendering/ssr/src/compiler-bridge.ts",
-        "!packages/rendering/ssr/src/environment.ts",
-        "!packages/primitives/server-elements/src/executor.ts"
+        "!packages/rendering/ssr/src/environment/**"
       ],
       "plugins": ["./scripts/biome-plugins/no-unbranded-duck-typing.grit"]
     },

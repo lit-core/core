@@ -26,13 +26,18 @@ pub struct ActionMetadata {
     pub hash: String,
     pub params: Vec<ParamValidationMeta>,
     pub written_properties: Vec<String>,
+    /// `@action({ revalidate: false })` skips loader revalidation after the action.
+    pub revalidate: Option<bool>,
 }
 
 #[napi(object)]
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LoaderMetadata {
     pub name: String,
+    /// Reactive properties this loader assigns, computed per loader.
     pub written_properties: Vec<String>,
+    /// `@loader({ dependencies })`: the loader re-runs after an action only when the action wrote one of these.
+    pub dependencies: Option<Vec<String>>,
 }
 
 #[napi(object)]

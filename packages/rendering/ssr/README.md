@@ -106,6 +106,22 @@ Server rendering maintains a lexical `SlotManager` context stack that projects l
 
 ---
 
+## Source layout
+
+| Path                                                                 | Responsibility                                                                                 |
+| :------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `renderer.ts`                                                        | The synchronous render core: context, Declarative Shadow DOM, compiled plans, slot projection  |
+| `render-api.ts`, `async-render.ts`                                   | Public entry points over the core: strings and documents; async boundaries and ordered streams |
+| `component/`                                                         | Component lifecycle, property reflection, host attributes and the DOM surface elements see     |
+| `environment/`                                                       | The isolate environment: element, shadow root, document and event stubs, registry, installer   |
+| `compiler-bridge.ts` and the modules it re-exports                   | Plan and context types, trusted raw HTML, escaping, directives, style deduplication            |
+| `html-rewriter*.ts`                                                  | Cloudflare `HTMLRewriter` integration: types, the multiplexer, progressive streaming           |
+| `stream.ts`, `slot.ts`, `reflected-attributes.ts`, `sdsd-scripts.ts` | Web stream adapters, slot projection, attribute reflection, out-of-order swap scripts          |
+
+`renderer.ts` is one mutually recursive group of functions (`renderInternal`, `renderPlanV2Opcodes`, `renderComponentInstance` and the Declarative Shadow DOM step renderers), so it stays together. Everything that does not take part in that recursion lives in its own module.
+
+---
+
 ## Installation
 
 ```bash
@@ -195,6 +211,22 @@ import { html } from 'lit';
 const stream = renderToStream(html`<div>Streamed</div>`);
 const fullHtml = await collectResult(stream);
 ```
+
+#### `createAsyncBoundary(promise, fallback?, options?)`
+
+Streams `fallback` now and swaps in the resolved value when `promise` settles, with no tokenizer blocking. `options` is `{ errorFallback?, group? }` (a bare function is still read as `errorFallback`).
+
+By default boundaries swap in as each one resolves. Give boundaries the same `group` to control the reveal order and avoid content jumping around:
+
+```ts
+const group = { id: 'cards', reveal: 'together' } as const; // or 'forwards'
+html`${createAsyncBoundary(loadA(), skeleton, { group })}${createAsyncBoundary(loadB(), skeleton, { group })}`;
+```
+
+- `together`: nothing in the group swaps until every member has settled, then all swap back to back.
+- `forwards`: members swap in document order, so a slow one holds back the ones after it.
+
+The order is decided on the server by when each swap chunk is emitted, so the browser needs no extra script. Ungrouped boundaries are unaffected.
 
 ### Configuration interfaces
 

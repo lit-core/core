@@ -101,7 +101,7 @@ describe('milestone 4 challenger: server elements adversarial stress suite', () 
       const state = { token: 't123' };
 
       // Snapshot with negative TTL (already expired)
-      const expiredSnapshot = await createSignedStateSnapshot('session-el', state, testSecret, -10_000);
+      const expiredSnapshot = await createSignedStateSnapshot('session-el', state, testSecret, { ttlMs: -10_000 });
       const verifyOpts = { token: expiredSnapshot.token };
       expect(await verifyStateSignature('session-el', state, expiredSnapshot.sig, testSecret, verifyOpts)).toBe(false);
 
@@ -214,7 +214,7 @@ describe('milestone 4 challenger: server elements adversarial stress suite', () 
       const res = await handleActionRequest(req, {
         env: {},
         secret: testSecret,
-        registry,
+        customElements: registry,
       });
 
       expect(res.status).toBe(403);
@@ -243,7 +243,7 @@ describe('milestone 4 challenger: server elements adversarial stress suite', () 
       const res = await handleActionRequest(req, {
         env: {},
         secret: testSecret,
-        registry,
+        customElements: registry,
         allowedOrigins: ['https://trusted-partner.com'],
       });
 
@@ -263,7 +263,7 @@ describe('milestone 4 challenger: server elements adversarial stress suite', () 
       const res = await handleActionRequest(req, {
         env: {},
         secret: testSecret,
-        registry,
+        customElements: registry,
       });
 
       expect(res.status).toBe(403);
@@ -290,7 +290,7 @@ describe('milestone 4 challenger: server elements adversarial stress suite', () 
         }),
       });
 
-      const res1 = await handleActionRequest(reqNoHeader, { env: {}, secret: testSecret, registry });
+      const res1 = await handleActionRequest(reqNoHeader, { env: {}, secret: testSecret, customElements: registry });
       expect(res1.status).toBe(403);
       const json1 = await res1.json();
       expect(json1.code).toBe('TOKEN_MISMATCH');
@@ -311,7 +311,7 @@ describe('milestone 4 challenger: server elements adversarial stress suite', () 
         }),
       });
 
-      const res2 = await handleActionRequest(reqMismatch, { env: {}, secret: testSecret, registry });
+      const res2 = await handleActionRequest(reqMismatch, { env: {}, secret: testSecret, customElements: registry });
       expect(res2.status).toBe(403);
       const json2 = await res2.json();
       expect(json2.code).toBe('TOKEN_MISMATCH');
@@ -332,7 +332,7 @@ describe('milestone 4 challenger: server elements adversarial stress suite', () 
         }),
       });
 
-      const res3 = await handleActionRequest(reqValid, { env: {}, secret: testSecret, registry });
+      const res3 = await handleActionRequest(reqValid, { env: {}, secret: testSecret, customElements: registry });
       expect(res3.status).toBe(200);
     });
 
@@ -356,7 +356,7 @@ describe('milestone 4 challenger: server elements adversarial stress suite', () 
         }),
       });
 
-      const res = await handleActionRequest(tamperedReq, { env: {}, secret: testSecret, registry });
+      const res = await handleActionRequest(tamperedReq, { env: {}, secret: testSecret, customElements: registry });
       expect(res.status).toBe(403);
       const json = await res.json();
       expect(json.code).toBe('STATE_TAMPERED');
@@ -369,7 +369,7 @@ describe('milestone 4 challenger: server elements adversarial stress suite', () 
         body: '{"tag":"mock-counter","args":[],"__proto__":{"polluted":true}}',
       });
 
-      const res = await handleActionRequest(pollutedReq, { env: {}, secret: testSecret, registry });
+      const res = await handleActionRequest(pollutedReq, { env: {}, secret: testSecret, customElements: registry });
       expect(res.status).toBe(400);
       const json = await res.json();
       expect(json.code).toBe('PROTOTYPE_POLLUTION');

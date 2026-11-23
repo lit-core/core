@@ -1,10 +1,24 @@
-import { LitElement } from 'lit';
+import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { ActionStateController } from './action-state.js';
 import type { ActionContext, Env, LoaderContext } from './context.js';
-import { CONTEXT_SYMBOL, ELEMENT_SYMBOL } from './symbols.js';
-import type { ActionState, Constructor } from './types.js';
+import type { ServerElementClass } from './metadata.js';
+import { DEFAULT_ROUTE_PREFIX, FORM_FIELD_PREFIX } from './protocol.js';
+import { CONTEXT_SYMBOL, ELEMENT_SYMBOL, FORM_SNAPSHOT_SYMBOL } from './symbols.js';
+import type { ActionState, Constructor, WireState } from './types.js';
+
+/** The signed snapshot an element embeds in its form fields so a plain form post can authenticate. */
+export interface FormSnapshot {
+  tag: string;
+  state: WireState;
+  sig: string;
+  token: string;
+  /** Public attributes and build id, exactly as the browser would echo them. */
+  attrs: Record<string, string>;
+}
 
 export interface ServerElementInterface {
+  actionUrl(actionName: string, routePrefix?: string): string;
+  formFields(options?: { redirect?: string }): TemplateResult | typeof nothing;
   readonly env: Env;
   readonly context: LoaderContext | ActionContext;
   readonly actionState: ActionStateController;
@@ -19,11 +33,11 @@ export function ServerElementMixin<T extends Constructor<LitElement>>(Base: T): 
   class ServerElementMixinClass extends Base implements ServerElementInterface {
     readonly _actionController: ActionStateController;
     [CONTEXT_SYMBOL]: LoaderContext | ActionContext | null = null;
+    readonly [ELEMENT_SYMBOL] = true;
 
     constructor(...args: any[]) {
       super(...args);
       this._actionController = new ActionStateController(this);
-      (this as any)[ELEMENT_SYMBOL] = true;
     }
 
     /**
@@ -34,7 +48,7 @@ export function ServerElementMixin<T extends Constructor<LitElement>>(Base: T): 
       if (ctx && 'env' in ctx) {
         return ctx.env;
       }
-      return (globalThis as any).env || {};
+      return (globalThis as { env?: Env }).env || {};
     }
 
     /**
@@ -54,6 +68,33 @@ export function ServerElementMixin<T extends Constructor<LitElement>>(Base: T): 
      */
     _setContext(ctx: LoaderContext | ActionContext): void {
       this[CONTEXT_SYMBOL] = ctx;
+    }
+
+    /**
+     * URL a plain `<form method="post">` posts to in order to run the named `@action()`.
+     * Works without JavaScript: pair it with `formFields()` inside the form.
+     */
+    actionUrl(actionName: string, routePrefix: string = DEFAULT_ROUTE_PREFIX): string {
+      const actions = (this.constructor as ServerElementClass).__lit_actions ?? {};
+      const hash = Object.keys(actions).find((key) => actions[key].name === actionName);
+      if (!hash) {
+        throw new Error(`[@lit-core/server-elements] <${String(this.tagName ?? 'element').toLowerCase()}> has no compiled @action() named '${actionName}'.`);
+      }
+      return `${routePrefix.endsWith('/') ? routePrefix : `${routePrefix}/`}${hash}`;
+    }
+
+    /**
+     * Hidden inputs carrying the signed snapshot, so a plain form post can run an action with no script.
+     * Renders nothing outside a server render, such as while computing action patches.
+     *
+     * Every other input in the form becomes the action's single argument object. The browser is sent
+     * back to `redirect` (a same-site path) afterwards, defaulting to the page it came from.
+     */
+    formFields(options: { redirect?: string } = {}): TemplateResult | typeof nothing {
+      const snapshot = (this as unknown as Record<symbol, FormSnapshot | undefined>)[FORM_SNAPSHOT_SYMBOL];
+      if (!snapshot) return nothing;
+      const name = (field: string) => `${FORM_FIELD_PREFIX}${field}`;
+      return html`<input type="hidden" name=${name('tag')} value=${snapshot.tag}><input type="hidden" name=${name('state')} value=${typeof snapshot.state === 'string' ? snapshot.state : JSON.stringify(snapshot.state)}><input type="hidden" name=${name('sig')} value=${snapshot.sig}><input type="hidden" name=${name('token')} value=${snapshot.token}><input type="hidden" name=${name('attrs')} value=${JSON.stringify(snapshot.attrs)}>${options.redirect ? html`<input type="hidden" name=${name('redirect')} value=${options.redirect}>` : nothing}`;
     }
 
     /**

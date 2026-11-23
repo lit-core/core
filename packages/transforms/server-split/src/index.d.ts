@@ -17,11 +17,16 @@ export interface ActionMetadata {
   hash: string;
   params: ParamValidationMeta[];
   writtenProperties: string[];
+  /** `@action({ revalidate: false })` skips loader revalidation after the action. */
+  revalidate?: boolean;
 }
 
 export interface LoaderMetadata {
   name: string;
+  /** Reactive properties this loader assigns, computed per loader. */
   writtenProperties: string[];
+  /** `@loader({ dependencies })`: re-run after an action only when it wrote one of these. */
+  dependencies?: string[];
 }
 
 export interface ServerSplitDiagnostic {

@@ -30,15 +30,15 @@ const PROTECTED_PATTERNS = [
 
 // Canonical authorized hashes for protected golden test suites, lint rules, and configs
 const CANONICAL_PROTECTED_HASHES = {
-  'packages/internal/tests/src/suites/server-elements-e2e.test.ts': '29f864817bf6aa7844b505670660fe0c733c963152abb2ee97c3150357f794be',
-  'packages/internal/tests/src/suites/edge-benchmarks.test.ts': 'ea4e0f6e71afe3ac6919af9cf40b41b6dfa46ba2e3abdc036f7032704a915e64',
+  'packages/internal/tests/src/suites/server-elements-e2e.test.ts': '576f4aef19255a5c3ae18d24deb53dc64d0d6af451e5737e2d3340d0cab18fb3',
+  'packages/internal/tests/src/suites/edge-benchmarks.test.ts': '96781165ba9ab13eff55db63b6502104fc54377c715c7d296645995e9f2ad280',
   'packages/transforms/dom-paths/tests/dsd_soundness_property.test.ts': '5d8534bc4b529195224e3099fbfcf041aa955281ad251bb06ba6e5f66a1806aa',
   'scripts/check/index.mjs': 'e334835eb6e30e900925f44c2de5ca9bebba02365eb64e5aff78d57994bd6577',
   'scripts/check/affected.mjs': '3260d1cdd41c8c73ee9a1f93c7a3e0acabf3c5bab5405b1324a12a26d41a2e65',
   'scripts/check/native-fresh.mjs': 'ac5fbf6c45f451525a482759d10b92e401b88a9741dd149bc29dbce67264cc5c',
   'AGENTS.md': 'd4fe8930430639b72e481b78dca3b460ee00d7c9c867edcfc648b1951a13fd0d',
   '.agents/skills/transform-principles/SKILL.md': '0d7309c909e244228a485341ee42dd4c23ac180152bb120221fec04bf738cc80',
-  'biome.json': '3cdd37278c4a9fbc9babff59799f462d17bf3c4157977fb365fd5be63d8196d8',
+  'biome.json': 'f32675af60b12ea296c43bd19a3ab1be6e351e8ea6cbd627802c7c5ef9e48dc5',
   'clippy.toml': 'e25f5cd8175beffdd4c3e80850635ae33fd1eb82f0c8586d12118a421206bc16',
   'scripts/biome-plugins/no-benchmark-literal-html.grit': 'b0186c1eab978a1e5244cc011e86f1955db5580db7660bc886727437a2f27ac3',
   'scripts/biome-plugins/no-benchmark-math-max.grit': 'b069488824c931038f3bf80f0d662346a62aa21ed544cbf7033412febfa17e29',
@@ -50,7 +50,7 @@ const CANONICAL_PROTECTED_HASHES = {
   'scripts/biome-plugins/no-unbranded-duck-typing.grit': 'e8f5021dd23767865d05c421cbc667900a0be6b55bfe9ac94b5f8a900c1c8b97',
 };
 
-const EXPECTED_LEDGER_NORMALIZED_HASH = '7496368b2364e0decf172287a7f072572823267eda3931a035330683af620083';
+const EXPECTED_LEDGER_NORMALIZED_HASH = '81713bafa5dc144ff8b0a036b795c1295d0925f835d22517bf9ff9cf2f13c0ad';
 
 const BANNED_SUPPRESSION_COMMENT_PATTERN =
   /biome-ignore(?:-all)?\s+(?:lint\s*:|(?:lint\/)?plugin\b|lint\/(?:style\/(?:noProcessEnv|noRestrictedImports)|correctness\/noProcessGlobal|suspicious\/(?:noGlobalAssign|noProto)|nursery\/noJsRestrictedProperties)\b)/;

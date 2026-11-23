@@ -222,7 +222,7 @@ describe('milestone m6 tier c acceptance test: minification resilience', () => {
         const webRes = await handleActionRequest(webReq, {
           env: {},
           secret: TEST_SECRET,
-          registry: (globalThis as any).customElements,
+          customElements: (globalThis as any).customElements,
         });
 
         const resBody = await webRes.text();
@@ -318,7 +318,7 @@ describe('milestone m6 tier c acceptance test: minification resilience', () => {
       const res = await handleActionRequest(actionReq, {
         env: {},
         secret: TEST_SECRET,
-        registry: (globalThis as any).customElements,
+        customElements: (globalThis as any).customElements,
       });
       streamText = await res.text();
     }
@@ -476,7 +476,7 @@ describe('milestone m6 tier c acceptance test: minification resilience', () => {
     const res = await handleActionRequest(tamperedReq, {
       env: {},
       secret: TEST_SECRET,
-      registry: (globalThis as any).customElements,
+      customElements: (globalThis as any).customElements,
     });
 
     expect(res.status).toBe(403);
@@ -499,7 +499,7 @@ describe('milestone m6 tier c acceptance test: minification resilience', () => {
     const emptyRes = await handleActionRequest(emptyStateReq, {
       env: {},
       secret: TEST_SECRET,
-      registry: (globalThis as any).customElements,
+      customElements: (globalThis as any).customElements,
     });
 
     expect(emptyRes.status).toBe(403);
@@ -522,36 +522,29 @@ describe('milestone m6 tier c acceptance test: minification resilience', () => {
     expect(parsed.code).toBe('STATE_TAMPERED');
   });
 
-  it('drops out-of-order stale sequence responses without rolling back dom state', async () => {
+  it('queues rapid actions so the second starts from the first response snapshot', async () => {
     shouldDelaySeq1 = true;
-
     await page.click('minified-counter button.set10-btn');
     await page.waitForTimeout(200);
 
     shouldDelaySeq1 = false;
     await page.click('minified-counter button.set20-btn');
+    await page.waitForTimeout(300);
+    expect(recordedActionBodies).toHaveLength(1);
 
+    delaySeq1Resolver?.();
+    delaySeq1Resolver = null;
     await page.waitForFunction(
       () => {
         const host = document.querySelector('minified-counter');
-        const countEl = host?.shadowRoot?.querySelector('.sole-count');
-        const adjEl = host?.shadowRoot?.querySelector('.adjacent-text');
-        return countEl?.textContent?.trim() === '20' && adjEl?.textContent?.trim() === 'Value: 20 items (set)';
+        return host?.shadowRoot?.querySelector('.sole-count')?.textContent?.trim() === '20';
       },
       undefined,
       { timeout: 3000 },
     );
 
-    if (delaySeq1Resolver) {
-      delaySeq1Resolver();
-      delaySeq1Resolver = null;
-    }
-
-    await page.waitForTimeout(500);
-
-    const text = await getShadowText(page, 'minified-counter', '.sole-count');
-    const adjacentText = await getShadowText(page, 'minified-counter', '.adjacent-text');
-    expect(text).toBe('20');
-    expect(adjacentText).toBe('Value: 20 items (set)');
+    expect(recordedActionBodies).toHaveLength(2);
+    expect(recordedActionBodies[1].snapshotSeq).toBe(1);
+    expect(await getShadowText(page, 'minified-counter', '.adjacent-text')).toBe('Value: 20 items (set)');
   });
 });

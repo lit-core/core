@@ -3,7 +3,8 @@
  * Implements deterministic backpressure, semantic async boundary flushing, and client cancellation handling.
  */
 
-import { createSyncAndAsyncBoundaryIterators, type RenderOptions, renderAsync } from './renderer.js';
+import { createSyncAndAsyncBoundaryIterators, renderAsync } from './async-render.js';
+import type { RenderOptions } from './render-options.js';
 
 export interface StreamRenderOptions extends RenderOptions {
   /**
