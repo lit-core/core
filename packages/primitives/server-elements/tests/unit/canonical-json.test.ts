@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalizeJson, escapeJsonForHtml, hasPrototypePollution } from '../../src/canonical-json.js';
+import { assertJsonState, canonicalizeJson, escapeJsonForHtml, hasPrototypePollution, NonJsonStateError } from '../../src/canonical-json.js';
 
 describe('canonicalizeJson', () => {
   it('sorts keys so equal objects serialize identically', () => {
@@ -50,5 +50,56 @@ describe('escapeJsonForHtml', () => {
 
   it('escapes the line separators JSON allows but scripts do not', () => {
     expect(escapeJsonForHtml('"\u2028\u2029"')).toBe('"\\u2028\\u2029"');
+  });
+});
+
+describe('assertJsonState', () => {
+  const rejects = (value: unknown) => {
+    try {
+      assertJsonState(value);
+    } catch (error) {
+      return error as NonJsonStateError;
+    }
+    throw new Error('expected the state to be rejected');
+  };
+
+  it('accepts everything JSON can carry', () => {
+    expect(() => assertJsonState({ n: 1, s: 'x', b: false, nil: null, list: [1, { deep: [true] }], nested: { a: { b: 'c' } }, omitted: undefined })).not.toThrow();
+    expect(() => assertJsonState(Object.assign(Object.create(null), { a: 1 }))).not.toThrow();
+  });
+
+  it('names the path and the kind of what it rejects', () => {
+    const error = rejects({ items: [{ tags: new Set(['a']) }] });
+    expect(error).toBeInstanceOf(NonJsonStateError);
+    expect(error.path).toBe('items[0].tags');
+    expect(error.found).toBe('Set');
+    expect(error.message).toContain("'items[0].tags'");
+  });
+
+  it('rejects collections, dates and class instances, which come back from JSON as something else', () => {
+    expect(rejects({ m: new Map([['a', 1]]) }).found).toBe('Map');
+    expect(rejects({ at: new Date(0) }).found).toBe('Date');
+    class Money {}
+    expect(rejects({ price: new Money() }).found).toBe('Money');
+    expect(rejects({ bytes: new Uint8Array(2) }).found).toBe('Uint8Array');
+  });
+
+  it('rejects values JSON cannot represent', () => {
+    expect(rejects({ f: () => 1 }).found).toBe('function');
+    expect(rejects({ s: Symbol('x') }).found).toBe('symbol');
+    expect(rejects({ big: 10n }).found).toBe('bigint');
+    expect(rejects({ n: Number.NaN }).found).toBe('NaN');
+    expect(rejects({ n: Number.POSITIVE_INFINITY }).found).toBe('Infinity');
+  });
+
+  it('rejects an undefined array entry, which JSON turns into null, but not an undefined member', () => {
+    expect(rejects({ list: [1, undefined] }).path).toBe('list[1]');
+    expect(() => assertJsonState({ gone: undefined })).not.toThrow();
+  });
+
+  it('rejects a cycle instead of recursing forever', () => {
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    expect(rejects(cyclic).found).toBe('circular reference');
   });
 });

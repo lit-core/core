@@ -14,7 +14,7 @@ export type { ActionContext, Env, LoaderContext } from './context.js';
 export { action } from './decorators/action.js';
 export { loader } from './decorators/loader.js';
 export { ServerElement, type ServerElementInterface, ServerElementMixin } from './element.js';
-export { ServerActionError, UncompiledServerElementError } from './errors.js';
+export { isReloadRequired, ServerActionError, UncompiledServerElementError } from './errors.js';
 export type { ActionMeta, LoaderMeta, ServerElementClass, ServerElementRegistry } from './metadata.js';
 export { ACTION_STATE_SYMBOL, ACTION_SYMBOL, CONTEXT_SYMBOL, ELEMENT_SYMBOL, LOADER_SYMBOL } from './symbols.js';
 export type * from './types.js';

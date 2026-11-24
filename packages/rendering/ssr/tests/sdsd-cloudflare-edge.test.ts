@@ -380,6 +380,7 @@ describe('Streaming Declarative Shadow DOM (SDSD) and Cloudflare HTMLRewriter mu
         rawHtml,
         {
           customElements: env.customElements,
+          tagNames: ['parent-card'],
           islands: {
             'order-island': {
               styles: ':host { display: inline-block; }',

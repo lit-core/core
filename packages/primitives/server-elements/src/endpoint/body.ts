@@ -1,3 +1,6 @@
+/** Largest request body the endpoint reads unless `maxBodyBytes` says otherwise. */
+export const DEFAULT_MAX_BODY_BYTES = 64 * 1024;
+
 export class BodyTooLargeError extends Error {
   constructor(readonly limit: number) {
     super(`Request body exceeds ${limit} bytes`);

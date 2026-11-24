@@ -14,6 +14,11 @@ Native Rust ahead-of-time (AOT) server and client component splitter and schema 
 - **Static isolation proof (`SE101`)**: Guarantees server-only imports, credentials, and loader parameters never reach browser client bundles.
 - **TypeScript parameter validator synthesis (`SE102`)**: Compiles TypeScript parameter types into defense-in-depth AST validation routines defending against prototype pollution and malformed payloads.
 - **Reactive property tracking (`SE103`)**: Verifies loader and action property writes against declared reactive properties.
+- **Decorator option checks (`SE107`)**: Options passed to `@loader()` and `@action()` must be literals the compiler can read.
+- **Reserved method names (`SE108`)**: An `@action()` or `@loader()` named like a member the element already has (`remove`, `update`, `click`, `requestUpdate`, `actionUrl`) is refused, because the compiled class would replace that member.
+- **JSON-safe state types (`SE109`)**: A reactive property annotated `Map`, `Set`, `Date`, a function, `symbol` or `bigint` is refused, since element state travels as JSON. Run `checkStateTypes` on the original source: lowering decorators removes the annotations it reads.
+- **Server-only `renderPending()`**: Kept in the worker artifact and removed from the client artifact, so a streamed element can show a placeholder at no cost to the browser.
+- **Source-derived build id**: Each element is stamped with a BLAKE3 hash of its source unless `buildId` is given, so a page from an older build is refused with `ACTION_STALE` instead of running against new code.
 - **Content-addressed action hashing**: Generates deterministic 16-hex BLAKE3 digests for action endpoints.
 - **Pure `AstBuilder` emission**: Strictly zero string splicing and zero re-parsing of generated code.
 

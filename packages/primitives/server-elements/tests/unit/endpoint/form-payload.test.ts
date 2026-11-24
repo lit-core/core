@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_MAX_BODY_BYTES } from '../../../src/endpoint/body.js';
 import type { EndpointError } from '../../../src/endpoint/endpoint-error.js';
-import { isFormRequest, MAX_FORM_BODY_BYTES, readFormPayload } from '../../../src/endpoint/form-payload.js';
+import { isFormRequest, readFormPayload } from '../../../src/endpoint/form-payload.js';
+import { FORM_TICKET_SEQ } from '../../../src/protocol.js';
 
 function formRequest(fields: Record<string, string | string[]>): Request {
   const params = new URLSearchParams();
@@ -27,19 +29,20 @@ describe('isFormRequest', () => {
 });
 
 describe('readFormPayload', () => {
-  const snapshot = { _lit_tag: 'my-el', _lit_sig: 'sig', _lit_token: 'tok', _lit_state: '{"n":1}', _lit_attrs: '{"id":"x"}' };
+  const snapshot = { _lit_tag: 'my-el', _lit_sig: 'sig', _lit_token: 'tok', _lit_attrs: '{"id":"x"}' };
 
   it('maps hidden fields to the request body and every other field to the single action argument', async () => {
     const { body, token, redirect } = await readFormPayload(formRequest({ ...snapshot, title: 'hi', tag: ['a', 'b'], _lit_redirect: '/done' }));
-    expect(body).toMatchObject({ tag: 'my-el', sig: 'sig', state: { n: 1 }, attrs: { id: 'x' }, seq: 0, snapshotSeq: 0 });
+    expect(body).toMatchObject({ tag: 'my-el', sig: 'sig', state: {}, attrs: { id: 'x' }, seq: 0, snapshotSeq: FORM_TICKET_SEQ });
     expect(body.args).toEqual([{ title: 'hi', tag: ['a', 'b'] }]);
     expect(token).toBe('tok');
     expect(redirect).toBe('/done');
   });
 
-  it('passes an encrypted state through as an opaque string', async () => {
-    const { body } = await readFormPayload(formRequest({ ...snapshot, _lit_state: 'v1.AbCdEf' }));
-    expect(body.state).toBe('v1.AbCdEf');
+  it('never takes state from the post, whatever the fields claim', async () => {
+    const { body } = await readFormPayload(formRequest({ ...snapshot, _lit_state: '{"n":1}', _lit_snapshot_seq: '7' }));
+    expect(body.state).toEqual({});
+    expect(body.snapshotSeq).toBe(FORM_TICKET_SEQ);
   });
 
   it('rejects a post without a tag', async () => {
@@ -60,7 +63,7 @@ describe('readFormPayload', () => {
   });
 
   it('rejects a body over the limit before parsing it', async () => {
-    const error = await failureOf(readFormPayload(formRequest({ ...snapshot, big: 'x'.repeat(MAX_FORM_BODY_BYTES + 1) })));
+    const error = await failureOf(readFormPayload(formRequest({ ...snapshot, big: 'x'.repeat(DEFAULT_MAX_BODY_BYTES + 1) })));
     expect(error).toMatchObject({ status: 413, code: 'PAYLOAD_TOO_LARGE' });
   });
 });

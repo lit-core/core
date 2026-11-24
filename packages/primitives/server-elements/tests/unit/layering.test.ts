@@ -51,7 +51,7 @@ describe('module layering', () => {
         expect([...external]).toEqual([]);
 
         const reached = relative(files);
-        const serverOnly = ['crypto.ts', 'action-error.ts', 'state-sealer.ts', 'replay-guard.ts', 'secret.ts', 'cookies.ts', 'execution.ts', 'element.ts'];
+        const serverOnly = ['crypto.ts', 'action-error.ts', 'state-sealer.ts', 'replay-guard.ts', 'secret.ts', 'cookies.ts', 'execution.ts', 'element.ts', 'cloudflare.ts'];
         const serverDirs = ['endpoint/', 'render/', 'patches/', 'decorators/'];
         expect(reached.filter((f) => serverOnly.includes(f) || serverDirs.some((d) => f.startsWith(d)))).toEqual([]);
       });

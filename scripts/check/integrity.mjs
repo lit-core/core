@@ -30,7 +30,7 @@ const PROTECTED_PATTERNS = [
 
 // Canonical authorized hashes for protected golden test suites, lint rules, and configs
 const CANONICAL_PROTECTED_HASHES = {
-  'packages/internal/tests/src/suites/server-elements-e2e.test.ts': '576f4aef19255a5c3ae18d24deb53dc64d0d6af451e5737e2d3340d0cab18fb3',
+  'packages/internal/tests/src/suites/server-elements-e2e.test.ts': '9fa992818627cf04bc315a7d6b087a5476a196b38925ea58119f35c0e30cd5eb',
   'packages/internal/tests/src/suites/edge-benchmarks.test.ts': '96781165ba9ab13eff55db63b6502104fc54377c715c7d296645995e9f2ad280',
   'packages/transforms/dom-paths/tests/dsd_soundness_property.test.ts': '5d8534bc4b529195224e3099fbfcf041aa955281ad251bb06ba6e5f66a1806aa',
   'scripts/check/index.mjs': 'e334835eb6e30e900925f44c2de5ca9bebba02365eb64e5aff78d57994bd6577',
@@ -50,7 +50,7 @@ const CANONICAL_PROTECTED_HASHES = {
   'scripts/biome-plugins/no-unbranded-duck-typing.grit': 'e8f5021dd23767865d05c421cbc667900a0be6b55bfe9ac94b5f8a900c1c8b97',
 };
 
-const EXPECTED_LEDGER_NORMALIZED_HASH = '81713bafa5dc144ff8b0a036b795c1295d0925f835d22517bf9ff9cf2f13c0ad';
+const EXPECTED_LEDGER_NORMALIZED_HASH = '925cdd4e96abd23ad1e267b4a9bc6833fd50b525b4c3875259a697018db53079';
 
 const BANNED_SUPPRESSION_COMMENT_PATTERN =
   /biome-ignore(?:-all)?\s+(?:lint\s*:|(?:lint\/)?plugin\b|lint\/(?:style\/(?:noProcessEnv|noRestrictedImports)|correctness\/noProcessGlobal|suspicious\/(?:noGlobalAssign|noProto)|nursery\/noJsRestrictedProperties)\b)/;

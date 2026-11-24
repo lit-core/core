@@ -15,9 +15,8 @@ describe('canonicalEqual', () => {
     expect(canonicalEqual({ a: 1, b: 2 }, { b: 2, a: 1 })).toBe(true);
   });
 
-  // Known gap: state is JSON on the wire, and canonical JSON serializes a Map or Set as `{}`, so two
-  // collections with different contents compare equal and a change to one produces no patch.
-  it.todo('tells apart Maps and Sets whose contents differ');
+  // A Map or Set never reaches this comparison: state holding one is refused when it is signed
+  // (`assertJsonState`), so there is no state in which two different collections look equal.
 });
 
 describe('cloneStateValue', () => {

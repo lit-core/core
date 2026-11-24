@@ -107,9 +107,12 @@ describe('actions without JavaScript', () => {
     const attribute = await page.evaluate(() => document.querySelector('guest-book')?.getAttribute('data-lit-state'));
     expect(attribute).toMatch(/^[A-Za-z0-9_-]+$/);
     expect(attribute).not.toContain('seed');
-    const hidden = await page.evaluate(() => (document.querySelector('guest-book')?.shadowRoot?.querySelector('input[name=_lit_state]') as HTMLInputElement | null)?.value);
-    expect(hidden).toMatch(/^[A-Za-z0-9_-]+$/);
-    expect(hidden).not.toContain('seed');
+    // The form carries a ticket for the element's identity and no state at all, encrypted or not.
+    const fields = await page.evaluate(() =>
+      Array.from(document.querySelector('guest-book')?.shadowRoot?.querySelectorAll('input[type=hidden]') ?? []).map((input) => (input as HTMLInputElement).name),
+    );
+    expect(fields).toContain('_lit_sig');
+    expect(fields).not.toContain('_lit_state');
   });
 
   it('renders the form with no script running on the page', async () => {

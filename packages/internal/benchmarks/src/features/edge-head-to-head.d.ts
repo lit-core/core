@@ -37,3 +37,27 @@ export function verifyEdgeDesignSystemSsr(): Promise<any[]>;
 export function comparePlainSsr(): Promise<any>;
 export function runEdgeHeadToHeadBenchmark(options?: { save?: boolean; verbose?: boolean }): Promise<any>;
 export default runEdgeHeadToHeadBenchmark;
+
+export interface PlainSsrTiming {
+  rawBytes: number;
+  gzipBytes: number;
+  brotliBytes: number;
+  workerdCpuMedianMs: number;
+  workerdCpuP95Ms: number;
+  nodeCpuMedianMs: number;
+  nodeCpuP95Ms: number;
+}
+
+export interface PlainSsrWorkload {
+  id: string;
+  rootTag: string;
+  sameTreeVerified: boolean;
+  litCore: PlainSsrTiming;
+  litLabs: PlainSsrTiming;
+}
+
+/** One run of the plain SSR comparison against `@lit-labs/ssr`; the suite is memoized inside a process. */
+export function measurePlainSsrHeadToHead(): Promise<{
+  environment: { workerdVersion: string; workerdEnvironment: string; nodeEnvironment: string };
+  workloads: PlainSsrWorkload[];
+}>;

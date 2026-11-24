@@ -15,6 +15,7 @@ import { globSync } from 'tinyglobby';
 import type { Plugin, ResolvedConfig, UserConfig, ViteDevServer } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { ServerElementsOptions } from '../options.js';
+import { rejectNonJsonStateTypes } from '../state-types.js';
 import { matchesPattern } from '../utils.js';
 import { INSTALL_GLOBALS_SOURCE } from '../virtual.js';
 
@@ -694,6 +695,7 @@ function serverElementsCore(options: ServerElementsOptions = {}, wasmState: Work
       try {
         const safeFilename = cleanId.replace(/^\0/, '');
         const actionRoutePrefix = options.actionRoutePrefix || '/_lit/a/';
+        rejectNonJsonStateTypes(this, code, safeFilename);
         const codeForSplit = lowerLitDecoratorsForServerSplit(code, safeFilename);
         const result = splitServerElement(codeForSplit, {
           filename: safeFilename,
@@ -853,6 +855,11 @@ function serverElementsCore(options: ServerElementsOptions = {}, wasmState: Work
             body: rawBody,
           });
 
+          // A dev server restarted under a page that is still open has transformed nothing yet, so the action is
+          // not indexed; find the element in the project, then load it so it registers itself.
+          if (!actionIndex.has(actionHash)) {
+            ensureProjectScanned();
+          }
           const actionMeta = actionIndex.get(actionHash);
           if (actionMeta) {
             await server.ssrLoadModule(actionMeta.filePath);

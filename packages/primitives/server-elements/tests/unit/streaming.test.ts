@@ -97,17 +97,22 @@ describe('two-phase action streaming', () => {
     const response = await call(request());
     const reader = frameReader(response);
 
-    // Phase one: the count patch and the action result arrive while the loader is still blocked.
-    const early = await reader.readUntil(2);
+    // Phase one: the count patch, the action result and the snapshot of that state arrive while the loader is still blocked.
+    const early = await reader.readUntil(3);
     expect(early).toContainEqual({ p: 0, v: 1 });
     expect(early).toContainEqual({ r: 'added' });
-    expect(early.some((f) => 's' in f)).toBe(false);
+    const phaseOneSnapshot = early.find((f) => 's' in f) as { s: Record<string, unknown> };
+    expect(phaseOneSnapshot.s.count).toBe(1);
+    expect(phaseOneSnapshot.s.summary).toBe('');
+    // The snapshot closes the phase: nothing from the second phase has been sent yet.
+    expect(early.at(-1)).toBe(phaseOneSnapshot);
 
     control.loaderGate.release();
     const all = await reader.readUntil(10);
     expect(all).toContainEqual({ p: 1, v: 'total:1' });
     const snapshot = all.at(-1) as { s: Record<string, unknown> };
     expect(snapshot.s.summary).toBe('total:1');
+    expect(all.filter((f) => 's' in f)).toHaveLength(2);
   });
 
   it('streams the signed snapshot of the delivered state when a loader fails, then the error', async () => {
@@ -115,13 +120,15 @@ describe('two-phase action streaming', () => {
     control.loaderShouldFail = true;
     const response = await call(request());
     const reader = frameReader(response);
-    await reader.readUntil(2);
+    await reader.readUntil(3);
     control.loaderGate.release();
     const all = await reader.readUntil(10);
 
-    const snapshot = all.find((f) => 's' in f) as { s: Record<string, unknown> };
-    expect(snapshot.s.count).toBe(1);
-    expect(snapshot.s.summary).toBe('');
+    // The first phase's snapshot is the only one: the failed revalidation adds none, just the error.
+    const snapshots = all.filter((f) => 's' in f) as Array<{ s: Record<string, unknown> }>;
+    expect(snapshots).toHaveLength(1);
+    expect(snapshots[0].s.count).toBe(1);
+    expect(snapshots[0].s.summary).toBe('');
     expect(all.at(-1)).toMatchObject({ e: 'summary backend down' });
   });
 
@@ -129,7 +136,7 @@ describe('two-phase action streaming', () => {
     const { request } = await open(hashes.add);
     control.loaderSetsCookie = true;
     const reader = frameReader(await call(request()));
-    await reader.readUntil(2);
+    await reader.readUntil(3);
     control.loaderGate.release();
     const all = await reader.readUntil(10);
 

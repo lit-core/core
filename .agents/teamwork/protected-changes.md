@@ -6,8 +6,8 @@ This ledger authorizes necessary modifications to protected paths under mileston
 - **File**: `packages/internal/tests/src/suites/server-elements-e2e.test.ts`
 - **Authorized by**: user_authorized_server_elements_loop
 - **Status**: approved
-- **Sha256**: 576f4aef19255a5c3ae18d24deb53dc64d0d6af451e5737e2d3340d0cab18fb3
-- **Reason**: Milestone M0 golden end-to-end acceptance test authored to establish failing baseline. Later user-authorized edit: replaced the stale `registry` global with `customElements`, and replaced a timing-dependent race test with a deterministic queue test.
+- **Sha256**: 9fa992818627cf04bc315a7d6b087a5476a196b38925ea58119f35c0e30cd5eb
+- **Reason**: Milestone M0 golden end-to-end acceptance test authored to establish failing baseline. Later user-authorized edit: replaced the stale `registry` global with `customElements`, and replaced a timing-dependent race test with a deterministic queue test. The test secret was lengthened from 31 to 32 characters (user-authorized) so the signing secret floor of 32 characters can be enforced.
 
 ### Entry 2: Edge benchmarks cleanup
 - **File**: `packages/internal/tests/src/suites/edge-benchmarks.test.ts`
@@ -34,7 +34,7 @@ This ledger authorizes necessary modifications to protected paths under mileston
 - **File**: `scripts/check/integrity.mjs`
 - **Authorized by**: teamwork_preview_orchestrator_6
 - **Status**: approved
-- **Sha256**: 378524d61cd1791ba78de1fe5c2b3b2d2798fa5871c004ec0cd7c7c80a5f260a
+- **Sha256**: 63daf302d9f35ed4b3a80410327dd509065f7386cc0ec69772bdc25f9490670a
 - **Reason**: Slimmed guardrail script enforcing protected paths, Biome configuration hashes, and biome-ignore anti-suppression checks after migrating static analysis to Biome and GritQL.
 
 ### Entry 6: Affected packages calculation script

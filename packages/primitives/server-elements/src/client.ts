@@ -10,4 +10,5 @@ export {
   executePatches,
   hydrateClientState,
 } from './client-runtime/index.js';
+export { isReloadRequired } from './errors.js';
 export { ACTION_ERROR_EVENT, ACTION_SUCCESS_EVENT } from './protocol.js';

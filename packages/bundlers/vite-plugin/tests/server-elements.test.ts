@@ -106,6 +106,76 @@ describe('@lit-core/vite-plugin server elements integration', () => {
     expect(errorCaught.message).toMatch(/SE101/);
   });
 
+  it('fails the build, naming SE108, for an action that would replace an element member', () => {
+    const shadowing = `
+      import { LitElement, html } from 'lit';
+      import { customElement } from 'lit/decorators.js';
+      import { action } from '@lit-core/server-elements';
+
+      @customElement('shadowing-element')
+      export class ShadowingElement extends LitElement {
+        @action()
+        async remove() {}
+
+        render() {
+          return html\`<div></div>\`;
+        }
+      }
+    `;
+
+    const plugin = serverElements()[0];
+    let errorCaught: any = null;
+    const mockContext = {
+      error(payload: any) {
+        errorCaught = payload;
+        throw new Error(payload.message);
+      },
+    };
+
+    expect(() => {
+      plugin.transform!.call(mockContext as any, shadowing, '/src/components/shadowing-element.ts', { ssr: false });
+    }).toThrow();
+    expect(errorCaught.message).toMatch(/SE108/);
+    expect(errorCaught.message).toMatch(/'remove'/);
+  });
+
+  it('fails the build, naming SE109, for a reactive property whose type JSON cannot carry', () => {
+    const holding = `
+      import { LitElement, html } from 'lit';
+      import { customElement, state } from 'lit/decorators.js';
+      import { action } from '@lit-core/server-elements';
+
+      @customElement('holding-element')
+      export class HoldingElement extends LitElement {
+        @state() tags: Set<string> = new Set();
+
+        @action()
+        async save() {
+          this.tags = new Set(['a']);
+        }
+
+        render() {
+          return html\`<div></div>\`;
+        }
+      }
+    `;
+
+    const plugin = serverElements()[0];
+    let errorCaught: any = null;
+    const mockContext = {
+      error(payload: any) {
+        errorCaught = payload;
+        throw new Error(payload.message);
+      },
+    };
+
+    expect(() => {
+      plugin.transform!.call(mockContext as any, holding, '/src/components/holding-element.ts', { ssr: false });
+    }).toThrow();
+    expect(errorCaught.message).toMatch(/SE109/);
+    expect(errorCaught.message).toMatch(/'tags'/);
+  });
+
   it('auto-injects executor script tag into HTML (Invariant 8)', () => {
     const plugin = serverElements()[0];
 

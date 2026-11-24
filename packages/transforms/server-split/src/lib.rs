@@ -4,13 +4,15 @@ pub mod diagnostics;
 pub mod hashing;
 pub mod isolation;
 pub mod options;
+pub mod reserved_members;
+pub mod state_types;
 pub mod symbol;
 pub mod transform;
 pub mod validator;
 pub mod worker_builder;
 pub mod worker_entry;
 
-pub use crate::hashing::{compute_action_hash, compute_template_id};
+pub use crate::hashing::{compute_action_hash, compute_build_id, compute_template_id};
 pub use crate::options::*;
 pub use crate::transform::transform_code;
 pub use crate::worker_entry::{
@@ -24,6 +26,13 @@ pub fn split_server_element(
     options: Option<ServerSplitOptions>,
 ) -> ServerSplitResult {
     transform_code(&source, options.unwrap_or_default())
+}
+
+/// Reports reactive properties typed as something JSON cannot carry (SE109). Run it on the author's
+/// original source: decorator lowering strips the annotations this reads.
+#[napi]
+pub fn check_state_types(source: String, filename: Option<String>) -> Vec<ServerSplitDiagnostic> {
+    state_types::check_source(&source, filename.as_deref().unwrap_or("component.ts"))
 }
 
 #[napi]

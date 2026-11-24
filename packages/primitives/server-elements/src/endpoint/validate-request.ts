@@ -1,16 +1,14 @@
 import { hasPrototypePollution, verifyStateSignature } from '../crypto.js';
 import type { ActionMeta, ServerElementClass, ServerElementRegistry } from '../metadata.js';
-import { ACTION_HASH_PATTERN } from '../protocol.js';
+import { ACTION_HASH_PATTERN, FORM_TICKET_SEQ } from '../protocol.js';
 import { type ReplayGuard, remainingTtlMs } from '../replay-guard.js';
 import { type OpenedActionRequest, StateOpenError, type StateSealer } from '../state-sealer.js';
 import type { ActionRequestBody } from '../types.js';
-import { BodyTooLargeError, readTextWithLimit } from './body.js';
+import { BodyTooLargeError, DEFAULT_MAX_BODY_BYTES, readTextWithLimit } from './body.js';
 import { evaluateCsrf } from './csrf.js';
 import { resolveServerBuildId } from './element-state.js';
-import { EndpointError } from './endpoint-error.js';
+import { EndpointError, payloadTooLarge } from './endpoint-error.js';
 import { isFormRequest, readFormPayload } from './form-payload.js';
-
-export const MAX_ACTION_BODY_BYTES = 64 * 1024;
 
 const STATE_SIGNATURE_PATTERN = /^\d+\.[0-9a-f]{64}$/i;
 
@@ -25,6 +23,8 @@ export interface RequestPolicy {
   replayGuard?: ReplayGuard;
   /** Opens the state the client echoed: a no-op for readable state, decryption for encrypted state. */
   sealer: StateSealer;
+  /** Largest request body to read, in bytes. */
+  maxBodyBytes?: number;
 }
 
 export interface ValidatedActionRequest {
@@ -82,13 +82,13 @@ function assertSameOrigin(request: Request, url: URL, allowedOrigins?: readonly 
   }
 }
 
-async function readActionBody(request: Request): Promise<ActionRequestBody> {
+async function readActionBody(request: Request, limit: number): Promise<ActionRequestBody> {
   let text: string;
   try {
-    text = await readTextWithLimit(request, MAX_ACTION_BODY_BYTES);
+    text = await readTextWithLimit(request, limit);
   } catch (err) {
     if (err instanceof BodyTooLargeError) {
-      throw new EndpointError(413, 'PAYLOAD_TOO_LARGE', 'Request body exceeds 64 KB limit');
+      throw payloadTooLarge(limit, true);
     }
     throw new EndpointError(400, 'INVALID_PAYLOAD', 'Failed to read request body');
   }
@@ -118,8 +118,9 @@ async function readActionBody(request: Request): Promise<ActionRequestBody> {
 export async function validateActionRequest(request: Request, url: URL, policy: RequestPolicy): Promise<ValidatedActionRequest> {
   const actionHash = parseActionHash(url, policy.routePrefix);
   assertSameOrigin(request, url, policy.allowedOrigins);
-  const form = isFormRequest(request) ? await readFormPayload(request) : undefined;
-  const body = form?.body ?? (await readActionBody(request));
+  const limit = policy.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
+  const form = isFormRequest(request) ? await readFormPayload(request, limit) : undefined;
+  const body = form?.body ?? (await readActionBody(request, limit));
 
   const ElementClass = policy.customElements?.get ? policy.customElements.get(body.tag) : undefined;
   if (!ElementClass) {
@@ -136,8 +137,16 @@ export async function validateActionRequest(request: Request, url: URL, policy: 
     throw new EndpointError(403, 'STATE_TAMPERED', 'Missing or malformed state signature');
   }
 
-  const snapshotSeq = body.snapshotSeq ?? 0;
-  if (!Number.isSafeInteger(snapshotSeq) || snapshotSeq < 0) {
+  // The signature leads with its own expiry time. A page left open past it is not tampered with, it is old,
+  // and the browser needs to hear that so it can offer a reload instead of an alarming signature error.
+  const expiresAt = Number(body.sig.slice(0, body.sig.indexOf('.')));
+  if (Date.now() > expiresAt) {
+    throw new EndpointError(409, 'STATE_EXPIRED', 'This page has expired. Reload to continue.');
+  }
+
+  // A form is signed as a ticket at its reserved sequence number; a fetch request must carry a real snapshot sequence.
+  const snapshotSeq = form ? FORM_TICKET_SEQ : (body.snapshotSeq ?? 0);
+  if (!form && (!Number.isSafeInteger(snapshotSeq) || snapshotSeq < 0)) {
     throw new EndpointError(400, 'INVALID_PAYLOAD', 'Invalid snapshot sequence');
   }
 
@@ -147,9 +156,10 @@ export async function validateActionRequest(request: Request, url: URL, policy: 
     throw new EndpointError(403, 'TOKEN_MISMATCH', 'Action token mismatch');
   }
 
+  // A form carries a ticket and no state, so there is nothing for the sealer to open, encrypted or not.
   let openedState: Record<string, unknown>;
   try {
-    openedState = await policy.sealer.open(body.tag, body.state ?? {});
+    openedState = form ? {} : await policy.sealer.open(body.tag, body.state ?? {});
   } catch (err) {
     if (err instanceof StateOpenError) {
       throw new EndpointError(403, 'STATE_TAMPERED', err.message);

@@ -2,6 +2,7 @@ import { transformLitProps } from '@lit-core/props-lower';
 import type { Plugin } from 'vite';
 import { reportTransformError } from '../errors.js';
 import type { PropsLowerOptions } from '../options.js';
+import { rejectNonJsonStateTypes } from '../state-types.js';
 import { matchesPattern } from '../utils.js';
 
 const LIT_DECORATOR_FAST_CHECK =
@@ -38,6 +39,9 @@ export function propsLower(options: PropsLowerOptions = {}): Plugin {
       if (!LIT_DECORATOR_FAST_CHECK.test(code)) {
         return null;
       }
+
+      // Lowering drops field type annotations, so state types are checked here, on the author's source.
+      rejectNonJsonStateTypes(this, code, cleanId);
 
       try {
         const result = transformLitProps(code, {

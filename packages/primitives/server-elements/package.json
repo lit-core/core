@@ -36,6 +36,11 @@
       "types": "./dist/crypto.d.ts",
       "import": "./dist/crypto.js",
       "default": "./dist/crypto.js"
+    },
+    "./cloudflare": {
+      "types": "./dist/cloudflare.d.ts",
+      "import": "./dist/cloudflare.js",
+      "default": "./dist/cloudflare.js"
     }
   },
   "files": [

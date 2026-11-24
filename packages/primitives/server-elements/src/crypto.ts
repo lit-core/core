@@ -18,16 +18,17 @@
  * scope for the stateless protocol; bound the exposure with a short `ttlMs`.
  */
 
-import { canonicalizeJson, hasPrototypePollution } from './canonical-json.js';
+import { BoundedCache, KEY_CACHE_CAPACITY } from './bounded-cache.js';
+import { assertJsonState, canonicalizeJson, hasPrototypePollution } from './canonical-json.js';
 
-export { canonicalizeJson, escapeJsonForHtml, hasPrototypePollution } from './canonical-json.js';
+export { assertJsonState, canonicalizeJson, escapeJsonForHtml, hasPrototypePollution, NonJsonStateError } from './canonical-json.js';
 
 const PAYLOAD_VERSION = 'lit-state-v1';
 /** Default lifetime of a signed snapshot: 15 minutes. */
 export const DEFAULT_STATE_TTL_MS = 900_000;
 const SIGNATURE_HEX_PATTERN = /^[0-9a-f]{64}$/;
 
-const keyCache = new Map<string, CryptoKey>();
+const keyCache = new BoundedCache<string, CryptoKey>(KEY_CACHE_CAPACITY);
 
 /**
  * Retrieves or imports a CryptoKey for HMAC-SHA256 operations.
@@ -157,6 +158,7 @@ export async function createSignedStateSnapshot(tag: string, state: Record<strin
   if (hasPrototypePollution(state)) {
     throw new Error('Prototype pollution detected in state payload');
   }
+  assertJsonState(state);
 
   const ttlMs = options.ttlMs ?? DEFAULT_STATE_TTL_MS;
 

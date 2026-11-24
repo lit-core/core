@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { createLoaderContext, executeServerAction, executeServerLoader, renderServerElement, renderTemplateToString, renderToResponse } from '../../src/edge.js';
 import { ServerElement } from '../../src/element.js';
 
+const TEST_SECRET = 'edge-render-test-secret-32-characters!';
+
 describe('edge runtime and initial SSR rendering', () => {
   it('createLoaderContext parses cookies, headers, URL, and signal', () => {
     const req = new Request('https://example.com/items/42?filter=active', {
@@ -122,7 +124,7 @@ describe('edge runtime and initial SSR rendering', () => {
     }
 
     const req = new Request('https://example.com/user/123');
-    const result = await renderServerElement(UserProfileElement, { userId: '456' }, { request: req, secret: 'test-secret' });
+    const result = await renderServerElement(UserProfileElement, { userId: '456' }, { request: req, secret: TEST_SECRET });
 
     expect(result.tagName).toBe('user-profile');
     expect(result.state).toEqual({
@@ -156,7 +158,7 @@ describe('edge runtime and initial SSR rendering', () => {
       },
     };
 
-    const res = await renderServerElement('custom-tag', {}, { customElements: registry, secret: 'test-secret' });
+    const res = await renderServerElement('custom-tag', {}, { customElements: registry, secret: TEST_SECRET });
     expect(res.tagName).toBe('custom-tag');
     expect(res.html).toContain('<span>Registered Tag</span>');
   });
@@ -172,7 +174,7 @@ describe('edge runtime and initial SSR rendering', () => {
       }
     }
 
-    const res = renderToResponse(SimpleElement, { status: 201, secret: 'test-secret' });
+    const res = renderToResponse(SimpleElement, { status: 201, secret: TEST_SECRET });
 
     expect(res.status).toBe(201);
     expect(res.headers.get('content-type')).toBe('text/html; charset=utf-8');

@@ -91,24 +91,14 @@ export function createProgressiveDsdStream(rewrittenBody: ReadableStream<Uint8Ar
 
 export function attachSsrToHtmlRewriter<T extends HtmlRewriterLike>(rewriter: T, options: HtmlRewriterSsrOptions = {}): { rewriter: T; multiplexer: HtmlRewriterSsrMultiplexer } {
   const multiplexer = new HtmlRewriterSsrMultiplexer(options);
+  // A list the caller gives is an allowlist. Expanding a tag runs that element's loaders on the server, so a tag
+  // that merely appears in the page HTML must not be expanded because the element happens to be registered.
+  // Only a caller who gives no list at all gets every registered element.
   const selectors = new Set<string>();
-
-  if (options.tagManifest) {
-    for (const tag of options.tagManifest) {
-      selectors.add(tag.toLowerCase());
-    }
+  for (const tag of [...(options.tagManifest ?? []), ...(options.tagNames ?? []), ...Object.keys(options.islands ?? {})]) {
+    selectors.add(tag.toLowerCase());
   }
-  if (options.tagNames) {
-    for (const tag of options.tagNames) {
-      selectors.add(tag.toLowerCase());
-    }
-  }
-  if (options.islands) {
-    for (const tag of Object.keys(options.islands)) {
-      selectors.add(tag.toLowerCase());
-    }
-  }
-  if (typeof options.customElements?.getRegisteredTagNames === 'function') {
+  if (selectors.size === 0 && typeof options.customElements?.getRegisteredTagNames === 'function') {
     for (const tag of options.customElements.getRegisteredTagNames()) {
       selectors.add(tag.toLowerCase());
     }

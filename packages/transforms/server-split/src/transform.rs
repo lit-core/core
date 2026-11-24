@@ -13,7 +13,7 @@ use oxc_span::{GetSpan, SPAN, SourceType};
 use crate::client_builder::{ClientBuilder, CompiledEventDescriptor};
 use crate::dependency::PropertyDependencyAuditor;
 use crate::diagnostics::{DiagnosticCode, error_diagnostic};
-use crate::hashing::{compute_action_hash, compute_template_id};
+use crate::hashing::{compute_action_hash, compute_build_id, compute_template_id};
 use crate::isolation::{IsolationProof, is_server_only_module_specifier};
 use crate::options::{
     ActionMetadata, LoaderMetadata, ParamValidationMeta, ServerSplitDiagnostic, ServerSplitOptions,
@@ -271,6 +271,7 @@ pub fn transform_code(source: &str, options: ServerSplitOptions) -> ServerSplitR
     // 2. Reactive property dependency audit
     let mut dep_auditor = PropertyDependencyAuditor::new(&program, target_cls, Some(source));
     dep_auditor.audit_server_methods(&extracted_methods);
+    let dep_declared_props = dep_auditor.declared_reactive_props.clone();
 
     let loader_names: HashSet<String> = extracted_methods
         .iter()
@@ -290,6 +291,7 @@ pub fn transform_code(source: &str, options: ServerSplitOptions) -> ServerSplitR
             };
             if name == "constructor"
                 || name == "render"
+                || crate::reserved_members::is_server_only_method(name)
                 || extracted_methods.iter().any(|m| m.name == name)
             {
                 continue;
@@ -329,6 +331,29 @@ pub fn transform_code(source: &str, options: ServerSplitOptions) -> ServerSplitR
             ));
         }
     }
+
+    // A method named like an existing element member would replace that member on the compiled class.
+    for m in &extracted_methods {
+        if crate::reserved_members::is_reserved_member(&m.name) {
+            diagnostics.push(error_diagnostic(
+                DiagnosticCode::SE108,
+                format!(
+                    "@{}() method '{}' in class '{}' has the name of a member that custom elements or Lit already define, so the compiled element would replace it. Rename the method.",
+                    if m.kind == ServerDecoratorKind::Action { "action" } else { "loader" },
+                    m.name,
+                    class_name
+                ),
+                m.span,
+            ));
+        }
+    }
+
+    // State is JSON on the wire, so a reactive property annotated with a type JSON cannot carry is a mistake.
+    diagnostics.extend(crate::state_types::diagnose_class(
+        target_cls,
+        &class_name,
+        &dep_declared_props,
+    ));
 
     // 3. Process actions: validate parameter schemas, synthesize validator AST, and compute hashes
     let mut action_metadata_list = Vec::new();
@@ -709,7 +734,14 @@ pub fn transform_code(source: &str, options: ServerSplitOptions) -> ServerSplitR
     }
 
     let has_errors = diagnostics.iter().any(|d| d.severity == "error");
-    let build_id = options.build_id.as_deref().unwrap_or("dev");
+    let derived_build_id;
+    let build_id = match options.build_id.as_deref() {
+        Some(explicit) => explicit,
+        None => {
+            derived_build_id = compute_build_id(source);
+            derived_build_id.as_str()
+        }
+    };
 
     // 6. Build Worker Artifact AST
     let worker_builder = WorkerBuilder::new(&ast, &server_ctx);

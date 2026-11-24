@@ -1,11 +1,9 @@
 import { hasPrototypePollution } from '../crypto.js';
 import { createFieldCollector } from '../form-fields.js';
-import { FORM_FIELD_PREFIX } from '../protocol.js';
-import type { ActionRequestBody, WireState } from '../types.js';
-import { BodyTooLargeError, readTextWithLimit } from './body.js';
-import { EndpointError } from './endpoint-error.js';
-
-export const MAX_FORM_BODY_BYTES = 64 * 1024;
+import { FORM_FIELD_PREFIX, FORM_TICKET_SEQ } from '../protocol.js';
+import type { ActionRequestBody } from '../types.js';
+import { BodyTooLargeError, DEFAULT_MAX_BODY_BYTES, readTextWithLimit } from './body.js';
+import { EndpointError, payloadTooLarge } from './endpoint-error.js';
 
 export interface FormPayload {
   body: ActionRequestBody;
@@ -29,26 +27,19 @@ function parseJsonField<T>(value: string | null, fallback: T, field: string): T 
   }
 }
 
-/** State is readable JSON, or an opaque ciphertext string when the page was rendered with `encryptState`. */
-function parseWireState(value: string | null): WireState {
-  if (value === null || value === '') return {};
-  if (!value.trimStart().startsWith('{')) return value;
-  return parseJsonField<Record<string, unknown>>(value, {}, 'state');
-}
-
 /**
  * Reads a no-JavaScript form submission into the same request shape the fetch transport uses.
  *
  * The signed snapshot travels in hidden `_lit_*` fields (see `ServerElement.formFields()`); every
  * other field becomes the single argument object passed to the action.
  */
-export async function readFormPayload(request: Request): Promise<FormPayload> {
+export async function readFormPayload(request: Request, limit: number = DEFAULT_MAX_BODY_BYTES): Promise<FormPayload> {
   let text: string;
   try {
-    text = await readTextWithLimit(request, MAX_FORM_BODY_BYTES);
+    text = await readTextWithLimit(request, limit);
   } catch (err) {
     if (err instanceof BodyTooLargeError) {
-      throw new EndpointError(413, 'PAYLOAD_TOO_LARGE', 'Request body exceeds 64 KB limit');
+      throw payloadTooLarge(limit, false);
     }
     throw new EndpointError(400, 'INVALID_PAYLOAD', 'Failed to read request body');
   }
@@ -67,15 +58,15 @@ export async function readFormPayload(request: Request): Promise<FormPayload> {
   }
 
   const token = reserved('token') ?? '';
-  const snapshotSeq = Number(reserved('snapshot_seq') ?? 0);
   const body: ActionRequestBody = {
     tag,
     attrs: parseJsonField<Record<string, string>>(reserved('attrs'), {}, 'attrs'),
-    state: parseWireState(reserved('state')),
+    // A form carries a ticket, not state: the endpoint rebuilds state from the element's loaders.
+    state: {},
     sig: reserved('sig') ?? '',
     args: [fields.result],
     seq: 0,
-    snapshotSeq,
+    snapshotSeq: FORM_TICKET_SEQ,
   };
   if (hasPrototypePollution(body)) {
     throw new EndpointError(400, 'PROTOTYPE_POLLUTION', 'Prototype pollution payload rejected');
