@@ -8,7 +8,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { closeTestBrowser, getShadowText, getTestBrowser } from '../harness.js';
 
 const ORIGIN = 'http://lit-app.local';
-const TEST_SECRET = 'golden-e2e-test-secret-key-32b!';
+const TEST_SECRET = 'golden-e2e-test-secret-key-32b!!';
 const workerOutDir = path.resolve('./dist/fixtures/server-elements-worker');
 
 const FIXTURE_SOURCE = `

@@ -521,4 +521,85 @@ describe('@lit-core/webpack-plugin server elements integration', () => {
     // Should NOT fail with 400 INVALID_HASH because hash was properly extracted
     expect(status).not.toBe(400);
   });
+
+  describe('the compiler checks the Vite plugin runs, applied by the webpack loader too', () => {
+    const decorated = (members: string) => `
+      import { LitElement, html } from 'lit';
+      import { customElement, state } from 'lit/decorators.js';
+      import { loader, action } from '@lit-core/server-elements';
+
+      @customElement('webpack-card')
+      export class WebpackCard extends LitElement {
+        @state() qty = 0;
+        ${members}
+        @loader()
+        async load(env: any) {
+          this.qty = 100;
+        }
+        @action()
+        async adjust(amount: number) {
+          this.qty += amount;
+        }
+        render() {
+          return html\`<span>\${this.qty}</span>\`;
+        }
+      }
+    `;
+
+    /** Runs the loader for one source and target, resolving with its output or its error. */
+    const run = (source: string, target: 'web' | 'node') =>
+      new Promise<{ code: string; error: string }>((resolve) => {
+        const pluginId = `webpack-parity-${Math.random()}`;
+        registerPluginState(pluginId, { transformedFiles: new Map(), virtualSheets: new Map(), isSsr: target === 'node', options: { serverElements: true } });
+        const finish = (error: string, code: string) => {
+          unregisterPluginState(pluginId);
+          resolve({ code, error });
+        };
+        const context = {
+          resourcePath: '/src/components/webpack-card.ts',
+          target,
+          getOptions: () => ({ pluginId }),
+          async: () => (err: any, code: string) => finish(err ? String(err.message) : '', code ?? ''),
+          emitWarning: () => {},
+          emitError: (err: any) => finish(String(err), ''),
+        };
+        litWebpackLoader.call(context as any, source);
+      });
+
+    it('turns a decorated element into a zero-Lit stub on the client, as the Vite plugin does', async () => {
+      const { code, error } = await run(decorated(''), 'web');
+      expect(error).toBe('');
+      expect(code).toContain('extends HTMLElement');
+      expect(code).not.toContain('extends LitElement');
+      expect(code).toContain('__litActionRpc');
+    });
+
+    it('keeps the full class, with its loader, in the worker build', async () => {
+      const { code, error } = await run(decorated(''), 'node');
+      expect(error).toBe('');
+      expect(code).toContain('qty = 100');
+    });
+
+    it('rejects an action named like an element member (SE108)', async () => {
+      const source = decorated('').replace('async adjust(amount: number)', 'async remove(amount: number)');
+      const { error } = await run(source, 'web');
+      expect(error).toMatch(/SE108/);
+      expect(error).toContain("'remove'");
+    });
+
+    it('rejects a reactive property typed as something JSON cannot carry (SE109), though decorators are lowered afterwards', async () => {
+      const { error } = await run(decorated('@state() tags: Set<string> = new Set();'), 'web');
+      expect(error).toMatch(/SE109/);
+      expect(error).toContain("'tags'");
+    });
+
+    it('keeps renderPending() in the worker and drops it from the client', async () => {
+      const source = decorated('renderPending() { return html`<span class="skeleton"></span>`; }');
+      const client = await run(source, 'web');
+      const worker = await run(source, 'node');
+      expect(client.error).toBe('');
+      expect(client.code).not.toContain('renderPending');
+      expect(worker.code).toContain('renderPending');
+    });
+  });
 });

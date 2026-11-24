@@ -81,14 +81,14 @@ export interface HtmlRewriterServerElementAdapter {
 
 export interface HtmlRewriterSsrOptions extends RenderOptions {
   /**
-   * Build-time tag manifest emitted by the bundler plugin listing all registered
-   * custom element tags to intercept in HTMLRewriter.
+   * The custom element tags to expand on the server. Expanding a tag runs that element's loaders, so this
+   * is an allowlist: with `tagManifest`, `tagNames` or `islands` given, no other registered element is
+   * expanded, even if its tag appears in the page. Only when none is given does every registered element qualify.
    */
   tagManifest?: readonly string[] | Set<string>;
 
   /**
-   * Explicit tag names to register with `rewriter.on(tagName, ...)` in addition to
-   * any tag names discoverable from `tagManifest` or `islands`.
+   * More tag names to expand, in addition to those in `tagManifest` and the keys of `islands`.
    */
   tagNames?: string[];
 

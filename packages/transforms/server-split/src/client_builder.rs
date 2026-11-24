@@ -57,7 +57,10 @@ impl<'a> ClientBuilder<'a> {
                         _ => continue,
                     };
 
-                    if name == "constructor" || name == "render" {
+                    if name == "constructor"
+                        || name == "render"
+                        || crate::reserved_members::is_server_only_method(name)
+                    {
                         continue;
                     }
                     if server_method_names.contains(name) {
@@ -113,6 +116,11 @@ impl<'a> ClientBuilder<'a> {
 
                     // If zero-Lit, strip render() method from client bundle
                     if zero_lit && name == "render" {
+                        continue;
+                    }
+
+                    // Server-only methods such as renderPending() never reach the client.
+                    if crate::reserved_members::is_server_only_method(name) {
                         continue;
                     }
 

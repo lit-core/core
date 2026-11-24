@@ -37,3 +37,16 @@ pub fn compute_template_id(quasis: &[&str]) -> String {
     let hex = hasher.finalize().to_hex();
     hex[..16].to_string()
 }
+
+/// Derives the build id stamped on a server element when none is configured: a deterministic 16-hex
+/// BLAKE3 hash of the element's source. The client and worker builds see the same source, so both
+/// stamp the same id, and any change to the source gives pages and snapshots from the previous
+/// build a different one. The endpoint then refuses their actions as stale instead of running them
+/// against code they were not rendered by.
+pub fn compute_build_id(source: &str) -> String {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(b"lit-build:v1:");
+    hasher.update(source.as_bytes());
+    let hex = hasher.finalize().to_hex();
+    hex[..16].to_string()
+}

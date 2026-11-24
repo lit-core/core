@@ -293,11 +293,16 @@ export const testActionEndpointExecution = {
       throw new Error('Action hash not found on ServerProductCounter.__lit_actions');
     }
 
+    // The compiler stamps each build with an id derived from the component source, so sign with the one it chose.
+    const compiledBuildId = ServerProductCounter.__litBuildId;
+    if (typeof compiledBuildId !== 'string' || compiledBuildId === '' || compiledBuildId === 'dev') {
+      throw new Error('Expected the compiler to stamp a source-derived build id, got ' + compiledBuildId);
+    }
     const signed = await createSignedStateSnapshot(
       'server-product-counter',
       { count: 5, status: 'loaded' },
       TEST_SECRET,
-      { ttlMs: 900_000, seq: 0, buildId: 'dev' }
+      { ttlMs: 900_000, seq: 0, buildId: compiledBuildId }
     );
 
     const actionReq = new Request('http://worker.local/_lit/a/' + actionHash, {
@@ -396,7 +401,7 @@ export const testActionEndpointExecution = {
         throw new Error('Expected ACTION_STALE code, got ' + staleJson.code);
       }
     } finally {
-      (ServerProductCounter as any).__litBuildId = 'dev';
+      (ServerProductCounter as any).__litBuildId = compiledBuildId;
     }
   }
 };

@@ -5,11 +5,14 @@ import { ActionError } from '../../src/action-error.js';
 import { createSignedStateSnapshot } from '../../src/crypto.js';
 import { ServerElement } from '../../src/element.js';
 import { resolveRedirectTarget } from '../../src/endpoint/form-response.js';
+import { FORM_TICKET_SEQ } from '../../src/protocol.js';
 import { renderServerElement } from '../../src/render/index.js';
 
 const secret = 'form-submission-test-secret-32-char!';
 const hashes = { add: '00000000000000c1', deny: '00000000000000c2', boom: '00000000000000c3', invalid: '00000000000000c4' };
 const received: unknown[] = [];
+/** The items the element held when an action started, to show where a form post's state comes from. */
+const itemsSeenByAction: unknown[] = [];
 
 class Basket extends ServerElement {
   static properties = { items: { state: true } };
@@ -22,6 +25,7 @@ class Basket extends ServerElement {
   };
   async add(fields: Record<string, unknown>) {
     received.push(fields);
+    itemsSeenByAction.push(this.items);
     this.items = [...this.items, String(fields.sku)];
     (this.context as any).setCookie('last_sku', String(fields.sku), { path: '/' });
   }
@@ -42,14 +46,12 @@ class Basket extends ServerElement {
 const customElements = { get: (tag: string) => (tag === 'basket-el' ? Basket : undefined) };
 const options = { env: {}, secret, customElements };
 
-/** Builds the urlencoded body a browser sends for a form rendered with `formFields()`. */
-async function formBody(extra: Record<string, string | string[]>, overrides: Record<string, string> = {}) {
+/** Builds the urlencoded body a browser sends for a form rendered with `formFields()`: a ticket, no state. */
+async function formBody(extra: Record<string, string | string[]>, overrides: Record<string, string> = {}, ticketSeq = FORM_TICKET_SEQ) {
   const token = 'form-token';
-  const state = { items: [] };
-  const { sig } = await createSignedStateSnapshot('basket-el', state, secret, { token });
+  const { sig } = await createSignedStateSnapshot('basket-el', {}, secret, { token, seq: ticketSeq });
   const params = new URLSearchParams({
     _lit_tag: 'basket-el',
-    _lit_state: JSON.stringify(state),
     _lit_sig: sig,
     _lit_token: token,
     _lit_attrs: JSON.stringify({ 'data-lit-token': token }),
@@ -91,10 +93,40 @@ describe('no-JavaScript form submission', () => {
     expect(resolveRedirectTarget(null, null, url)).toBe('/');
   });
 
-  it('rejects a tampered snapshot', async () => {
-    const body = await formBody({ sku: 'D' }, { _lit_state: JSON.stringify({ items: ['stolen'] }) });
+  it('rejects a tampered ticket', async () => {
+    const body = await formBody({ sku: 'D' }, { _lit_attrs: JSON.stringify({ 'data-lit-token': 'form-token', sku: 'injected' }) });
     const response = await handleActionRequest(post(hashes.add, body), options);
     expect(response.status).toBe(403);
+  });
+
+  it('ignores state a post claims to carry: the element starts from what its loaders produce', async () => {
+    itemsSeenByAction.length = 0;
+    const body = await formBody({ sku: 'D' }, { _lit_state: JSON.stringify({ items: ['stolen'] }) });
+    const response = await handleActionRequest(post(hashes.add, body), options);
+    expect(response.status).toBe(303);
+    expect(itemsSeenByAction.at(-1)).toEqual([]);
+  });
+
+  it('accepts a form post when state encryption is on, since a form carries no state to open', async () => {
+    const response = await handleActionRequest(post(hashes.add, await formBody({ sku: 'E' })), { ...options, encryptState: true });
+    expect(response.status).toBe(303);
+  });
+
+  it('refuses a state snapshot presented as a ticket, and a ticket presented as a snapshot', async () => {
+    const asTicket = await formBody({ sku: 'D' }, {}, 0);
+    expect((await handleActionRequest(post(hashes.add, asTicket), options)).status).toBe(403);
+
+    const token = 'form-token';
+    const { sig: ticket } = await createSignedStateSnapshot('basket-el', {}, secret, { token, seq: FORM_TICKET_SEQ });
+    const asSnapshot = await handleActionRequest(
+      new Request(`http://localhost/_lit/a/${hashes.add}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Lit-Action-Token': token },
+        body: JSON.stringify({ tag: 'basket-el', attrs: { 'data-lit-token': token }, state: {}, sig: ticket, args: [{ sku: 'X' }], seq: 1, snapshotSeq: 0 }),
+      }),
+      options,
+    );
+    expect(asSnapshot.status).toBe(403);
   });
 
   it('applies the cross-site check to form posts and answers with a page, not JSON', async () => {
@@ -152,10 +184,11 @@ describe('formFields and actionUrl', () => {
     const output = await renderServerElement(Cart, {}, { secret, customElements });
 
     expect(output.html).toContain(`action="/_lit/a/${hashes.add}"`);
-    for (const name of ['_lit_tag', '_lit_state', '_lit_sig', '_lit_token', '_lit_attrs', '_lit_redirect']) {
+    for (const name of ['_lit_tag', '_lit_sig', '_lit_token', '_lit_attrs', '_lit_redirect']) {
       expect(output.html).toContain(`name="${name}"`);
     }
-    expect(output.html).toContain(`value="${output.sig}"`);
+    // The form carries a ticket, not the state, so it stays the same size however large the state grows.
+    expect(output.html).not.toContain('name="_lit_state"');
     expect(output.html).toContain(`value="${output.token}"`);
   });
 

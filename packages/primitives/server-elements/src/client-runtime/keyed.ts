@@ -6,6 +6,7 @@ export type KeyedNodeCache = Map<string | number, Node>;
 
 /** Builds the DOM node for one keyed item and tags it so it can be found again. */
 function createItemNode(doc: Document, item: KeyedItem): Node | null {
+  if (!isRecord(item)) return null;
   let node: Node | null;
   if (typeof item.html === 'string') {
     const fragment = parseFragment(doc, item.html);
@@ -16,6 +17,11 @@ function createItemNode(doc: Document, item: KeyedItem): Node | null {
   }
   (node as Element | null)?.setAttribute?.('data-lit-key', String(item.key));
   return node;
+}
+
+/** A frame crosses the network, so each op is checked for the shape it needs before it touches the DOM. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
 }
 
 function removeNode(node: Node | undefined): void {
@@ -31,8 +37,10 @@ export function applyKeyedOps(region: PartRegion, cache: KeyedNodeCache, ops: re
   const doc = documentOf(parent);
 
   for (const op of ops) {
+    if (!isRecord(op)) continue;
     switch (op.op) {
       case 'replace': {
+        if (!Array.isArray(op.items)) break;
         clearBetween(start, end, parent);
         cache.clear();
         for (const item of op.items) {
@@ -68,6 +76,7 @@ export function applyKeyedOps(region: PartRegion, cache: KeyedNodeCache, ops: re
         break;
       }
       case 'reorder': {
+        if (!Array.isArray(op.order)) break;
         let before: Node | null = start;
         for (const key of op.order) {
           const node = cache.get(key);

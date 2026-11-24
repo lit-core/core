@@ -1,3 +1,5 @@
+import { RELOAD_REQUIRED_CODES } from './protocol.js';
+
 /**
  * Error thrown when an uncompiled server element with @loader() or @action() is executed at runtime.
  */
@@ -30,4 +32,19 @@ export class ServerActionError extends Error {
     this.code = code;
     this.status = status;
   }
+}
+
+/**
+ * True when an action failed because its page is out of date (a newer deploy, a snapshot already used,
+ * or a page open past its signed state's lifetime). The fix is to reload, so an application can offer that:
+ *
+ * ```ts
+ * document.addEventListener('lit-action-error', (event) => {
+ *   if (isReloadRequired(event.detail.error)) showReloadBanner();
+ * });
+ * ```
+ */
+export function isReloadRequired(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code === 'string' && RELOAD_REQUIRED_CODES.includes(code);
 }

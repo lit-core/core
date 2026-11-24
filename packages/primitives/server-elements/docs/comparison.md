@@ -4,18 +4,18 @@ Compared against the upstream sources of Qwik (`qwik-router`) and Astro (`action
 
 ## Capability comparison
 
-| Capability                  | Server elements                                                                      | Qwik City                        | Astro                            | React server actions |
-| :-------------------------- | :----------------------------------------------------------------------------------- | :------------------------------- | :------------------------------- | :------------------- |
-| Input validation            | Compiler synthesizes validators from TypeScript parameters, naming the failing field | `zod$` and `valibot$` validators | Zod `input` schemas              | Manual               |
-| Typed, user-safe errors     | `ActionError` with codes and statuses; others are redacted                           | `fail()` returns                 | `ActionError` with codes         | Throw or return      |
-| Works without JavaScript    | Yes: form posts, enhanced in place when script runs                                  | Yes, form posts                  | Yes, form posts                  | Yes, form actions    |
-| Streaming action responses  | Two-phase NDJSON: action patches first, loader patches after                         | Loaders stream through SSR       | No                               | Streams through RSC  |
-| Deferred rendering          | `renderPending` boundaries flushed out of order                                      | Lazy resumption                  | Server islands (`server:defer`)  | Suspense             |
-| State integrity             | HMAC signed; AES-GCM encryption opt-in                                               | Not reviewed                     | Island props encrypted           | Not reviewed         |
-| Cross-site protection       | `Origin` and `Sec-Fetch-Site` checks, allowlist                                      | `checkOrigin` option             | `checkOrigin` option             | Not reviewed         |
-| Request body limit          | 64 KB, enforced while streaming                                                      | Not reviewed                     | Configurable, enforced streaming | Not reviewed         |
-| Selective revalidation      | `dependencies` and `revalidate: false`, compiler checked                             | Loaders refresh after actions    | Not applicable                   | Cache tags and paths |
-| Client code for a component | Zero Lit runtime: part descriptors, RPC stub, patch executor                         | Lazy chunks plus a small loader  | Framework island or none         | React runtime        |
+| Capability                  | Server elements                                                                                                                 | Qwik City                        | Astro                            | React server actions |
+| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :------------------------------- | :------------------------------- | :------------------- |
+| Input validation            | Compiler synthesizes validators from TypeScript parameters, naming the failing field                                            | `zod$` and `valibot$` validators | Zod `input` schemas              | Manual               |
+| Typed, user-safe errors     | `ActionError` with codes and statuses; others are redacted                                                                      | `fail()` returns                 | `ActionError` with codes         | Throw or return      |
+| Works without JavaScript    | Yes on the non-streaming render path: form posts, enhanced in place when script runs (a streamed element needs its swap script) | Yes, form posts                  | Yes, form posts                  | Yes, form actions    |
+| Streaming action responses  | Two-phase NDJSON: action patches first, loader patches after                                                                    | Loaders stream through SSR       | No                               | Streams through RSC  |
+| Deferred rendering          | `renderPending` boundaries flushed out of order                                                                                 | Lazy resumption                  | Server islands (`server:defer`)  | Suspense             |
+| State integrity             | HMAC signed; AES-GCM encryption opt-in                                                                                          | Not reviewed                     | Island props encrypted           | Not reviewed         |
+| Cross-site protection       | `Origin` and `Sec-Fetch-Site` checks, allowlist                                                                                 | `checkOrigin` option             | `checkOrigin` option             | Not reviewed         |
+| Request body limit          | 64 KB by default (`maxBodyBytes`), enforced while streaming                                                                     | Not reviewed                     | Configurable, enforced streaming | Not reviewed         |
+| Selective revalidation      | `dependencies` and `revalidate: false`, compiler checked                                                                        | Loaders refresh after actions    | Not applicable                   | Cache tags and paths |
+| Client code for a component | Zero Lit runtime: part descriptors, RPC stub, patch executor                                                                    | Lazy chunks plus a small loader  | Framework island or none         | React runtime        |
 
 ## Resumability and streaming
 
@@ -44,12 +44,13 @@ What follows from this:
 
 ## Gaps, in priority order
 
-1. **No optimistic updates.** React offers `useOptimistic`. Pending state is covered (`data-lit-pending` and `aria-busy` on the host, `isActionPending` on Lit elements), but a provisional result before the server answers is not: a zero-Lit stub cannot render one.
+1. **No optimistic updates (deferred).** React offers `useOptimistic`. The Qwik City and Astro action APIs reviewed for this comparison had no built-in equivalent, though those sources were not rechecked when this was written. Pending state is covered (`data-lit-pending` and `aria-busy` on the host, `isActionPending` on Lit elements), and a page can already show a provisional result itself, from the `lit-action-success` and `lit-action-error` events, with CSS on the pending attribute.
 
-   Design sketch, not built. The patch executor can already apply scalar values, so the missing pieces are narrower than a client renderer:
+   Not built, on purpose. A sound version has to render a prediction without a client renderer and take it back on failure, and that is a larger surface than the benefit justifies while the closest competitors go without it:
    - The compiler would emit an identity map from a property to the parts that display it unchanged (a binding that is exactly `${this.count}`, never `${this.count * 2}`). Only those parts can be set honestly from a property value.
-   - `dispatchServerAction` would accept `optimistic: { count: 3 }`, read each part's current value, apply the provisional one, and restore the saved value when the action fails. Authoritative frames from the server replace the provisional ones on success.
-   - Queued actions complicate rollback: a failure must restore the value from before the first provisional write that is still unresolved.
-2. **Replay protection is opt-in.** `replayGuard` makes snapshots single-use, but it needs a shared store the deployment provides; without one a snapshot can be replayed until it expires.
+   - The prediction itself should come from the action, not be written twice. A body made only of assignments over literals, arguments and other properties could be compiled to a client predictor, and anything else would be refused with a diagnostic when `optimistic` is requested.
+   - Rollback has to survive the action queue: a failure restores the authoritative state, then re-applies the predictions of actions still waiting.
+2. **Replay protection is opt-in.** `replayGuard` makes snapshots single-use. On Cloudflare Workers `@lit-core/server-elements/cloudflare` provides a Durable Object guard tested in `workerd`; elsewhere it needs a shared store the deployment provides, and without a guard a snapshot can be replayed until it expires.
 3. **State encryption is opt-in.** `encryptState` hides state from the page as Astro does for island props, but it is off by default, so state is readable until you enable it.
 4. **Queued actions are never cancelled (deliberate).** Actions on one element run in order, and each one runs to completion: actions are mutations, so cancelling one could discard a submit the user meant. Search-as-you-type reads belong in loaders, not actions.
+5. **Action requests carry the element's whole state.** Every JSON action sends all of the element's signed state, so request size grows with the data it holds: about 25 KB at 400 rows of 60 bytes, and the 64 KB default (`maxBodyBytes`) is reached at roughly 1,000. No-JavaScript forms avoid this, since they carry a ticket and rebuild state from loaders. The JSON path cannot do the same, because state an action accumulates (a counter with no database behind it) exists only in the snapshot. Sending only what an action needs would take a compiler analysis of what each action reads and a render that tolerates absent properties, and `render()` reads most of the state to compute patches. Until there is a design that holds up, the guidance is to keep large collections in loaders and storage rather than reactive properties, and raise `maxBodyBytes` where that is not possible.

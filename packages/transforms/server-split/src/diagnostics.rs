@@ -17,6 +17,10 @@ pub enum DiagnosticCode {
     SE106,
     /// Invalid or unsupported option passed to @loader() or @action().
     SE107,
+    /// An @action() or @loader() method is named like a member the element already has.
+    SE108,
+    /// A reactive property is typed as something the JSON state wire cannot carry.
+    SE109,
 }
 
 impl DiagnosticCode {
@@ -29,6 +33,8 @@ impl DiagnosticCode {
             Self::SE105 => "SE105",
             Self::SE106 => "SE106",
             Self::SE107 => "SE107",
+            Self::SE108 => "SE108",
+            Self::SE109 => "SE109",
         }
     }
 }

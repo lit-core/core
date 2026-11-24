@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import remapping from '@jridgewell/remapping';
-import { splitServerElement } from '@lit-core/server-split';
+import { checkStateTypes, splitServerElement } from '@lit-core/server-split';
 import type { LoaderContext } from 'webpack';
 import type {
   CssMinifierOptions,
@@ -144,6 +144,20 @@ export default function litWebpackLoader(this: LoaderContext<LitLoaderOptions>, 
           : isTargetServer;
 
       const actionRoutePrefix = typeof serverElementsOpt === 'object' && serverElementsOpt.actionRoutePrefix ? serverElementsOpt.actionRoutePrefix : '/_lit/a/';
+
+      // Check what state is typed as while the annotations still exist; lowering decorators removes them.
+      const stateTypeError = checkStateTypes(currentSource, resourcePath).find((d) => d.severity === 'error');
+      if (stateTypeError) {
+        return callback(new Error(`[@lit-core/webpack-plugin] [${stateTypeError.code}] ${stateTypeError.message}`));
+      }
+
+      // The split makes an element a zero-Lit stub only when no decorators are left on it, so decorators
+      // are lowered first, as the Vite plugin does. Without this a decorated element's client keeps Lit.
+      const lowered = transformPropsLower(currentSource, resourcePath, { sourcemap: Boolean((options as any).sourcemap) });
+      if (lowered) {
+        currentSource = lowered.code;
+        currentMap = chainSourceMap(lowered.map, currentMap);
+      }
 
       const splitResult = splitServerElement(currentSource, {
         filename: resourcePath,

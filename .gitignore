@@ -62,3 +62,6 @@ blob-report
 .agents/teamwork/*
 !.agents/teamwork/protected-changes.md
 
+
+# Written by packages/bundlers/vite-plugin/tests/integration.test.js on every run
+packages/bundlers/vite-plugin/tests/fixtures/

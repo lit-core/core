@@ -37,6 +37,11 @@ export interface ActionEndpointOptions {
   encryptState?: boolean;
   /** Makes each signed snapshot single-use. See `ReplayGuard`. Omitted, snapshots can be replayed until they expire. */
   replayGuard?: ReplayGuard;
+  /**
+   * Largest request body to accept, in bytes (defaults to 64 KB). A JSON action request carries the element's
+   * whole state, so an element holding a large list needs more.
+   */
+  maxBodyBytes?: number;
 }
 
 /**
@@ -68,6 +73,7 @@ export async function handleActionRequest(request: Request, options: ActionEndpo
       customElements,
       buildIdFallback: options.buildId ?? (options.env?.LIT_BUILD_ID as string | undefined),
       replayGuard: options.replayGuard,
+      maxBodyBytes: options.maxBodyBytes,
       sealer,
     });
   } catch (err) {

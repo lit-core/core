@@ -53,6 +53,15 @@ export interface ServerSplitResult {
   workerMap?: string;
 }
 
+/**
+ * Reports reactive properties typed as something the JSON state wire cannot carry (SE109).
+ * Run it on the author's original source, before decorator lowering strips the type annotations.
+ */
+export function checkStateTypes(
+  source: string,
+  filename?: string
+): ServerSplitDiagnostic[];
+
 export function splitServerElement(
   source: string,
   options?: ServerSplitOptions

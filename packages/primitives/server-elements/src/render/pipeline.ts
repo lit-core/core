@@ -4,6 +4,7 @@ import { createSignedStateSnapshot, generateActionToken } from '../crypto.js';
 import type { FormSnapshot } from '../element.js';
 import { bindContext, runLoaders } from '../execution.js';
 import type { ServerElementClass } from '../metadata.js';
+import { FORM_TICKET_SEQ } from '../protocol.js';
 import { createStateSealer } from '../state-sealer.js';
 import { FORM_SNAPSHOT_SYMBOL } from '../symbols.js';
 import type { ServerElementRenderOptions, WireState } from '../types.js';
@@ -160,7 +161,8 @@ export async function prepareServerElement(
   const buildId = typeof Ctor.__litBuildId === 'string' ? Ctor.__litBuildId : '';
   const { sig } = await createSignedStateSnapshot(tagName, state, secret, { ttlMs: options.ttlMs, token, buildId, seq: 0, publicAttrs });
   const wireState = await createStateSealer(secret, options.encryptState === true).seal(tagName, state);
-  const formSnapshot: FormSnapshot = { tag: tagName, state: wireState, sig, token, attrs: { ...publicAttrs, 'data-lit-token': token, ...(buildId ? { 'data-lit-build-id': buildId } : {}) } };
+  const { sig: ticketSig } = await createSignedStateSnapshot(tagName, {}, secret, { ttlMs: options.ttlMs, token, buildId, seq: FORM_TICKET_SEQ, publicAttrs });
+  const formSnapshot: FormSnapshot = { tag: tagName, sig: ticketSig, token, attrs: { ...publicAttrs, 'data-lit-token': token, ...(buildId ? { 'data-lit-build-id': buildId } : {}) } };
   instance[FORM_SNAPSHOT_SYMBOL] = formSnapshot;
 
   return {

@@ -41,4 +41,4 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding for @lit-core/server-split (${currentPlatform}-${currentArch})`);
 }
 
-export const { splitServerElement, compileWorkerEntry } = nativeBinding;
+export const { splitServerElement, checkStateTypes, compileWorkerEntry } = nativeBinding;

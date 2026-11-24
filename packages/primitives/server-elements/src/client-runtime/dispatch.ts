@@ -101,12 +101,28 @@ async function performAction<T>(host: ClientElement, actionHash: string, args: u
     const response = await fetch(`${prefix.endsWith('/') ? prefix : `${prefix}/`}${actionHash}`, { method: 'POST', headers, body: JSON.stringify(body) });
     if (!response.ok) throw await toActionError(response);
 
+    // Patches change the page and the snapshot changes what the next action is signed from, so they have
+    // to land together. Frames are held until the snapshot that follows them arrives, then applied in one
+    // step: a connection that drops mid-response leaves the page and its signed state as they were, not
+    // a page that shows the new state over a snapshot of the old one.
     let result: unknown;
+    let held: PatchFrame[] = [];
+    const applyHeld = () => {
+      if (held.length === 0) return;
+      executePatches(host, held);
+      held = [];
+    };
     for await (const frame of readFrames(response)) {
-      executePatches(host, frame as PatchFrame);
-      if ('e' in frame) throw new ServerActionError(frame.e, frame.code || 'ACTION_FRAME_ERROR', undefined, frame.fields);
+      if ('e' in frame) {
+        applyHeld();
+        throw new ServerActionError(frame.e, frame.code || 'ACTION_FRAME_ERROR', undefined, frame.fields);
+      }
+      held.push(frame as PatchFrame);
       if ('r' in frame) result = frame.r;
+      if ('s' in frame) applyHeld();
     }
+    // A response that ended cleanly without a snapshot is complete as it stands.
+    applyHeld();
 
     host.actionState?.setSuccess?.(actionName, result);
     announce(host, ACTION_SUCCESS_EVENT, { action: actionName, result });

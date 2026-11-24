@@ -1,3 +1,4 @@
+import { BoundedCache, KEY_CACHE_CAPACITY } from './bounded-cache.js';
 import type { ActionRequestBody, WireState } from './types.js';
 
 /**
@@ -38,7 +39,7 @@ const plainSealer: StateSealer = {
 
 const ENCRYPTION_INFO = new TextEncoder().encode('@lit-core/server-elements state encryption v1');
 const IV_BYTES = 12;
-const keyCache = new Map<string, Promise<CryptoKey>>();
+const keyCache = new BoundedCache<string, Promise<CryptoKey>>(KEY_CACHE_CAPACITY);
 
 /** Derives the AES key from the signing secret, so one secret configures both integrity and confidentiality. */
 function deriveEncryptionKey(secret: string): Promise<CryptoKey> {
@@ -50,6 +51,8 @@ function deriveEncryptionKey(secret: string): Promise<CryptoKey> {
         crypto.subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(32), info: ENCRYPTION_INFO }, material, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']),
       );
     keyCache.set(secret, key);
+    // A failed derivation must not be remembered, or every later request for this secret would fail the same way.
+    key.catch(() => keyCache.delete(secret));
   }
   return key;
 }

@@ -1,4 +1,5 @@
 import { isActionError } from '../action-error.js';
+import { runLoaders } from '../execution.js';
 import { signSnapshotFrame } from '../patches/compute.js';
 import type { ErrorPatchFrame, PatchFrame } from '../types.js';
 import { actionFrames, collectActionFrames } from './action-frames.js';
@@ -38,9 +39,13 @@ const runScopedAction = (scope: ActionScope) => runAction(scope.instance, scope.
  *
  * A form post has no script to apply patches, so the action runs and the browser is sent back to
  * reload the page, whose loaders reflect the change. Loader revalidation is skipped for that reason.
+ * The post carries no state either, so the loaders run once before the action to give the element
+ * the state its page was rendered with.
  */
 export async function respondToForm(scope: ActionScope): Promise<Response> {
   try {
+    // A form carries no state, so the element gets what a page load would give it: its loaders run first.
+    await runLoaders(scope.instance, scope.ElementClass, scope.context);
     await runScopedAction(scope);
     return redirectResponse(resolveRedirectTarget(scope.form?.redirect ?? null, scope.request.headers.get('Referer'), scope.url), applyOutgoing(new Headers(), scope.outgoing));
   } catch (err) {

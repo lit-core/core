@@ -2,8 +2,18 @@ import type { ClientPartDescriptor } from './descriptors.js';
 import { clearBetween, documentOf, TEXT_NODE } from './dom.js';
 import { resolveNodeByPath, resolveRangeMarkers } from './markers.js';
 
+/**
+ * Text for a scalar value. A value that arrives as JSON can be an object whose own `toString` is not a function,
+ * which makes `String(value)` throw. A frame that cannot be shown as text is shown as empty rather than thrown,
+ * so one odd value cannot stop the rest of a response from being applied.
+ */
 function asText(value: unknown): string {
-  return value == null ? '' : String(value);
+  if (value == null) return '';
+  try {
+    return String(value);
+  } catch {
+    return '';
+  }
 }
 
 function isFocused(root: Node, el: Element): boolean {
@@ -48,7 +58,7 @@ function applyElementPart(root: Node, part: Extract<ClientPartDescriptor, { kind
       if (value == null) {
         el.removeAttribute(part.attr);
       } else {
-        el.setAttribute(part.attr, String(value));
+        el.setAttribute(part.attr, asText(value));
       }
       break;
   }

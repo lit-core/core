@@ -4,12 +4,15 @@ import type { ActionContext, Env, LoaderContext } from './context.js';
 import type { ServerElementClass } from './metadata.js';
 import { DEFAULT_ROUTE_PREFIX, FORM_FIELD_PREFIX } from './protocol.js';
 import { CONTEXT_SYMBOL, ELEMENT_SYMBOL, FORM_SNAPSHOT_SYMBOL } from './symbols.js';
-import type { ActionState, Constructor, WireState } from './types.js';
+import type { ActionState, Constructor } from './types.js';
 
-/** The signed snapshot an element embeds in its form fields so a plain form post can authenticate. */
+/**
+ * What an element embeds in its forms so a plain form post can authenticate: a signed ticket for its
+ * identity, with no state. The server rebuilds state from the element's loaders when the form is posted.
+ */
 export interface FormSnapshot {
   tag: string;
-  state: WireState;
+  /** Signature over the element's identity at `FORM_TICKET_SEQ`. */
   sig: string;
   token: string;
   /** Public attributes and build id, exactly as the browser would echo them. */
@@ -84,7 +87,8 @@ export function ServerElementMixin<T extends Constructor<LitElement>>(Base: T): 
     }
 
     /**
-     * Hidden inputs carrying the signed snapshot, so a plain form post can run an action with no script.
+     * Hidden inputs carrying a signed ticket for this element, so a plain form post can run an action with no script.
+     * The ticket holds no state, so the size of every form is the same however large the element's state is.
      * Renders nothing outside a server render, such as while computing action patches.
      *
      * Every other input in the form becomes the action's single argument object. The browser is sent
@@ -94,7 +98,7 @@ export function ServerElementMixin<T extends Constructor<LitElement>>(Base: T): 
       const snapshot = (this as unknown as Record<symbol, FormSnapshot | undefined>)[FORM_SNAPSHOT_SYMBOL];
       if (!snapshot) return nothing;
       const name = (field: string) => `${FORM_FIELD_PREFIX}${field}`;
-      return html`<input type="hidden" name=${name('tag')} value=${snapshot.tag}><input type="hidden" name=${name('state')} value=${typeof snapshot.state === 'string' ? snapshot.state : JSON.stringify(snapshot.state)}><input type="hidden" name=${name('sig')} value=${snapshot.sig}><input type="hidden" name=${name('token')} value=${snapshot.token}><input type="hidden" name=${name('attrs')} value=${JSON.stringify(snapshot.attrs)}>${options.redirect ? html`<input type="hidden" name=${name('redirect')} value=${options.redirect}>` : nothing}`;
+      return html`<input type="hidden" name=${name('tag')} value=${snapshot.tag}><input type="hidden" name=${name('sig')} value=${snapshot.sig}><input type="hidden" name=${name('token')} value=${snapshot.token}><input type="hidden" name=${name('attrs')} value=${JSON.stringify(snapshot.attrs)}>${options.redirect ? html`<input type="hidden" name=${name('redirect')} value=${options.redirect}>` : nothing}`;
     }
 
     /**

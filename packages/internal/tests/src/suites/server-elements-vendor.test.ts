@@ -9,7 +9,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { closeTestBrowser, getShadowText, getTestBrowser } from '../harness.js';
 
 const ORIGIN = 'http://lit-vendor-app.local';
-const TEST_SECRET = 'vendor-tier-d-test-secret-32b!!';
+const TEST_SECRET = 'vendor-tier-d-test-secret-32b!!!';
 const workerOutDir = path.resolve(fileURLToPath(import.meta.url), '../../../dist/fixtures/server-elements-vendor-worker');
 
 const FIXTURE_SOURCE = `
