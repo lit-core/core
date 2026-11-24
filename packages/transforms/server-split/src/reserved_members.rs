@@ -109,6 +109,16 @@ pub fn is_reserved_member(name: &str) -> bool {
     RESERVED.binary_search(&name).is_ok()
 }
 
+/// Methods a server element may define that only ever run on the server.
+///
+/// `renderPending()` supplies the placeholder a streamed element shows until its loaders settle. The
+/// worker keeps it and the client stub drops it, as with a loader.
+pub const SERVER_ONLY_METHODS: &[&str] = &["renderPending"];
+
+pub fn is_server_only_method(name: &str) -> bool {
+    SERVER_ONLY_METHODS.contains(&name)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -139,14 +149,4 @@ mod tests {
             assert!(!is_reserved_member(name), "{name}");
         }
     }
-}
-
-/// Methods a server element may define that only ever run on the server.
-///
-/// `renderPending()` supplies the placeholder a streamed element shows until its loaders settle. The
-/// worker keeps it and the client stub drops it, as with a loader.
-pub const SERVER_ONLY_METHODS: &[&str] = &["renderPending"];
-
-pub fn is_server_only_method(name: &str) -> bool {
-    SERVER_ONLY_METHODS.contains(&name)
 }

@@ -1639,11 +1639,7 @@ impl<'a> SymbolProofContext<'a> {
         let has_decorator = self.has_proven_lit_decorators(class);
         let has_base = self.has_proven_lit_base_class(class);
 
-        if !has_base && !has_tag && !has_decorator {
-            return false;
-        }
-
-        true
+        has_base || has_tag || has_decorator
     }
 
     fn expr_contains_lit_template(&self, expr: &Expression) -> bool {
